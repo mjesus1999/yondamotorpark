@@ -1,12 +1,5 @@
 <!DOCTYPE html>
 
-<?php
-
-//Variables para rutas absolutas
-$path = "http://motorpark.test";
-
-?>
-
 <html lang="es" data-bs-theme="dark">
 
 <head>
@@ -26,8 +19,9 @@ $path = "http://motorpark.test";
   <link rel="stylesheet" href="https://cdn.datatables.net/2.2.2/css/dataTables.bootstrap5.css">
   <link rel="stylesheet" href="https://cdn.datatables.net/select/3.0.0/css/select.bootstrap5.css">
 
-  <link rel="stylesheet" href="<?= $path ?>/public/css/style-dashboard.css">
-  <link rel="stylesheet" href="<?= $path ?>/public/css/motorpark-style.css">
+  <link rel="stylesheet" href="/assets/css/style-dashboard.css">
+  <link rel="stylesheet" href="/assets/css/motorpark-style.css">
+
 </head>
 
 <body>
@@ -38,8 +32,8 @@ $path = "http://motorpark.test";
       <!-- Content For Sidebar -->
       <div class="h-100 sticky-top">
         <div class="sidebar-logo">
-          <a href="<?= $path ?>/views">
-            <img src="<?= $path ?>/public/images/motoropark-logo-blanco.png" class="img-fluid" alt="">
+          <a href="/">
+            <img src="/assets/images/motoropark-logo-blanco.png" class="img-fluid" alt="">
           </a>
         </div>
         <ul class="sidebar-nav">
@@ -161,7 +155,7 @@ $path = "http://motorpark.test";
           <ul class="navbar-nav">
             <li class="nav-item dropdown">
               <a href="#" data-bs-toggle="dropdown" class="nav-icon pe-md-0">
-                <img src="http://localhost/motorpark/public/images/profile.jpg" class="avatar img-fluid rounded" alt="">
+                <img src="/assets/images/profile.jpg" class="avatar img-fluid rounded" alt="">
               </a>
               <div class="dropdown-menu dropdown-menu-end">
                 <a href="#" class="dropdown-item">Jhon (Sistemas)</a>
@@ -174,4 +168,4 @@ $path = "http://motorpark.test";
         </div>
       </nav>
 
-      <main class="content px-3 py-2"></main>
+      <main class="content px-3 py-2">

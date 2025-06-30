@@ -46,11 +46,11 @@
  <script src="https://cdn.datatables.net/select/3.0.0/js/dataTables.select.js"></script>
  <script src="https://cdn.datatables.net/select/3.0.0/js/select.bootstrap5.js"></script>
 
-<script src="http://localhost/motorpark/public/js/script-dashboard.js"></script>
+<script src="/assets/js/script-dashboard.js"></script>
 
 <!-- Sweet Alert -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="http://localhost/motorpark/public/js/swalcustom.js"></script>
+<script src="/assets/js/swalcustom.js"></script>
 
 </body>
 
