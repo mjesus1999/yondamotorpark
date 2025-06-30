@@ -1,0 +1,24 @@
+.bg-yonda {
+  background-color: #FF5F00;
+  color: #FFF
+}
+
+input[type=text]:focus,
+input[type=date]:focus,
+textarea:focus,
+select:focus {
+  background-color: #FFFAC9 !important;
+}
+
+.inactive{
+  background-color: #ebebeb;
+}
+
+/* Estilos para la tabla */
+.table-hover-yonda {
+    --bs-table-hover-bg: rgba(25, 135, 84, 0.25) !important; /* Verde */
+}
+
+/* Predeterminamos que las última columna esté alineada a la derecha */
+.table th:last-child { text-align: center; }
+.table td:last-child{ text-align: right; }
