@@ -23,6 +23,7 @@ $router = new Router();
 require APP_ROOT . '/app/Routes/Home.router.php';
 require APP_ROOT . '/app/Routes/Marca.router.php';
 require APP_ROOT . '/app/Routes/Vehiculo.router.php';
+require APP_ROOT . '/app/Routes/Usuario.router.php';
 
 // Un controlador básico para la página de inicio
 class HomeController extends App\Core\Controller
