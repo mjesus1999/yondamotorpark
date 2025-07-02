@@ -1,0 +1,1 @@
+array(10) { ["tienda"]=> string(9) "motorpark" ["iddistrito"]=> string(3) "102" ["idmotorpark"]=> string(1) "1" ["principal"]=> string(1) "N" ["responsable"]=> string(19) "Juan Flores Tasayco" ["correo"]=> string(13) "yfd@gmail.com" ["direccion"]=> string(17) "Siempre viva #422" ["telefono"]=> string(9) "999911119" ["latitud"]=> string(0) "" ["longitud"]=> string(0) "" }
