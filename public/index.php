@@ -19,24 +19,10 @@ use App\Core\Router;
 
 $router = new Router();
 
-//RUTAS WEB
-//Productos
-$router->add('GET', '/', 'HomeController', 'index'); // Ruta para la página de inicio
-$router->add('GET', '/products', 'ProductController', 'index');
-$router->add('GET', '/products/create', 'ProductController', 'create');
-$router->add('POST', '/products/store', 'ProductController', 'store');
-$router->add('GET', '/products/edit/{id}', 'ProductController', 'edit'); // {id} para capturar el ID
-$router->add('POST', '/products/update/{id}', 'ProductController', 'update');
-$router->add('POST', '/products/delete/{id}', 'ProductController', 'delete');
-$router->add('GET', '/products/search', 'ProductController', 'search');
-
-//Marcas
-$router->add('GET', '/marcas', 'MarcaController', 'index');
-
-//API
-// Endpoint para búsqueda con AJAX
-$router->add('GET', '/api/products/{id}', 'ProductController', 'searchById');
-
+//RUTAS POR MÓDULO
+require APP_ROOT . '/app/Routes/Home.router.php';
+require APP_ROOT . '/app/Routes/Marca.router.php';
+require APP_ROOT . '/app/Routes/Vehiculo.router.php';
 
 // Un controlador básico para la página de inicio
 class HomeController extends App\Core\Controller

@@ -41,31 +41,31 @@
             Módulos
           </li>
           <li class="sidebar-item">
-            <a href="<?= $path ?>/views/oc" class="sidebar-link">
+            <a href="/oc" class="sidebar-link">
               <i class="fa-solid fa-list pe-2"></i>
               Orden de compra
             </a>
           </li>
           <li class="sidebar-item">
-            <a href="<?= $path ?>/views/compras" class="sidebar-link">
+            <a href="/compras" class="sidebar-link">
               <i class="fa-solid fa-list pe-2"></i>
               Compras
             </a>
           </li>
           <li class="sidebar-item">
-            <a href="<?= $path ?>/views/concesionarios" class="sidebar-link">
+            <a href="/concesionarios" class="sidebar-link">
               <i class="fa-solid fa-list pe-2"></i>
               Concesionarios
             </a>
           </li>
           <li class="sidebar-item">
-            <a href="<?= $path ?>/views/marcas" class="sidebar-link">
+            <a href="/marcas" class="sidebar-link">
               <i class="fa-solid fa-list pe-2"></i>
               Marcas
             </a>
           </li>
           <li class="sidebar-item">
-            <a href="<?= $path ?>/views/vehiculos" class="sidebar-link">
+            <a href="/vehiculos" class="sidebar-link">
               <i class="fa-solid fa-list pe-2"></i>
               Vehículos
             </a>
