@@ -138,6 +138,94 @@ class UsuarioController extends Controller
 
   public function store(): void
   {
+    // Solo procesar POST
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+      // 1) Capturar y sanear
+      $idPersona = (int) trim($_POST['idpersona'] ?? 0);
+      $idCargo = (int) trim($_POST['idcargo'] ?? 0);
+      $fechaInicio = trim($_POST['fecha_inicio'] ?? '');
+      $sinFin = isset($_POST['sin_fecha_fin']);
+      $fechaFin = trim($_POST['fecha_fin'] ?? '');
+      $usuario = trim($_POST['usuario'] ?? '');
+      $pass1 = $_POST['password1'] ?? '';
+      $pass2 = $_POST['password2'] ?? '';
+
+      // 2) Validar
+      $valid = true;
+      $error = '';
+      if ($idPersona <= 0) {
+        $valid = false;
+        $error = 'Debe registrar primero la persona.';
+      } elseif ($idCargo <= 0) {
+        $valid = false;
+        $error = 'Área y cargo requeridos.';
+      } elseif (!$fechaInicio) {
+        $valid = false;
+        $error = 'Fecha de inicio requerida.';
+      } elseif (!$sinFin && !$fechaFin) {
+        $valid = false;
+        $error = 'Fecha fin o “Indeterminado” requerido.';
+      } elseif (!$usuario) {
+        $valid = false;
+        $error = 'Usuario requerido.';
+      } elseif (!$pass1 || !$pass2) {
+        $valid = false;
+        $error = 'Ambas contraseñas son requeridas.';
+      } elseif ($pass1 !== $pass2) {
+        $valid = false;
+        $error = 'Las contraseñas no coinciden.';
+      } elseif (
+        !preg_match(
+          '/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&]).{8,}$/',
+          $pass1
+        )
+      ) {
+        $valid = false;
+        $error = 'La contraseña no cumple el patrón de seguridad.';
+      }
+
+      // 3) Si pasó validación, insertar; si no, mostrar error
+      if ($valid) {
+        $contratoData = [
+          'idcargo' => $idCargo,
+          'fechainicio' => $fechaInicio,
+          'fechafin' => $sinFin ? null : $fechaFin,
+          'tipocontrato' => 'P',
+        ];
+        $colaboradorData = [
+          'usernick' => $usuario,
+          'userpassword' => password_hash($pass1, PASSWORD_BCRYPT),
+        ];
+
+        if ($this->usuarioModel->create($idPersona, $contratoData, $colaboradorData)) {
+          // Redirige al listado
+          $this->redirect('/usuarios');
+        } else {
+          // Error de inserción
+          $areas = $this->usuarioModel->getAllAreas();
+          $this->view('usuarios.create', [
+            'areas' => $areas,
+            'error' => 'Error al registrar el usuario.'
+          ]);
+        }
+      } else {
+        // Muestra el formulario con mensaje de validación
+        $areas = $this->usuarioModel->getAllAreas();
+        $this->view('usuarios.create', [
+          'areas' => $areas,
+          'error' => $error,
+          'old' => $_POST,  // para repoblar si quieres
+        ]);
+      }
+    } else {
+      // Si entran por GET, mostrar el formulario
+      $areas = $this->usuarioModel->getAllAreas();
+      $this->view('usuarios.create', ['areas' => $areas]);
+    }
+  }
+
+  /* public function store(): void
+  {
     header('Content-Type: application/json; charset=utf-8');
 
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -218,8 +306,9 @@ class UsuarioController extends Controller
       ]);
     }
   }
-
-  public function searchByDNI(): void
+ */
+  
+ public function searchByDNI(): void
   {
     $dni = trim($_GET['nrodoc'] ?? '');
     if ($dni === '') {

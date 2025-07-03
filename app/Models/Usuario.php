@@ -226,10 +226,14 @@ class Usuario
     return (int) $this->db->lastInsertId();
   }
 
-  /**
-   * Orquesta persona + contrato + colaborador en transacción
-   */
 
+  /**
+   * Crear Registro persona + contrato + colaborador
+   * @param int $idPersona
+   * @param array $c
+   * @param array $u
+   * @return array{idcolaborador: int, idcontratolaboral: int}
+   */
   public function create(int $idPersona, array $c, array $u): array
   {
     try {
@@ -263,6 +267,10 @@ class Usuario
     }
   }
 
+  /**
+   * Buscar por DNI
+   * @param string $dni
+   */
   public function searchByDNI(string $dni): ?array
   {
     $sql = "SELECT idpersona, apellidos, nombres
@@ -277,6 +285,12 @@ class Usuario
     return $row !== false ? $row : null;
   }
 
+  /**
+   * Actualizar contraseña
+   * @param int $idColaborador
+   * @param string $newHash
+   * @return bool
+   */
   public function updatePassword(int $idColaborador, string $newHash): bool
   {
     $sql = "UPDATE colaboradores
@@ -287,4 +301,5 @@ class Usuario
     $stmt->bindValue(':idcolaborador', $idColaborador, PDO::PARAM_INT);
     return $stmt->execute();
   }
+
 }

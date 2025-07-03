@@ -109,43 +109,43 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-  document.querySelectorAll('.btn-cambiar-clave').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const idColab = btn.getAttribute('data-idcolab');
-      const usuario = btn.getAttribute('data-usuario');
+    document.querySelectorAll('.btn-cambiar-clave').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const idColab = btn.getAttribute('data-idcolab');
+        const usuario = btn.getAttribute('data-usuario');
 
-      // Asegúrate de apuntar al mismo id que tu input hidden:
-      document.getElementById('cc-idcolaborador').value = idColab;
-      document.getElementById('cc-usuario').value       = usuario;
+        // Asegúrate de apuntar al mismo id que tu input hidden:
+        document.getElementById('cc-idcolaborador').value = idColab;
+        document.getElementById('cc-usuario').value = usuario;
 
-      bootstrap.Modal.getOrCreateInstance('#modalCambiarClave').show();
+        bootstrap.Modal.getOrCreateInstance('#modalCambiarClave').show();
+      });
+    });
+
+    document.getElementById('btnAceptarCambiarClave').addEventListener('click', () => {
+      const form = document.getElementById('formCambiarClave');
+      const formData = new FormData(form);
+
+      fetch('/usuarios/changePassword', {
+        method: 'POST',
+        body: formData
+      })
+        .then(res => res.json())
+        .then(json => {
+          if (json.success) {
+            alert('Contraseña actualizada correctamente.');
+            bootstrap.Modal.getInstance(document.getElementById('modalCambiarClave')).hide();
+            form.reset();
+          } else {
+            alert('Error: ' + json.error);
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          alert('Error de conexión.');
+        });
     });
   });
-
-  document.getElementById('btnAceptarCambiarClave').addEventListener('click', () => {
-    const form = document.getElementById('formCambiarClave');
-    const formData = new FormData(form);
-
-    fetch('/usuarios/changePassword', {
-      method: 'POST',
-      body: formData
-    })
-      .then(res => res.json())
-      .then(json => {
-        if (json.success) {
-          alert('Contraseña actualizada correctamente.');
-          bootstrap.Modal.getInstance(document.getElementById('modalCambiarClave')).hide();
-          form.reset();
-        } else {
-          alert('Error: ' + json.error);
-        }
-      })
-      .catch(err => {
-        console.error(err);
-        alert('Error de conexión.');
-      });
-  });
-});
 </script>
 
 <?php include __DIR__ . '/../layout/footer.php'; ?>
