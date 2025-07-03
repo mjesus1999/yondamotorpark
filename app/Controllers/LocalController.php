@@ -34,19 +34,18 @@ class LocalController extends Controller
         }
         $registro = [
             'tienda'      => trim($_POST['tienda']),
-            'iddistrito'  => trim($_POST['iddistrito']),
-            'idmotorpark' => trim($_POST['idmotorpark']),
+            'iddistrito'  => trim(intval($_POST['iddistrito'])),
+            'idmotorpark' => trim(intval($_POST['idmotorpark'])),
             'principal'   => trim($_POST['principal']),
             'responsable' => trim($_POST['responsable']),
-            'correo'      => trim($_POST['correo'] ?? ''),    // opcional
-            'direccion'   => trim($_POST['direccion'] ?? ''), // opcional
-            'telefono'    => trim($_POST['telefono'] ?? ''),  // opcional
-            'latitud'     => trim($_POST['latitud'] ?? ''),   // opcional
-            'longitud'    => trim($_POST['longitud'] ?? '')   // opcional
+            'correo' =>   trim($_POST['correo']) !== '' && trim($_POST['correo']) !== 'null' ? trim($_POST['correo']) : null,
+            'direccion' =>   trim($_POST['direccion']) !== '' && trim($_POST['direccion']) !== 'null' ? trim($_POST['direccion']) : null,
+            'telefono' =>   trim($_POST['telefono']) !== '' && trim($_POST['telefono']) !== 'null' ? trim($_POST['telefono']) : null
+            // 'latitud' =>   trim($_POST['latitud']) !== '' && trim($_POST['latitud']) !== 'null' ? trim($_POST['latitud']) : null,
+            // 'longitud' =>   trim($_POST['longitud']) !== '' && trim($_POST['longitud']) !== 'null' ? trim($_POST['longitud']) : null,
         ];
 
-        var_dump($registro);
-        exit();
+
 
         // 2. Validar campos obligatorios
         $errores = [];
@@ -73,6 +72,81 @@ class LocalController extends Controller
             // Si hubo un error en la inserción (retornó -1 o 0), muestra la vista con el error.
             $this->view('locales.create', ['error' => 'Error al crear el local.']);
             return $lastInsertId; // Retorna -1 (o el valor que `create` haya retornado en caso de fallo)
+        }
+    }
+
+
+
+    public function edit(int $id): void
+    {
+        header('Content-Type: application/json');
+        $local = $this->localModel->getById($id);
+        if ($local) {
+            echo json_encode(['success' => true, 'local' => $local]);
+        } else {
+            http_response_code(404);
+            echo json_encode(['success' => false, 'message' => 'Local no encontrado.']);
+        }
+        exit();
+    }
+
+    public function update(int $id): void
+    {
+        header('Content-Type: application/json');
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $responsable = trim($_POST['responsable'] ?? '');
+            $telefono = trim($_POST['telefono'] ?? '');
+
+            $registro = [
+                'responsable' => $responsable,
+                'telefono'    => $telefono,
+                'idlocal'     => $id
+            ];
+
+            $errores = [];
+            if (empty($registro['responsable'])) {
+                $errores[] = "El campo 'Responsable' es obligatorio.";
+            }
+            if (empty($registro['telefono'])) {
+                $errores[] = "El campo 'Teléfono' es obligatorio.";
+            }
+
+            if (count($errores) > 0) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'message' => 'Errores de validación: ' . implode('<br>', $errores)]);
+                exit();
+            }
+
+            $rowsAffected = $this->localModel->update($registro);
+
+            if ($rowsAffected > 0) {
+                echo json_encode(['success' => true, 'message' => '¡Local actualizado exitosamente!']);
+            } else {
+
+                http_response_code(500);
+                echo json_encode(['success' => false, 'message' => 'Error al actualizar el local o no se realizaron cambios.']);
+            }
+        } else {
+            http_response_code(405);
+            echo json_encode(['success' => false, 'message' => 'Método no permitido.']);
+        }
+        exit();
+    }
+
+
+    public function delete(int $id): void
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') { 
+            if ($this->localModel->delete($id)) {
+                $this->redirect('/locales');
+            } else {
+                
+                $this->redirect('/products?error=delete_failed');
+            }
+        } else {
+         
+            http_response_code(405);
+            $this->view('errors.405'); 
         }
     }
 }

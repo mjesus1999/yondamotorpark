@@ -19,7 +19,7 @@
                 </nav>
             </div>
             <div class="col-md-6 text-end">
-                <a class="btn btn-sm btn-outline-primary" href="locales/" class="">Mostrar
+                <a class="btn btn-sm btn-outline-primary" href="/locales" class="">Mostrar
                     lista</a>
             </div>
         </div>
@@ -152,7 +152,7 @@
         const departamentosSelect = document.querySelector('#departamento');
         const provinciasSelect = document.querySelector('#provincia');
         const distritosSelect = document.querySelector('#distrito');
-        const motorparkSelect = document.querySelector('#idmotorpark'); // Selector para Motorpark
+        const motorparkSelect = document.querySelector('#idmotorpark');
 
         // Función para cargar departamentos
         async function getAllDepartamentos() {
@@ -235,15 +235,15 @@
             }
         }
 
-        // NUEVA FUNCIÓN: Para cargar Motorpark
+        //  Para cargar Motorpark(Tienda)
         async function getMotorParkData() {
             try {
                 const response = await fetch(`/api/motorpark`, { method: 'GET' });
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
-                const result = await response.json(); // La respuesta es un objeto con 'success' y 'motorpark'
-                console.log("Motorpark data recibida:", result);
+                const result = await response.json(); 
+             
 
                 motorparkSelect.innerHTML = `<option value='' selected>Seleccione</option>`;
 
@@ -276,7 +276,7 @@
 
         // Cargar datos al inicio de la página
         getAllDepartamentos();
-        getMotorParkData(); // ¡Llamada para cargar Motorpark!
+        getMotorParkData(); 
 
 
         const form = document.querySelector("#form-registro-local")

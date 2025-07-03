@@ -28,6 +28,7 @@ class Local
             INNER JOIN distritos d ON l.iddistrito = d.iddistrito
             INNER JOIN provincias p ON d.idprovincia = p.idprovincia
             INNER JOIN departamentos dp ON p.iddepartamento = dp.iddepartamento
+            WHERE l.estado = 'ACT';
         ";
             $stmt = $this->db->prepare($query);
             $stmt->execute();
@@ -39,12 +40,28 @@ class Local
         }
     }
 
+    
+    public function getById($idlocal = 0): ?array
+    {
+        $query = "SELECT idlocal, responsable, telefono FROM locales WHERE idlocal = ?";
+        try {
+            $cmd = $this->db->prepare($query);
+            $cmd->execute(array($idlocal));
+            $results = $cmd->fetch(PDO::FETCH_ASSOC);
+            return $results;
+        } catch (PDOException $error) {
+            error_log($error->getMessage());
+            return [];
+        }
+    }
+
+
 
 
     public function create($params = []): int
     {
-        $query = "INSERT INTO locales(tienda, iddistrito, idmotorpark, principal, responsable, correo, direccion, telefono, latitud, longitud) 
-                    VALUES (:tienda,:iddistrito,:idmotorpark,:principal,:responsable,:correo,:direccion,:telefono,:lattidud,:longitud)";
+        $query = "INSERT INTO locales(tienda, iddistrito, idmotorpark, principal, responsable, correo, direccion, telefono) 
+                    VALUES (:tienda,:iddistrito,:idmotorpark,:principal,:responsable,:correo,:direccion,:telefono)";
         try {
             $stmt = $this->db->prepare($query);
             $stmt->execute(
@@ -56,12 +73,50 @@ class Local
                     ':responsable'  => $params['responsable'],
                     ':correo' => $params['correo'], // Puede ser null
                     ':direccion' => $params['direccion'], // Puede ser null
-                    ':telefono' => $params['telefono'], // Puede ser null
-                    ':latitud' => $params['latitud'], // Puede ser null
-                    ':longitud' => $params['longitud'] // Puede ser null
+                    ':telefono' => $params['telefono'] // Puede ser null
+
                 )
             );
             return (int) $this->db->lastInsertId();
+        } catch (PDOException $error) {
+            error_log($error->getMessage());
+            return -1;
+        }
+    }
+
+
+
+
+    public function update($params): int
+    {
+        try {
+            $query = "UPDATE locales SET  
+                responsable = :responsable, 
+                telefono = :telefono, 
+                modificado = NOW()
+              WHERE idlocal = :idlocal";
+
+            $cmd = $this->db->prepare($query);
+            $cmd->execute([
+                ':responsable' => $params['responsable'],
+                ':telefono' => $params['telefono'],
+                ':idlocal' => $params['idlocal']
+            ]);
+
+            return (int) $cmd->rowCount();
+        } catch (PDOException $error) {
+            error_log($error->getMessage());
+            return -1;
+        }
+    }
+
+    public function delete($idlocal = -1): int
+    {
+        try {
+            $cmd = $this->db->prepare("DELETE FROM locales WHERE idlocal=?");
+            $cmd->execute(array($idlocal));
+            $cmd->fetchAll(PDO::FETCH_ASSOC);
+            return (int) $cmd->rowCount();
         } catch (PDOException $error) {
             error_log($error->getMessage());
             return -1;
