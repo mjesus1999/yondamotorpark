@@ -22,8 +22,8 @@
 
   <!-- Campos -->
   <div class="mb-2">
-    <form action="" id="formRegisterFull" autocomplete="off">
-
+    <form action="/usuarios/store" id="formRegisterFull" method="POST" autocomplete="off">
+      <input type="hidden" name="idpersona" id="idpersona" value="">
       <!-- PASO 1 - DATOS DE LA EMPRESA -->
       <div class="card mb-4">
         <div class="card-header bg-info">
@@ -114,7 +114,7 @@
             <!-- Checkbox al final -->
             <div class="col-md-1 mb-2 d-flex align-items-center">
               <div class="form-check mt-2">
-                <input class="form-check-input" type="checkbox" value="" id="sin-fecha-fin" name="sin_fecha_fin">
+                <input class="form-check-input" type="checkbox" value="1" id="sin-fecha-fin" name="sin_fecha_fin">
                 <label class="form-check-label" for="sin-fecha-fin">
                   Indeterminado
                 </label>
@@ -343,8 +343,8 @@
       // Serializar formData
       const formData = new FormData(formModal);
       for (const [key, val] of formData.entries()) {
-          console.log(`formData: ${key} = ${val}`);
-        }
+        console.log(`formData: ${key} = ${val}`);
+      }
       // Enviar por fetch
       fetch(formModal.action, {
         method: 'POST',
@@ -366,6 +366,7 @@
             document.getElementById('dni').value = json.data.nrodoc;
             document.getElementById('apellidos').value = json.data.apellidos;
             document.getElementById('nombres').value = json.data.nombres;
+            document.getElementById('idpersona').value = json.data.idpersona;
 
           } else {
             // Mostrar error dentro del modal
@@ -376,6 +377,88 @@
           console.error(err);
           alert('Error al conectar con el servidor');
         });
+    });
+    const formRegister = document.getElementById('formRegisterFull');
+
+    formRegister.addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      const formData = new FormData(formRegister);
+      fetch('/usuarios/store', {
+        method: 'POST',
+        body: formData
+      })
+        .then(res => res.json())
+        .then(json => {
+          if (json.success) {
+            // ahora sí usamos la URL que vino del controlador
+            window.location.href = json.redirect;
+          } else {
+            alert('Error: ' + json.error);
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          alert('Error de conexión con el servidor');
+        });
+    });
+
+    const inputDNI = document.getElementById('dni');
+    const modalEl = document.getElementById('modalRegistrarPersona');
+    const bsModal = new bootstrap.Modal(modalEl, { backdrop: 'static', keyboard: false });
+
+    inputDNI.addEventListener('blur', () => {
+      const dni = inputDNI.value.trim();
+      if (!dni) return;
+
+      fetch(`/usuarios/searchByDNI?nrodoc=${encodeURIComponent(dni)}`, {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+      })
+        .then(res => res.json())
+        .then(json => {
+          if (json.success) {
+            // Persona existe: rellenamos y guardamos idpersona
+            document.getElementById('apellidos').value = json.data.apellidos;
+            document.getElementById('nombres').value = json.data.nombres;
+            document.getElementById('idpersona').value = json.data.idpersona;
+          } else {
+            // NO existe: abrimos modal para crear persona
+            // Limpiamos campos principales
+            document.getElementById('apellidos').value = '';
+            document.getElementById('nombres').value = '';
+            document.getElementById('idpersona').value = '';
+
+            // Prefill del modal: pongo el DNI y tipo doc
+            document.getElementById('modal-nrodoc').value = dni;
+            // Opcional: si quieres preseleccionar tipo doc a DNI
+            document.getElementById('modal-tipodoc').value = 'DNI';
+
+            // Abrir modal
+            bsModal.show();
+          }
+        })
+        .catch(err => console.error('Error buscando persona:', err));
+    });
+    const chkIndeterminado = document.getElementById('sin-fecha-fin');
+    const inputFechaFin = document.getElementById('fecha-fin');
+
+    if (chkIndeterminado.checked) {
+      inputFechaFin.readOnly = true;
+      inputFechaFin.value = '';
+      inputFechaFin.placeholder = 'Indeterminado';
+    }
+
+    chkIndeterminado.addEventListener('change', () => {
+      if (chkIndeterminado.checked) {
+        // Marqué “Indeterminado”: lo hago solo lectura, limpio valor
+        inputFechaFin.readOnly = true;
+        inputFechaFin.value = '';
+        inputFechaFin.placeholder = 'Indeterminado';
+      } else {
+        // Desmarqué: quito solo lectura para poder elegir fecha
+        inputFechaFin.readOnly = false;
+        inputFechaFin.placeholder = '';
+      }
     });
   });
 </script>

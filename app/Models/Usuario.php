@@ -91,6 +91,23 @@ class Usuario
     }
   }
 
+  /**
+   * Summary of createPersona
+   * @param string $tipodoc
+   * @param string $nrodoc
+   * @param string $apellidos
+   * @param string $nombres
+   * @param string $genero
+   * @param string $fechanac
+   * @param string $estadocivil
+   * @param mixed $email
+   * @param int $iddistrito
+   * @param mixed $direccion
+   * @param mixed $referencia
+   * @param string $telprimario
+   * @param mixed $telalternativo
+   * @return int
+   */
   public function createPersona(
     string $tipodoc,
     string $nrodoc,
@@ -155,4 +172,107 @@ class Usuario
     }
   }
 
+
+  /**
+   * Registrar un contrato
+   * @param int $idPersona
+   * @param int $idCargo
+   * @param string $fechaInicio
+   * @param mixed $fechaFin
+   * @param string $tipoContrato
+   * @return int
+   */
+  public function createContratoLaboral(int $idPersona, int $idCargo, string $fechaInicio, ?string $fechaFin, string $tipoContrato): int
+  {
+    $sql = "INSERT INTO contratoslaborales
+          (idpersona, idcargo, fechainicio, fechafin, tipocontrato)
+        VALUES
+          (:idpersona, :idcargo, :fechainicio, :fechafin, :tipocontrato)";
+    $stmt = $this->db->prepare($sql);
+    $stmt->bindValue(':idpersona', $idPersona, PDO::PARAM_INT);
+    $stmt->bindValue(':idcargo', $idCargo, PDO::PARAM_INT);
+    $stmt->bindValue(':fechainicio', $fechaInicio);
+    if ($fechaFin !== null) {
+      // Si hay fecha, la pasamos como string (por defecto PDO::PARAM_STR)
+      $stmt->bindValue(':fechafin', $fechaFin);
+    } else {
+      // Si no hay fecha, lo bindearmos explícitamente como NULL
+      $stmt->bindValue(':fechafin', null, PDO::PARAM_NULL);
+    }
+    $stmt->bindValue(':tipocontrato', $tipoContrato);
+    $stmt->execute();
+    return (int) $this->db->lastInsertId();
+  }
+
+  /**
+   * Registrar un colaborador
+   * @param int $idContrato
+   * @param string $usernick
+   * @param string $passHash
+   * @return int
+   */
+  public function createColaborador(int $idContrato, string $usernick, string $passHash): int
+  {
+    $sql = "INSERT INTO colaboradores
+          (idcontratolaboral, usernick, userpassword)
+        VALUES
+          (:idcontratolaboral, :usernick, :userpassword)";
+    $stmt = $this->db->prepare($sql);
+    $stmt->bindValue(':idcontratolaboral', $idContrato, PDO::PARAM_INT);
+    $stmt->bindValue(':usernick', $usernick);
+    $stmt->bindValue(':userpassword', $passHash);
+    $stmt->execute();
+    return (int) $this->db->lastInsertId();
+  }
+
+  /**
+   * Orquesta persona + contrato + colaborador en transacción
+   */
+
+  public function create(int $idPersona, array $c, array $u): array
+  {
+    try {
+      $this->db->beginTransaction();
+
+      // 1) Contrato
+      $idContrato = $this->createContratoLaboral(
+        $idPersona,
+        $c['idcargo'],
+        $c['fechainicio'],
+        $c['fechafin'],
+        $c['tipocontrato']
+      );
+
+      // 2) Colaborador
+      $idColab = $this->createColaborador(
+        $idContrato,
+        $u['usernick'],
+        $u['userpassword']
+      );
+
+      $this->db->commit();
+
+      return [
+        'idcontratolaboral' => $idContrato,
+        'idcolaborador' => $idColab,
+      ];
+    } catch (Exception $e) {
+      $this->db->rollBack();
+      throw $e;
+    }
+  }
+
+  public function searchByDNI(string $dni): ?array
+  {
+    $sql = "SELECT idpersona, apellidos, nombres
+            FROM personas
+            WHERE nrodoc = :dni
+            LIMIT 1";
+    $stmt = $this->db->prepare($sql);
+    $stmt->bindValue(':dni', $dni);
+    $stmt->execute();
+
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    return $row !== false ? $row : null;
+  }
 }

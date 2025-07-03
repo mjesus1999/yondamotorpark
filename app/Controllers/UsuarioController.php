@@ -109,7 +109,6 @@ class UsuarioController extends Controller
       http_response_code(500);
       echo json_encode([
         'success' => false,
-        // Opcional: en desarrollo muestra $e->getMessage()
         'error' => 'Error en la base de datos: ' . $e->getMessage()
       ]);
       exit;
@@ -134,6 +133,116 @@ class UsuarioController extends Controller
         'error' => 'Error interno al registrar la persona.',
       ]);
       exit;
+    }
+  }
+
+  public function store(): void
+  {
+    header('Content-Type: application/json; charset=utf-8');
+
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+      http_response_code(405);
+      echo json_encode(['success' => false, 'error' => 'Método no permitido']);
+      return;
+    }
+
+    $post = array_map('trim', $_POST);
+    $idPersona = (int) ($post['idpersona'] ?? 0);
+    $idCargo = (int) ($post['idcargo'] ?? 0);
+    $fechaInicio = $post['fecha_inicio'] ?? '';
+    $sinFechaFin = isset($_POST['sin_fecha_fin']);
+    $fechaFinInput = $post['fecha_fin'] ?? '';
+    $usuario = $post['usuario'] ?? '';
+    $pass1 = $_POST['password1'] ?? '';
+    $pass2 = $_POST['password2'] ?? '';
+
+    $errors = [];
+    if ($idPersona <= 0)
+      $errors[] = 'Persona no registrada.';
+    if ($idCargo <= 0)
+      $errors[] = 'Área/cargo requerido.';
+    if (!$fechaInicio)
+      $errors[] = 'Fecha de inicio requerida.';
+    if (!$sinFechaFin && !$fechaFinInput)
+      $errors[] = 'Fecha fin o indeterminado.';
+    if (!$usuario)
+      $errors[] = 'Usuario requerido.';
+    if (!$pass1 || !$pass2)
+      $errors[] = 'Ambas contraseñas son requeridas.';
+    if ($pass1 !== $pass2)
+      $errors[] = 'Las contraseñas no coinciden.';
+    if (
+      !preg_match(
+        '/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&]).{8,}$/',
+        $pass1
+      )
+    )
+      $errors[] = 'La contraseña no cumple el patrón.';
+
+    if ($errors) {
+      http_response_code(422);
+      echo json_encode([
+        'success' => false,
+        'error' => implode(' ', $errors)
+      ]);
+      return;
+    }
+
+    // prepara datos
+    $contratoData = [
+      'idcargo' => $idCargo,
+      'fechainicio' => $fechaInicio,
+      'fechafin' => $sinFechaFin ? null : $fechaFinInput,
+      'tipocontrato' => 'P',
+    ];
+    $colaboradorData = [
+      'usernick' => $usuario,
+      'userpassword' => password_hash($pass1, PASSWORD_BCRYPT),
+    ];
+
+    // intenta guardar
+    try {
+      $this->usuarioModel->create($idPersona, $contratoData, $colaboradorData);
+
+      http_response_code(201);
+      echo json_encode([
+        'success' => true,
+        // le decimos al cliente a dónde ir
+        'redirect' => '/usuarios'
+      ]);
+    } catch (\Exception $e) {
+      http_response_code(500);
+      echo json_encode([
+        'success' => false,
+        'error' => 'Error en el servidor: ' . $e->getMessage()
+      ]);
+    }
+  }
+
+  public function searchByDNI(): void
+  {
+    $dni = trim($_GET['nrodoc'] ?? '');
+    if ($dni === '') {
+      http_response_code(422);
+      echo json_encode([
+        'success' => false,
+        'error' => 'Debe enviar un nrodoc'
+      ]);
+      return;
+    }
+
+    $persona = $this->usuarioModel->searchByDNI($dni);
+    if ($persona) {
+      echo json_encode([
+        'success' => true,
+        'data' => $persona
+      ]);
+    } else {
+      http_response_code(404);
+      echo json_encode([
+        'success' => false,
+        'error' => 'Persona no encontrada'
+      ]);
     }
   }
 
