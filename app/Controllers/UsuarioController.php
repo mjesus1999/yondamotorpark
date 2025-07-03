@@ -36,31 +36,104 @@ class UsuarioController extends Controller
 
   public function storePersona(): void
   {
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-      $tipodoc = trim($_POST['tipodoc'] ?? '');
-      $nrodoc = trim($_POST['nrodoc'] ?? '');
-      $apellidos = trim($_POST['apellidos'] ?? '');
-      $nombres = trim($_POST['nombres'] ?? '');
-      $genero = trim($_POST['genero'] ?? '');
-      $fechanac = trim($_POST['fechanac'] ?? '');
-      $estadocivil = trim($_POST[''] ?? '');
-      $email = trim($_POST['email'] ?? '');
-      $iddistrito = trim($_POST['iddistrito'] ?? '');
-      $direccion = trim($_POST['direccion'] ?? '');
-      $referencia = trim($_POST['referencia'] ?? '');
-      $telprimario = trim($_POST['telprimario'] ?? '');
-      $telalternativo = trim($_POST['telalternativo'] ?? '');
+    // 2) Recuperar campos
+    $tipodoc = trim($_POST['tipodoc'] ?? '');
+    $nrodoc = trim($_POST['nrodoc'] ?? '');
+    $apellidos = trim($_POST['apellidos'] ?? '');
+    $nombres = trim($_POST['nombres'] ?? '');
+    $genero = trim($_POST['genero'] ?? '');
+    $fechanac = trim($_POST['fechanac'] ?? '');
+    $estadocivil = trim($_POST['estadocivil'] ?? '');
+    $email = trim($_POST['email'] ?? '');
+    $iddistrito = (int) trim($_POST['iddistrito'] ?? 0);
+    $direccion = trim($_POST['direccion'] ?? '');
+    $referencia = trim($_POST['referencia'] ?? '');
+    $telprimario = trim($_POST['telprimario'] ?? '');
+    $telalternativo = trim($_POST['telalternativo'] ?? '');
 
-      if ($tipodoc && $nrodoc && $apellidos && $nombres && $genero && $fechanac && $estadocivil && $email && $iddistrito && $direccion && $referencia && $telprimario && $telalternativo) {
-        if ($this->usuarioModel->createPersona($tipodoc, $nrodoc, $apellidos, $nombres, $genero, $fechanac, $estadocivil, $email, $iddistrito, $direccion, $referencia, $telprimario, $telalternativo)) {
-          $this->redirect('/usuarios');
-        } else {
-          $this->view('usuarios.create', ['error' => 'Error al Registrar a una Personas']);
+    // 3) Validar
+    $errors = [];
+    if (!$tipodoc)
+      $errors[] = 'Tipo de documento requerido.';
+    if (!$nrodoc)
+      $errors[] = 'Número de documento requerido.';
+    if (!$apellidos)
+      $errors[] = 'Apellidos requeridos.';
+    if (!$nombres)
+      $errors[] = 'Nombres requeridos.';
+    if (!$genero)
+      $errors[] = 'Género requerido.';
+    if (!$fechanac)
+      $errors[] = 'Fecha de nacimiento requerida.';
+    if (!$estadocivil)
+      $errors[] = 'Estado civil requerido.';
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+      $errors[] = 'Email inválido.';
+    }
+    if ($iddistrito <= 0)
+      $errors[] = 'Debe seleccionar un distrito.';
+    if (!$direccion)
+      $errors[] = 'Dirección requerida.';
+    if (!$referencia)
+      $errors[] = 'Referencia requerida.';
+    if (!$telprimario)
+      $errors[] = 'Teléfono primario requerido.';
 
-        }
-      } else {
-        $this->view('usuarios.create', ['error' => 'Llene los campos necesarios']);
-      }
+    if ($errors) {
+      http_response_code(422);
+      echo json_encode([
+        'success' => false,
+        'error' => implode(' ', $errors),
+      ]);
+      exit;
+    }
+
+    // 4) Grabar en BD
+    try {
+      $newId = $this->usuarioModel->createPersona(
+        $tipodoc,
+        $nrodoc,
+        $apellidos,
+        $nombres,
+        $genero,
+        $fechanac,
+        $estadocivil,
+        $email,
+        $iddistrito,
+        $direccion,
+        $referencia,
+        $telprimario,
+        $telalternativo
+      );
+    } catch (\Exception $e) {
+      http_response_code(500);
+      echo json_encode([
+        'success' => false,
+        // Opcional: en desarrollo muestra $e->getMessage()
+        'error' => 'Error en la base de datos: ' . $e->getMessage()
+      ]);
+      exit;
+    }
+
+    if ($newId > 0) {
+      http_response_code(201);
+      echo json_encode([
+        'success' => true,
+        'data' => [
+          'idpersona' => $newId,
+          'nrodoc' => $nrodoc,
+          'apellidos' => $apellidos,
+          'nombres' => $nombres,
+        ]
+      ]);
+      exit;
+    } else {
+      http_response_code(500);
+      echo json_encode([
+        'success' => false,
+        'error' => 'Error interno al registrar la persona.',
+      ]);
+      exit;
     }
   }
 

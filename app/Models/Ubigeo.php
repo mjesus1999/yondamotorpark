@@ -69,5 +69,16 @@ class Ubigeo
     }
   }
 
+  public function getAllDistritosAll(): array
+  {
+    $sql = "SELECT iddistrito, distrito FROM distritos ORDER BY distrito";
+    try {
+      $stmt = $this->db->prepare($sql);
+      $stmt->execute();
+      return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (Exception $e) {
+      return [];
+    }
+  }
 
 }

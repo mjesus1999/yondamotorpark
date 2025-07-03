@@ -183,7 +183,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
       <div class="modal-body">
-        <form id="formRegistrarPersona" autocomplete="off">
+        <form action="/usuarios/storePersona" id="formRegistrarPersona" method="POST" autocomplete="off">
           <div class="row g-1">
             <!-- Tipo y número de doc -->
             <div class="col-md-2 form-floating">
@@ -239,8 +239,8 @@
               <label for="modal-email">Email</label>
             </div>
             <div class="col-md-6 form-floating">
-              <select class="form-select" id="modal-iddistrito" name="iddistrito">
-                <option value="">Seleccione Distrito</option>
+              <select class="form-select" id="modal-iddistrito" name="iddistrito" disabled>
+                <option value="">Cargando distritos…</option>
               </select>
               <label for="modal-iddistrito">Distrito</label>
             </div>
@@ -307,6 +307,74 @@
           console.error(err);
           selCargo.innerHTML = '<option value="">Error cargando cargos</option>';
           selCargo.disabled = true;
+        });
+    });
+
+    const selDist = document.getElementById('modal-iddistrito');
+    const modal = document.getElementById('modalRegistrarPersona');
+
+    modal.addEventListener('show.bs.modal', () => {
+      selDist.innerHTML = '<option value="">Cargando distritos…</option>';
+      selDist.disabled = true;
+
+      fetch('/ubigeo/distritos/all')
+        .then(res => res.json())
+        .then(data => {
+          selDist.innerHTML = '<option value="">Seleccione Distrito</option>';
+          data.forEach(d => {
+            const opt = document.createElement('option');
+            opt.value = d.iddistrito;   // clave que devuelve tu JSON
+            opt.text = d.distrito;     // nombre del distrito
+            selDist.appendChild(opt);
+          });
+          selDist.disabled = false;
+        })
+        .catch(err => {
+          console.error(err);
+          selDist.innerHTML = '<option value="">Error al cargar distritos</option>';
+        });
+    });
+
+    //registrar persona en el modal
+    const btnGuardar = document.getElementById('btnGuardarPersona');
+    const formModal = document.getElementById('formRegistrarPersona');
+
+    btnGuardar.addEventListener('click', () => {
+      // Serializar formData
+      const formData = new FormData(formModal);
+      for (const [key, val] of formData.entries()) {
+          console.log(`formData: ${key} = ${val}`);
+        }
+      // Enviar por fetch
+      fetch(formModal.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          // Opcional: para que el controller reconozca AJAX
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+        .then(res => res.json())
+        .then(json => {
+          if (json.success) {
+            // Cerrar modal
+            const modalEl = document.getElementById('modalRegistrarPersona');
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            modal.hide();
+
+            //rellenar los campos principales con los datos creados
+            document.getElementById('dni').value = json.data.nrodoc;
+            document.getElementById('apellidos').value = json.data.apellidos;
+            document.getElementById('nombres').value = json.data.nombres;
+
+          } else {
+            // Mostrar error dentro del modal
+            alert('Error: ' + json.error);
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          alert('Error al conectar con el servidor');
         });
     });
   });

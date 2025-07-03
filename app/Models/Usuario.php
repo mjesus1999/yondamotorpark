@@ -127,19 +127,19 @@ class Usuario
       ");
 
       // Vinculamos parámetros
-      $stmt->bindParam(':tipodoc', $tipodoc, PDO::PARAM_STR);
-      $stmt->bindParam(':nrodoc', $nrodoc, PDO::PARAM_STR);
-      $stmt->bindParam(':apellidos', $apellidos, PDO::PARAM_STR);
-      $stmt->bindParam(':nombres', $nombres, PDO::PARAM_STR);
-      $stmt->bindParam(':genero', $genero, PDO::PARAM_STR);
-      $stmt->bindParam(':fechanac', $fechanac, PDO::PARAM_STR);
-      $stmt->bindParam(':estadocivil', $estadocivil, PDO::PARAM_STR);
-      $stmt->bindParam(':email', $email, PDO::PARAM_STR);
-      $stmt->bindParam(':iddistrito', $iddistrito, PDO::PARAM_INT);
-      $stmt->bindParam(':direccion', $direccion, PDO::PARAM_STR);
-      $stmt->bindParam(':referencia', $referencia, PDO::PARAM_STR);
-      $stmt->bindParam(':telprimario', $telprimario, PDO::PARAM_STR);
-      $stmt->bindParam(':telalternativo', $telalternativo, PDO::PARAM_STR);
+      $stmt->bindParam(':tipodoc', $tipodoc);
+      $stmt->bindParam(':nrodoc', $nrodoc);
+      $stmt->bindParam(':apellidos', $apellidos);
+      $stmt->bindParam(':nombres', $nombres);
+      $stmt->bindParam(':genero', $genero);
+      $stmt->bindParam(':fechanac', $fechanac);
+      $stmt->bindParam(':estadocivil', $estadocivil);
+      $stmt->bindParam(':email', $email);
+      $stmt->bindParam(':iddistrito', $iddistrito);
+      $stmt->bindParam(':direccion', $direccion);
+      $stmt->bindParam(':referencia', $referencia);
+      $stmt->bindParam(':telprimario', $telprimario);
+      $stmt->bindParam(':telalternativo', $telalternativo);
 
       $stmt->execute();
 
@@ -149,7 +149,9 @@ class Usuario
 
       return isset($row['last_id']) ? (int) $row['last_id'] : 0;
     } catch (Exception $e) {
-      return 0;
+      error_log("SP spu_pers_registrar fallo: " . $e->getMessage());
+      // 2) Vuelve a lanzar para que el controller lo capture
+      throw $e;
     }
   }
 
