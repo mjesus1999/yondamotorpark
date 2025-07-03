@@ -32,6 +32,7 @@ class Usuario
         DATE_FORMAT(cl.fechafin, '%Y-%m-%d'),
         'Indeterminado'
       )               AS fecha_fin,
+      col.idcolaborador AS idcolaborador, 
       col.usernick    AS usuario
     FROM personas p
     INNER JOIN contratoslaborales cl
@@ -274,5 +275,16 @@ class Usuario
 
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
     return $row !== false ? $row : null;
+  }
+
+  public function updatePassword(int $idColaborador, string $newHash): bool
+  {
+    $sql = "UPDATE colaboradores
+            SET userpassword = :userpassword
+            WHERE idcolaborador = :idcolaborador";
+    $stmt = $this->db->prepare($sql);
+    $stmt->bindValue(':userpassword', $newHash);
+    $stmt->bindValue(':idcolaborador', $idColaborador, PDO::PARAM_INT);
+    return $stmt->execute();
   }
 }

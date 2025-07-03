@@ -246,4 +246,69 @@ class UsuarioController extends Controller
     }
   }
 
+  public function changePassword(): void
+  {
+    header('Content-Type: application/json; charset=utf-8');
+
+    // 1) Validar método
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+      http_response_code(405);
+      echo json_encode(['success' => false, 'error' => 'Método no permitido']);
+      return;
+    }
+
+    // 2) Recoger datos
+    $idColaborador = isset($_POST['idcolaborador'])
+      ? (int) $_POST['idcolaborador']
+      : 0;
+    $pass1 = $_POST['password1'] ?? '';
+    $pass2 = $_POST['password2'] ?? '';
+
+    // 3) Validar inputs
+    $errors = [];
+    if ($idColaborador <= 0)
+      $errors[] = 'Usuario inválido.';
+    if (!$pass1 || !$pass2)
+      $errors[] = 'Ambas contraseñas son requeridas.';
+    if ($pass1 !== $pass2)
+      $errors[] = 'Las contraseñas no coinciden.';
+    if (
+      !preg_match(
+        '/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&]).{8,}$/',
+        $pass1
+      )
+    )
+      $errors[] = 'La contraseña no cumple el patrón de seguridad.';
+
+    if ($errors) {
+      http_response_code(422);
+      echo json_encode([
+        'success' => false,
+        'error' => implode(' ', $errors)
+      ]);
+      return;
+    }
+
+    // 4) Hash y actualizar
+    $newHash = password_hash($pass1, PASSWORD_BCRYPT);
+    try {
+      $updated = $this->usuarioModel->updatePassword($idColaborador, $newHash);
+      if ($updated) {
+        echo json_encode(['success' => true]);
+      } else {
+        http_response_code(500);
+        echo json_encode([
+          'success' => false,
+          'error' => 'No se pudo actualizar la contraseña.'
+        ]);
+      }
+    } catch (\Exception $e) {
+      http_response_code(500);
+      echo json_encode([
+        'success' => false,
+        'error' => 'Error del servidor: ' . $e->getMessage()
+      ]);
+    }
+  }
+
 }
