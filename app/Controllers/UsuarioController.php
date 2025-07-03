@@ -136,7 +136,7 @@ class UsuarioController extends Controller
     }
   }
 
-  public function store(): void
+  /* public function store(): void
   {
     // Solo procesar POST
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -222,9 +222,9 @@ class UsuarioController extends Controller
       $areas = $this->usuarioModel->getAllAreas();
       $this->view('usuarios.create', ['areas' => $areas]);
     }
-  }
+  } */
 
-  /* public function store(): void
+  public function store(): void
   {
     header('Content-Type: application/json; charset=utf-8');
 
@@ -306,9 +306,8 @@ class UsuarioController extends Controller
       ]);
     }
   }
- */
-  
- public function searchByDNI(): void
+
+  public function searchByDNI(): void
   {
     $dni = trim($_GET['nrodoc'] ?? '');
     if ($dni === '') {
