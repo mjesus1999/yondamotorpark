@@ -82,8 +82,8 @@ class UsuarioController extends Controller
       $errors[] = 'Debe seleccionar un distrito.';
     if (!$direccion)
       $errors[] = 'Dirección requerida.';
-    if (!$referencia)
-      $errors[] = 'Referencia requerida.';
+    /* if (!$referencia)
+      $errors[] = 'Referencia requerida.'; */
     if (!$telprimario)
       $errors[] = 'Teléfono primario requerido.';
 
