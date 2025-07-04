@@ -21,8 +21,8 @@ class Cliente
         $query = "INSERT INTO clientes(idpersona, idempresa, idcolregistra, idcolactualiza, tipocliente)
               VALUES(:idpersona, :idempresa, :idcolregistra, :idcolactualiza, :tipocliente)";
         try {
-            $cmd = $this->db->prepare($query);
-            $cmd->execute([
+            $stmt = $this->db->prepare($query);
+            $stmt->execute([
                 ':idpersona' => $params['idpersona'] ,
                 ':idempresa' => $params['idempresa'],
                 ':idcolregistra' => $params['idcolregistra'],
@@ -33,6 +33,22 @@ class Cliente
         } catch (PDOException $error) {
             error_log($error->getMessage());
             return -1;
+        }
+    }
+
+
+     public function disabled($idcliente = -1):int {
+        try {
+            $query = "UPDATE clientes SET estado = 'INACT' WHERE idcliente = :id ";
+            $stmt = $this->db->prepare($query);
+            $stmt->execute(array(':id' => $idcliente));
+            
+            return (int) $stmt->rowCount();
+
+
+        } catch(PDOException $error) {
+            error_log($error->getMessage());
+            return - 1;
         }
     }
 

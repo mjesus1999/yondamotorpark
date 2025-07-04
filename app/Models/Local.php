@@ -45,9 +45,9 @@ class Local
     {
         $query = "SELECT idlocal, responsable, telefono FROM locales WHERE idlocal = ?";
         try {
-            $cmd = $this->db->prepare($query);
-            $cmd->execute(array($idlocal));
-            $results = $cmd->fetch(PDO::FETCH_ASSOC);
+            $stmt = $this->db->prepare($query);
+            $stmt->execute(array($idlocal));
+            $results = $stmt->fetch(PDO::FETCH_ASSOC);
             return $results;
         } catch (PDOException $error) {
             error_log($error->getMessage());
@@ -96,14 +96,14 @@ class Local
                 modificado = NOW()
               WHERE idlocal = :idlocal";
 
-            $cmd = $this->db->prepare($query);
-            $cmd->execute([
+            $stmt = $this->db->prepare($query);
+            $stmt->execute([
                 ':responsable' => $params['responsable'],
                 ':telefono' => $params['telefono'],
                 ':idlocal' => $params['idlocal']
             ]);
 
-            return (int) $cmd->rowCount();
+            return (int) $stmt->rowCount();
         } catch (PDOException $error) {
             error_log($error->getMessage());
             return -1;
@@ -113,10 +113,10 @@ class Local
     public function delete($idlocal = -1): int
     {
         try {
-            $cmd = $this->db->prepare("DELETE FROM locales WHERE idlocal=?");
-            $cmd->execute(array($idlocal));
-            $cmd->fetchAll(PDO::FETCH_ASSOC);
-            return (int) $cmd->rowCount();
+            $stmt = $this->db->prepare("DELETE FROM locales WHERE idlocal=?");
+            $stmt->execute(array($idlocal));
+            $stmt->fetchAll(PDO::FETCH_ASSOC);
+            return (int) $stmt->rowCount();
         } catch (PDOException $error) {
             error_log($error->getMessage());
             return -1;

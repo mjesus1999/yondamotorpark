@@ -15,9 +15,6 @@ class PersonaController extends Controller
     {
         $this->personaModel = new Persona();
         $this->clienteModel = new Cliente();
-        if (session_status() == PHP_SESSION_NONE) {
-            session_start();
-        }
     }
 
     public function indexPersonCliente(): void
@@ -32,7 +29,7 @@ class PersonaController extends Controller
         $this->view('clientes.create');
     }
 
-    public function store(): void
+    public function storePersonaClient(): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
@@ -115,26 +112,20 @@ class PersonaController extends Controller
         return;
     }
 
-
-
-
-
     public function edit(int $id): void
     {
-        header('Content-Type: application/json');
-        $personClient = $this->personaModel->getById($id);
-        if ($personClient) {
-            echo json_encode(['success' => true, 'personClient' => $personClient]);
+        $personaCliente = $this->personaModel->getById($id);
+        if ($personaCliente) {
+            $this->view('clientes.edit', ['personaCliente' => $personaCliente]);
         } else {
             http_response_code(404);
-            echo json_encode(['success' => false, 'message' => 'Perona cliente no encontrado.']);
+            $this->view('errors.404');
         }
-        exit();
     }
 
     public function update(int $id): void
     {
-        header('Content-Type: application/json');
+
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $registro = [
@@ -150,33 +141,17 @@ class PersonaController extends Controller
 
             ];
 
-            $errores = [];
-            if (empty($registro['responsable'])) {
-                $errores[] = "El campo 'Responsable' es obligatorio.";
-            }
-            if (empty($registro['telefono'])) {
-                $errores[] = "El campo 'Teléfono' es obligatorio.";
-            }
-
-            if (count($errores) > 0) {
-                http_response_code(400);
-                echo json_encode(['success' => false, 'message' => 'Errores de validación: ' . implode('<br>', $errores)]);
-                exit();
-            }
-
-            $rowsAffected = $this->personaModel->update($registro);
-
-            if ($rowsAffected > 0) {
-                echo json_encode(['success' => true, 'message' => '¡Local actualizado exitosamente!']);
+            if ($registro['nombres'] && $registro['apellidos'] && $registro['telprimario'] !== false) {
+                if ($this->personaModel->update($registro)) {
+                    $this->redirect('/clientes');
+                } else {
+                    $personaCliente = $this->personaModel->getById($id);
+                    $this->view('clientes.edit', ['personaCliente' => $personaCliente, 'error' => 'Error al actualizar el cliente.']);
+                }
             } else {
-
-                http_response_code(500);
-                echo json_encode(['success' => false, 'message' => 'Error al actualizar el local o no se realizaron cambios.']);
+                $personaCliente = $this->personaModel->getById($id);
+                $this->view('personas.edit', ['personaCliente' => $personaCliente, 'error' => 'Todos los campos son obligatorios.']);
             }
-        } else {
-            http_response_code(405);
-            echo json_encode(['success' => false, 'message' => 'Método no permitido.']);
         }
-        exit();
     }
 }

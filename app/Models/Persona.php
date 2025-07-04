@@ -41,9 +41,9 @@ class Persona
                 INNER JOIN departamentos dp ON pr.iddepartamento = dp.iddepartamento
                 WHERE p.idpersona = ?";
         try {
-            $cmd = $this->db->prepare($query);
-            $cmd->execute(array($idpersona));
-            $results = $cmd->fetch(PDO::FETCH_ASSOC);
+            $stmt = $this->db->prepare($query);
+            $stmt->execute(array($idpersona));
+            $results = $stmt->fetch(PDO::FETCH_ASSOC);
             return $results;
         } catch (PDOException $error) {
             error_log($error->getMessage());
@@ -72,9 +72,9 @@ class Persona
                         LEFT JOIN provincias pr ON di.idprovincia = pr.idprovincia
                         LEFT JOIN departamentos de ON pr.iddepartamento = de.iddepartamento
                         WHERE c.tipocliente = 'P' AND c.estado = 'ACT'";
-            $cmd = $this->db->prepare($query);
-            $cmd->execute();
-            $results = $cmd->fetchAll(PDO::FETCH_ASSOC);
+            $stmt = $this->db->prepare($query);
+            $stmt->execute();
+            $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
             return $results;
         } catch (PDOException $error) {
             error_log($error->getMessage());
@@ -91,8 +91,8 @@ class Persona
                   VALUES(:apellidos,:nombres,:tipodoc,:nrodoc,:genero,:fechanac,:estadocivil,:email,:iddistrito,:direccion,:referencia,:telprimario,:telalternativo,:latitud,:longitud)";
 
         try {
-            $cmd = $this->db->prepare($query);
-            $cmd->execute(array(
+            $stmt = $this->db->prepare($query);
+            $stmt->execute(array(
                 ':apellidos' => $params['apellidos'],
                 ':nombres' => $params['nombres'],
                 ':tipodoc' => $params['tipodoc'],
@@ -133,8 +133,8 @@ class Persona
                 modificado = NOW()
               WHERE idpersona  = :idpersona";
 
-                $cmd = $this->db->prepare($query);
-                $cmd->execute([
+                $stmt = $this->db->prepare($query);
+                $stmt->execute([
                     ':nombres' => $params['nombres'],
                     ':apellidos' => $params['apellidos'],
                     ':email' => $params['email'],
@@ -146,11 +146,16 @@ class Persona
                     ':idpersona' => $params['idpersona']
                 ]);
 
-                return (int) $cmd->rowCount();
+                return (int) $stmt->rowCount();
             } catch (PDOException $error) {
                 error_log($error->getMessage());
                 return -1;
             }
         }
     }
+
+   
+
+
+
 }
