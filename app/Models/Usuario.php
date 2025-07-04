@@ -15,10 +15,6 @@ class Usuario
     $this->db = Database::getInstance();
   }
 
-  /**
-   * Lista los usuarios
-   * @return array
-   */
   public function getAll(): array
   {
     $query = "SELECT
@@ -55,10 +51,6 @@ class Usuario
     }
   }
 
-  /**
-   * listar las areas
-   * @return array
-   */
   public function getAllAreas(): array
   {
     $query = "SELECT idarea, area FROM areas ORDER BY area";
@@ -71,11 +63,6 @@ class Usuario
     }
   }
 
-  /**
-   * conforme a la area seleccionada se muestran los campos
-   * @param int $idArea
-   * @return array
-   */
   public function getCargosByArea(int $idArea): array
   {
     $query = "SELECT idcargo, cargo
@@ -92,23 +79,6 @@ class Usuario
     }
   }
 
-  /**
-   * Summary of createPersona
-   * @param string $tipodoc
-   * @param string $nrodoc
-   * @param string $apellidos
-   * @param string $nombres
-   * @param string $genero
-   * @param string $fechanac
-   * @param string $estadocivil
-   * @param mixed $email
-   * @param int $iddistrito
-   * @param mixed $direccion
-   * @param mixed $referencia
-   * @param string $telprimario
-   * @param mixed $telalternativo
-   * @return int
-   */
   public function createPersona(
     string $tipodoc,
     string $nrodoc,
@@ -124,122 +94,93 @@ class Usuario
     string $telprimario,
     ?string $telalternativo
   ): int {
-    try {
-      // Preparamos la llamada al SP
-      $stmt = $this->db->prepare("
-        CALL spu_pers_registrar(
-            :tipodoc,
-            :nrodoc,
-            :apellidos,
-            :nombres,
-            :genero,
-            :fechanac,
-            :estadocivil,
-            :email,
-            :iddistrito,
-            :direccion,
-            :referencia,
-            :telprimario,
-            :telalternativo
-          )
-      ");
+    $sql = "
+      CALL spu_pers_registrar(
+        :tipodoc, :nrodoc, :apellidos, :nombres,
+        :genero, :fechanac, :estadocivil, :email,
+        :iddistrito, :direccion, :referencia,
+        :telprimario, :telalternativo
+      )
+    ";
 
-      // Vinculamos parámetros
-      $stmt->bindParam(':tipodoc', $tipodoc);
-      $stmt->bindParam(':nrodoc', $nrodoc);
-      $stmt->bindParam(':apellidos', $apellidos);
-      $stmt->bindParam(':nombres', $nombres);
-      $stmt->bindParam(':genero', $genero);
-      $stmt->bindParam(':fechanac', $fechanac);
-      $stmt->bindParam(':estadocivil', $estadocivil);
-      $stmt->bindParam(':email', $email);
-      $stmt->bindParam(':iddistrito', $iddistrito);
-      $stmt->bindParam(':direccion', $direccion);
-      $stmt->bindParam(':referencia', $referencia);
-      $stmt->bindParam(':telprimario', $telprimario);
-      $stmt->bindParam(':telalternativo', $telalternativo);
+    $stmt = $this->db->prepare($sql);
+    $stmt->bindParam(':tipodoc', $tipodoc);
+    $stmt->bindParam(':nrodoc', $nrodoc);
+    $stmt->bindParam(':apellidos', $apellidos);
+    $stmt->bindParam(':nombres', $nombres);
+    $stmt->bindParam(':genero', $genero);
+    $stmt->bindParam(':fechanac', $fechanac);
+    $stmt->bindParam(':estadocivil', $estadocivil);
+    $stmt->bindParam(':email', $email);
+    $stmt->bindParam(':iddistrito', $iddistrito, PDO::PARAM_INT);
+    $stmt->bindParam(':direccion', $direccion);
+    $stmt->bindParam(':referencia', $referencia);
+    $stmt->bindParam(':telprimario', $telprimario);
+    $stmt->bindParam(':telalternativo', $telalternativo);
 
-      $stmt->execute();
+    $stmt->execute();
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    $stmt->closeCursor();
 
-      // El SP devuelve un resultset con { last_id }
-      $row = $stmt->fetch(PDO::FETCH_ASSOC);
-      $stmt->closeCursor();
-
-      return isset($row['last_id']) ? (int) $row['last_id'] : 0;
-    } catch (Exception $e) {
-      error_log("SP spu_pers_registrar fallo: " . $e->getMessage());
-      // 2) Vuelve a lanzar para que el controller lo capture
-      throw $e;
-    }
+    return isset($row['last_id']) ? (int) $row['last_id'] : 0;
   }
 
+  public function createContratoLaboral(
+    int $idPersona,
+    int $idCargo,
+    string $fechaInicio,
+    ?string $fechaFin,
+    string $tipoContrato
+  ): int {
+    $sql = "
+      INSERT INTO contratoslaborales
+        (idpersona, idcargo, fechainicio, fechafin, tipocontrato)
+      VALUES
+        (:idpersona, :idcargo, :fechainicio, :fechafin, :tipocontrato)
+    ";
 
-  /**
-   * Registrar un contrato
-   * @param int $idPersona
-   * @param int $idCargo
-   * @param string $fechaInicio
-   * @param mixed $fechaFin
-   * @param string $tipoContrato
-   * @return int
-   */
-  public function createContratoLaboral(int $idPersona, int $idCargo, string $fechaInicio, ?string $fechaFin, string $tipoContrato): int
-  {
-    $sql = "INSERT INTO contratoslaborales
-          (idpersona, idcargo, fechainicio, fechafin, tipocontrato)
-        VALUES
-          (:idpersona, :idcargo, :fechainicio, :fechafin, :tipocontrato)";
     $stmt = $this->db->prepare($sql);
-    $stmt->bindValue(':idpersona', $idPersona, PDO::PARAM_INT);
-    $stmt->bindValue(':idcargo', $idCargo, PDO::PARAM_INT);
-    $stmt->bindValue(':fechainicio', $fechaInicio);
+    $stmt->bindParam(':idpersona', $idPersona, PDO::PARAM_INT);
+    $stmt->bindParam(':idcargo', $idCargo, PDO::PARAM_INT);
+    $stmt->bindParam(':fechainicio', $fechaInicio);
     if ($fechaFin !== null) {
-      // Si hay fecha, la pasamos como string (por defecto PDO::PARAM_STR)
-      $stmt->bindValue(':fechafin', $fechaFin);
+      $stmt->bindParam(':fechafin', $fechaFin);
     } else {
-      // Si no hay fecha, lo bindearmos explícitamente como NULL
+      // para NULL hay que usar bindValue con PDO::PARAM_NULL
       $stmt->bindValue(':fechafin', null, PDO::PARAM_NULL);
     }
-    $stmt->bindValue(':tipocontrato', $tipoContrato);
+    $stmt->bindParam(':tipocontrato', $tipoContrato);
+
     $stmt->execute();
     return (int) $this->db->lastInsertId();
   }
 
-  /**
-   * Registrar un colaborador
-   * @param int $idContrato
-   * @param string $usernick
-   * @param string $passHash
-   * @return int
-   */
-  public function createColaborador(int $idContrato, string $usernick, string $passHash): int
-  {
-    $sql = "INSERT INTO colaboradores
-          (idcontratolaboral, usernick, userpassword)
-        VALUES
-          (:idcontratolaboral, :usernick, :userpassword)";
+  public function createColaborador(
+    int $idContrato,
+    string $usernick,
+    string $passHash
+  ): int {
+    $sql = "
+      INSERT INTO colaboradores
+        (idcontratolaboral, usernick, userpassword)
+      VALUES
+        (:idcontratolaboral, :usernick, :userpassword)
+    ";
+
     $stmt = $this->db->prepare($sql);
-    $stmt->bindValue(':idcontratolaboral', $idContrato, PDO::PARAM_INT);
-    $stmt->bindValue(':usernick', $usernick);
-    $stmt->bindValue(':userpassword', $passHash);
+    $stmt->bindParam(':idcontratolaboral', $idContrato, PDO::PARAM_INT);
+    $stmt->bindParam(':usernick', $usernick);
+    $stmt->bindParam(':userpassword', $passHash);
+
     $stmt->execute();
     return (int) $this->db->lastInsertId();
   }
 
-
-  /**
-   * Crear Registro persona + contrato + colaborador
-   * @param int $idPersona
-   * @param array $c
-   * @param array $u
-   * @return array{idcolaborador: int, idcontratolaboral: int}
-   */
   public function create(int $idPersona, array $c, array $u): array
   {
     try {
       $this->db->beginTransaction();
 
-      // 1) Contrato
       $idContrato = $this->createContratoLaboral(
         $idPersona,
         $c['idcargo'],
@@ -248,7 +189,6 @@ class Usuario
         $c['tipocontrato']
       );
 
-      // 2) Colaborador
       $idColab = $this->createColaborador(
         $idContrato,
         $u['usernick'],
@@ -256,7 +196,6 @@ class Usuario
       );
 
       $this->db->commit();
-
       return [
         'idcontratolaboral' => $idContrato,
         'idcolaborador' => $idColab,
@@ -267,38 +206,31 @@ class Usuario
     }
   }
 
-  /**
-   * Buscar por DNI
-   * @param string $dni
-   */
   public function searchByDNI(string $dni): ?array
   {
-    $sql = "SELECT idpersona, apellidos, nombres
-            FROM personas
-            WHERE nrodoc = :dni
-            LIMIT 1";
+    $sql = "
+      SELECT idpersona, apellidos, nombres
+      FROM personas
+      WHERE nrodoc = :dni
+      LIMIT 1
+    ";
     $stmt = $this->db->prepare($sql);
-    $stmt->bindValue(':dni', $dni);
+    $stmt->bindParam(':dni', $dni);
     $stmt->execute();
-
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
-    return $row !== false ? $row : null;
+    return $row ?: null;
   }
 
-  /**
-   * Actualizar contraseña
-   * @param int $idColaborador
-   * @param string $newHash
-   * @return bool
-   */
   public function updatePassword(int $idColaborador, string $newHash): bool
   {
-    $sql = "UPDATE colaboradores
-            SET userpassword = :userpassword
-            WHERE idcolaborador = :idcolaborador";
+    $sql = "
+      UPDATE colaboradores
+        SET userpassword = :userpassword
+      WHERE idcolaborador = :idcolaborador
+    ";
     $stmt = $this->db->prepare($sql);
-    $stmt->bindValue(':userpassword', $newHash);
-    $stmt->bindValue(':idcolaborador', $idColaborador, PDO::PARAM_INT);
+    $stmt->bindParam(':userpassword', $newHash);
+    $stmt->bindParam(':idcolaborador', $idColaborador, PDO::PARAM_INT);
     return $stmt->execute();
   }
 

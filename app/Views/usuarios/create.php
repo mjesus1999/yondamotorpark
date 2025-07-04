@@ -281,6 +281,8 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
+
+    //CARGAR AREAS Y CARGOS
     const selArea = document.getElementById('area');
     const selCargo = document.getElementById('cargo');
 
@@ -310,6 +312,7 @@
         });
     });
 
+    // CARGAR DISTRITOS
     const selDist = document.getElementById('modal-iddistrito');
     const modal = document.getElementById('modalRegistrarPersona');
 
@@ -335,131 +338,137 @@
         });
     });
 
-    //registrar persona en el modal
-    const btnGuardar = document.getElementById('btnGuardarPersona');
+    // REGISTRAR PERSONAS DESDE EL MODAL
+    const btnGuardarPersona = document.getElementById('btnGuardarPersona');
     const formModal = document.getElementById('formRegistrarPersona');
 
-    btnGuardar.addEventListener('click', () => {
-      // Serializar formData
+    btnGuardarPersona.addEventListener('click', async () => {
       const formData = new FormData(formModal);
-      for (const [key, val] of formData.entries()) {
-        console.log(`formData: ${key} = ${val}`);
-      }
-      // Enviar por fetch
-      fetch(formModal.action, {
-        method: 'POST',
-        body: formData,
-        headers: {
-          // Opcional: para que el controller reconozca AJAX
-          'X-Requested-With': 'XMLHttpRequest'
+
+      try {
+        const resp = await fetch('/usuarios/storePersona', {
+          method: 'POST',
+          body: formData
+        });
+
+        const result = await resp.json();
+
+        if (result.success) {
+          // Rellenar campos en el formulario principal
+          document.getElementById('idpersona').value = result.data.idpersona;
+          document.getElementById('dni').value = result.data.nrodoc;
+          document.getElementById('apellidos').value = result.data.apellidos;
+          document.getElementById('nombres').value = result.data.nombres;
+
+          // Cerrar el modal
+          const modalEl = document.getElementById('modalRegistrarPersona');
+          bootstrap.Modal.getInstance(modalEl).hide();
+        } else {
+          alert(result.error || 'No se pudo registrar la persona.');
         }
-      })
-        .then(res => res.json())
-        .then(json => {
-          if (json.success) {
-            // Cerrar modal
-            const modalEl = document.getElementById('modalRegistrarPersona');
-            const modal = bootstrap.Modal.getInstance(modalEl);
-            modal.hide();
-
-            //rellenar los campos principales con los datos creados
-            document.getElementById('dni').value = json.data.nrodoc;
-            document.getElementById('apellidos').value = json.data.apellidos;
-            document.getElementById('nombres').value = json.data.nombres;
-            document.getElementById('idpersona').value = json.data.idpersona;
-
-          } else {
-            // Mostrar error dentro del modal
-            alert('Error: ' + json.error);
-          }
-        })
-        .catch(err => {
-          console.error(err);
-          alert('Error al conectar con el servidor');
-        });
-    });
-    const formRegister = document.getElementById('formRegisterFull');
-
-    formRegister.addEventListener('submit', function (e) {
-      e.preventDefault();
-
-      const formData = new FormData(formRegister);
-      fetch('/usuarios/store', {
-        method: 'POST',
-        body: formData
-      })
-        .then(res => res.json())
-        .then(json => {
-          if (json.success) {
-            // ahora sí usamos la URL que vino del controlador
-            window.location.href = json.redirect;
-          } else {
-            alert('Error: ' + json.error);
-          }
-        })
-        .catch(err => {
-          console.error(err);
-          alert('Error de conexión con el servidor');
-        });
+      } catch (err) {
+        console.error(err);
+        alert('Error de red o servidor.');
+      }
     });
 
-    const inputDNI = document.getElementById('dni');
-    const modalEl = document.getElementById('modalRegistrarPersona');
-    const bsModal = new bootstrap.Modal(modalEl, { backdrop: 'static', keyboard: false });
+    // BUSCAR APELLIDOS Y NOMBRES POR DNI
+    const dniInput = document.getElementById('dni');
+    const apellidosInput = document.getElementById('apellidos');
+    const nombresInput = document.getElementById('nombres');
 
-    inputDNI.addEventListener('blur', () => {
-      const dni = inputDNI.value.trim();
+    dniInput.addEventListener('blur', async () => {
+      const dni = dniInput.value.trim();
       if (!dni) return;
 
-      fetch(`/usuarios/searchByDNI?nrodoc=${encodeURIComponent(dni)}`, {
-        headers: { 'X-Requested-With': 'XMLHttpRequest' }
-      })
-        .then(res => res.json())
-        .then(json => {
-          if (json.success) {
-            // Persona existe: rellenamos y guardamos idpersona
-            document.getElementById('apellidos').value = json.data.apellidos;
-            document.getElementById('nombres').value = json.data.nombres;
-            document.getElementById('idpersona').value = json.data.idpersona;
-          } else {
-            // NO existe: abrimos modal para crear persona
-            // Limpiamos campos principales
-            document.getElementById('apellidos').value = '';
-            document.getElementById('nombres').value = '';
-            document.getElementById('idpersona').value = '';
+      try {
+        const resp = await fetch(`/usuarios/searchByDNI?nrodoc=${encodeURIComponent(dni)}`);
+        const result = await resp.json();
 
-            // Prefill del modal: pongo el DNI y tipo doc
-            document.getElementById('modal-nrodoc').value = dni;
-            // Opcional: si quieres preseleccionar tipo doc a DNI
-            document.getElementById('modal-tipodoc').value = 'DNI';
+        if (result.success) {
+          // Rellena si existe…
+          apellidosInput.value = result.data.apellidos;
+          nombresInput.value = result.data.nombres;
+          document.getElementById('idpersona').value = result.data.idpersona;
+        } else {
+          // Toast de advertencia
+          Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'warning',
+            title: `DNI ${dni} no encontrado`,
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+          });
 
-            // Abrir modal
-            bsModal.show();
-          }
-        })
-        .catch(err => console.error('Error buscando persona:', err));
-    });
-    const chkIndeterminado = document.getElementById('sin-fecha-fin');
-    const inputFechaFin = document.getElementById('fecha-fin');
-
-    if (chkIndeterminado.checked) {
-      inputFechaFin.readOnly = true;
-      inputFechaFin.value = '';
-      inputFechaFin.placeholder = 'Indeterminado';
-    }
-
-    chkIndeterminado.addEventListener('change', () => {
-      if (chkIndeterminado.checked) {
-        // Marqué “Indeterminado”: lo hago solo lectura, limpio valor
-        inputFechaFin.readOnly = true;
-        inputFechaFin.value = '';
-        inputFechaFin.placeholder = 'Indeterminado';
-      } else {
-        // Desmarqué: quito solo lectura para poder elegir fecha
-        inputFechaFin.readOnly = false;
-        inputFechaFin.placeholder = '';
+          // Rellenar el DNI en el modal y abrirlo
+          document.getElementById('modal-nrodoc').value = dni;
+          const modalEl = document.getElementById('modalRegistrarPersona');
+          bootstrap.Modal.getOrCreateInstance(modalEl).show();
+        }
+      } catch (err) {
+        console.error('Error buscando DNI:', err);
+        Swal.fire({
+          toast: true,
+          position: 'top-end',
+          icon: 'error',
+          title: 'Error de red al buscar DNI',
+          showConfirmButton: false,
+          timer: 3000,
+          timerProgressBar: true,
+        });
       }
     });
+
+    // registro de persona + contrato + colaborador
+    const formFull = document.getElementById('formRegisterFull');
+    const submitButton = formFull.querySelector('button[type="submit"]');
+
+    formFull.addEventListener('submit', async e => {
+      e.preventDefault();
+
+      // Lanza la alerta de confirmación
+      const { isConfirmed } = await Swal.fire({
+        title: '¿Estás seguro de registrar este usuario?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, registrar',
+        cancelButtonText: 'No, cancelar',
+        reverseButtons: true
+      });
+
+      if (!isConfirmed) {
+        return; // El usuario canceló
+      }
+
+      // Continúa con el envío via AJAX
+      submitButton.disabled = true;
+      submitButton.textContent = 'Registrando…';
+
+      const formData = new FormData(formFull);
+
+      try {
+        const resp = await fetch('/usuarios/store', { method: 'POST', body: formData });
+        const result = await resp.json();
+
+        if (result.success) {
+          // Redirige al listado
+          window.location.href = '/usuarios';
+        } else {
+          // Muestra error con SweetAlert2
+          await Swal.fire({ icon: 'error', title: 'Error', text: result.error || 'Error al registrar.' });
+          submitButton.disabled = false;
+          submitButton.textContent = 'Registrar';
+        }
+      } catch (err) {
+        console.error(err);
+        await Swal.fire({ icon: 'error', title: 'Error de red', text: 'No se pudo conectar al servidor.' });
+        submitButton.disabled = false;
+        submitButton.textContent = 'Registrar';
+      }
+    });
+
   });
 </script>
 
