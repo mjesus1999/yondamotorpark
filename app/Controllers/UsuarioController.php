@@ -138,11 +138,11 @@ class UsuarioController extends Controller
     }
 
     // 5) Falla inesperada
-    http_response_code(500);
+    /* http_response_code(500);
     echo json_encode([
       'success' => false,
       'error' => 'No se pudo crear la persona.'
-    ]);
+    ]); */
     return 0;
   }
 
@@ -218,7 +218,6 @@ class UsuarioController extends Controller
     }
 
     if (isset($res['idcolaborador']) && $res['idcolaborador'] > 0) {
-      // Éxito
       header('Content-Type: application/json; charset=utf-8');
       echo json_encode([
         'success' => true,
@@ -226,13 +225,11 @@ class UsuarioController extends Controller
       ]);
       return (int) $res['idcolaborador'];
     }
-
-    // Caso inesperado
-    http_response_code(500);
+    /* http_response_code(500);
     echo json_encode([
       'success' => false,
       'error' => 'No se pudo crear el colaborador.',
-    ]);
+    ]); */
     return 0;
   }
 
