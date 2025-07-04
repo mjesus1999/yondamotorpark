@@ -300,37 +300,21 @@ class UsuarioController extends Controller
     }
   }
 
-  public function delete(): void
+  public function delete(int $id): void
   {
-    header('Content-Type: application/json; charset=utf-8');
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
       http_response_code(405);
-      echo json_encode(['success' => false, 'error' => 'Método no permitido']);
-      return;
-    }
-
-    // Tomamos el ID del body JSON o form-data
-    $id = isset($_POST['idcolaborador'])
-      ? (int) $_POST['idcolaborador']
-      : 0;
-
-    if ($id <= 0) {
-      http_response_code(422);
-      echo json_encode(['success' => false, 'error' => 'ID inválido']);
       return;
     }
 
     try {
-      $deleted = $this->usuarioModel->delete($id);
-      if ($deleted) {
-        echo json_encode(['success' => true]);
+      if ($this->usuarioModel->delete($id)) {
+        $this->redirect('/usuarios');
       } else {
-        http_response_code(500);
-        echo json_encode(['success' => false, 'error' => 'No se pudo eliminar.']);
+        $this->redirect('/usuarios?error=delete_failed');
       }
     } catch (Exception $e) {
-      http_response_code(500);
-      echo json_encode(['success' => false, 'error' => 'Error del servidor.']);
+      $this->redirect('/usuarios?error=server_error');
     }
   }
 

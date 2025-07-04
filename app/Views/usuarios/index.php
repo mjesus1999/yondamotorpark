@@ -171,33 +171,12 @@
         });
         if (!isConfirmed) return;
 
-        try {
-          const formData = new FormData();
-          formData.append('idcolaborador', id);
-          const resp = await fetch('/usuarios/delete', {
-            method: 'POST',
-            body: formData
-          });
-          const json = await resp.json();
-
-          if (json.success) {
-            Swal.fire({
-              toast: true,
-              position: 'top-end',
-              icon: 'success',
-              title: 'Usuario eliminado',
-              showConfirmButton: false,
-              timer: 1500
-            });
-            // Quitar la fila de la tabla
-            btn.closest('tr').remove();
-          } else {
-            Swal.fire('Error', json.error || 'No se pudo eliminar.', 'error');
-          }
-        } catch (err) {
-          console.error(err);
-          Swal.fire('Error de red', 'No se pudo conectar al servidor.', 'error');
-        }
+        // Creamos y enviamos un formulario POST tradicional:
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/usuarios/delete/${id}`;
+        document.body.appendChild(form);
+        form.submit();
       });
     });
 

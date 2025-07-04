@@ -53,7 +53,8 @@ class Router
       // Convierte la URI de la ruta en una expresión regular
       // '{id}' se convierte en '([0-9]+)' para capturar uno o más dígitos
       // Puedes ajustar '([0-9]+)' a '([^/]+)' si esperas cualquier carácter excepto '/'
-      $pattern = preg_replace('#\{([a-zA-Z0-9_]+)\}#', '([0-9]+)', $route['uri']);
+      //$pattern = preg_replace('#\{([a-zA-Z0-9_]+)\}#', '([0-9]+)', $route['uri']);
+      $pattern = preg_replace('#\{([a-zA-Z0-9_]+)\}#', '([^/]+)', $route['uri']);
       $pattern = '#^' . $pattern . '$#'; // Asegura que la expresión coincida con la cadena completa
 
       // Intenta hacer coincidir la URI actual con el patrón de la ruta
