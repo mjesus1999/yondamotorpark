@@ -425,6 +425,26 @@
     const formFull = document.getElementById('formRegisterFull');
     const submitButton = formFull.querySelector('button[type="submit"]');
 
+    const cbIndeterminado = document.getElementById('sin-fecha-fin');
+    const inputFechaFin = document.getElementById('fecha-fin');
+
+    // Inicial: si carga marcado, deshabilita fecha-fin
+    if (cbIndeterminado.checked) {
+      inputFechaFin.value = '';
+      inputFechaFin.disabled = true;
+    }
+
+    cbIndeterminado.addEventListener('change', () => {
+      if (cbIndeterminado.checked) {
+        // Limpia y deshabilita el datepicker
+        inputFechaFin.value = '';
+        inputFechaFin.disabled = true;
+      } else {
+        // Vuelve a habilitar
+        inputFechaFin.disabled = false;
+      }
+    });
+
     formFull.addEventListener('submit', async e => {
       e.preventDefault();
 
@@ -468,6 +488,7 @@
         submitButton.textContent = 'Registrar';
       }
     });
+
 
   });
 </script>
