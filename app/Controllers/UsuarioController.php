@@ -264,5 +264,5 @@ class UsuarioController extends Controller
       $this->view('errors.server_error');
     }
   }
-  
+
 }
