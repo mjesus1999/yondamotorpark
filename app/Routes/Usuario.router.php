@@ -14,3 +14,6 @@ $router->add('GET', '/usuarios/searchByDNI', 'UsuarioController', 'searchByDNI')
 
 // ACTUALIZAR
 $router->add('POST', '/usuarios/changePassword', 'UsuarioController', 'changePassword');
+
+// ELIMINAR
+$router->add('POST', '/usuarios/delete', 'UsuarioController', 'delete');

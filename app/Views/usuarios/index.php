@@ -50,12 +50,23 @@
                   <td><?= htmlspecialchars($u['fecha_fin']) ?></td>
                   <td><?= htmlspecialchars($u['usuario']) ?></td>
                   <td>
-                    <!-- Botones de ejemplo: editar, cambiar clave -->
-                    <a href="<?= $path ?>/usuarios/editar/<?= $u['idpersona'] ?>"
-                      class="btn btn-sm btn-outline-primary">Editar</a>
-                    <button class="btn btn-sm btn-outline-secondary btn-cambiar-clave"
+                    <!-- Editar -->
+                    <a href="<?= $path ?>/usuarios/editar/<?= $u['idpersona'] ?>" class="btn btn-sm btn-outline-primary"
+                      title="Editar">
+                      <i class="fa-solid fa-pen"></i>
+                    </a>
+
+                    <!-- Cambiar contraseña -->
+                    <button type="button" class="btn btn-sm btn-outline-warning mx-1 btn-cambiar-clave"
+                      title="Cambiar contraseña" data-bs-toggle="modal" data-bs-target="#modalCambiarClave"
                       data-idcolab="<?= $u['idcolaborador'] ?>" data-usuario="<?= htmlspecialchars($u['usuario']) ?>">
-                      Password
+                      <i class="fa-solid fa-key"></i>
+                    </button>
+
+                    <!-- Eliminar -->
+                    <button type="button" class="btn btn-sm btn-outline-danger btn-borrar" title="Eliminar"
+                      data-idcolab="<?= $u['idcolaborador'] ?>">
+                      <i class="fa-solid fa-trash"></i>
                     </button>
                   </td>
                 </tr>
@@ -69,6 +80,7 @@
 
 </div>
 
+<!-- CAMBIO DE PASSWORD MODAL -->
 <div class="modal fade" id="modalCambiarClave" tabindex="-1" aria-labelledby="modalCambiarClaveLabel"
   aria-hidden="true">
   <div class="modal-dialog modal-sm">
@@ -145,7 +157,50 @@
           alert('Error de conexión.');
         });
     });
-    
+    document.querySelectorAll('.btn-borrar').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = btn.getAttribute('data-idcolab');
+        const { isConfirmed } = await Swal.fire({
+          title: '¿Eliminar usuario?',
+          text: 'Esta acción no se puede deshacer.',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Sí, eliminar',
+          cancelButtonText: 'Cancelar',
+          reverseButtons: true
+        });
+        if (!isConfirmed) return;
+
+        try {
+          const formData = new FormData();
+          formData.append('idcolaborador', id);
+          const resp = await fetch('/usuarios/delete', {
+            method: 'POST',
+            body: formData
+          });
+          const json = await resp.json();
+
+          if (json.success) {
+            Swal.fire({
+              toast: true,
+              position: 'top-end',
+              icon: 'success',
+              title: 'Usuario eliminado',
+              showConfirmButton: false,
+              timer: 1500
+            });
+            // Quitar la fila de la tabla
+            btn.closest('tr').remove();
+          } else {
+            Swal.fire('Error', json.error || 'No se pudo eliminar.', 'error');
+          }
+        } catch (err) {
+          console.error(err);
+          Swal.fire('Error de red', 'No se pudo conectar al servidor.', 'error');
+        }
+      });
+    });
+
   });
 </script>
 

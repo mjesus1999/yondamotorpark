@@ -234,4 +234,15 @@ class Usuario
     return $stmt->execute();
   }
 
+  public function delete(int $id): bool
+  {
+    $stmt = $this->db->prepare("
+    DELETE
+    FROM colaboradores
+    WHERE idcolaborador = :id
+  ");
+    $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+    return $stmt->execute();
+  }
+
 }
