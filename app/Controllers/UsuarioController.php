@@ -8,7 +8,6 @@ use Exception;
 
 class UsuarioController extends Controller
 {
-
   private Usuario $usuarioModel;
 
   public function __construct()
@@ -32,18 +31,18 @@ class UsuarioController extends Controller
   {
     $idArea = isset($_GET['idarea']) ? (int) $_GET['idarea'] : 0;
     $cargos = $this->usuarioModel->getCargosByArea($idArea);
-    echo json_encode($cargos);
+    $this->view('usuarios.cargos', ['cargos' => $cargos]); // Asegúrate de tener la vista 'usuarios.cargos'
   }
 
-  public function storePersona(): int
+  public function storePersona(): void
   {
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
       http_response_code(405);
-      echo json_encode(['success' => false, 'error' => 'Método no permitido']);
-      return 0;
+      $this->view('errors.405'); // Vista de error para método no permitido
+      return;
     }
 
-    // 1) Sanear input
+    // Sanear input
     $post = array_map('trim', $_POST);
     $tipodoc = $post['tipodoc'] ?? '';
     $nrodoc = $post['nrodoc'] ?? '';
@@ -59,7 +58,7 @@ class UsuarioController extends Controller
     $telprimario = $post['telprimario'] ?? '';
     $telalternativo = $post['telalternativo'] ?? '';
 
-    // 2) Validar
+    // Validación
     $errors = [];
     if (!$tipodoc)
       $errors[] = 'Tipo de documento requerido.';
@@ -75,28 +74,21 @@ class UsuarioController extends Controller
       $errors[] = 'Fecha de nacimiento requerida.';
     if (!$estadocivil)
       $errors[] = 'Estado civil requerido.';
-    if ($email && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    if ($email && !filter_var($email, FILTER_VALIDATE_EMAIL))
       $errors[] = 'Email inválido.';
-    }
     if ($iddistrito <= 0)
       $errors[] = 'Debe seleccionar un distrito.';
     if (!$direccion)
       $errors[] = 'Dirección requerida.';
-    /* if (!$referencia)
-      $errors[] = 'Referencia requerida.'; */
     if (!$telprimario)
       $errors[] = 'Teléfono primario requerido.';
 
     if (!empty($errors)) {
-      http_response_code(422);
-      echo json_encode([
-        'success' => false,
-        'error' => implode(' ', $errors)
-      ]);
-      return -1;
+      $this->view('usuarios.create', ['errors' => $errors, 'data' => $_POST]);
+      return;
     }
 
-    // 3) Intentar insertar
+    // Intentar insertar en la base de datos
     try {
       $newId = $this->usuarioModel->createPersona(
         $tipodoc,
@@ -114,47 +106,27 @@ class UsuarioController extends Controller
         $telalternativo ?: null
       );
     } catch (Exception $e) {
-      http_response_code(500);
-      echo json_encode([
-        'success' => false,
-        'error' => 'Error en la base de datos al crear persona.'
-      ]);
-      return -2;
+      $this->view('errors.db_error'); // Vista de error en base de datos
+      return;
     }
 
-    // 4) Responder éxito con JSON y devolver el ID
+    // Si todo sale bien, redirigimos a la lista de usuarios
     if ($newId > 0) {
-      header('Content-Type: application/json; charset=utf-8');
-      echo json_encode([
-        'success' => true,
-        'data' => [
-          'idpersona' => $newId,
-          'nrodoc' => $nrodoc,
-          'apellidos' => $apellidos,
-          'nombres' => $nombres,
-        ]
-      ]);
-      return $newId;
+      $this->redirect('/usuarios');
+    } else {
+      $this->view('errors.unknown_error');
     }
-
-    // 5) Falla inesperada
-    /* http_response_code(500);
-    echo json_encode([
-      'success' => false,
-      'error' => 'No se pudo crear la persona.'
-    ]); */
-    return 0;
   }
 
-  public function store(): int
+  public function store(): void
   {
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
       http_response_code(405);
-      echo json_encode(['success' => false, 'error' => 'Método no permitido']);
-      return 0;
+      $this->view('errors.405'); // Vista de error para método no permitido
+      return;
     }
 
-    // 1) Sanear
+    // Sanear input
     $post = array_map('trim', $_POST);
     $idPersona = (int) ($post['idpersona'] ?? 0);
     $idCargo = (int) ($post['idcargo'] ?? 0);
@@ -165,7 +137,7 @@ class UsuarioController extends Controller
     $pass1 = $_POST['password1'] ?? '';
     $pass2 = $_POST['password2'] ?? '';
 
-    // 2) Validar
+    // Validación
     $errors = [];
     if ($idPersona <= 0)
       $errors[] = 'Primero registre la persona.';
@@ -186,15 +158,11 @@ class UsuarioController extends Controller
     }
 
     if (!empty($errors)) {
-      http_response_code(422);
-      echo json_encode([
-        'success' => false,
-        'error' => implode(' ', $errors),
-      ]);
-      return -1;
+      $this->view('usuarios.create', ['errors' => $errors, 'data' => $_POST]);
+      return;
     }
 
-    // 3) Guardar en BD
+    // Guardar en la base de datos
     $contratoData = [
       'idcargo' => $idCargo,
       'fechainicio' => $fechaInicio,
@@ -209,28 +177,15 @@ class UsuarioController extends Controller
     try {
       $res = $this->usuarioModel->create($idPersona, $contratoData, $colaboradorData);
     } catch (Exception $e) {
-      http_response_code(500);
-      echo json_encode([
-        'success' => false,
-        'error' => 'Error en la base de datos al crear colaborador.',
-      ]);
-      return -2;
+      $this->view('errors.db_error');
+      return;
     }
 
     if (isset($res['idcolaborador']) && $res['idcolaborador'] > 0) {
-      header('Content-Type: application/json; charset=utf-8');
-      echo json_encode([
-        'success' => true,
-        'data' => $res,
-      ]);
-      return (int) $res['idcolaborador'];
+      $this->redirect('/usuarios');
+    } else {
+      $this->view('errors.unknown_error');
     }
-    /* http_response_code(500);
-    echo json_encode([
-      'success' => false,
-      'error' => 'No se pudo crear el colaborador.',
-    ]); */
-    return 0;
   }
 
   public function searchByDNI(): void
@@ -238,26 +193,23 @@ class UsuarioController extends Controller
     $dni = trim($_GET['nrodoc'] ?? '');
     if ($dni === '') {
       http_response_code(422);
-      echo json_encode(['success' => false, 'error' => 'Debe enviar nrodoc']);
+      $this->view('errors.missing_dni'); // Vista para error de falta de DNI
       return;
     }
 
     $persona = $this->usuarioModel->searchByDNI($dni);
     if ($persona) {
-      echo json_encode(['success' => true, 'data' => $persona]);
+      $this->view('usuarios.search', ['persona' => $persona]);
     } else {
-      http_response_code(404);
-      echo json_encode(['success' => false, 'error' => 'Persona no encontrada']);
+      $this->view('errors.persona_not_found'); // Vista para error de persona no encontrada
     }
   }
 
   public function changePassword(): void
   {
-    header('Content-Type: application/json; charset=utf-8');
-
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
       http_response_code(405);
-      echo json_encode(['success' => false, 'error' => 'Método no permitido']);
+      $this->view('errors.405');
       return;
     }
 
@@ -277,8 +229,7 @@ class UsuarioController extends Controller
     }
 
     if (!empty($errors)) {
-      http_response_code(422);
-      echo json_encode(['success' => false, 'error' => implode(' ', $errors)]);
+      $this->view('errors.validation', ['errors' => $errors]);
       return;
     }
 
@@ -286,14 +237,12 @@ class UsuarioController extends Controller
     try {
       $updated = $this->usuarioModel->updatePassword($idColaborador, $newHash);
       if ($updated) {
-        echo json_encode(['success' => true]);
+        $this->redirect('/usuarios');
       } else {
-        http_response_code(500);
-        echo json_encode(['success' => false, 'error' => 'No se pudo actualizar contraseña.']);
+        $this->view('errors.db_error');
       }
     } catch (Exception $e) {
-      http_response_code(500);
-      echo json_encode(['success' => false, 'error' => 'Error del servidor.']);
+      $this->view('errors.server_error');
     }
   }
 
@@ -301,6 +250,7 @@ class UsuarioController extends Controller
   {
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
       http_response_code(405);
+      $this->view('errors.405');
       return;
     }
 
@@ -308,11 +258,11 @@ class UsuarioController extends Controller
       if ($this->usuarioModel->delete($id)) {
         $this->redirect('/usuarios');
       } else {
-        $this->redirect('/usuarios?error=delete_failed');
+        $this->view('errors.delete_failed');
       }
     } catch (Exception $e) {
-      $this->redirect('/usuarios?error=server_error');
+      $this->view('errors.server_error');
     }
   }
-
+  
 }
