@@ -16,6 +16,22 @@ class Cliente
         $this->db = Database::getInstance();
     }
 
+
+    public function getTipoClienteById(int $id): ?string
+{
+    try {
+        $query = "SELECT tipocliente FROM clientes WHERE idcliente = :idcliente";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute([':idcliente' => $id]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result ? $result['tipocliente'] : null;
+    } catch (PDOException $e) {
+        error_log($e->getMessage());
+        return null;
+    }
+}
+
+
     public function create($params = []):int
     {
         $query = "INSERT INTO clientes(idpersona, idempresa, idcolregistra, idcolactualiza, tipocliente)

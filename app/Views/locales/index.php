@@ -1,5 +1,17 @@
 <?php include __DIR__ . '/../layout/header.php'; ?>
 
+<?php
+ /* 
+    PARA REDIRECT
+ if (isset($_SESSION['success_message'])): ?>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            showToast('<?= addslashes($_SESSION['success_message']) ?>', 'SUCCESS', 1000);
+        });
+    </script>
+    <?php unset($_SESSION['success_message']); ?> // Eliminar el mensaje de éxito de la sesión
+<?php endif; */?>
+
 <div class="container-fluid">
 
     <div class="alert alert-info mt-2" role="alert">
@@ -55,12 +67,12 @@
                                             <td><?= htmlspecialchars($local['correo']) ?></td>
                                             <td><?= htmlspecialchars($local['telefono']) ?></td>
                                             <td>
-                                                <button type="button" class="btn btn-sm btn-outline-primary btn-edit-local"
+                                                <a class="btn btn-sm btn-outline-primary btn-edit-local"
                                                     data-bs-toggle="modal" data-bs-target="#modal-locales"
                                                     data-idlocal="<?= htmlspecialchars($local['idlocal']) ?>"
-                                                    title="Editar">
-                                                    Editar
-                                                </button>
+                                                    title="Editar"> <i class="fa-solid fa-pen" data-idlocal="<?= htmlspecialchars($local['idlocal']) ?>"></i> </a>
+                                                   
+                                                
                                                 <form action="/locales/delete/<?= htmlspecialchars($local['idlocal']) ?>" method="POST" class="d-inline"
                                                     onsubmit="return confirm('¿Estás seguro de que quieres eliminar este local?');">
                                                     <button type="submit" class='btn btn-sm btn-outline-danger delete' title='Eliminar'>
@@ -197,13 +209,12 @@
                     const contentType = response.headers.get("content-type");
                     if (!contentType || contentType.indexOf("application/json") === -1) {
                         const errorText = await response.text();
-                        console.error("Respuesta no JSON de /locales/update:", errorText);
                         showToast("Error inesperado del servidor al actualizar. Revisa la consola.", "ERROR");
                         return;
                     }
 
                     const result = await response.json();
-                    console.log(result);
+                    
 
                     if (result.success) {
                         showToast(result.message, "SUCCESS");

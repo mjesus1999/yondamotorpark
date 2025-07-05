@@ -1,5 +1,5 @@
 <?php
-session_start();
+
 include __DIR__ . '/../layout/header.php';
 ?>
 
@@ -32,7 +32,7 @@ include __DIR__ . '/../layout/header.php';
             <div class="card">
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-sm table-hover table-hover-yonda" id="tabla-clientes-personas">
+                        <table class="table table-sm table-hover table-hover-yonda" id="tabla-clientes-personas" >
                             <thead>
                                 <tr>
                                     <th>#</th>
@@ -46,7 +46,7 @@ include __DIR__ . '/../layout/header.php';
                                     <th>Acciones</th>
                                 </tr>
                             </thead>
-                            <<tbody>
+                            <tbody>
 
                                 <?php if (empty($personClientes)): ?>
                                     <tr>
@@ -56,24 +56,26 @@ include __DIR__ . '/../layout/header.php';
                                     <?php $numeroFila = 1 ?>
                                     <?php foreach ($personClientes as $personCliente): ?>
                                         <tr>
-                                            <td><?= htmlspecialchars($numeroFila++) ?></td>
-                                            <td><?= htmlspecialchars($personCliente['ubicacion']) ?></td>
-                                            <td><?= htmlspecialchars($personCliente['direccion'] ?? 'No asignado') ?></td>
-                                            <td><?= htmlspecialchars($personCliente['nombrecompleto']) ?></td>
-                                            <td><?= htmlspecialchars($personCliente['tipodoc']) ?></td>
-                                            <td><?= htmlspecialchars($personCliente['nrodoc']) ?></td>
-                                            <td><?= htmlspecialchars($personCliente['email'] ?? 'No asignado')  ?></td>
-                                            <td><?= htmlspecialchars($personCliente['telprimario']) ?></td>
-                                            <td>
-                                                <a href="/personaCliente/edit/<?= htmlspecialchars($personCliente['idpersona']) ?>"
+                                            <td class='align-middle m-1'><?= htmlspecialchars($numeroFila++) ?></td>
+                                            <td class='align-middle m-1'><?= htmlspecialchars($personCliente['ubicacion']) ?></td>
+                                            <td class='align-middle m-1'><?= htmlspecialchars($personCliente['direccion'] ?? 'No asignado') ?></td>
+                                            <td class='align-middle m-1'><?= htmlspecialchars($personCliente['nombrecompleto']) ?></td>
+                                            <td class='align-middle m-1'><?= htmlspecialchars($personCliente['tipodoc']) ?></td>
+                                            <td class='align-middle m-1'><?= htmlspecialchars($personCliente['nrodoc']) ?></td>
+                                            <td class='align-middle m-1'><?= htmlspecialchars($personCliente['email'] ?? 'No asignado')  ?></td>
+                                            <td class='align-middle m-1'><?= htmlspecialchars($personCliente['telprimario']) ?></td>
+                                            <td class='align-middle m-1'>
+                                                <div class="d-flex gap-1">
+                                                 <a href="/personaCliente/edit/<?= htmlspecialchars($personCliente['idpersona']) ?>"
                                                     class="btn btn-sm btn-outline-primary"> <i class="fa-solid fa-pen"></i></a>
 
-                                                <form action="/personaCliente/delete/<?= htmlspecialchars($personCliente['idcliente']) ?>" method="POST" class="d-inline"
+                                                 <form action="/personaCliente/delete/<?= htmlspecialchars($personCliente['idcliente']) ?>" method="POST" class="d-inline"
                                                     onsubmit="return confirm('¿Estás seguro de que quieres eliminar este cliente?');">
                                                     <button type="submit" class='btn btn-sm btn-outline-danger delete' title='Eliminar'>
                                                         <i class="fa-solid fa-trash"></i>
                                                     </button>
                                                 </form>
+                                                </div>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
@@ -88,22 +90,5 @@ include __DIR__ . '/../layout/header.php';
 
 </div>
 
-<?php
-
-// if (isset($_SESSION['message'])) {
-//     $message = $_SESSION['message'];
-//     $messageType = $_SESSION['message_type'] ?? 'INFO'; // Tipo por defecto
-
-//     echo '<script>
-//         document.addEventListener("DOMContentLoaded", function() {
-//             showToast(' . json_encode($message) . ', "' . $messageType . '", 1000, null);
-//         });
-//     </script>';
-
-//     // Limpia los mensajes después de mostrarlos
-//     unset($_SESSION['message']);
-//     unset($_SESSION['message_type']);
-// }
-?>
 
 <?php include __DIR__ . '/../layout/footer.php'; ?>

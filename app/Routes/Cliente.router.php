@@ -1,7 +1,7 @@
 <?php
 
 
-// RUTAS PARA CLIENETS PERSONAS:
+// RUTAS PARA CLIENTES PERSONAS:
 
 // Ruta para listar clientes (Personas-clientes)
 $router->add('GET','/clientes','PersonaController','indexPersonCliente');
@@ -16,6 +16,8 @@ $router->add('POST', '/storepersonclient/store', 'PersonaController', 'storePers
 $router->add('GET', '/personaCliente/edit/{id}', 'PersonaController', 'edit'); 
 $router->add('POST', '/personaCliente/update/{id}', 'PersonaController', 'update');
 $router->add('POST','/personaCliente/delete/{id}','ClienteController','delete');
+
+
 
 
 // RUTAS PARA LOS CLIENTES EMPRESAS:

@@ -3,6 +3,27 @@
 include __DIR__ . '/../../layout/header.php';
 ?>
 
+
+<?php if (isset($error)): ?>
+  <div class="alert alert-danger" role="alert">
+    <?= htmlspecialchars($error) ?>
+  </div>
+<?php endif; ?>
+
+
+
+<?php if (isset($success)): ?>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            showToast('<?= addslashes($success) ?>', 'SUCCESS', 1000);
+            
+            setTimeout(function() {
+                window.location.href = '/clientes/empresas';
+            }, 1500);
+        });
+    </script>
+<?php endif; ?>
+
 <div class="container-fluid">
     <div class="alert alert-info mt-2" role="alert">
         <div class="row">

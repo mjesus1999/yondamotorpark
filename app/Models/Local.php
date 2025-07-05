@@ -110,10 +110,10 @@ class Local
         }
     }
 
-    public function delete($idlocal = -1): int
+    public function disable($idlocal = -1): int
     {
         try {
-            $stmt = $this->db->prepare("DELETE FROM locales WHERE idlocal=?");
+            $stmt = $this->db->prepare("UPDATE locales SET estado = 'INACT' WHERE idlocal=?");
             $stmt->execute(array($idlocal));
             $stmt->fetchAll(PDO::FETCH_ASSOC);
             return (int) $stmt->rowCount();

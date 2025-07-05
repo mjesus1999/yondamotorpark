@@ -29,12 +29,10 @@ class PersonaController extends Controller
         $this->view('clientes.create');
     }
 
-    public function storePersonaClient(): void
+    public function storePersonaClient(): int
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-
-            $this->redirect('/clientes/createpersonclient');
-            return;
+            return 0;
         }
 
         $apellidos_val = trim($_POST['apellidos'] ?? '');
@@ -72,16 +70,29 @@ class PersonaController extends Controller
         ];
 
         $errores = [];
+        $nombresCampos = [
+            'apellidos' => 'Apellidos',
+            'nombres' => 'Nombres',
+            'tipodoc' => 'Tipo de documento',
+            'nrodoc' => 'Número de documento',
+            'genero' => 'Género',
+            'fechanac' => 'Fecha de nacimiento',
+            'estadocivil' => 'Estado civil',
+            'iddistrito' => 'Distrito',
+            'telprimario' => 'Teléfono'
+        ];
+
         foreach (['apellidos', 'nombres', 'tipodoc', 'nrodoc', 'genero', 'fechanac', 'estadocivil', 'iddistrito', 'telprimario'] as $campo) {
             if (empty($registroPersona[$campo])) {
-                $errores[] = "El campo '" . $campo . "' es obligatorio.";
+                $nombreAmigable = $nombresCampos[$campo] ?? $campo;
+                $errores[] = "El campo '$nombreAmigable' es obligatorio.";
             }
         }
 
         if (count($errores) > 0) {
 
-            $this->view('clientes.create', ['error' => implode('<br>', $errores)]);
-            return;
+            $this->view('clientes.create', ['error' => implode('\n', $errores)]);
+            return -1 ;
         }
 
         $idPersona = $this->personaModel->create($registroPersona);
@@ -98,18 +109,18 @@ class PersonaController extends Controller
             $idCliente = $this->clienteModel->create($registroCliente);
 
             if ($idCliente > 0) {
-                $_SESSION['success_message'] = '¡Persona y Cliente registrados exitosamente!';
-                $this->redirect('/clientes');
+                $success = '¡Cliente creado exitosamente!';
+                $this->view('clientes.create', ['success' => $success]);
+                return $idCliente;
             } else {
-                $_SESSION['error_message'] = 'Error al crear el registro del cliente. La persona fue creada, pero no se pudo vincular como cliente.';
-
                 $this->view('clientes.create', ['error' => 'Error al crear el registro del cliente.']);
+                return -1;
             }
         } else {
-            $_SESSION['error_message'] = 'Error al crear la persona. Por favor, intente de nuevo.';
+            
             $this->view('clientes.create', ['error' => 'Error al crear la persona.']);
         }
-        return;
+        return $idCliente;
     }
 
     public function edit(int $id): void
@@ -125,32 +136,71 @@ class PersonaController extends Controller
 
     public function update(int $id): void
     {
-
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
             $registro = [
                 'nombres' =>   trim($_POST['nombres']) ?? '',
                 'apellidos' =>   trim($_POST['apellidos']) ?? '',
                 'email' =>   trim($_POST['email']) ?? '',
                 'direccion' =>   trim($_POST['direccion']) !== '' && trim($_POST['direccion']) !== 'null' ? trim($_POST['direccion']) : null,
                 'telprimario' => trim($_POST['telprimario']) ?? '',
-                'latitud' =>   trim($_POST['latitud']) !== '' && trim($_POST['latitud']) !== 'null' ? trim($_POST['latitud']) : null,
-                'longitud' =>   trim($_POST['longitud']) !== '' && trim($_POST['longitud']) !== 'null' ? trim($_POST['longitud']) : null,
+                'latitud' => ($_POST['latitud'] ?? '') !== '' ? trim($_POST['latitud']) : null,
+                'longitud' => ($_POST['longitud'] ?? '') !== '' ? trim($_POST['longitud']) : null,
+'                 direccion' => ($_POST['direccion'] ?? '') !== '' ? trim($_POST['direccion']) : null,
+
                 'iddistrito' => trim($_POST['iddistrito']) ?? '',
                 'idpersona' => $id
-
             ];
 
-            if ($registro['nombres'] && $registro['apellidos'] && $registro['telprimario'] !== false) {
-                if ($this->personaModel->update($registro)) {
-                    $this->redirect('/clientes');
-                } else {
-                    $personaCliente = $this->personaModel->getById($id);
-                    $this->view('clientes.edit', ['personaCliente' => $personaCliente, 'error' => 'Error al actualizar el cliente.']);
+            // Validación amigable
+            $errores = [];
+            $nombresCampos = [
+                'nombres' => 'Nombres',
+                'apellidos' => 'Apellidos',
+                'telprimario' => 'Teléfono'
+            ];
+            foreach (['nombres', 'apellidos', 'telprimario'] as $campo) {
+                if (empty($registro[$campo])) {
+                    $nombreAmigable = $nombresCampos[$campo] ?? $campo;
+                    $errores[] = "El campo '$nombreAmigable' es obligatorio.";
                 }
-            } else {
+            }
+
+            if (count($errores) > 0) {
                 $personaCliente = $this->personaModel->getById($id);
-                $this->view('personas.edit', ['personaCliente' => $personaCliente, 'error' => 'Todos los campos son obligatorios.']);
+                $this->view('clientes.edit', [
+                    'personaCliente' => $personaCliente,
+                    'error' => implode('\n', $errores)
+                ]);
+                return;
+            }
+
+            // Si la actualización fue exitosa
+            $resultado = $this->personaModel->update($registro);
+           // var_dump($resultado); exit;
+
+           // No muestra la notificación que no hubo cambios, porque el Now() del model fuerza un cambio
+            if ($resultado > 0) {
+                // Actualización exitosa
+                $personaCliente = $this->personaModel->getById($id);
+                $success = '¡Cliente actualizado correctamente!';
+                $this->view('clientes.edit', [
+                    'personaCliente' => $personaCliente,
+                    'success' => $success
+                ]);
+            } elseif ($resultado === 0) {
+                // No hubo cambios
+                $personaCliente = $this->personaModel->getById($id);
+                $this->view('clientes.edit', [
+                    'personaCliente' => $personaCliente,
+                    'error' => 'No se realizaron cambios en el cliente.'
+                ]);
+            } else {
+                // Error real
+                $personaCliente = $this->personaModel->getById($id);
+                $this->view('clientes.edit', [
+                    'personaCliente' => $personaCliente,
+                    'error' => 'Error al actualizar el cliente.'
+                ]);
             }
         }
     }

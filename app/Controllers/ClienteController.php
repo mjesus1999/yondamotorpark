@@ -20,27 +20,26 @@ class ClienteController extends Controller
     {
 
         $this->clienteModel = new Cliente();
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
     }
 
     public function delete($id): void
-    {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $result = $this->clienteModel->disabled($id);
+{
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        
+        $result = $this->clienteModel->disabled($id);
 
-            // Asignar mensaje basado en el resultado
-            if ($result > 0) {
-                $_SESSION['message'] = 'Se eliminó el cliente exitosamente';
-                $_SESSION['message_type'] = 'SUCCESS';
-            } else {
-                $_SESSION['message'] = 'No se pudo eliminar el cliente. Inténtelo nuevamente.';
-                $_SESSION['message_type'] = 'ERROR';
-            }
-
-            
-            $this->redirect('/clientes');
-        }
+        // Obtener tipo cliente para redirección
+        $tipoCliente = $this->clienteModel->getTipoClienteById($id);
+        
+        // Redirige según tipo
+        if ($tipoCliente === 'P') {
+            $this->redirect('/clientes');  
+        } else  {
+            $this->redirect('/clientes/empresas');  
+        
     }
+
+}
+}
+
 }

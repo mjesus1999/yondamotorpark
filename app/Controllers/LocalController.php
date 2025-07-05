@@ -45,19 +45,27 @@ class LocalController extends Controller
             // 'longitud' =>   trim($_POST['longitud']) !== '' && trim($_POST['longitud']) !== 'null' ? trim($_POST['longitud']) : null,
         ];
 
-
-
         // 2. Validar campos obligatorios
         $errores = [];
+        
+        // Mapeo de nombres de campos para mensajes amigables
+        $nombresCampos = [
+            'tienda' => 'Nombre del Local',
+            'iddistrito' => 'Distrito',
+            'idmotorpark' => 'Tienda',
+            'principal' => '¿Es principal?',
+            'responsable' => 'Responsable'
+        ];
+        
         foreach (['tienda', 'iddistrito', 'idmotorpark', 'principal', 'responsable'] as $campo) {
             if (empty($registro[$campo])) {
-                $errores[] = "El campo '$campo' es obligatorio.";
+                $nombreAmigable = $nombresCampos[$campo] ?? $campo;
+                $errores[] = "El campo '$nombreAmigable' es obligatorio.";
             }
         }
 
         if (count($errores) > 0) {
-
-            $this->view('locales.create', ['error' => implode('<br>', $errores)]);
+            $this->view('locales.create', ['error' => implode('\n', $errores)]);
             return -1;
         }
 
@@ -65,9 +73,18 @@ class LocalController extends Controller
         $lastInsertId = $this->localModel->create($registro);
 
         if ($lastInsertId > 0) {
+            // Esta es la otra manera de mostrar el toast, pero
+            // redirigiendo a la página de locales, solo en locales.create con :
+            // $success = '¡Local creado exitosamente!';
+            // $this->view('locales.create', ['success' => $succcess]);)
+            
+           // $_SESSION['success_message'] = '¡Local creado exitosamente!';
+            //$this->redirect('/locales');
 
-            $this->redirect('/locales');
+            $success = '¡Local creado exitosamente!';
+            $this->view('locales.create', ['success' => $success]);
             return $lastInsertId; // Retorna el ID insertado
+            
         } else {
             // Si hubo un error en la inserción (retornó -1 o 0), muestra la vista con el error.
             $this->view('locales.create', ['error' => 'Error al crear el local.']);
@@ -137,7 +154,7 @@ class LocalController extends Controller
     public function delete(int $id): void
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') { 
-            if ($this->localModel->delete($id)) {
+            if ($this->localModel->disable($id) > 0) {
                 $this->redirect('/locales');
             } else {
                 

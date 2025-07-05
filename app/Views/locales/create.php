@@ -6,6 +6,23 @@
   </div>
 <?php endif; ?>
 
+<!-- Mensaje de éxito (Esta es una manera de mostrar el toast, pero
+ sin redirigir a la página de locales, solo en locales.create con :
+ $this->view('locales.create', ['success' => $succcess]);) -->
+
+<?php if (isset($success)): ?>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            showToast('<?= addslashes($success) ?>', 'SUCCESS', 1000);
+            // Redirigir después de mostrar el toast
+            setTimeout(function() {
+                window.location.href = '/locales';
+            }, 1500);
+        });
+    </script>
+<?php endif; ?>
+
+
 
 <div class="container-fluid">
     <div class="alert alert-info mt-2" role="alert">
@@ -87,7 +104,7 @@
                     <div class="row g-3 mt-1">
                         <div class="col-md-4">
                             <div class="form-floating">
-                                <input type="text" id="telefono" name="telefono" maxlength="12" pattern="[0-9]+"
+                                <input type="text" id="telefono" name="telefono" maxlength="9" pattern="[0-9]+"
                                     class="form-control" placeholder="Teléfono" required>
                                 <label for="telefono">Teléfono</label>
                             </div>
@@ -95,7 +112,7 @@
                         <div class="col-md-8">
                             <div class="form-floating">
                                 <input type="email" name="correo" id="correo" class="form-control"
-                                    placeholder="Correo electrónico" required>
+                                    placeholder="Correo electrónico">
                                 <label for="correo">Correo electrónico</label>
                             </div>
                         </div>
@@ -123,10 +140,8 @@
                     <div class="mt-3">
                         <label for="direccion" class="form-label">Dirección</label>
                         <textarea name="direccion" id="direccion" rows="3" class="form-control" maxlength="300"
-                            placeholder="Dirección" required></textarea>
+                            placeholder="Dirección"></textarea>
                     </div>
-
-
 
                     <!-- Botón -->
                     <div class="text-end mt-4">
@@ -140,11 +155,6 @@
     </div>
 
 </div>
-
-
-
-
-
 
 <script>
     document.addEventListener("DOMContentLoaded", async () => {
@@ -244,7 +254,6 @@
                 }
                 const result = await response.json(); 
              
-
                 motorparkSelect.innerHTML = `<option value='' selected>Seleccione</option>`;
 
                 if (result.success && result.motorpark && result.motorpark.length > 0) {
@@ -260,7 +269,6 @@
                 console.error("Error al obtener datos de motorpark:", e);
             }
         }
-
 
         // Event Listeners para los selectores de Ubigeo
         departamentosSelect.addEventListener('change', (event) => {

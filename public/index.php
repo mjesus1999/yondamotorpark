@@ -1,6 +1,9 @@
 <?php
 // public/index.php
 
+// Iniciar sesión para poder usar $_SESSION
+session_start();
+
 // Define el directorio raíz de la aplicación para mayor claridad
 define('APP_ROOT', dirname(__DIR__));
 

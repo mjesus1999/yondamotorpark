@@ -16,9 +16,7 @@ class EmpresaController extends Controller
     {
         $this->empresaModel = new Empresa();
         $this->clienteModel = new Cliente();
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
+        
     }
 
     public function indexEmpresaClientes(): void
@@ -33,13 +31,13 @@ class EmpresaController extends Controller
         $this->view('/clientes/empresas.create');
     }
 
-    public function storeEmpresaClient(): void
+    public function storeEmpresaClient(): int
     {
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
             $this->redirect('/clientes/createempresaclient');
-            return;
+            return 0;
         }
 
         $iddistrito_val = trim($_POST['iddistrito'] ?? '');
@@ -71,16 +69,24 @@ class EmpresaController extends Controller
         ];
 
         $errores = [];
-        foreach (['iddistrito', 'razonsocial', 'nombrecomercial', 'ruc', 'representante', 'direccion', 'telprimario'] as $campo) {
+        $nombresCampos = [
+            'iddistrito' => 'Distrito',
+            'razonsocial' => 'Razón Social',
+            'nombrecomercial' => 'Nombre Comercial',
+            'ruc' => 'RUC',
+            'representante' => 'Representante',
+            'telprimario' => 'Teléfono',
+        ];
+        foreach (['iddistrito', 'razonsocial', 'nombrecomercial', 'ruc', 'representante', 'telprimario'] as $campo) {
             if (empty($registroEmpresa[$campo])) {
-                $errores[] = "El campo '" . $campo . "' es obligatorio.";
+                $nombreAmigable = $nombresCampos[$campo] ?? $campo;
+                $errores[] = "El campo '$nombreAmigable' es obligatorio.";
             }
         }
 
         if (count($errores) > 0) {
-
-            $this->view('/clientes/empresas.create', ['error' => implode('<br>', $errores)]);
-            return;
+            $this->view('clientes/empresas.create', ['error' => implode('\n', $errores)]);
+            return -1;
         }
 
         $idEmpresa = $this->empresaModel->create($registroEmpresa);
@@ -97,22 +103,17 @@ class EmpresaController extends Controller
             $idCliente = $this->clienteModel->create($registroCliente);
 
             if ($idCliente > 0) {
-                $_SESSION['message'] = 'Se registro el cliente exitosamente';
-                $_SESSION['message_type'] = 'SUCCESS';
-                // $this->view('clientes/empresas.create');
-                $this->redirect('/clientes/empresas');
-            } else {
-                $_SESSION['message'] = 'No se pudo crear el cliente.';
-                $_SESSION['message_type'] = 'ERROR';
 
-                $this->view('clientes/empresas.create');
+                $success = 'Se agrego el cliente';
+                $this->view('clientes/empresas.create',['success' => $success]);
+                
+            } else {
+                $this->view('clientes/empresas.create', ['error' => 'Error al crear el registro del cliente.']);
             }
         } else {
-            $_SESSION['message'] = 'No se ha podido crear la empresa';
-            $_SESSION['message_type'] = 'ERROR';
-            $this->view('clientes/empresas.create');
+            $this->view('clientes.create', ['error' => 'Error al crear la empresa.']);
         }
-        return;
+        return -1;
     }
 
 
@@ -130,30 +131,68 @@ class EmpresaController extends Controller
 
     public function update(int $id): void
     {
-
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
             $registro = [
-                'razonsocial' =>   trim($_POST['razonsocial']) ?? '',
-                'nombrecomercial' =>   trim($_POST['nombrecomercial']) ?? '',
-                'ruc' =>   trim($_POST['ruc']) ?? '',
-                'representante' =>   trim($_POST['representante']) ?? '',
-                'email' =>   trim($_POST['email']) ?? '',
-                'telprimario' =>   trim($_POST['telprimario']) ?? '',
+                'razonsocial' => trim($_POST['razonsocial']) ?? '',
+                'nombrecomercial' => trim($_POST['nombrecomercial']) ?? '',
+                'ruc' => trim($_POST['ruc']) ?? '',
+                'representante' => trim($_POST['representante']) ?? '',
+                'email' => trim($_POST['email']) ?? '',
+                'telprimario' => trim($_POST['telprimario']) ?? '',
                 'idempresa' => $id
-
             ];
 
-            if ($registro['razonsocial'] && $registro['nombrecomercial'] && $registro['ruc'] && $registro['representante'] &&$registro['telprimario'] !== false) {
-                if ($this->empresaModel->update($registro)) {
-                    $this->redirect('/clientes/empresas');
-                } else {
-                    $empresaCliente = $this->empresaModel->getById($id);
-                    $this->view('clientes/empresas.edit', ['empresaCliente' => $empresaCliente, 'error' => 'Error al actualizar el cliente.']);
+            // Validación amigable
+            $errores = [];
+            $nombresCampos = [
+                'razonsocial' => 'Razón Social',
+                'nombrecomercial' => 'Nombre Comercial',
+                'ruc' => 'RUC',
+                'representante' => 'Representante',
+                'telprimario' => 'Teléfono'
+            ];
+            foreach (['razonsocial', 'nombrecomercial', 'ruc', 'representante', 'telprimario'] as $campo) {
+                if (empty($registro[$campo])) {
+                    $nombreAmigable = $nombresCampos[$campo] ?? $campo;
+                    $errores[] = "El campo '$nombreAmigable' es obligatorio.";
                 }
-            } else {
+            }
+
+            if (count($errores) > 0) {
                 $empresaCliente = $this->empresaModel->getById($id);
-                $this->view('clientes/empresas.edit', ['empresaCliente' => $empresaCliente, 'error' => 'Todos los campos son obligatorios.']);
+                $this->view('clientes/empresas.edit', [
+                    'empresaCliente' => $empresaCliente,
+                    'error' => implode('\n', $errores)
+                ]);
+                return;
+            }
+
+            // Si la actualización fue exitosa
+            $resultado = $this->empresaModel->update($registro);
+            //var_dump($resultado); exit;
+
+            if ($resultado >= 0) {
+                // Actualización exitosa
+                $empresaCliente = $this->empresaModel->getById($id);
+                $success = '¡Cliente actualizado correctamente!';
+                $this->view('clientes/empresas.edit', [
+                    'empresaCliente' => $empresaCliente,
+                    'success' => $success
+                ]);
+            } /*elseif ($resultado === 0) {
+                // No hubo cambios
+                $empresaCliente = $this->empresaModel->getById($id);
+                $this->view('clientes/empresas.edit', [
+                    'empresaCliente' => $empresaCliente,
+                    'error' => 'No se realizaron cambios en el cliente.'
+                ]);*/
+            else {
+                // Error real
+                $empresaCliente = $this->empresaModel->getById($id);
+                $this->view('clientes/empresas.edit', [
+                    'empresaCliente' => $empresaCliente,
+                    'error' => 'Error al actualizar el cliente.'
+                ]);
             }
         }
     }

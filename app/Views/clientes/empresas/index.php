@@ -55,15 +55,16 @@
                                     <?php $numeroFila = 1 ?>
                                     <?php foreach ($empresasClientes as $empresaCliente): ?>
                                         <tr>
-                                            <td><?= htmlspecialchars($numeroFila++) ?></td>
-                                            <td><?= htmlspecialchars($empresaCliente['ubicacion']) ?></td>
-                                            <td><?= htmlspecialchars($empresaCliente['direccion'] ?? 'No asignado') ?></td>
-                                            <td><?= htmlspecialchars($empresaCliente['responsable']) ?></td>
-                                            <td><?= htmlspecialchars($empresaCliente['ruc']) ?></td>
-                                            <td><?= htmlspecialchars($empresaCliente['nombrecomercial']) ?></td>
-                                            <td><?= htmlspecialchars($empresaCliente['email'] ?? 'No asignado') ?></td>
-                                            <td><?= htmlspecialchars($empresaCliente['telprimario']) ?></td>
-                                            <td>
+                                            <td class="align-middle m-1"><?= htmlspecialchars($numeroFila++) ?></td>
+                                            <td class="align-middle m-1"><?= htmlspecialchars($empresaCliente['ubicacion']) ?></td>
+                                            <td class="align-middle m-1"><?= htmlspecialchars($empresaCliente['direccion'] ?? 'No asignado') ?></td>
+                                            <td class="align-middle m-1"><?= htmlspecialchars($empresaCliente['responsable']) ?></td>
+                                            <td class="align-middle m-1"><?= htmlspecialchars($empresaCliente['ruc']) ?></td>
+                                            <td class="align-middle m-1"><?= htmlspecialchars($empresaCliente['nombrecomercial']) ?></td>
+                                            <td class="align-middle m-1"><?= htmlspecialchars($empresaCliente['email'] ?? 'No asignado') ?></td>
+                                            <td class="align-middle m-1"><?= htmlspecialchars($empresaCliente['telprimario']) ?></td>
+                                            <td class="align-middle m-1">
+                                            <div class="d-flex gap-1">
                                                 <a href="/clientes/empresaCliente/edit/<?= htmlspecialchars($empresaCliente['idempresa']) ?>"
                                                     class="btn btn-sm btn-outline-primary"> <i class="fa-solid fa-pen"></i></a>
 
@@ -73,6 +74,7 @@
                                                         <i class="fa-solid fa-trash"></i>
                                                     </button>
                                                 </form>
+                                                 </div>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>

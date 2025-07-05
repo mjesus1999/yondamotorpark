@@ -1,4 +1,27 @@
 <?php include __DIR__ . '/../../layout/header.php'; ?>
+
+
+
+<?php if (isset($error)): ?>
+  <div class="alert alert-danger" role="alert">
+    <?= htmlspecialchars($error) ?>
+  </div>
+<?php endif; ?>
+
+
+<?php if (isset($success)): ?>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            showToast('<?= addslashes($success) ?>', 'SUCCESS', 1000);
+            
+            setTimeout(function() {
+                window.location.href = '/clientes/empresas';
+            }, 1500);
+        });
+    </script>
+<?php endif; ?>
+
+
 <div class="container-fluid">
 
     <div class="container-fluid">
@@ -75,16 +98,15 @@
 
                                     <div class="col-md-6">
                                         <div class="form-floating">
-                                            <input type="text" class="form-control" id="telprimario" maxlength="9" name="telprimario"
+                                            <input type="text" class="form-control" id="telprimario" maxlength="9" name="telprimario" required
                                                 placeholder="Teléfono principal" value="<?= htmlspecialchars($empresaCliente['telprimario'])?>">
                                             <label for="telprimario">Teléfono</label>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-sm btn-outline-secondary m-2"
-                                    data-bs-dismiss="modal">Cancelar</button>
+                            <div class="modal-footer mt-2">
+                              
                                 <button type="submit" class="btn btn-sm btn-primary">Actualizar</button>
                             </div>
                 </div>

@@ -1,4 +1,23 @@
 <?php include __DIR__ . '/../layout/header.php'; ?>
+
+<?php if (isset($error)): ?>
+  <div class="alert alert-danger" role="alert">
+    <?= htmlspecialchars($error) ?>
+  </div>
+<?php endif; ?>
+
+<?php if (isset($success)): ?>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            showToast('<?= addslashes($success) ?>', 'SUCCESS', 1000);
+            // Redirigir después de mostrar el toast
+            setTimeout(() => {
+                window.location.href = '/clientes';
+            }, 1500);
+        });
+    </script>
+<?php endif; ?>
+
 <div class="container-fluid">
 
     <div class="container-fluid">
@@ -69,7 +88,7 @@
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-floating">
-                                            <input type="email" class="form-control" id="email" name="email" placeholder="Correo" value="<?= htmlspecialchars($personaCliente['email'] ?? '') ?>">
+                                            <input type="email" class="form-control" id="email" name="email" placeholder="Correo" value="<?= htmlspecialchars($personaCliente['email'] ?? 'No asignado') ?>">
                                             <label for="email">Correo</label>
                                         </div>
                                     </div>
@@ -148,16 +167,6 @@
         </div>
     </div>
 
-    <div class="toast-container position-fixed bottom-0 end-0 p-3">
-        <div id="liveToast" class="toast text-white" role="alert" aria-live="assertive" aria-atomic="true">
-            <div class="toast-header">
-                <strong class="me-auto" id="toast-title">Notificación</strong>
-                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-            <div class="toast-body" id="toast-body">
-            </div>
-        </div>
-    </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', async () => {

@@ -1,5 +1,27 @@
 <?php include __DIR__ . '/../layout/header.php'; ?>
 
+
+
+<?php if (isset($error)): ?>
+  <div class="alert alert-danger" role="alert">
+    <?= htmlspecialchars($error) ?>
+  </div>
+<?php endif; ?>
+
+
+<?php if (isset($success)): ?>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            showToast('<?= addslashes($success) ?>', 'SUCCESS', 1000);
+            
+            setTimeout(() => {
+                window.location.href = '/clientes/';
+            }, 1500);
+        });
+    </script>
+<?php endif; ?>
+
+
 <div class="container-fluid">
     <div class="alert alert-info mt-2" role="alert">
         <div class="row">
@@ -41,7 +63,7 @@
                         <div class="col-md-3">
                             <div class="form-floating">
                                 <input type="text" name="nrodoc" id="ndocumento" class="form-control"
-                                    placeholder="Ingrese el N° de documento" required>
+                                    placeholder="Ingrese el N° de documento" maxlength="11" required>
                                 <label for="ndocumento">N° documento</label>
                             </div>
                         </div>
@@ -283,25 +305,18 @@
 
         getAllDepartamentos();
 
-        // Manejo del envío del formulario
+        
         formRegistroClientePersona.addEventListener('submit', (event) => {
-            event.preventDefault(); // Evita el envío tradicional por defecto
+            event.preventDefault(); 
 
             if (confirm("¿Desea registrar este nuevo cliente?")) {
-                formRegistroClientePersona.submit(); // Envía el formulario de forma tradicional
+                formRegistroClientePersona.submit(); 
             }
         });
     });
 
 
-    // Esto es lo que activa el toast si hay un mensaje en la sesión
-        <?php if (isset($success_message)): ?>
-            showToast("<?= htmlspecialchars($success_message) ?>", "SUCCESS");
-        <?php endif; ?>
 
-        <?php if (isset($error_message)): ?>
-            showToast("<?= htmlspecialchars($error_message) ?>", "ERROR");
-        <?php endif; ?>
 </script>
 
 <?php include __DIR__ . '/../layout/footer.php'; ?>

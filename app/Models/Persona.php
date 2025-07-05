@@ -119,7 +119,7 @@ class Persona
     }
 
     public function update($params): int
-    { {
+    {
             try {
                 $query = "UPDATE personas SET  
                 nombres = :nombres, 
@@ -133,8 +133,8 @@ class Persona
                 modificado = NOW()
               WHERE idpersona  = :idpersona";
 
-                $stmt = $this->db->prepare($query);
-                $stmt->execute([
+                $cmd = $this->db->prepare($query);
+                $cmd->execute([
                     ':nombres' => $params['nombres'],
                     ':apellidos' => $params['apellidos'],
                     ':email' => $params['email'],
@@ -146,7 +146,7 @@ class Persona
                     ':idpersona' => $params['idpersona']
                 ]);
 
-                return (int) $stmt->rowCount();
+                return (int) $cmd->rowCount();
             } catch (PDOException $error) {
                 error_log($error->getMessage());
                 return -1;
@@ -158,4 +158,4 @@ class Persona
 
 
 
-}
+
