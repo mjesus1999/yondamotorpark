@@ -1,26 +1,29 @@
-<?php include __DIR__ . '/../layout/header.php'; ?>
+<?php
 
+include __DIR__ . '/../../layout/header.php';
+include __DIR__ . '/../../components/mapa-includes.php';
+include __DIR__ . '/../../components/mapa-modal.php'; 
 
+?>
 
 <?php if (isset($error)): ?>
   <div class="alert alert-danger" role="alert">
     <?= htmlspecialchars($error) ?>
   </div>
-<?php endif; ?>
-
+  
+  <?php endif; ?>
 
 <?php if (isset($success)): ?>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             showToast('<?= addslashes($success) ?>', 'SUCCESS', 1000);
             
-            setTimeout(() => {
-                window.location.href = '/clientes/';
+            setTimeout(function() {
+                window.location.href = '/clientes/empresas';
             }, 1500);
         });
     </script>
-<?php endif; ?>
-
+<?php endif;?>
 
 <div class="container-fluid">
     <div class="alert alert-info mt-2" role="alert">
@@ -305,7 +308,6 @@
 
         getAllDepartamentos();
 
-        
         formRegistroClientePersona.addEventListener('submit', (event) => {
             event.preventDefault(); 
 
@@ -314,9 +316,6 @@
             }
         });
     });
-
-
-
 </script>
 
 <?php include __DIR__ . '/../layout/footer.php'; ?>

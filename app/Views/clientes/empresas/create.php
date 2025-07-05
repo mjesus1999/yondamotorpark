@@ -1,16 +1,17 @@
 <?php
 
 include __DIR__ . '/../../layout/header.php';
-?>
+include __DIR__ . '/../../components/mapa-includes.php';
+include __DIR__ . '/../../components/mapa-modal.php'; 
 
+?>
 
 <?php if (isset($error)): ?>
   <div class="alert alert-danger" role="alert">
     <?= htmlspecialchars($error) ?>
   </div>
-<?php endif; ?>
-
-
+  
+  <?php endif; ?>
 
 <?php if (isset($success)): ?>
     <script>
@@ -22,7 +23,7 @@ include __DIR__ . '/../../layout/header.php';
             }, 1500);
         });
     </script>
-<?php endif; ?>
+<?php endif;?>
 
 <div class="container-fluid">
     <div class="alert alert-info mt-2" role="alert">
@@ -302,16 +303,7 @@ include __DIR__ . '/../../layout/header.php';
         });
     });
 
-
-    <?php
-    if (isset($_SESSION['message'])) {
-        $message = $_SESSION['message'];
-        $messageType = $_SESSION['message_type'] ?? 'INFO';
-        echo 'showToast(' . json_encode($message) . ', "' . $messageType . '", 1000, null);';
-        unset($_SESSION['message']);
-        unset($_SESSION['message_type']);
-    }
-    ?>
+   
 </script>
 
 <?php include __DIR__ . '/../../layout/footer.php'; ?>

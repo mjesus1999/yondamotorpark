@@ -151,7 +151,6 @@ class Empresa
                 $params['email'],
                 $params['telprimario'],
                 $params['idempresa']
-
             ]);
 
             return (int) $cmd->rowCount();
