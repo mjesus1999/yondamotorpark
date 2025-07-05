@@ -1,4 +1,5 @@
 <?php
+//USUARIO
 
 // MOSTRAR
 $router->add('GET', '/usuarios', 'UsuarioController', 'index');
@@ -6,7 +7,6 @@ $router->add('GET', '/usuarios/create', 'UsuarioController', 'create');
 $router->add('GET',  '/usuarios/cargos',   'UsuarioController', 'getCargosByArea');
 
 // REGISTRAR
-/* $router->add('POST', '/usuarios/storePersona', 'UsuarioController', 'storePersona'); */
 $router->add('POST', '/usuarios/store', 'UsuarioController', 'store');
 
 // BUSCAR

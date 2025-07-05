@@ -126,4 +126,20 @@ class PersonaController extends Controller
         }
     }
 
+    public function searchByDNI(): void
+    {
+        header('Content-Type: application/json; charset=utf-8');
+        $dni = trim($_GET['dni'] ?? '');
+        if ($dni === '') {
+            echo json_encode(['success' => false, 'message' => 'Falta DNI']);
+            return;
+        }
+        $persona = $this->personaModal->searchByDNI($dni);
+        if ($persona) {
+            echo json_encode(['success' => true] + $persona);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'No encontrado']);
+        }
+    }
+
 }

@@ -79,133 +79,6 @@ class Usuario
     }
   }
 
-  public function createPersona(
-    string $tipodoc,
-    string $nrodoc,
-    string $apellidos,
-    string $nombres,
-    string $genero,
-    string $fechanac,
-    string $estadocivil,
-    ?string $email,
-    int $iddistrito,
-    ?string $direccion,
-    ?string $referencia,
-    string $telprimario,
-    ?string $telalternativo
-  ): int {
-    $sql = "
-      CALL spu_pers_registrar(
-        :tipodoc, :nrodoc, :apellidos, :nombres,
-        :genero, :fechanac, :estadocivil, :email,
-        :iddistrito, :direccion, :referencia,
-        :telprimario, :telalternativo
-      )
-    ";
-
-    $stmt = $this->db->prepare($sql);
-    $stmt->bindParam(':tipodoc', $tipodoc);
-    $stmt->bindParam(':nrodoc', $nrodoc);
-    $stmt->bindParam(':apellidos', $apellidos);
-    $stmt->bindParam(':nombres', $nombres);
-    $stmt->bindParam(':genero', $genero);
-    $stmt->bindParam(':fechanac', $fechanac);
-    $stmt->bindParam(':estadocivil', $estadocivil);
-    $stmt->bindParam(':email', $email);
-    $stmt->bindParam(':iddistrito', $iddistrito, PDO::PARAM_INT);
-    $stmt->bindParam(':direccion', $direccion);
-    $stmt->bindParam(':referencia', $referencia);
-    $stmt->bindParam(':telprimario', $telprimario);
-    $stmt->bindParam(':telalternativo', $telalternativo);
-
-    $stmt->execute();
-    $row = $stmt->fetch(PDO::FETCH_ASSOC);
-    $stmt->closeCursor();
-
-    return isset($row['last_id']) ? (int) $row['last_id'] : 0;
-  }
-
-  public function createContratoLaboral(
-    int $idPersona,
-    int $idCargo,
-    string $fechaInicio,
-    ?string $fechaFin,
-    string $tipoContrato
-  ): int {
-    $sql = "
-      INSERT INTO contratoslaborales
-        (idpersona, idcargo, fechainicio, fechafin, tipocontrato)
-      VALUES
-        (:idpersona, :idcargo, :fechainicio, :fechafin, :tipocontrato)
-    ";
-
-    $stmt = $this->db->prepare($sql);
-    $stmt->bindParam(':idpersona', $idPersona, PDO::PARAM_INT);
-    $stmt->bindParam(':idcargo', $idCargo, PDO::PARAM_INT);
-    $stmt->bindParam(':fechainicio', $fechaInicio);
-    if ($fechaFin !== null) {
-      $stmt->bindParam(':fechafin', $fechaFin);
-    } else {
-      // para NULL hay que usar bindValue con PDO::PARAM_NULL
-      $stmt->bindValue(':fechafin', null, PDO::PARAM_NULL);
-    }
-    $stmt->bindParam(':tipocontrato', $tipoContrato);
-
-    $stmt->execute();
-    return (int) $this->db->lastInsertId();
-  }
-
-  public function createColaborador(
-    int $idContrato,
-    string $usernick,
-    string $passHash
-  ): int {
-    $sql = "
-      INSERT INTO colaboradores
-        (idcontratolaboral, usernick, userpassword)
-      VALUES
-        (:idcontratolaboral, :usernick, :userpassword)
-    ";
-
-    $stmt = $this->db->prepare($sql);
-    $stmt->bindParam(':idcontratolaboral', $idContrato, PDO::PARAM_INT);
-    $stmt->bindParam(':usernick', $usernick);
-    $stmt->bindParam(':userpassword', $passHash);
-
-    $stmt->execute();
-    return (int) $this->db->lastInsertId();
-  }
-
-  public function create(int $idPersona, array $c, array $u): array
-  {
-    try {
-      $this->db->beginTransaction();
-
-      $idContrato = $this->createContratoLaboral(
-        $idPersona,
-        $c['idcargo'],
-        $c['fechainicio'],
-        $c['fechafin'],
-        $c['tipocontrato']
-      );
-
-      $idColab = $this->createColaborador(
-        $idContrato,
-        $u['usernick'],
-        $u['userpassword']
-      );
-
-      $this->db->commit();
-      return [
-        'idcontratolaboral' => $idContrato,
-        'idcolaborador' => $idColab,
-      ];
-    } catch (Exception $e) {
-      $this->db->rollBack();
-      throw $e;
-    }
-  }
-
   public function searchByDNI(string $dni): ?array
   {
     $sql = "
@@ -237,10 +110,10 @@ class Usuario
   public function delete(int $id): bool
   {
     $stmt = $this->db->prepare("
-    DELETE
-    FROM colaboradores
-    WHERE idcolaborador = :id
-  ");
+      DELETE
+      FROM colaboradores
+      WHERE idcolaborador = :id
+    ");
     $stmt->bindParam(':id', $id, PDO::PARAM_INT);
     return $stmt->execute();
   }
