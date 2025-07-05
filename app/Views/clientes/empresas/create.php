@@ -1,17 +1,19 @@
 <?php
 
 include __DIR__ . '/../../layout/header.php';
-include __DIR__ . '/../../components/mapa-includes.php';
-include __DIR__ . '/../../components/mapa-modal.php'; 
-
 ?>
+
+<!-- Incluir librerías y JavaScript del mapa -->
+<?php include __DIR__ . '/../../components/mapa-includes.php'; ?>
+
+<!-- Incluir modal del mapa -->
+<?php include __DIR__ . '/../../components/mapa-modal.php'; ?>
 
 <?php if (isset($error)): ?>
   <div class="alert alert-danger" role="alert">
     <?= htmlspecialchars($error) ?>
   </div>
-  
-  <?php endif; ?>
+<?php endif; ?>
 
 <?php if (isset($success)): ?>
     <script>
@@ -23,7 +25,7 @@ include __DIR__ . '/../../components/mapa-modal.php';
             }, 1500);
         });
     </script>
-<?php endif;?>
+<?php endif; ?>
 
 <div class="container-fluid">
     <div class="alert alert-info mt-2" role="alert">

@@ -1,28 +1,28 @@
-<?php
-include __DIR__ . '/../../layout/header.php';
-include __DIR__ . '/../../components/mapa-includes.php';
-include __DIR__ . '/../../components/mapa-modal.php'; 
-?>
+<?php include __DIR__ . '/../layout/header.php'; ?>
+
+<!-- Incluir librerías y JavaScript del mapa -->
+<?php include __DIR__ . '/../components/mapa-includes.php'; ?>
+
+<!-- Incluir modal del mapa -->
+<?php include __DIR__ . '/../components/mapa-modal.php'; ?>
 
 <?php if (isset($error)): ?>
   <div class="alert alert-danger" role="alert">
     <?= htmlspecialchars($error) ?>
   </div>
-  
-  <?php endif; ?>
+<?php endif; ?>
 
 <?php if (isset($success)): ?>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             showToast('<?= addslashes($success) ?>', 'SUCCESS', 1000);
-            
-            setTimeout(function() {
-                window.location.href = '/clientes/empresas';
+            // Redirigir después de mostrar el toast
+            setTimeout(() => {
+                window.location.href = '/clientes';
             }, 1500);
         });
     </script>
-<?php endif;?>
-
+<?php endif; ?>
 
 <div class="container-fluid">
 
