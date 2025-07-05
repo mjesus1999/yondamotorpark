@@ -183,7 +183,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
       <div class="modal-body">
-        <form action="/usuarios/storePersona" id="formRegistrarPersona" method="POST" autocomplete="off">
+        <form action="/persona/store" id="formRegistrarPersona" method="POST" autocomplete="off">
           <div class="row g-1">
             <!-- Tipo y número de doc -->
             <div class="col-md-2 form-floating">
@@ -280,6 +280,65 @@
 </div>
 
 <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const modal = document.getElementById('modalRegistrarPersona');
+    const distritoSelect = document.getElementById('modal-iddistrito');
+    const btnGuardar = document.getElementById('btnGuardarPersona');
+    const formModal = document.getElementById('formRegistrarPersona');
+
+    // 2.1 Poblar distritos al abrir el modal
+    modal.addEventListener('show.bs.modal', () => {
+      distritoSelect.innerHTML = '<option>Cargando distritos…</option>';
+      fetch('/ubigeo/distritos/all')
+        .then(res => res.json())
+        .then(data => {
+          distritoSelect.disabled = false;
+          distritoSelect.innerHTML = '<option value="">seleccione</option>';
+          data.forEach(d => {
+            const opt = document.createElement('option');
+            opt.value = d.iddistrito;
+            opt.text = d.distrito;
+            distritoSelect.appendChild(opt);
+          });
+        })
+        .catch(() => {
+          distritoSelect.innerHTML = '<option value="">Error al cargar</option>';
+        });
+    });
+
+    // 2.2 Enviar formulario por AJAX
+    btnGuardar.addEventListener('click', () => {
+      const formData = new FormData(formModal);
+      fetch('/persona/store', {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        body: formData
+      })
+        .then(res => res.json())
+        .then(json => {
+          if (json.success) {
+            // 2.3 Rellenar form principal
+            document.getElementById('idpersona').value = json.idpersona;
+            document.getElementById('dni').value = json.nrodoc;
+            document.getElementById('apellidos').value = json.apellidos;
+            document.getElementById('nombres').value = json.nombres;
+            // cerrar modal
+            const bsModal = bootstrap.Modal.getInstance(modal);
+            bsModal.hide();
+          } else {
+            // mostrar errores (puedes ajustarlo a tu markup)
+            alert('Errores:\n' + json.errors.join('\n'));
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          alert('Error al conectar con el servidor.');
+        });
+    });
+  });
+</script>
+
+<!-- <script>
   document.addEventListener('DOMContentLoaded', () => {
 
     //CARGAR AREAS Y CARGOS
@@ -491,6 +550,6 @@
 
 
   });
-</script>
+</script> -->
 
 <?php include __DIR__ . '/../layout/footer.php'; ?>
