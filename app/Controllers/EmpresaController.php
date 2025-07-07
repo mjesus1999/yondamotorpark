@@ -199,11 +199,6 @@ class EmpresaController extends Controller
 
             $_SESSION['success'] = 'Cliente actualizado correctamente';
             $this->redirect('/clientes/empresas');
-
-            // $this->view('clientes/empresas.edit', [
-            //     'empresaCliente' => $empresaCliente,
-            //     'success' => 'Cliente actualizado correctamente.'
-            // ]);
         } elseif ($resultado === 0) {
             $this->view('clientes/empresas.edit', [
                 'empresaCliente' => $empresaCliente,
