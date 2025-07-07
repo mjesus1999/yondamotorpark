@@ -41,8 +41,6 @@ class LocalController extends Controller
             'correo' =>   trim($_POST['correo']) !== '' && trim($_POST['correo']) !== 'null' ? trim($_POST['correo']) : null,
             'direccion' =>   trim($_POST['direccion']) !== '' && trim($_POST['direccion']) !== 'null' ? trim($_POST['direccion']) : null,
             'telefono' =>   trim($_POST['telefono']) !== '' && trim($_POST['telefono']) !== 'null' ? trim($_POST['telefono']) : null
-            // 'latitud' =>   trim($_POST['latitud']) !== '' && trim($_POST['latitud']) !== 'null' ? trim($_POST['latitud']) : null,
-            // 'longitud' =>   trim($_POST['longitud']) !== '' && trim($_POST['longitud']) !== 'null' ? trim($_POST['longitud']) : null,
         ];
 
         // 2. Validar campos obligatorios
@@ -65,7 +63,7 @@ class LocalController extends Controller
         }
 
         if (count($errores) > 0) {
-            $this->view('locales.create', ['error' => implode('\n', $errores)]);
+            $this->view('locales.create', ['error' => implode('<br>', $errores)]);
             return -1;
         }
 

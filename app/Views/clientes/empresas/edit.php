@@ -3,24 +3,10 @@
 
 
 <?php if (isset($error)): ?>
-  <div class="alert alert-danger" role="alert">
-    <?= htmlspecialchars($error) ?>
-  </div>
+    <div class="alert alert-danger" role="alert">
+        <?= htmlspecialchars($error) ?>
+    </div>
 <?php endif; ?>
-
-
-<?php if (isset($success)): ?>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            showToast('<?= addslashes($success) ?>', 'SUCCESS', 1000);
-            
-            setTimeout(function() {
-                window.location.href = '/clientes/empresas';
-            }, 1500);
-        });
-    </script>
-<?php endif; ?>
-
 
 <div class="container-fluid">
 
@@ -52,14 +38,14 @@
 
                 <div class="card-body">
                     <?php if (isset($empresaCliente)): ?>
-                        <form action="/clientes/empresaCliente/update/<?= htmlspecialchars($empresaCliente['idempresa'])?>" autocomplete="off" id="formulario-cliente-empresa" method="POST">
+                        <form action="/clientes/empresaCliente/update/<?= htmlspecialchars($empresaCliente['idempresa']) ?>" autocomplete="off" id="formulario-cliente-empresa" method="POST">
 
                             <div class="modal-body">
                                 <div class="row g-2">
                                     <div class="col-md-6">
                                         <div class="form-floating">
                                             <input type="text" class="form-control" id="razonsocial" name="razonsocial" placeholder="Razón Social"
-                                                required value="<?= htmlspecialchars($empresaCliente['razonsocial'])?>">
+                                                required value="<?= htmlspecialchars($empresaCliente['razonsocial']) ?>">
                                             <label for="razonsocial">Razón Social</label>
                                         </div>
                                     </div>
@@ -67,7 +53,7 @@
                                     <div class="col-md-6">
                                         <div class="form-floating">
                                             <input type="text" class="form-control" id="nombrecomercial" name="nombrecomercial"
-                                                placeholder="Nombre Comercial" required value="<?= htmlspecialchars($empresaCliente['nombrecomercial'])?>">
+                                                placeholder="Nombre Comercial" required value="<?= htmlspecialchars($empresaCliente['nombrecomercial']) ?>">
                                             <label for="nombrecomercial">Nombre Comercial</label>
                                         </div>
                                     </div>
@@ -75,15 +61,15 @@
                                     <div class="col-md-6">
                                         <div class="form-floating">
                                             <input type="text" class="form-control" id="ruc" name="ruc" placeholder="RUC" maxlength="11"
-                                                required value="<?= htmlspecialchars($empresaCliente['ruc'] )?>">
+                                                required value="<?= htmlspecialchars($empresaCliente['ruc']) ?>">
                                             <label for="ruc">RUC</label>
                                         </div>
                                     </div>
 
                                     <div class="col-md-6">
                                         <div class="form-floating">
-                                            <input type="text" class="form-control" id="representante"  name="representante" required
-                                                placeholder="Representante Legal" value="<?= htmlspecialchars($empresaCliente['representante'])?>">
+                                            <input type="text" class="form-control" id="representante" name="representante" required
+                                                placeholder="Representante Legal" value="<?= htmlspecialchars($empresaCliente['representante']) ?>">
                                             <label for="representante">Representante</label>
                                         </div>
                                     </div>
@@ -91,7 +77,7 @@
                                     <div class="col-md-6">
                                         <div class="form-floating">
                                             <input type="email" class="form-control" id="email" name="email"
-                                                placeholder="Correo electrónico" value="<?= htmlspecialchars($empresaCliente['email'] ?? '')?>">
+                                                placeholder="Correo electrónico" value="<?= htmlspecialchars($empresaCliente['email'] ?? '') ?>">
                                             <label for="email">Correo electrónico</label>
                                         </div>
                                     </div>
@@ -99,14 +85,15 @@
                                     <div class="col-md-6">
                                         <div class="form-floating">
                                             <input type="text" class="form-control" id="telprimario" maxlength="9" name="telprimario" required
-                                                placeholder="Teléfono principal" value="<?= htmlspecialchars($empresaCliente['telprimario'])?>">
+                                                placeholder="Teléfono principal" value="<?= htmlspecialchars($empresaCliente['telprimario']) ?>">
                                             <label for="telprimario">Teléfono</label>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                             <div class="modal-footer mt-2">
-                              
+
+                                
                                 <button type="submit" class="btn btn-sm btn-primary">Actualizar</button>
                             </div>
                 </div>
@@ -125,6 +112,22 @@
     </div>
 
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        const formularioClienteEmpresa = document.querySelector('#formulario-cliente-empresa');
+
+        formularioClienteEmpresa.addEventListener('submit', (event) => {
+            event.preventDefault();
+            if (confirm("¿Desea actualizar este cliente?")) {
+
+                event.target.submit();
+
+            }
+        });
+    });
+</script>
 
 
 

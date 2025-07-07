@@ -3,6 +3,16 @@
 include __DIR__ . '/../layout/header.php';
 ?>
 
+<?php if (isset($_SESSION['success'])): ?>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            showToast('<?= addslashes($_SESSION['success']) ?>', 'SUCCESS', 1000);
+        });
+    </script>
+    <?php unset($_SESSION['success']); ?>
+<?php endif; ?>
+
+
 <div class="container-fluid">
 
     <div class="alert alert-info mt-2" role="alert">
@@ -32,7 +42,7 @@ include __DIR__ . '/../layout/header.php';
             <div class="card">
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-sm table-hover table-hover-yonda" id="tabla-clientes-personas" >
+                        <table class="table table-sm table-hover table-hover-yonda" id="tabla-clientes-personas">
                             <thead>
                                 <tr>
                                     <th>#</th>
@@ -66,21 +76,21 @@ include __DIR__ . '/../layout/header.php';
                                             <td class='align-middle m-1'><?= htmlspecialchars($personCliente['telprimario']) ?></td>
                                             <td class='align-middle m-1'>
                                                 <div class="d-flex gap-1">
-                                                 <a href="/personaCliente/edit/<?= htmlspecialchars($personCliente['idpersona']) ?>"
-                                                    class="btn btn-sm btn-outline-primary"> <i class="fa-solid fa-pen"></i></a>
+                                                    <a href="/personaCliente/edit/<?= htmlspecialchars($personCliente['idpersona']) ?>"
+                                                        class="btn btn-sm btn-outline-primary"> <i class="fa-solid fa-pen"></i></a>
 
-                                                 <form action="/personaCliente/delete/<?= htmlspecialchars($personCliente['idcliente']) ?>" method="POST" class="d-inline"
-                                                    onsubmit="return confirm('¿Estás seguro de que quieres eliminar este cliente?');">
-                                                    <button type="submit" class='btn btn-sm btn-outline-danger delete' title='Eliminar'>
-                                                        <i class="fa-solid fa-trash"></i>
-                                                    </button>
-                                                </form>
+                                                    <form action="/personaCliente/delete/<?= htmlspecialchars($personCliente['idcliente']) ?>" method="POST" class="d-inline"
+                                                        onsubmit="return confirm('¿Estás seguro de que quieres eliminar este cliente?');">
+                                                        <button type="submit" class='btn btn-sm btn-outline-danger delete' title='Eliminar'>
+                                                            <i class="fa-solid fa-trash"></i>
+                                                        </button>
+                                                    </form>
                                                 </div>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
                                 <?php endif; ?>
-                                </tbody>
+                            </tbody>
                         </table>
                     </div>
                 </div>

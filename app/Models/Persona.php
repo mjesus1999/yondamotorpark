@@ -133,8 +133,8 @@ class Persona
                 modificado = NOW()
               WHERE idpersona  = :idpersona";
 
-                $cmd = $this->db->prepare($query);
-                $cmd->execute([
+                $stmt = $this->db->prepare($query);
+                $stmt->execute([
                     ':nombres' => $params['nombres'],
                     ':apellidos' => $params['apellidos'],
                     ':email' => $params['email'],
@@ -146,7 +146,7 @@ class Persona
                     ':idpersona' => $params['idpersona']
                 ]);
 
-                return (int) $cmd->rowCount();
+                return (int) $stmt->rowCount();
             } catch (PDOException $error) {
                 error_log($error->getMessage());
                 return -1;

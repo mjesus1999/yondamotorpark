@@ -5,195 +5,215 @@ namespace App\Controllers;
 use App\Core\Controller;
 use App\Models\Empresa;
 use App\Models\Cliente;
+use App\Helpers\Validador;
 
 class EmpresaController extends Controller
 {
     private Empresa $empresaModel;
     private Cliente $clienteModel;
 
-
     public function __construct()
     {
         $this->empresaModel = new Empresa();
         $this->clienteModel = new Cliente();
-        
     }
 
     public function indexEmpresaClientes(): void
     {
-        $empresaClientes = $this->empresaModel->getAllEmpresasCliente();
-
-        $this->view('/clientes/empresas.index', ['empresasClientes' => $empresaClientes]);
+        $empresas = $this->empresaModel->getAllEmpresasCliente();
+        $this->view('/clientes/empresas.index', ['empresasClientes' => $empresas]);
     }
 
     public function createEmpresaClient(): void
     {
         $this->view('/clientes/empresas.create');
     }
-
     public function storeEmpresaClient(): int
     {
-
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-
             $this->redirect('/clientes/createempresaclient');
             return 0;
         }
 
-        $iddistrito_val = trim($_POST['iddistrito'] ?? '');
-        $razonsocial_val = trim($_POST['razonsocial'] ?? '');
-        $nombrecomercial_val = trim($_POST['nombrecomercial'] ?? '');
-        $ruc_val = trim($_POST['ruc'] ?? '');
-        $representante_val = trim($_POST['representante'] ?? '');
-        $email_val = trim($_POST['email'] ?? '');
-        $direccion_val = trim($_POST['direccion'] ?? '');
-        $referencia_val = trim($_POST['referencia'] ?? '');
-        $latitud_val = trim($_POST['latitud'] ?? '');
-        $longitud_val = trim($_POST['longitud'] ?? '');
-        $telprimario_val = trim($_POST['telprimario'] ?? '');
-        $telsecundario_val = trim($_POST['telsecundario'] ?? '');
+        // Sanitización
+        $data = array_map([Validador::class, 'limpiar'], $_POST);
 
-        $registroEmpresa = [
-            'iddistrito'     => ($iddistrito_val !== '') ? (int)$iddistrito_val : null,
-            'razonsocial'    => ($razonsocial_val !== '') ? $razonsocial_val : null,
-            'nombrecomercial' => ($nombrecomercial_val !== '') ? $nombrecomercial_val : null,
-            'ruc'            => ($ruc_val !== '') ? $ruc_val : null,
-            'representante'  => ($representante_val !== '') ? $representante_val : null,
-            'email'          => ($email_val !== '') ? $email_val : null,
-            'direccion'      => ($direccion_val !== '') ? $direccion_val : null,
-            'referencia'     => ($referencia_val !== '') ? $referencia_val : null,
-            'latitud'        => ($latitud_val !== '') ? $latitud_val : null,
-            'longitud'       => ($longitud_val !== '') ? $longitud_val : null,
-            'telprimario'    => $telprimario_val,
-            'telsecundario' => ($telsecundario_val !== '') ? $telsecundario_val : null,
+        $empresa = [
+            'iddistrito'       => (int)($data['iddistrito'] ?? 0),
+            'razonsocial'      => $data['razonsocial'] ?? '',
+            'nombrecomercial'  => $data['nombrecomercial'] ?? '',
+            'ruc'              => $data['ruc'] ?? '',
+            'representante'    => $data['representante'] ?? '',
+            'email'            => !empty($data['email']) ? $data['email'] : null,
+            'direccion'        => $data['direccion'] ?? '',
+            'referencia'       => !empty($data['referencia']) ? $data['referencia'] : null,
+            'latitud'          => !empty($data['latitud']) ? $data['latitud'] : null,
+            'longitud'         => !empty($data['longitud']) ? $data['longitud'] : null,
+            'telprimario'      => $data['telprimario'] ?? '',
+            'telsecundario'    => !empty($data['telsecundario']) ? $data['telsecundario'] : null,
         ];
 
         $errores = [];
-        $nombresCampos = [
-            'iddistrito' => 'Distrito',
-            'razonsocial' => 'Razón Social',
-            'nombrecomercial' => 'Nombre Comercial',
-            'ruc' => 'RUC',
-            'representante' => 'Representante',
-            'telprimario' => 'Teléfono',
-        ];
-        foreach (['iddistrito', 'razonsocial', 'nombrecomercial', 'ruc', 'representante', 'telprimario'] as $campo) {
-            if (empty($registroEmpresa[$campo])) {
-                $nombreAmigable = $nombresCampos[$campo] ?? $campo;
-                $errores[] = "El campo '$nombreAmigable' es obligatorio.";
-            }
+
+        // Validaciones básicas - CORREGIDAS
+        $errores[] = Validador::campoObligatorio($empresa['iddistrito'], 'Distrito');
+        $errores[] = Validador::campoObligatorio($empresa['razonsocial'], 'Razón Social');
+        $errores[] = Validador::campoObligatorio($empresa['nombrecomercial'], 'Nombre Comercial');
+
+        // Validación de RUC corregida
+        $errorRuc = Validador::campoObligatorio($empresa['ruc'], 'RUC');
+        if ($errorRuc) {
+            $errores[] = $errorRuc;
+        } else {
+            $errores[] = Validador::soloNumeros($empresa['ruc'], 'RUC');
         }
 
-        if (count($errores) > 0) {
-            $this->view('clientes/empresas.create', ['error' => implode('\n', $errores)]);
+        $errores[] = Validador::campoObligatorio($empresa['representante'], 'Representante');
+
+        // Validación de teléfono corregida
+        $errorTel = Validador::campoObligatorio($empresa['telprimario'], 'Teléfono');
+        if ($errorTel) {
+            $errores[] = $errorTel;
+        } else {
+            $errores[] = Validador::telefonoValido($empresa['telprimario'], 'teléfono');
+        }
+
+        // Email solo si no está vacío
+        if (!empty($empresa['email'])) {
+            $errores[] = Validador::emailValido($empresa['email']);
+        }
+
+        $errores = array_filter($errores); 
+
+        if (!empty($errores)) {
+            $this->view('/clientes/empresas.create',['error' => implode("<br>",$errores),'data' => $empresa]); 
             return -1;
         }
 
-        $idEmpresa = $this->empresaModel->create($registroEmpresa);
+        // Debug: Log para verificar los datos antes de insertar
+        error_log("Datos a insertar: " . print_r($empresa, true));
+
+        $idEmpresa = $this->empresaModel->create($empresa);
+
+        // Debug: Log del resultado
+        error_log("ID Empresa creado: " . $idEmpresa);
 
         if ($idEmpresa > 0) {
-            $registroCliente = [
-                'idpersona'      => null,
-                'idempresa'      => $idEmpresa,
-                'idcolregistra'  => null,
+            $cliente = [
+                'idpersona' => null,
+                'idempresa' => $idEmpresa,
+                'idcolregistra' => null,
                 'idcolactualiza' => null,
-                'tipocliente'    => 'E',
+                'tipocliente' => 'E'
             ];
 
-            $idCliente = $this->clienteModel->create($registroCliente);
+            $idCliente = $this->clienteModel->create($cliente);
 
             if ($idCliente > 0) {
 
-                $success = 'Se agrego el cliente';
-                $this->view('clientes/empresas.create',['success' => $success]);
-                
+                $_SESSION['success'] = 'Cliente creado correctamente';
+                $this->redirect('/clientes/empresas');
+                //  $this->view('clientes/empresas.create', ['success' => 'Se agregó el cliente correctamente.']);
+                 return $idCliente;
             } else {
-                $this->view('clientes/empresas.create', ['error' => 'Error al crear el registro del cliente.']);
+                $this->view('clientes/empresas.create', ['error' => 'Error al crear el cliente.']);
             }
         } else {
-            $this->view('clientes.create', ['error' => 'Error al crear la empresa.']);
+            $this->view('clientes/empresas.create', ['error' => 'Error al registrar la empresa.']);
         }
+
         return -1;
     }
 
-
     public function edit(int $id): void
     {
-        $empresaCliente = $this->empresaModel->getById($id);
-        if ($empresaCliente) {
-            $this->view('clientes/empresas.edit', ['empresaCliente' => $empresaCliente]);
+        $empresa = $this->empresaModel->getById($id);
+        if ($empresa) {
+            $this->view('clientes/empresas.edit', ['empresaCliente' => $empresa]);
         } else {
             http_response_code(404);
             $this->view('errors.404');
         }
     }
-
-
     public function update(int $id): void
     {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $registro = [
-                'razonsocial' => trim($_POST['razonsocial']) ?? '',
-                'nombrecomercial' => trim($_POST['nombrecomercial']) ?? '',
-                'ruc' => trim($_POST['ruc']) ?? '',
-                'representante' => trim($_POST['representante']) ?? '',
-                'email' => trim($_POST['email']) ?? '',
-                'telprimario' => trim($_POST['telprimario']) ?? '',
-                'idempresa' => $id
-            ];
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') return;
 
-            // Validación amigable
-            $errores = [];
-            $nombresCampos = [
-                'razonsocial' => 'Razón Social',
-                'nombrecomercial' => 'Nombre Comercial',
-                'ruc' => 'RUC',
-                'representante' => 'Representante',
-                'telprimario' => 'Teléfono'
-            ];
-            foreach (['razonsocial', 'nombrecomercial', 'ruc', 'representante', 'telprimario'] as $campo) {
-                if (empty($registro[$campo])) {
-                    $nombreAmigable = $nombresCampos[$campo] ?? $campo;
-                    $errores[] = "El campo '$nombreAmigable' es obligatorio.";
-                }
-            }
+        $data = array_map([Validador::class, 'limpiar'], $_POST);
 
-            if (count($errores) > 0) {
-                $empresaCliente = $this->empresaModel->getById($id);
-                $this->view('clientes/empresas.edit', [
-                    'empresaCliente' => $empresaCliente,
-                    'error' => implode('\n', $errores)
-                ]);
-                return;
-            }
+        $empresa = [
+            'razonsocial' => $data['razonsocial'] ?? '',
+            'nombrecomercial' => $data['nombrecomercial'] ?? '',
+            'ruc' => $data['ruc'] ?? '',
+            'representante' => $data['representante'] ?? '',
+            'email' => !empty($data['email']) ? $data['email'] : null,
+            'telprimario' => $data['telprimario'] ?? '',
+            'idempresa' => $id
+        ];
 
-            // Si la actualización fue exitosa
-            $resultado = $this->empresaModel->update($registro);
-            //var_dump($resultado); exit;
+        $errores = [];
 
-            if ($resultado >= 0) {
-                // Actualización exitosa
-                $empresaCliente = $this->empresaModel->getById($id);
-                $success = '¡Cliente actualizado correctamente!';
-                $this->view('clientes/empresas.edit', [
-                    'empresaCliente' => $empresaCliente,
-                    'success' => $success
-                ]);
-            } /*elseif ($resultado === 0) {
-                // No hubo cambios
-                $empresaCliente = $this->empresaModel->getById($id);
-                $this->view('clientes/empresas.edit', [
-                    'empresaCliente' => $empresaCliente,
-                    'error' => 'No se realizaron cambios en el cliente.'
-                ]);*/
-            else {
-                // Error real
-                $empresaCliente = $this->empresaModel->getById($id);
-                $this->view('clientes/empresas.edit', [
-                    'empresaCliente' => $empresaCliente,
-                    'error' => 'Error al actualizar el cliente.'
-                ]);
-            }
+        // Validaciones corregidas
+        $errores[] = Validador::campoObligatorio($empresa['razonsocial'], 'Razón Social');
+        $errores[] = Validador::campoObligatorio($empresa['nombrecomercial'], 'Nombre Comercial');
+
+        // RUC
+        $errorRuc = Validador::campoObligatorio($empresa['ruc'], 'RUC');
+        if ($errorRuc) {
+            $errores[] = $errorRuc;
+        } else {
+            $errores[] = Validador::soloNumeros($empresa['ruc'], 'RUC');
+        }
+
+        $errores[] = Validador::campoObligatorio($empresa['representante'], 'Representante');
+
+        // Teléfono
+        $errorTel = Validador::campoObligatorio($empresa['telprimario'], 'Teléfono');
+        if ($errorTel) {
+            $errores[] = $errorTel;
+        } else {
+            $errores[] = Validador::telefonoValido($empresa['telprimario'], 'teléfono');
+        }
+
+        // Email solo si no está vacío
+        if (!empty($empresa['email'])) {
+            $errores[] = Validador::emailValido($empresa['email']);
+        }
+
+        $errores = array_filter($errores);
+
+        if (!empty($errores)) {
+            $empresaCliente = $this->empresaModel->getById($id);
+            $this->view('clientes/empresas.edit', [
+                'empresaCliente' => $empresaCliente,
+                'error' => implode("<br>", $errores)
+            ]);
+            return;
+        }
+
+        $resultado = $this->empresaModel->update($empresa);
+
+        $empresaCliente = $this->empresaModel->getById($id);
+
+        if ($resultado > 0) {
+
+            $_SESSION['success'] = 'Cliente actualizado correctamente';
+            $this->redirect('/clientes/empresas');
+
+            // $this->view('clientes/empresas.edit', [
+            //     'empresaCliente' => $empresaCliente,
+            //     'success' => 'Cliente actualizado correctamente.'
+            // ]);
+        } elseif ($resultado === 0) {
+            $this->view('clientes/empresas.edit', [
+                'empresaCliente' => $empresaCliente,
+                'error' => 'No se realizaron cambios.'
+            ]);
+        } else {
+            $this->view('clientes/empresas.edit', [
+                'empresaCliente' => $empresaCliente,
+                'error' => 'Error al actualizar el cliente.'
+            ]);
         }
     }
 }

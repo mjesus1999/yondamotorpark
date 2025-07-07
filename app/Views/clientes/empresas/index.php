@@ -1,5 +1,13 @@
 <?php include __DIR__ . '/../../layout/header.php';?>
 
+<?php if (isset($_SESSION['success'])): ?>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            showToast('<?= addslashes($_SESSION['success']) ?>', 'SUCCESS', 1000);
+        });
+    </script>
+    <?php unset($_SESSION['success']); ?> 
+<?php endif; ?>
 
 
 <div class="container-fluid">

@@ -147,7 +147,7 @@
                     <div class="text-end mt-4">
                         <button type="reset" class="btn btn-sm btn-outline-secondary"
                             data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-sm btn-primary">Guardar Local</button>
+                        <button type="submit" class="btn btn-sm btn-primary">Guardar</button>
                     </div>
                 </form>
             </div>
@@ -282,7 +282,7 @@
         });
 
 
-        // Cargar datos al inicio de la página
+    
         getAllDepartamentos();
         getMotorParkData(); 
 

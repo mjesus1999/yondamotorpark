@@ -105,7 +105,7 @@ class MapaSelector {
             this.actualizarCoordenadasSeleccionadas(latInicial, lngInicial);
         }
 
-        // Evento para agregar marcador al hacer clic
+        // Evento para agregar marcador al hacer click
         this.mapa.on('click', (e) => {
             const lat = e.latlng.lat;
             const lng = e.latlng.lng;
@@ -184,8 +184,8 @@ class MapaSelector {
         }
     }
 
-    mostrarMensaje(mensaje, tipo = 'INFO', duracion = 3000) {
-        // Usar showToast si está disponible, sino usar alert
+    mostrarMensaje(mensaje, tipo = 'INFO', duracion = 1000) {
+        
         if (typeof showToast === 'function') {
             showToast(mensaje, tipo, duracion);
         } else {

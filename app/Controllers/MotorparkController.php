@@ -22,10 +22,6 @@ class MotorparkController extends Controller
     }
 
 
-
-
-
-
     // SE USARA PARA API:
 
     public function getMotorPark(): void{
