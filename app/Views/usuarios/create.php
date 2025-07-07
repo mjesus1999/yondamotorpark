@@ -286,7 +286,7 @@
     const btnGuardar = document.getElementById('btnGuardarPersona');
     const formModal = document.getElementById('formRegistrarPersona');
 
-    // 2.1 Poblar distritos al abrir el modal
+    // 1 Poblar distritos al abrir el modal
     modal.addEventListener('show.bs.modal', () => {
       distritoSelect.innerHTML = '<option>Cargando distritos…</option>';
       fetch('/ubigeo/distritos/all')
@@ -326,7 +326,6 @@
             const bsModal = bootstrap.Modal.getInstance(modal);
             bsModal.hide();
           } else {
-            // mostrar errores (puedes ajustarlo a tu markup)
             alert('Errores:\n' + json.errors.join('\n'));
           }
         })
@@ -395,9 +394,8 @@
             nombresIn.value = '';
 
             // Rellenamos el campo del DNI en el modal
-            modalDniInput.value = dni;  // Asignamos el DNI al campo en el modal
+            modalDniInput.value = dni;
 
-            // Abrimos el modal para registrar la persona
             bootstrap.Modal.getOrCreateInstance(personaModalEl).show();
           }
         })
@@ -409,14 +407,13 @@
 
     sinFinCheckbox.addEventListener('change', () => {
       if (sinFinCheckbox.checked) {
-        // si marco indeterminado:  
         // 1) limpio el valor
         fechaFinInput.value = '';
         // 2) deshabilito y quito required
         fechaFinInput.disabled = true;
         fechaFinInput.removeAttribute('required');
       } else {
-        // si desmarco: habilito y añado required
+        //si se desmarca la opcion de inderteminado: se habilita y se añade required
         fechaFinInput.disabled = false;
         fechaFinInput.setAttribute('required', 'required');
       }
@@ -424,9 +421,8 @@
 
     const formFull = document.getElementById('formRegisterFull');
     formFull.addEventListener('submit', async (e) => {
-      e.preventDefault(); // Evitamos el envío inmediato del formulario
+      e.preventDefault();
 
-      // Mostrar la confirmación de SweetAlert2
       const { isConfirmed } = await Swal.fire({
         title: '¿Registrar nuevo cliente?',
         text: 'Esta acción registrará a un nuevo cliente en el sistema.',
@@ -438,8 +434,7 @@
       });
 
       if (isConfirmed) {
-        // Si el usuario confirma, enviamos el formulario
-        formFull.submit(); // Envía el formulario
+        formFull.submit();
       }
     });
   });

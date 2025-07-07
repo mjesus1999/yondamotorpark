@@ -51,13 +51,13 @@ class UsuarioController extends Controller
     $idCargo = (int) ($_POST['idcargo'] ?? 0);
     $fechaInicio = trim($_POST['fecha_inicio'] ?? '');
     $fechaFin = isset($_POST['sin_fecha_fin']) ? null : trim($_POST['fecha_fin'] ?? null);
-    $tipoContrato = 'P'; // o recoger un select si lo tienes
+    $tipoContrato = 'P'; // por defecto ahora esta como planilla (cambiar si se debe)
 
     $usernick = trim($_POST['usuario'] ?? '');
     $pass1 = $_POST['password1'] ?? '';
     $pass2 = $_POST['password2'] ?? '';
 
-    // 2) Validaciones básicas…
+    // 2) Validaciones
     $errors = [];
     if ($idPersona <= 0)
       $errors[] = 'Debe registrar primero la persona.';
@@ -70,13 +70,12 @@ class UsuarioController extends Controller
 
     if ($errors) {
       $areas = $this->usuarioModel->getAllAreas();
-      // Mostrar la vista con errores sin devolver valor
       $this->view('usuarios.create', [
         'areas' => $areas,
         'error' => implode('<br>', $errors),
         'old' => $_POST
       ]);
-      return;  // detenemos la ejecución
+      return;
     }
 
     // 3) Crear contrato laboral
@@ -138,7 +137,6 @@ class UsuarioController extends Controller
 
   public function delete(int $id): void
   {
-    // Podrías añadir un check de permisos aquí...
     $deleted = $this->usuarioModel->delete($id);
     if ($deleted) {
       $_SESSION['success_message'] = 'Usuario eliminado correctamente.';
@@ -148,4 +146,18 @@ class UsuarioController extends Controller
     $this->redirect('/usuarios');
   }
 
+/*   public function logout(): void
+{
+    if (session_status() !== PHP_SESSION_ACTIVE) {
+        session_start();
+    }
+
+    // Limpiar sesión
+    $_SESSION = [];
+    session_destroy();
+
+    // Redirigir al login que está en la raíz del proyecto
+    header('Location: /login.php');
+    exit;
+} */
 }

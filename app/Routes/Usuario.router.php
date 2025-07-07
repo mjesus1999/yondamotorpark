@@ -17,3 +17,5 @@ $router->add('POST', '/usuarios/changePassword', 'UsuarioController', 'changePas
 
 // ELIMINAR
 $router->add('POST', '/usuarios/delete/{id}', 'UsuarioController', 'delete');
+
+/* $router->add('GET', '/logout', 'UsuarioController', 'logout'); */

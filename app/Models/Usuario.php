@@ -81,13 +81,13 @@ class Usuario
 
   public function searchByDNI(string $dni): ?array
   {
-    $sql = "
+    $query = "
       SELECT idpersona, apellidos, nombres
       FROM personas
       WHERE nrodoc = :dni
       LIMIT 1
     ";
-    $stmt = $this->db->prepare($sql);
+    $stmt = $this->db->prepare($query);
     $stmt->bindParam(':dni', $dni);
     $stmt->execute();
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -96,12 +96,12 @@ class Usuario
 
   public function updatePassword(int $idColaborador, string $newHash): bool
   {
-    $sql = "
+    $query = "
       UPDATE colaboradores
         SET userpassword = :userpassword
       WHERE idcolaborador = :idcolaborador
     ";
-    $stmt = $this->db->prepare($sql);
+    $stmt = $this->db->prepare($query);
     $stmt->bindParam(':userpassword', $newHash);
     $stmt->bindParam(':idcolaborador', $idColaborador, PDO::PARAM_INT);
     return $stmt->execute();

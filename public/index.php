@@ -26,6 +26,7 @@ require APP_ROOT . '/app/Routes/Vehiculo.router.php';
 require APP_ROOT . '/app/Routes/Usuario.router.php';
 require APP_ROOT . '/app/Routes/Ubigeo.router.php';
 require APP_ROOT . '/app/Routes/Persona.router.php';
+require APP_ROOT . '/app/Routes/Auth.router.php';
 
 // Un controlador básico para la página de inicio
 class HomeController extends App\Core\Controller

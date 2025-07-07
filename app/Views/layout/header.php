@@ -167,7 +167,7 @@
                 <a href="#" class="dropdown-item">Jhon (Sistemas)</a>
                 <a href="#" class="dropdown-item">Configuración</a>
                 <a href="#" class="dropdown-item">Cambiar contraseña</a>
-                <a href="#" class="dropdown-item">Cerrar sesión</a>
+                <a href="/logout" class="dropdown-item">Cerrar sesión</a>
               </div>
             </li>
           </ul>
