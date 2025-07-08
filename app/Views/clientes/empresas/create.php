@@ -1,7 +1,8 @@
+<?php
+use function App\Helpers\persistirDatosFormulario;
+require_once __DIR__ . '/../../../Helpers/functions.php'; ?>
 <?php include __DIR__ . '/../../layout/header.php';?>
-<!-- Incluir librerías y JavaScript del mapa -->
 <?php include __DIR__ . '/../../components/mapa-includes.php'; ?>
-<!-- Incluir modal del mapa -->
 <?php include __DIR__ . '/../../components/mapa-modal.php'; ?>
 
 
@@ -9,21 +10,8 @@
   <div class="alert alert-danger" role="alert">
     <?= htmlspecialchars($error) ?>
   </div>
+  <?php persistirDatosFormulario($data) ?>
 <?php endif; ?>
-
-<?php if (isset($data)): ?>
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-    const old = <?= json_encode($data) ?>;
-    for (const [key, value] of Object.entries(old)) {
-        const input = document.querySelector(`[name="${key}"]`);
-        if (input) input.value = value;
-    }
-});
-</script>
-<?php endif; ?>
-
-
 
 <div class="container-fluid">
     <div class="alert alert-info mt-2" role="alert">
@@ -136,17 +124,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
                         </div>
 
-
                         <div class="col-md-4">
                             <div class="form-floating">
                                 <input type="tel" name="telsecundario" id="telsecundario" class="form-control"
-                                    placeholder="Número de telefóno" maxlength="0" pattern="[0-9]+">
+                                    placeholder="Número de telefóno" maxlength="9" pattern="[0-9]+">
                                 <label for="telsecundario">Telefóno 2 (Opcional)</label>
                             </div>
 
                         </div>
-
-
                     </div>
 
                     <div class="row g-3 mt-1">

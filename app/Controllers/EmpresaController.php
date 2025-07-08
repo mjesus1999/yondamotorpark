@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Controllers;
 
 use App\Core\Controller;
@@ -55,12 +54,12 @@ class EmpresaController extends Controller
 
         $errores = [];
 
-        // Validaciones básicas - CORREGIDAS
+        // Validaciones básicas - 
         $errores[] = Validador::campoObligatorio($empresa['iddistrito'], 'Distrito');
         $errores[] = Validador::campoObligatorio($empresa['razonsocial'], 'Razón Social');
         $errores[] = Validador::campoObligatorio($empresa['nombrecomercial'], 'Nombre Comercial');
 
-        // Validación de RUC corregida
+        // Validación de RUC 
         $errorRuc = Validador::campoObligatorio($empresa['ruc'], 'RUC');
         if ($errorRuc) {
             $errores[] = $errorRuc;
@@ -90,13 +89,13 @@ class EmpresaController extends Controller
             return -1;
         }
 
-        // Debug: Log para verificar los datos antes de insertar
-        error_log("Datos a insertar: " . print_r($empresa, true));
+        // // Debug: Log para verificar los datos antes de insertar
+        // error_log("Datos a insertar: " . print_r($empresa, true));
 
         $idEmpresa = $this->empresaModel->create($empresa);
 
         // Debug: Log del resultado
-        error_log("ID Empresa creado: " . $idEmpresa);
+        // error_log("ID Empresa creado: " . $idEmpresa);
 
         if ($idEmpresa > 0) {
             $cliente = [
@@ -196,7 +195,6 @@ class EmpresaController extends Controller
         $empresaCliente = $this->empresaModel->getById($id);
 
         if ($resultado > 0) {
-
             $_SESSION['success'] = 'Cliente actualizado correctamente';
             $this->redirect('/clientes/empresas');
         } elseif ($resultado === 0) {

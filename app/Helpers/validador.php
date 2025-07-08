@@ -1,5 +1,9 @@
 <?php
+
 namespace App\Helpers;
+
+use DateTime;
+use Exception;
 
 class Validador
 {
@@ -21,8 +25,8 @@ class Validador
 
     public static function telefonoValido(string $telefono, string $campo): ?string
     {
-        if (!preg_match('/^\d{7,12}$/', $telefono)) {
-            return "El $campo debe tener entre 7 y 12 dígitos.";
+        if (!preg_match('/^\d{9,12}$/', $telefono)) {
+            return "El $campo debe tener entre 9 y 12 dígitos.";
         }
         return null;
     }
@@ -34,4 +38,41 @@ class Validador
         }
         return null;
     }
+public static function validarFechaNacimiento(string $fecha): ?string
+{
+    try {
+        $nacimiento = new DateTime($fecha);
+        $hoy = new DateTime();
+        $mayorEdad = (clone $hoy)->modify('-18 years');
+
+        // Comparamos solo fechas 
+        $fechaNacimientoStr = $nacimiento->format('Y-m-d');
+        $fechaHoyStr = $hoy->format('Y-m-d');
+        $fechaLimiteStr = $mayorEdad->format('Y-m-d');
+
+        // var_dump("FECHA HOY:" . $fechaHoyStr);
+
+        if ($fechaNacimientoStr > $fechaHoyStr) {
+            return "La fecha de nacimiento no puede ser en el futuro.";
+        }
+
+        if ($fechaNacimientoStr === $fechaHoyStr) {
+            return "La fecha de nacimiento no puede ser la actual.";
+        }
+
+        if ($fechaNacimientoStr > $fechaLimiteStr) {
+            return "Debe tener al menos 18 años.";
+        }
+
+        return null;
+    } catch (Exception $e) {
+        return "Fecha inválida. Formato esperado: YYYY-MM-DD.";
+    }
 }
+
+}
+
+
+// $fechaNacimiento = '2025-07-08';
+
+// var_dump(Validador::validarFechaNacimiento($fechaNacimiento));

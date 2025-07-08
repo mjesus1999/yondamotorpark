@@ -47,12 +47,12 @@ include __DIR__ . '/../layout/header.php';
                                 <tr>
                                     <th>#</th>
                                     <th>Ubicación</th>
-                                    <th>Direccion</th>
+                                    <th>Dirección</th>
                                     <th>Nombre completo</th>
                                     <th>Tipo documento</th>
                                     <th>N° documento</th>
                                     <th>Correo</th>
-                                    <th>Telefóno</th>
+                                    <th>Teléfono</th>
                                     <th>Acciones</th>
                                 </tr>
                             </thead>

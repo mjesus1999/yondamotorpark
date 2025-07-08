@@ -2,7 +2,7 @@
 
 <?php if (isset($_SESSION['success'])): ?>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', () => {
             showToast('<?= addslashes($_SESSION['success']) ?>', 'SUCCESS', 1000);
         });
     </script>
@@ -42,19 +42,21 @@
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-sm table-hover table-hover-yonda" id="tabla-cliente-empresa">
+                            
                             <thead>
                                 <tr>
                                     <th>#</th>
                                     <th>Ubicación</th>
-                                    <th>Direccion</th>
+                                    <th>Dirección</th>
                                     <th>Responsable</th>
                                     <th>Ruc</th>
                                     <th>Empresa</th>
                                     <th>Correo</th>
-                                    <th>Telefono</th>
+                                    <th>Teléfono</th>
                                     <th>Acciones</th>
                                 </tr>
                             </thead>
+                            
                              <?php if (empty($empresasClientes)): ?>
                                     <tr>
                                         <td colspan="8" class="text-center">No hay clientes empresas registradas.</td>
@@ -63,15 +65,15 @@
                                     <?php $numeroFila = 1 ?>
                                     <?php foreach ($empresasClientes as $empresaCliente): ?>
                                         <tr>
-                                            <td class="align-middle m-1"><?= htmlspecialchars($numeroFila++) ?></td>
-                                            <td class="align-middle m-1"><?= htmlspecialchars($empresaCliente['ubicacion']) ?></td>
-                                            <td class="align-middle m-1"><?= htmlspecialchars($empresaCliente['direccion'] ?? 'No asignado') ?></td>
-                                            <td class="align-middle m-1"><?= htmlspecialchars($empresaCliente['responsable']) ?></td>
-                                            <td class="align-middle m-1"><?= htmlspecialchars($empresaCliente['ruc']) ?></td>
-                                            <td class="align-middle m-1"><?= htmlspecialchars($empresaCliente['nombrecomercial']) ?></td>
-                                            <td class="align-middle m-1"><?= htmlspecialchars($empresaCliente['email'] ?? 'No asignado') ?></td>
-                                            <td class="align-middle m-1"><?= htmlspecialchars($empresaCliente['telprimario']) ?></td>
-                                            <td class="align-middle m-1">
+                                            <td class="align-middle"><?= htmlspecialchars($numeroFila++) ?></td>
+                                            <td class="align-middle"><?= htmlspecialchars($empresaCliente['ubicacion']) ?></td>
+                                            <td class="align-middle"><?= htmlspecialchars($empresaCliente['direccion'] ?? 'No asignado') ?></td>
+                                            <td class="align-middle"><?= htmlspecialchars($empresaCliente['responsable']) ?></td>
+                                            <td class="align-middle"><?= htmlspecialchars($empresaCliente['ruc']) ?></td>
+                                            <td class="align-middle"><?= htmlspecialchars($empresaCliente['nombrecomercial']) ?></td>
+                                            <td class="align-middle"><?= htmlspecialchars($empresaCliente['email'] ?? 'No asignado') ?></td>
+                                            <td class="align-middle"><?= htmlspecialchars($empresaCliente['telprimario']) ?></td>
+                                            <td class="align-middle">
                                             <div class="d-flex gap-1">
                                                 <a href="/clientes/empresaCliente/edit/<?= htmlspecialchars($empresaCliente['idempresa']) ?>"
                                                     class="btn btn-sm btn-outline-primary"> <i class="fa-solid fa-pen"></i></a>

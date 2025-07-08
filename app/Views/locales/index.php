@@ -130,14 +130,7 @@
             </div>
         </div>
     </div>
-
-
-
 </div>
-
-
-
-
 <script>
     document.addEventListener("DOMContentLoaded", () => {
         const modalLocales = document.getElementById('modal-locales');

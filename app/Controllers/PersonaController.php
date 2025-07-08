@@ -67,6 +67,7 @@ class PersonaController extends Controller
         $errores[] = Validador::campoObligatorio($registroPersona['fechanac'], 'Fecha de nacimiento');
         $errores[] = Validador::campoObligatorio($registroPersona['estadocivil'], 'Estado civil');
         $errores[] = Validador::campoObligatorio($registroPersona['iddistrito'], 'Distrito');
+        $errores[] = Validador::validarFechaNacimiento($registroPersona['fechanac']); // Validando la fecha de nacimiento.
 
         $errorTel = Validador::campoObligatorio($registroPersona['telprimario'], 'Teléfono');
         if ($errorTel) {
@@ -82,10 +83,7 @@ class PersonaController extends Controller
         $errores = array_filter($errores);
 
         if (!empty($errores)) {
-            $this->view('clientes.create', [
-                'error' => implode("<br>", $errores),
-                'data' => $registroPersona
-            ]);
+            $this->view('clientes.create', ['error' => implode("<br>", $errores),'data' => $registroPersona]);
             return -1;
         }
 
