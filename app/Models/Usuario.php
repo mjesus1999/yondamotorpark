@@ -125,6 +125,7 @@ class Usuario
               col.usernick,
               col.userpassword,
               col.habilitado,
+              col.avatar,
               p.nombres,
               p.apellidos
             FROM colaboradores col
@@ -136,9 +137,58 @@ class Usuario
     $stmt->bindParam(':usernick', $usernick);
     $stmt->execute();
 
-    $result = $stmt->fetch();
-    return $result ?: null; // ← Esto es lo que evita el error
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    return $row ?: null;
   }
+
+  public function getById(int $idColab): ?array
+  {
+    $stmt = $this->db->prepare("
+      SELECT
+        col.usernick,
+        col.avatar,
+        p.apellidos,
+        p.nombres,
+        p.tipodoc,
+        p.nrodoc,
+        p.genero,
+        DATE_FORMAT(p.fechanac, '%Y-%m-%d') AS fechanac,
+        p.estadocivil,
+        p.email,
+        p.iddistrito,
+        d.distrito AS nombre_distrito,
+        p.direccion,
+        p.referencia,
+        p.telprimario,
+        p.telalternativo,
+        DATE_FORMAT(cl.fechainicio, '%Y-%m-%d') AS fechainicio,
+        IFNULL(DATE_FORMAT(cl.fechafin, '%Y-%m-%d'), 'Indeterminado') AS fechafin,
+        cg.cargo,
+        a.area
+      FROM colaboradores col
+      JOIN contratoslaborales cl ON cl.idcontratolaboral = col.idcontratolaboral
+      JOIN personas p         ON p.idpersona       = cl.idpersona
+      JOIN cargos cg          ON cg.idcargo        = cl.idcargo
+      JOIN areas a            ON a.idarea          = cg.idarea
+      LEFT JOIN distritos d   ON d.iddistrito      = p.iddistrito
+      WHERE col.idcolaborador = :id
+    ");
+    $stmt->bindValue(':id', $idColab, PDO::PARAM_INT);
+    $stmt->execute();
+    return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+  }
+
+  public function updateAvatar(int $idColab, string $url): bool
+{
+    $stmt = $this->db->prepare("
+      UPDATE colaboradores 
+      SET avatar = :url, modificado = NOW() 
+      WHERE idcolaborador = :id
+    ");
+    $stmt->bindValue(':url', $url);
+    $stmt->bindValue(':id', $idColab, PDO::PARAM_INT);
+    return $stmt->execute();
+}
 
   /*   public function searchByUsernick(string $usernick): ?array
     {

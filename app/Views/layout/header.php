@@ -166,11 +166,15 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
           <ul class="navbar-nav">
             <li class="nav-item dropdown">
               <a href="#" data-bs-toggle="dropdown" class="nav-icon pe-md-0">
-                <img src="/assets/images/profile.jpg" class="avatar img-fluid rounded" alt="">
+                <!-- Validacion de la imagen -->
+                <img src="<?= htmlspecialchars($_SESSION['user']['avatar'] ?? '/assets/images/profile.jpg') ?>"
+                  class="avatar img-fluid rounded" alt="Avatar" />
               </a>
               <div class="dropdown-menu dropdown-menu-end">
+                
+                <!-- MOSTRAR POR NOMBRE Y APELLIDOS -->
                 <?php if (!empty($_SESSION['user'])): ?>
-                  <a href="#" class="dropdown-item">
+                  <a href="/usuarios/profile/<?= $_SESSION['user']['id'] ?>" class="dropdown-item">
                     <?php
                     $primerNombre = explode(' ', trim($_SESSION['user']['nombres']))[0];
                     $primerApellido = explode(' ', trim($_SESSION['user']['apellidos']))[0];

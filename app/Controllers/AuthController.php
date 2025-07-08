@@ -54,10 +54,13 @@ class AuthController extends Controller
 
         //confirmacion
         $_SESSION['user'] = [
-            'id'         => $user['idcolaborador'],
-            'usernick'   => $user['usernick'],
-            'nombres'    => $user['nombres'],
-            'apellidos'  => $user['apellidos'],
+            'id' => $user['idcolaborador'],
+            'usernick' => $user['usernick'],
+            'nombres' => $user['nombres'],
+            'apellidos' => $user['apellidos'],
+            //ft de perfil
+            'avatar'    => $user['avatar'],
+            /* 'avatar' => $user['avatar'] ?? '/assets/images/profile.jpg', */ //Validar
         ];
 
         header('Location: /');

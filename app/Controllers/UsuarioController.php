@@ -146,4 +146,79 @@ class UsuarioController extends Controller
     $this->redirect('/usuarios');
   }
 
+  // PERFIL DEL USUARIO
+  public function profile(): void
+  {
+    $this->authRequired();
+    //ID por URL, recógelo: $id = (int) $params['id'];
+    $idColab = $_SESSION['user']['id'];
+
+    //Datos completos del usuario
+    $usuario = $this->usuarioModel->getById($idColab);
+    $this->view('usuarios.profile', ['usuario' => $usuario]);
+  }
+
+  public function uploadAvatar(): void
+  {
+    $this->authRequired();
+
+    if (
+      !isset($_FILES['avatar']) ||
+      $_FILES['avatar']['error'] !== UPLOAD_ERR_OK
+    ) {
+      http_response_code(400);
+      echo json_encode([
+        'success' => false,
+        'error' => 'Archivo no recibido'
+      ]);
+      return;
+    }
+
+    //Definimos la carpeta
+    $avatarsDir = $_SERVER['DOCUMENT_ROOT'] . '/assets/images/avatar';
+
+    //Creacion de la carpeta si no eciste
+    if (!is_dir($avatarsDir)) {
+      mkdir($avatarsDir, 0755, true);
+    }
+
+    //Se le desgina un nombre al avatar
+    $tmp = $_FILES['avatar']['tmp_name'];
+    $ext = pathinfo($_FILES['avatar']['name'], PATHINFO_EXTENSION);
+    $id = $_SESSION['user']['id'];
+    $filename = "avatar_{$id}." . $ext;
+    $dest = $avatarsDir . '/' . $filename;
+
+
+    //Mueve el archivo ?
+    if (!move_uploaded_file($tmp, $dest)) {
+      http_response_code(500);
+      echo json_encode([
+        'success' => false,
+        'error' => 'No se pudo guardar archivo'
+      ]);
+      return;
+    }
+
+    //URL pública para la imagen
+    $avatarUrl = '/assets/images/avatar/' . $filename;
+
+    //se actualiza la url en la BD
+    $ok = $this->usuarioModel->updateAvatar($id, $avatarUrl);
+    $_SESSION['user']['avatar'] = $avatarUrl;
+    if (!$ok) {
+      echo json_encode([
+        'success' => false,
+        'error' => 'No se pudo actualizar BD'
+      ]);
+      return;
+    }
+
+    // 6) Responde éxito y nueva URL
+    echo json_encode([
+      'success' => true,
+      'avatarUrl' => $avatarUrl
+    ]);
+  }
+
 }

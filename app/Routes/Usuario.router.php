@@ -18,3 +18,7 @@ $router->add('POST', '/usuarios/changePassword', 'UsuarioController', 'changePas
 
 // ELIMINAR
 $router->add('POST', '/usuarios/delete/{id}', 'UsuarioController', 'delete');
+
+// PROFILE
+$router->add('POST', '/usuarios/profile/avatar', 'UsuarioController', 'uploadAvatar');
+$router->add('GET', '/usuarios/profile/{id}', 'UsuarioController', 'profile');
