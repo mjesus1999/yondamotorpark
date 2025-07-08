@@ -146,18 +146,4 @@ class UsuarioController extends Controller
     $this->redirect('/usuarios');
   }
 
-/*   public function logout(): void
-{
-    if (session_status() !== PHP_SESSION_ACTIVE) {
-        session_start();
-    }
-
-    // Limpiar sesión
-    $_SESSION = [];
-    session_destroy();
-
-    // Redirigir al login que está en la raíz del proyecto
-    header('Location: /login.php');
-    exit;
-} */
 }

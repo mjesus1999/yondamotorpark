@@ -3,38 +3,70 @@
 namespace App\Controllers;
 
 use App\Core\Controller;
-
+use App\Models\Usuario;
 class AuthController extends Controller
 {
-  public function showLogin(): void
-  {
-    // si ya hay sesión, va al dashboard
-    if (session_status() !== PHP_SESSION_ACTIVE) session_start();
-    if (!empty($_SESSION['user'])) {
-      header('Location: /');
-      exit;
+    private Usuario $usuarioModel;
+
+    public function __construct()
+    {
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_start();
+        }
+        $this->usuarioModel = new Usuario();
     }
-    $this->view('auth.login');
-  }
 
-  public function login(): void
-  {
-    if (session_status() !== PHP_SESSION_ACTIVE) session_start();
-    // aquí validas $_POST['usernick'] y $_POST['userpassword']
-    // si OK:
-    $_SESSION['user'] = [/* tus datos de usuario */];
-    header('Location: /');
-    exit;
+    public function showLogin(): void
+    {
+        // si ya hay sesión, va al dashboard
+        if (session_status() !== PHP_SESSION_ACTIVE)
+            session_start();
+        if (!empty($_SESSION['user'])) {
+            header('Location: /');
+            exit;
+        }
+        $this->view('auth.login');
+    }
 
-    // si falla, podrías volver a la vista con un mensaje de error…
-  }
+    public function login(): void
+    {
+        if (session_status() !== PHP_SESSION_ACTIVE)
+            session_start();
 
-  public function logout(): void
-  {
-    if (session_status() !== PHP_SESSION_ACTIVE) session_start();
-    $_SESSION = [];
-    session_destroy();
-    header('Location: /login');
-    exit;
-  }
+        $usernick = trim($_POST['usernick'] ?? '');
+        $password = $_POST['userpassword'] ?? '';
+
+        // 1) Buscar colaborador
+        $user = $this->usuarioModel->searchByUsernick($usernick);
+
+        if (!$user || $user['habilitado'] !== 'S') {
+            $this->view('auth.login', ['error' => 'Usuario no encontrado o inactivo.']);
+            return;
+        }
+
+        // 2) Verificar contraseña
+        if (!password_verify($password, $user['userpassword'])) {
+            $this->view('auth.login', ['error' => 'Contraseña incorrecta.']);
+            return;
+        }
+
+        // 3) ¡Login exitoso!
+        $_SESSION['user'] = [
+            'id' => $user['idcolaborador'],
+            'usernick' => $user['usernick'],
+        ];
+
+        header('Location: /');
+        exit;
+    }
+
+    public function logout(): void
+    {
+        if (session_status() !== PHP_SESSION_ACTIVE)
+            session_start();
+        $_SESSION = [];
+        session_destroy();
+        header('Location: /login');
+        exit;
+    }
 }

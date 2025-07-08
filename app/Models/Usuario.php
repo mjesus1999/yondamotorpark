@@ -118,4 +118,17 @@ class Usuario
     return $stmt->execute();
   }
 
+  public function searchByUsernick(string $usernick): ?array
+  {
+    $query = "SELECT idcolaborador, usernick, userpassword, habilitado
+            FROM colaboradores
+            WHERE usernick = :usernick
+            LIMIT 1";
+    $stmt = $this->db->prepare($query);
+    $stmt->bindParam(':usernick', $usernick);
+    $stmt->execute();
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    return $row ?: null;
+  }
+
 }

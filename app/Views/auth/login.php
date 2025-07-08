@@ -32,15 +32,19 @@
                                     <h3 class="mb-4">Motorpark App 1.0</h3>
                                 </div>
                             </div>
-                            <form action="#" class="signin-form" id="formulario-login">
+                            <?php if (!empty($error)): ?>
+                                <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
+                            <?php endif; ?>
+                            <form action="/login" method="POST" class="signin-form" id="formulario-login">
                                 <div class="form-group mb-3">
                                     <label class="label" for="name">Nombre de usuario</label>
-                                    <input type="text" class="form-control" placeholder="Nombre de usuario" autofocus
-                                        required>
+                                    <input type="text" name="usernick" class="form-control"
+                                        placeholder="Nombre de usuario" required>
                                 </div>
                                 <div class="form-group mb-3">
                                     <label class="label" for="password">Contraseña</label>
-                                    <input type="password" class="form-control" placeholder="Contraseña" required>
+                                    <input type="password" name="userpassword" class="form-control"
+                                        placeholder="Contraseña" required>
                                 </div>
                                 <div class="form-group">
                                     <button type="submit"
@@ -66,6 +70,42 @@
     </section>
 
     <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.querySelector('.signin-form');
+            form.addEventListener('submit', e => {
+                // evitar el envío automático para verlo antes
+                e.preventDefault();
+
+                const usernick = document.querySelector('input[name="usernick"]').value;
+                const password = document.querySelector('input[name="userpassword"]').value;
+
+                console.log('▶️ Enviando login:', { usernick, password });
+
+                // luego permitimos el submit real
+                form.submit();
+            });
+        });
+    </script>
+
+    <!-- imprime en consola -->
+    <!-- <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.querySelector('.signin-form');
+            form.addEventListener('submit', e => {
+                e.preventDefault();
+
+                const usernick = document.querySelector('input[name="usernick"]').value;
+                const password = document.querySelector('input[name="userpassword"]').value;
+
+                console.log('▶️ Enviando login:', { usernick, password });
+
+                // Espera 1 segundo antes de enviar
+                setTimeout(() => form.submit(), 1000);
+            });
+        });
+    </script> -->
+
+    <!--     <script>
         document.addEventListener("DOMContentLoaded", () => {
             const formulario = document.querySelector("#formulario-login");
 
@@ -75,7 +115,7 @@
                 window.location.href = './views/';
             });
         });
-    </script>
+    </script> -->
 
 </body>
 
