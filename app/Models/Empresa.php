@@ -128,7 +128,7 @@ class Empresa
     }
 
 
-    
+
 
     public function update($params = []): int
     {
@@ -159,4 +159,24 @@ class Empresa
             return -1;
         }
     }
+
+    public function rucExiste(string $ruc, ?int $excluirId = null): bool
+    {
+
+        $sql = "SELECT COUNT(*) as total FROM empresas  WHERE ruc=:ruc";
+        $params = [":ruc" => $ruc];
+
+        if ($excluirId !== null) {
+            $sql .= " AND idempresa !=:id";
+            $params[":id"] = $excluirId;
+        }
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+        $resultado = $stmt->fetch();
+
+        return $resultado['total'] > 0;
+    }
 }
+
+
