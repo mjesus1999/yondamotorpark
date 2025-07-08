@@ -1,9 +1,11 @@
 <?php
 // app/Controllers/AuthController.php
+
 namespace App\Controllers;
 
 use App\Core\Controller;
 use App\Models\Usuario;
+
 class AuthController extends Controller
 {
     private Usuario $usuarioModel;
@@ -18,7 +20,7 @@ class AuthController extends Controller
 
     public function showLogin(): void
     {
-        // si ya hay sesión, va al dashboard
+        //redireccion al dashboard si inicia sesion
         if (session_status() !== PHP_SESSION_ACTIVE)
             session_start();
         if (!empty($_SESSION['user'])) {
@@ -36,7 +38,7 @@ class AuthController extends Controller
         $usernick = trim($_POST['usernick'] ?? '');
         $password = $_POST['userpassword'] ?? '';
 
-        // 1) Buscar colaborador
+        //buscar colaborador
         $user = $this->usuarioModel->searchByUsernick($usernick);
 
         if (!$user || $user['habilitado'] !== 'S') {
@@ -44,16 +46,18 @@ class AuthController extends Controller
             return;
         }
 
-        // 2) Verificar contraseña
+        //verificar contraseña
         if (!password_verify($password, $user['userpassword'])) {
             $this->view('auth.login', ['error' => 'Contraseña incorrecta.']);
             return;
         }
 
-        // 3) ¡Login exitoso!
+        //confirmacion
         $_SESSION['user'] = [
-            'id' => $user['idcolaborador'],
-            'usernick' => $user['usernick'],
+            'id'         => $user['idcolaborador'],
+            'usernick'   => $user['usernick'],
+            'nombres'    => $user['nombres'],
+            'apellidos'  => $user['apellidos'],
         ];
 
         header('Location: /');

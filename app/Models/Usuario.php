@@ -1,5 +1,6 @@
 <?php
 // app/Models/Usuario.php
+
 namespace App\Models;
 
 use App\Core\Database;
@@ -120,15 +121,36 @@ class Usuario
 
   public function searchByUsernick(string $usernick): ?array
   {
-    $query = "SELECT idcolaborador, usernick, userpassword, habilitado
-            FROM colaboradores
-            WHERE usernick = :usernick
+    $query = "SELECT col.idcolaborador,
+              col.usernick,
+              col.userpassword,
+              col.habilitado,
+              p.nombres,
+              p.apellidos
+            FROM colaboradores col
+            JOIN contratoslaborales cl ON cl.idcontratolaboral = col.idcontratolaboral
+            JOIN personas p ON p.idpersona = cl.idpersona
+            WHERE BINARY col.usernick = :usernick
             LIMIT 1";
     $stmt = $this->db->prepare($query);
     $stmt->bindParam(':usernick', $usernick);
     $stmt->execute();
-    $row = $stmt->fetch(PDO::FETCH_ASSOC);
-    return $row ?: null;
+
+    $result = $stmt->fetch();
+    return $result ?: null; // ← Esto es lo que evita el error
   }
+
+  /*   public function searchByUsernick(string $usernick): ?array
+    {
+      $query = "SELECT idcolaborador, usernick, userpassword, habilitado
+              FROM colaboradores
+              WHERE usernick = :usernick
+              LIMIT 1";
+      $stmt = $this->db->prepare($query);
+      $stmt->bindParam(':usernick', $usernick);
+      $stmt->execute();
+      $row = $stmt->fetch(PDO::FETCH_ASSOC);
+      return $row ?: null;
+    } */
 
 }

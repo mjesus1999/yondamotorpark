@@ -30,12 +30,12 @@ class Persona
                 ':genero' => $params['genero'],
                 ':fechanac' => $params['fechanac'],
                 ':estadocivil' => $params['estadocivil'],
-                ':email' => $params['email'], //null
+                ':email' => $params['email'],                   //null
                 ':iddistrito' => $params['iddistrito'],
-                ':direccion' => $params['direccion'], //null
-                ':referencia' => $params['referencia'], //null
+                ':direccion' => $params['direccion'],           //null
+                ':referencia' => $params['referencia'],         //null
                 ':telprimario' => $params['telprimario'],
-                ':telalternativo' => $params['telalternativo']//null
+                ':telalternativo' => $params['telalternativo']  //null
             ));
 
             return (int) $this->db->lastInsertId();

@@ -19,11 +19,11 @@ class UsuarioController extends Controller
     $this->usuarioModel = new Usuario();
     $this->contratoModel = new ContratoLaboral();
     $this->colaboradorModel = new Colaborador();
-
   }
 
   public function index(): void
   {
+    $this->authRequired();
     $usuario = $this->usuarioModel->getAll();
     $this->view('usuarios.index', ['Usuarios' => $usuario]);
   }

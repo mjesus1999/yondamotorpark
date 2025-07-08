@@ -7,7 +7,7 @@
     <title>Motorpark</title>
     <link href="https://fonts.googleapis.com/css?family=Lato:300,400,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-    <link rel="stylesheet" href="./views/css/login-style.css">
+    <link rel="stylesheet" href="/public/assets/css/login-style.css">
     <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous"> -->
 </head>
 
@@ -73,15 +73,14 @@
         document.addEventListener('DOMContentLoaded', () => {
             const form = document.querySelector('.signin-form');
             form.addEventListener('submit', e => {
-                // evitar el envío automático para verlo antes
+                //evitar el envío automático
                 e.preventDefault();
 
                 const usernick = document.querySelector('input[name="usernick"]').value;
                 const password = document.querySelector('input[name="userpassword"]').value;
 
-                console.log('▶️ Enviando login:', { usernick, password });
+                /* console.log('▶️ Enviando login:', { usernick, password }); */
 
-                // luego permitimos el submit real
                 form.submit();
             });
         });

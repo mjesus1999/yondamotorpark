@@ -8,6 +8,7 @@ class HomeController extends Controller
 {
   public function index(): void
   {
+    $this->authRequired();
     // Llama al método 'view' de la clase base Controller
     // para cargar la vista 'home/index.php'
     $this->view('home.index');

@@ -17,6 +17,7 @@ class MarcaController extends Controller
 
   public function index(): void
   {
+    $this->authRequired();
     //$products = $this->productModel->getAll();
     //$this->view('products.index', ['products' => $products]);
     $this->view('marcas.index');

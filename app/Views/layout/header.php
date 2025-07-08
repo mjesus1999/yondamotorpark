@@ -1,3 +1,8 @@
+<?php
+if (session_status() !== PHP_SESSION_ACTIVE) {
+  session_start();
+}
+?>
 <!DOCTYPE html>
 
 <html lang="es" data-bs-theme="dark">
@@ -164,7 +169,15 @@
                 <img src="/assets/images/profile.jpg" class="avatar img-fluid rounded" alt="">
               </a>
               <div class="dropdown-menu dropdown-menu-end">
-                <a href="#" class="dropdown-item">Jhon (Sistemas)</a>
+                <?php if (!empty($_SESSION['user'])): ?>
+                  <a href="#" class="dropdown-item">
+                    <?php
+                    $primerNombre = explode(' ', trim($_SESSION['user']['nombres']))[0];
+                    $primerApellido = explode(' ', trim($_SESSION['user']['apellidos']))[0];
+                    echo htmlspecialchars($primerNombre . ' ' . $primerApellido);
+                    ?>
+                  </a>
+                <?php endif; ?>
                 <a href="#" class="dropdown-item">Configuración</a>
                 <a href="#" class="dropdown-item">Cambiar contraseña</a>
                 <a href="/logout" class="dropdown-item">Cerrar sesión</a>
