@@ -125,6 +125,7 @@ class Persona
                 nombres = :nombres, 
                 apellidos = :apellidos, 
                 email = :email,
+                estadocivil = :estadocivil,
                 direccion = :direccion,
                 telprimario = :telprimario,
                 latitud   = :latitud,
@@ -137,6 +138,7 @@ class Persona
                 $stmt->execute([
                     ':nombres' => $params['nombres'],
                     ':apellidos' => $params['apellidos'],
+                    ':estadocivil' => $params['estadocivil'],
                     ':email' => $params['email'],
                     ':direccion' => $params['direccion'],
                     ':telprimario' =>  $params['telprimario'],

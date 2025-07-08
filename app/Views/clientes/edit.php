@@ -12,17 +12,6 @@
   </div>
 <?php endif; ?>
 
-<?php if (isset($success)): ?>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            showToast('<?= addslashes($success) ?>', 'SUCCESS', 1000);
-            // Redirigir después de mostrar el toast
-            setTimeout(() => {
-                window.location.href = '/clientes';
-            }, 1500);
-        });
-    </script>
-<?php endif; ?>
 
 <div class="container-fluid">
 

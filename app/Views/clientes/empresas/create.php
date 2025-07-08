@@ -1,16 +1,25 @@
 <?php
+
 use function App\Helpers\persistirDatosFormulario;
+
 require_once __DIR__ . '/../../../Helpers/functions.php'; ?>
-<?php include __DIR__ . '/../../layout/header.php';?>
+<?php include __DIR__ . '/../../layout/header.php'; ?>
 <?php include __DIR__ . '/../../components/mapa-includes.php'; ?>
 <?php include __DIR__ . '/../../components/mapa-modal.php'; ?>
 
+<?php if (isset($error) && !empty($error)): ?>
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1055">
+        <div class="toast align-items-center text-white bg-danger border-0 show" role="alert" aria-live="assertive" aria-atomic="true" id="errorToast">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <?= $error ?>
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
 
-<?php if (isset($error)): ?>
-  <div class="alert alert-danger" role="alert">
-    <?= htmlspecialchars($error) ?>
-  </div>
-  <?php persistirDatosFormulario($data) ?>
+    <?php persistirDatosFormulario($data) ?>
 <?php endif; ?>
 
 <div class="container-fluid">
@@ -188,107 +197,17 @@ require_once __DIR__ . '/../../../Helpers/functions.php'; ?>
 
 </div>
 
-
+<script src="/assets/js/ubigeo.js"></script>
 <script>
-    document.addEventListener("DOMContentLoaded", async () => {
-        const departamentosSelect = document.querySelector('#departamento');
-        const provinciasSelect = document.querySelector('#provincia');
-        const distritosSelect = document.querySelector('#distrito');
-        const formRegistroClienteEmpresa = document.getElementById('form-registro-cliente-empresa');
+    const formRegistroClienteEmpresa = document.querySelector('#form-registro-cliente-empresa');
 
+    formRegistroClienteEmpresa.addEventListener('submit', (event) => {
+        event.preventDefault();
 
-        async function getAllDepartamentos() {
-            try {
-                const response = await fetch(`/api/ubigeo/departamentos`, {
-                    method: 'GET'
-                });
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const data = await response.json();
-                console.log(data);
-                departamentosSelect.innerHTML = `<option value='' selected>Seleccione</option>`;
-                if (data.length > 0) {
-                    data.forEach(element => {
-                        departamentosSelect.innerHTML += `
-                            <option value='${element.iddepartamento}'>${element.departamento}</option>
-                        `;
-                    });
-                }
-            } catch (e) {
-                console.error("Error al obtener departamentos:", e);
-            }
+        if (confirm("¿Desea registrar este nuevo cliente?")) {
+            formRegistroClienteEmpresa.submit()
         }
-
-        async function getProvinciasByDepartamento(iddepartamento) {
-            provinciasSelect.innerHTML = `<option value='' selected>Seleccione</option>`;
-            distritosSelect.innerHTML = `<option value='' selected>Seleccione</option>`;
-            if (!iddepartamento) return;
-            try {
-                const response = await fetch(`/api/ubigeo/provincias/${iddepartamento}`, {
-                    method: 'GET'
-                });
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const data = await response.json();
-                if (data.length > 0) {
-                    data.forEach(element => {
-                        provinciasSelect.innerHTML += `
-                            <option value='${element.idprovincia}'>${element.provincia}</option>
-                        `;
-                    });
-                }
-            } catch (e) {
-                console.error("Error al obtener provincias:", e);
-            }
-        }
-
-        async function getDistritosByProvincia(idprovincia) {
-            distritosSelect.innerHTML = `<option value='' selected>Seleccione</option>`;
-            if (!idprovincia) return;
-            try {
-                const response = await fetch(`/api/ubigeo/distritos/${idprovincia}`, {
-                    method: 'GET'
-                });
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const data = await response.json();
-                if (data.length > 0) {
-                    data.forEach(element => {
-                        distritosSelect.innerHTML += `
-                            <option value='${element.iddistrito}'>${element.distrito}</option>
-                        `;
-                    });
-                }
-            } catch (e) {
-                console.error("Error al obtener distritos:", e);
-            }
-        }
-
-        departamentosSelect.addEventListener('change', (event) => {
-            const iddepartamento = event.target.value;
-            getProvinciasByDepartamento(iddepartamento);
-        });
-
-        provinciasSelect.addEventListener('change', (event) => {
-            const idprovincia = event.target.value;
-            getDistritosByProvincia(idprovincia);
-        });
-
-        getAllDepartamentos();
-
-        formRegistroClienteEmpresa.addEventListener('submit', (event) => {
-            event.preventDefault();
-
-            if (confirm("¿Desea registrar este nuevo cliente?")) {
-                formRegistroClienteEmpresa.submit()
-            }
-        });
     });
-
-   
 </script>
 
 <?php include __DIR__ . '/../../layout/footer.php'; ?>

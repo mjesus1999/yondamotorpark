@@ -144,7 +144,7 @@ class MapaSelector {
         }
 
         try {
-            const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(direccion)}&limit=1`);
+            const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(direccion)}&limit=1&addressdetails=1&countrycodes=pe`);
             const data = await response.json();
 
             if (data.length > 0) {

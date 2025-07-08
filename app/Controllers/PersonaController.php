@@ -135,6 +135,7 @@ class PersonaController extends Controller
             'nombres'       => $data['nombres'] ?? '',
             'apellidos'     => $data['apellidos'] ?? '',
             'email'         => $data['email'] ?? '',
+            'estadocivil'    => $data['estadocivil'] ?? '',
             'telprimario'   => $data['telprimario'] ?? '',
             'latitud'       => $data['latitud'] ?? null,
             'longitud'      => $data['longitud'] ?? null,
@@ -147,6 +148,7 @@ class PersonaController extends Controller
 
         $errores[] = Validador::campoObligatorio($registro['nombres'], 'Nombres');
         $errores[] = Validador::campoObligatorio($registro['apellidos'], 'Apellidos');
+        $errores[] = Validador::campoObligatorio($registro['estadocivil'],'Estado civil');
 
         $errorTel = Validador::campoObligatorio($registro['telprimario'], 'Teléfono');
         if ($errorTel) {
@@ -166,7 +168,7 @@ class PersonaController extends Controller
         if (!empty($errores)) {
             $this->view('clientes.edit', [
                 'personaCliente' => $personaCliente,
-                'error' => implode("\n", $errores)
+                'error' => implode("<br>", $errores)
             ]);
             return;
         }
