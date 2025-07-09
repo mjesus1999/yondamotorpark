@@ -47,7 +47,7 @@
                   <!-- Input oculto para seleccionar fichero -->
                   <input type="file" id="avatar-input" accept="image/*" style="display:none;">
                 </div>
-                
+
                 <button type="button" class="btn btn-primary" id="btnSaveAvatar" style="display:none;">
                   Guardar foto
                 </button>
@@ -124,9 +124,7 @@
           <?php else: ?>
             <p>Usuario no encontrado.</p>
           <?php endif; ?>
-
         </div> <!-- ./card-body -->
-
       </div><!-- ./card -->
 
     </form>
@@ -176,7 +174,7 @@
     form.append('avatar', fileInput.files[0]);
 
     try {
-      const resp = await fetch('/usuarios/profile/avatar', {
+      const resp = await fetch('/api/usuarios/profile/avatar', {
         method: 'POST',
         body: form
       });

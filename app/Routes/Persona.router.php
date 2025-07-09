@@ -1,6 +1,8 @@
 <?php
 // PERSONA
 
-// REGISTRAR
+// REGISTRAR PERSONA NATURAL
 $router->add('POST', '/persona/store', 'PersonaController', 'store');
-$router->add('GET', '/persona/searchByDNI', 'PersonaController', 'searchByDNI');
+
+//API - BUSCAR DNI
+$router->add('GET', '/api/persona/searchByDNI', 'PersonaController', 'searchByDNI');

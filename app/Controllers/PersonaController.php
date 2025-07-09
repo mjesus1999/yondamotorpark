@@ -15,9 +15,7 @@ class PersonaController extends Controller
         $this->personaModal = new Persona();
     }
 
-    /**
-     * POST /usuarios/store
-     */
+    
     public function store(): void
     {
         // Solo aceptamos POST
@@ -126,6 +124,10 @@ class PersonaController extends Controller
         }
     }
 
+    /**
+     * Buscar Persona por DNI
+     * @return void
+     */
     public function searchByDNI(): void
     {
         header('Content-Type: application/json; charset=utf-8');

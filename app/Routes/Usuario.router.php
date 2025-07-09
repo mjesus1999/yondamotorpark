@@ -5,20 +5,28 @@
 // MOSTRAR
 $router->add('GET', '/usuarios', 'UsuarioController', 'index');
 $router->add('GET', '/usuarios/create', 'UsuarioController', 'create');
-$router->add('GET',  '/usuarios/cargos',   'UsuarioController', 'getCargosByArea');
 
 // REGISTRAR
 $router->add('POST', '/usuarios/store', 'UsuarioController', 'store');
 
 // BUSCAR
-$router->add('GET', '/usuarios/searchByDNI', 'UsuarioController', 'searchByDNI');
-
-// ACTUALIZAR
-$router->add('POST', '/usuarios/changePassword', 'UsuarioController', 'changePassword');
+/* $router->add('GET', '/usuarios/searchByDNI', 'UsuarioController', 'searchByDNI');
+ */
 
 // ELIMINAR
 $router->add('POST', '/usuarios/delete/{id}', 'UsuarioController', 'delete');
 
 // PROFILE
-$router->add('POST', '/usuarios/profile/avatar', 'UsuarioController', 'uploadAvatar');
 $router->add('GET', '/usuarios/profile/{id}', 'UsuarioController', 'profile');
+
+
+//API
+
+// MOSTRAR
+$router->add('GET',  '/api/usuarios/cargos', 'UsuarioController', 'getCargosByArea');
+
+// ACTUALIZAR
+$router->add('POST', '/api/usuarios/changePassword',  'UsuarioController', 'changePassword');
+
+// PROFILE
+$router->add('POST', '/api/usuarios/profile/avatar',  'UsuarioController', 'uploadAvatar');

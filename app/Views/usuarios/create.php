@@ -223,7 +223,7 @@
             </div>
             <div class="col-md-6 form-floating">
               <select class="form-select" id="modal-estadocivil" name="estadocivil">
-                <option value="">--</option>
+                <option value="">Seleccione</option>
                 <option value="SOL">Soltero</option>
                 <option value="CAS">Casado</option>
                 <option value="VDO">Viudo</option>
@@ -286,14 +286,14 @@
     const btnGuardar = document.getElementById('btnGuardarPersona');
     const formModal = document.getElementById('formRegistrarPersona');
 
-    // 1 Poblar distritos al abrir el modal
+    //mostrar los distritos al abrir el modal
     modal.addEventListener('show.bs.modal', () => {
-      distritoSelect.innerHTML = '<option>Cargando distritos…</option>';
+      distritoSelect.innerHTML = '<option>Cargando distritos...</option>';
       fetch('/ubigeo/distritos/all')
         .then(res => res.json())
         .then(data => {
           distritoSelect.disabled = false;
-          distritoSelect.innerHTML = '<option value="">seleccione</option>';
+          distritoSelect.innerHTML = '<option value="">Seleccione un Distrito</option>';
           data.forEach(d => {
             const opt = document.createElement('option');
             opt.value = d.iddistrito;
@@ -306,7 +306,7 @@
         });
     });
 
-    // 2.2 Enviar formulario por AJAX
+    //Enviar formulario por AJAX
     btnGuardar.addEventListener('click', () => {
       const formData = new FormData(formModal);
       fetch('/persona/store', {
@@ -317,12 +317,12 @@
         .then(res => res.json())
         .then(json => {
           if (json.success) {
-            // 2.3 Rellenar form principal
+            //Rellenar form principal
             document.getElementById('idpersona').value = json.idpersona;
             document.getElementById('dni').value = json.nrodoc;
             document.getElementById('apellidos').value = json.apellidos;
             document.getElementById('nombres').value = json.nombres;
-            // cerrar modal
+            //cerrar modal
             const bsModal = bootstrap.Modal.getInstance(modal);
             bsModal.hide();
           } else {
@@ -340,19 +340,19 @@
     areaSelect.addEventListener('change', () => {
       const idArea = areaSelect.value;
       if (!idArea) {
-        cargoSelect.innerHTML = '<option value="">Seleccione un área primero</option>';
+        cargoSelect.innerHTML = '<option value="">Seleccione un Área primero</option>';
         cargoSelect.disabled = true;
         return;
       }
 
-      cargoSelect.innerHTML = '<option>Cargando cargos…</option>';
+      cargoSelect.innerHTML = '<option>Cargando cargos...</option>';
       cargoSelect.disabled = true;
 
-      fetch(`/usuarios/cargos?idarea=${encodeURIComponent(idArea)}`)
+      fetch(`/api/usuarios/cargos?idarea=${encodeURIComponent(idArea)}`)
         .then(res => res.json())
         .then(data => {
           // data es un array de objetos {idcargo, cargo}
-          cargoSelect.innerHTML = '<option value="">Seleccione un cargo</option>';
+          cargoSelect.innerHTML = '<option value="">Seleccione un Cargo</option>';
           data.forEach(c => {
             const opt = document.createElement('option');
             opt.value = c.idcargo;
@@ -379,21 +379,21 @@
       const dni = dniInput.value.trim();
       if (!dni) return;
 
-      fetch(`/persona/searchByDNI?dni=${encodeURIComponent(dni)}`)
+      fetch(`/api/persona/searchByDNI?dni=${encodeURIComponent(dni)}`)
         .then(res => res.json())
         .then(json => {
           if (json.success) {
-            // Si el DNI ya existe, rellenamos los campos
+            //si el DNI existe
             idPersonaIn.value = json.idpersona;
             apellidosIn.value = json.apellidos;
             nombresIn.value = json.nombres;
           } else {
-            // Si el DNI no existe, limpiamos los campos
+            //si el DNI no existe
             idPersonaIn.value = '';
             apellidosIn.value = '';
             nombresIn.value = '';
 
-            // Rellenamos el campo del DNI en el modal
+            //muetra el DNI en el modal
             modalDniInput.value = dni;
 
             bootstrap.Modal.getOrCreateInstance(personaModalEl).show();
@@ -407,9 +407,7 @@
 
     sinFinCheckbox.addEventListener('change', () => {
       if (sinFinCheckbox.checked) {
-        // 1) limpio el valor
         fechaFinInput.value = '';
-        // 2) deshabilito y quito required
         fechaFinInput.disabled = true;
         fechaFinInput.removeAttribute('required');
       } else {

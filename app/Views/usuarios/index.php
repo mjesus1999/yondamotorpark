@@ -138,7 +138,7 @@
       const form = document.getElementById('formCambiarClave');
       const formData = new FormData(form);
 
-      fetch('/usuarios/changePassword', {
+      fetch('/api/usuarios/changePassword', {
         method: 'POST',
         body: formData
       })
