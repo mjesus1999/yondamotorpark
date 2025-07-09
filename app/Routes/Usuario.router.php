@@ -9,10 +9,6 @@ $router->add('GET', '/usuarios/create', 'UsuarioController', 'create');
 // REGISTRAR
 $router->add('POST', '/usuarios/store', 'UsuarioController', 'store');
 
-// BUSCAR
-/* $router->add('GET', '/usuarios/searchByDNI', 'UsuarioController', 'searchByDNI');
- */
-
 // ELIMINAR
 $router->add('POST', '/usuarios/delete/{id}', 'UsuarioController', 'delete');
 
@@ -30,3 +26,7 @@ $router->add('POST', '/api/usuarios/changePassword',  'UsuarioController', 'chan
 
 // PROFILE
 $router->add('POST', '/api/usuarios/profile/avatar',  'UsuarioController', 'uploadAvatar');
+
+// BUSCAR
+/* $router->add('GET', '/usuarios/searchByDNI', 'UsuarioController', 'searchByDNI');
+ */
