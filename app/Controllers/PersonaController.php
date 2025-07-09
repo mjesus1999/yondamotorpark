@@ -56,31 +56,8 @@ class PersonaController extends Controller
             'longitud'       => $data['longitud'] ?? null,
         ];
 
-        $errores = [];
+        $errores = Validador::validarPersonaCrear($registroPersona);
 
-        // Validaciones obligatorias
-        $errores[] = Validador::campoObligatorio($registroPersona['apellidos'], 'Apellidos');
-        $errores[] = Validador::campoObligatorio($registroPersona['nombres'], 'Nombres');
-        $errores[] = Validador::campoObligatorio($registroPersona['tipodoc'], 'Tipo de documento');
-        $errores[] = Validador::campoObligatorio($registroPersona['nrodoc'], 'Número de documento');
-        $errores[] = Validador::campoObligatorio($registroPersona['genero'], 'Género');
-        $errores[] = Validador::campoObligatorio($registroPersona['fechanac'], 'Fecha de nacimiento');
-        $errores[] = Validador::campoObligatorio($registroPersona['estadocivil'], 'Estado civil');
-        $errores[] = Validador::campoObligatorio($registroPersona['iddistrito'], 'Distrito');
-        $errores[] = Validador::validarFechaNacimiento($registroPersona['fechanac']); // Validando la fecha de nacimiento.
-
-        $errorTel = Validador::campoObligatorio($registroPersona['telprimario'], 'Teléfono');
-        if ($errorTel) {
-            $errores[] = $errorTel;
-        } else {
-            $errores[] = Validador::telefonoValido($registroPersona['telprimario'], 'Teléfono');
-        }
-
-        if (!empty($registroPersona['email'])) {
-            $errores[] = Validador::emailValido($registroPersona['email']);
-        }
-
-        $errores = array_filter($errores);
 
         if (!empty($errores)) {
             $this->view('clientes.create', ['error' => implode("<br>", $errores),'data' => $registroPersona]);
@@ -144,25 +121,7 @@ class PersonaController extends Controller
             'idpersona'     => $id
         ];
 
-        $errores = [];
-
-        $errores[] = Validador::campoObligatorio($registro['nombres'], 'Nombres');
-        $errores[] = Validador::campoObligatorio($registro['apellidos'], 'Apellidos');
-        $errores[] = Validador::campoObligatorio($registro['estadocivil'],'Estado civil');
-
-        $errorTel = Validador::campoObligatorio($registro['telprimario'], 'Teléfono');
-        if ($errorTel) {
-            $errores[] = $errorTel;
-        } else {
-            $errores[] = Validador::telefonoValido($registro['telprimario'], 'Teléfono');
-        }
-
-        if (!empty($registro['email'])) {
-            $errores[] = Validador::emailValido($registro['email']);
-        }
-
-        $errores = array_filter($errores);
-
+        $errores = Validador::validarPersonaUpdate($registro);
         $personaCliente = $this->personaModel->getById($id);
 
         if (!empty($errores)) {
