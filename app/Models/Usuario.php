@@ -119,6 +119,12 @@ class Usuario
     return $stmt->execute();
   }
 
+  // CONSULTAS PARA EL LOGIN
+
+  /**
+   * Buscar por usuario el (idcolab)
+   * @param string $usernick
+   */
   public function searchByUsernick(string $usernick): ?array
   {
     $query = "SELECT col.idcolaborador,
@@ -141,6 +147,10 @@ class Usuario
     return $row ?: null;
   }
 
+  /**
+   * Mostrar el usuario por id
+   * @param int $idColab
+   */
   public function getById(int $idColab): ?array
   {
     $stmt = $this->db->prepare("
@@ -178,8 +188,14 @@ class Usuario
     return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
   }
 
+  /**
+   * Actualizar la img (avatar)
+   * @param int $idColab
+   * @param string $url
+   * @return bool
+   */
   public function updateAvatar(int $idColab, string $url): bool
-{
+  {
     $stmt = $this->db->prepare("
       UPDATE colaboradores 
       SET avatar = :url, modificado = NOW() 
@@ -188,19 +204,6 @@ class Usuario
     $stmt->bindValue(':url', $url);
     $stmt->bindValue(':id', $idColab, PDO::PARAM_INT);
     return $stmt->execute();
-}
-
-  /*   public function searchByUsernick(string $usernick): ?array
-    {
-      $query = "SELECT idcolaborador, usernick, userpassword, habilitado
-              FROM colaboradores
-              WHERE usernick = :usernick
-              LIMIT 1";
-      $stmt = $this->db->prepare($query);
-      $stmt->bindParam(':usernick', $usernick);
-      $stmt->execute();
-      $row = $stmt->fetch(PDO::FETCH_ASSOC);
-      return $row ?: null;
-    } */
+  }
 
 }
