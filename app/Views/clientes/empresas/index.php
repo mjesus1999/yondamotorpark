@@ -1,4 +1,4 @@
-<?php include __DIR__ . '/../../layout/header.php';?>
+<?php include __DIR__ . '/../../layout/header.php'; ?>
 
 <?php if (isset($_SESSION['success'])): ?>
     <script>
@@ -6,7 +6,7 @@
             showToast('<?= addslashes($_SESSION['success']) ?>', 'SUCCESS', 1000);
         });
     </script>
-    <?php unset($_SESSION['success']); ?> 
+    <?php unset($_SESSION['success']); ?>
 <?php endif; ?>
 
 
@@ -42,7 +42,7 @@
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-sm table-hover table-hover-yonda" id="tabla-cliente-empresa">
-                            
+
                             <thead>
                                 <tr>
                                     <th>#</th>
@@ -56,24 +56,29 @@
                                     <th>Acciones</th>
                                 </tr>
                             </thead>
-                            
-                             <?php if (empty($empresasClientes)): ?>
+
+                            <?php if (empty($empresasClientes)): ?>
+                                <tr>
+                                    <td colspan="8" class="text-center">No hay clientes empresas registradas.</td>
+                                </tr>
+                            <?php else: ?>
+                                <?php $numeroFila = 1 ?>
+                                <?php foreach ($empresasClientes as $empresaCliente): ?>
                                     <tr>
-                                        <td colspan="8" class="text-center">No hay clientes empresas registradas.</td>
-                                    </tr>
-                                <?php else: ?>
-                                    <?php $numeroFila = 1 ?>
-                                    <?php foreach ($empresasClientes as $empresaCliente): ?>
-                                        <tr>
-                                            <td class="align-middle"><?= htmlspecialchars($numeroFila++) ?></td>
-                                            <td class="align-middle"><?= htmlspecialchars($empresaCliente['ubicacion']) ?></td>
-                                            <td class="align-middle"><?= htmlspecialchars($empresaCliente['direccion'] ?? 'No asignado') ?></td>
-                                            <td class="align-middle"><?= htmlspecialchars($empresaCliente['responsable']) ?></td>
-                                            <td class="align-middle"><?= htmlspecialchars($empresaCliente['ruc']) ?></td>
-                                            <td class="align-middle"><?= htmlspecialchars($empresaCliente['nombrecomercial']) ?></td>
-                                            <td class="align-middle"><?= htmlspecialchars($empresaCliente['email'] ?? 'No asignado') ?></td>
-                                            <td class="align-middle"><?= htmlspecialchars($empresaCliente['telprimario']) ?></td>
-                                            <td class="align-middle">
+                                        <td class="align-middle"><?= htmlspecialchars($numeroFila++) ?></td>
+                                        <td class="align-middle"><?= htmlspecialchars($empresaCliente['ubicacion']) ?></td>
+                                         <td class="align-middle">
+                                            <?= $empresaCliente['direccion'] ? htmlspecialchars($empresaCliente['direccion']) : 'No asignado' ?>
+                                        </td>
+                                        <td class="align-middle"><?= htmlspecialchars($empresaCliente['responsable']) ?></td>
+                                        <td class="align-middle"><?= htmlspecialchars($empresaCliente['ruc']) ?></td>
+                                        <td class="align-middle"><?= htmlspecialchars($empresaCliente['nombrecomercial']) ?></td>
+                                        <td class="align-middle">
+                                            <?= $empresaCliente['email'] ? htmlspecialchars($empresaCliente['email']) : 'No asignado' ?>
+                                        </td>
+
+                                        <td class="align-middle"><?= htmlspecialchars($empresaCliente['telprimario']) ?></td>
+                                        <td class="align-middle">
                                             <div class="d-flex gap-1">
                                                 <a href="/clientes/empresaCliente/edit/<?= htmlspecialchars($empresaCliente['idempresa']) ?>"
                                                     class="btn btn-sm btn-outline-primary"> <i class="fa-solid fa-pen"></i></a>
@@ -84,11 +89,11 @@
                                                         <i class="fa-solid fa-trash"></i>
                                                     </button>
                                                 </form>
-                                                 </div>
-                                            </td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                <?php endif; ?>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
                         </table>
                     </div>
                 </div>
@@ -98,7 +103,7 @@
 
 </div>
 
-   
+
 
 
 

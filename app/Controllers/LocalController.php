@@ -5,6 +5,7 @@ namespace App\Controllers;
 
 use App\Core\Controller;
 use App\Models\Local;
+use App\Helpers\Validador;
 
 class LocalController extends Controller
 {
@@ -30,63 +31,58 @@ class LocalController extends Controller
     {
         // 1. Validar que la petición sea POST
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            return 0;
+            return 0; // Errror en el método
         }
+
+        $data = array_map([Validador::class, 'limpiar'], $_POST);
+        
         $registro = [
-            'tienda'      => trim($_POST['tienda']),
-            'iddistrito'  => trim(intval($_POST['iddistrito'])),
-            'idmotorpark' => trim(intval($_POST['idmotorpark'])),
-            'principal'   => trim($_POST['principal']),
-            'responsable' => trim($_POST['responsable']),
-            'correo' =>   trim($_POST['correo']) !== '' && trim($_POST['correo']) !== 'null' ? trim($_POST['correo']) : null,
-            'direccion' =>   trim($_POST['direccion']) !== '' && trim($_POST['direccion']) !== 'null' ? trim($_POST['direccion']) : null,
-            'telefono' =>   trim($_POST['telefono']) !== '' && trim($_POST['telefono']) !== 'null' ? trim($_POST['telefono']) : null
+            'tienda'      => $data['tienda'] ?? '' ,
+            'iddistrito'  => (int)($data['iddistrito'] ?? 0), 
+            'idmotorpark' => (int)($data['idmotorpark'] ?? 0),
+            'principal'   =>  $data['principal'] ?? '',
+            'responsable' => $data['responsable'] ?? '',
+            'correo' =>   !empty($data['correo']) ? $data['correo'] : null,
+            'direccion' => !empty($data['direccion']) ? $data['direccion']:null,  
+            'telefono' =>   $data['telefono'] ?? ''
         ];
 
-        // 2. Validar campos obligatorios
+        
         $errores = [];
-        
-        // Mapeo de nombres de campos para mensajes amigables
-        $nombresCampos = [
-            'tienda' => 'Nombre del Local',
-            'iddistrito' => 'Distrito',
-            'idmotorpark' => 'Tienda',
-            'principal' => '¿Es principal?',
-            'responsable' => 'Responsable'
-        ];
-        
-        foreach (['tienda', 'iddistrito', 'idmotorpark', 'principal', 'responsable'] as $campo) {
-            if (empty($registro[$campo])) {
-                $nombreAmigable = $nombresCampos[$campo] ?? $campo;
-                $errores[] = "El campo '$nombreAmigable' es obligatorio.";
-            }
+        $errores[] = Validador::campoObligatorio($registro['tienda'], 'Local');
+        $errores[] = Validador::campoObligatorio($registro['iddistrito'], 'Distrito');
+        $errores[] = Validador::campoObligatorio($registro['idmotorpark'], 'Tienda');
+        $errores[] = Validador::campoObligatorio($registro['principal'], 'Es Principal');
+        $errores[] = Validador::campoObligatorio($registro['responsable'], 'Responsable');
+       
+        $errorTel = Validador::campoObligatorio($registro['telefono'], 'Teléfono');
+        if ($errorTel) {
+            $errores[] = $errorTel;
+        } else {
+            $errores[] = Validador::telefonoValido($registro['telefono'],'Teléfono');
         }
 
-        if (count($errores) > 0) {
-            $this->view('locales.create', ['error' => implode('<br>', $errores)]);
+        if (!empty($registro['correo'])) {
+            $errores[] = Validador::emailValido($registro['correo']);
+        }
+
+        $errores = array_filter($errores);
+
+        if (!empty($errores)) {
+            $this->view('locales.create', ['error' => implode('<br>', $errores), 'data' => $registro]);
             return -1;
         }
 
-        // 3. Insertar en base de datos
         $lastInsertId = $this->localModel->create($registro);
 
         if ($lastInsertId > 0) {
-            // Esta es la otra manera de mostrar el toast, pero
-            // redirigiendo a la página de locales, solo en locales.create con :
-            // $success = '¡Local creado exitosamente!';
-            // $this->view('locales.create', ['success' => $succcess]);)
-            
-           // $_SESSION['success_message'] = '¡Local creado exitosamente!';
-            //$this->redirect('/locales');
-
-            $success = '¡Local creado exitosamente!';
-            $this->view('locales.create', ['success' => $success]);
+            $_SESSION['success'] = 'Local agregado correctamente';
+            $this->redirect('/locales');
             return $lastInsertId; // Retorna el ID insertado
             
         } else {
-            // Si hubo un error en la inserción (retornó -1 o 0), muestra la vista con el error.
             $this->view('locales.create', ['error' => 'Error al crear el local.']);
-            return $lastInsertId; // Retorna -1 (o el valor que `create` haya retornado en caso de fallo)
+            return $lastInsertId;
         }
     }
 

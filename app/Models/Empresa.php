@@ -79,11 +79,6 @@ class Empresa
         }
     }
 
-
-
-
-
-
     public function create($params = []): int
     {
         $query = "INSERT INTO empresas (
@@ -162,7 +157,6 @@ class Empresa
 
     public function rucExiste(string $ruc, ?int $excluirId = null): bool
     {
-
         $sql = "SELECT COUNT(*) as total FROM empresas  WHERE ruc=:ruc";
         $params = [":ruc" => $ruc];
 

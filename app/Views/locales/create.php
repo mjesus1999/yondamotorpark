@@ -1,27 +1,26 @@
+<?php
+
+use function App\Helpers\persistirDatosFormulario;
+
+require_once __DIR__ . '/../../Helpers/functions.php';
+?>
+
 <?php include __DIR__ . '/../layout/header.php'; ?>
 
-<?php if (isset($error)): ?>
-  <div class="alert alert-danger" role="alert">
-    <?= htmlspecialchars($error) ?>
-  </div>
+<?php if (isset($error) && !empty($error)): ?>
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1055">
+        <div class="toast align-items-center text-white bg-danger border-0 show" role="alert" aria-live="assertive" aria-atomic="true" id="errorToast">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <?= $error ?>
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+
+    <?php persistirDatosFormulario($data) ?>
 <?php endif; ?>
-
-<!-- Mensaje de éxito (Esta es una manera de mostrar el toast, pero
- sin redirigir a la página de locales, solo en locales.create con :
- $this->view('locales.create', ['success' => $succcess]);) -->
-
-<?php if (isset($success)): ?>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            showToast('<?= addslashes($success) ?>', 'SUCCESS', 1000);
-            // Redirigir después de mostrar el toast
-            setTimeout(function() {
-                window.location.href = '/locales';
-            }, 1500);
-        });
-    </script>
-<?php endif; ?>
-
 
 
 <div class="container-fluid">
@@ -48,7 +47,7 @@
             </div>
             <div class="card-body">
                 <form action="/locales/store" id="form-registro-local" autocomplete="off" method="POST">
-                    
+
                     <!-- Ubicación -->
                     <div class="row g-3">
                         <div class="col-md-4">
@@ -90,7 +89,6 @@
                         <div class="col-md-6">
                             <div class="form-floating">
                                 <select name="principal" id="principal" class="form-select" required>
-                                    <option value="">Seleccione</option>
                                     <option value="S">Sí</option>
                                     <option value="N">No</option>
                                 </select>
@@ -104,7 +102,7 @@
                     <div class="row g-3 mt-1">
                         <div class="col-md-4">
                             <div class="form-floating">
-                                <input type="text" id="telefono" name="telefono" maxlength="9" pattern="[0-9]+"
+                                <input type="tel" id="telefono" name="telefono" maxlength="9" pattern="[0-9]+"
                                     class="form-control" placeholder="Teléfono" required>
                                 <label for="telefono">Teléfono</label>
                             </div>
@@ -155,105 +153,22 @@
     </div>
 
 </div>
-
+<script src="/assets/js/ubigeo.js"></script>
 <script>
     document.addEventListener("DOMContentLoaded", async () => {
 
-        const departamentosSelect = document.querySelector('#departamento');
-        const provinciasSelect = document.querySelector('#provincia');
-        const distritosSelect = document.querySelector('#distrito');
         const motorparkSelect = document.querySelector('#idmotorpark');
-
-        // Función para cargar departamentos
-        async function getAllDepartamentos() {
-            try {
-                const response = await fetch(`/api/ubigeo/departamentos`, { method: 'GET' });
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const data = await response.json();
-                console.log("Departamentos recibidos:", data);
-
-                departamentosSelect.innerHTML = `<option value='' selected>Seleccione</option>`;
-
-                if (data.length > 0) {
-                    data.forEach(element => {
-                        departamentosSelect.innerHTML += `
-                            <option value='${element.iddepartamento}'>${element.departamento}</option>
-                        `;
-                    });
-                } else {
-                    console.log("No se recibieron departamentos o el array está vacío.");
-                }
-            } catch (e) {
-                console.error("Error al obtener departamentos:", e);
-            }
-        }
-
-        // Función para cargar provincias
-        async function getProvinciasByDepartamento(iddepartamento) {
-            provinciasSelect.innerHTML = `<option value='' selected>Seleccione</option>`;
-            distritosSelect.innerHTML = `<option value='' selected>Seleccione</option>`;
-            if (!iddepartamento) return;
-
-            try {
-                const response = await fetch(`/api/ubigeo/provincias/${iddepartamento}`, { method: 'GET' });
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const data = await response.json();
-                console.log(`Provincias para departamento ${iddepartamento}:`, data);
-
-                if (data.length > 0) {
-                    data.forEach(element => {
-                        provinciasSelect.innerHTML += `
-                            <option value='${element.idprovincia}'>${element.provincia}</option>
-                        `;
-                    });
-                } else {
-                    console.log(`No se recibieron provincias para el departamento ${iddepartamento}.`);
-                }
-            } catch (e) {
-                console.error("Error al obtener provincias:", e);
-            }
-        }
-
-        // Función para cargar distritos
-        async function getDistritosByProvincia(idprovincia) {
-            distritosSelect.innerHTML = `<option value='' selected>Seleccione</option>`;
-            if (!idprovincia) return;
-
-            try {
-                const response = await fetch(`/api/ubigeo/distritos/${idprovincia}`, { method: 'GET' });
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const data = await response.json();
-                console.log(`Distritos para provincia ${idprovincia}:`, data);
-
-                if (data.length > 0) {
-                    data.forEach(element => {
-                        distritosSelect.innerHTML += `
-                            <option value='${element.iddistrito}'>${element.distrito}</option>
-                        `;
-                    });
-                } else {
-                    console.log(`No se recibieron distritos para la provincia ${idprovincia}.`);
-                }
-            } catch (e) {
-                console.error("Error al obtener distritos:", e);
-            }
-        }
-
         //  Para cargar Motorpark(Tienda)
         async function getMotorParkData() {
             try {
-                const response = await fetch(`/api/motorpark`, { method: 'GET' });
+                const response = await fetch(`/api/motorpark`, {
+                    method: 'GET'
+                });
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
-                const result = await response.json(); 
-             
+                const result = await response.json();
+
                 motorparkSelect.innerHTML = `<option value='' selected>Seleccione</option>`;
 
                 if (result.success && result.motorpark && result.motorpark.length > 0) {
@@ -270,22 +185,7 @@
             }
         }
 
-        // Event Listeners para los selectores de Ubigeo
-        departamentosSelect.addEventListener('change', (event) => {
-            const iddepartamento = event.target.value;
-            getProvinciasByDepartamento(iddepartamento);
-        });
-
-        provinciasSelect.addEventListener('change', (event) => {
-            const idprovincia = event.target.value;
-            getDistritosByProvincia(idprovincia);
-        });
-
-
-    
-        getAllDepartamentos();
-        getMotorParkData(); 
-
+        getMotorParkData();
 
         const form = document.querySelector("#form-registro-local")
         form.addEventListener("submit", (event) => {

@@ -31,7 +31,7 @@ class EmpresaController extends Controller
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->redirect('/clientes/createempresaclient');
-            return 0;
+            return 0; // Error en el método
         }
 
         // Sanitización
@@ -115,8 +115,7 @@ class EmpresaController extends Controller
 
                 $_SESSION['success'] = 'Cliente creado correctamente';
                 $this->redirect('/clientes/empresas');
-                //  $this->view('clientes/empresas.create', ['success' => 'Se agregó el cliente correctamente.']);
-                 return $idCliente;
+                 return $idCliente; // Se pudo agregar
             } else {
                 $this->view('clientes/empresas.create', ['error' => 'Error al crear el cliente.']);
             }
@@ -124,7 +123,7 @@ class EmpresaController extends Controller
             $this->view('clientes/empresas.create', ['error' => 'Error al registrar la empresa.']);
         }
 
-        return -1;
+        return -1; // No se pudo agregar a la DB
     }
 
     public function edit(int $id): void

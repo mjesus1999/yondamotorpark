@@ -1,16 +1,15 @@
 <?php include __DIR__ . '/../layout/header.php'; ?>
 
-<?php
- /* 
-    PARA REDIRECT
- if (isset($_SESSION['success_message'])): ?>
+<?php if (isset($_SESSION['success'])) : ?>
+
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            showToast('<?= addslashes($_SESSION['success_message']) ?>', 'SUCCESS', 1000);
+        document.addEventListener('DOMContentLoaded', () => {
+            showToast('<?= addslashes($_SESSION['success']) ?>', 'SUCCESS', 1000);
         });
     </script>
-    <?php unset($_SESSION['success_message']); ?> // Eliminar el mensaje de éxito de la sesión
-<?php endif; */?>
+    <?php unset($_SESSION['success']); ?>
+
+<?php endif; ?>
 
 <div class="container-fluid">
 
@@ -62,17 +61,17 @@
                                             <td><?= htmlspecialchars($numeroFila++) ?></td>
                                             <td><?= htmlspecialchars($local['tienda']) ?></td>
                                             <td><?= htmlspecialchars($local['departamento'] . "/" . $local['provincia'] . '/' . $local['distrito']) ?></td>
-                                            <td><?= htmlspecialchars($local['direccion']) ?></td>
+                                            <td><?= htmlspecialchars($local['direccion']) ?? 'No asignado' ?></td>
                                             <td><?= htmlspecialchars($local['responsable']) ?></td>
-                                            <td><?= htmlspecialchars($local['correo']) ?></td>
+                                            <td><?= $local['correo'] ? htmlspecialchars($local['correo']) : 'No asignado' ?></td>
                                             <td><?= htmlspecialchars($local['telefono']) ?></td>
                                             <td>
                                                 <a class="btn btn-sm btn-outline-primary btn-edit-local"
                                                     data-bs-toggle="modal" data-bs-target="#modal-locales"
                                                     data-idlocal="<?= htmlspecialchars($local['idlocal']) ?>"
                                                     title="Editar"> <i class="fa-solid fa-pen" data-idlocal="<?= htmlspecialchars($local['idlocal']) ?>"></i> </a>
-                                                   
-                                                
+
+
                                                 <form action="/locales/delete/<?= htmlspecialchars($local['idlocal']) ?>" method="POST" class="d-inline"
                                                     onsubmit="return confirm('¿Estás seguro de que quieres eliminar este local?');">
                                                     <button type="submit" class='btn btn-sm btn-outline-danger delete' title='Eliminar'>
@@ -207,7 +206,7 @@
                     }
 
                     const result = await response.json();
-                    
+
 
                     if (result.success) {
                         showToast(result.message, "SUCCESS");

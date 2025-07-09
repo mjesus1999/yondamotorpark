@@ -212,7 +212,7 @@ require_once __DIR__ . '/../../Helpers/functions.php'; ?>
                     <div class="text-end mt-4">
                         <button type="reset" class="btn btn-sm btn-outline-secondary"
                             id="btn-cancelar">Cancelar</button>
-                        <button type="submit" class="btn btn-sm btn-primary" id="btn-registrar">Guardar Cliente</button>
+                        <button type="submit" class="btn btn-sm btn-primary" id="btn-registrar">Guardar</button>
                     </div>
                 </form>
             </div>
