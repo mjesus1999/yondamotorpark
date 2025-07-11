@@ -39,7 +39,7 @@ class Validador
         return null;
     }
 
-    // Algunos ejmplos para validar la peesona y no repetir tanto código de validacióm el Controller.
+    // Algunos ejmplos para validar la persona y no repetir tanto código de validacióm el Controller.
 
     public static function validarPersonaCrear(array $data): array
     {

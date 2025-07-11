@@ -32,8 +32,8 @@ class Concesionario
         }
     }
 
-    // Obtener los concesionarios RUC EN LA DB
-    public function getConcesionarioByRUC($ruc = ''):?array
+    // Obtener los concesionarios por RUC EN LA DB
+    public function getConcesionarioByRUC($ruc = ''): ?array
     {
         $query = "SELECT idconcesionario, ruc, razonsocial, nombrecomercial FROM concesionarios WHERE ruc = ?";
         try {
@@ -44,6 +44,26 @@ class Concesionario
         } catch (PDOException $error) {
             error_log($error->getMessage());
             return [];
+        }
+    }
+
+
+    public function create($params = []): int
+    {
+        $query = "INSERT INTO concesionarios (ruc, razonsocial, nombrecomercial) VALUES (:ruc,:razonsocial,:nombrecomercial)";
+        try {
+            $cmd = $this->db->prepare($query);
+            $cmd->execute(
+                array(
+                    ':ruc' => $params['ruc'],
+                    ':razonsocial' => $params['razonsocial'],
+                    ':nombrecomercial' =>  $params['nombrecomercial']
+                )
+            );
+            return (int) $this->db->lastInsertId();
+        } catch (PDOException $error) {
+            error_log($error->getMessage());
+            return -1;
         }
     }
 }

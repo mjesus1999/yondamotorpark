@@ -1,26 +1,82 @@
 <?php
+
 namespace App\Controllers;
+
 use App\Core\Controller;
+use App\Helpers\Validador;
 use App\Models\Concesionario;
 
-class ConcesionarioController extends Controller {
+class ConcesionarioController extends Controller
+{
 
-    private  Concesionario $consecionarioModel;
+    private  Concesionario $concesionarioModel;
 
     public function __construct()
     {
-        $this->consecionarioModel = new Concesionario();
+        $this->concesionarioModel = new Concesionario();
     }
 
-    public function index():void {
-        $consecionarios = $this->consecionarioModel->getAll();
-        $this->view('concesionarios.index', ['concesionarios' => $consecionarios]);
-
+    public function index(): void
+    {
+        $concesionarios = $this->concesionarioModel->getAll();
+        $this->view('concesionarios.index', ['concesionarios' => $concesionarios]);
     }
-    public function create():void {
+    public function create(): void
+    {
         $this->view('concesionarios.create');
     }
 
+    public function store(): int
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            echo json_encode(['success' => false, 'message' => 'Método no permitido']);
+            exit;
+        }
+
+        header('Content-Type: application/json');
+
+        $data = array_map([Validador::class, 'limpiar'], $_POST);
+
+        $registro = [
+            'ruc' => $data['ruc'] ?? '',
+            'nombrecomercial' => $data['nombrecomercial'] ?? '',
+            'razonsocial' => $data['razonsocial'] ?? ''
+        ];
+
+        $errores = [];
+        $errores[] = Validador::campoObligatorio($registro['ruc'], 'RUC');
+        $errores[] = Validador::campoObligatorio($registro['nombrecomercial'], 'Nombre Comercial');
+        $errores[] = Validador::campoObligatorio($registro['razonsocial'], 'Razón Social');
+        $errores = array_filter($errores);
+
+        if (!empty($errores)) {
+            echo json_encode([
+                'success' => false,
+                'message' => implode("<br>", $errores),
+                'id' => 0
+            ]);
+            exit;
+        }
+
+        $idConcesionario = $this->concesionarioModel->create($registro);
+
+        if ($idConcesionario > 0) {
+            echo json_encode([
+                'success' => true,
+                'message' => '¡Concesionario creado exitosamente!',
+                'id' => $idConcesionario
+            ]);
+            exit;
+        } else {
+            echo json_encode([
+                'success' => false,
+                'message' => 'No se pudo crear el concesionario',
+                'id' => 0
+            ]);
+            exit;
+        }
+    }
 
 
 
@@ -28,38 +84,50 @@ class ConcesionarioController extends Controller {
 
     // METODOS PARA LAS APIS:
 
+    // Retorna los datos de un Concesionario buscado mediante la api de Sunat
+    public function searchRucSunat($ruc): void
+    {
+        if (strlen($ruc) != 11) {
+            http_response_code(400);
+            echo json_encode(['error' => 'RUC inválido']);
+            return;
+        }
 
-    // Retorna los datos de un Concesioanrio buscado mediante la api de Sunat
-   public function searchRucSunat(): void {
-    if (!isset($_GET['ruc']) || strlen($_GET['ruc']) != 11) {
-        http_response_code(400);
-        echo json_encode(['error' => 'RUC inválido']);
-        return;
+        $token = 'apis-token-10575.ycXCIbBCEoM8ufZplATB5oIDwVTo7mzp';
+
+        $curl = curl_init();
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => 'https://api.apis.net.pe/v2/sunat/ruc/full?numero=' . $ruc,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_CUSTOMREQUEST => 'GET',
+            CURLOPT_HTTPHEADER => array(
+                'Referer: http://apis.net.pe/api-ruc',
+                'Authorization: Bearer ' . $token
+            ),
+        ));
+
+        $response = curl_exec($curl);
+        curl_close($curl);
+
+        header('Content-Type: application/json; charset=utf-8');
+        echo $response;
     }
 
-    $ruc = $_GET['ruc'];
-    $token = 'apis-token-10575.ycXCIbBCEoM8ufZplATB5oIDwVTo7mzp';
+    // Buscará el Ruc del concesionario en la DB.
 
-    $curl = curl_init();
-    curl_setopt_array($curl, array(
-        CURLOPT_URL => 'https://api.apis.net.pe/v2/sunat/ruc/full?numero=' . $ruc,
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_SSL_VERIFYPEER => false,
-        CURLOPT_CUSTOMREQUEST => 'GET',
-        CURLOPT_HTTPHEADER => array(
-            'Referer: http://apis.net.pe/api-ruc',
-            'Authorization: Bearer ' . $token
-        ),
-    ));
+    public function searchRucDB($ruc): void
+    {
+        header('Content-Type: application/json');
+        $concesionario = $this->concesionarioModel->getConcesionarioByRUC($ruc);
 
-    $response = curl_exec($curl);
-    curl_close($curl);
+        if ($concesionario) {
+            echo json_encode($concesionario);
+        } else {
+            http_response_code(404);
+            echo json_encode([]);
+        }
 
-    header('Content-Type: application/json; charset=utf-8');
-    echo $response;
-}
-
- 
-
-
+        exit();
+    }
 }
