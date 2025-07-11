@@ -15,7 +15,10 @@ class PersonaController extends Controller
         $this->personaModal = new Persona();
     }
 
-    
+    /**
+     * STORE / Personas
+     * @return void
+     */
     public function store(): void
     {
         // Solo aceptamos POST

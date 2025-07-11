@@ -135,7 +135,18 @@ class UsuarioController extends Controller
     }
   }
 
-  public function delete(int $id): void
+  public function disabled(int $id): void
+  {
+    $disabled = $this->usuarioModel->disabled($id);
+    if ($disabled) {
+        $_SESSION['success_message'] = 'Usuario deshabilitado correctamente.';
+    } else {
+        $_SESSION['error_message'] = 'No se pudo deshabilitar el usuario.';
+    }
+    $this->redirect('/usuarios');
+  }
+
+  /* public function delete(int $id): void
   {
     $deleted = $this->usuarioModel->delete($id);
     if ($deleted) {
@@ -144,7 +155,7 @@ class UsuarioController extends Controller
       $_SESSION['error_message'] = 'No se pudo eliminar el usuario.';
     }
     $this->redirect('/usuarios');
-  }
+  } */
 
   // PERFIL DEL USUARIO
   public function profile(): void

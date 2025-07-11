@@ -18,19 +18,20 @@ class Usuario
 
   public function getAll(): array
   {
-    $query = "SELECT
-      p.idpersona     AS idpersona,
-      p.apellidos     AS apellidos,
-      p.nombres       AS nombres,
-      a.area          AS area,
-      cg.cargo        AS cargo,
-      cl.fechainicio  AS fecha_inicio,
+    $query = "
+    SELECT
+      p.idpersona         AS idpersona,
+      p.apellidos         AS apellidos,
+      p.nombres           AS nombres,
+      a.area              AS area,
+      cg.cargo            AS cargo,
+      cl.fechainicio      AS fecha_inicio,
       IFNULL(
         DATE_FORMAT(cl.fechafin, '%Y-%m-%d'),
         'Indeterminado'
-      )               AS fecha_fin,
-      col.idcolaborador AS idcolaborador, 
-      col.usernick    AS usuario
+      )                   AS fecha_fin,
+      col.idcolaborador   AS idcolaborador, 
+      col.usernick        AS usuario
     FROM personas p
     INNER JOIN contratoslaborales cl
       ON cl.idpersona = p.idpersona
@@ -40,6 +41,7 @@ class Usuario
       ON a.idarea = cg.idarea
     INNER JOIN colaboradores col
       ON col.idcontratolaboral = cl.idcontratolaboral
+    WHERE col.habilitado = 'S'
     ORDER BY p.idpersona
     LIMIT 0,1000;
     ";
@@ -108,7 +110,18 @@ class Usuario
     return $stmt->execute();
   }
 
-  public function delete(int $id): bool
+  public function disabled(int $id): bool
+  {
+    $stmt = $this->db->prepare("
+        UPDATE colaboradores
+        SET habilitado = 'N'
+        WHERE idcolaborador = :id
+    ");
+    $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+    return $stmt->execute();
+  }
+
+  /* public function delete(int $id): bool
   {
     $stmt = $this->db->prepare("
       DELETE
@@ -117,7 +130,7 @@ class Usuario
     ");
     $stmt->bindParam(':id', $id, PDO::PARAM_INT);
     return $stmt->execute();
-  }
+  } */
 
   // CONSULTAS PARA EL LOGIN
 

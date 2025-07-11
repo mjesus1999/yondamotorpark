@@ -174,7 +174,7 @@
         // Creamos y enviamos un formulario POST tradicional:
         const form = document.createElement('form');
         form.method = 'POST';
-        form.action = `/usuarios/delete/${id}`;
+        form.action = `/usuarios/disabled/${id}`;
         document.body.appendChild(form);
         form.submit();
       });
