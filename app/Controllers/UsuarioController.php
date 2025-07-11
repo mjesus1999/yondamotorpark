@@ -50,9 +50,9 @@ class UsuarioController extends Controller
     $idPersona = (int) ($_POST['idpersona'] ?? 0);
     $idCargo = (int) ($_POST['idcargo'] ?? 0);
     $fechaInicio = trim($_POST['fecha_inicio'] ?? '');
-    $fechaFin = isset($_POST['sin_fecha_fin']) ? null : trim($_POST['fecha_fin'] ?? null);
-    $tipoContrato = 'P'; // por defecto ahora esta como planilla (cambiar si se debe)
-
+    $fechaFin = isset($_POST['sin_fecha_fin'])
+      ? null
+      : trim($_POST['fecha_fin'] ?? null);
     $usernick = trim($_POST['usuario'] ?? '');
     $pass1 = $_POST['password1'] ?? '';
     $pass2 = $_POST['password2'] ?? '';
@@ -63,12 +63,26 @@ class UsuarioController extends Controller
       $errors[] = 'Debe registrar primero la persona.';
     if ($idCargo <= 0)
       $errors[] = 'Debe seleccionar un cargo.';
-    if (empty($fechaInicio))
+    if ($fechaInicio === '')
       $errors[] = 'La fecha de inicio es obligatoria.';
     if ($pass1 !== $pass2)
       $errors[] = 'Las contraseñas no coinciden.';
 
+    // ¿Es petición AJAX?
+    $isAjax =
+      !empty($_SERVER['HTTP_X_REQUESTED_WITH'])
+      && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest';
+
     if ($errors) {
+      if ($isAjax) {
+        header('Content-Type: application/json; charset=utf-8');
+        // armamos explícito para que 'success' sea primero
+        $response = ['success' => false];
+        $response['errors'] = $errors;
+        echo json_encode($response);
+        exit;
+      }
+      // flujo normal (no-AJAX)
       $areas = $this->usuarioModel->getAllAreas();
       $this->view('usuarios.create', [
         'areas' => $areas,
@@ -76,6 +90,7 @@ class UsuarioController extends Controller
         'old' => $_POST
       ]);
       return;
+
     }
 
     // 3) Crear contrato laboral
@@ -84,13 +99,13 @@ class UsuarioController extends Controller
       $idCargo,
       $fechaInicio,
       $fechaFin,
-      $tipoContrato
+      'P'
     );
     if ($idContrato <= 0) {
       throw new Exception('No se pudo crear el contrato laboral');
     }
 
-    // 4) Crear colaborador (hashea la contraseña primero)
+    // 4) Crear colaborador
     $passwordHash = password_hash($pass1, PASSWORD_DEFAULT);
     $idColab = $this->colaboradorModel->create(
       $idContrato,
@@ -101,24 +116,33 @@ class UsuarioController extends Controller
       throw new Exception('No se pudo crear el usuario');
     }
 
-    // 5) Éxito y redirección
-    $_SESSION['success_message'] = "Usuario creado con éxito. ID colaborador: {$idColab}";
+    // 5) Respuesta exitosa
+    if ($isAjax) {
+      header('Content-Type: application/json; charset=utf-8');
+      $response = ['success' => true];
+      $response['idcolaborador'] = $idColab;
+      $response['idcontrato'] = $idContrato;
+      echo json_encode($response);
+      exit;
+    }
+
+    // flujo normal
+    $_SESSION['success_message'] =
+      "Usuario creado con éxito. ID colaborador: {$idColab}";
     $this->redirect('/usuarios');
   }
 
   public function changePassword(): void
   {
-    header('Content-Type: application/json; charset=utf-8');
+    session_start(); // Asegúrate de tener sesión iniciada
 
     $idColab = (int) ($_POST['idcolaborador'] ?? 0);
     $p1 = $_POST['password1'] ?? '';
     $p2 = $_POST['password2'] ?? '';
 
     if ($idColab <= 0 || $p1 === '' || $p1 !== $p2) {
-      echo json_encode([
-        'success' => false,
-        'error' => 'Datos inválidos o contraseñas no coinciden.'
-      ]);
+      $_SESSION['error_message'] = 'Datos inválidos o contraseñas no coinciden.';
+      echo json_encode(['success' => false]);
       return;
     }
 
@@ -126,12 +150,11 @@ class UsuarioController extends Controller
     $ok = $this->usuarioModel->updatePassword($idColab, $newHash);
 
     if ($ok) {
+      $_SESSION['success_message'] = 'Contraseña actualizada correctamente.';
       echo json_encode(['success' => true]);
     } else {
-      echo json_encode([
-        'success' => false,
-        'error' => 'No se pudo actualizar la contraseña.'
-      ]);
+      $_SESSION['error_message'] = 'No se pudo actualizar la contraseña.';
+      echo json_encode(['success' => false]);
     }
   }
 
@@ -139,23 +162,12 @@ class UsuarioController extends Controller
   {
     $disabled = $this->usuarioModel->disabled($id);
     if ($disabled) {
-        $_SESSION['success_message'] = 'Usuario deshabilitado correctamente.';
+      $_SESSION['success_message'] = 'Usuario deshabilitado correctamente.';
     } else {
-        $_SESSION['error_message'] = 'No se pudo deshabilitar el usuario.';
+      $_SESSION['error_message'] = 'No se pudo deshabilitar el usuario.';
     }
     $this->redirect('/usuarios');
   }
-
-  /* public function delete(int $id): void
-  {
-    $deleted = $this->usuarioModel->delete($id);
-    if ($deleted) {
-      $_SESSION['success_message'] = 'Usuario eliminado correctamente.';
-    } else {
-      $_SESSION['error_message'] = 'No se pudo eliminar el usuario.';
-    }
-    $this->redirect('/usuarios');
-  } */
 
   // PERFIL DEL USUARIO
   public function profile(): void
@@ -232,4 +244,14 @@ class UsuarioController extends Controller
     ]);
   }
 
+  /* public function delete(int $id): void
+  {
+    $deleted = $this->usuarioModel->delete($id);
+    if ($deleted) {
+      $_SESSION['success_message'] = 'Usuario eliminado correctamente.';
+    } else {
+      $_SESSION['error_message'] = 'No se pudo eliminar el usuario.';
+    }
+    $this->redirect('/usuarios');
+  } */
 }

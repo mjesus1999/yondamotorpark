@@ -58,9 +58,9 @@ class AuthController extends Controller
             'usernick' => $user['usernick'],
             'nombres' => $user['nombres'],
             'apellidos' => $user['apellidos'],
-            //ft de perfil
+            //avatar del perfil
             'avatar'    => $user['avatar'],
-            /* 'avatar' => $user['avatar'] ?? '/assets/images/profile.jpg', */ //Validar
+            /* 'avatar' => $user['avatar'] ?? '/assets/images/profile.jpg', */ //validando
         ];
 
         header('Location: /');

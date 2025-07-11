@@ -97,21 +97,20 @@ class PersonaController extends Controller
             && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest'
         ) {
             header('Content-Type: application/json; charset=utf-8');
+
+            // construimos explícitamente el array para garantizar el orden de las claves
             if ($newId > 0) {
-                // devolvemos también los datos clave para rellenar el form principal
-                echo json_encode([
-                    'success' => true,
-                    'idpersona' => $newId,
-                    'nrodoc' => $data['nrodoc'],
-                    'apellidos' => $data['apellidos'],
-                    'nombres' => $data['nombres'],
-                ]);
+                $response = ['success' => true];
+                $response['idpersona'] = $newId;
+                $response['nrodoc'] = $data['nrodoc'];
+                $response['apellidos'] = $data['apellidos'];
+                $response['nombres'] = $data['nombres'];
             } else {
-                echo json_encode([
-                    'success' => false,
-                    'errors' => ['Error al crear la persona.']
-                ]);
+                $response = ['success' => false];
+                $response['errors'] = ['Error al crear la persona.'];
             }
+
+            echo json_encode($response);
             exit;
         }
 
@@ -141,10 +140,14 @@ class PersonaController extends Controller
         }
         $persona = $this->personaModal->searchByDNI($dni);
         if ($persona) {
-            echo json_encode(['success' => true] + $persona);
+            $response = ['success' => true];
+            foreach ($persona as $key => $value) {
+                $response[$key] = $value;
+            }
         } else {
-            echo json_encode(['success' => false, 'message' => 'No encontrado']);
+            $response = ['success' => false, 'message' => 'No encontrado'];
         }
+        echo json_encode($response);
     }
 
 }
