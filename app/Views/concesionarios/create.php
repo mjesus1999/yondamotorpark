@@ -386,7 +386,7 @@
               showToast(data.message, 'ERROR', 2000);
             }
 
-// IMPLEMENATR LA LOGICA PARA EDITAR Y ELIMINAR TIENDA
+// IMPLEMENATR LA LOGICA PARA EDITAR Y ELIMINAR TIEND
           } catch (error) {
             console.log(error);
           }
