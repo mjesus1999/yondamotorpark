@@ -8,8 +8,7 @@ use App\Models\Concesionario;
 
 class ConcesionarioController extends Controller
 {
-
-    private  Concesionario $concesionarioModel;
+    private Concesionario $concesionarioModel;
 
     public function __construct()
     {
@@ -21,6 +20,7 @@ class ConcesionarioController extends Controller
         $concesionarios = $this->concesionarioModel->getAll();
         $this->view('concesionarios.index', ['concesionarios' => $concesionarios]);
     }
+
     public function create(): void
     {
         $this->view('concesionarios.create');
@@ -53,7 +53,7 @@ class ConcesionarioController extends Controller
         if (!empty($errores)) {
             echo json_encode([
                 'success' => false,
-                'message' => implode("<br>", $errores),
+                'message' => implode('<br>', $errores),
                 'id' => 0
             ]);
             exit;
@@ -78,9 +78,104 @@ class ConcesionarioController extends Controller
         }
     }
 
+    public function update($id): int
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            echo json_encode(['success' => false, 'message' => 'Método no permitido']);
+            exit;
+        }
 
+        header('Content-Type: application/json');
 
+        $data = array_map([Validador::class, 'limpiar'], $_POST);
 
+        $registro = ['nombrecomercial' => $data['nombrecomercial'] ?? '', 'idconcesionario' => $id];
+
+        $errores = [];
+        $errores[] = Validador::campoObligatorio($registro['nombrecomercial'], 'Nombre Comercial');
+
+        $errores = array_filter($errores);
+
+        if (!empty($errores)) {
+            echo json_encode([
+                'success' => false,
+                'message' => implode('<br>', $errores),
+                'id' => 0
+            ]);
+            exit;
+        }
+
+        $rowAffects = $this->concesionarioModel->update($registro);
+
+        if ($rowAffects > 0) {
+            echo json_encode([
+                'success' => true,
+                'message' => '¡Concesionario actualizado exitosamente!',
+            ]);
+            exit;
+        } else {
+            echo json_encode([
+                'success' => false,
+                'message' => 'No se pudo actualizar el concesionario',
+            ]);
+            exit;
+        }
+    }
+
+    // Metodo que me permite ver las tiendas del concesionario.
+    public function gestionar($ruc): void
+    {
+        $concesionario = $this->concesionarioModel->getConcesionarioByRUC($ruc);
+
+        if (!$concesionario || count($concesionario) === 0) {
+            $this->view('errors.404', ['mensaje' => 'Concesionario no encontrado']);
+            return;
+        }
+
+        // Le pasamos solo el RUC, el JS se encargará de cargar el resto.
+        $this->view('concesionarios.create', ['ruc' => $concesionario[0]['ruc']]);
+    }
+
+    public function delete($id)
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            header('Content-Type: application/json');
+
+            // Paso 1: Verificar si el concesionario tiene OC
+            $oc = $this->concesionarioModel->getOC($id);
+
+            if ($oc > 0) {
+                // Tiene OC, no se puede eliminar
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'No se puede eliminar. Tiene órdenes de compra registradas.'
+                ]);
+                return;
+            }
+
+            // Paso 2: Proceder a eliminar si no tiene OC
+            $resultado = $this->concesionarioModel->delete($id);
+
+            if ($resultado > 0) {
+                echo json_encode([
+                    'success' => true,
+                    'message' => 'Concesionario eliminado correctamente.'
+                ]);
+            } else {
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'No se pudo eliminar el concesionario.'
+                ]);
+            }
+        } else {
+            http_response_code(405);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Método no permitido'
+            ]);
+        }
+    }
 
     // METODOS PARA LAS APIS:
 

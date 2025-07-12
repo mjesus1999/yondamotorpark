@@ -53,9 +53,15 @@ include __DIR__ . '/../layout/header.php';
                                         <td><?= htmlspecialchars($concesionario['razonsocial']) ?></td>
                                         <td><?= htmlspecialchars($concesionario['ruc']) ?></td>
                                         <td>
-                                            <a href='#' title='Editar nombre comercial' data-idconcesionario='<?= htmlspecialchars($concesionario['idconcesionario'])?>' data-nombrecomercial='<?=htmlspecialchars($concesionario['nombrecomercial']) ?>' class='btn btn-sm btn-outline-primary edit'><i class="fa-solid fa-pen"></i></a>
-                                            <a href='#' title='Eliminar' data-idconcesionario='${element.idconcesionario}' class='btn btn-sm btn-outline-danger delete'><i class="fa-solid fa-trash"></i></a>
-                                            <a href='/concesionario/tiendas/<?= htmlspecialchars($concesionario['ruc']) ?>' title='Ver tiendas' data-idtienda='${element.idconcesionario}' class='btn btn-sm btn-outline-secondary'><i class="fa-solid fa-shop"></i></a>
+                                            <a href='#' title='Editar nombre comercial' data-idconcesionario='<?= htmlspecialchars($concesionario['idconcesionario']) ?>' data-nombrecomercial='<?= htmlspecialchars($concesionario['nombrecomercial']) ?>' class='btn btn-sm btn-outline-primary edit'><i class="fa-solid fa-pen"></i></a>
+                                            <a href='#' title='Eliminar' data-idconcesionario='<?= $concesionario['idconcesionario'] ?>' class='btn btn-sm btn-outline-danger delete'>
+  <i class="fa-solid fa-trash"></i>
+</a>
+
+                                            <a href="/concesionarios/gestionar/<?= $concesionario['ruc'] ?>" title="Ver tiendas" class="btn btn-sm btn-outline-secondary">
+  <i class="fa-solid fa-shop"></i> 
+</a>
+
                                         </td>
                                     </tr>
 
@@ -97,5 +103,104 @@ include __DIR__ . '/../layout/header.php';
             </form>
         </div>
     </div>
+
+
+
+    <script>
+  document.addEventListener('DOMContentLoaded', () => {
+
+    const tablaConcesionarios = document.querySelector('#tabla-concesionarios');
+    const modalConcesionario = new bootstrap.Modal(document.getElementById('modal-concesionario'));
+    const formulario = document.querySelector('#formulario-concesionario');
+    const inputNombreComercial = document.querySelector('#nombre-comercial');
+
+    let idActual = null;
+
+    // Abrir modal y cargar datos al hacer clic en el botón de editar
+    tablaConcesionarios.addEventListener('click', (e) => {
+      const btnEdit = e.target.closest('.edit');
+      if (btnEdit) {
+        e.preventDefault();
+
+        idActual = btnEdit.dataset.idconcesionario;
+        const nombreActual = btnEdit.dataset.nombrecomercial;
+
+        inputNombreComercial.value = nombreActual;
+
+        modalConcesionario.show();
+      }
+    });
+
+    // Enviar actualización al servidor
+    formulario.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const nombrecomercial = inputNombreComercial.value.trim();
+
+      if (!nombrecomercial) {
+        showToast("El nombre comercial es obligatorio", "WARNING", 2000);
+        return;
+      }
+
+      try {
+        const formData = new FormData();
+        formData.append('nombrecomercial', nombrecomercial);
+
+        const response = await fetch(`/concesionarios/update/${idActual}`, {
+          method: 'POST',
+          body: formData
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          showToast(data.message, 'SUCCESS', 1500);
+          modalConcesionario.hide();
+          setTimeout(() => {
+            location.reload(); 
+          }, 1500);
+        } else {
+          showToast(data.message, 'WARNING', 1500);
+        }
+
+      } catch (error) {
+        console.error('Error al actualizar:', error);
+        showToast("Error inesperado", "ERROR", 2000);
+      }
+    });
+
+    tablaConcesionarios.addEventListener('click', async (e) => {
+  const btnDelete = e.target.closest('.delete');
+  if (btnDelete) {
+    e.preventDefault();
+
+    const id = btnDelete.dataset.idconcesionario;
+
+    if (!confirm("¿Seguro que desea eliminar este concesionario?")) return;
+
+    try {
+      const response = await fetch(`/concesionarios/delete/${id}`, {
+        method: 'POST'
+      });
+
+      const data = await response.json();
+
+      showToast(data.message, data.success ? 'SUCCESS' : 'WARNING',1500);
+
+      if (data.success) {
+        setTimeout(() => location.reload(), 1500);
+      }
+
+    } catch (error) {
+      console.error("Error al eliminar:", error);
+      showToast("Error inesperado", "ERROR", 1500);
+    }
+  }
+});
+
+
+  });
+</script>
+
 
     <?php include __DIR__ . '/../layout/footer.php'; ?>

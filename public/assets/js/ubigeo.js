@@ -1,4 +1,4 @@
- document.addEventListener("DOMContentLoaded", async () => {
+ 
         const departamentosSelect = document.querySelector('#departamento');
         const provinciasSelect = document.querySelector('#provincia');
         const distritosSelect = document.querySelector('#distrito');
@@ -94,4 +94,4 @@
 
         getAllDepartamentos();
 
-    });
+    
