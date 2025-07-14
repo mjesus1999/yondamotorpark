@@ -1,7 +1,6 @@
 <?php include __DIR__ . '/../layout/header.php'; ?>
 <script>
 	const rucInicial = "<?= isset($ruc) ? $ruc : '' ?>";
-	
 </script>
 
 
@@ -36,7 +35,7 @@
 									<label for="ruc" class="form-label">RUC</label>
 								</div>
 								<button type="button" id="btn-buscar-concesionario" class="btn btn-success"><i
-                    class="fa-solid fa-magnifying-glass"></i></button>
+										class="fa-solid fa-magnifying-glass"></i></button>
 							</div>
 						</div>
 						<div class="col-md-3">
@@ -117,20 +116,20 @@
 					<div class="modal-body">
 						<div class="form-floating mb-2">
 							<select name="departamentos" id="departamento" class="form-select" required>
-                <option value="">Seleccione</option>
-              </select>
+								<option value="">Seleccione</option>
+							</select>
 							<label for="">Departamentos</label>
 						</div>
 						<div class="form-floating mb-2">
 							<select name="provincias" id="provincia" class="form-select" required>
-                <option value="">Seleccione</option>
-              </select>
+								<option value="">Seleccione</option>
+							</select>
 							<label for="">Provincias</label>
 						</div>
 						<div class="form-floating mb-2">
 							<select name="distritos" id="distrito" class="form-select" required>
-                <option value="">Seleccione</option>
-              </select>
+								<option value="">Seleccione</option>
+							</select>
 							<label for="">Distritos</label>
 						</div>
 						<div class="mb-2">
@@ -169,379 +168,264 @@
 
 	<script src="/assets/js/ubigeo.js"></script>
 	<script>
-		let idconcesionario = null;
-		
-		  
-		  const ruc = document.querySelector('#ruc');
-		  const razonSocial = document.querySelector('#razonsocial');
-		  const nombreComercial = document.querySelector('#nombrecomercial');
-		  const telefono = document.querySelector('#telefono');
-		  const direccion = document.querySelector('#direccion');
-		  const email = document.querySelector('#email');
-		  const contacto = document.querySelector('#contacto');
-		  const distrito = document.querySelector('#distrito');
-		  const tablaTiendas = document.querySelector('#tabla-tiendas tbody');
-		
-		
-		
-		    document.addEventListener('DOMContentLoaded', async () => {
-		
-		      
-		      if (rucInicial !== '') {
-		  document.querySelector('#ruc').value = rucInicial;
-		  obtenerConcesionarioByDB();
-		}
-		
-		
-		      let idconcesionario = null;
-		
-		    
-		      const btnBuscarConcesionario = document.querySelector('#btn-buscar-concesionario');
-		      const btnRegistrarConcesionario = document.querySelector('#btn-registrar-concesionario');
-		      const btnCancelarRegistro = document.querySelector('#btn-cancelar-registro');
-		      const btnModalTiendas = document.querySelector('#btn-modal-tiendas');
-		
-		      const modalTienda = new bootstrap.Modal(document.getElementById("modal-tiendas"))
-		
-		      const formConcesionarioRegistro = document.querySelector('#form-registro-concesionario');
-		      const formTiendaRegistro = document.querySelector('#form-registro-tienda');
-		
-		      
-		
-		
-		      // Obtiener los Concesionarios buscado por la api de SUNAT
-		      async function obtenerConcesionarioBySunat() {
-		
-		        razonSocial.value = 'Buscando.....';
-		        try {
-		
-		          if (ruc.value.length === 11) {
-		
-		            const response = await fetch(`/api/concesionarioSunat/${ruc.value}`);
-		            const data = await response.json();
-		            // console.log(data);
-		
-		            if (data.razonSocial !== undefined) {
-		
-		              razonSocial.value = data.razonSocial;
-		              nombreComercial.value = '';
-		              nombreComercial.focus();
-		              showToast('Empresa encontrada', 'SUCCESS', 1500);
-		            } else {
-		              showToast('No existe la empresa', 'WARNING', 2000);
-		              razonSocial.value = '';
-		              ruc.value = '';
-		              ruc.focus();
-		              ruc.removeAttribute("disabled");
-		             
-		
-		            }
-		          } else {
-		            showToast("Se requiere 11 dígitos", "WARNING", 1500);
-		          }
-		
-		        } catch (error) {
-		          console.error(error);
-		        }
-		      }
-		
-		      // Obtener los concesionarios
-		
-		      async function obtenerConcesionarioByDB() {
-		        razonSocial.value = 'Buscando....';
-		
-		        try {
-		
-		          if (ruc.value.length === 11) {
-		            const response = await fetch(`/api/concesionarioDB/${ruc.value}`);
-		            const data = await response.json();
-		
-		            // Si no existe en la DB - Buscar por la API DE SUNAT
-		            if (data.length === 0) {
-		              btnRegistrarConcesionario.removeAttribute("disabled");
-		              btnCancelarRegistro.removeAttribute("disabled");
-		              razonSocial.setAttribute("disabled", true);
-		              ruc.setAttribute("disabled", true);
-		              idconcesionario = null;
-		              obtenerConcesionarioBySunat();
-		
-		            } else {
-		              // Si se encontro en la DB:
-		              // console.log(data)
-		      
-		              idconcesionario = data[0].idconcesionario;
-		              razonSocial.value = data[0].razonsocial;
-		              nombreComercial.value = data[0].nombrecomercial;
-		              btnCancelarRegistro.setAttribute("disabled", true);
-		              btnRegistrarConcesionario.setAttribute("disabled", true);
-		              nombreComercial.setAttribute("disabled", true);
-		              razonSocial.setAttribute("disabled", true);
-		              ruc.setAttribute("disabled", true);
-		              obtenerTiendasByConcesionario();
-		              showToast('Empresa encontrada','SUCCESS', 1500);
-		
-		            }
-		
-		          } else {
-		            razonSocial.value = '';
-		            showToast("Se requiere 11 dígitos", "INFO", 1500);
-		          }
-		
-		
-		        } catch (error) {
-		          console.error(error);
-		        }
-		      }
-		      // Obtiene las tiendas del concesionario 
-		
-		      async function obtenerTiendasByConcesionario() {
-		        try {
-		
-		          const response = await fetch(`/api/tiendasConcesionario/${idconcesionario}`)
-		          const data = await response.json();
-		
-		          if (data.length === 0) {
-		
-		            
-		          } else {
-		            tablaTiendas.innerHTML = ``;
-		            let numFila = 1;
-		            data.forEach(tienda => {
-		              tablaTiendas.innerHTML += `
-		                  <tr>
-		                    <td class='align-middle'>${numFila}</td>
-		                    <td class='align-middle'>${tienda.ubigeo}</td>
-		                    <td class='align-middle'>${tienda.direccion}</td>
-		                    <td class='align-middle'>${tienda.telefono}</td>
-		                    <td class='align-middle'>${tienda.email}</td>
-		                    <td class='align-middle'>${tienda.contacto}</td>
-		                    <td>
-		                    
-		                      <a href='' title='Editar' data-idtienda='${tienda.idtienda}' class='btn btn-sm btn-outline-primary edit'><i class="fa-solid fa-pen"></i></a>
-		                      <a href='#' title='Eliminar' data-idtienda='${tienda.idtienda}' class='btn btn-sm btn-outline-danger delete'><i class="fa-solid fa-trash"></i></a>
-		                    </td>
-		                  </tr>
-		                `;
-		              numFila++;
-		            });
-		          }
-		
-		
-		        } catch (error) {
-		          console.error(error);
-		        }
-		
-		    
-		      }
-		
-		
-		      // Mostrará los datos en el modal
-		
-		      async function mostrarDatosTiendaEnModal(tienda) {
-		  
-		  await getAllDepartamentos();
-		  document.querySelector("#departamento").value = tienda.iddepartamento;
-		
-		
-		  await getProvinciasByDepartamento(tienda.iddepartamento);
-		  document.querySelector("#provincia").value = tienda.idprovincia;
-		
-		
-		  await getDistritosByProvincia(tienda.idprovincia);
-		  document.querySelector("#distrito").value = tienda.iddistrito;
-		
-		
-		  document.querySelector("#direccion").value = tienda.direccion;
-		  document.querySelector("#telefono").value = tienda.telefono;
-		  document.querySelector("#email").value = tienda.email;
-		  document.querySelector("#contacto").value = tienda.contacto;
-		
-		  // Guardamos el ID en el dataset para saber que es edición
-		  document.querySelector("#form-registro-tienda").dataset.idtienda = tienda.idtienda;
-		
-		  // Cambiar texto del botón
-		  document.querySelector("#btn-agregar-tienda").textContent = "Actualizar";
-		
-		  // Mostrar modal
-		  modalTienda.show();
-		}
-		
-		
-		
-		tablaTiendas.addEventListener('click', async (event) => {
-		  const botonEditar = event.target.closest('.edit');
-		
-		  if (botonEditar) {
-		    event.preventDefault();
-		
-		    const idtienda = botonEditar.dataset.idtienda;
-		
-		    try {
-		      const response = await fetch(`/tiendas/edit/${idtienda}`);
-		      const tienda = await response.json();
-		     // console.log(tienda);
-		
-		      if (tienda) {
-		        await mostrarDatosTiendaEnModal(tienda);
-		      } else {
-		        showToast("No se pudo cargar la tienda", "ERROR", 2000);
-		      }
-		
-		    } catch (error) {
-		      console.error("Error al obtener tienda:", error);
-		    }
-		  }
-		});
-		
-		
-		// Maneja el registro y la actuaización.
-		formTiendaRegistro.addEventListener('submit', async (event) => {
-		  event.preventDefault();
-		
-		  const idtienda = formTiendaRegistro.dataset.idtienda;
-		  const esEdicion = !!idtienda; // Idnetrificar si estamos editando
-		
-		  const confirmMsg = esEdicion ? "¿Desea actualizar la tienda?" : "¿Desea registrar la tienda?";
-		  if (!confirm(confirmMsg)) return;
-		
-		  const params = new FormData();
-		
-		  // Datos que siempre se envían
-		  params.append('iddistrito', distrito.value);
-		  params.append('direccion', direccion.value);
-		  params.append('email', email.value);
-		  params.append('telefono', telefono.value);
-		  params.append('contacto', contacto.value);
-		
-		  // Solo agregar idconcesionario si es registro
-		  if (!esEdicion) {
-		    params.append('idconcesionario', idconcesionario);
-		  }
-		
-		  let url = '/tiendas/store';
-		  if (esEdicion) {
-		    url = `/tiendas/update/${idtienda}`;
-		  }
-		
-		  try {
-		    const response = await fetch(url, {
-		      method: 'POST',
-		      body: params
-		    });
-		
-		    const data = await response.json();
-		
-		    if (data.success) {
-		      showToast(data.message, 'SUCCESS', 1500);
-		      modalTienda.hide();
-		      obtenerTiendasByConcesionario();
-		
-		      // Reiniciar form y modo edición
-		      formTiendaRegistro.reset();
-		      delete formTiendaRegistro.dataset.idtienda;
-		      document.querySelector("#btn-agregar-tienda").textContent = "Guardar";
-		    } else {
-		      showToast(data.message, 'WARNING', 1500);
-		    }
-		
-		  } catch (error) {
-		    console.error("Error al enviar datos:", error);
-		  }
-		});
-		
-		
-		
-		tablaTiendas.addEventListener('click', async (event) => {
-		  const botonEliminar = event.target.closest('.delete');
-		  if (botonEliminar) {
-		    event.preventDefault();
-		
-		    const idtienda = botonEliminar.dataset.idtienda;
-		    if (!confirm("¿Desea eliminar esta tienda?")) return;
-		
-		    try {
-		      const response = await fetch(`/tiendas/delete/${idtienda}`, {
-		        method: 'POST'
-		      });
-		        const data = await response.json(); 
-		        if (data.success) {
-		          showToast(data.message, 'SUCCESS', 1500);
-              setTimeout(() => location.reload(), 1500);
-		          obtenerTiendasByConcesionario();
-		        } else {
-		          showToast(data.message || 'Error al eliminar', 'WARNING', 1500);
-		        }
-		      }
-		
-		     catch (error) {
-		      console.error("Error al eliminar tienda:", error);
-		      showToast("Error al eliminar tienda", "ERROR", 1500);
-		    }}
-		  });
-		
-		
-		
-		      // Registrar el concesionario.
-		      formConcesionarioRegistro.addEventListener('submit', async (event) => {
-		        event.preventDefault()
-		
-		        if (confirm('¿Desea registrar el concesionario?')) {
-		          params = new FormData();
-		          params.append('ruc', ruc.value);
-		          params.append('nombrecomercial', nombreComercial.value);
-		          params.append('razonsocial', razonSocial.value);
-		
-		
-		          try {
-		
-		            const response = await fetch(`/concesionarios/store`, {
-		              method: 'POST',
-		              body: params
-		            });
-		            const data = await response.json();
-		            // console.log(data);
-		            if (data.success) {
-		              idconcesionario = data.id;
-		              console.log('IDCONCESIONARIO:', idconcesionario);
-		              showToast(data.message, 'SUCCESS', 1500);
-		              btnCancelarRegistro.setAttribute("disabled", true);
-		              btnRegistrarConcesionario.setAttribute("disabled", true);
-		            } else {
-		              showToast(data.message, 'ERROR', 2000);
-		            }
-		          } catch (error) {
-		            console.log(error);
-		          }
-		
-		
-		        }
-		
-		
-		      });
-		
-		
-		      btnModalTiendas.addEventListener('click',  async () => {
-		        //console.log(idconcesionario);
-		        if (idconcesionario === null) {
-		          showToast('Pimero indicar la tienda', 'WARNING', 1500);
-		          ruc.focus();
-		        } else {
-		          modalTienda.show();
-		        }
-		      });
-		
-		
-		      btnBuscarConcesionario.addEventListener('click', () => {
-		        obtenerConcesionarioByDB();
-		      });
-		
-		
-		
-		
-		    });
-		
-	</script>
+document.addEventListener('DOMContentLoaded', async () => {
+	// === Variables UI ===
+	const ruc = document.querySelector('#ruc');
+	const razonSocial = document.querySelector('#razonsocial');
+	const nombreComercial = document.querySelector('#nombrecomercial');
+	const telefono = document.querySelector('#telefono');
+	const direccion = document.querySelector('#direccion');
+	const email = document.querySelector('#email');
+	const contacto = document.querySelector('#contacto');
+	const distrito = document.querySelector('#distrito');
+	const tablaTiendas = document.querySelector('#tabla-tiendas tbody');
 
+	const btnBuscar = document.querySelector('#btn-buscar-concesionario');
+	const btnRegistrar = document.querySelector('#btn-registrar-concesionario');
+	const btnCancelar = document.querySelector('#btn-cancelar-registro');
+	const btnModalTiendas = document.querySelector('#btn-modal-tiendas');
 
+	const formConcesionario = document.querySelector('#form-registro-concesionario');
+	const formTienda = document.querySelector('#form-registro-tienda');
+
+	const modalTienda = new bootstrap.Modal(document.getElementById("modal-tiendas"));
+
+	let idconcesionario = null;
+
+	const rucInicial = "<?= isset($ruc) ? $ruc : '' ?>";
+	if (rucInicial !== '') {
+		ruc.value = rucInicial;
+		await obtenerConcesionarioByDB();
+	}
+
+	// === Eventos ===
+	btnBuscar.addEventListener('click', obtenerConcesionarioByDB);
+	btnModalTiendas.addEventListener('click', () => {
+		if (!idconcesionario) {
+			showToast('Primero registrar el concesionario', 'WARNING', 1200);
+			ruc.focus();
+			return;
+		}
+		modalTienda.show();
+	});
+
+	btnCancelar.addEventListener('click', () => {
+		formConcesionario.reset();
+		razonSocial.removeAttribute("disabled");
+		nombreComercial.removeAttribute("disabled");
+		ruc.removeAttribute("disabled");
+	});
+
+	formConcesionario.addEventListener('submit', registrarConcesionario);
+	formTienda.addEventListener('submit', guardarTienda);
+
+	tablaTiendas.addEventListener('click', handleAccionesTabla);
+
+	// === Funciones ===
+		// Buscar los concesionarios en la DB
+	async function obtenerConcesionarioByDB() {
+		if (ruc.value.length !== 11) return showToast("Se requiere 11 dígitos", "INFO", 1200);
+		razonSocial.value = 'Buscando...';
+
+		try {
+			const res = await fetch(`/api/concesionarioDB/${ruc.value}`);
+			const data = await res.json();
+
+			if (data.length === 0) {
+				btnRegistrar.removeAttribute("disabled");
+				btnCancelar.removeAttribute("disabled");
+				razonSocial.setAttribute("disabled", true);
+				ruc.setAttribute("disabled", true);
+				await obtenerConcesionarioBySunat();
+			} else {
+				const concesionario = data[0];
+				idconcesionario = concesionario.idconcesionario;
+
+				razonSocial.value = concesionario.razonsocial;
+				nombreComercial.value = concesionario.nombrecomercial;
+
+				[btnCancelar, btnRegistrar].forEach(btn => btn.setAttribute("disabled", true));
+				[ruc, razonSocial, nombreComercial].forEach(el => el.setAttribute("disabled", true));
+
+				await obtenerTiendasByConcesionario();
+				showToast('Empresa encontrada', 'SUCCESS', 1200);
+			}
+		} catch (error) {
+			console.error(error);
+			showToast('Error al buscar concesionario', 'ERROR', 1200);
+		}
+	}
+	// Buscar los Concesionarios en SUNAT
+	async function obtenerConcesionarioBySunat() {
+		try {
+			const res = await fetch(`/api/concesionarioSunat/${ruc.value}`);
+			const data = await res.json();
+
+			if (data.razonSocial) {
+				razonSocial.value = data.razonSocial;
+				nombreComercial.value = '';
+				nombreComercial.focus();
+				showToast('Empresa encontrada', 'SUCCESS', 1200);
+			} else {
+				showToast('No existe la empresa', 'WARNING', 1200);
+				ruc.value = '';
+				razonSocial.value = '';
+				[ruc,razonSocial].forEach(el => el.removeAttribute('disabled'));
+				ruc.focus();
+			}
+		} catch (error) {
+			console.error(error);
+		}
+	}
+	// Registrar el concesionario
+	async function registrarConcesionario(event) {
+		event.preventDefault();
+		if (!confirm('¿Desea registrar el concesionario?')) return;
+
+		const form = new FormData();
+		form.append('ruc', ruc.value);
+		form.append('nombrecomercial', nombreComercial.value);
+		form.append('razonsocial', razonSocial.value);
+
+		try {
+			const res = await fetch(`/concesionarios/store`, { method: 'POST', body: form });
+			const data = await res.json();
+
+			if (data.success) {
+				idconcesionario = data.id;
+				showToast(data.message, 'SUCCESS', 1200);
+				btnRegistrar.setAttribute("disabled", true);
+				btnCancelar.setAttribute("disabled", true);
+			} else {
+				showToast(data.message, 'ERROR', 1200);
+			}
+		} catch (error) {
+			console.error(error);
+		}
+	}
+
+	async function obtenerTiendasByConcesionario() {
+		try {
+			const res = await fetch(`/api/tiendasConcesionario/${idconcesionario}`);
+			const tiendas = await res.json();
+
+			if (!tiendas.length) {
+				tablaTiendas.innerHTML = `<tr><td colspan="7" class="text-center">No hay tiendas registradas</td></tr>`;
+				return;
+			}
+
+			tablaTiendas.innerHTML = '';
+			tiendas.forEach((tienda, i) => {
+				tablaTiendas.innerHTML += `
+					<tr>
+						<td>${i + 1}</td>
+						<td>${tienda.ubigeo}</td>
+						<td>${tienda.direccion}</td>
+						<td>${tienda.telefono}</td>
+						<td>${tienda.email}</td>
+						<td>${tienda.contacto}</td>
+						<td>
+							<a href="#" class="btn btn-sm btn-outline-primary edit" data-id="${tienda.idtienda}"><i class="fa fa-pen"></i></a>
+							<a href="#" class="btn btn-sm btn-outline-danger delete" data-id="${tienda.idtienda}"><i class="fa fa-trash"></i></a>
+						</td>
+					</tr>`;
+			});
+		} catch (error) {
+			console.error(error);
+		}
+	}
+
+	async function mostrarDatosTiendaEnModal(tienda) {
+		await getAllDepartamentos();
+		document.querySelector("#departamento").value = tienda.iddepartamento;
+		await getProvinciasByDepartamento(tienda.iddepartamento);
+		document.querySelector("#provincia").value = tienda.idprovincia;
+		await getDistritosByProvincia(tienda.idprovincia);
+		document.querySelector("#distrito").value = tienda.iddistrito;
+
+		direccion.value = tienda.direccion;
+		telefono.value = tienda.telefono;
+		email.value = tienda.email;
+		contacto.value = tienda.contacto;
+
+		formTienda.dataset.idtienda = tienda.idtienda;
+		document.querySelector("#btn-agregar-tienda").textContent = "Actualizar";
+		modalTienda.show();
+	}
+
+	async function guardarTienda(event) {
+		event.preventDefault();
+
+		const idtienda = formTienda.dataset.idtienda;
+		const esEdicion = !!idtienda; // Verificar si existe una tienda y convertirlo a un valor booleano.
+
+		if (!confirm(esEdicion ? "¿Desea actualizar la tienda?" : "¿Desea registrar la tienda?")) return;
+
+		const form = new FormData(formTienda);
+		form.append('iddistrito', distrito.value);
+		form.append('direccion', direccion.value);
+		form.append('telefono', telefono.value);
+		form.append('email', email.value);
+		form.append('contacto', contacto.value);
+
+		if (!esEdicion) form.append('idconcesionario', idconcesionario);
+
+		const url = esEdicion ? `/tiendas/update/${idtienda}` : '/tiendas/store';
+
+		try {
+			const res = await fetch(url, { method: 'POST', body: form });
+			const data = await res.json();
+
+			if (data.success) {
+				showToast(data.message, 'SUCCESS', 1200);
+				modalTienda.hide();
+				await obtenerTiendasByConcesionario();
+				formTienda.reset();
+				delete formTienda.dataset.idtienda;
+				document.querySelector("#btn-agregar-tienda").textContent = "Guardar";
+			} else {
+				showToast(data.message, 'WARNING', 1200);
+			}
+		} catch (error) {
+			console.error("Error al guardar tienda:", error);
+		}
+	}
+	// Identificar que acciones se hacen en la tabla, si es edit o delete
+	async function handleAccionesTabla(event) {
+		const editBtn = event.target.closest('.edit');
+		const deleteBtn = event.target.closest('.delete');
+
+		if (editBtn) {
+			event.preventDefault();
+			try {
+				const res = await fetch(`/tiendas/edit/${editBtn.dataset.id}`);
+				const tienda = await res.json();
+				if (tienda) await mostrarDatosTiendaEnModal(tienda);
+			} catch (error) {
+				console.error("Error al editar:", error);
+			}
+		}
+
+		if (deleteBtn) {
+			event.preventDefault();
+			if (!confirm("¿Desea eliminar esta tienda?")) return;
+
+			try {
+				const res = await fetch(`/tiendas/delete/${deleteBtn.dataset.id}`, { method: 'POST' });
+				const data = await res.json();
+				if (data.success) {
+					showToast(data.message, 'SUCCESS', 1200);
+					await obtenerTiendasByConcesionario();
+				} else {
+					showToast(data.message || 'Error al eliminar', 'WARNING', 1200);
+				}
+			} catch (error) {
+				// console.error("Error al eliminar tienda:", error);
+				showToast("Error al eliminar tienda", "ERROR", 1200);
+			}
+		}
+	}
+});
+</script>
 
 	<?php include __DIR__ . '/../layout/footer.php'; ?>
