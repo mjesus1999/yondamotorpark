@@ -1,7 +1,27 @@
 <?php
+use App\Models\Permisos;
+
 if (session_status() !== PHP_SESSION_ACTIVE) {
   session_start();
 }
+
+$permisosModel = new Permisos();
+
+if(!empty($_SESSION['user']['idcargo'])){
+  $modulosPermitidos = $permisosModel->getPermisosByCargo((int) $_SESSION['user']['idcargo']);
+} else {
+  $modulosPermitidos = [];
+}
+
+//Definimos los modulos en un array
+$allModules = [
+  'OC' => ['url' => '/oc', 'icon' => 'fa-solid fa-list pe-2', 'label' => 'Orden de compra'],
+  'COMPRAS' => ['url' => '/compras', 'icon' => 'fa-solid fa-list pe-2', 'label' => 'Compras'],
+  'CONCESION' => ['url' => '/concesionarios', 'icon' => 'fa-solid fa-list pe-2', 'label' => 'Concesionarios'],
+  'MARCAS' => ['url' => '/marcas', 'icon' => 'fa-solid fa-list pe-2', 'label' => 'Marcas'],
+  'VEHICULOS' => ['url' => '/vehiculos', 'icon' => 'fa-solid fa-list pe-2', 'label' => 'Vehículos'],
+  'USUARIOS' => ['url' => '/usuarios', 'icon' => 'fa-solid fa-list pe-2', 'label' => 'Usuarios'],
+];
 ?>
 <!DOCTYPE html>
 
@@ -45,7 +65,18 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
           <li class="sidebar-header">
             Módulos
           </li>
-          <li class="sidebar-item">
+          <?php foreach ($allModules as $codigo => $m): ?>
+            <?php if (in_array($codigo, $modulosPermitidos, true)): ?>
+              <li class="sidebar-item">
+                <a href="<?= htmlspecialchars($m['url']) ?>" class="sidebar-link">
+                  <i class="fa-solid <?= htmlspecialchars($m['icon']) ?> pe-2"></i>
+                  <?= htmlspecialchars($m['label']) ?>
+                </a>
+              </li>
+            <?php endif ?>
+          <?php endforeach ?>
+
+          <!-- <li class="sidebar-item">
             <a href="/oc" class="sidebar-link">
               <i class="fa-solid fa-list pe-2"></i>
               Orden de compra
@@ -94,7 +125,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
                 <a href="#" class="sidebar-link">Page 2</a>
               </li>
             </ul>
-          </li>
+          </li> -->
           <li class="sidebar-item">
             <a href="#" class="sidebar-link collapsed" data-bs-target="#posts" data-bs-toggle="collapse"
               aria-expanded="false"><i class="fa-solid fa-sliders pe-2"></i>
@@ -171,7 +202,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
                   class="avatar img-fluid rounded" alt="Avatar" />
               </a>
               <div class="dropdown-menu dropdown-menu-end">
-                
+
                 <!-- MOSTRAR POR NOMBRE Y APELLIDOS -->
                 <?php if (!empty($_SESSION['user'])): ?>
                   <a href="/usuarios/profile/<?= $_SESSION['user']['id'] ?>" class="dropdown-item">

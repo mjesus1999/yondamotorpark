@@ -123,10 +123,7 @@ class Usuario
 
   // CONSULTAS PARA EL LOGIN
 
-  /**
-   * Buscar por usuario el (idcolab)
-   * @param string $usernick
-   */
+  //buscar por nombre de usuario
   public function searchByUsernick(string $usernick): ?array
   {
     $query = "SELECT col.idcolaborador,
@@ -135,10 +132,13 @@ class Usuario
               col.habilitado,
               col.avatar,
               p.nombres,
-              p.apellidos
+              p.apellidos,
+              cl.idcargo,
+              cg.cargo
             FROM colaboradores col
             JOIN contratoslaborales cl ON cl.idcontratolaboral = col.idcontratolaboral
             JOIN personas p ON p.idpersona = cl.idpersona
+            JOIN cargos cg ON cg.idcargo = cl.idcargo
             WHERE BINARY col.usernick = :usernick
             LIMIT 1";
     $stmt = $this->db->prepare($query);
@@ -149,10 +149,7 @@ class Usuario
     return $row ?: null;
   }
 
-  /**
-   * Mostrar el usuario por id
-   * @param int $idColab
-   */
+  //mostrar el usuario por id
   public function getById(int $idColab): ?array
   {
     $stmt = $this->db->prepare("
@@ -190,12 +187,8 @@ class Usuario
     return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
   }
 
-  /**
-   * Actualizar la img (avatar)
-   * @param int $idColab
-   * @param string $url
-   * @return bool
-   */
+
+  //actualizar avatar
   public function updateAvatar(int $idColab, string $url): bool
   {
     $stmt = $this->db->prepare("

@@ -65,7 +65,7 @@
                   <td><?= htmlspecialchars($u['fecha_inicio']) ?></td>
                   <td><?= htmlspecialchars($u['fecha_fin']) ?></td>
                   <td><?= htmlspecialchars($u['usuario']) ?></td>
-                  <td>
+                  <td class="text-center">
                     <!-- Editar -->
                     <a href="<?= $path ?>/usuarios/editar/<?= $u['idpersona'] ?>" class="btn btn-sm btn-outline-primary"
                       title="Editar">

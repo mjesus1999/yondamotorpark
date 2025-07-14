@@ -68,7 +68,7 @@ class UsuarioController extends Controller
     if ($pass1 !== $pass2)
       $errors[] = 'Las contraseñas no coinciden.';
 
-    // ¿Es petición AJAX?
+    //peticion ajax
     $isAjax =
       !empty($_SERVER['HTTP_X_REQUESTED_WITH'])
       && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest';
@@ -76,7 +76,6 @@ class UsuarioController extends Controller
     if ($errors) {
       if ($isAjax) {
         header('Content-Type: application/json; charset=utf-8');
-        // armamos explícito para que 'success' sea primero
         $response = ['success' => false];
         $response['errors'] = $errors;
         echo json_encode($response);
@@ -134,7 +133,7 @@ class UsuarioController extends Controller
 
   public function changePassword(): void
   {
-    session_start(); // Asegúrate de tener sesión iniciada
+    session_start(); //tener sesión iniciada
 
     $idColab = (int) ($_POST['idcolaborador'] ?? 0);
     $p1 = $_POST['password1'] ?? '';
