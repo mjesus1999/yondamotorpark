@@ -79,7 +79,7 @@
       <div class="card mb-4">
         <div class="card-header bg-info">
           <strong>Paso 2:</strong> <span class="fst-italic">
-            Datos del contrato
+            Registrar del contrato
           </span>
         </div>
         <div class="card-body">
