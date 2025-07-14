@@ -1,25 +1,53 @@
 <?php
-// app/Controllers/ProductController.php
+
 
 namespace App\Controllers;
 
 use App\Core\Controller;
-//use App\Models\Product;
+use App\Models\Marca;
 
 class MarcaController extends Controller
 {
-  //private Product $productModel;
+  private Marca $marcaModel;
 
   public function __construct()
   {
-    //$this->productModel = new Product();
+    $this->marcaModel = new Marca();
   }
 
   public function index(): void
   {
-    //$products = $this->productModel->getAll();
-    //$this->view('products.index', ['products' => $products]);
+   
     $this->view('marcas.index');
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  // API PARA TRAER LAS MARCAS:
+
+
+  public function getMarcasDB():void {
+    header('Content-Type: application/json');
+
+    $marcas = $this->marcaModel->getAll();
+
+    if($marcas) {echo json_encode($marcas);}
+    else {http_response_code(404); echo json_encode([]);}
+    exit();
+
   }
 
 

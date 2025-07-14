@@ -13,3 +13,6 @@ $router->add('POST', '/concesionarios/delete/{id}', 'ConcesionarioController', '
 // APIS
 $router->add('GET', '/api/concesionarioSunat/{ruc}', 'ConcesionarioController', 'searchRucSunat');
 $router->add('GET', '/api/concesionarioDB/{ruc}', 'ConcesionarioController', 'searchRucDB');
+
+// API PARA OBTENER CONCESIONARIO A LA VISTA DE ORDEN DE COMPRA CREAR:
+$router->add('GET','/api/concesionariosDB','ConcesionarioController','getConcesionariosDB');

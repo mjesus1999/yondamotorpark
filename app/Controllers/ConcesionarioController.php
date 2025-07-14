@@ -225,4 +225,19 @@ class ConcesionarioController extends Controller
 
         exit();
     }
+
+
+    public function getConcesionariosDB(): void
+    {
+        header('Content-Type: application/json');
+        $concesionarios = $this->concesionarioModel->getAll();
+
+        if ($concesionarios) {
+            echo json_encode($concesionarios);
+        } else {
+            http_response_code(404);
+            echo json_encode([]);
+        }
+        exit();
+    }
 }
