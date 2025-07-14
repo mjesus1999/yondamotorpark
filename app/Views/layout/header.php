@@ -5,7 +5,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
   session_start();
 }
 
-$permisosModel = new Permisos();
+/* $permisosModel = new Permisos();
 
 if(!empty($_SESSION['user']['idcargo'])){
   $modulosPermitidos = $permisosModel->getPermisosByCargo((int) $_SESSION['user']['idcargo']);
@@ -21,7 +21,7 @@ $allModules = [
   'MARCAS' => ['url' => '/marcas', 'icon' => 'fa-solid fa-list pe-2', 'label' => 'Marcas'],
   'VEHICULOS' => ['url' => '/vehiculos', 'icon' => 'fa-solid fa-list pe-2', 'label' => 'Vehículos'],
   'USUARIOS' => ['url' => '/usuarios', 'icon' => 'fa-solid fa-list pe-2', 'label' => 'Usuarios'],
-];
+]; */
 ?>
 <!DOCTYPE html>
 
@@ -65,7 +65,7 @@ $allModules = [
           <li class="sidebar-header">
             Módulos
           </li>
-          <?php foreach ($allModules as $codigo => $m): ?>
+          <!-- <?php foreach ($allModules as $codigo => $m): ?>
             <?php if (in_array($codigo, $modulosPermitidos, true)): ?>
               <li class="sidebar-item">
                 <a href="<?= htmlspecialchars($m['url']) ?>" class="sidebar-link">
@@ -74,9 +74,9 @@ $allModules = [
                 </a>
               </li>
             <?php endif ?>
-          <?php endforeach ?>
+          <?php endforeach ?> -->
 
-          <!-- <li class="sidebar-item">
+          <li class="sidebar-item">
             <a href="/oc" class="sidebar-link">
               <i class="fa-solid fa-list pe-2"></i>
               Orden de compra
@@ -125,7 +125,7 @@ $allModules = [
                 <a href="#" class="sidebar-link">Page 2</a>
               </li>
             </ul>
-          </li> -->
+          </li>
           <li class="sidebar-item">
             <a href="#" class="sidebar-link collapsed" data-bs-target="#posts" data-bs-toggle="collapse"
               aria-expanded="false"><i class="fa-solid fa-sliders pe-2"></i>

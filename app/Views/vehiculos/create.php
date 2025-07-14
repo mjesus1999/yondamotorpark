@@ -23,7 +23,7 @@
             <div class="card mb-4">
                 <div class="card-header bg-info">
                     <strong>Paso 1:</strong> <span class="fst-italic">
-                        Información del cliente
+                        Información del cliente (opcional)
                     </span>
                 </div>
                 <div class="card-body">

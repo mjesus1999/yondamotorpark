@@ -22,7 +22,7 @@ class VehiculoController extends Controller
     //$this->view('products.index', ['products' => $products]);
     $this->view('vehiculos.index');
   }
-  
+
   public function create(): void
   {
     $this->authRequired();
