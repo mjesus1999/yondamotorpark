@@ -1,9 +1,6 @@
-<?php
+<?php include __DIR__ . '/../layout/header.php';?>
 
-include __DIR__ . '/../layout/header.php';
-?>
 <div class="container-fluid">
-
   <div class="alert alert-info mt-2" role="alert">
     <div class="row">
       <div class="col-md-6 d-flex align-items-center justify-content-start">
@@ -64,11 +61,7 @@ include __DIR__ . '/../layout/header.php';
 
                     </td>
                   </tr>
-
-
                 <?php endforeach; ?>
-
-
               <?php endif; ?>
             </tbody>
           </table>
@@ -76,9 +69,6 @@ include __DIR__ . '/../layout/header.php';
       </div>
     </div>
   </div>
-
-
-
 
   <!-- Zona modales -->
   <div class="modal fade" id="modal-concesionario" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="modal-concesionario" aria-hidden="true">
@@ -103,8 +93,6 @@ include __DIR__ . '/../layout/header.php';
       </form>
     </div>
   </div>
-
-
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -199,7 +187,4 @@ include __DIR__ . '/../layout/header.php';
       });
     });
   </script>
-
-
-
   <?php include __DIR__ . '/../layout/footer.php'; ?>
