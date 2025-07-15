@@ -40,6 +40,32 @@ class OrdenCompra
             return [];
         }
     }
+
+
+    public function create($params = []): int
+    {
+        $query = "call spu_oc_registrar(:idtienda,:idlogistica,:moneda,:serie,:numstock,:observaciones)";
+
+        try {
+            $stmt = $this->db->prepare($query);
+            $stmt->execute(array(
+                ':idtienda' => $params['idtienda'],
+                ':idlogistica' => $params['idlogistica'],
+                ':moneda' => $params['moneda'],
+                ':serie' => $params['serie'],
+                ':numstock' => $params['numstock'],
+                ':observaciones' => $params['observaciones']
+
+            ));
+
+            $idOrdenCompra = $stmt->fetch(PDO::FETCH_ASSOC);
+            $stmt->closeCursor();
+            return isset($idOrdenCompra['last_id']) ? (int) $idOrdenCompra['last_id'] : 0;
+        } catch (PDOException $error) {
+            error_log($error->getMessage());
+            return -1;
+        }
+    }
 }
 
 // $orden = new OrdenCompra();

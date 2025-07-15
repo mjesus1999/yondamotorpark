@@ -315,6 +315,9 @@ CREATE TABLE ordenescompra
     CONSTRAINT fk_idlogistica_ocp FOREIGN KEY (idlogistica) REFERENCES colaboradores (idcolaborador)
 )ENGINE = INNODB;
 
+
+
+-- La orden de compra es el documento que se genera para solicitar la compra de un vehículo
 -- Una orden de compra puede tener más de un equipo
 CREATE TABLE detordencompra
 (

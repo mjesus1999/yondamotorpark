@@ -6,8 +6,7 @@
         <div class="row">
             <div class="col-md-6 d-flex align-items-center justify-content-start">
                 <!-- <nav aria-label="breadcrumb"> -->
-                <nav
-                    style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='%236c757d'/%3E%3C/svg%3E&#34;);"
+                <nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='%236c757d'/%3E%3C/svg%3E&#34;);"
                     aria-label="breadcrumb">
                     <ol class="breadcrumb mb-0">
                         <li class="breadcrumb-item"><a href="#">Órdenes de compra</a></li>
@@ -24,15 +23,15 @@
     <form action="" id="formulario-oc" autocomplete="off">
         <div class="card mb-2">
             <div class="card-header bg-info">
-                <strong>Paso 1:</strong> <span class="fst-italic">Datos generales de la orden de compra</span>
+                <strong>Paso 1:</strong> <span class="fst-italic"> Datos generales de la orden de compra</span>
             </div>
             <div class="card-body">
 
                 <div class="row g-2">
                     <div class="col-md-2 mb-2">
                         <div class="form-floating">
-                            <input type="text" class="form-control text-center" id="serie" maxlength="11" value="2025-0001254"
-                                disabled>
+                            <input type="text" class="form-control text-center" name="serie" id="serie" maxlength="11"
+                                value="2025">
                             <label for="form-label">Serie</label>
                         </div>
                     </div>
@@ -52,13 +51,14 @@
                     </div>
                     <div class="col-md-2 mb-2">
                         <div class="form-floating">
-                            <input type="text" class="form-control text-center" name="ruc" id="ruc" maxlength="11" required readonly>
+                            <input type="text" class="form-control text-center" name="ruc" id="ruc" maxlength="11"
+                                required readonly disabled>
                             <label for="form-label">RUC</label>
                         </div>
                     </div>
                     <div class="col-md-3 mb-2">
                         <div class="form-floating">
-                            <select name="tiendas" id="tiendas" class="form-select" required>
+                            <select name="idtienda" id="tiendas" class="form-select" required>
                                 <option value="">Seleccione</option>
                             </select>
                             <label for="form-label">Tienda</label>
@@ -70,29 +70,32 @@
                 <div class="row g-2">
                     <div class="col-md-3 mb-2">
                         <div class="form-floating">
-                            <input type="text" class="form-control" name="direccion" id="direccion" required readonly>
+                            <input type="text" class="form-control" name="direccion" id="direccion" required readonly
+                                disabled>
                             <label for="form-label">Dirección</label>
                         </div>
                     </div>
                     <div class="col-md-3 mb-2">
                         <div class="form-floating">
-                            <input type="text" class="form-control" name="asesor" id="asesor" required readonly>
+                            <input type="text" class="form-control" name="asesor" id="asesor" required readonly
+                                disabled>
                             <label for="form-label">Asesor</label>
                         </div>
                     </div>
                     <div class="col-md-2 mb-2">
                         <div class="input-group">
                             <div class="form-floating">
-                                <input type="text" class="form-control text-center" name="telefono" id="telefono" required readonly>
+                                <input type="text" class="form-control text-center" name="telefono" id="telefono"
+                                    required readonly disabled>
                                 <label for="form-label">Teléfono</label>
                             </div>
-                            <button class="btn btn-outline-success" type="button" id="abrir-wsp" title="Contactar por WhatsApp"><i
-                                    class="fa-brands fa-whatsapp"></i></button>
+                            <button class="btn btn-outline-success" type="button" id="abrir-wsp"
+                                title="Contactar por WhatsApp"><i class="fa-brands fa-whatsapp"></i></button>
                         </div>
                     </div>
                     <div class="col-md-2 mb-2">
                         <div class="form-floating">
-                            <input type="text" class="form-control text-center" name="stock" id="stock">
+                            <input type="text" class="form-control text-center" name="numstock" id="stock">
                             <label for="form-label">Stock</label>
                         </div>
                     </div>
@@ -110,7 +113,7 @@
                 <div class="row g-2">
                     <div class="col-md-12">
                         <div class="form-floating">
-                            <input type="text" id="observaciones" class="form-control">
+                            <input type="text" id="observaciones" name="observaciones" class="form-control">
                             <label for="observaciones">Observaciones</label>
                         </div>
                     </div>
@@ -130,12 +133,14 @@
         <div class="card-header bg-info">
             <div class="row">
                 <div class="col-md-6 d-flex align-items-center justify-content-start">
-                    <strong>Paso 2:</strong> <span class="fst-italic">Agregar elementos a la orden de compra</span>
+                    <strong>Paso 2: </strong> <span class="fst-italic"> Agregar elementos a la orden de compra</span>
                 </div>
                 <div class="col-md-6 d-flex align-items-center justify-content-end">
                     <div class="btn-group btn-group-sm">
-                        <button class="btn btn-sm btn-dark" id="agregar-accesorio" type="button" title="Agregar accesorio"><i class="fa-solid fa-box-open"></i> Accesorio</button>
-                        <button class="btn btn-sm btn-dark" id="agregar-item" type="button" title="Agregar vehiculo"><i class="fa-solid fa-car-side"></i> Vehículo</button>
+                        <button class="btn btn-sm btn-dark" id="agregar-accesorio" type="button"
+                            title="Agregar accesorio"><i class="fa-solid fa-box-open"></i> Accesorio</button>
+                        <button class="btn btn-sm btn-dark" id="agregar-item" type="button" title="Agregar vehiculo"><i
+                                class="fa-solid fa-car-side"></i> Vehículo</button>
                     </div>
                 </div>
             </div>
@@ -215,7 +220,8 @@
                         <div class="row g-2">
                             <div class="col-md-2 mb-2">
                                 <div class="form-floating">
-                                    <input type="number" id="cantidad" value="1" min="1" max="20" class="form-control text-center">
+                                    <input type="number" id="cantidad" value="1" min="1" max="20"
+                                        class="form-control text-center">
                                     <label for="cantidad">Cantidad</label>
                                 </div>
                             </div>
@@ -224,7 +230,8 @@
                                     <select name="marcas" id="marcas" class="form-select" required>
                                         <option value="">Seleccione</option>
                                     </select>
-                                    <label for="marcas" class="form-label">Marca <span class="text-danger">*</span></label>
+                                    <label for="marcas" class="form-label">Marca <span
+                                            class="text-danger">*</span></label>
                                 </div>
                             </div>
                             <div class="col-md-2 mb-2">
@@ -307,7 +314,8 @@
                                         <option value="">GNV</option>
                                         <option value="">Dual: Gasolina, GLP</option>
                                     </select>
-                                    <label for="combustible">Tipo de combustible <span class="text-danger">*</span></label>
+                                    <label for="combustible">Tipo de combustible <span
+                                            class="text-danger">*</span></label>
                                 </div>
                             </div>
                             <div class="col-md-2 mb-2">
@@ -354,7 +362,8 @@
 
                         </dv>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary"
+                                data-bs-dismiss="modal">Cancelar</button>
                             <button type="submit" form="formulario-vehiculo" id="registrar-vehiculo"
                                 class="btn btn-sm btn-primary">Agregar</button>
                         </div>
@@ -399,6 +408,9 @@
                     const abrirWsp = document.querySelector("#abrir-wsp")
                     const agregarItem = document.querySelector("#agregar-item")
 
+                    // IDCONCESIONARIO
+                    const idconcesionario = null;
+
                     let dataConcesionarios = []
                     let dataTiendas = []
                     let dataVehiculos = []
@@ -411,25 +423,25 @@
                             inputsDinamicos.innerHTML = ``
                             for (let i = 1; i <= cantidad; i++) {
                                 inputsDinamicos.innerHTML += `
-                <div class="row g-2">
-                  <div class="col-md-1 mb-2"><input type="text" class="form-control text-center" id="idvh${i}" value="${i}" disabled></div>
-                  <div class="col-md-4 mb-2"><input type="text" class="form-control" id="chas${i}"></div>
-                  <div class="col-md-2 mb-2"><input type="text" class="form-control" id="plac${i}"></div>
-                  <div class="col-md-2 mb-2"><input type="text" class="form-control" id="plar${i}"></div>
-                  <div class="col-md-3 mb-2"><input type="text" class="form-control" id="seri${i}"></div>
-                </div>
-                `;
+                                    <div class="row g-2">
+                                    <div class="col-md-1 mb-2"><input type="text" class="form-control text-center" id="idvh${i}" value="${i}" disabled></div>
+                                    <div class="col-md-4 mb-2"><input type="text" class="form-control" id="chas${i}"></div>
+                                    <div class="col-md-2 mb-2"><input type="text" class="form-control" id="plac${i}"></div>
+                                    <div class="col-md-2 mb-2"><input type="text" class="form-control" id="plar${i}"></div>
+                                    <div class="col-md-3 mb-2"><input type="text" class="form-control" id="seri${i}"></div>
+                                    </div>
+                                    `;
                             }
                         }
                     }
 
                     //Se deberán generar input de forma dinámica para agregar: id, chasis, placa, placa rotativa, serie
-                    cantidad.addEventListener("change", function(event) {
+                    cantidad.addEventListener("change", function (event) {
                         generadorInputsDinamicos(parseInt(this.value))
                     })
 
                     //Se deberán generar input de forma dinámica para agregar: id, chasis, placa, placa rotativa, serie
-                    cantidad.addEventListener("keyup", function(event) {
+                    cantidad.addEventListener("keyup", function (event) {
                         if (this.value != "") {
                             generadorInputsDinamicos(parseInt(this.value))
                         }
@@ -466,36 +478,6 @@
                     //     document.querySelector("#bloque-version-lista").classList.remove("d-none")
                     //     document.querySelector("#bloque-version-input").classList.add("d-none")
                     //     versionLS.value = ``
-                    //   })
-
-                    //   //Registra la OC
-                    //   formOC.addEventListener("submit", function (event) {
-                    //     event.preventDefault()
-
-                    //     if (confirm("¿Está seguro de registrar los datos generales de esta orden de compra?")){
-                    //       const parametros = new FormData()
-
-                    //       parametros.append("operation", "create")
-                    //       parametros.append("idtienda", parseInt(tiendas.value))
-                    //       parametros.append("moneda", moneda.value)
-                    //       parametros.append("numstock", numstock.value)
-                    //       parametros.append("observaciones", observaciones.value)
-
-                    //       fetch(`../../app/controllers/ordencompra.controller.php`, {
-                    //         method: 'POST',
-                    //         body: parametros
-                    //       })
-                    //         .then(response => response.json())
-                    //         .then(data => {
-                    //           if (data.id > 0){
-                    //             showToast("OC agregada correctamente", "SUCCESS", 2500);
-
-                    //           }else{
-                    //             showToast("No pudo concretar el proceso", "DANGER", 1500);
-                    //           }
-                    //         })
-                    //         .catch(error => console.error(error))
-                    //     }
                     //   })
 
 
@@ -551,7 +533,7 @@
                                 data.forEach(element => {
                                     concesionarios.innerHTML += ` <option value="${element.idconcesionario}">${element.nombrecomercial}</option>`;
                                 });
-                                dataConcesionarios =  data;
+                                dataConcesionarios = data;
                             } else {
                                 console.error('No hay datos a mostrar');
                             }
@@ -574,44 +556,89 @@
                             const res = await fetch(`/api/tiendasConcesionario/${idconcesionario}`);
                             const data = await res.json();
                             return data;
-                        } catch(error){console.error(error);}
-                        
+                        } catch (error) { console.error(error); }
+
                     }
 
                     await obtenerConcesionarios();
 
-
-                    concesionarios.addEventListener('change',async (event) => {
+                    concesionarios.addEventListener('change', async (event) => {
                         const idConcesionario = event.target.value;
-                        const concesionarioSeleccionado = dataConcesionarios.find(item => item.idconcesionario == idConcesionario); 
-                        ruc.value = concesionarioSeleccionado ? concesionarioSeleccionado.ruc :null;
+                        const concesionarioSeleccionado = dataConcesionarios.find(item => item.idconcesionario == idConcesionario);
+
+                        // Asignar RUC o limpiar si no hay
+                        ruc.value = concesionarioSeleccionado ? concesionarioSeleccionado.ruc : '';
+
+                        // impiar tiendas antes de cargarlas
+                        tiendas.innerHTML = `<option value=''>Seleccione</option>`;
+
+                        if (!idConcesionario) {
+                            dataTiendas = [];
+                            direccion.value = '';
+                            asesor.value = '';
+                            telefono.value = '';
+                            return;
+                        }
+
+                        // 2️ Obtener las tiendas del concesionario
                         dataTiendas = await obtenerTiendaByConcesionario(idConcesionario);
 
-                        // Rellenar el select de tiendas:
-                        dataTiendas.forEach(element => {
+                        if (dataTiendas.length === 0) {
+                            tiendas.innerHTML = `<option value=''>No hay tiendas registradas</option>`;
+                        } else {
+                            dataTiendas.forEach(element => {
                                 tiendas.innerHTML += `<option value='${element.idtienda}'>${element.ubigeo}</option>`;
-                        })
+                            });
+                        }
 
-                        // console.log('TIENDA DEL CONCESIOANRIO: ', dataTiendas);
-                    
-
-                        // console.log('ID: ', idConcesionario) ;
-                        // console.log('RUC: ',  ruc);
-                        
+                        // 3️ Limpiar los campos de dirección/teléfono/asesor
+                        direccion.value = '';
+                        asesor.value = '';
+                        telefono.value = '';
                     });
+
 
                     // Cuando seleccione la tienda, me ocmplete con sus datos.
-                    tiendas.addEventListener('change' ,async (event) => {
-                        console.log(dataTiendas);
-                        const idTiendaSeleccionada = event.target.value; // Capturo el id de la tienda seleccionda
-                        const tiendaSelecionada = dataTiendas.find(item => item.idtienda == idTiendaSeleccionada); // Solo me quedo con los datos de la tienda seleccionada
-                        // console.log('Tienda seleccionad: ' , tiendaSelecionada);
-                        direccion.value = tiendaSelecionada.direccion
-                        asesor.value = tiendaSelecionada.contacto;
-                        telefono.value = tiendaSelecionada.telefono;
+                    tiendas.addEventListener('change', (event) => {
+                        const idTiendaSeleccionada = event.target.value;
 
+                        if (!idTiendaSeleccionada) {
+                            direccion.value = '';
+                            asesor.value = '';
+                            telefono.value = '';
+                            return;
+                        }
+
+                        const tiendaSeleccionada = dataTiendas.find(item => item.idtienda == idTiendaSeleccionada);
+                        direccion.value = tiendaSeleccionada.direccion;
+                        asesor.value = tiendaSeleccionada.contacto;
+                        telefono.value = tiendaSeleccionada.telefono;
                     });
 
+
+                    // Enviar los datos para agregar una orden de compra
+ 
+                    formOC.addEventListener('submit', async (event) => {
+
+                        event.preventDefault();
+
+                        if (confirm('¿Está seguro de agregar esta orden de compra?')) {
+                            const formData = new FormData(formOC);
+                            const response = await fetch('/oc/store', {
+                                method: 'POST',
+                                body: formData
+                            });
+                            const data = await response.json();
+
+                            if (data.success) {
+                                showToast(data.message, "SUCCESS", 1200);
+
+                            } else {
+                                showToast(data.message, "WARNING", 1200);
+                            }
+                        }
+
+                    });
 
 
 
