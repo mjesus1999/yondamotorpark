@@ -15,9 +15,6 @@ class TipoVehiculo
         $this->db = Database::getInstance();
     }
 
-
-
-
     public function getTipoVehiculoByMarca(int $idmarca): array
     {
         $query = "

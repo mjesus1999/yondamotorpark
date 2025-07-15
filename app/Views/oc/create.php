@@ -308,11 +308,11 @@
                                 <div class="form-floating">
                                     <select name="combustible" id="combustible" class="form-select" required>
                                         <option value="">Seleccione</option>
-                                        <option value="">Gasolina</option>
-                                        <option value="">Diesel</option>
-                                        <option value="">GLP</option>
-                                        <option value="">GNV</option>
-                                        <option value="">Dual: Gasolina, GLP</option>
+                                        <option value="1">Gasolina</option>
+                                        <option value="2">Diesel</option>
+                                        <option value="3">GLP</option>
+                                        <option value="4">GNV</option>
+                                        <option value="5">Dual: Gasolina, GLP</option>
                                     </select>
                                     <label for="combustible">Tipo de combustible <span
                                             class="text-danger">*</span></label>
@@ -472,40 +472,43 @@
                         }
                     })
 
-                    //   //Cuando se especifica la VERSION manualmente (input) se puede volver a mostrar la lista
-                    //   mostrarVersionLS.addEventListener("click", () => {
-                    //     versionIN.value = ``;
-                    //     document.querySelector("#bloque-version-lista").classList.remove("d-none")
-                    //     document.querySelector("#bloque-version-input").classList.add("d-none")
-                    //     versionLS.value = ``
-                    //   })
+                    //   Cuando se especifica la VERSION manualmente (input) se puede volver a mostrar la lista
+                    mostrarVersionLS.addEventListener("click", () => {
+                        versionIN.value = ``;
+                        document.querySelector("#bloque-version-lista").classList.remove("d-none")
+                        document.querySelector("#bloque-version-input").classList.add("d-none")
+                        versionLS.value = ``
+                    })
 
 
 
 
-                    //   //Registra un vehículo (envía los datos a un arreglo)
-                    //   formVehiculo.addEventListener("submit", function (event) {
-                    //     event.preventDefault()
-                    //     const pregunta = (cantidad.value) == 1 ? "¿Agregamos este vehículo?" : "¿Agregamos los vehículos de la lista?"
+                       //Registra un vehículo (envía los datos a un arreglo)
+                       formVehiculo.addEventListener("submit", function (event) {
+                         event.preventDefault()
+                         let idVehiculo = 0;
+                         const pregunta = (cantidad.value) == 1 ? "¿Agregamos este vehículo?" : "¿Agregamos los vehículos de la lista?"
 
-                    //     if (confirm(pregunta)) {
+                         if (confirm(pregunta)) {
 
-                    //       for (let i = 1; i <= parseInt(cantidad.value); i++) {
-                    //         //Respaldamos la información ingresada en un objeto
-                    //         const vehiculo = {
-                    //           idmodelo: modelos.value,
-                    //           version: versionLS.value,
-                    //           condicion: condicion.value
-                    //         }
-                    //         console.log(vehiculo);
-                    //       }
+                           for (let i = 1; i <= parseInt(cantidad.value); i++) {
+                            // Respaldamos la información ingresada en un objeto
+                            idVehiculo++;
+                             const vehiculo = {
+                                idVehiculo,
+                               idmodelo: modelos.value,
+                               version: versionLS.value,
+                               condicion: condicion.value
+                             }
+                             console.log(vehiculo);
+                           }
 
-                    //     }
-                    //   })
+                         }
+                       })
 
 
 
-    
+
                     // Obtener los concesionarios de la DB
                     async function obtenerConcesionarios() {
 
@@ -530,7 +533,7 @@
                         }
 
                     }
-                    
+
                     async function obtenerTiendaByConcesionario(idconcesionario) {
 
                         try {
@@ -544,7 +547,7 @@
 
                     }
 
-                   
+
                     concesionarios.addEventListener('change', async (event) => {
                         const idConcesionario = event.target.value;
                         const concesionarioSeleccionado = dataConcesionarios.find(item => item.idconcesionario == idConcesionario);
@@ -728,4 +731,4 @@
             </script>
 
 
-<?php include __DIR__ . '/../layout/footer.php'; ?>
+            <?php include __DIR__ . '/../layout/footer.php'; ?>

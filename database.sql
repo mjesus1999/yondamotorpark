@@ -261,9 +261,11 @@ CREATE TABLE vehiculos
 (
 	idvehiculo			INT AUTO_INCREMENT PRIMARY KEY,
 	idmodelo 			INT 			NOT NULL,
+    idcombustible 		INT 			NOT NULL,
+    idlogistica			INT 			NOT NULL,
+    idlocal 			INT 			NULL,
     version				VARCHAR(20) 	NOT NULL,
     condicion			ENUM('nuevo', 'seminuevo') NOT NULL DEFAULT 'nuevo',
-    idcombustible 		INT 			NOT NULL,
     color 				VARCHAR(30) 	NULL,
     chasis 				VARCHAR(30)		NULL,
     placa 				VARCHAR(10)	 	NULL,
@@ -272,8 +274,6 @@ CREATE TABLE vehiculos
     moneda				ENUM('USD', 'PEN') NULL DEFAULT 'USD', -- VENTA
     precioventa			DECIMAL(9,2) 	NULL,
     disponibilidad 		ENUM('proceso', 'libre', 'separado', 'vendido', 'recuperado') NOT NULL,
-    idlogistica			INT 			NOT NULL,
-    idlocal 			INT 			NULL,
     origen 				ENUM ('OCP', 'OLD','CTZ') NOT NULL COMMENT 'OCP = Orden de compra (conducto regular), OLD (Contratos anteriores al sistema), CTZ (Cotizado por asesor)',
 	creado 				DATETIME 		NOT NULL DEFAULT NOW(),
     modificado 			DATETIME 		NULL,
