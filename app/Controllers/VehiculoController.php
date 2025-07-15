@@ -7,6 +7,7 @@ use App\Core\Controller;
 use App\Models\Cliente;
 use App\Models\Marca;
 use App\Models\TipoVehiculo;
+use App\Models\Vehiculo;
 
 
 class VehiculoController extends Controller
@@ -35,6 +36,26 @@ class VehiculoController extends Controller
       'marcas',
       'tipovehiculos'
     ));
+  }
+
+  public function getDisponibles(): void
+  {
+    header('Content-Type: application/json; charset=utf-8');
+    $m = isset($_GET['marca']) ? (int) $_GET['marca'] : 0;
+    $t = isset($_GET['tipo']) ? (int) $_GET['tipo'] : 0;
+    $mo = $_GET['modelo'] ?? '';
+    $a = $_GET['anio'] ?? '';
+
+    if ($m <= 0 || $t <= 0 || $mo === '' || $a === '') {
+      echo json_encode(['success' => false, 'vehiculos' => []]);
+      exit;
+    }
+
+    $vehModel = new Vehiculo();
+    $lista = $vehModel->getDisponibles($m, $t, $mo, $a);
+
+    echo json_encode(['success' => true, 'vehiculos' => $lista], JSON_UNESCAPED_UNICODE);
+    exit;
   }
 
 }

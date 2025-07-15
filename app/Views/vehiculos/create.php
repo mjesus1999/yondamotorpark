@@ -305,60 +305,92 @@
             documentoInput.value = option.dataset.doc || '';
             telefonoInput.value = option.dataset.tel || '';
         });
+
         const marcaSel = document.getElementById('idmarca');
-  const tipoSel  = document.getElementById('idtipovehiculo');
-  const modeloSel= document.getElementById('idmodelo');
-  const anioSel  = document.getElementById('anio');
+        const tipoSel = document.getElementById('idtipovehiculo');
+        const modeloSel = document.getElementById('idmodelo');
+        const anioSel = document.getElementById('anio');
 
-  let modelosData = [];
+        let modelosData = [];
 
-  // Función para poblar modelo y limpiar año
-  function actualizarModelos() {
-    const idmarca = marcaSel.value;
-    const idtipo  = tipoSel.value;
-    modeloSel.innerHTML = '<option value="">Seleccionar modelo</option>';
-    anioSel .innerHTML = '<option value="">Seleccionar año</option>';
+        // Función para poblar modelo y limpiar año
+        function actualizarModelos() {
+            const idmarca = marcaSel.value;
+            const idtipo = tipoSel.value;
+            modeloSel.innerHTML = '<option value="">Seleccionar modelo</option>';
+            anioSel.innerHTML = '<option value="">Seleccionar año</option>';
 
-    if (!idmarca || !idtipo) return;
+            if (!idmarca || !idtipo) return;
 
-    fetch(`/modelos/lista?marca=${idmarca}&tipo=${idtipo}`)
-      .then(res => res.ok ? res.json() : Promise.reject(res.status))
-      .then(json => {
-        if (!json.success) return;
-        modelosData = json.modelos;
-        // Extraer nombres de modelos únicos
-        const nombres = Array.from(new Set(modelosData.map(m => m.modelo)));
-        nombres.forEach(nombre => {
-          const opt = document.createElement('option');
-          opt.value = nombre;
-          opt.textContent = nombre;
-          modeloSel.append(opt);
+            fetch(`/modelos/lista?marca=${idmarca}&tipo=${idtipo}`)
+                .then(res => res.ok ? res.json() : Promise.reject(res.status))
+                .then(json => {
+                    if (!json.success) return;
+                    modelosData = json.modelos;
+                    // Extraer nombres de modelos únicos
+                    const nombres = Array.from(new Set(modelosData.map(m => m.modelo)));
+                    nombres.forEach(nombre => {
+                        const opt = document.createElement('option');
+                        opt.value = nombre;
+                        opt.textContent = nombre;
+                        modeloSel.append(opt);
+                    });
+                })
+                .catch(err => console.error('Error al cargar modelos:', err));
+        }
+
+        // Cuando cambian marca o tipo
+        marcaSel.addEventListener('change', actualizarModelos);
+        tipoSel.addEventListener('change', actualizarModelos);
+
+        // Al seleccionar un modelo, poblar años
+        modeloSel.addEventListener('change', () => {
+            const nombreSel = modeloSel.value;
+            anioSel.innerHTML = '<option value="">Seleccionar año</option>';
+            if (!nombreSel) return;
+            // Filtrar datos para ese modelo
+            const años = modelosData
+                .filter(m => m.modelo === nombreSel)
+                .map(m => m.anio);
+            // Únicos y ordenados
+            Array.from(new Set(años)).sort().forEach(year => {
+                const opt = document.createElement('option');
+                opt.value = year;
+                opt.textContent = year;
+                anioSel.append(opt);
+            });
         });
-      })
-      .catch(err => console.error('Error al cargar modelos:', err));
-  }
+        const vehSel = document.getElementById('idvehiculo');
 
-  // Cuando cambian marca o tipo
-  marcaSel.addEventListener('change', actualizarModelos);
-  tipoSel .addEventListener('change', actualizarModelos);
+// Función para poblar vehículos disponibles
+function cargarDisponibles() {
+  const idmarca = marcaSel.value;
+  const idtipo  = tipoSel.value;
+  const modelo  = modeloSel.value;
+  const anio    = anioSel.value;
 
-  // Al seleccionar un modelo, poblar años
-  modeloSel.addEventListener('change', () => {
-    const nombreSel = modeloSel.value;
-    anioSel.innerHTML = '<option value="">Seleccionar año</option>';
-    if (!nombreSel) return;
-    // Filtrar datos para ese modelo
-    const años = modelosData
-      .filter(m => m.modelo === nombreSel)
-      .map(m => m.anio);
-    // Únicos y ordenados
-    Array.from(new Set(años)).sort().forEach(year => {
-      const opt = document.createElement('option');
-      opt.value = year;
-      opt.textContent = year;
-      anioSel.append(opt);
-    });
-  });
+  vehSel.innerHTML = '<option value="">Seleccionar vehículo</option>';
+  if (!idmarca || !idtipo || !modelo || !anio) return;
+
+  fetch(`/vehiculos/disponibles?marca=${idmarca}&tipo=${idtipo}` +
+        `&modelo=${encodeURIComponent(modelo)}&anio=${anio}`)
+    .then(res => res.ok ? res.json() : Promise.reject(res.status))
+    .then(json => {
+      if (!json.success) return;
+      json.vehiculos.forEach(v => {
+        const opt = document.createElement('option');
+        opt.value = v.idvehiculo;
+        opt.textContent = `${v.version} | ${v.color} | ${v.placa}`;
+        vehSel.append(opt);
+      });
+    })
+    .catch(err => console.error('Error al cargar vehículos:', err));
+}
+
+// Dispara carga cuando cambien también modelo o año
+modeloSel.addEventListener('change', cargarDisponibles);
+anioSel  .addEventListener('change', cargarDisponibles);
+        
     });
 </script>
 

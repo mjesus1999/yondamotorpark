@@ -12,3 +12,4 @@ $router->add('GET', '/clientes/lista', 'ClienteController', 'getAllCliente');
 
 //Modelos de vehiculo
 $router->add('GET', '/modelos/lista', 'ModeloController', 'getByMarcaYTipo');
+$router->add('GET', '/vehiculos/disponibles', 'VehiculoController', 'getDisponibles');
