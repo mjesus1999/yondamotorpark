@@ -362,35 +362,35 @@
         });
         const vehSel = document.getElementById('idvehiculo');
 
-// Función para poblar vehículos disponibles
-function cargarDisponibles() {
-  const idmarca = marcaSel.value;
-  const idtipo  = tipoSel.value;
-  const modelo  = modeloSel.value;
-  const anio    = anioSel.value;
+        // Función para poblar vehículos disponibles
+        function cargarDisponibles() {
+            const idmarca = marcaSel.value;
+            const idtipo = tipoSel.value;
+            const modelo = modeloSel.value;
+            const anio = anioSel.value;
 
-  vehSel.innerHTML = '<option value="">Seleccionar vehículo</option>';
-  if (!idmarca || !idtipo || !modelo || !anio) return;
+            vehSel.innerHTML = '<option value="">Seleccionar vehículo</option>';
+            if (!idmarca || !idtipo || !modelo || !anio) return;
 
-  fetch(`/vehiculos/disponibles?marca=${idmarca}&tipo=${idtipo}` +
-        `&modelo=${encodeURIComponent(modelo)}&anio=${anio}`)
-    .then(res => res.ok ? res.json() : Promise.reject(res.status))
-    .then(json => {
-      if (!json.success) return;
-      json.vehiculos.forEach(v => {
-        const opt = document.createElement('option');
-        opt.value = v.idvehiculo;
-        opt.textContent = `${v.version} | ${v.color} | ${v.placa}`;
-        vehSel.append(opt);
-      });
-    })
-    .catch(err => console.error('Error al cargar vehículos:', err));
-}
+            fetch(`/vehiculos/disponibles?marca=${idmarca}&tipo=${idtipo}` +
+                `&modelo=${encodeURIComponent(modelo)}&anio=${anio}`)
+                .then(res => res.ok ? res.json() : Promise.reject(res.status))
+                .then(json => {
+                    if (!json.success) return;
+                    json.vehiculos.forEach(v => {
+                        const opt = document.createElement('option');
+                        opt.value = v.idvehiculo;
+                        opt.textContent = `${v.version} | ${v.color} | ${v.placa}`;
+                        vehSel.append(opt);
+                    });
+                })
+                .catch(err => console.error('Error al cargar vehículos:', err));
+        }
 
-// Dispara carga cuando cambien también modelo o año
-modeloSel.addEventListener('change', cargarDisponibles);
-anioSel  .addEventListener('change', cargarDisponibles);
-        
+        // Dispara carga cuando cambien también modelo o año
+        modeloSel.addEventListener('change', cargarDisponibles);
+        anioSel.addEventListener('change', cargarDisponibles);
+
     });
 </script>
 
