@@ -70,9 +70,14 @@
                     <div class="row g-2">
                         <div class="col-md-3">
                             <div class="form-floating">
-                                <select class="form-select" id="idmarca" name="idmarca" required>
+                                <select id="idmarca" name="idmarca" class="form-select" required>
                                     <option value="">Seleccionar marca</option>
-                                    <!-- Cargar desde BD -->
+                                    <?php foreach ($marcas as $m): ?>
+                                        <option value="<?= $m['idmarca'] ?>">
+                                            <?= htmlspecialchars($m['marca']) ?>
+                                            (<?= $m['modelos'] ?> modelos)
+                                        </option>
+                                    <?php endforeach; ?>
                                 </select>
                                 <label for="idmarca">Marca</label>
                             </div>
@@ -309,6 +314,21 @@
             inputDoc.value = opt ? (opt.dataset.doc || '') : '';
             inputTel.value = opt ? (opt.dataset.tel || '') : '';
         });
+
+        fetch('/marcas/lista')
+            .then(res => res.json())
+            .then(json => {
+                if (!json.success) return;
+                const marcaSelect = document.getElementById('idmarca');
+                marcaSelect.innerHTML = '<option value="">Seleccionar marca</option>';
+                json.marcas.forEach(m => {
+                    const opt = document.createElement('option');
+                    opt.value = m.idmarca;
+                    opt.textContent = `${m.marca} (${m.modelos})`;
+                    marcaSelect.append(opt);
+                });
+            })
+            .catch(console.error);
     });
 </script>
 

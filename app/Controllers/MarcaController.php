@@ -4,24 +4,33 @@
 namespace App\Controllers;
 
 use App\Core\Controller;
+use App\Models\Marca;
 //use App\Models\Product;
 
 class MarcaController extends Controller
 {
-  //private Product $productModel;
+  private Marca $model;
 
   public function __construct()
   {
-    //$this->productModel = new Product();
+    $this->model = new Marca();
   }
 
   public function index(): void
   {
     $this->authRequired();
-    //$products = $this->productModel->getAll();
-    //$this->view('products.index', ['products' => $products]);
     $this->view('marcas.index');
   }
 
+  public function getAll(): void
+  {
+    header('Content-Type: application/json; charset=utf-8');
+    $lista = $this->model->getAll();
+    echo json_encode([
+      'success' => true,
+      'marcas' => $lista
+    ], JSON_UNESCAPED_UNICODE);
+    exit;
+  }
 
 }

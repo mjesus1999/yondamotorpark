@@ -24,7 +24,7 @@ class ClienteController extends Controller
         header('Content-Type: application/json; charset=utf-8');
         $lista = $this->clienteModel->getAll();
         echo json_encode([
-            'success'  => true,
+            'success' => true,
             'clientes' => $lista
         ], JSON_UNESCAPED_UNICODE);
         exit;
