@@ -74,8 +74,7 @@
                                     <option value="">Seleccionar marca</option>
                                     <?php foreach ($marcas as $m): ?>
                                         <option value="<?= $m['idmarca'] ?>">
-                                            <?= htmlspecialchars($m['marca']) ?>
-                                            (<?= $m['modelos'] ?> modelos)
+                                            <?= htmlspecialchars($m['marca']) ?> (<?= $m['modelos'] ?>)
                                         </option>
                                     <?php endforeach; ?>
                                 </select>
@@ -84,9 +83,13 @@
                         </div>
                         <div class="col-md-3">
                             <div class="form-floating">
-                                <select class="form-select" id="idtipovehiculo" name="idtipovehiculo" required>
+                                <select id="idtipovehiculo" name="idtipovehiculo" class="form-select" required>
                                     <option value="">Seleccionar tipo</option>
-                                    <!-- Cargar desde BD -->
+                                    <?php foreach ($tipovehiculos as $tv): ?>
+                                        <option value="<?= $tv['idtipovehiculo'] ?>">
+                                            <?= htmlspecialchars($tv['tipovehiculo']) ?>
+                                        </option>
+                                    <?php endforeach; ?>
                                 </select>
                                 <label for="idtipovehiculo">Tipo de Vehículo</label>
                             </div>
@@ -287,51 +290,77 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        const select = document.getElementById('idcliente');
-        const inputDoc = document.getElementById('documento');
-        const inputTel = document.getElementById('telefono');
+        const clienteSelect = document.getElementById('idcliente');
+        const documentoInput = document.getElementById('documento');
+        const telefonoInput = document.getElementById('telefono');
 
-        //cargamos los clientes en el select (nombre, numero de documento, numero de telprimario)
-        fetch('/clientes/lista')
-            .then(res => res.json())
-            .then(json => {
-                if (!json.success) return;
-                select.innerHTML = '<option value="">Seleccionar cliente</option>';
-                json.clientes.forEach(cli => {
-                    const opt = document.createElement('option');
-                    opt.value = cli.idcliente;
-                    opt.textContent = cli.label;
-                    opt.dataset.doc = cli.nrodoc;
-                    opt.dataset.tel = cli.telprimario;
-                    select.append(opt);
-                });
-            })
-            .catch(console.error);
-
-        //se limpia y se actualiza conforme se cambie el cliente
-        select.addEventListener('change', () => {
-            const opt = select.selectedOptions[0];
-            inputDoc.value = opt ? (opt.dataset.doc || '') : '';
-            inputTel.value = opt ? (opt.dataset.tel || '') : '';
+        clienteSelect.addEventListener('change', () => {
+            const option = clienteSelect.selectedOptions[0];
+            if (!option || !option.value) {
+                documentoInput.value = '';
+                telefonoInput.value = '';
+                return;
+            }
+            //se llena los campos al ser seleccionado un cliente
+            documentoInput.value = option.dataset.doc || '';
+            telefonoInput.value = option.dataset.tel || '';
         });
+        const marcaSel = document.getElementById('idmarca');
+  const tipoSel  = document.getElementById('idtipovehiculo');
+  const modeloSel= document.getElementById('idmodelo');
+  const anioSel  = document.getElementById('anio');
 
-        fetch('/marcas/lista')
-            .then(res => res.json())
-            .then(json => {
-                if (!json.success) return;
-                const marcaSelect = document.getElementById('idmarca');
-                marcaSelect.innerHTML = '<option value="">Seleccionar marca</option>';
-                json.marcas.forEach(m => {
-                    const opt = document.createElement('option');
-                    opt.value = m.idmarca;
-                    opt.textContent = `${m.marca} (${m.modelos})`;
-                    marcaSelect.append(opt);
-                });
-            })
-            .catch(console.error);
+  let modelosData = [];
+
+  // Función para poblar modelo y limpiar año
+  function actualizarModelos() {
+    const idmarca = marcaSel.value;
+    const idtipo  = tipoSel.value;
+    modeloSel.innerHTML = '<option value="">Seleccionar modelo</option>';
+    anioSel .innerHTML = '<option value="">Seleccionar año</option>';
+
+    if (!idmarca || !idtipo) return;
+
+    fetch(`/modelos/lista?marca=${idmarca}&tipo=${idtipo}`)
+      .then(res => res.ok ? res.json() : Promise.reject(res.status))
+      .then(json => {
+        if (!json.success) return;
+        modelosData = json.modelos;
+        // Extraer nombres de modelos únicos
+        const nombres = Array.from(new Set(modelosData.map(m => m.modelo)));
+        nombres.forEach(nombre => {
+          const opt = document.createElement('option');
+          opt.value = nombre;
+          opt.textContent = nombre;
+          modeloSel.append(opt);
+        });
+      })
+      .catch(err => console.error('Error al cargar modelos:', err));
+  }
+
+  // Cuando cambian marca o tipo
+  marcaSel.addEventListener('change', actualizarModelos);
+  tipoSel .addEventListener('change', actualizarModelos);
+
+  // Al seleccionar un modelo, poblar años
+  modeloSel.addEventListener('change', () => {
+    const nombreSel = modeloSel.value;
+    anioSel.innerHTML = '<option value="">Seleccionar año</option>';
+    if (!nombreSel) return;
+    // Filtrar datos para ese modelo
+    const años = modelosData
+      .filter(m => m.modelo === nombreSel)
+      .map(m => m.anio);
+    // Únicos y ordenados
+    Array.from(new Set(años)).sort().forEach(year => {
+      const opt = document.createElement('option');
+      opt.value = year;
+      opt.textContent = year;
+      anioSel.append(opt);
+    });
+  });
     });
 </script>
-
 
 
 <?php include __DIR__ . '/../layout/footer.php'; ?>

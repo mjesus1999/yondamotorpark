@@ -4,29 +4,37 @@
 namespace App\Controllers;
 
 use App\Core\Controller;
-//use App\Models\Product;
+use App\Models\Cliente;
+use App\Models\Marca;
+use App\Models\TipoVehiculo;
+
 
 class VehiculoController extends Controller
 {
-  //private Product $productModel;
 
   public function __construct()
   {
-    //$this->productModel = new Product();
   }
 
   public function index(): void
   {
     $this->authRequired();
-    //$products = $this->productModel->getAll();
-    //$this->view('products.index', ['products' => $products]);
     $this->view('vehiculos.index');
   }
 
   public function create(): void
   {
     $this->authRequired();
-    $this->view('vehiculos.create');
+
+    $clientes = (new Cliente())->getAll();
+    $marcas = (new Marca())->getAll();
+    $tipovehiculos = (new TipoVehiculo())->getAll();
+
+    $this->view('vehiculos.create', compact(
+      'clientes',
+      'marcas',
+      'tipovehiculos'
+    ));
   }
 
 }

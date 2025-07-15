@@ -1,5 +1,6 @@
 <?php
 //app/Controllers/Cliente.php
+
 namespace App\Models;
 
 use App\Core\Database;
@@ -52,7 +53,7 @@ class Cliente
             CASE
                 WHEN c.tipocliente = 'P'
                 THEN CONCAT(p.nombres, ' ', p.apellidos)
-                ELSE CONCAT(e.razonsocial, ' – ', e.nombrecomercial)
+                ELSE CONCAT(e.razonsocial, ' - ', e.nombrecomercial)
             END AS label,
             CASE
                 WHEN c.tipocliente = 'P' THEN p.nrodoc
