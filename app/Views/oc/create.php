@@ -436,12 +436,12 @@
                     }
 
                     //Se deberán generar input de forma dinámica para agregar: id, chasis, placa, placa rotativa, serie
-                    cantidad.addEventListener("change", function (event) {
+                    cantidad.addEventListener("change", function(event) {
                         generadorInputsDinamicos(parseInt(this.value))
                     })
 
                     //Se deberán generar input de forma dinámica para agregar: id, chasis, placa, placa rotativa, serie
-                    cantidad.addEventListener("keyup", function (event) {
+                    cantidad.addEventListener("keyup", function(event) {
                         if (this.value != "") {
                             generadorInputsDinamicos(parseInt(this.value))
                         }
@@ -505,22 +505,7 @@
 
 
 
-                    //   async function obtenerConcesionarios() {
-                    //     const response = await fetch(`../../app/controllers/concesionario.c.php?operation=getAllConcesionarios`, { method: 'GET' })
-                    //     const data = await response.json()
-                    //     return data
-                    //   }
-
-                    //   async function renderConcesionarios() {
-                    //     dataConcesionarios = await obtenerConcesionarios()
-                    //     if (dataConcesionarios.length > 0) {
-                    //       concesionarios.innerHTML = `<option value=''>Seleccione</option>`
-                    //       dataConcesionarios.forEach(element => {
-                    //         concesionarios.innerHTML += `<option value='${element.idconcesionario}'>${element.nombrecomercial}</option>`
-                    //       });
-                    //     }
-                    //   }
-
+    
                     // Obtener los concesionarios de la DB
                     async function obtenerConcesionarios() {
 
@@ -545,10 +530,7 @@
                         }
 
                     }
-
-                    await obtenerConcesionarios();
-
-
+                    
                     async function obtenerTiendaByConcesionario(idconcesionario) {
 
                         try {
@@ -556,12 +538,13 @@
                             const res = await fetch(`/api/tiendasConcesionario/${idconcesionario}`);
                             const data = await res.json();
                             return data;
-                        } catch (error) { console.error(error); }
+                        } catch (error) {
+                            console.error(error);
+                        }
 
                     }
 
-                    await obtenerConcesionarios();
-
+                   
                     concesionarios.addEventListener('change', async (event) => {
                         const idConcesionario = event.target.value;
                         const concesionarioSeleccionado = dataConcesionarios.find(item => item.idconcesionario == idConcesionario);
@@ -597,7 +580,6 @@
                         telefono.value = '';
                     });
 
-
                     // Cuando seleccione la tienda, me ocmplete con sus datos.
                     tiendas.addEventListener('change', (event) => {
                         const idTiendaSeleccionada = event.target.value;
@@ -615,9 +597,7 @@
                         telefono.value = tiendaSeleccionada.telefono;
                     });
 
-
                     // Enviar los datos para agregar una orden de compra
- 
                     formOC.addEventListener('submit', async (event) => {
 
                         event.preventDefault();
@@ -640,154 +620,98 @@
 
                     });
 
+                    // Obtener las Marcas de la DB
+                    async function obtenerMarcas() {
+                        try {
+
+                            const res = await fetch(`/api/marcas`);
+                            const data = await res.json();
+
+                            if (data.length > 0) {
+                                marcas.innerHTML = '<option>Seleccione</option>'
+
+                                data.forEach(element => {
+                                    marcas.innerHTML += `<option value="${element.idmarca}">${element.marca}</option>`;
+                                });
+                            } else {
+                                marcas.innerHTML = '<option> No hay datos registrados</option>'
+                            }
+
+                        } catch (error) {
+                            console.error(error);
+                        }
+
+                    }
+
+                    // EVENTO CUANDO SELECCIONE UN MARCA, SE AGRGEUEN LOS TIPOS DE VEHICULOS DE ESA MARCA AL SELECT
+                    marcas.addEventListener('change', async (event) => {
+                        const idmarca = event.target.value;
+                        const res = await fetch(`/api/getTipoVehiculoByMarca/${idmarca}`);
+                        const data = await res.json();
 
 
-                    //  // Obtener las Marcas de la DB
-                    //   async function obtenerMarcas() {
-                    //     try {
+                        if (data.length > 0) {
+                            tipos.innerHTML = '<option>Seleccione</option>';
+                            data.forEach(element => {
+                                tipos.innerHTML += `<option value="${element.idtipovehiculo}">${element.tipovehiculo}</option>`;
+                            });
+                        } else {
+                            tipos.innerHTML = '<option> No hay datos</option>'
+                        }
 
-                    //         const res = await fetch(`/api/marcas`);
-                    //         const data = await res.json();
+                    });
 
-                    //         console.log('LISTADO DE MARCAS: ', data);
+                    // EVENTO CUANDO SE SEECCIONE UN TIPO DE VEHICULO Y ME MUESTRE SUS MODELO
+                    tipos.addEventListener('change', async (event) => {
+                        const idmarca = parseInt(marcas.value);
+                        const idTipoVehiculo = parseInt(event.target.value);
 
-                    //     } catch(error) {
-                    //         console.error(error);
-                    //     }
+                        const res = await fetch(`/api/getModeloByTipoMarca/${idmarca}/${idTipoVehiculo}`);
+                        dataModelos = await res.json();
 
-                    //   }
+                        modelos.innerHTML = '<option>Seleccione</option>';
+                        anios.innerHTML = '<option>Seleccione</option>';
 
-                    //   await obtenerMarcas();
+                        if (dataModelos.length > 0) {
+                            // Map para evitar modelos repetidos (por si vienen con distintos años) - Agregar cualquir tipo de dato {c:v}
+                            const modelosUnicos = new Map();
+
+                            dataModelos.forEach(element => {
+                                if (!modelosUnicos.has(element.modelo)) { //Pregunto si ya fue agregado
+                                    modelosUnicos.set(element.modelo, element.idmodelo);
+                                }
+                            });
+
+                            modelosUnicos.forEach((idmodelo, modelo) => {
+                                modelos.innerHTML += `<option value="${idmodelo}">${modelo}</option>`;
+                            });
+                        } else {
+                            modelos.innerHTML = '<option>No hay datos</option>';
+                        }
+                    });
 
 
+                    modelos.addEventListener('change', async (event) => {
+                        const modeloSeleccionado = event.target.value;
+                        // Filtrar todos los objetos con ese modelo
+                        const modelosFiltrados = dataModelos.filter(item => item.idmodelo == modeloSeleccionado);
+
+                        // Extraer años únicos
+                        const aniosUnicos = [...new Set(modelosFiltrados.map(item => item.anio))];
+
+                        // Limpiar el select de años
+                        anios.innerHTML = '<option>Seleccione</option>';
+
+                        if (aniosUnicos.length > 0) {
+                            aniosUnicos.forEach(anio => {
+                                anios.innerHTML += `<option value="${anio}">${anio}</option>`;
+                            });
+                        } else {
+                            anios.innerHTML += `<option>No hay datos</option>`;
+                        }
+                    });
 
 
-
-
-
-
-
-
-
-
-                    //   function resetFormOC() {
-                    //     ruc.value = ""
-                    //     direccion.value = ""
-                    //     asesor.value = ""
-                    //     telefono.value = ""
-                    //     moneda.value = "USD"
-                    //   }
-
-                    //   //Al cambiar una marca de la lista, se recargan los tipo de vehiculos
-                    //   marcas.addEventListener("change", async function (event) {
-                    //     const idmarca = parseInt(this.value)
-                    //     const response = await fetch(`../../app/controllers/tipovehiculo.c.php?operation=getTipoVehiculoByMarca&idmarca=${idmarca}`, { method: 'GET' })
-                    //     const data = await response.json()
-
-                    //     if (data.length > 0) {
-                    //       tipos.innerHTML = `<option value=''>Seleccione</option>`
-                    //       data.forEach(element => {
-                    //         tipos.innerHTML += `<option value='${element.idtipovehiculo}'>${element.tipovehiculo}</option>`
-                    //       });
-                    //       modelos.innerHTML = `<option value=''>Seleccione</option>`
-                    //       anios.innerHTML = `<option value=''>Seleccione</option>`
-                    //     } else {
-                    //       tipos.innerHTML = `<option value=''>No hay  datos</option>`
-                    //       modelos.innerHTML = `<option value=''>No hay  datos</option>`
-                    //       anios.innerHTML = `<option value=''>No hay  datos</option>`
-                    //     }
-                    //   })
-
-                    //   tipos.addEventListener("change", async function () {
-                    //     const idmarca = parseInt(marcas.value)
-                    //     const idtipovehiculo = parseInt(tipos.value)
-                    //     const response = await fetch(`../../app/controllers/modelo.c.php?operation=getModelosByTipoMarca&idmarca=${idmarca}&idtipovehiculo=${idtipovehiculo}`, { method: 'GET' })
-                    //     dataModelos = await response.json()
-
-                    //     if (dataModelos.length > 0) {
-                    //       modelos.innerHTML = `<option value=''>Seleccione</option>`
-                    //       anios.innerHTML = `<option value=''>Seleccione</option>`
-
-                    //       //Se compara el modelo por agregar con el ya agregado para no repetir
-                    //       let modeloAgregado = ""
-
-                    //       dataModelos.forEach(element => {
-
-                    //         if (modeloAgregado === "") {
-                    //           //Si la variable está vacía, se agrega directamente (es el primero)
-                    //           modelos.innerHTML += `<option value='${element.idmodelo}'>${element.modelo}</option>`
-                    //         }
-                    //         else {
-                    //           //Para las otras iteraciones, se agrega siempre que el nuevo modelo sea diferente del agregado anteriormente
-                    //           if (modeloAgregado != element.modelo) {
-                    //             modelos.innerHTML += `<option value='${element.idmodelo}'>${element.modelo}</option>`
-                    //           }
-                    //         }
-
-                    //         //Para cualquier cosa, la variable actualiza su valor con el modelo agregado
-                    //         modeloAgregado = element.modelo
-                    //       });
-                    //     } else {
-                    //       modelos.innerHTML = `<option value=''>No hay  datos</option>`
-                    //     }
-                    //   })
-
-                    //   //Se agregan los años del modelo seleccionado
-                    //   modelos.addEventListener("change", function (event) {
-                    //     const modeloSeleccionado = this.options[this.selectedIndex].text
-
-                    //     //Buscamos ese modelo en DataModelos y agregamos los años a la lista
-                    //     anios.innerHTML = `<option value=''>Seleccione</option>`
-                    //     dataModelos.forEach(element => {
-                    //       if (element.modelo === modeloSeleccionado) {
-                    //         anios.innerHTML += `<option value='${element.idmodelo}'>${element.anio}</option>`
-                    //       }
-                    //     });
-                    //   })
-
-                    //   //Al seleccionar un concesionario recuperamos el número de RUC
-                    //   concesionarios.addEventListener("change", async function (event) {
-
-                    //     //Reiniciando formulario
-                    //     ruc.value = ""
-                    //     direccion.value = ""
-                    //     asesor.value = ""
-                    //     telefono.value = ""
-                    //     moneda.value = "USD"
-
-                    //     const indice = event.target.selectedIndex
-                    //     if (indice > 0) {
-                    //       ruc.value = dataConcesionarios[indice - 1].ruc
-
-                    //       //Se debe mostrar las tiendas
-                    //       const idconcesionario = parseInt(this.value)
-                    //       dataTiendas = await obtenerTiendas(idconcesionario)
-                    //       if (dataTiendas.length == 0) {
-                    //         tiendas.innerHTML = `<option value=''>No hay tiendas registradas</option>`
-                    //       } else {
-                    //         tiendas.innerHTML = `<option value=''>Seleccione</option>`
-                    //         dataTiendas.forEach(element => {
-                    //           tiendas.innerHTML += `<option value='${element.idtienda}'>${element.ubigeo}</option>`;
-                    //         });
-                    //       }
-                    //     } else {
-                    //       tiendas.innerHTML = `<option value=''>Seleccione</option>`
-                    //     }
-                    //   })
-
-                    //   //Al cambiar una tienda de la lista se debe mostrar la dirección, teléfono y el asesor
-                    //   tiendas.addEventListener("change", (event) => {
-                    //     const indice = event.target.selectedIndex
-                    //     if (indice == 0) {
-                    //       direccion.value = ``
-                    //       telefono.value = ``
-                    //       asesor.value = ``
-                    //     } else {
-                    //       direccion.value = dataTiendas[indice - 1].direccion
-                    //       telefono.value = dataTiendas[indice - 1].telefono
-                    //       asesor.value = dataTiendas[indice - 1].contacto
-                    //     }
-                    //   })
 
                     function asignarFechaActual() {
                         const hoy = new Date()
@@ -796,11 +720,12 @@
                         fechaEmision.setAttribute("disabled", true)
                     }
 
-                    asignarFechaActual()
-                    //   renderConcesionarios()
-                    //   listarMarcas()
+                    asignarFechaActual();
+                    await obtenerConcesionarios();
+                    await obtenerMarcas();
+
                 });
             </script>
 
 
-            <?php include __DIR__ . '/../layout/footer.php'; ?>
+<?php include __DIR__ . '/../layout/footer.php'; ?>
