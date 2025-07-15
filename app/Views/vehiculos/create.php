@@ -18,7 +18,7 @@
     </div>
 
     <div class="mb-2">
-        <form id="formCotizacion" action="/cotizaciones/generar" method="POST">
+        <form id="formCotizacion" action="/cotizaciones" method="POST">
             <!-- Información del Cliente -->
             <div class="card mb-4">
                 <div class="card-header bg-info">
@@ -30,9 +30,15 @@
                     <div class="row g-2">
                         <div class="col-md-6">
                             <div class="form-floating">
-                                <select class="form-select" id="idcliente" name="idcliente" required>
+                                <select id="idcliente" name="idcliente" class="form-select" required>
                                     <option value="">Seleccionar cliente</option>
-                                    <!-- Cargar desde BD -->
+                                    <?php foreach ($clientes as $cli): ?>
+                                        <option value="<?= $cli['idcliente'] ?>"
+                                            data-doc="<?= htmlspecialchars($cli['nrodoc']) ?>"
+                                            data-tel="<?= htmlspecialchars($cli['telprimario']) ?>">
+                                            <?= htmlspecialchars($cli['label']) ?>
+                                        </option>
+                                    <?php endforeach; ?>
                                 </select>
                                 <label for="idcliente">Cliente</label>
                             </div>
@@ -173,8 +179,8 @@
                         </div>
                         <div class="col-md-3">
                             <div class="form-floating">
-                                <input type="number" class="form-control" id="vigenciadias" name="vigenciadias"
-                                    value="" min="1" max="90" required>
+                                <input type="number" class="form-control" id="vigenciadias" name="vigenciadias" value=""
+                                    min="1" max="90" required>
                                 <label for="vigenciadias">Vigencia (días)</label>
                             </div>
                         </div>
@@ -273,6 +279,39 @@
         </form>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const select = document.getElementById('idcliente');
+        const inputDoc = document.getElementById('documento');
+        const inputTel = document.getElementById('telefono');
+
+        //cargamos los clientes en el select (nombre, numero de documento, numero de telprimario)
+        fetch('/clientes/lista')
+            .then(res => res.json())
+            .then(json => {
+                if (!json.success) return;
+                select.innerHTML = '<option value="">Seleccionar cliente</option>';
+                json.clientes.forEach(cli => {
+                    const opt = document.createElement('option');
+                    opt.value = cli.idcliente;
+                    opt.textContent = cli.label;
+                    opt.dataset.doc = cli.nrodoc;
+                    opt.dataset.tel = cli.telprimario;
+                    select.append(opt);
+                });
+            })
+            .catch(console.error);
+
+        //se limpia y se actualiza conforme se cambie el cliente
+        select.addEventListener('change', () => {
+            const opt = select.selectedOptions[0];
+            inputDoc.value = opt ? (opt.dataset.doc || '') : '';
+            inputTel.value = opt ? (opt.dataset.tel || '') : '';
+        });
+    });
+</script>
+
 
 
 <?php include __DIR__ . '/../layout/footer.php'; ?>
