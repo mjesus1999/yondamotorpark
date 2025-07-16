@@ -235,9 +235,7 @@
                                     <option value="">Seleccionar formato</option>
                                     <?php foreach ($formatos as $f): ?>
                                         <option value="<?= $f['idformato'] ?>">
-                                            <?= htmlspecialchars($f['cotización']) ?>
-                                            (<?= $f['fechainicio'] ?> -
-                                            <?= $f['fechafin'] ?? '∞' ?>)
+                                        <?= htmlspecialchars($f['tipocotizacion']) ?>
                                         </option>
                                     <?php endforeach; ?>
                                 </select>

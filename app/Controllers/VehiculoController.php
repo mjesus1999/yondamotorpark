@@ -8,6 +8,7 @@ use App\Models\Cliente;
 use App\Models\Marca;
 use App\Models\TipoVehiculo;
 use App\Models\Vehiculo;
+use App\Models\FormatoCotizacion;
 
 
 class VehiculoController extends Controller
@@ -30,15 +31,17 @@ class VehiculoController extends Controller
     $clientes = (new Cliente())->getAll();
     $marcas = (new Marca())->getAll();
     $tipovehiculos = (new TipoVehiculo())->getAll();
+    $formatos = (new FormatoCotizacion())->getAll();
 
     $this->view('vehiculos.create', compact(
       'clientes',
       'marcas',
-      'tipovehiculos'
+      'tipovehiculos',
+      'formatos'
     ));
   }
 
-  public function getDisponibles(): void
+  public function getVehiculosDisponibles(): void
   {
     header('Content-Type: application/json; charset=utf-8');
     $m = isset($_GET['marca']) ? (int) $_GET['marca'] : 0;

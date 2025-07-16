@@ -8,24 +8,23 @@ use App\Models\Cliente;
 
 class ClienteController extends Controller
 {
-    private Cliente $model;
+    private Cliente $clienteModel;
 
     public function __construct()
     {
-        parent::__construct();
-        $this->model = new Cliente();
+        $this->clienteModel = new Cliente();
     }
 
     /**
      * GET /clientes/lista
-     * Devuelve JSON con todos los clientes para el AJAX.
+     * Devuelve JSON con todos los clientes.
      */
-    public function getCliente(): void
+    public function getAllCliente(): void
     {
         header('Content-Type: application/json; charset=utf-8');
-        $lista = $this->model->getAll();  // tu método en App\Models\Cliente
+        $lista = $this->clienteModel->getAll();
         echo json_encode([
-            'success'  => true,
+            'success' => true,
             'clientes' => $lista
         ], JSON_UNESCAPED_UNICODE);
         exit;
