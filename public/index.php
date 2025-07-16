@@ -25,7 +25,6 @@ $router = new Router();
 //RUTAS POR MÓDULO
 require APP_ROOT . '/app/Routes/Home.router.php';
 require APP_ROOT . '/app/Routes/Marca.router.php';
-require APP_ROOT . '/app/Routes/Vehiculo.router.php';
 require APP_ROOT . '/app/Routes/Local.router.php';
 require APP_ROOT . '/app/Routes/Ubigeo.router.php';
 require APP_ROOT . '/app/Routes/Motorpark.router.php';
@@ -36,6 +35,8 @@ require APP_ROOT . '/app/Routes/Concesionario.router.php';
 require APP_ROOT . '/app/Routes/OC.router.php';
 require APP_ROOT . '/app/Routes/TipoVehiculo.router.php';
 require APP_ROOT . '/app/Routes/Modelo.router.php';
+require APP_ROOT . '/app/Routes/Vehiculo.router.php';
+require APP_ROOT . '/app/Routes/DetalleOC.router.php';
 
 // Un controlador básico para la página de inicio
 class HomeController extends App\Core\Controller

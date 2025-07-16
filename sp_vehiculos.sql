@@ -8,38 +8,33 @@ SELECT * FROM detordencompra;
 SELECT * FROM modelos;
 SELECT * FROM tipovehiculos ;
 
+
+
+DROP PROCEDURE sp_vehiculo_OC_registrar;
 DELIMITER //
 
 CREATE PROCEDURE sp_vehiculo_OC_registrar(
 IN idmodelo_ INT,
 IN idcombustible_ INT,
-IN idlogistica_ INT,
-IN idlocal_ 	INT,
 IN version_ VARCHAR(20),
-IN condicion_ VARCHAR(20),
 IN color_ VARCHAR(30), -- NULL
 IN chasis_ VARCHAR(30), -- NULL
 IN placa_ VARCHAR(10), -- NULL
 IN placarotativa_ VARCHAR(10), -- NULL
-IN seriemotor_ VARCHAR(20),-- NULL
-IN precioventa_ DECIMAL(9,2) 
+IN seriemotor_ VARCHAR(20) -- NULL
 )
 BEGIN
 
-	INSERT INTO vehiculos(idmodelo,idcombustible, idlogistica,idlocal,version,condicion,color,chasis,placa,placarotativa,seriemotor,precioventa,disponibilidad,origen)
+	INSERT INTO vehiculos(idmodelo,idcombustible,version,color,chasis,placa,placarotativa,seriemotor,disponibilidad,origen)
 		VALUES(
         idmodelo_,
         idcombustible_,
-        idlogistica_,
-        idlocal_,
         version_,
-        condicion_,
         NULLIF(color_,''),
         NULLIF(chasis_,''),
         NULLIF(placa_,''),
         NULLIF(placarotativa_,''),
         NULLIF(seriemotor_,''),
-        precioventa_,
         'proceso',
         'OCP'
         );
@@ -47,6 +42,8 @@ BEGIN
         SELECT LAST_INSERT_ID() AS 'last_id';
 
 END //
+
+CALL sp_vehiculo_OC_registrar(13,1,'FULL','Rojo','','','','');
 
 
 

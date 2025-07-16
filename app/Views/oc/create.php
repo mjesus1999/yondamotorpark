@@ -120,10 +120,7 @@
                 </div>
 
             </div> <!-- ./card-body -->
-            <div class="card-footer text-end">
-                <button type="reset" class="btn btn-sm btn-outline-secondary">Cancelar</button>
-                <button type="submit" class="btn btn-sm btn-primary">Registrar</button>
-            </div>
+
         </div><!-- ./card -->
     </form>
 
@@ -148,7 +145,7 @@
 
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-sm">
+                <table class="table table-sm" id="tabla-detalle">
                     <thead>
                         <tr>
                             <th>#</th>
@@ -161,48 +158,20 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>1</td>
-                            <td>
-                                <a href=""><i class="fa-solid fa-trash"></i></a> ::
-                                Kia SUV Seltos blanco 2025/ Full equipo / Chasis 77A855455A
-                            </td>
-                            <td>1</td>
 
-                            <td>18000</td>
-                            <td>0</td>
-                            <td>18000</td>
-                        </tr>
-                        <tr>
-                            <td>1</td>
-                            <td>
-                                <a href=""><i class="fa-solid fa-trash"></i></a> ::
-                                Kia SUV Seltos blanco 2025/ Full equipo / Chasis 77A855455A
-                            </td>
-                            <td>1</td>
-
-                            <td>18000</td>
-                            <td>0</td>
-                            <td>18000</td>
-                        </tr>
-                        <tr>
-                            <td>1</td>
-                            <td>
-                                <a href=""><i class="fa-solid fa-trash"></i></a> ::
-                                Kia SUV Seltos blanco 2025/ Full equipo / Chasis 77A855455A
-                            </td>
-                            <td>1</td>
-
-                            <td>18000</td>
-                            <td>0</td>
-                            <td>18000</td>
-                        </tr>
                     </tbody>
                 </table>
             </div>
         </div>
 
+        <div class="card-footer text-end">
+            <button type="reset" class="btn btn-sm btn-outline-secondary">Cancelar</button>
+            <button type="submit" class="btn btn-sm btn-primary" id="registrar-OC">Registrar</button>
+        </div>
+
     </div>
+
+
 
     <!-- Zona de modales -->
     <div class="modal fade" id="modal-vehiculo" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
@@ -400,13 +369,21 @@
                     const versionIN = document.querySelector("#version-in")
                     const mostrarVersionLS = document.querySelector("#mostrar-version-ls")
                     const registrarVehiculo = document.querySelector("#registrar-vehiculo")
+                    const combustible = document.querySelector('#combustible');
+                    const color = document.querySelector('#color');
+                    const precio = document.querySelector('#precio');
 
                     //Formularios
                     const formOC = document.querySelector("#formulario-oc")
                     const formVehiculo = document.querySelector("#formulario-vehiculo")
+                    const btnRegistrarOC = document.querySelector('#registrar-OC');
 
                     const abrirWsp = document.querySelector("#abrir-wsp")
                     const agregarItem = document.querySelector("#agregar-item")
+
+                    // Tabla detalle
+
+                    const tablaDetalle = document.querySelector('#tabla-detalle tbody');
 
                     // IDCONCESIONARIO
                     const idconcesionario = null;
@@ -481,32 +458,97 @@
                     })
 
 
+                    //Registra un vehículo (envía los datos a un arreglo) Y DE ESE ARREGLO GENERAR EL REPORTE DE OC.
+                    formVehiculo.addEventListener("submit", function(event) {
+                        event.preventDefault();
 
+                        let idVehiculo = dataVehiculos.length;
+                        const pregunta = (cantidad.value == 1) ?
+                            "¿Agregamos este vehículo?" :
+                            `¿Agregamos los ${cantidad.value} vehículos de la lista?`;
 
-                       //Registra un vehículo (envía los datos a un arreglo)
-                       formVehiculo.addEventListener("submit", function (event) {
-                         event.preventDefault()
-                         let idVehiculo = 0;
-                         const pregunta = (cantidad.value) == 1 ? "¿Agregamos este vehículo?" : "¿Agregamos los vehículos de la lista?"
+                        if (!confirm(pregunta)) {
+                            return;
+                        }
 
-                         if (confirm(pregunta)) {
-
-                           for (let i = 1; i <= parseInt(cantidad.value); i++) {
-                            // Respaldamos la información ingresada en un objeto
+                        for (let i = 1; i <= parseInt(cantidad.value); i++) {
                             idVehiculo++;
-                             const vehiculo = {
+
+                            const vehiculo = {
                                 idVehiculo,
-                               idmodelo: modelos.value,
-                               version: versionLS.value,
-                               condicion: condicion.value
-                             }
-                             console.log(vehiculo);
-                           }
+                                idmodelo: modelos.value,
+                                modelo_texto: modelos.options[modelos.selectedIndex].text,
+                                marca: marcas.options[marcas.selectedIndex].text,
+                                tipo: tipos.options[tipos.selectedIndex].text,
+                                idcombustible: combustible.value,
+                                combustible_texto: combustible.options[combustible.selectedIndex].text,
+                                version: (versionLS.value === "ESP") ? versionIN.value : versionLS.value,
+                                color: color.value,
+                                condicion: condicion.value,
+                                precio: precio.value,
+                                chasis: document.querySelector(`#chas${i}`).value.trim(),
+                                placa: document.querySelector(`#plac${i}`).value.trim(),
+                                placa_rotativa: document.querySelector(`#plar${i}`).value.trim(),
+                                serie_motor: document.querySelector(`#seri${i}`).value.trim()
+                            };
 
-                         }
-                       })
+
+                            dataVehiculos.push(vehiculo);
+                        }
+
+                        renderizarTabla();
+
+                        console.log("Vehículos agregados:", dataVehiculos);
+
+                        // Puedes cerrar el modal y resetear el formulario
+                        formVehiculo.reset();
+                        generadorInputsDinamicos(0);
+                        modalVehiculo.hide();
+                    });
 
 
+                    // Función para renderizar la tabla 
+
+                    function renderizarTabla() {
+                        tablaDetalle.innerHTML = "";
+
+                        dataVehiculos.forEach((veh, index) => {
+                            tablaDetalle.innerHTML += `
+                                    <tr>
+                                        <td>${index + 1}</td>
+                                        <td>
+                                            <a href="#" class="btn-eliminar" data-index="${index}">
+                                                <i class="fa-solid fa-trash text-danger"></i>
+                                            </a> ::
+                                            ${veh.marca} / ${veh.tipo} / ${veh.modelo_texto} ${veh.color || ""} /
+                                            ${veh.version} / Chasis: ${veh.chasis || "-"}
+                                        </td>
+                                        <td>1</td>
+                                        <td>${veh.precio}</td>
+                                        <td>0</td>
+                                        <td>${veh.precio}</td>
+                                    </tr>
+                                `;
+                        });
+
+                        console.log("Vehículos actuales:", dataVehiculos);
+                    }
+
+                    // Eliminar vehículo de la lista y del array
+                    tablaDetalle.addEventListener("click", function(event) {
+                        if (event.target.closest(".btn-eliminar")) {
+                            event.preventDefault();
+
+                            const index = event.target.closest(".btn-eliminar").dataset.index;
+                            if (confirm("¿Eliminar este vehículo de la lista?")) {
+                                // Eliminar del array
+                                dataVehiculos.splice(index, 1);
+
+                                // Volver a renderizar la tabla
+                                renderizarTabla();
+                            }
+                        }
+                    });
 
 
                     // Obtener los concesionarios de la DB
@@ -525,8 +567,6 @@
                             } else {
                                 console.error('No hay datos a mostrar');
                             }
-
-                            console.log('LISTADO DE CONCESIONARIOS: ', data);
 
                         } catch (error) {
                             console.error(error);
@@ -600,28 +640,105 @@
                         telefono.value = tiendaSeleccionada.telefono;
                     });
 
-                    // Enviar los datos para agregar una orden de compra
-                    formOC.addEventListener('submit', async (event) => {
 
-                        event.preventDefault();
 
-                        if (confirm('¿Está seguro de agregar esta orden de compra?')) {
-                            const formData = new FormData(formOC);
-                            const response = await fetch('/oc/store', {
+                    btnRegistrarOC.addEventListener("click", async () => {
+                        if (!confirm("¿Registrar esta orden con sus vehículos?")) return;
+
+                        const formDataOC = new FormData(formOC);
+
+                        try {
+                            // 1. Crear la Orden de Compra
+                            const resOC = await fetch('/oc/store', {
                                 method: 'POST',
-                                body: formData
+                                body: formDataOC
                             });
-                            const data = await response.json();
 
-                            if (data.success) {
-                                showToast(data.message, "SUCCESS", 1200);
+                            const dataOC = await resOC.json();
 
-                            } else {
-                                showToast(data.message, "WARNING", 1200);
+                            if (!dataOC.success) {
+                                showToast(dataOC.message, "WARNING", 2000);
+                                return;
                             }
-                        }
 
+                            const idOC = dataOC.id;
+                            console.log("Orden creada con ID:", idOC);
+
+                            showToast("Registrando vehículos, espere...", "INFO", 3000);
+
+                            // Esperamos 3 segundos antes de registrar los vehículos
+                            setTimeout(async () => {
+                                for (let vehiculo of dataVehiculos) {
+                                    try {
+                                        // 2. Registrar cada vehículo en la tabla vehiculos
+                                        const formVeh = new FormData();
+                                        formVeh.append("idmodelo", vehiculo.idmodelo);
+                                        formVeh.append("idcombustible", vehiculo.idcombustible);
+                                        formVeh.append("version", vehiculo.version);
+                                        formVeh.append("color", vehiculo.color);
+                                        formVeh.append("chasis", vehiculo.chasis);
+                                        formVeh.append("placa", vehiculo.placa);
+                                        formVeh.append("placarotativa", vehiculo.placa_rotativa);
+                                        formVeh.append("seriemotor", vehiculo.serie_motor);
+
+                                        const resVeh = await fetch('/vehiculosOC/store', {
+                                            method: 'POST',
+                                            body: formVeh
+                                        });
+
+                                        const dataVeh = await resVeh.json();
+
+                                        if (!dataVeh.success) {
+                                            console.warn("Vehículo con error:", dataVeh.message);
+                                            continue;
+                                        }
+
+                                        console.log("Vehículo creado con ID:", dataVeh.id);
+
+                                        // 3. Registrar en detordencompra usando el ID del vehículo recién creado
+                                        const formDetalle = new FormData();
+                                        formDetalle.append("idordencompra", idOC);
+                                        formDetalle.append("idvehiculo", dataVeh.id);
+                                        formDetalle.append("preciocompra", vehiculo.precio);
+
+                                        const resDetalle = await fetch('/detalleOC/store', {
+                                            method: 'POST',
+                                            body: formDetalle
+                                        });
+
+                                        const dataDetalle = await resDetalle.json();
+
+                                        if (!dataDetalle.success) {
+                                            console.warn("Detalle OC con error:", dataDetalle.message);
+                                        } else {
+                                            console.log(`Detalle OC registrado: Vehículo ${dataVeh.id} en Orden ${idOC}`);
+                                        }
+
+                                    } catch (err) {
+                                        console.error("Error registrando vehículo o detalle:", err);
+                                    }
+                                }
+
+                                showToast("¡OC y detalles registrados correctamente!", "SUCCESS", 2000);
+
+                                setTimeout(() => {
+                                    window.location = '/oc/';
+                                }, 2000);
+
+                                // Limpiar
+                                // dataVehiculos = [];
+                                // renderizarTabla();
+                                // formOC.reset();
+                            }, 3000);
+
+
+
+                        } catch (error) {
+                            console.error("Error:", error);
+                            showToast("Error en el registro", "WARNING", 2000);
+                        }
                     });
+
 
                     // Obtener las Marcas de la DB
                     async function obtenerMarcas() {
@@ -714,14 +831,13 @@
                         }
                     });
 
-
-
                     function asignarFechaActual() {
                         const hoy = new Date()
                         const fechaFormat = hoy.toISOString().split('T')[0]
                         fechaEmision.value = fechaFormat
                         fechaEmision.setAttribute("disabled", true)
                     }
+
 
                     asignarFechaActual();
                     await obtenerConcesionarios();

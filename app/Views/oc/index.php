@@ -71,6 +71,7 @@
                                 <td>50000</td>
                                 <td>101788</td> -->
                                     <td>
+                                        <a href="#"><i class="fa-solid fa-file-pdf" style="color: #f73809;"></i></a>
                                         <a href="#" class="show-details">Detalle</a>
                                     </td>
                                 </tr>
@@ -141,18 +142,6 @@
             const enlacesDetalle = document.querySelectorAll(".show-details")
             const botonVolver = document.querySelector("#btn-volver")
             const speedAnimation = 750;
-
-            // let tableOC = new DataTable('#tabla-oc', {
-            //     language: {
-            //         url: '../../public/js/datable-es-ES.json'
-            //     }
-            // });
-
-            // let tableDetails = new DataTable('#tabla-detalles', {
-            //     language: {
-            //         url: '../../public/js/datable-es-ES.json'
-            //     }
-            // });
 
             botonVolver.addEventListener("click", () => {
                 $("#detalle-oc").slideUp(speedAnimation);

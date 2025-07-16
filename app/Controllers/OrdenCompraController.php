@@ -54,7 +54,6 @@ class OrdenCompraController extends Controller
         $errores[] = Validador::campoObligatorio($registro['idlogistica'], 'Logística');
         $errores[] = Validador::campoObligatorio($registro['moneda'], 'Moneda');
         $errores[] = Validador::campoObligatorio($registro['serie'], 'Serie');
-        $errores[] = Validador::campoObligatorio($registro['numstock'], 'Número de Stock');
         $errores = array_filter($errores);
 
         if (!empty($errores)) {

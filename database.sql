@@ -255,14 +255,13 @@ CREATE TABLE locales
     CONSTRAINT fk_idmotorpark_loc FOREIGN KEY (idmotorpark) REFERENCES motorpark (idmotorpark)
 )ENGINE = INNODB;
 
-
 -- La moneda y precio de compra están definidos en el proceso de COMPRA
 CREATE TABLE vehiculos
 (
 	idvehiculo			INT AUTO_INCREMENT PRIMARY KEY,
 	idmodelo 			INT 			NOT NULL,
     idcombustible 		INT 			NOT NULL,
-    idlogistica			INT 			NOT NULL,
+    idlogistica			INT 			NULL,
     idlocal 			INT 			NULL,
     version				VARCHAR(20) 	NOT NULL,
     condicion			ENUM('nuevo', 'seminuevo') NOT NULL DEFAULT 'nuevo',
@@ -282,6 +281,8 @@ CREATE TABLE vehiculos
     CONSTRAINT fk_idlocal_veh FOREIGN KEY (idlocal) REFERENCES locales (idlocal),
     CONSTRAINT fk_idlogistica_veh FOREIGN KEY (idlogistica) REFERENCES colaboradores (idcolaborador)
 )ENGINE = INNODB;
+
+ALTER TABLE vehiculos MODIFY COLUMN idlogistica  INT NULL;
 
 -- Cuando se compra un vehículo, este además de su valor, supone pagos adicioanles como:
 -- Tarjeta de propiedad y placa, Flete picanto, gastos administrativos
@@ -324,7 +325,7 @@ CREATE TABLE detordencompra
 	iddetordencompra	INT AUTO_INCREMENT PRIMARY KEY,
     idordencompra		INT 			NOT NULL,
     idvehiculo			INT 			NOT NULL,
-    preciocompra		DECIMAL(9,2)	NOT NULL,
+    preciocompra		DECIMAL(9,2)	NOT NULL, -- PRECIO
     escorrecto 			ENUM ('S', 'N') NULL COMMENT 'Define si el vehículo llego de acuerdo a los datos de la factura',
     CONSTRAINT fk_idordencompra_doc FOREIGN KEY (idordencompra) REFERENCES ordenescompra (idordencompra),
     CONSTRAINT fk_idvehiculo_doc FOREIGN KEY (idvehiculo) REFERENCES vehiculos (idvehiculo),
