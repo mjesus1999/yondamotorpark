@@ -10,7 +10,6 @@ use App\Models\TipoVehiculo;
 use App\Models\Vehiculo;
 use App\Models\FormatoCotizacion;
 
-
 class VehiculoController extends Controller
 {
 

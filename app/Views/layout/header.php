@@ -113,6 +113,12 @@ $allModules = [
             </a>
           </li>
           <li class="sidebar-item">
+            <a href="/cotizacion" class="sidebar-link">
+              <i class="fa-solid fa-list pe-2"></i>
+              Requisitos
+            </a>
+          </li>
+          <li class="sidebar-item">
             <a href="#" class="sidebar-link collapsed" data-bs-target="#pages" data-bs-toggle="collapse"
               aria-expanded="false"><i class="fa-solid fa-file-lines pe-2"></i>
               Pages
