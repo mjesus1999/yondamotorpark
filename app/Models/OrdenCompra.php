@@ -20,6 +20,7 @@ class OrdenCompra
 
         $query = "
             SELECT 
+                oc.idordencompra,
                 oc.serie,
                 oc.emision,
                 oc.moneda,
@@ -36,6 +37,20 @@ class OrdenCompra
             return $results;
         } catch (PDOException $error) {
 
+            error_log($error->getMessage());
+            return [];
+        }
+    }
+
+    public function getDetOCByIdOC($idOC): ?array
+    {
+        $query = "CALL sp_detOC_By_IdOC(:idOC)";
+        try {
+            $stmt = $this->db->prepare($query);
+            $stmt->execute(array(':idOC' => $idOC));
+            $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            return $results;
+        } catch (PDOException $error) {
             error_log($error->getMessage());
             return [];
         }

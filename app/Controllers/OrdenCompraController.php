@@ -22,8 +22,15 @@ class OrdenCompraController extends Controller
         $ordenCompras = $this->ordenCompraModel->getAll();
         $this->view('oc.index', ['ordenCompras' => $ordenCompras]);
     }
-    // Me llevará a la voista de crear 
 
+    public function indexReport($id): void {
+        $ocDetalles = $this->ordenCompraModel->getDetOCByIdOC($id);
+        $this->view('pdf/oc.reporte', ['ocDetalles' => $ocDetalles]);
+    }
+
+
+
+    // Me llevará a la voista de crear 
     public function create(): void
     {
         $this->view('oc.create');
@@ -67,8 +74,8 @@ class OrdenCompraController extends Controller
 
 
         $idOrdenCompra = $this->ordenCompraModel->create($registro);
-        
-        
+
+
 
         if ($idOrdenCompra > 0) {
             echo json_encode([
@@ -85,15 +92,24 @@ class OrdenCompraController extends Controller
             ]);
             exit;
         }
-
-
-
     }
 
 
 
 
+    // API PARA TRAER EL DETALLE DE UNA PC OR SU ID:
 
+    public function searchtDetOCByIdOc($idOC): void
+    {
+
+        header('Content-Type: application/json');
+        $ocDet = $this->ordenCompraModel->getDetOCByIdOC($idOC);
+
+        if ($ocDet) {
+            echo json_encode($ocDet);
+        } else {
+            echo json_encode([]);
+        }
+        exit();
+    }
 }
-
-

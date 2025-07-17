@@ -71,8 +71,8 @@
                                 <td>50000</td>
                                 <td>101788</td> -->
                                     <td>
-                                        <a href="#"><i class="fa-solid fa-file-pdf" style="color: #f73809;"></i></a>
-                                        <a href="#" class="show-details">Detalle</a>
+                                        <a href="/oc/reporte/<?=htmlspecialchars($ordenCompra['idordencompra']) ?>" target="_blank"><i class="fa-solid fa-file-pdf" style="color: #f73809;"></i></a>
+                                        <a href="#" class="show-details" data-idoc=<?= htmlspecialchars($ordenCompra['idordencompra']) ?>>Detalle</a>
                                     </td>
                                 </tr>
 
@@ -86,12 +86,15 @@
             </div> <!-- ./table-responsive -->
         </div> <!-- ./card-body -->
 
+
+
         <div class="card-footer" id="detalle-oc" style="display: none;">
             <div class="row">
                 <div class="col-md-6">
                     <div style="padding: 1rem;">
-                        <h3>AUTONIZA PERU S.A.C.</h3>
-                        <h5>2025-00001, 25 abril 2025 | USD 15178.00</h5>
+                        <
+                        <h3 id="detail-concesionario-razon-social"></h3>
+                        <h5 id="detail-oc-summary"></h5>
                     </div>
                 </div>
                 <div class="col-md-6 d-flex align-items-center justify-content-end" style="padding-right: 1.5rem;">
@@ -110,25 +113,15 @@
                             <th>Año</th>
                             <th>Chasis</th>
                             <th>Serie</th>
+                            <th>Placa</th> 
+                            <th>Placa Rotativa</th> 
                             <th>Color</th>
                             <th>Moneda</th>
                             <th>Monto</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>1</td>
-                            <td>Hyundai</td>
-                            <td>Grand i10</td>
-                            <td>Confort</td>
-                            <td>Gasolina</td>
-                            <td>2025</td>
-                            <td>JIKAS8821144</td>
-                            <td>1454987498798</td>
-                            <td>Blanco</td>
-                            <td>USD</td>
-                            <td>11676.00</td>
-                        </tr>
+                    
                     </tbody>
                 </table>
             </div> <!-- ./table-responsive -->
@@ -143,12 +136,130 @@
             const botonVolver = document.querySelector("#btn-volver")
             const speedAnimation = 750;
 
-            botonVolver.addEventListener("click", () => {
-                $("#detalle-oc").slideUp(speedAnimation);
-                $("#lista-oc").slideDown(speedAnimation);
-            })
+            // Referencias a los contenedores principales
+            const listaOc = document.getElementById('lista-oc'); 
+            const ocDetailView = document.getElementById('detalle-oc');
 
-            //Comportamiento para botones de filtrado
+            // Referencias a elementos dentro de la vista de detalle
+            const detailConcesionarioRazonSocial = document.getElementById('detail-concesionario-razon-social');
+            const detailOcSummary = document.getElementById('detail-oc-summary');
+            const tablaDetallesBody = document.getElementById('tabla-detalles').querySelector('tbody');
+            const btnVolver = document.getElementById('btn-volver');
+
+            // Selecciona todos los enlaces con la clase 'show-details'
+            const detailLinks = document.querySelectorAll('.show-details');
+
+            function limpiarVistaDetalle() {
+                // Limpiar el nombre del concesionario
+                if (detailConcesionarioRazonSocial) {
+                    detailConcesionarioRazonSocial.textContent = '';
+                }
+
+                // Limpiar el resumen de la OC (número, fecha, moneda, total)
+                if (detailOcSummary) {
+                    detailOcSummary.textContent = '';
+                }
+
+                // Limpiar la tabla de detalles (vehículos)
+                if (tablaDetallesBody) {
+                    tablaDetallesBody.innerHTML = '';
+                }
+            }
+
+            // Evento para eventos clikc de detalles
+            detailLinks.forEach(link => {
+                link.addEventListener('click', async (event) => {
+                    event.preventDefault();
+                    const ocId = event.target.dataset.idoc;
+
+                    if (!ocId) {
+                        console.warn('ID de Orden de Compra no encontrado en el enlace de detalle.');
+                        return;
+                    }
+
+                    // Limpiar vista antes de cargar nuevos datos
+                    limpiarVistaDetalle();
+
+                    const apiUrl = `/api/oc/${ocId}`;
+
+                    try {
+                        const response = await fetch(apiUrl);
+
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+
+                        const ocDetails = await response.json();
+
+                        // Validar si hay datos válidos
+                        if (!ocDetails || !Array.isArray(ocDetails) || ocDetails.length === 0) {
+                            showToast('No hay datos para la OC', 'WARNING', 1200);
+                            return; // No mostrar la vista de detalles.
+                        }
+
+                        // Mostrar la vista de detalle con animación
+                        $("#lista-oc").slideUp(speedAnimation);
+                        $("#detalle-oc").slideDown(speedAnimation);
+
+                        // Llenar información del encabezado
+                        const firstDetail = ocDetails[0];
+
+                        if (detailConcesionarioRazonSocial && detailOcSummary) {
+                            detailConcesionarioRazonSocial.textContent = firstDetail.concesionario_razon_social || 'N/A';
+
+                            const numeroOc = firstDetail.numero_oc_formateado || 'N/A';
+                            const fechaEmision = firstDetail.fecha_emision_oc || 'N/A';
+                            const moneda = firstDetail.moneda_oc || 'N/A';
+                            const total = firstDetail.total_general_orden ? parseFloat(firstDetail.total_general_orden).toFixed(2) : '0.00';
+
+                            detailOcSummary.textContent = `${numeroOc} | ${fechaEmision} | ${moneda} ${total}`;
+                        }
+
+                        // Llenar tabla de detalles
+                        if (tablaDetallesBody) {
+                            tablaDetallesBody.innerHTML = '';
+
+                            ocDetails.forEach((detail, index) => {
+                                const row = document.createElement('tr');
+                                row.innerHTML = `
+                            <td>${index + 1}</td>
+                            <td>${detail.vehiculo_marca || 'N/A'}</td>
+                            <td>${detail.vehiculo_modelo || 'N/A'}</td>
+                            <td>${detail.vehiculo_version || 'N/A'}</td>
+                            <td>${detail.vehiculo_combustible || 'N/A'}</td>
+                            <td>${detail.vehiculo_anio_modelo || 'N/A'}</td>
+                            <td>${detail.vehiculo_chasis || 'N/A'}</td>
+                            <td>${detail.vehiculo_serie_motor || 'N/A'}</td>
+                            <td>${detail.vehiculo_placa || 'N/A'}</td>
+                            <td>${detail.vehiculo_placa_rotativa || 'N/A'}</td>
+                            <td>${detail.vehiculo_color || 'N/A'}</td>
+                            <td>${detail.moneda_oc || 'N/A'}</td>
+                            <td>${detail.vehiculo_precio_unitario ? parseFloat(detail.vehiculo_precio_unitario).toFixed(2) : '0.00'}</td>
+                        `;
+                                tablaDetallesBody.appendChild(row);
+                            });
+                        }
+
+                    } catch (error) {
+                      showToast('No se ha podido cargar los datos','WARNING',1200);
+                    }
+                });
+            });
+
+
+            if (botonVolver) {
+                botonVolver.addEventListener('click', () => {
+
+                    limpiarVistaDetalle();
+
+
+                    $("#detalle-oc").slideUp(speedAnimation);
+                    $("#lista-oc").slideDown(speedAnimation);
+                });
+            }
+
+
+            // Comportamiento para botones de filtrado
             botonesFiltro.forEach(boton => {
                 boton.addEventListener("click", () => {
                     botonesFiltro.forEach(btn => btn.classList.remove("active"));
@@ -156,14 +267,7 @@
                 })
             });
 
-            //Detalle = mostrar los vehiculos solicitados en la OC
-            enlacesDetalle.forEach(enlace => {
-                enlace.addEventListener("click", (event) => {
-                    event.preventDefault();
-                    $("#detalle-oc").slideDown(speedAnimation);
-                    $("#lista-oc").slideUp(speedAnimation);
-                });
-            });
+
 
         });
     </script>
