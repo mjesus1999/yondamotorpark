@@ -5,55 +5,32 @@ namespace App\Controllers;
 
 use App\Core\Controller;
 use App\Models\Cotizacion;
-use App\Models\FormatoCotizacion;
 
 class CotizacionController extends Controller
 {
     private Cotizacion $cotizacionModel;
-    private FormatoCotizacion $formatoModel;
 
     public function __construct()
     {
         $this->cotizacionModel = new Cotizacion();
-        $this->formatoModel = new FormatoCotizacion();
     }
 
-    public function index(): void
-    {
-        $this->authRequired();
-        $formatos = $this->formatoModel->getAll();
-        $requisitos = $this->cotizacionModel->getRequisitos();
+    /*     public function index(): void
+        {
+            $this->authRequired();
+            $formatos = $this->formatoModel->getAll();
+            $requisitos = $this->cotizacionModel->getRequisitos();
 
-        $this->view("cotizacion.index", compact('formatos', 'requisitos'));
-    }
+            $this->view("cotizacion.index", compact('formatos', 'requisitos'));
+        }
 
-    public function create(): void
-    {
-        $this->authRequired();
-        $this->view('cotizacion.create');
-    }
+        public function create(): void
+        {
+            $this->authRequired();
+            $this->view('cotizacion.create');
+        } */
 
-    public function getRequisitos(int $idformato): void
-    {
-        $this->authRequired();
 
-        // Obtengo info general del formato (opcional, para mostrar el nombre)
-        $formatos = $this->formatoModel->getAll();
-        $formato = array_filter($formatos, fn($f) => $f['idformato'] == $idformato);
-        $formato = $formato ? array_shift($formato) : null;
-
-        // Obtengo TODOS los requisitos disponibles
-        $todosRequisitos = $this->cotizacionModel->getRequisitos();
-
-        // Obtengo sólo los requisitos asignados a este formato
-        $asignados = $this->formatoModel->getDetalleRequisitos($idformato);
-
-        // Paso ambas listas a la vista
-        $this->view(
-            'cotizacion.requisitos',
-            compact('formato', 'todosRequisitos', 'asignados')
-        );
-    }
 
 
     /* public function requisitos(): void
@@ -64,27 +41,23 @@ class CotizacionController extends Controller
     } */
 
 
-    public function store(): void
-    {
-        $this->authRequired();
+    /*     public function store(): void
+        {
+            $this->authRequired();
 
-        $tipocot = trim($_POST['tipocotizacion'] ?? '');
-        $fi = $_POST['fechainicio'] ?? '';
-        $indefinido = isset($_POST['indefinido']);
+            $tipocot = trim($_POST['tipocotizacion'] ?? '');
+            $fi = $_POST['fechainicio'] ?? '';
+            $indefinido = isset($_POST['indefinido']);
+            $ff = (!$indefinido && !empty($_POST['fechafin']))
+                ? $_POST['fechafin']
+                : null;
 
-        // Si no es indefinido y hay fecha, la tomamos; si no, null
-        $ff = (!$indefinido && !empty($_POST['fechafin']))
-            ? $_POST['fechafin']
-            : null;
+            // Insertar y obtener nuevo ID
+            $newId = $this->formatoModel->create($tipocot, $fi, $ff);
 
-        // Insertar y obtener nuevo ID
-        $newId = $this->formatoModel->create($tipocot, $fi, $ff);
-
-        // Redirigir de vuelta al listado
-        header('Location: /cotizacion');
-        exit;
-    }
-
+            header('Location: /cotizacion');
+            exit;
+        } */
 
 
 }

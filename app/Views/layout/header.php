@@ -113,7 +113,7 @@ $allModules = [
             </a>
           </li>
           <li class="sidebar-item">
-            <a href="/cotizacion" class="sidebar-link">
+            <a href="/formatoCotizacion" class="sidebar-link">
               <i class="fa-solid fa-list pe-2"></i>
               Requisitos
             </a>

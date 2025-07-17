@@ -13,13 +13,13 @@
                 </nav>
             </div>
             <div class="col-md-6 text-end">
-                <a href="/cotizacion" class="">[ Volver ]</a>
+                <a href="/formatoCotizacion" class="">[ Volver ]</a>
             </div>
         </div>
     </div>
 
     <div class="mb-2">
-        <form action="/cotizacion/requisitos/save" method="POST" id="formCotizacion">
+        <form action="/formatoCotizacion/requisitos/save" method="POST" id="formCotizacion">
             <input type="hidden" name="idformato" value="<?= $formato['idformato'] ?>">
             <div class="card mb-4">
                 <div class="card-header bg-info">
