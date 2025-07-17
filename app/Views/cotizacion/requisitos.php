@@ -13,34 +13,41 @@
                 </nav>
             </div>
             <div class="col-md-6 text-end">
-                <a href="/cotizacion/create" class="">[ Registrar ]</a>
+                <a href="/cotizacion" class="">[ Volver ]</a>
             </div>
         </div>
     </div>
 
     <div class="mb-2">
         <form action="" id="formCotizacion">
-            <!-- Requisitos -->
             <div class="card mb-4">
                 <div class="card-header bg-info">
-                    <strong>Formato Cotización</strong> <span class="fst-italic">
-                    </span>
+                    <strong>Formato:</strong>
+                    <span class="fst-italic"><?= htmlspecialchars($formato['tipocotizacion']) ?></span>
                 </div>
                 <div class="card-body">
-                    <!-- CAMPOS -->
                     <div class="row g-1 align-items-center">
-                        <!-- Cuadro izquierdo -->
+
+                        <?php
+                        // Preparo lookup de IDs ya asignados:
+                        $idsAsignados = array_column($asignados, 'idrequisito');
+                        ?>
+
+                        <!-- Cuadro izquierdo: requisitos no asignados -->
                         <div class="col-md-5">
                             <div class="border rounded p-2 MostrarRequisitos"
-                                style="min-height: 620px; overflow-y: auto;">
-                                <?php if (!empty($requisitos)): ?>
+                                 style="min-height: 620px; overflow-y: auto;">
+                                <?php if (!empty($todosRequisitos)): ?>
                                     <ul class="list-group list-group-flush" id="lista-disponibles">
-                                        <?php foreach ($requisitos as $req): ?>
-                                            <li class="list-group-item">
-                                                <input type="checkbox" class="form-check-input me-2 requisito-checkbox"
-                                                    value="<?= $req['idrequisito'] ?>">
-                                                <?= htmlspecialchars($req['requisito']) ?>
-                                            </li>
+                                        <?php foreach ($todosRequisitos as $req): ?>
+                                            <?php if (!in_array($req['idrequisito'], $idsAsignados)): ?>
+                                                <li class="list-group-item">
+                                                    <input type="checkbox"
+                                                           class="form-check-input me-2 requisito-checkbox"
+                                                           value="<?= $req['idrequisito'] ?>">
+                                                    <?= htmlspecialchars($req['requisito']) ?>
+                                                </li>
+                                            <?php endif; ?>
                                         <?php endforeach; ?>
                                     </ul>
                                 <?php else: ?>
@@ -49,20 +56,35 @@
                             </div>
                         </div>
 
-                        <!-- Botones en el centro -->
+                        <!-- Botones centro -->
                         <div class="col-md-2 d-flex flex-column align-items-center">
                             <button type="button" id="btnAgregar"
-                                class="btn btn-sm btn-outline-primary mb-2">&gt;</button>
-                            <button type="button" id="btnQuitar" class="btn btn-sm btn-outline-primary">&lt;</button>
+                                    class="btn btn-sm btn-outline-primary mb-2">&gt;</button>
+                            <button type="button" id="btnQuitar"
+                                    class="btn btn-sm btn-outline-primary">&lt;</button>
                         </div>
 
-                        <!-- Cuadro derecho -->
+                        <!-- Cuadro derecho: requisitos asignados -->
                         <div class="col-md-5">
                             <div class="border rounded p-2 RequisitosAgregados"
-                                style="min-height: 620px; overflow-y: auto;">
-                                <ul class="list-group list-group-flush" id="lista-seleccionados"></ul>
+                                 style="min-height: 620px; overflow-y: auto;">
+                                <?php if (!empty($asignados)): ?>
+                                    <ul class="list-group list-group-flush" id="lista-seleccionados">
+                                        <?php foreach ($asignados as $req): ?>
+                                            <li class="list-group-item">
+                                                <input type="checkbox"
+                                                       class="form-check-input me-2 requisito-checkbox"
+                                                       value="<?= $req['idrequisito'] ?>">
+                                                <?= htmlspecialchars($req['requisito']) ?>
+                                            </li>
+                                        <?php endforeach; ?>
+                                    </ul>
+                                <?php else: ?>
+                                    <p class="text-muted">Aún no hay requisitos asignados.</p>
+                                <?php endif; ?>
                             </div>
                         </div>
+
                     </div>
                 </div>
             </div>
@@ -73,10 +95,10 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        const btnAdd = document.getElementById('btnAgregar');
+        const btnAdd    = document.getElementById('btnAgregar');
         const btnRemove = document.getElementById('btnQuitar');
         const listaDisp = document.getElementById('lista-disponibles');
-        const listaSel = document.getElementById('lista-seleccionados');
+        const listaSel  = document.getElementById('lista-seleccionados');
 
         btnAdd.addEventListener('click', () => moveItems(listaDisp, listaSel));
         btnRemove.addEventListener('click', () => moveItems(listaSel, listaDisp));

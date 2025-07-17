@@ -34,4 +34,18 @@ class FormatoCotizacion
         return (int) $this->db->lastInsertId();
     }
 
+    public function getDetalleRequisitos(int $idformato): array
+    {
+        $sql = "
+            SELECT r.idrequisito, r.requisito
+            FROM requisitos AS r
+            JOIN detallerequisitos AS dr ON dr.idrequisito = r.idrequisito
+            WHERE dr.idformato = :idformato
+            ORDER BY r.requisito
+        ";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([':idformato' => $idformato]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
 }

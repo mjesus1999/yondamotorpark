@@ -102,34 +102,6 @@
                         </tbody>
                     </table>
                 </div>
-                <!-- <table class="table table-sm table-hover table-hover-yonda" id="tabla-cotizacion">
-                    <colgroup>
-                        <col style="width: 75%;">
-                        <col style="width: 25%;">
-                    </colgroup>
-                    <thead>
-                        <tr>
-                            <th>Nombre de la cotizacion</th>
-                            <th>Fecha Inicio</th>
-                            <th>Fecha Fin</th>
-                            <th class="text-center">Opciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>Independiente formal</td>
-                            <td class="text-center">
-                                <a href="#" class="btn btn-sm btn-info me-1" title="Ver detalles">
-                                    <i class="bi bi-eye"></i> Ver
-                                </a>
-                                <a href="/cotizacion/requisitos" class="btn btn-sm btn-secondary"
-                                    title="Agregar requisitos">
-                                    <i class="bi bi-plus-circle"></i> Requisitos
-                                </a>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table> -->
                 <div class="text-end">
                     <span style="font-style: italic;">Seleccione un elemento</span>
                 </div>

@@ -32,9 +32,31 @@ class CotizacionController extends Controller
         $this->authRequired();
         $this->view('cotizacion.create');
     }
-    
 
-/*     public function requisitos(): void
+    public function getRequisitos(int $idformato): void
+    {
+        $this->authRequired();
+
+        // Obtengo info general del formato (opcional, para mostrar el nombre)
+        $formatos = $this->formatoModel->getAll();
+        $formato = array_filter($formatos, fn($f) => $f['idformato'] == $idformato);
+        $formato = $formato ? array_shift($formato) : null;
+
+        // Obtengo TODOS los requisitos disponibles
+        $todosRequisitos = $this->cotizacionModel->getRequisitos();
+
+        // Obtengo sólo los requisitos asignados a este formato
+        $asignados = $this->formatoModel->getDetalleRequisitos($idformato);
+
+        // Paso ambas listas a la vista
+        $this->view(
+            'cotizacion.requisitos',
+            compact('formato', 'todosRequisitos', 'asignados')
+        );
+    }
+
+
+    /* public function requisitos(): void
     {
         $this->authRequired();
         $requisitos = $this->cotizacionModel->getRequisitos();
@@ -63,6 +85,6 @@ class CotizacionController extends Controller
         exit;
     }
 
-    
+
 
 }
