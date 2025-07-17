@@ -56,7 +56,7 @@
                             </div>
                         </div>
 
-                        <div class="col-md-1 d-flex flex-column align-items-center">
+                        <div class="col-md-2 d-flex flex-column align-items-center">
                             <button type="button" id="btnAgregar"
                                 class="btn btn-sm btn-outline-primary mb-2">&gt;</button>
                             <button type="button" id="btnQuitar" class="btn btn-sm btn-outline-primary">&lt;</button>

@@ -68,7 +68,7 @@
             <div class="card-header">
                 <div class="row">
                     <div class="col">Lista Formato de cotizacion</div>
-                    <div class="col text-end"><a href="#" id="lnk-agregar-marca">[ Agregar ]</a></div>
+                    <!-- <div class="col text-end"><a href="#" id="lnk-agregar-marca">[ Agregar ]</a></div> -->
                 </div>
             </div>
             <div class="card-body">
@@ -131,7 +131,7 @@
             </div>
             <div class="modal-body">
                 <ul id="listaRequisitos" class="list-group">
-                    <!-- aquí se insertarán los <li> dinámicamente -->
+                    <!-- datos dinámicamente -->
                 </ul>
             </div>
             <div class="modal-footer">
