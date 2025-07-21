@@ -1,6 +1,6 @@
 <?php
 
-//VEHICULOS COTIZACION
+//VEHICULOS
 
 // Endpoint para búsqueda con AJAX
 $router->add('GET', '/vehiculos', 'VehiculoController', 'index');
