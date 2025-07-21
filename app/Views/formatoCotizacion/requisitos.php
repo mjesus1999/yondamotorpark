@@ -7,7 +7,7 @@
             <div class="col-md-6 d-flex aling-items-center justify-content-start">
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb mb-0">
-                        <li class="breadcrumb-item"><a href="#">Cotizacion</a></li>
+                        <li class="breadcrumb-item"><a href="#">Formato de cotizacion</a></li>
                         <li class="breadcrumb-item active" aria-current="page">Requisitos</li>
                     </ol>
                 </nav>

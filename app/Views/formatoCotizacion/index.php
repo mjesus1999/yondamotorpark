@@ -19,7 +19,7 @@
     </div>
 
     <div class="mb-2">
-        <form action="/formatoCotizacion/store" method="POST" id="formCotizacion">
+        <form action="/formatoCotizacion/store" method="POST" id="formCotizacion" autocomplete="OFF">
             <!-- Formato de cotizacion -->
             <div class="card mb-4">
                 <div class="card-body">
