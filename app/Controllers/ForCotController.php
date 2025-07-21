@@ -41,7 +41,7 @@ class ForCotController extends Controller
             ? $_POST['fechafin']
             : null;
 
-        // Insertar y obtener nuevo ID
+        //inserta y obtiene nuevo ID
         $newId = $this->formatoModel->create($tipocot, $fi, $ff);
 
         header('Location: /formatoCotizacion');
@@ -57,11 +57,10 @@ class ForCotController extends Controller
 
         //los requisitos disponibles
         $todosRequisitos = $this->formatoModel->getRequisitos();
-
-        //Obtengolos requisitos asignados a este formato
+        //obtengo los requisitos asignados a este formato
         $asignados = $this->formatoModel->getDetalleRequisitos($idformato);
 
-        //ambas listas a la vista
+        //muestra en lista 
         $this->view(
             'formatoCotizacion.requisitos',
             compact('formato', 'todosRequisitos', 'asignados')
@@ -79,14 +78,12 @@ class ForCotController extends Controller
             exit;
         }
 
-        // Elimina las relaciones previas
+        //se elimina las relaciones previas
         $this->formatoModel->deleteDetalle($idformato);
-
-        // Inserta cada requisito nuevo
+        //se inserta cada requisito nuevo
         foreach ($requisitos as $idreq) {
             $this->formatoModel->addDetalle($idformato, (int) $idreq);
         }
-
         header('Location: /formatoCotizacion');
         exit;
     }
