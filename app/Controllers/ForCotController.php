@@ -68,7 +68,7 @@ class ForCotController extends Controller
         );
     }
 
-    public function saveRequisitos(): void
+    public function storeRequisitos(): void
     {
         $this->authRequired();
         $idformato = (int) ($_POST['idformato'] ?? 0);

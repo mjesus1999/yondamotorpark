@@ -15,11 +15,11 @@ class Cotizacion
         $this->pdo = Database::getInstance();
     }
 
-    public function getRequisitos(): array
+    /* public function getRequisitos(): array
     {
         $stmt = $this->pdo->prepare("SELECT idrequisito, requisito FROM requisitos ORDER BY idrequisito");
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
+    } */
     
 }
