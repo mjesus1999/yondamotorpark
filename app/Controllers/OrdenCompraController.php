@@ -23,14 +23,10 @@ class OrdenCompraController extends Controller
         $this->view('oc.index', ['ordenCompras' => $ordenCompras]);
     }
 
-    /*public function indexReport($id): void {
-        $ocDetalles = $this->ordenCompraModel->getDetOCByIdOC($id);
-        $this->view('pdf/oc.reporte', ['ocDetalles' => $ocDetalles]);
-    }*/
 
-    
 
-    public function html2pdfReport($id): void {
+    public function html2pdfReport($id): void
+    {
         // Solo necesitamos pasar el ID, los datos se cargarán via JavaScript
         // El PDF se generará automáticamente sin mostrar la vista
         $this->view('pdf/oc/oc-html2pdf', ['id' => $id]);
@@ -102,6 +98,53 @@ class OrdenCompraController extends Controller
     }
 
 
+    public function update($idOC): int
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            echo json_encode(['success' => false, 'message' => 'Método no permitido']);
+            exit;
+        }
+
+        header('Content-Type: application/json');
+
+        $data = array_map([Validador::class, 'limpiar'], $_POST);
+
+        $registro = [
+            'escorrecto' => $data['escorrecto'],
+            'idordencompra' => $idOC
+        ];
+
+        $errores = [];
+        $errores[] = Validador::campoObligatorio($registro['escorrecto'], '¿Es correcto?');
+        $errores = array_filter($errores);
+
+        if (!empty($errores)) {
+            echo json_encode([
+                'success' => false,
+                'message' => implode('<br>', $errores),
+            ]);
+            exit();
+        }
+
+        $rowAffects = $this->ordenCompraModel->updateEscorrectoDetOC($registro);
+
+        if ($rowAffects > 0) {
+            echo json_encode([
+                'success' => true,
+                'message' => '¡Detalle actualizado!',
+            ]);
+            exit;
+        } else {
+            echo json_encode([
+                'success' => false,
+                'message' => '¡No se ha podido actualizar el detalle!',
+            ]);
+            exit();
+        }
+    }
+
+
 
 
     // API PARA TRAER EL DETALLE DE UNA PC OR SU ID:
@@ -115,6 +158,23 @@ class OrdenCompraController extends Controller
         if ($ocDet) {
             echo json_encode($ocDet);
         } else {
+            echo json_encode([]);
+        }
+        exit();
+    }
+
+    // API PARA TRAER LOS DATOS DEL AUTO A ACTULIZAR EN DETALLE_OC SI LLEGO CORRECTO
+
+    public function searchInfoAutos($idOC)
+    {
+
+        header('Content-Type: application/json');
+        $infoAuto = $this->ordenCompraModel->getInfoEsCorrecto($idOC);
+
+        if ($infoAuto) {
+            echo json_encode($infoAuto);
+        } else {
+            http_response_code(404);
             echo json_encode([]);
         }
         exit();

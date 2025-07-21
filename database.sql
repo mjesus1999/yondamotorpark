@@ -327,6 +327,8 @@ CREATE TABLE detordencompra
     idvehiculo			INT 			NOT NULL,
     preciocompra		DECIMAL(9,2)	NOT NULL, -- PRECIO
     escorrecto 			ENUM ('S', 'N') NULL COMMENT 'Define si el vehículo llego de acuerdo a los datos de la factura',
+    creado              DATETIME        NOT NULL DEFAULT NOW(),
+    modificado          DATETIME        NULL;
     CONSTRAINT fk_idordencompra_doc FOREIGN KEY (idordencompra) REFERENCES ordenescompra (idordencompra),
     CONSTRAINT fk_idvehiculo_doc FOREIGN KEY (idvehiculo) REFERENCES vehiculos (idvehiculo),
     CONSTRAINT uk_idvehiculo_doc UNIQUE (idvehiculo) -- Relación uno a uno

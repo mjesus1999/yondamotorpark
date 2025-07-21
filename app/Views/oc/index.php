@@ -46,8 +46,8 @@
                             <th>Fecha</th>
                             <th>Moneda</th>
                             <!-- <th>Total</th>
-              <th>Amortización</th>
-              <th>Saldo</th> -->
+                            <th>Amortización</th>
+                            <th>Saldo</th> -->
                             <th>Operaciones</th>
                         </tr>
                     </thead>
@@ -71,8 +71,8 @@
                                 <td>50000</td>
                                 <td>101788</td> -->
                                     <td>
-                                        <!-- <a href="/oc/reporte/<?=htmlspecialchars($ordenCompra['idordencompra']) ?>" target="_blank" title="PDF Tradicional"><i class="fa-solid fa-file-pdf" style="color: #f73809;"></i></a> -->
-                                        <a href="/oc/reporte/<?=htmlspecialchars($ordenCompra['idordencompra']) ?>" target="_blank" title="PDF HTML2PDF"><i class="fa-solid fa-file-pdf" style="color: #f73809;;"></i></a>
+                                        <a href="#" title="Verificar estado de autos" class="p-1" data-idocmodal=<?= htmlspecialchars($ordenCompra['idordencompra']) ?>><i class="fa-solid fa-clipboard-list" style="color: #74C0FC;"></i></a>
+                                        <a href="/oc/reporte/<?= htmlspecialchars($ordenCompra['idordencompra']) ?>" target="_blank" title="PDF OC"><i class="fa-solid fa-file-pdf" style="color: #f73809;;"></i></a>
                                         <a href="#" class="show-details" data-idoc=<?= htmlspecialchars($ordenCompra['idordencompra']) ?>>Detalle</a>
                                     </td>
                                 </tr>
@@ -93,7 +93,7 @@
             <div class="row">
                 <div class="col-md-6">
                     <div style="padding: 1rem;">
-                        
+
                         <h3 id="detail-concesionario-razon-social"></h3>
                         <h5 id="detail-oc-summary"></h5>
                     </div>
@@ -114,19 +114,67 @@
                             <th>Año</th>
                             <th>Chasis</th>
                             <th>Serie</th>
-                            <th>Placa</th> 
-                            <th>Placa Rotativa</th> 
+                            <th>Placa</th>
+                            <th>Placa Rotativa</th>
                             <th>Color</th>
                             <th>Moneda</th>
                             <th>Monto</th>
                         </tr>
                     </thead>
                     <tbody>
-                    
+
                     </tbody>
                 </table>
             </div> <!-- ./table-responsive -->
         </div> <!-- ./card-footer -->
+
+        <!-- Zona modales -->
+        <div class="modal fade" id="modal-oc" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="modal-oc" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <form action="" autocomplete="off" id="formulario-oc">
+                    <div class="modal-content">
+                        <div class="modal-header bg-yonda">
+                            <h1 class="modal-title fs-5" id="exampleModalLabel">Estado de los vehículos</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover" id="tabla-autos-modal">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Auto</th>
+                                            <th>Cantidad</th>
+
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Aquí se llenarán los autos dinámicamente -->
+                                    </tbody>
+                                </table>
+
+                                <div class="mt-3 text-center">
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="escorrecto" value="S" id="escorrecto">
+                                        <label class="form-check-label">SI</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="escorrecto" value="N" checked id="escorrecto">
+                                        <label class="form-check-label">NO</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-sm btn-primary">Actualizar</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
     </div> <!-- ./card -->
 
     <script>
@@ -138,7 +186,7 @@
             const speedAnimation = 750;
 
             // Referencias a los contenedores principales
-            const listaOc = document.getElementById('lista-oc'); 
+            const listaOc = document.getElementById('lista-oc');
             const ocDetailView = document.getElementById('detalle-oc');
 
             // Referencias a elementos dentro de la vista de detalle
@@ -149,6 +197,92 @@
 
             // Selecciona todos los enlaces con la clase 'show-details'
             const detailLinks = document.querySelectorAll('.show-details');
+
+            // Variables para el modal de verificar si los autos llegaron bien
+            const tablaAutosModalBody = document.querySelector("#tabla-autos-modal tbody");
+            const modalOc = new bootstrap.Modal(document.getElementById('modal-oc'));
+            const formularioOc = document.getElementById("formulario-oc");
+
+            let idOC = null; // Para identifcar el idoc a actualizar desde el modal
+
+
+
+            formularioOc.addEventListener("submit", async (e) => {
+                e.preventDefault();
+
+                const valorSeleccionado = document.querySelector('input[name="escorrecto"]:checked').value;
+
+                // console.log('IDOC DESDE FORM: ', idOC);
+
+                // console.log("VALOR RADIO SELECCIONADO:", valorSeleccionado);
+
+                if (confirm('¿Actualizar el detalle?')) {
+                    formData = new FormData();
+                    formData.append('escorrecto', valorSeleccionado);
+
+                    try {
+                        const res = await fetch(`/oc/update/${idOC}`, {
+                            method: 'POST',
+                            body: formData
+                        })
+
+                        const data = await res.json();
+
+                        if (data.success) {
+                            modalOc.hide();
+                            showToast(data.message, 'SUCCESS', 1000);
+                            // setTimeout(() => location.reload(), 1000);
+
+                        } else {
+                            modalOc.hide();
+                            showToast(data.message, 'WARNING', 1000);
+                        }
+
+                    } catch (error) {
+                        console.error(error);
+                    }
+
+                }
+
+            });
+
+            document.querySelectorAll("a[data-idocmodal]").forEach(icono => {
+                icono.addEventListener("click", async (e) => {
+                    e.preventDefault();
+                    idOC = e.currentTarget.dataset.idocmodal;
+                    if (!idOC) return;
+
+                    try {
+                        const response = await fetch(`/api/oc/infoAutos/${idOC}`);
+                        if (!response.ok) throw new Error("Error al obtener los autos");
+
+                        const autos = await response.json();
+                        if (!autos || autos.length === 0) {
+                            tablaAutosModalBody.innerHTML = `<tr><td colspan="4" class="text-center">No hay autos para esta orden</td></tr>`;
+                        } else {
+                            tablaAutosModalBody.innerHTML = "";
+                            autos.sort((a, b) => a.auto.localeCompare(b.auto));
+
+                            autos.forEach((item, index) => {
+                                const row = document.createElement("tr");
+                                row.innerHTML = `
+                            <td>${index + 1}</td>
+                            <td>${item.auto}</td>
+                            <td>${item.cantidad}</td>
+                        `;
+                                tablaAutosModalBody.appendChild(row);
+                            });
+                        }
+
+                        modalOc.show();
+
+                    } catch (error) {
+                        console.error(error);
+                        alert("No se pudieron cargar los datos.");
+                    }
+                });
+            });
+
 
             function limpiarVistaDetalle() {
                 // Limpiar el nombre del concesionario
@@ -242,7 +376,7 @@
                         }
 
                     } catch (error) {
-                      showToast('No se ha podido cargar los datos','WARNING',1200);
+                        showToast('No se ha podido cargar los datos', 'WARNING', 1200);
                     }
                 });
             });

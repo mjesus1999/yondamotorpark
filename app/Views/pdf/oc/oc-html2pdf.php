@@ -25,7 +25,7 @@
             </div>
             <div class="orden-box">
                 <div class="orden-title">ORDEN DE COMPRA</div>
-                <div class="orden-number" id="numero-oc">2025-00007</div>
+                <div class="orden-number" id="numero-oc"></div>
             </div>
         </div>
 
@@ -36,31 +36,31 @@
                 <table class="info-table">
                     <tr>
                         <td class="label">Punto de venta:</td>
-                        <td class="value" id="punto-venta">Chacoche / Abancay / Apurimac</td>
+                        <td class="value" id="punto-venta"></td>
                         <td class="label">Banco:</td>
-                        <td class="value">BCP</td>
+                        <td class="value"></td>
                     </tr>
                     <tr>
                         <td class="label">Razón Social:</td>
-                        <td class="value" id="razon-social">HYUNDAI ENGINEERING & CONSTRUCTION CO., LTD-SUCURSAL DEL PERU</td>
+                        <td class="value" id="razon-social"></td>
                         <td class="label">N° Oper:</td>
                         <td class="value">-</td>
                     </tr>
                     <tr>
                         <td class="label">RUC:</td>
-                        <td class="value" id="ruc">20605661522</td>
+                        <td class="value" id="ruc"></td>
                         <td class="label">Fecha:</td>
-                        <td class="value" id="fecha">18/07/2025</td>
+                        <td class="value" id="fecha"></td>
                     </tr>
                     <tr>
                         <td class="label">Dirección:</td>
-                        <td class="value" colspan="3" id="direccion">Jiron San Martin 123</td>
+                        <td class="value" colspan="3" id="direccion"></td>
                     </tr>
                     <tr>
                         <td class="label">Vendedor:</td>
-                        <td class="value" id="vendedor">Arturo Magallanes Castro</td>
+                        <td class="value" id="vendedor"></td>
                         <td class="label">Teléfono:</td>
-                        <td class="value" id="telefono">956888999</td>
+                        <td class="value" id="telefono"></td>
                     </tr>
                 </table>
             </div>

@@ -58,6 +58,44 @@ class OrdenCompra
         }
     }
 
+    // TRAERA LOS DATOS DE LOS VEHICULOS A ACTUALIZAR EN LA TABLA DETALLE_OC, VERIFICAR SI HAN LLEGADO DE MANERA CORRECTA
+
+    public function getInfoEsCorrecto($idOC): ?array
+    {
+        $query = "CALL sp_det_oc_escorrecto(:idOC)";
+        try {
+            $stmt = $this->db->prepare($query);
+            $stmt->execute(array(':idOC' => $idOC));
+            $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            return $results;
+        } catch (PDOException $error) {
+            error_log($error->getMessage());
+            return [];
+        }
+    }
+
+    //  METODO PARA ACTUAIZAR EL CAMPO ESCORRECTO EN LA TABLA DET_ORDEN_COMPRA DE LA DB
+
+    public function updateEscorrectoDetOC($params = []): int
+    {
+
+        $query = "UPDATE detordencompra SET escorrecto=:escorrecto, modificado=NOW() WHERE idordencompra=:idordencompra;";
+        try {
+            $stmt = $this->db->prepare($query);
+            $stmt->execute(array(
+                ':escorrecto' => $params['escorrecto'],
+                ':idordencompra' => $params['idordencompra']
+            ));
+
+            return  (int) $stmt->rowCount();
+        } catch (PDOException $error) {
+            error_log($error->getMessage());
+            return -1;
+        }
+    }
+
+
 
     public function create($params = []): int
     {
