@@ -13,7 +13,8 @@
                 </nav>
             </div>
             <div class="col-md-6 text-end">
-                <a href="/formatoCotizacion" class="">[ Volver ]</a>
+                <span>Desde este módulo podrá seleccionar los requisitos para el Formato Cotizacion</span>
+                <!-- <a href="/formatoCotizacion" class="">[ Volver ]</a> -->
             </div>
         </div>
     </div>
@@ -87,8 +88,9 @@
                     </div>
                 </div>
                 <div class="card-footer text-end">
-                    <button type="reset" id="btn-cancelar-registro"
-                        class="btn btn-sm btn-outline-secondary">Cancelar</button>
+                    <a href="/formatoCotizacion" class="btn btn-sm btn-outline-secondary">Cancelar</a>
+                    <!-- <button type="reset" id="btn-cancelar-registro"
+                        class="btn btn-sm btn-outline-secondary">Cancelar</button> -->
                     <button type="submit" class="btn btn-primary btn-sm btnGuardarRequisito">Agregar</button>
                 </div>
             </div>

@@ -7,13 +7,13 @@
             <div class="col-md-6 d-flex aling-items-center justify-content-start">
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb mb-0">
-                        <li class="breadcrumb-item"><a href="#">Cotizacion</a></li>
-                        <li class="breadcrumb-item active" aria-current="page">Formato</li>
+                        <li class="breadcrumb-item"><a href="#">Formato de Cotizacion</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Registro</li>
                     </ol>
                 </nav>
             </div>
             <div class="col-md-6 text-end">
-                <a href="/formatoCotizacion/create" class="">[ Registrar ]</a>
+                <!-- <a href="/formatoCotizacion/create" class="">[ Registrar ]</a> -->
             </div>
         </div>
     </div>
@@ -29,14 +29,15 @@
                         <!-- COTIZACION -->
                         <div class="col-md-5">
                             <div class="form-floating">
-                                <input type="text" class="form-control" id="tipocotizacion" name="tipocotizacion">
+                                <input type="text" class="form-control" id="tipocotizacion" name="tipocotizacion"
+                                    required>
                                 <label for="tipocotizacion">Formato Cotizacion</label>
                             </div>
                         </div>
                         <!-- FECHA INICIO -->
                         <div class="col-md-3 mb-2">
                             <div class="form-floating">
-                                <input type="date" class="form-control" id="fechainicio" name="fechainicio">
+                                <input type="date" class="form-control" id="fechainicio" name="fechainicio" required>
                                 <label for="fechainicio">Fecha Inicio</label>
                             </div>
                         </div>
@@ -131,7 +132,7 @@
             </div>
             <div class="modal-body">
                 <ul id="listaRequisitos" class="list-group">
-                    <!-- datos dinámicamente -->
+                    <!-- se insertan datos dinámicamente -->
                 </ul>
             </div>
             <div class="modal-footer">
