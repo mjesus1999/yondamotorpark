@@ -93,21 +93,42 @@ BEGIN
         oc.idordencompra = p_idordencompra; 
 END //
 
--- 	SELECT * FROM vehiculos;
---     SELECT * FROM marcas; -- 21
---     SELECT * FROM modelos;
---     INSERT INTO modelos(idtipovehiculo,idmarca,modelo,anio)VALUES(1,21,'Yaris','2025');
---     SELECT * FROM tipovehiculos; -- 1
-    
--- CALL sp_detOC_By_IdOC(14);
 
--- SHOW PROCEDURE STATUS WHERE Db = 'motorpark' AND Name = 'sp_get_reporte_orden_compra';
+DELIMITER //
+CREATE PROCEDURE sp_det_oc_escorrecto
+(IN idOC INT)
+BEGIN
 
+SELECT 
+    CONCAT(
+        mvh.marca, ' / ', 
+        modvh.modelo, ' / ', 
+        tpvh.tipovehiculo, ' / ', 
+		vh.version, ' / ', 
+		cvh.combustible,' / ',
+        vh.color, ' / ', 
+        modvh.anio, ' / ', 
+        CONCAT(UCASE(LEFT(vh.condicion, 1)), LOWER(SUBSTRING(vh.condicion, 2)))
 
--- SELECT * FROM ordenescompra;
--- SELECT * FROM detordencompra
--- SELECT * FROM concesionarios;
--- UPDATE concesionarios SET razonsocial = 'Toyota del Perú S.A.' WHERE idconcesionario = 9;
+        
+    ) AS auto,
+    COUNT(*) AS cantidad
+FROM detordencompra detoc
+INNER JOIN ordenescompra oc ON detoc.idordencompra = oc.idordencompra
+INNER JOIN vehiculos vh ON detoc.idvehiculo = vh.idvehiculo
+INNER JOIN combustibles cvh ON vh.idcombustible = cvh.idcombustible
+INNER JOIN modelos modvh ON vh.idmodelo = modvh.idmodelo
+INNER JOIN marcas mvh ON modvh.idmarca = mvh.idmarca
+INNER JOIN tipovehiculos tpvh ON modvh.idtipovehiculo = tpvh.idtipovehiculo
+WHERE oc.idordencompra = idOC
+GROUP BY 
+    mvh.marca, modvh.modelo, tpvh.tipovehiculo, vh.color, 
+    modvh.anio, vh.version, vh.condicion, cvh.combustible
+ORDER BY cantidad DESC;
+
+END //
+
+CALL sp_det_oc_escorrecto(13);
 
 
 SELECT * FROM ordenescompra;

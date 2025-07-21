@@ -71,7 +71,7 @@
                                 <td>50000</td>
                                 <td>101788</td> -->
                                     <td>
-                                        <a href="#" title="Verificar estado de autos" class="p-1" data-idocmodal=<?= htmlspecialchars($ordenCompra['idordencompra']) ?>><i class="fa-solid fa-clipboard-list" style="color: #74C0FC;"></i></a>
+                                        <a href="#" title="Verificar estado de autos" class="p-1" data-idocmodal=<?= htmlspecialchars($ordenCompra['idordencompra']) ?>><i class="fa-solid fa-clipboard-list" style="color: #3459e2ff;"></i></a>
                                         <a href="/oc/reporte/<?= htmlspecialchars($ordenCompra['idordencompra']) ?>" target="_blank" title="PDF OC"><i class="fa-solid fa-file-pdf" style="color: #f73809;;"></i></a>
                                         <a href="#" class="show-details" data-idoc=<?= htmlspecialchars($ordenCompra['idordencompra']) ?>>Detalle</a>
                                     </td>
