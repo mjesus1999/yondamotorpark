@@ -96,6 +96,24 @@ class OrdenCompra
     }
 
 
+    public function updateEstadoToProceso($params = []): int
+    {
+        $query = "UPDATE ordenescompra SET estado='proceso', observaciones=:observaciones WHERE idordencompra=:idordencompra;";
+        try {
+            $stmt = $this->db->prepare($query);
+            $stmt->execute(array(
+                ':observaciones' => $params['observaciones'],
+                ':idordencompra' => $params['idordencompra']
+            ));
+
+            return  (int) $stmt->rowCount();
+        } catch (PDOException $error) {
+            error_log($error->getMessage());
+            return -1;
+        }
+    }
+
+
 
     public function create($params = []): int
     {

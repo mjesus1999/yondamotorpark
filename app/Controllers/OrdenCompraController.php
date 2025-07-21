@@ -97,6 +97,43 @@ class OrdenCompraController extends Controller
         }
     }
 
+    public function setEstadoToProceso($idOC): int
+    {
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            echo json_encode(['success' => false, 'message' => 'Método no permitido']);
+            exit;
+        }
+
+        header('Content-Type: application/json');
+
+        $data = array_map([Validador::class, 'limpiar'], $_POST);
+
+        $registro = [
+            'observaciones' => $data['observaciones'] ?? '',
+            'idordencompra' => $idOC
+        ];
+
+        $rowAffects = $this->ordenCompraModel->updateEstadoToProceso($registro);
+
+        if ($rowAffects > 0) {
+            echo json_encode([
+                'success' => true,
+                'message' => '¡Se actualizo la OC a proceso!'
+            ]);
+            exit();
+        } else {
+            echo json_encode(
+                [
+                    'success' => false,
+                    'message' => '¡No se ha podido actualizar la OC a proceso!'
+                ]
+            );
+        }
+        exit();
+    }
+
 
     public function update($idOC): int
     {

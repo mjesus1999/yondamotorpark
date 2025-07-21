@@ -106,7 +106,7 @@ SELECT
         tpvh.tipovehiculo, ' / ', 
 		vh.version, ' / ', 
 		cvh.combustible,' / ',
-        vh.color, ' / ', 
+        IFNULL(vh.color,'COLOR NO ESPECIFICADO'), ' / ', 
         modvh.anio, ' / ', 
         CONCAT(UCASE(LEFT(vh.condicion, 1)), LOWER(SUBSTRING(vh.condicion, 2)))
 
@@ -128,7 +128,7 @@ ORDER BY cantidad DESC;
 
 END //
 
-CALL sp_det_oc_escorrecto(13);
+CALL sp_det_oc_escorrecto(21);
 
 
 SELECT * FROM ordenescompra;

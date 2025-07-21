@@ -311,11 +311,15 @@ CREATE TABLE ordenescompra
     anulacion 			DATE 			NULL COMMENT 'Logística anula la orden de compra',
     numstock			VARCHAR(20) 	NULL COMMENT 'Este dato será provisto por el concesionario - opcional',
     observaciones		VARCHAR(400) 	NULL,
-    estado 				ENUM('emitido', 'aprobado', 'presentado', 'anulado', 'pagado')  NOT NULL DEFAULT 'emitido',
+    estado              ENUM('emitido','proceso','anulado','pagado') NOT NULL DEFAULT 'emitido',
+    creado              DATETIME NOT NULL DEFAULT NOW(),
+    fechanulado         DATETIME NULL,
     CONSTRAINT fk_idtienda_ocp FOREIGN KEY (idtienda) REFERENCES tiendas (idtienda),
     CONSTRAINT fk_idlogistica_ocp FOREIGN KEY (idlogistica) REFERENCES colaboradores (idcolaborador)
 )ENGINE = INNODB;
-
+-- ALTER TABLE ordenescompra ADD COLUMN creado DATETIME NOT NULL DEFAULT NOW();
+-- ALTER TABLE ordenescompra ADD COLUMN fechanulado DATETIME NULL;
+--ALTER TABLE ordenescompra MODIFY COLUMN estado ENUM('emitido','proceso','anulado','pagado') NOT NULL DEFAULT 'emitido';
 
 
 -- La orden de compra es el documento que se genera para solicitar la compra de un vehículo

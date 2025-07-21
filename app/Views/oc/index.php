@@ -27,9 +27,7 @@
                 <button class="btn btn-sm btn-outline-primary"
                     title="El área de logística generó una nueva OC que aun gerencia no autoriza">Emitido</button>
                 <button class="btn btn-sm btn-outline-primary"
-                    title="Gerencia aprobó la OC deberá envíarsela al concesionario">Aprobado</button>
-                <button class="btn btn-sm btn-outline-primary"
-                    title="La OC fue enviada al concesionario, se deben realizar los pagos correspondientes">En proceso</button>
+                    title="La OC fue enviada al concesionario, se deben realizar los pagos correspondientes">Proceso</button>
                 <button class="btn btn-sm btn-outline-primary" title="OC anulada, deberá indicar los motivos">Anulado</button>
                 <button class="btn btn-sm btn-outline-primary"
                     title="OC pagada completamente, verifique factura">Pagado</button>
@@ -49,6 +47,7 @@
                             <th>Amortización</th>
                             <th>Saldo</th> -->
                             <th>Operaciones</th>
+                            <th>Estado</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -73,7 +72,11 @@
                                     <td>
                                         <a href="#" title="Verificar estado de autos" class="p-1" data-idocmodal=<?= htmlspecialchars($ordenCompra['idordencompra']) ?>><i class="fa-solid fa-clipboard-list" style="color: #3459e2ff;"></i></a>
                                         <a href="/oc/reporte/<?= htmlspecialchars($ordenCompra['idordencompra']) ?>" target="_blank" title="PDF OC"><i class="fa-solid fa-file-pdf" style="color: #f73809;;"></i></a>
-                                        <a href="#" class="show-details" data-idoc=<?= htmlspecialchars($ordenCompra['idordencompra']) ?>>Detalle</a>
+                                        <a href="#" class="show-details" data-idoc=<?= htmlspecialchars($ordenCompra['idordencompra']) ?>><!-- <i class="fa-solid fa-circle-info" style="color: #74C0FC;"></i>-->Detalle</a>
+                                    </td>
+                                    <td>
+                                        <a href="#" class="btn btn-outline-success btn-sm">Proceso</a>
+                                        <a href="#" class="btn btn-outline-danger btn-sm">Anulado</a>
                                     </td>
                                 </tr>
 
