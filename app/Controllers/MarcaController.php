@@ -9,11 +9,11 @@ use App\Models\Marca;
 
 class MarcaController extends Controller
 {
-  private Marca $model;
+  private Marca $marcaModel;
 
   public function __construct()
   {
-    $this->model = new Marca();
+    $this->marcaModel = new Marca();
   }
 
   public function index(): void
@@ -25,7 +25,7 @@ class MarcaController extends Controller
   public function getAll(): void
   {
     header('Content-Type: application/json; charset=utf-8');
-    $lista = $this->model->getAll();
+    $lista = $this->marcaModel->getAll();
     echo json_encode([
       'success' => true,
       'marcas' => $lista

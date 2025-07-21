@@ -24,7 +24,7 @@ class Controller
     }
 
     if (empty($_SESSION['user'])) {
-      header('Location: /login');
+      header('Location: /login'); //accede
       exit;
     }
 

@@ -1,396 +1,337 @@
 <?php include __DIR__ . '/../layout/header.php'; ?>
 
 <div class="container-fluid">
-    <div class="alert alert-info mt-2" role="alert">
-        <div class="row">
-            <div class="col-md-6 d-flex align-items-center justify-content-start">
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb mb-0">
-                        <li class="breadcrumb-item"><a href="#">Cotizaciones</a></li>
-                        <li class="breadcrumb-item active" aria-current="page">Registrar</li>
-                    </ol>
-                </nav>
-            </div>
-            <div class="col-md-6 text-end">
-                <a href="/cotizaciones/listar" class="">[ Mostrar Lista ]</a>
-            </div>
-        </div>
-    </div>
 
-    <div class="mb-2">
-        <form id="formCotizacion" action="/cotizaciones" method="POST">
-            <!-- Información del Cliente -->
-            <div class="card mb-4">
-                <div class="card-header bg-info">
-                    <strong>Paso 1:</strong> <span class="fst-italic">
-                        Información del cliente (opcional)
-                    </span>
-                </div>
-                <div class="card-body">
-                    <div class="row g-2">
-                        <div class="col-md-6">
-                            <div class="form-floating">
-                                <select id="idcliente" name="idcliente" class="form-select" required>
-                                    <option value="">Seleccionar cliente</option>
-                                    <?php foreach ($clientes as $cli): ?>
-                                        <option value="<?= $cli['idcliente'] ?>"
-                                            data-doc="<?= htmlspecialchars($cli['nrodoc']) ?>"
-                                            data-tel="<?= htmlspecialchars($cli['telprimario']) ?>">
-                                            <?= htmlspecialchars($cli['label']) ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
-                                <label for="idcliente">Cliente</label>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="form-floating">
-                                <input type="text" class="form-control" id="documento" name="documento" readonly>
-                                <label for="documento">Documento</label>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="form-floating">
-                                <input type="text" class="form-control" id="telefono" name="telefono" readonly>
-                                <label for="telefono">Teléfono</label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+	<div class="alert alert-info mt-2" role="alert">
+		<div class="row">
+			<div class="col-md-6 d-flex aling-items-center justify-content-start">
+				<nav aria-label="breadcrumb">
+					<ol class="breadcrumb mb-0">
+						<li class="breadcrumb-item"><a href="#">Vehiculos</a></li>
+						<li class="breadcrumb-item active" aria-current="page">Registrar</li>
+					</ol>
+				</nav>
+			</div>
+			<div class="col-md-6 text-end">
+				<a href="/vehiculos/index" class="">[ Listar ]</a>
+			</div>
+		</div>
+	</div>
 
-            <!-- Selección de Vehículo -->
-            <div class="card mb-4">
-                <div class="card-header bg-info">
-                    <strong>Paso 2:</strong> <span class="fst-italic">
-                        Selección de vehículo
-                    </span>
-                </div>
-                <div class="card-body">
-                    <div class="row g-2">
-                        <div class="col-md-3">
-                            <div class="form-floating">
-                                <select id="idmarca" name="idmarca" class="form-select" required>
-                                    <option value="">Seleccionar marca</option>
-                                    <?php foreach ($marcas as $m): ?>
-                                        <option value="<?= $m['idmarca'] ?>">
-                                            <?= htmlspecialchars($m['marca']) ?> (<?= $m['modelos'] ?>)
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
-                                <label for="idmarca">Marca</label>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="form-floating">
-                                <select id="idtipovehiculo" name="idtipovehiculo" class="form-select" required>
-                                    <option value="">Seleccionar tipo</option>
-                                    <?php foreach ($tipovehiculos as $tv): ?>
-                                        <option value="<?= $tv['idtipovehiculo'] ?>">
-                                            <?= htmlspecialchars($tv['tipovehiculo']) ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
-                                <label for="idtipovehiculo">Tipo de Vehículo</label>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="form-floating">
-                                <select class="form-select" id="idmodelo" name="idmodelo" required>
-                                    <option value="">Seleccionar modelo</option>
-                                    <!-- Se carga dinámicamente -->
-                                </select>
-                                <label for="idmodelo">Modelo</label>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="form-floating">
-                                <select class="form-select" id="anio" name="anio" required>
-                                    <option value="">Seleccionar año</option>
-                                    <!-- Se carga dinámicamente -->
-                                </select>
-                                <label for="anio">Año</label>
-                            </div>
-                        </div>
-                    </div>
+	<!-- <div class="mb-3">
+		<h4>Vehículo</h4>
+	</div>
+	<div class="row">
+		<div class="col-md-12">
+		</div>
+	</div> -->
 
-                    <div class="row g-3 mt-2">
-                        <div class="col-md-12">
-                            <div class="form-floating">
-                                <select class="form-select" id="idvehiculo" name="idvehiculo" required>
-                                    <option value="">Seleccionar vehículo</option>
-                                    <!-- Se carga dinámicamente basado en filtros anteriores -->
-                                </select>
-                                <label for="idvehiculo">Vehículo Disponible</label>
-                            </div>
-                        </div>
-                    </div>
+	<div class="mb-2">
+		<form action="" id="registrar-vehiculos" autocomplete="off">
+			<div class="card mb-2">
+				<div class="card-header bg-info">
+					<strong>Paso 1:</strong> <span class="fst-italic">Nuevo Vehiculos</span>
+				</div>
+				<div class="card-body">
 
-                    <!-- Información del Vehículo Seleccionado -->
-                    <div id="infoVehiculo" class="mt-3" style="display: none;">
-                        <div class="row g-3">
-                            <div class="col-md-3">
-                                <div class="form-floating">
-                                    <input type="text" class="form-control" id="version" name="version" readonly>
-                                    <label for="version">Versión</label>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="form-floating">
-                                    <input type="text" class="form-control" id="condicion" name="condicion" readonly>
-                                    <label for="condicion">Condición</label>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="form-floating">
-                                    <input type="text" class="form-control" id="combustible" name="combustible"
-                                        readonly>
-                                    <label for="combustible">Combustible</label>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="form-floating">
-                                    <input type="text" class="form-control" id="color" name="color" readonly>
-                                    <label for="color">Color</label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+					<div class="row g-2">
+						<div class="col-md-2 mb-2">
+							<div class="form-floating">
+								<input type="number" id="cantidad" value="1" min="1" max="20"
+									class="form-control text-center">
+								<label for="cantidad">Cantidad</label>
+							</div>
+						</div>
+						<div class="col-md-3 mb-2">
+							<div class="form-floating">
+								<select name="marcas" id="marcas" class="form-select" required>
+									<option value="">Seleccione</option>
+								</select>
+								<label for="marcas" class="form-label">Marca <span class="text-danger">*</span></label>
+							</div>
+						</div>
+						<div class="col-md-2 mb-2">
+							<div class="form-floating">
+								<select name="tipos" id="tipos" class="form-select" required>
+									<option value="">Seleccione</option>
+								</select>
+								<label for="tipos">Tipo de vehículo <span class="text-danger">*</span></label>
+							</div>
+						</div>
+						<div class="col-md-3 mb-2">
+							<div class="form-floating">
+								<select name="modelos" id="modelos" class="form-select" required>
+									<option value="">Seleccione</option>
+								</select>
+								<label for="modelos">Modelos disponibles <span class="text-danger">*</span></label>
+							</div>
+						</div>
+						<div class="col-md-2 mb-2">
+							<div class="input-group">
+								<div class="form-floating">
+									<select name="anios" id="anios" class="form-select" required>
+										<option value="">Seleccione</option>
+									</select>
+									<label for="anios">Año <span class="text-danger">*</span></label>
+								</div>
+								<button type="button" class="btn btn-outline-success"
+									title="Incrementa el año del modelo y lo guarda en la base de datos">+</button>
+							</div>
+						</div>
 
-            <!-- Condiciones de Cotización -->
-            <div class="card mb-4">
-                <div class="card-header bg-info">
-                    <strong>Paso 3:</strong> <span class="fst-italic">
-                        Realizar la cotizacion
-                    </span>
-                </div>
-                <div class="card-body">
-                    <div class="row g-2">
-                        <div class="col-md-3">
-                            <div class="form-floating">
-                                <select class="form-select" id="moneda" name="moneda" required>
-                                    <option value="">Seleccionar moneda</option>
-                                    <option value="PEN">Soles (PEN)</option>
-                                    <option value="USD">Dólares (USD)</option>
-                                </select>
-                                <label for="moneda">Moneda</label>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="form-floating">
-                                <input type="number" class="form-control" id="precioventa" name="precioventa"
-                                    step="0.01" required>
-                                <label for="precioventa">Precio de Venta</label>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="form-floating">
-                                <input type="number" class="form-control" id="vigenciadias" name="vigenciadias" value=""
-                                    min="1" max="90" required>
-                                <label for="vigenciadias">Vigencia (días)</label>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="form-floating">
-                                <input type="number" class="form-control" id="inicial" name="inicial" step="0.01"
-                                    min="0" required>
-                                <label for="inicial">Cuota Inicial</label>
-                            </div>
-                        </div>
-                    </div>
+					</div> <!-- ./row -->
 
-                    <div class="row g-3 mt-2">
-                        <div class="col-md-6">
-                            <div class="form-floating">
-                                <input type="number" class="form-control" id="numcuotas" name="numcuotas" min="1"
-                                    max="72" required>
-                                <label for="numcuotas">Número de Cuotas</label>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-floating">
-                                <input type="number" class="form-control" id="valorcuota" name="valorcuota" step="0.01"
-                                    readonly>
-                                <label for="valorcuota">Valor de Cuota</label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+					<div class="row g-2">
+						<div class="col-md-2 mb-2">
 
-            <!-- Formato de Cotización -->
-            <div class="card mb-4">
-                <div class="card-header bg-info">
-                    <strong>Paso 4:</strong> <span class="fst-italic">
-                        Formato de cotizacion
-                    </span>
-                </div>
-                <div class="card-body">
-                    <div class="row g-2">
-                        <div class="col-md-4">
-                            <div class="form-floating">
-                                <select class="form-select" id="idformato" name="idformato" required>
-                                    <option value="">Seleccionar formato</option>
-                                    <?php foreach ($formatos as $f): ?>
-                                        <option value="<?= $f['idformato'] ?>">
-                                        <?= htmlspecialchars($f['tipocotizacion']) ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
-                                <label for="idformato">Formato de Cotización</label>
-                            </div>
-                        </div>
+							<!-- lista de versiones -->
+							<div class="form-floating" id="bloque-version-lista">
+								<select name="version-ls" id="version-ls" class="form-select" required>
+									<option value="">Seleccione</option>
+									<optgroup label="Prestaciones">
+										<option value="Básico">Básico</option>
+										<option value="Semi Full">Semi Full</option>
+										<option value="Full">Full</option>
+										<option value="Tope de gama">Tope de gama</option>
+									</optgroup>
+									<optgroup label="Otro">
+										<option value="ESP">Especificar...</option>
+									</optgroup>
+								</select>
+								<label for="version-ls">Versión <span class="text-danger">*</span></label>
+							</div>
 
-                        <!-- Colaborador de Venta -->
-                        <div class="col-md-4">
-                            <div class="form-floating">
-                                <select class="form-select" id="idcolventa" name="idcolventa" required>
-                                    <option value="">Seleccionar colaborador</option>
-                                    <?php foreach ($colaboradores as $c): ?>
-                                        <option value="<?= $c['idcolaborador'] ?>">
-                                            <?= htmlspecialchars($c['nombres'] . ' ' . $c['apellidos']) ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
-                                <label for="idcolventa">Colaborador de Venta</label>
-                            </div>
-                        </div>
+							<!-- input de versión (especificada por el usuario) -->
+							<div class="input-group d-none" id="bloque-version-input">
+								<div class="form-floating">
+									<input type="text" class="form-control" id="version-in">
+									<label for="version-in">Describa la versión</label>
+								</div>
+								<button type="button" id="mostrar-version-ls" class="btn btn-outline-secondary"
+									title="Mostrar lista"><i class="fa-solid fa-bars-staggered"></i></button>
+							</div>
 
-                        <!-- Estado de la Cotización -->
-                        <div class="col-md-4">
-                            <div class="form-floating">
-                                <select class="form-select" id="estadocotizacion" name="estadocotizacion" required>
-                                    <option value="">Seleccionar estado</option>
-                                    <option value="aprobado">Aprobado</option>
-                                    <option value="rechazado">Rechazado</option>
-                                    <option value="observado">Observado</option>
-                                </select>
-                                <label for="estadocotizacion">Estado de Cotización</label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+						</div>
+						<div class="col-md-3 mb-2">
+							<div class="form-floating">
+								<select name="condicion" id="condicion" class="form-select" required>
+									<option value="nuevo" selected>Nuevo</option>
+									<option value="seminuevo">Seminuevo</option>
+								</select>
+								<label for="condicion">Condición <span class="text-danger">*</span></label>
+							</div>
+						</div>
+						<div class="col-md-3 mb-2">
+							<div class="form-floating">
+								<select name="combustible" id="combustible" class="form-select" required>
+									<option value="">Seleccione</option>
+									<option value="">Gasolina</option>
+									<option value="">Diesel</option>
+									<option value="">GLP</option>
+									<option value="">GNV</option>
+									<option value="">Dual: Gasolina, GLP</option>
+								</select>
+								<label for="combustible">Tipo de combustible <span class="text-danger">*</span></label>
+							</div>
+						</div>
+						<div class="col-md-2 mb-2">
+							<div class="form-floating">
+								<input type="text" id="color" class="form-control" placeholder="Color">
+								<label for="color">Color</label>
+							</div>
+						</div>
+						<div class="col-md-2 mb-2">
+							<div class="form-floating">
+								<input type="text" id="precio" class="form-control text-end" pattern="[0-9]+"
+									title="Solo se permiten números" placeholder="Precio" required>
+								<label for="precio">Precio <span class="text-danger">*</span></label>
+							</div>
+						</div>
+					</div>
 
-            <!-- Botones de Acción -->
-            <div class="card">
-                <div class="card-footer text-end">
-                    <button type="reset" id="btn-cancelar-registro"
-                        class="btn btn-sm btn-outline-secondary">Cancelar</button>
-                    <button type="submit" class="btn btn-primary btn-sm btnGuardarCotizacion">Registrar</button>
-                </div>
-            </div>
-        </form>
-    </div>
+					<hr>
+
+					<!-- Fila para agregar chasis, placa, placa rotativa y serie motor -->
+					<div class="row g-2">
+
+						<div class="row mt-2 g-2">
+							<div class="col-md-1 text-center">#</div>
+							<div class="col-md-4">Chasis</div>
+							<div class="col-md-2">Placa</div>
+							<div class="col-md-2">Placa rotativa</div>
+							<div class="col-md-3">Serie</div>
+						</div>
+
+						<!-- Se van a generar inputs para agregar los datos de los vehículos -->
+						<div class="content" id="inputs-dinamicos">
+							<!-- Contenido generado de forma dinámica -->
+						</div>
+
+						<!-- Fila para leyenda de campos obligatorios -->
+						<div class="row">
+							<div class="col-md-12">
+								<span class="fst-italic text-danger">* Campos obligatorios</span>
+							</div>
+						</div>
+					</div>
+
+				</div> <!-- ./card-body -->
+
+				<div class="card-footer text-end">
+					<button type="reset" class="btn btn-sm btn-outline-secondary">Cancelar</button>
+					<button type="submit" class="btn btn-sm btn-primary">Registrar</button>
+				</div>
+			</div><!-- ./card -->
+		</form>
+
+	</div>
+
+
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const clienteSelect = document.getElementById('idcliente');
-        const documentoInput = document.getElementById('documento');
-        const telefonoInput = document.getElementById('telefono');
+	document.addEventListener("DOMContentLoaded", () => {
+		const cantidadInput = document.getElementById("cantidad");
+		const container = document.getElementById("inputs-dinamicos");
 
-        clienteSelect.addEventListener('change', () => {
-            const option = clienteSelect.selectedOptions[0];
-            if (!option || !option.value) {
-                documentoInput.value = '';
-                telefonoInput.value = '';
-                return;
-            }
-            //se llena los campos al ser seleccionado un cliente
-            documentoInput.value = option.dataset.doc || '';
-            telefonoInput.value = option.dataset.tel || '';
-        });
+		function generarInputs(cant) {
+			container.innerHTML = "";
+			cant = Number(cant) || 0;
+			for (let i = 1; i <= cant; i++) {
+				const row = document.createElement("div");
+				row.className = "row g-2 mb-2";
+				row.innerHTML = `
+					<div class="col-md-1">
+					<input type="text" class="form-control text-center" value="${i}" disabled>
+					</div>
+					<div class="col-md-4">
+					<input type="text" class="form-control" name="chasis[]" required>
+					</div>
+					<div class="col-md-2">
+					<input type="text" class="form-control" name="placa[]" required>
+					</div>
+					<div class="col-md-2">
+					<input type="text" class="form-control" name="placa_rotativa[]">
+					</div>
+					<div class="col-md-3">
+					<input type="text" class="form-control" name="serie[]" required>
+					</div>
+				`;
+				container.appendChild(row);
+			}
+		}
 
-        const marcaSel = document.getElementById('idmarca');
-        const tipoSel = document.getElementById('idtipovehiculo');
-        const modeloSel = document.getElementById('idmodelo');
-        const anioSel = document.getElementById('anio');
+		// Inicializa con el valor por defecto
+		generarInputs(cantidadInput.value);
 
-        let modelosData = [];
+		// Regenera al cambiar o teclear en el input de cantidad
+		cantidadInput.addEventListener("change", () => generarInputs(cantidadInput.value));
+		cantidadInput.addEventListener("keyup", () => generarInputs(cantidadInput.value));
 
-        // Función para poblar modelo y limpiar año
-        function actualizarModelos() {
-            const idmarca = marcaSel.value;
-            const idtipo = tipoSel.value;
-            modeloSel.innerHTML = '<option value="">Seleccionar modelo</option>';
-            anioSel.innerHTML = '<option value="">Seleccionar año</option>';
+		// Marcas > Tipos > Modelos > Años
+		const marcasSel = document.getElementById("marcas");
+		const tiposSel = document.getElementById("tipos");
+		const modelosSel = document.getElementById("modelos");
+		const aniosSel = document.getElementById("anios");
 
-            if (!idmarca || !idtipo) return;
+		let modelosCache = [];
 
-            fetch(`/modelos/lista?marca=${idmarca}&tipo=${idtipo}`)
-                .then(res => res.ok ? res.json() : Promise.reject(res.status))
-                .then(json => {
-                    if (!json.success) return;
-                    modelosData = json.modelos;
-                    // Extraer nombres de modelos únicos
-                    const nombres = Array.from(new Set(modelosData.map(m => m.modelo)));
-                    nombres.forEach(nombre => {
-                        const opt = document.createElement('option');
-                        opt.value = nombre;
-                        opt.textContent = nombre;
-                        modeloSel.append(opt);
-                    });
-                })
-                .catch(err => console.error('Error al cargar modelos:', err));
-        }
+		// 1) Carga inicial de marcas
+		async function cargarMarcas() {
+			try {
+				const res = await fetch("/marcas/lista", { headers: { "Accept": "application/json" } });
+				if (!res.ok) throw new Error(res.status);
+				const { success, marcas } = await res.json();
+				if (!success) throw new Error("Error API marcas");
+				marcasSel.innerHTML = `<option value="">Seleccione Marca</option>`;
+				marcas.forEach(m => {
+					marcasSel.insertAdjacentHTML("beforeend",
+						`<option value="${m.idmarca}">${m.marca}</option>`);
+				});
+			} catch (err) {
+				console.error(err);
+				marcasSel.innerHTML = `<option value="">No se pudieron cargar marcas</option>`;
+			}
+		}
 
-        // Cuando cambian marca o tipo
-        marcaSel.addEventListener('change', actualizarModelos);
-        tipoSel.addEventListener('change', actualizarModelos);
+		// 2) Al cambiar marca, cargar tipos
+		marcasSel.addEventListener("change", async () => {
+			const idm = marcasSel.value;
+			tiposSel.innerHTML = `<option value="">Cargando Tipo</option>`;
+			modelosSel.innerHTML = `<option value="">Seleccione Tipo antes</option>`;
+			aniosSel.innerHTML = `<option value="">Seleccione Modelo antes</option>`;
+			modelosCache = [];
 
-        // Al seleccionar un modelo, poblar años
-        modeloSel.addEventListener('change', () => {
-            const nombreSel = modeloSel.value;
-            anioSel.innerHTML = '<option value="">Seleccionar año</option>';
-            if (!nombreSel) return;
-            // Filtrar datos para ese modelo
-            const años = modelosData
-                .filter(m => m.modelo === nombreSel)
-                .map(m => m.anio);
-            // Únicos y ordenados
-            Array.from(new Set(años)).sort().forEach(year => {
-                const opt = document.createElement('option');
-                opt.value = year;
-                opt.textContent = year;
-                anioSel.append(opt);
-            });
-        });
-        const vehSel = document.getElementById('idvehiculo');
+			if (!idm) {
+				tiposSel.innerHTML = `<option value="">Seleccione Marca primero</option>`;
+				return;
+			}
 
-        // Función para poblar vehículos disponibles
-        function cargarDisponibles() {
-            const idmarca = marcaSel.value;
-            const idtipo = tipoSel.value;
-            const modelo = modeloSel.value;
-            const anio = anioSel.value;
+			try {
+				const res = await fetch(`/tipovehiculos/lista?idmarca=${idm}`, { headers: { "Accept": "application/json" } });
+				if (!res.ok) throw new Error(res.status);
+				const { success, tipos } = await res.json();
+				if (!success) throw new Error("Error API tipos");
+				tiposSel.innerHTML = `<option value="">Seleccione Tipo</option>`;
+				tipos.forEach(t => {
+					tiposSel.insertAdjacentHTML("beforeend",
+						`<option value="${t.idtipovehiculo}">${t.tipovehiculo}</option>`);
+				});
+			} catch (err) {
+				console.error(err);
+				tiposSel.innerHTML = `<option value="">No se pudieron cargar tipos</option>`;
+			}
+		});
 
-            vehSel.innerHTML = '<option value="">Seleccionar vehículo</option>';
-            if (!idmarca || !idtipo || !modelo || !anio) return;
+		// 3) Al cambiar tipo, cargar modelos
+		tiposSel.addEventListener("change", async () => {
+			const idm = marcasSel.value;
+			const idt = tiposSel.value;
+			modelosSel.innerHTML = `<option value="">Cargando Modelos</option>`;
+			aniosSel.innerHTML = `<option value="">Seleccione Modelo antes</option>`;
+			modelosCache = [];
 
-            fetch(`/vehiculos/disponibles?marca=${idmarca}&tipo=${idtipo}` +
-                `&modelo=${encodeURIComponent(modelo)}&anio=${anio}`)
-                .then(res => res.ok ? res.json() : Promise.reject(res.status))
-                .then(json => {
-                    if (!json.success) return;
-                    json.vehiculos.forEach(v => {
-                        const opt = document.createElement('option');
-                        opt.value = v.idvehiculo;
-                        opt.textContent = `${v.version} | ${v.color} | ${v.placa}`;
-                        vehSel.append(opt);
-                    });
-                })
-                .catch(err => console.error('Error al cargar vehículos:', err));
-        }
+			if (!idm || !idt) {
+				modelosSel.innerHTML = `<option value="">Seleccione marca y tipo primero</option>`;
+				return;
+			}
 
-        // Dispara carga cuando cambien también modelo o año
-        modeloSel.addEventListener('change', cargarDisponibles);
-        anioSel.addEventListener('change', cargarDisponibles);
+			try {
+				const res = await fetch(`/modelos/lista?marca=${idm}&tipo=${idt}`, { headers: { "Accept": "application/json" } });
+				if (!res.ok) throw new Error(res.status);
+				const { success, modelos } = await res.json();
+				if (!success) throw new Error("Error API modelos");
+				modelosCache = modelos;
+				// extraer nombres únicos
+				const nombres = [...new Set(modelos.map(m => m.modelo))].sort();
+				modelosSel.innerHTML = `<option value="">Seleccione Modelo</option>`;
+				nombres.forEach(n => {
+					modelosSel.insertAdjacentHTML("beforeend",
+						`<option value="${n}">${n}</option>`);
+				});
+			} catch (err) {
+				console.error(err);
+				modelosSel.innerHTML = `<option value="">No se pudieron cargar modelos</option>`;
+			}
+		});
 
-    });
+		// 4) Al cambiar modelo, poblar años
+		modelosSel.addEventListener("change", () => {
+			const sel = modelosSel.value;
+			aniosSel.innerHTML = `<option value="">Seleccione Año</option>`;
+			if (!sel) return;
+			modelosCache
+				.filter(m => m.modelo === sel)
+				.map(m => m.anio)
+				.sort()
+				.filter((v, i, a) => a.indexOf(v) === i)
+				.forEach(year => {
+					aniosSel.insertAdjacentHTML("beforeend",
+						`<option value="${year}">${year}</option>`);
+				});
+		});
+		cargarMarcas();
+	});
 </script>
-
 
 <?php include __DIR__ . '/../layout/footer.php'; ?>

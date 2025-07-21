@@ -29,6 +29,7 @@ require APP_ROOT . '/app/Routes/Persona.router.php';
 require APP_ROOT . '/app/Routes/Auth.router.php';
 require APP_ROOT . '/app/Routes/Cliente.router.php';
 require APP_ROOT . '/app/Routes/ForCotizacion.router.php';
+require APP_ROOT . '/app/Routes/TipoVehiculos.router.php';
 /* require APP_ROOT . '/app/Routes/Cotizacion.router.php'; */
 
 // Un controlador básico para la página de inicio

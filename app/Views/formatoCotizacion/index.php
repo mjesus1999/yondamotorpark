@@ -184,6 +184,7 @@
                 });
             });
         });
+
         document.querySelectorAll('.btn-ver-requisitos').forEach(btn => {
             btn.addEventListener('click', async () => {
                 const id = btn.dataset.id;
@@ -207,7 +208,7 @@
                         });
                     }
 
-                    // Muestra el modal (Bootstrap 5)
+                    //muestra el modal
                     const modal = new bootstrap.Modal(document.getElementById('modalRequisitos'));
                     modal.show();
 

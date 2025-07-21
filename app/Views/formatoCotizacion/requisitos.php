@@ -91,7 +91,7 @@
                     <a href="/formatoCotizacion" class="btn btn-sm btn-outline-secondary">Cancelar</a>
                     <!-- <button type="reset" id="btn-cancelar-registro"
                         class="btn btn-sm btn-outline-secondary">Cancelar</button> -->
-                    <button type="submit" class="btn btn-primary btn-sm btnGuardarRequisito">Agregar</button>
+                    <button type="submit" class="btn btn-primary btn-sm btnGuardarRequisito">Guardar Cambios</button>
                 </div>
             </div>
         </form>
