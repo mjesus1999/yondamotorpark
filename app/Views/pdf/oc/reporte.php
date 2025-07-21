@@ -8,7 +8,10 @@ try {
     ob_start();
     include 'oc.php';
     $html = ob_get_clean();
-    $pdf = new Html2Pdf('P', 'A4', 'es');
+    
+    // Configurar HTML2PDF con márgenes
+    $pdf = new Html2Pdf('P', 'A4', 'es', true, 'UTF-8', array(10, 10,10, 10));
+    
     $pdf->writeHTML($html);
     $pdf->output('reporte-oc.pdf'); 
 } catch (Exception $e) {

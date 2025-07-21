@@ -23,11 +23,18 @@ class OrdenCompraController extends Controller
         $this->view('oc.index', ['ordenCompras' => $ordenCompras]);
     }
 
-    public function indexReport($id): void {
+    /*public function indexReport($id): void {
         $ocDetalles = $this->ordenCompraModel->getDetOCByIdOC($id);
         $this->view('pdf/oc.reporte', ['ocDetalles' => $ocDetalles]);
-    }
+    }*/
 
+    
+
+    public function html2pdfReport($id): void {
+        // Solo necesitamos pasar el ID, los datos se cargarán via JavaScript
+        // El PDF se generará automáticamente sin mostrar la vista
+        $this->view('pdf/oc/oc-html2pdf', ['id' => $id]);
+    }
 
 
     // Me llevará a la voista de crear 

@@ -37,7 +37,7 @@
         </div>
         <div class="card-body" id="lista-oc">
             <div class="table-responsive">
-                <table class="table table-sm" id="tabla-oc">
+                <table class="table table-sm table-hover" id="tabla-oc">
                     <thead>
                         <tr>
                             <th>#</th>
@@ -71,7 +71,8 @@
                                 <td>50000</td>
                                 <td>101788</td> -->
                                     <td>
-                                        <a href="/oc/reporte/<?=htmlspecialchars($ordenCompra['idordencompra']) ?>" target="_blank"><i class="fa-solid fa-file-pdf" style="color: #f73809;"></i></a>
+                                        <!-- <a href="/oc/reporte/<?=htmlspecialchars($ordenCompra['idordencompra']) ?>" target="_blank" title="PDF Tradicional"><i class="fa-solid fa-file-pdf" style="color: #f73809;"></i></a> -->
+                                        <a href="/oc/reporte/<?=htmlspecialchars($ordenCompra['idordencompra']) ?>" target="_blank" title="PDF HTML2PDF"><i class="fa-solid fa-file-pdf" style="color: #f73809;;"></i></a>
                                         <a href="#" class="show-details" data-idoc=<?= htmlspecialchars($ordenCompra['idordencompra']) ?>>Detalle</a>
                                     </td>
                                 </tr>
@@ -92,7 +93,7 @@
             <div class="row">
                 <div class="col-md-6">
                     <div style="padding: 1rem;">
-                        <
+                        
                         <h3 id="detail-concesionario-razon-social"></h3>
                         <h5 id="detail-oc-summary"></h5>
                     </div>

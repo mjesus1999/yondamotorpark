@@ -109,3 +109,9 @@ END //
 -- SELECT * FROM concesionarios;
 -- UPDATE concesionarios SET razonsocial = 'Toyota del Perú S.A.' WHERE idconcesionario = 9;
 
+
+SELECT * FROM ordenescompra;
+
+DELETE FROM ordenescompra 
+WHERE idordencompra NOT IN (6, 7);
+

@@ -44,13 +44,13 @@ BEGIN
 END //
 
 CALL sp_vehiculo_OC_registrar(13,1,'FULL','Rojo','','','','');
+ALTER TABLE vehiculos MODIFY COLUMN idlogistica  INT NULL;
 
 
-
-
-
-
-
+SELECT * FROM vehiculos;
+SELECT * FROM detordencompra;
+SELECT * FROM ordenescompra;
+SELECT * FROM combustibles;
 
 
 

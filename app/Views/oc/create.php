@@ -329,77 +329,95 @@
                             </div>
                         </div>
 
-                        </dv>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-sm btn-outline-secondary"
-                                data-bs-dismiss="modal">Cancelar</button>
-                            <button type="submit" form="formulario-vehiculo" id="registrar-vehiculo"
-                                class="btn btn-sm btn-primary">Agregar</button>
-                        </div>
                     </div>
-                </div> <!-- /.modal-dialog -->
-            </div> <!-- ./modal -->
-            <!-- Fin Zona de modales -->
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-sm btn-outline-secondary"
+                            data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" form="formulario-vehiculo" id="registrar-vehiculo"
+                            class="btn btn-sm btn-primary">Agregar</button>
+                    </div>
+                </div>
+            </div> <!-- /.modal-dialog -->
+        </div> <!-- ./modal -->
+        <!-- Fin Zona de modales -->
 
 
-            <script>
-                document.addEventListener("DOMContentLoaded", async () => {
+        <script>
+            document.addEventListener("DOMContentLoaded", async () => {
 
-                    const modalVehiculo = new bootstrap.Modal(document.getElementById("modal-vehiculo"))
-                    const concesionarios = document.querySelector("#concesionarios")
+                const modalVehiculo = new bootstrap.Modal(document.getElementById("modal-vehiculo"))
+                const concesionarios = document.querySelector("#concesionarios")
 
-                    //input form datos de la OC
-                    const ruc = document.querySelector("#ruc")
-                    const fechaEmision = document.querySelector("#fechaemision")
-                    const tiendas = document.querySelector("#tiendas")
-                    const direccion = document.querySelector("#direccion")
-                    const telefono = document.querySelector("#telefono")
-                    const numstock = document.querySelector("#stock")
-                    const asesor = document.querySelector("#asesor")
-                    const moneda = document.querySelector("#moneda")
-                    const observaciones = document.querySelector("#observaciones")
+                //input form datos de la OC
+                const ruc = document.querySelector("#ruc")
+                const fechaEmision = document.querySelector("#fechaemision")
+                const tiendas = document.querySelector("#tiendas")
+                const direccion = document.querySelector("#direccion")
+                const telefono = document.querySelector("#telefono")
+                const numstock = document.querySelector("#stock")
+                const asesor = document.querySelector("#asesor")
+                const moneda = document.querySelector("#moneda")
+                const observaciones = document.querySelector("#observaciones")
 
-                    //input form vehiculos (modal)
-                    const cantidad = document.querySelector("#cantidad")
-                    const tipos = document.querySelector("#tipos")
-                    const marcas = document.querySelector("#marcas")
-                    const modelos = document.querySelector("#modelos")
-                    const anios = document.querySelector("#anios")
-                    const versionLS = document.querySelector("#version-ls")
-                    const versionIN = document.querySelector("#version-in")
-                    const mostrarVersionLS = document.querySelector("#mostrar-version-ls")
-                    const registrarVehiculo = document.querySelector("#registrar-vehiculo")
-                    const combustible = document.querySelector('#combustible');
-                    const color = document.querySelector('#color');
-                    const precio = document.querySelector('#precio');
+                //input form vehiculos (modal)
+                const cantidad = document.querySelector("#cantidad")
+                const tipos = document.querySelector("#tipos")
+                const marcas = document.querySelector("#marcas")
+                const modelos = document.querySelector("#modelos")
+                const anios = document.querySelector("#anios")
+                const versionLS = document.querySelector("#version-ls")
+                const versionIN = document.querySelector("#version-in")
+                const mostrarVersionLS = document.querySelector("#mostrar-version-ls")
+                const registrarVehiculo = document.querySelector("#registrar-vehiculo")
+                const combustible = document.querySelector('#combustible');
+                const color = document.querySelector('#color');
+                const precio = document.querySelector('#precio');
 
-                    //Formularios
-                    const formOC = document.querySelector("#formulario-oc")
-                    const formVehiculo = document.querySelector("#formulario-vehiculo")
-                    const btnRegistrarOC = document.querySelector('#registrar-OC');
+                //Formularios
+                const formOC = document.querySelector("#formulario-oc")
+                const formVehiculo = document.querySelector("#formulario-vehiculo")
+                const btnRegistrarOC = document.querySelector('#registrar-OC');
+                const btnAgregarItem = document.querySelector('#agregar-item');
 
-                    const abrirWsp = document.querySelector("#abrir-wsp")
-                    const agregarItem = document.querySelector("#agregar-item")
+                const abrirWsp = document.querySelector("#abrir-wsp")
+                const agregarItem = document.querySelector("#agregar-item")
 
-                    // Tabla detalle
+                // Tabla detalle
 
-                    const tablaDetalle = document.querySelector('#tabla-detalle tbody');
+                const tablaDetalle = document.querySelector('#tabla-detalle tbody');
 
-                    // IDCONCESIONARIO
-                    const idconcesionario = null;
+                // IDCONCESIONARIO
+                const idconcesionario = null;
 
-                    let dataConcesionarios = []
-                    let dataTiendas = []
-                    let dataVehiculos = []
-                    let dataModelos = [] //Se utilizará para cargar y seleccionar un modelo y luego un año sin hacer doble consulta al backend
+                let dataConcesionarios = []
+                let dataTiendas = []
+                let dataVehiculos = []
+                let dataModelos = [] //Se utilizará para cargar y seleccionar un modelo y luego un año sin hacer doble consulta al backend
 
-                    function generadorInputsDinamicos(cantidad) {
-                        const inputsDinamicos = document.querySelector("#inputs-dinamicos")
+                // Función para verificar si se pueden habilitar los botones
+                function verificarEstadoBotones() {
+                    // Verificar si hay vehículos agregados
+                    const hayVehiculos = dataVehiculos.length > 0;
 
-                        if (cantidad > 0) {
-                            inputsDinamicos.innerHTML = ``
-                            for (let i = 1; i <= cantidad; i++) {
-                                inputsDinamicos.innerHTML += `
+                    // Habilitar/deshabilitar botón Registrar
+                    if (hayVehiculos) {
+                        btnRegistrarOC.disabled = false;
+                        btnRegistrarOC.classList.remove('btn-secondary');
+                        btnRegistrarOC.classList.add('btn-primary');
+                    } else {
+                        btnRegistrarOC.disabled = true;
+                        btnRegistrarOC.classList.remove('btn-primary');
+                        btnRegistrarOC.classList.add('btn-secondary');
+                    }
+                }
+
+                function generadorInputsDinamicos(cantidad) {
+                    const inputsDinamicos = document.querySelector("#inputs-dinamicos")
+
+                    if (cantidad > 0) {
+                        inputsDinamicos.innerHTML = ``
+                        for (let i = 1; i <= cantidad; i++) {
+                            inputsDinamicos.innerHTML += `
                                     <div class="row g-2">
                                     <div class="col-md-1 mb-2"><input type="text" class="form-control text-center" id="idvh${i}" value="${i}" disabled></div>
                                     <div class="col-md-4 mb-2"><input type="text" class="form-control" id="chas${i}"></div>
@@ -408,112 +426,130 @@
                                     <div class="col-md-3 mb-2"><input type="text" class="form-control" id="seri${i}"></div>
                                     </div>
                                     `;
-                            }
                         }
+                    } else {
+                        inputsDinamicos.innerHTML = ``
+                    }
+                }
+
+                //Se deberán generar input de forma dinámica para agregar: id, chasis, placa, placa rotativa, serie
+                cantidad.addEventListener("change", function(event) {
+                    generadorInputsDinamicos(parseInt(this.value))
+                })
+
+                //Se deberán generar input de forma dinámica para agregar: id, chasis, placa, placa rotativa, serie
+                cantidad.addEventListener("keyup", function(event) {
+                    if (this.value != "") {
+                        generadorInputsDinamicos(parseInt(this.value))
+                    }
+                })
+
+                //Abre Web WhatsApp con el número indicado
+                abrirWsp.addEventListener("click", () => {
+                    if (telefono.value.length >= 9) {
+                        window.open(`https://web.whatsapp.com/send?phone=${telefono.value}`, '_blank')
+                    }
+                })
+
+                agregarItem.addEventListener("click", () => {
+                    modalVehiculo.show()
+                    // Inicializar inputs dinámicos con la cantidad actual
+                    generadorInputsDinamicos(parseInt(cantidad.value) || 1)
+                })
+
+                //Si elige VERSION (especificar...) debemos mostrar una caja de texto
+                versionLS.addEventListener("change", (event) => {
+                    const opcion = event.target.value
+
+                    if (opcion == "ESP") {
+                        document.querySelector("#bloque-version-lista").classList.add("d-none")
+                        document.querySelector("#bloque-version-input").classList.remove("d-none")
+                        versionIN.value = ``
+                        versionIN.focus()
+                    } else {
+                        versionIN.value = versionLS.value
+                    }
+                })
+
+                //   Cuando se especifica la VERSION manualmente (input) se puede volver a mostrar la lista
+                mostrarVersionLS.addEventListener("click", () => {
+                    versionIN.value = ``;
+                    document.querySelector("#bloque-version-lista").classList.remove("d-none")
+                    document.querySelector("#bloque-version-input").classList.add("d-none")
+                    versionLS.value = ``
+                })
+
+
+                //Registra un vehículo (envía los datos a un arreglo) Y DE ESE ARREGLO GENERAR EL REPORTE DE OC.
+                formVehiculo.addEventListener("submit", function(event) {
+                    event.preventDefault();
+
+                    // Validar campos requeridos
+                    if (!marcas.value || !tipos.value || !modelos.value || !anios.value || 
+                        !versionLS.value || !combustible.value || !precio.value) {
+                        alert("Por favor complete todos los campos obligatorios");
+                        return;
                     }
 
-                    //Se deberán generar input de forma dinámica para agregar: id, chasis, placa, placa rotativa, serie
-                    cantidad.addEventListener("change", function(event) {
-                        generadorInputsDinamicos(parseInt(this.value))
-                    })
+                    // Validar que si la versión es "ESP", el campo de texto no esté vacío
+                    if (versionLS.value === "ESP" && !versionIN.value.trim()) {
+                        alert("Por favor especifique la versión del vehículo");
+                        versionIN.focus();
+                        return;
+                    }
 
-                    //Se deberán generar input de forma dinámica para agregar: id, chasis, placa, placa rotativa, serie
-                    cantidad.addEventListener("keyup", function(event) {
-                        if (this.value != "") {
-                            generadorInputsDinamicos(parseInt(this.value))
-                        }
-                    })
+                    let idVehiculo = dataVehiculos.length;
+                    const pregunta = (cantidad.value == 1) ?
+                        "¿Agregamos este vehículo?" :
+                        `¿Agregamos los ${cantidad.value} vehículos de la lista?`;
 
-                    //Abre Web WhatsApp con el número indicado
-                    abrirWsp.addEventListener("click", () => {
-                        if (telefono.value.length >= 9) {
-                            window.open(`https://web.whatsapp.com/send?phone=${telefono.value}`, '_blank')
-                        }
-                    })
+                    if (!confirm(pregunta)) {
+                        return;
+                    }
 
-                    agregarItem.addEventListener("click", () => {
-                        modalVehiculo.show()
-                    })
+                    for (let i = 1; i <= parseInt(cantidad.value); i++) {
+                        idVehiculo++;
 
-                    //Si elige VERSION (especificar...) debemos mostrar una caja de texto
-                    versionLS.addEventListener("change", (event) => {
-                        const opcion = event.target.value
-
-                        if (opcion == "ESP") {
-                            document.querySelector("#bloque-version-lista").classList.add("d-none")
-                            document.querySelector("#bloque-version-input").classList.remove("d-none")
-                            versionIN.value = ``
-                            versionIN.focus()
-                        } else {
-                            versionIN.value = versionLS.value
-                        }
-                    })
-
-                    //   Cuando se especifica la VERSION manualmente (input) se puede volver a mostrar la lista
-                    mostrarVersionLS.addEventListener("click", () => {
-                        versionIN.value = ``;
-                        document.querySelector("#bloque-version-lista").classList.remove("d-none")
-                        document.querySelector("#bloque-version-input").classList.add("d-none")
-                        versionLS.value = ``
-                    })
+                        const vehiculo = {
+                            idVehiculo,
+                            idmodelo: modelos.value,
+                            modelo_texto: modelos.options[modelos.selectedIndex].text,
+                            marca: marcas.options[marcas.selectedIndex].text,
+                            tipo: tipos.options[tipos.selectedIndex].text,
+                            idcombustible: combustible.value,
+                            combustible_texto: combustible.options[combustible.selectedIndex].text,
+                            version: (versionLS.value === "ESP") ? versionIN.value : versionLS.value,
+                            color: color.value,
+                            condicion: condicion.value,
+                            precio: precio.value,
+                            chasis: document.querySelector(`#chas${i}`) ? document.querySelector(`#chas${i}`).value.trim() : '',
+                            placa: document.querySelector(`#plac${i}`) ? document.querySelector(`#plac${i}`).value.trim() : '',
+                            placa_rotativa: document.querySelector(`#plar${i}`) ? document.querySelector(`#plar${i}`).value.trim() : '',
+                            serie_motor: document.querySelector(`#seri${i}`) ? document.querySelector(`#seri${i}`).value.trim() : ''
+                        };
 
 
-                    //Registra un vehículo (envía los datos a un arreglo) Y DE ESE ARREGLO GENERAR EL REPORTE DE OC.
-                    formVehiculo.addEventListener("submit", function(event) {
-                        event.preventDefault();
+                        dataVehiculos.push(vehiculo);
+                    }
 
-                        let idVehiculo = dataVehiculos.length;
-                        const pregunta = (cantidad.value == 1) ?
-                            "¿Agregamos este vehículo?" :
-                            `¿Agregamos los ${cantidad.value} vehículos de la lista?`;
+                    renderizarTabla();
 
-                        if (!confirm(pregunta)) {
-                            return;
-                        }
+                    console.log("Vehículos agregados:", dataVehiculos);
 
-                        for (let i = 1; i <= parseInt(cantidad.value); i++) {
-                            idVehiculo++;
-
-                            const vehiculo = {
-                                idVehiculo,
-                                idmodelo: modelos.value,
-                                modelo_texto: modelos.options[modelos.selectedIndex].text,
-                                marca: marcas.options[marcas.selectedIndex].text,
-                                tipo: tipos.options[tipos.selectedIndex].text,
-                                idcombustible: combustible.value,
-                                combustible_texto: combustible.options[combustible.selectedIndex].text,
-                                version: (versionLS.value === "ESP") ? versionIN.value : versionLS.value,
-                                color: color.value,
-                                condicion: condicion.value,
-                                precio: precio.value,
-                                chasis: document.querySelector(`#chas${i}`).value.trim(),
-                                placa: document.querySelector(`#plac${i}`).value.trim(),
-                                placa_rotativa: document.querySelector(`#plar${i}`).value.trim(),
-                                serie_motor: document.querySelector(`#seri${i}`).value.trim()
-                            };
+                    // Puedes cerrar el modal y resetear el formulario
+                    formVehiculo.reset();
+                    generadorInputsDinamicos(0);
+                    modalVehiculo.hide();
+                });
 
 
-                            dataVehiculos.push(vehiculo);
-                        }
+                // Función para renderizar la tabla 
 
-                        renderizarTabla();
+                function renderizarTabla() {
+                    tablaDetalle.innerHTML = "";
 
-                        console.log("Vehículos agregados:", dataVehiculos);
-
-                        // Puedes cerrar el modal y resetear el formulario
-                        formVehiculo.reset();
-                        generadorInputsDinamicos(0);
-                        modalVehiculo.hide();
-                    });
-
-
-                    // Función para renderizar la tabla 
-
-                    function renderizarTabla() {
-                        tablaDetalle.innerHTML = "";
-
-                        dataVehiculos.forEach((veh, index) => {
-                            tablaDetalle.innerHTML += `
+                    dataVehiculos.forEach((veh, index) => {
+                        tablaDetalle.innerHTML += `
                                     <tr>
                                         <td>${index + 1}</td>
                                         <td>
@@ -529,322 +565,328 @@
                                         <td>${veh.precio}</td>
                                     </tr>
                                 `;
-                        });
-
-                        console.log("Vehículos actuales:", dataVehiculos);
-                    }
-
-                    // Eliminar vehículo de la lista y del array
-                    tablaDetalle.addEventListener("click", function(event) {
-                        if (event.target.closest(".btn-eliminar")) {
-                            event.preventDefault();
-
-                            const index = event.target.closest(".btn-eliminar").dataset.index;
-                            if (confirm("¿Eliminar este vehículo de la lista?")) {
-                                // Eliminar del array
-                                dataVehiculos.splice(index, 1);
-
-                                // Volver a renderizar la tabla
-                                renderizarTabla();
-                            }
-                        }
                     });
 
+                    console.log("Vehículos actuales:", dataVehiculos);
+                    
+                    // Verificar estado de botones después de renderizar
+                    verificarEstadoBotones();
+                }
 
-                    // Obtener los concesionarios de la DB
-                    async function obtenerConcesionarios() {
+                // Eliminar vehículo de la lista y del array
+                tablaDetalle.addEventListener("click", function(event) {
+                    if (event.target.closest(".btn-eliminar")) {
+                        event.preventDefault();
 
-                        try {
-                            const res = await fetch(`/api/concesionariosDB`);
-                            const data = await res.json();
+                        const index = event.target.closest(".btn-eliminar").dataset.index;
+                        if (confirm("¿Eliminar este vehículo de la lista?")) {
+                            // Eliminar del array
+                            dataVehiculos.splice(index, 1);
 
-                            if (data.length > 0) {
-                                concesionarios.innerHTML = `<option value=''>Seleccione</option>`;
-                                data.forEach(element => {
-                                    concesionarios.innerHTML += ` <option value="${element.idconcesionario}">${element.nombrecomercial}</option>`;
-                                });
-                                dataConcesionarios = data;
-                            } else {
-                                console.error('No hay datos a mostrar');
-                            }
-
-                        } catch (error) {
-                            console.error(error);
+                            // Volver a renderizar la tabla
+                            renderizarTabla();
                         }
-
                     }
-
-                    async function obtenerTiendaByConcesionario(idconcesionario) {
-
-                        try {
-
-                            const res = await fetch(`/api/tiendasConcesionario/${idconcesionario}`);
-                            const data = await res.json();
-                            return data;
-                        } catch (error) {
-                            console.error(error);
-                        }
-
-                    }
+                });
 
 
-                    concesionarios.addEventListener('change', async (event) => {
-                        const idConcesionario = event.target.value;
-                        const concesionarioSeleccionado = dataConcesionarios.find(item => item.idconcesionario == idConcesionario);
+                // Obtener los concesionarios de la DB
+                async function obtenerConcesionarios() {
 
-                        // Asignar RUC o limpiar si no hay
-                        ruc.value = concesionarioSeleccionado ? concesionarioSeleccionado.ruc : '';
+                    try {
+                        const res = await fetch(`/api/concesionariosDB`);
+                        const data = await res.json();
 
-                        // impiar tiendas antes de cargarlas
-                        tiendas.innerHTML = `<option value=''>Seleccione</option>`;
-
-                        if (!idConcesionario) {
-                            dataTiendas = [];
-                            direccion.value = '';
-                            asesor.value = '';
-                            telefono.value = '';
-                            return;
-                        }
-
-                        // 2️ Obtener las tiendas del concesionario
-                        dataTiendas = await obtenerTiendaByConcesionario(idConcesionario);
-
-                        if (dataTiendas.length === 0) {
-                            tiendas.innerHTML = `<option value=''>No hay tiendas registradas</option>`;
-                        } else {
-                            dataTiendas.forEach(element => {
-                                tiendas.innerHTML += `<option value='${element.idtienda}'>${element.ubigeo}</option>`;
+                        if (data.length > 0) {
+                            concesionarios.innerHTML = `<option value=''>Seleccione</option>`;
+                            data.forEach(element => {
+                                concesionarios.innerHTML += ` <option value="${element.idconcesionario}">${element.nombrecomercial}</option>`;
                             });
+                            dataConcesionarios = data;
+                        } else {
+                            console.error('No hay datos a mostrar');
                         }
 
-                        // 3️ Limpiar los campos de dirección/teléfono/asesor
+                    } catch (error) {
+                        console.error(error);
+                    }
+
+                }
+
+                async function obtenerTiendaByConcesionario(idconcesionario) {
+
+                    try {
+
+                        const res = await fetch(`/api/tiendasConcesionario/${idconcesionario}`);
+                        const data = await res.json();
+                        return data;
+                    } catch (error) {
+                        console.error(error);
+                    }
+
+                }
+
+
+                concesionarios.addEventListener('change', async (event) => {
+                    const idConcesionario = event.target.value;
+                    const concesionarioSeleccionado = dataConcesionarios.find(item => item.idconcesionario == idConcesionario);
+
+                    // Asignar RUC o limpiar si no hay
+                    ruc.value = concesionarioSeleccionado ? concesionarioSeleccionado.ruc : '';
+
+                    // impiar tiendas antes de cargarlas
+                    tiendas.innerHTML = `<option value=''>Seleccione</option>`;
+
+                    if (!idConcesionario) {
+                        dataTiendas = [];
                         direccion.value = '';
                         asesor.value = '';
                         telefono.value = '';
-                    });
+                        return;
+                    }
 
-                    // Cuando seleccione la tienda, me ocmplete con sus datos.
-                    tiendas.addEventListener('change', (event) => {
-                        const idTiendaSeleccionada = event.target.value;
+                    // 2️ Obtener las tiendas del concesionario
+                    dataTiendas = await obtenerTiendaByConcesionario(idConcesionario);
 
-                        if (!idTiendaSeleccionada) {
-                            direccion.value = '';
-                            asesor.value = '';
-                            telefono.value = '';
+                    if (dataTiendas.length === 0) {
+                        tiendas.innerHTML = `<option value=''>No hay tiendas registradas</option>`;
+                    } else {
+                        dataTiendas.forEach(element => {
+                            tiendas.innerHTML += `<option value='${element.idtienda}'>${element.ubigeo}</option>`;
+                        });
+                    }
+
+                    // 3️ Limpiar los campos de dirección/teléfono/asesor
+                    direccion.value = '';
+                    asesor.value = '';
+                    telefono.value = '';
+                });
+
+                // Cuando seleccione la tienda, me ocmplete con sus datos.
+                tiendas.addEventListener('change', (event) => {
+                    const idTiendaSeleccionada = event.target.value;
+
+                    if (!idTiendaSeleccionada) {
+                        direccion.value = '';
+                        asesor.value = '';
+                        telefono.value = '';
+                        return;
+                    }
+
+                    const tiendaSeleccionada = dataTiendas.find(item => item.idtienda == idTiendaSeleccionada);
+                    direccion.value = tiendaSeleccionada.direccion;
+                    asesor.value = tiendaSeleccionada.contacto;
+                    telefono.value = tiendaSeleccionada.telefono;
+                });
+
+
+
+                btnRegistrarOC.addEventListener("click", async () => {
+                    if (!confirm("¿Registrar esta orden con sus vehículos?")) return;
+
+                    const formDataOC = new FormData(formOC);
+
+                    try {
+                        // 1. Crear la Orden de Compra
+                        const resOC = await fetch('/oc/store', {
+                            method: 'POST',
+                            body: formDataOC
+                        });
+
+                        const dataOC = await resOC.json();
+
+                        if (!dataOC.success) {
+                            showToast(dataOC.message, "WARNING", 2000);
                             return;
                         }
 
-                        const tiendaSeleccionada = dataTiendas.find(item => item.idtienda == idTiendaSeleccionada);
-                        direccion.value = tiendaSeleccionada.direccion;
-                        asesor.value = tiendaSeleccionada.contacto;
-                        telefono.value = tiendaSeleccionada.telefono;
-                    });
+                        const idOC = dataOC.id;
+                        console.log("Orden creada con ID:", idOC);
 
+                        showToast("Registrando vehículos, espere...", "INFO", 3000);
 
+                        // Esperamos 3 segundos antes de registrar los vehículos
+                        setTimeout(async () => {
+                            for (let vehiculo of dataVehiculos) {
+                                try {
+                                    // 2. Registrar cada vehículo en la tabla vehiculos
+                                    const formVeh = new FormData();
+                                    formVeh.append("idmodelo", vehiculo.idmodelo);
+                                    formVeh.append("idcombustible", vehiculo.idcombustible);
+                                    formVeh.append("version", vehiculo.version);
+                                    formVeh.append("color", vehiculo.color);
+                                    formVeh.append("chasis", vehiculo.chasis);
+                                    formVeh.append("placa", vehiculo.placa);
+                                    formVeh.append("placarotativa", vehiculo.placa_rotativa);
+                                    formVeh.append("seriemotor", vehiculo.serie_motor);
 
-                    btnRegistrarOC.addEventListener("click", async () => {
-                        if (!confirm("¿Registrar esta orden con sus vehículos?")) return;
+                                    const resVeh = await fetch('/vehiculosOC/store', {
+                                        method: 'POST',
+                                        body: formVeh
+                                    });
 
-                        const formDataOC = new FormData(formOC);
+                                    const dataVeh = await resVeh.json();
 
-                        try {
-                            // 1. Crear la Orden de Compra
-                            const resOC = await fetch('/oc/store', {
-                                method: 'POST',
-                                body: formDataOC
-                            });
-
-                            const dataOC = await resOC.json();
-
-                            if (!dataOC.success) {
-                                showToast(dataOC.message, "WARNING", 2000);
-                                return;
-                            }
-
-                            const idOC = dataOC.id;
-                            console.log("Orden creada con ID:", idOC);
-
-                            showToast("Registrando vehículos, espere...", "INFO", 3000);
-
-                            // Esperamos 3 segundos antes de registrar los vehículos
-                            setTimeout(async () => {
-                                for (let vehiculo of dataVehiculos) {
-                                    try {
-                                        // 2. Registrar cada vehículo en la tabla vehiculos
-                                        const formVeh = new FormData();
-                                        formVeh.append("idmodelo", vehiculo.idmodelo);
-                                        formVeh.append("idcombustible", vehiculo.idcombustible);
-                                        formVeh.append("version", vehiculo.version);
-                                        formVeh.append("color", vehiculo.color);
-                                        formVeh.append("chasis", vehiculo.chasis);
-                                        formVeh.append("placa", vehiculo.placa);
-                                        formVeh.append("placarotativa", vehiculo.placa_rotativa);
-                                        formVeh.append("seriemotor", vehiculo.serie_motor);
-
-                                        const resVeh = await fetch('/vehiculosOC/store', {
-                                            method: 'POST',
-                                            body: formVeh
-                                        });
-
-                                        const dataVeh = await resVeh.json();
-
-                                        if (!dataVeh.success) {
-                                            console.warn("Vehículo con error:", dataVeh.message);
-                                            continue;
-                                        }
-
-                                        console.log("Vehículo creado con ID:", dataVeh.id);
-
-                                        // 3. Registrar en detordencompra usando el ID del vehículo recién creado
-                                        const formDetalle = new FormData();
-                                        formDetalle.append("idordencompra", idOC);
-                                        formDetalle.append("idvehiculo", dataVeh.id);
-                                        formDetalle.append("preciocompra", vehiculo.precio);
-
-                                        const resDetalle = await fetch('/detalleOC/store', {
-                                            method: 'POST',
-                                            body: formDetalle
-                                        });
-
-                                        const dataDetalle = await resDetalle.json();
-
-                                        if (!dataDetalle.success) {
-                                            console.warn("Detalle OC con error:", dataDetalle.message);
-                                        } else {
-                                            console.log(`Detalle OC registrado: Vehículo ${dataVeh.id} en Orden ${idOC}`);
-                                        }
-
-                                    } catch (err) {
-                                        console.error("Error registrando vehículo o detalle:", err);
+                                    if (!dataVeh.success) {
+                                        console.warn("Vehículo con error:", dataVeh.message);
+                                        continue;
                                     }
+
+                                    console.log("Vehículo creado con ID:", dataVeh.id);
+
+                                    // 3. Registrar en detordencompra usando el ID del vehículo recién creado
+                                    const formDetalle = new FormData();
+                                    formDetalle.append("idordencompra", idOC);
+                                    formDetalle.append("idvehiculo", dataVeh.id);
+                                    formDetalle.append("preciocompra", vehiculo.precio);
+
+                                    const resDetalle = await fetch('/detalleOC/store', {
+                                        method: 'POST',
+                                        body: formDetalle
+                                    });
+
+                                    const dataDetalle = await resDetalle.json();
+
+                                    if (!dataDetalle.success) {
+                                        console.warn("Detalle OC con error:", dataDetalle.message);
+                                    } else {
+                                        console.log(`Detalle OC registrado: Vehículo ${dataVeh.id} en Orden ${idOC}`);
+                                    }
+
+                                } catch (err) {
+                                    console.error("Error registrando vehículo o detalle:", err);
                                 }
-
-                                showToast("¡OC y detalles registrados correctamente!", "SUCCESS", 2000);
-
-                                setTimeout(() => {
-                                    window.location = '/oc/';
-                                }, 2000);
-
-                                // Limpiar
-                                // dataVehiculos = [];
-                                // renderizarTabla();
-                                // formOC.reset();
-                            }, 3000);
-
-
-
-                        } catch (error) {
-                            console.error("Error:", error);
-                            showToast("Error en el registro", "WARNING", 2000);
-                        }
-                    });
-
-
-                    // Obtener las Marcas de la DB
-                    async function obtenerMarcas() {
-                        try {
-
-                            const res = await fetch(`/api/marcas`);
-                            const data = await res.json();
-
-                            if (data.length > 0) {
-                                marcas.innerHTML = '<option>Seleccione</option>'
-
-                                data.forEach(element => {
-                                    marcas.innerHTML += `<option value="${element.idmarca}">${element.marca}</option>`;
-                                });
-                            } else {
-                                marcas.innerHTML = '<option> No hay datos registrados</option>'
                             }
 
-                        } catch (error) {
-                            console.error(error);
-                        }
+                            showToast("¡OC y detalles registrados correctamente!", "SUCCESS", 2000);
 
+                            setTimeout(() => {
+                                window.location = '/oc/';
+                            }, 2000);
+
+                            // Limpiar
+                            // dataVehiculos = [];
+                            // renderizarTabla();
+                            // formOC.reset();
+                        }, 3000);
+
+
+
+                    } catch (error) {
+                        console.error("Error:", error);
+                        showToast("Error en el registro", "WARNING", 2000);
                     }
+                });
 
-                    // EVENTO CUANDO SELECCIONE UN MARCA, SE AGRGEUEN LOS TIPOS DE VEHICULOS DE ESA MARCA AL SELECT
-                    marcas.addEventListener('change', async (event) => {
-                        const idmarca = event.target.value;
-                        const res = await fetch(`/api/getTipoVehiculoByMarca/${idmarca}`);
+
+                // Obtener las Marcas de la DB
+                async function obtenerMarcas() {
+                    try {
+
+                        const res = await fetch(`/api/marcas`);
                         const data = await res.json();
 
-
                         if (data.length > 0) {
-                            tipos.innerHTML = '<option>Seleccione</option>';
+                            marcas.innerHTML = '<option>Seleccione</option>'
+
                             data.forEach(element => {
-                                tipos.innerHTML += `<option value="${element.idtipovehiculo}">${element.tipovehiculo}</option>`;
+                                marcas.innerHTML += `<option value="${element.idmarca}">${element.marca}</option>`;
                             });
                         } else {
-                            tipos.innerHTML = '<option> No hay datos</option>'
+                            marcas.innerHTML = '<option> No hay datos registrados</option>'
                         }
 
-                    });
-
-                    // EVENTO CUANDO SE SEECCIONE UN TIPO DE VEHICULO Y ME MUESTRE SUS MODELO
-                    tipos.addEventListener('change', async (event) => {
-                        const idmarca = parseInt(marcas.value);
-                        const idTipoVehiculo = parseInt(event.target.value);
-
-                        const res = await fetch(`/api/getModeloByTipoMarca/${idmarca}/${idTipoVehiculo}`);
-                        dataModelos = await res.json();
-
-                        modelos.innerHTML = '<option>Seleccione</option>';
-                        anios.innerHTML = '<option>Seleccione</option>';
-
-                        if (dataModelos.length > 0) {
-                            // Map para evitar modelos repetidos (por si vienen con distintos años) - Agregar cualquir tipo de dato {c:v}
-                            const modelosUnicos = new Map();
-
-                            dataModelos.forEach(element => {
-                                if (!modelosUnicos.has(element.modelo)) { //Pregunto si ya fue agregado
-                                    modelosUnicos.set(element.modelo, element.idmodelo);
-                                }
-                            });
-
-                            modelosUnicos.forEach((idmodelo, modelo) => {
-                                modelos.innerHTML += `<option value="${idmodelo}">${modelo}</option>`;
-                            });
-                        } else {
-                            modelos.innerHTML = '<option>No hay datos</option>';
-                        }
-                    });
-
-
-                    modelos.addEventListener('change', async (event) => {
-                        const modeloSeleccionado = event.target.value;
-                        // Filtrar todos los objetos con ese modelo
-                        const modelosFiltrados = dataModelos.filter(item => item.idmodelo == modeloSeleccionado);
-
-                        // Extraer años únicos
-                        const aniosUnicos = [...new Set(modelosFiltrados.map(item => item.anio))];
-
-                        // Limpiar el select de años
-                        anios.innerHTML = '<option>Seleccione</option>';
-
-                        if (aniosUnicos.length > 0) {
-                            aniosUnicos.forEach(anio => {
-                                anios.innerHTML += `<option value="${anio}">${anio}</option>`;
-                            });
-                        } else {
-                            anios.innerHTML += `<option>No hay datos</option>`;
-                        }
-                    });
-
-                    function asignarFechaActual() {
-                        const hoy = new Date()
-                        const fechaFormat = hoy.toISOString().split('T')[0]
-                        fechaEmision.value = fechaFormat
-                        fechaEmision.setAttribute("disabled", true)
+                    } catch (error) {
+                        console.error(error);
                     }
 
+                }
 
-                    asignarFechaActual();
-                    await obtenerConcesionarios();
-                    await obtenerMarcas();
+                // EVENTO CUANDO SELECCIONE UN MARCA, SE AGRGEUEN LOS TIPOS DE VEHICULOS DE ESA MARCA AL SELECT
+                marcas.addEventListener('change', async (event) => {
+                    const idmarca = event.target.value;
+                    const res = await fetch(`/api/getTipoVehiculoByMarca/${idmarca}`);
+                    const data = await res.json();
+
+
+                    if (data.length > 0) {
+                        tipos.innerHTML = '<option>Seleccione</option>';
+                        data.forEach(element => {
+                            tipos.innerHTML += `<option value="${element.idtipovehiculo}">${element.tipovehiculo}</option>`;
+                        });
+                    } else {
+                        tipos.innerHTML = '<option> No hay datos</option>'
+                    }
 
                 });
-            </script>
+
+                // EVENTO CUANDO SE SEECCIONE UN TIPO DE VEHICULO Y ME MUESTRE SUS MODELO
+                tipos.addEventListener('change', async (event) => {
+                    const idmarca = parseInt(marcas.value);
+                    const idTipoVehiculo = parseInt(event.target.value);
+
+                    const res = await fetch(`/api/getModeloByTipoMarca/${idmarca}/${idTipoVehiculo}`);
+                    dataModelos = await res.json();
+
+                    modelos.innerHTML = '<option>Seleccione</option>';
+                    anios.innerHTML = '<option>Seleccione</option>';
+
+                    if (dataModelos.length > 0) {
+                        // Map para evitar modelos repetidos (por si vienen con distintos años) - Agregar cualquir tipo de dato {c:v}
+                        const modelosUnicos = new Map();
+
+                        dataModelos.forEach(element => {
+                            if (!modelosUnicos.has(element.modelo)) { //Pregunto si ya fue agregado
+                                modelosUnicos.set(element.modelo, element.idmodelo);
+                            }
+                        });
+
+                        modelosUnicos.forEach((idmodelo, modelo) => {
+                            modelos.innerHTML += `<option value="${idmodelo}">${modelo}</option>`;
+                        });
+                    } else {
+                        modelos.innerHTML = '<option>No hay datos</option>';
+                    }
+                });
 
 
-            <?php include __DIR__ . '/../layout/footer.php'; ?>
+                modelos.addEventListener('change', async (event) => {
+                    const modeloSeleccionado = event.target.value;
+                    // Filtrar todos los objetos con ese modelo
+                    const modelosFiltrados = dataModelos.filter(item => item.idmodelo == modeloSeleccionado);
+
+                    // Extraer años únicos
+                    const aniosUnicos = [...new Set(modelosFiltrados.map(item => item.anio))];
+
+                    // Limpiar el select de años
+                    anios.innerHTML = '<option>Seleccione</option>';
+
+                    if (aniosUnicos.length > 0) {
+                        aniosUnicos.forEach(anio => {
+                            anios.innerHTML += `<option value="${anio}">${anio}</option>`;
+                        });
+                    } else {
+                        anios.innerHTML += `<option>No hay datos</option>`;
+                    }
+                });
+
+                function asignarFechaActual() {
+                    const hoy = new Date()
+                    const fechaFormat = hoy.toISOString().split('T')[0]
+                    fechaEmision.value = fechaFormat
+                    fechaEmision.setAttribute("disabled", true)
+                }
+
+
+                asignarFechaActual();
+                await obtenerConcesionarios();
+                await obtenerMarcas();
+                
+                // Inicializar estado de botones
+                verificarEstadoBotones();
+
+            });
+        </script>
+
+
+        <?php include __DIR__ . '/../layout/footer.php'; ?>

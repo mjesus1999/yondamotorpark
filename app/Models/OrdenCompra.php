@@ -27,7 +27,9 @@ class OrdenCompra
                 con.razonsocial
             FROM ordenescompra oc 
             JOIN tiendas t ON oc.idtienda = t.idtienda
-            JOIN concesionarios con ON t.idconcesionario = con.idconcesionario;
+            JOIN concesionarios con ON t.idconcesionario = con.idconcesionario
+            
+            ORDER BY oc.idordencompra DESC;
                 
         ";
         try {

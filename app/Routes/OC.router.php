@@ -6,7 +6,10 @@ $router->add('GET', '/oc/create','OrdenCompraController','create');
 
 $router->add('POST', '/oc/store','OrdenCompraController','store');
 
-$router->add('GET','/oc/reporte/{id}','OrdenCompraController','indexReport');
+//$router->add('GET','/oc/reporte/{id}','OrdenCompraController','indexReport');
+$router->add('GET','/oc/reporte/{id}','OrdenCompraController','html2pdfReport');
+
+
 
 // RUTAS DE LAS APIS
     //MOSTRAR LOS DETAALLES EN LA VISTA INDEX
