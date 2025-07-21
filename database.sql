@@ -333,8 +333,8 @@ CREATE TABLE detordencompra
     CONSTRAINT fk_idvehiculo_doc FOREIGN KEY (idvehiculo) REFERENCES vehiculos (idvehiculo),
     CONSTRAINT uk_idvehiculo_doc UNIQUE (idvehiculo) -- Relación uno a uno
 )ENGINE = INNODB;
--- ALTER TABLE detordencompra ADD COLUMN creado  DATETIME        NOT NULL DEFAULT NOW(),
---                                       modificado          DATETIME        NULL;
+-- ALTER TABLE detordencompra ADD COLUMN creado      DATETIME        NOT NULL DEFAULT NOW(),
+-- ALTER TABLE detordencompra ADD COLUMN modificado  DATETIME        NULL;
 
 CREATE TABLE compras
 (
