@@ -8,16 +8,16 @@ use Exception;
 
 class TipoVehiculo
 {
-    private PDO $pdo;
+    private PDO $db;
 
     public function __construct()
     {
-        $this->pdo = Database::getInstance();
+        $this->db = Database::getInstance();
     }
 
     public function getAll(): array
     {
-        $stmt = $this->pdo->prepare("
+        $stmt = $this->db->prepare("
             SELECT idtipovehiculo, tipovehiculo
             FROM tipovehiculos
             ORDER BY tipovehiculo
@@ -38,7 +38,7 @@ class TipoVehiculo
             ";
 
         try {
-            $query = $this->pdo->prepare($sql);
+            $query = $this->db->prepare($sql);
             $query->execute([$idmarca]);
             return $query->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {

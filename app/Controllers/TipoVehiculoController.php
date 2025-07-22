@@ -1,4 +1,6 @@
 <?php
+//app/TipoVehiculoController.php
+
 namespace App\Controllers;
 
 use App\Core\Controller;
@@ -6,12 +8,13 @@ use App\Models\TipoVehiculo;
 
 class TipovehiculoController extends Controller
 {
-    private TipoVehiculo $vehiculoModel;
+    private TipoVehiculo $TipoVehiculoModel;
 
     public function __construct()
     {
-        $this->vehiculoModel = new TipoVehiculo();
+        $this->TipoVehiculoModel = new TipoVehiculo();
     }
+
     public function getTipoVehiculoByMarca(): void
     {
         header('Content-Type: application/json; charset=utf-8');
@@ -20,7 +23,7 @@ class TipovehiculoController extends Controller
             echo json_encode(['success' => false, 'tipos' => []]);
             exit;
         }
-        $tipos = $this->vehiculoModel->getTipoVehiculoByMarca($idmarca);
+        $tipos = $this->TipoVehiculoModel->getTipoVehiculoByMarca($idmarca);
         echo json_encode(['success' => true, 'tipos' => $tipos], JSON_UNESCAPED_UNICODE);
         exit;
     }

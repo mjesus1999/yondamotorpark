@@ -124,6 +124,7 @@ class Usuario
   // CONSULTAS PARA EL LOGIN
 
   //buscar por nombre de usuario
+
   public function searchByUsernick(string $usernick): ?array
   {
     $query = "SELECT col.idcolaborador,
@@ -187,8 +188,8 @@ class Usuario
     return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
   }
 
-
   //actualizar avatar
+  
   public function updateAvatar(int $idColab, string $url): bool
   {
     $stmt = $this->db->prepare("

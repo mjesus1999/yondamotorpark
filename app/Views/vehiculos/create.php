@@ -27,7 +27,7 @@
 	</div> -->
 
 	<div class="mb-2">
-		<form action="" id="registrar-vehiculos" autocomplete="off">
+		<form action="/vehiculos/store" method="POST" id="registrar-vehiculos" autocomplete="off">
 			<div class="card mb-2">
 				<div class="card-header bg-info">
 					<strong>Paso 1:</strong> <span class="fst-italic">Nuevo Vehiculos</span>
@@ -125,30 +125,30 @@
 							<div class="form-floating">
 								<select name="combustible" id="combustible" class="form-select" required>
 									<option value="">Seleccione</option>
-									<option value="">Gasolina</option>
-									<option value="">Diesel</option>
-									<option value="">GLP</option>
-									<option value="">GNV</option>
-									<option value="">Dual: Gasolina, GLP</option>
+									<option value="1">Gasolina</option>
+									<option value="2">Diésel</option>
+									<option value="3">GLP</option>
+									<option value="4">GNV</option>
+									<option value="5">Dual: Gasolina, GLP</option>
 								</select>
 								<label for="combustible">Tipo de combustible <span class="text-danger">*</span></label>
 							</div>
 						</div>
+						<input type="hidden" name="idmodelo" id="idmodelo">
 						<div class="col-md-2 mb-2">
 							<div class="form-floating">
-								<input type="text" id="color" class="form-control" placeholder="Color">
+								<input type="text" id="color" name="color" class="form-control" placeholder="Color">
 								<label for="color">Color</label>
 							</div>
 						</div>
 						<div class="col-md-2 mb-2">
 							<div class="form-floating">
-								<input type="text" id="precio" class="form-control text-end" pattern="[0-9]+"
-									title="Solo se permiten números" placeholder="Precio" required>
+								<input type="text" id="precio" name="precio" class="form-control text-end"
+									pattern="[0-9]+" title="Solo se permiten números" placeholder="Precio" required>
 								<label for="precio">Precio <span class="text-danger">*</span></label>
 							</div>
 						</div>
 					</div>
-
 					<hr>
 
 					<!-- Fila para agregar chasis, placa, placa rotativa y serie motor -->
@@ -191,6 +191,7 @@
 
 <script>
 	document.addEventListener("DOMContentLoaded", () => {
+		const hiddenModeloId = document.getElementById('idmodelo');
 		const cantidadInput = document.getElementById("cantidad");
 		const container = document.getElementById("inputs-dinamicos");
 
@@ -221,7 +222,6 @@
 			}
 		}
 
-		// Inicializa con el valor por defecto
 		generarInputs(cantidadInput.value);
 
 		// Regenera al cambiar o teclear en el input de cantidad
@@ -258,8 +258,6 @@
 		marcasSel.addEventListener("change", async () => {
 			const idm = marcasSel.value;
 			tiposSel.innerHTML = `<option value="">Cargando Tipo</option>`;
-			modelosSel.innerHTML = `<option value="">Seleccione Tipo antes</option>`;
-			aniosSel.innerHTML = `<option value="">Seleccione Modelo antes</option>`;
 			modelosCache = [];
 
 			if (!idm) {
@@ -288,7 +286,6 @@
 			const idm = marcasSel.value;
 			const idt = tiposSel.value;
 			modelosSel.innerHTML = `<option value="">Cargando Modelos</option>`;
-			aniosSel.innerHTML = `<option value="">Seleccione Modelo antes</option>`;
 			modelosCache = [];
 
 			if (!idm || !idt) {
@@ -317,20 +314,57 @@
 
 		// 4) Al cambiar modelo, poblar años
 		modelosSel.addEventListener("change", () => {
-			const sel = modelosSel.value;
+			const selModelo = modelosSel.value;
 			aniosSel.innerHTML = `<option value="">Seleccione Año</option>`;
-			if (!sel) return;
-			modelosCache
-				.filter(m => m.modelo === sel)
+
+			if (!selModelo) {
+				hiddenModeloId.value = '';  // limpiar
+				return;
+			}
+
+			// extraer años únicos para ese nombre
+			const años = modelosCache
+				.filter(m => m.modelo === selModelo)
 				.map(m => m.anio)
-				.sort()
-				.filter((v, i, a) => a.indexOf(v) === i)
-				.forEach(year => {
-					aniosSel.insertAdjacentHTML("beforeend",
-						`<option value="${year}">${year}</option>`);
-				});
+				.sort((a, b) => a - b)
+				.filter((v, i, a) => a.indexOf(v) === i);
+
+			años.forEach(year => {
+				aniosSel.insertAdjacentHTML("beforeend",
+					`<option value="${year}">${year}</option>`);
+			});
+
+			// limpiar campo oculto hasta que elijan año
+			hiddenModeloId.value = '';
+		});
+
+		// 5) Al cambiar año, buscar el objeto completo y setear su ID
+		aniosSel.addEventListener("change", () => {
+			const selModelo = modelosSel.value;
+			const selAnio = aniosSel.value;
+			if (!selModelo || !selAnio) {
+				hiddenModeloId.value = '';
+				return;
+			}
+			const encontrado = modelosCache.find(m =>
+				m.modelo === selModelo && String(m.anio) === selAnio
+			);
+			hiddenModeloId.value = encontrado
+				? encontrado.idmodelo
+				: '';
 		});
 		cargarMarcas();
+
+		/* const form = document.getElementById('registrar-vehiculos');
+		form.addEventListener('submit', e => {
+		  // Antes de enviar, volcar todo el FormData
+		  const data = new FormData(form);
+		  console.group('🚀 FormData antes de submit');
+		  for (let [key, val] of data.entries()) {
+			console.log(key, val);
+		  }
+		  console.groupEnd();
+		}); */
 	});
 </script>
 

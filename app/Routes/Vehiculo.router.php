@@ -6,9 +6,13 @@
 $router->add('GET', '/vehiculos', 'VehiculoController', 'index');
 $router->add('GET', '/vehiculos/create', 'VehiculoController', 'create');
 
-//CLIENTE DENTRO DE VEHICULO
-/* $router->add('GET', '/clientes/lista', 'ClienteController', 'getAllCliente'); */
 
 //Modelos de vehiculo
 $router->add('GET', '/modelos/lista', 'ModeloController', 'getByMarcaYTipo');
-$router->add('GET', '/vehiculos/disponibles', 'VehiculoController', 'getVehiculosDisponibles'); 
+
+//registro del vehiculo:
+$router->add('POST', '/vehiculos/store', 'VehiculoController', 'store');
+
+//CLIENTE DENTRO DE VEHICULO
+/* $router->add('GET', '/clientes/lista', 'ClienteController', 'getAllCliente'); */
+/* $router->add('GET', '/vehiculos/disponibles', 'VehiculoController', 'getVehiculosDisponibles');  */
