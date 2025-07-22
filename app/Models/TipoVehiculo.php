@@ -1,5 +1,5 @@
 <?php
-// app/Models/TipoVehiculo
+// app/Models/TipoVehiculo.php
 
 namespace App\Models;
 use App\Core\Database;

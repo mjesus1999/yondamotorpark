@@ -13,7 +13,7 @@
 				</nav>
 			</div>
 			<div class="col-md-6 text-end">
-				<a href="/vehiculos/index" class="">[ Listar ]</a>
+				<a href="/vehiculos" class="">[ Listar ]</a>
 			</div>
 		</div>
 	</div>

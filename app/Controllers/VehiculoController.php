@@ -22,7 +22,8 @@ class VehiculoController extends Controller
   public function index(): void
   {
     $this->authRequired();
-    $this->view('vehiculos.index');
+    $vehiculos = $this->vehiculoModel->getAll();
+    $this->view('vehiculos.index', ['vehiculos'=> $vehiculos]);
   }
 
   public function create(): void

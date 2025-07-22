@@ -16,6 +16,28 @@ class Vehiculo
     $this->db = Database::getInstance();
   }
 
+  public function getAll(): array
+  {
+    $query = "
+    SELECT 
+      v.idvehiculo,
+        m.modelo,
+        v.version,
+        v.condicion,
+        v.color,
+        v.disponibilidad
+        FROM vehiculos v
+        INNER JOIN modelos m ON m.idmodelo = v.idmodelo;
+    ";
+    try {
+      $stmt = $this->db->prepare($query);
+      $stmt->execute();
+      return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (Exception $e) {
+      return [];
+    }
+  }
+
   public function create(array $data): int
   {
     $sql = "
