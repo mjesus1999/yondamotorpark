@@ -73,6 +73,7 @@
                                         <a href="#" title="Verificar estado de autos" class="p-1" data-idocmodal=<?= htmlspecialchars($ordenCompra['idordencompra']) ?>><i class="fa-solid fa-clipboard-list" style="color: #3459e2ff;"></i></a>
                                         <a href="/oc/reporte/<?= htmlspecialchars($ordenCompra['idordencompra']) ?>" target="_blank" title="PDF OC"><i class="fa-solid fa-file-pdf" style="color: #f73809;;"></i></a>
                                         <a href="#" class="show-details" data-idoc=<?= htmlspecialchars($ordenCompra['idordencompra']) ?>><!-- <i class="fa-solid fa-circle-info" style="color: #74C0FC;"></i>-->Detalle</a>
+                                        <a href="#"><i class="fa-solid fa-gears" style="color: #ff8040;"></i></a>
                                     </td>
                                     <td>
                                         <a href="#" class="btn btn-outline-success btn-sm">Proceso</a>
@@ -207,8 +208,6 @@
             const formularioOc = document.getElementById("formulario-oc");
 
             let idOC = null; // Para identifcar el idoc a actualizar desde el modal
-
-
 
             formularioOc.addEventListener("submit", async (e) => {
                 e.preventDefault();
@@ -404,8 +403,6 @@
                     boton.classList.add("active");
                 })
             });
-
-
 
         });
     </script>
