@@ -23,7 +23,7 @@ class VehiculoController extends Controller
   {
     $this->authRequired();
     $vehiculos = $this->vehiculoModel->getAll();
-    $this->view('vehiculos.index', ['vehiculos'=> $vehiculos]);
+    $this->view('vehiculos.index', ['vehiculos' => $vehiculos]);
   }
 
   public function create(): void
@@ -56,9 +56,17 @@ class VehiculoController extends Controller
       echo json_encode(['error' => 'Debe elegir modelo y año válidos'], JSON_UNESCAPED_UNICODE);
       exit;
     }
-    $version = ($_POST['version-ls'] === 'ESP')
+
+    $version = trim((string) ($_POST['version'] ?? ''));
+    if ($version === '') {
+      echo json_encode(['error' => 'Debe indicar una versión válida'], JSON_UNESCAPED_UNICODE);
+      exit;
+    }
+
+    /* $version = ($_POST['version-ls'] === 'ESP')
       ? ($_POST['version-in'] ?? '')
-      : $_POST['version-ls'];
+      : $_POST['version-ls']; */
+
     $condicion = $_POST['condicion'];
     $idcombustible = (int) ($_POST['combustible'] ?? 0);
     $color = $_POST['color'] ?? null;

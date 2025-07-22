@@ -78,7 +78,8 @@
 
 							<!-- lista de versiones -->
 							<div class="form-floating" id="bloque-version-lista">
-								<select name="version-ls" id="version-ls" class="form-select" required>
+								<!-- <select name="version-ls" id="version-ls" class="form-select" required> -->
+								<select id="version-ls" class="form-select" required name="version">
 									<option value="">Seleccione</option>
 									<optgroup label="Prestaciones">
 										<option value="Básico">Básico</option>
@@ -97,6 +98,7 @@
 							<div class="input-group d-none" id="bloque-version-input">
 								<div class="form-floating">
 									<input type="text" class="form-control" id="version-in">
+									<!-- <input type="text" class="form-control" id="version-in" name="version-in"> -->
 									<label for="version-in">Describa la versión</label>
 								</div>
 								<button type="button" id="mostrar-version-ls" class="btn btn-outline-secondary"
@@ -344,28 +346,42 @@
 				? encontrado.idmodelo
 				: '';
 		});
+
 		const versionLS = document.getElementById('version-ls');
 		const versionIN = document.getElementById('version-in');
 		const mostrarVersionLS = document.getElementById('mostrar-version-ls');
+		const bloqueVersionLista = document.getElementById("bloque-version-lista");
+		const bloqueVersionInput = document.getElementById("bloque-version-input");
+
 
 		versionLS.addEventListener("change", (event) => {
 			const opcion = event.target.value;
 			if (opcion === "ESP") {
-				document.getElementById("bloque-version-lista").classList.add("d-none");
-				document.getElementById("bloque-version-input").classList.remove("d-none");
+				// ocultar select, mostrar input
+				bloqueVersionLista.classList.add("d-none");
+				bloqueVersionInput.classList.remove("d-none");
+				// pasar el name al input
+				versionLS.removeAttribute("name");
+				versionIN.setAttribute("name", "version");
 				versionIN.value = "";
 				versionIN.focus();
 			} else {
+				// mantener select visible, input oculto
+				// (no hace falta cambiar aquí, lo haremos en el botón)
 				versionIN.value = opcion;
 			}
 		});
 
 		mostrarVersionLS.addEventListener("click", () => {
+			// reverso: volvemos al <select>
+			versionIN.removeAttribute("name");
+			versionLS.setAttribute("name", "version");
 			versionIN.value = "";
-			document.getElementById("bloque-version-lista").classList.remove("d-none");
-			document.getElementById("bloque-version-input").classList.add("d-none");
+			bloqueVersionLista.classList.remove("d-none");
+			bloqueVersionInput.classList.add("d-none");
 			versionLS.value = "";
 		});
+
 		cargarMarcas();
 
 		/* const form = document.getElementById('registrar-vehiculos');
