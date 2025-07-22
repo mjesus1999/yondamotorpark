@@ -16,13 +16,18 @@ class OrdenCompraController extends Controller
         $this->ordenCompraModel = new OrdenCompra();
     }
 
-    // Me enlistara todas las ordenes de compras: 
-    public function index(): void
+    // Me enlistara todas las ordenes de compras, dependiendo de su estado: 
+    public function index(string $estado = 'emitido'): void
     {
-        $ordenCompras = $this->ordenCompraModel->getAll();
-        $this->view('oc.index', ['ordenCompras' => $ordenCompras]);
+        $ordenCompraModel = new OrdenCompra();
+        $ordenCompras = $ordenCompraModel->getByEstado($estado);
+        $this->view('oc.index', ['ordenCompras' => $ordenCompras, 'estado' => $estado]);
     }
 
+    // METODO QUE  SOLO ME LLEVARA A LA VISTA PARA REGISTRAR LOS PAGOS
+    public function indexPagos():void {
+        $this->view('oc.pagos');
+    }
 
 
     public function html2pdfReport($id): void
@@ -97,9 +102,9 @@ class OrdenCompraController extends Controller
         }
     }
 
-    public function setEstadoToProceso($idOC): int
+    // METODO PARA CAMBIAR EL ESTADO  EN LA TABAL OC  = 'PROCESO,ANULADO'
+    public function setEstado($estado, $idOC): void
     {
-
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             http_response_code(405);
             echo json_encode(['success' => false, 'message' => 'Método no permitido']);
@@ -111,28 +116,22 @@ class OrdenCompraController extends Controller
         $data = array_map([Validador::class, 'limpiar'], $_POST);
 
         $registro = [
+            'estado' => $estado, // Viene desde la URL (proceso, anulado, etc.)
             'observaciones' => $data['observaciones'] ?? '',
             'idordencompra' => $idOC
         ];
 
-        $rowAffects = $this->ordenCompraModel->updateEstadoToProceso($registro);
+        $rowAffects = $this->ordenCompraModel->updateEstado($registro);
 
-        if ($rowAffects > 0) {
-            echo json_encode([
-                'success' => true,
-                'message' => '¡Se actualizo la OC a proceso!'
-            ]);
-            exit();
-        } else {
-            echo json_encode(
-                [
-                    'success' => false,
-                    'message' => '¡No se ha podido actualizar la OC a proceso!'
-                ]
-            );
-        }
+        echo json_encode([
+            'success' => $rowAffects > 0,
+            'message' => $rowAffects > 0
+                ? "¡Se actualizó la OC a {$estado}!"
+                : "¡No se ha podido actualizar la OC a {$estado}!"
+        ]);
         exit();
     }
+
 
 
     public function update($idOC): int
@@ -180,6 +179,13 @@ class OrdenCompraController extends Controller
             exit();
         }
     }
+
+
+
+
+
+
+
 
 
 

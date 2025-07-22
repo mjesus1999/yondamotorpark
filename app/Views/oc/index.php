@@ -21,18 +21,33 @@
     </div>
 
     <div class="card">
+
         <div class="card-header">
-            <div class="btn-group" id="botones-filtro">
-                <!-- 'emitido', 'aprobado', 'presentado', 'anulado', 'pagado' -->
-                <button class="btn btn-sm btn-outline-primary"
-                    title="El área de logística generó una nueva OC que aun gerencia no autoriza">Emitido</button>
-                <button class="btn btn-sm btn-outline-primary"
-                    title="La OC fue enviada al concesionario, se deben realizar los pagos correspondientes">Proceso</button>
-                <button class="btn btn-sm btn-outline-primary" title="OC anulada, deberá indicar los motivos">Anulado</button>
-                <button class="btn btn-sm btn-outline-primary"
-                    title="OC pagada completamente, verifique factura">Pagado</button>
+            <?php $estadoActual = $estado ?? ''; ?>
+            <div class="btn-group m-1" id="botones-filtro">
+                <a href="/oc/listar/emitido"
+                    class="btn btn-sm  <?= $estadoActual === 'emitido' ? 'btn-primary' : 'btn-outline-primary' ?>">
+                    Emitido
+                </a>
+
+                <a href="/oc/listar/proceso"
+                    class="btn btn-sm <?= $estadoActual === 'proceso' ? 'btn-warning' : 'btn-outline-warning' ?>">
+                    Proceso
+                </a>
+
+                <a href="/oc/listar/anulado"
+                    class="btn btn-sm <?= $estadoActual === 'anulado' ? 'btn-danger' : 'btn-outline-danger' ?>">
+                    Anulado
+                </a>
+
+                <a href="/oc/listar/pagado"
+                    class="btn btn-sm <?= $estadoActual === 'pagado' ? 'btn-success' : 'btn-outline-success' ?>">
+                    Pagado
+                </a>
             </div>
+
         </div>
+
         <div class="card-body" id="lista-oc">
             <div class="table-responsive">
                 <table class="table table-sm table-hover" id="tabla-oc">
@@ -43,11 +58,13 @@
                             <th>Concesionario</th>
                             <th>Fecha</th>
                             <th>Moneda</th>
-                            <!-- <th>Total</th>
+                            <th>Total</th>
                             <th>Amortización</th>
-                            <th>Saldo</th> -->
-                            <th>Operaciones</th>
-                            <th>Estado</th>
+                            <th>Saldo</th>
+
+                            <?php if ($estadoActual == 'emitido'): ?>
+                                <th>Operaciones</th>
+                            <?php endif; ?>
                         </tr>
                     </thead>
                     <tbody>
@@ -55,38 +72,57 @@
                             <tr>
                                 <td colspan="8" class="text-center">No hay ordénes de compras registradas.</td>
                             </tr>
-
                         <?php else : ?>
                             <?php $numeroFila = 1; ?>
-                            <?php foreach ($ordenCompras as $ordenCompra) : ?>
-
+                            <?php foreach ($ordenCompras as $ordenCompra): ?>
                                 <tr>
                                     <td><?= htmlspecialchars($numeroFila++) ?></td>
                                     <td><?= htmlspecialchars($ordenCompra['serie']) ?></td>
                                     <td><?= htmlspecialchars($ordenCompra['razonsocial']) ?></td>
                                     <td><?= htmlspecialchars($ordenCompra['emision']) ?></td>
                                     <td><?= htmlspecialchars($ordenCompra['moneda']) ?></td>
-                                    <!-- <td>151788.00</td>
-                                <td>50000</td>
-                                <td>101788</td> -->
-                                    <td>
-                                        <a href="#" title="Verificar estado de autos" class="p-1" data-idocmodal=<?= htmlspecialchars($ordenCompra['idordencompra']) ?>><i class="fa-solid fa-clipboard-list" style="color: #3459e2ff;"></i></a>
-                                        <a href="/oc/reporte/<?= htmlspecialchars($ordenCompra['idordencompra']) ?>" target="_blank" title="PDF OC"><i class="fa-solid fa-file-pdf" style="color: #f73809;;"></i></a>
-                                        <a href="#" class="show-details" data-idoc=<?= htmlspecialchars($ordenCompra['idordencompra']) ?>><!-- <i class="fa-solid fa-circle-info" style="color: #74C0FC;"></i>-->Detalle</a>
-                                        <a href="#"><i class="fa-solid fa-gears" style="color: #ff8040;"></i></a>
-                                    </td>
-                                    <td>
-                                        <a href="#" class="btn btn-outline-success btn-sm">Proceso</a>
-                                        <a href="#" class="btn btn-outline-danger btn-sm">Anulado</a>
-                                    </td>
+                                    <td>N/A</td>
+                                    <td>N/A</td>
+                                    <td>N/A</td>
+                                    <?php if ($estadoActual == 'emitido'): ?>
+                                        <td class="">
+                                            <a href="#" title="Verificar estado de autos" class="p-1"
+                                                data-idocmodal="<?= htmlspecialchars($ordenCompra['idordencompra']) ?>">
+                                                <i class="fa-solid fa-clipboard-list fa-lg" style="color: #3459e2ff;"></i>
+                                            </a>
+
+                                            <a href="/oc/reporte/<?= htmlspecialchars($ordenCompra['idordencompra']) ?>" class="p-1" target="_blank" title="PDF OC">
+                                                <i class="fa-solid fa-file-pdf fa-lg" style="color: #f73809;"></i>
+                                            </a>
+
+                                            <a href="#" class="show-details p-1" data-idoc="<?= htmlspecialchars($ordenCompra['idordencompra']) ?>" title="Ver detalle">
+                                                <i class="fa-solid fa-circle-info fa-lg" style="color: #74C0FC;"></i>
+                                            </a>
+
+                                            <a href="#" class="p-1 btn-abrir-modal-estado"
+                                                data-id="<?= htmlspecialchars($ordenCompra['idordencompra']) ?>"
+                                                data-accion="proceso"
+                                                data-ruta="/oc/updateEstado/proceso/<?= htmlspecialchars($ordenCompra['idordencompra']) ?>"
+                                                title="OC en proceso">
+                                                <i class="fa-solid fa-gears fa-xl" style="color: #dafa23ff;"></i>
+                                            </a>
+
+                                            <a href="#" class="p-1 btn-abrir-modal-estado"
+                                                data-id="<?= htmlspecialchars($ordenCompra['idordencompra']) ?>"
+                                                data-accion="anulado"
+                                                data-ruta="/oc/updateEstado/anulado/<?= htmlspecialchars($ordenCompra['idordencompra']) ?>"
+                                                title="OC anulado">
+                                                <i class="fa-solid fa-ban fa-lg" style="color: #f42e0b;"></i>
+                                            </a>
+
+                                            <a href="/oc/pagos/<?=htmlspecialchars($ordenCompra['idordencompra'])?>"><i class="fa-solid fa-sack-dollar fa-lg" title="Pagar" style="color: #1f7709;"></i></a>
+                                        </td>
+                                    <?php endif; ?>
                                 </tr>
-
                             <?php endforeach; ?>
-
-
                         <?php endif; ?>
-
                     </tbody>
+
                 </table>
             </div> <!-- ./table-responsive -->
         </div> <!-- ./card-body -->
@@ -179,6 +215,33 @@
             </div>
         </div>
 
+
+        <div class="modal fade" id="modal-proceso" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <form id="form-proceso">
+                    <div class="modal-content">
+                        <div class="modal-header bg-yonda">
+                            <h5 class="modal-title" id="modal-proceso-titulo">Observaciones</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <input type="hidden" id="id-oc-proceso">
+                            <input type="hidden" id="modal-proceso-ruta">
+                            <div class="mb-3">
+                                <label for="observaciones" class="form-label">Observaciones</label>
+                                <textarea id="observaciones" class="form-control" rows="4" placeholder=""></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-sm btn-primary">Actualizar</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+
     </div> <!-- ./card -->
 
     <script>
@@ -207,16 +270,21 @@
             const modalOc = new bootstrap.Modal(document.getElementById('modal-oc'));
             const formularioOc = document.getElementById("formulario-oc");
 
-            let idOC = null; // Para identifcar el idoc a actualizar desde el modal
+            // Campos para abrir el modal de proceso o anulado:
+            const modalProceso = new bootstrap.Modal(document.getElementById("modal-proceso"));
+            const formProceso = document.getElementById("form-proceso");
+            const inputIdOc = document.getElementById("id-oc-proceso");
+            const inputRuta = document.getElementById("modal-proceso-ruta");
+            const inputObs = document.getElementById("observaciones");
+            const modalTitulo = document.getElementById("modal-proceso-titulo");
+
+
+            let idOC = null; // Para identifcar el idoc a actualizar desde el modal para verificar si los autos llegarón de acuerdo a la OC
 
             formularioOc.addEventListener("submit", async (e) => {
                 e.preventDefault();
 
                 const valorSeleccionado = document.querySelector('input[name="escorrecto"]:checked').value;
-
-                // console.log('IDOC DESDE FORM: ', idOC);
-
-                // console.log("VALOR RADIO SELECCIONADO:", valorSeleccionado);
 
                 if (confirm('¿Actualizar el detalle?')) {
                     formData = new FormData();
@@ -247,6 +315,70 @@
                 }
 
             });
+
+
+            document.querySelectorAll(".btn-abrir-modal-estado").forEach(btn => {
+                btn.addEventListener("click", (e) => {
+                    e.preventDefault();
+                    const idOC = btn.dataset.id;
+                    const accion = btn.dataset.accion;
+                    const ruta = btn.dataset.ruta;
+
+                    inputIdOc.value = idOC;
+                    inputRuta.value = ruta;
+                    inputObs.value = "";
+
+                    // Cambiar el título dinámicamente
+                    modalTitulo.textContent = (accion === "proceso") ?
+                        "Observaciones - Confirmar OC" :
+                        "Observaciones - Anular OC";
+
+                    modalProceso.show();
+                });
+            });
+
+            // Enviar el formulario
+            formProceso.addEventListener("submit", async (e) => {
+                e.preventDefault();
+                const ruta = inputRuta.value;
+                const obs = inputObs.value.trim();
+
+                if (!obs) {
+                    alert("Por favor ingrese el motivo antes de continuar.");
+                    return;
+                }
+
+                if (confirm('¿Esta seguro de acttulizar el estado de la OC?'))
+
+                {
+                    try {
+                        const res = await fetch(ruta, {
+                            method: "POST",
+                            body: new URLSearchParams({
+                                observaciones: obs
+                            })
+                        });
+
+                        const data = await res.json();
+
+                        if (data.success) {
+                            modalProceso.hide();
+                            showToast(data.message, "SUCCESS", 1200);
+                            setTimeout(() => location.reload(), 1000);
+                        } else {
+                            showToast(data.message, "WARNING", 1200);
+                        }
+                    } catch (error) {
+                        console.error(error);
+                        alert("Hubo un error al actualizar.");
+                    }
+
+                }
+
+            });
+
+
+            // Para el modal de check
 
             document.querySelectorAll("a[data-idocmodal]").forEach(icono => {
                 icono.addEventListener("click", async (e) => {
@@ -307,13 +439,14 @@
             detailLinks.forEach(link => {
                 link.addEventListener('click', async (event) => {
                     event.preventDefault();
-                    const ocId = event.target.dataset.idoc;
+
+                    const enlace = event.currentTarget || event.target.closest('a');
+                    const ocId = enlace.dataset.idoc;
 
                     if (!ocId) {
                         console.warn('ID de Orden de Compra no encontrado en el enlace de detalle.');
                         return;
                     }
-
                     // Limpiar vista antes de cargar nuevos datos
                     limpiarVistaDetalle();
 
@@ -396,15 +529,9 @@
             }
 
 
-            // Comportamiento para botones de filtrado
-            botonesFiltro.forEach(boton => {
-                boton.addEventListener("click", () => {
-                    botonesFiltro.forEach(btn => btn.classList.remove("active"));
-                    boton.classList.add("active");
-                })
-            });
-
         });
     </script>
+
+
 
     <?php include __DIR__ . '/../layout/footer.php'; ?>

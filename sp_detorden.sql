@@ -94,6 +94,14 @@ BEGIN
 END //
 
 
+
+CALL sp_detOC_By_IdOC(13);
+
+
+
+
+
+
 DELIMITER //
 CREATE PROCEDURE sp_det_oc_escorrecto
 (IN idOC INT)
