@@ -344,6 +344,28 @@
 				? encontrado.idmodelo
 				: '';
 		});
+		const versionLS = document.getElementById('version-ls');
+		const versionIN = document.getElementById('version-in');
+		const mostrarVersionLS = document.getElementById('mostrar-version-ls');
+
+		versionLS.addEventListener("change", (event) => {
+			const opcion = event.target.value;
+			if (opcion === "ESP") {
+				document.getElementById("bloque-version-lista").classList.add("d-none");
+				document.getElementById("bloque-version-input").classList.remove("d-none");
+				versionIN.value = "";
+				versionIN.focus();
+			} else {
+				versionIN.value = opcion;
+			}
+		});
+
+		mostrarVersionLS.addEventListener("click", () => {
+			versionIN.value = "";
+			document.getElementById("bloque-version-lista").classList.remove("d-none");
+			document.getElementById("bloque-version-input").classList.add("d-none");
+			versionLS.value = "";
+		});
 		cargarMarcas();
 
 		/* const form = document.getElementById('registrar-vehiculos');

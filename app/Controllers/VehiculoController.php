@@ -43,7 +43,7 @@ class VehiculoController extends Controller
     //Buscar dinámicamente el local “Chincha” -> termporal
     $localModel = new Local();
     $local = $localModel->getByTienda('Chincha');
-    $idlocal = $local['idlocal'] ?? 5;
+    $idlocal = $local['idlocal'] ?? 3;
 
     //Arrays dinámicos
     $chasisArr = $_POST['chasis'] ?? [];

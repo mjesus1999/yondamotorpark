@@ -95,8 +95,8 @@ class Vehiculo
 
       return (int) $this->db->lastInsertId();
     } catch (Exception $e) {
-      error_log($e->getMessage());
-      return -1;
+      echo json_encode(['error' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
+      exit;
     }
   }
 
