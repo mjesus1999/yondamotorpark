@@ -18,14 +18,6 @@
 		</div>
 	</div>
 
-	<!-- <div class="mb-3">
-		<h4>Vehículo</h4>
-	</div>
-	<div class="row">
-		<div class="col-md-12">
-		</div>
-	</div> -->
-
 	<div class="mb-2">
 		<form action="/vehiculos/store" method="POST" id="registrar-vehiculos" autocomplete="off">
 			<div class="card mb-2">
@@ -224,7 +216,6 @@
 
 		generarInputs(cantidadInput.value);
 
-		// Regenera al cambiar o teclear en el input de cantidad
 		cantidadInput.addEventListener("change", () => generarInputs(cantidadInput.value));
 		cantidadInput.addEventListener("keyup", () => generarInputs(cantidadInput.value));
 
@@ -236,7 +227,7 @@
 
 		let modelosCache = [];
 
-		// 1) Carga inicial de marcas
+		//Carga de marcas
 		async function cargarMarcas() {
 			try {
 				const res = await fetch("/marcas/lista", { headers: { "Accept": "application/json" } });
@@ -254,7 +245,7 @@
 			}
 		}
 
-		// 2) Al cambiar marca, cargar tipos
+		//marca -> cargar tipos
 		marcasSel.addEventListener("change", async () => {
 			const idm = marcasSel.value;
 			tiposSel.innerHTML = `<option value="">Cargando Tipo</option>`;
@@ -281,7 +272,7 @@
 			}
 		});
 
-		// 3) Al cambiar tipo, cargar modelos
+		//tipo -> cargar modelos
 		tiposSel.addEventListener("change", async () => {
 			const idm = marcasSel.value;
 			const idt = tiposSel.value;
@@ -312,13 +303,13 @@
 			}
 		});
 
-		// 4) Al cambiar modelo, poblar años
+		//modelo -> cargar años
 		modelosSel.addEventListener("change", () => {
 			const selModelo = modelosSel.value;
 			aniosSel.innerHTML = `<option value="">Seleccione Año</option>`;
 
 			if (!selModelo) {
-				hiddenModeloId.value = '';  // limpiar
+				hiddenModeloId.value = '';
 				return;
 			}
 
@@ -338,7 +329,7 @@
 			hiddenModeloId.value = '';
 		});
 
-		// 5) Al cambiar año, buscar el objeto completo y setear su ID
+		//Al cambiar año, buscar el objeto completo y setear su ID
 		aniosSel.addEventListener("change", () => {
 			const selModelo = modelosSel.value;
 			const selAnio = aniosSel.value;
@@ -359,7 +350,7 @@
 		form.addEventListener('submit', e => {
 		  // Antes de enviar, volcar todo el FormData
 		  const data = new FormData(form);
-		  console.group('🚀 FormData antes de submit');
+		  console.group('FormData antes de submit');
 		  for (let [key, val] of data.entries()) {
 			console.log(key, val);
 		  }
