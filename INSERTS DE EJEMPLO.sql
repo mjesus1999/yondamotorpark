@@ -1,0 +1,141 @@
+USE motorpark;
+
+-- EMPRESAS
+INSERT INTO empresas (razonsocial, nombrecomercial, ruc, representante, email, telprimario)
+VALUES
+  ('Servicios Alpha S.A.C.', 'Alpha', '20512345678', 'Carlos Ruiz', 'ventas@alpha.com', '999888777');
+  
+-- MOTORPARK
+INSERT INTO motorpark (ruc, razonsocial, nombrecomercial)
+VALUES
+  ('20500011122', 'Motorpark S.A.C.', 'Motorpark');
+
+-- CLIENTES
+INSERT INTO clientes (tipocliente, idpersona, idempresa, idcolregistra)
+VALUES
+  ('P', 1, NULL,  3),  -- Cliente Persona
+  ('P', 2, NULL,  3),
+  ('E', NULL, 1,  3);   
+
+-- COMBUSTIBLE
+INSERT IGNORE INTO combustibles (idcombustible, combustible) VALUES
+  (1, 'Gasolina'),
+  (2, 'Diésel'),
+  (3, 'GLP'),
+  (4, 'GNV'),
+  (5, 'Dual: Gasolina, GLP');
+
+-- LOCALES
+INSERT INTO locales (
+  tienda, iddistrito, idmotorpark, principal,
+  responsable, correo, direccion, telefono, latitud, longitud
+) VALUES
+  (
+    'Sucursal Lima Centro', 10, 1, 'S',
+    'Juan Pérez', 'juan.perez@motorpark.com',
+    'Av. Ejemplo 123, Lima', '012345678',
+    '-12.046374', '-77.042793'
+  ),
+  (
+    'Sucursal Arequipa', 20, 1, 'N',
+    'María López', 'maria.lopez@motorpark.com',
+    'Calle Ficticia 456, Arequipa', '054123456',
+    '-16.409047', '-71.537451'
+  ),
+  (
+    'Sucursal Chincha', 1010 , 1, 'S',
+    'Leticia', 'leticia.llana@motorpark.com',
+    'Av. Ejemplo 24, Chincha', '987654321',
+    '-14.046374', '-70.042793'
+  );
+
+-- FORMATO COTIZACION
+INSERT INTO formatocotizacion (tipocotizacion, fechainicio, fechafin)
+VALUES
+  ('Independiente formal',      '2025-01-01', NULL),
+  ('Independiente Informal',    '2025-07-01', NULL),
+  ('Dependiente',               '2025-03-15', NULL),
+  ('Contado Empresas',          '2025-07-21', NULL),
+  ('Contado Persona Natural',   '2025-07-21', NULL);
+
+-- REQUISITOS
+INSERT INTO requisitos (requisito) 
+VALUES
+  ('FOTOCOPIA DNI DEL TITULAR Y CONYUGUE'),
+  ('COPIA DEL ÚLTIMO RECIBO PAGADO DE SERVICIOS (LUZ O AGUA)'),
+  ('COPIA SIMPLE DE VIVIENDA (TÍTULO DE PROPIEDAD / CERTIFICADO DE POSESIÓN, COPIA LITERAL)'),
+  ('DECLARACION JURADA DE INGRESOS'),
+  ('LICENCIA DE CONDUCIR'),
+  ('RECORD DE PAPELETAS'),
+  ('DNI AVAL (DNI CONYUGE DE SER NECESARIO)'),
+  ('EVALUACION DE GASTOS FAMILIARES'),
+  ('30% DE INICIAL COMO MINIMO (aumenta según precio de la unidad)'),
+  ('VERIFICACION DOMICILIARIA Y LABORAL'),
+  ('PAGO UNICO POR GASTOS ADMINISTRATIVOS S/1,500.00'),
+  ('SEGURO VEHICULAR (bajo evaluación)'),
+  ('GPS SATELITAL'),
+  ('RECIBO DE SERVICIOS'),
+  ('BOLETAS DE PAGO');
+
+-- DETALLE DE LOS REQUISITOS PARA EL FORMATO DE COTIZACION
+-- Independiente formal (idformato = 1), requisitos según listado (incluye RECIBO DE SERVICIOS = 14)
+INSERT INTO detallerequisitos (idformato, idrequisito) VALUES
+  (1, 1),
+  (1, 2),
+  (1, 3),
+  (1, 4),
+  (1, 5),
+  (1, 14),
+  (1, 6),
+  (1, 7),
+  (1, 8),
+  (1, 9),
+  (1, 10),
+  (1, 11),
+  (1, 12),
+  (1, 13);
+  
+-- Independiente Informal (idformato = 2), requisitos 1 a 13
+INSERT INTO detallerequisitos (idformato, idrequisito) VALUES
+  (2, 1),
+  (2, 2),
+  (2, 3),
+  (2, 4),
+  (2, 5),
+  (2, 6),
+  (2, 7),
+  (2, 8),
+  (2, 9),
+  (2, 10),
+  (2, 11),
+  (2, 12),
+  (2, 13);
+
+-- Dependiente (idformato = 3), requisitos según listado (incluye BOLETAS DE PAGO = 15)
+INSERT INTO detallerequisitos (idformato, idrequisito) VALUES
+  (3, 1),
+  (3, 2),
+  (3, 3),
+  (3, 15),
+  (3, 7),
+  (3, 8),
+  (3, 9),
+  (3, 10),
+  (3, 11),
+  (3, 12),
+  (3, 13);
+
+/*
+INSERT INTO vehiculos
+  (idmodelo, version, condicion, idcombustible, color, chasis, placa, placarotativa, seriemotor,
+   moneda, precioventa, disponibilidad, idlogistica, idlocal, origen)
+VALUES
+  -- Vehículo 1
+  (1, 'Standard',      'nuevo', 1, 'Rojo',    'CHASIS123ABC', 'ABC-123', 'ROT-001', 'ENG-0001',
+   'USD', 25000.00, 'libre', 2, 3, 'CTZ'),
+  -- Vehículo 2
+  (2, 'Deluxe',        'seminuevo', 2, 'Azul',  'CHASIS456DEF', 'DEF-456', 'ROT-002', 'ENG-0002',
+   'PEN', 85000.50, 'separado', 2, 4, 'OCP');
+
+SELECT idlocal, tienda FROM locales;
+*/
