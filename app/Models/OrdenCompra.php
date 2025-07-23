@@ -15,23 +15,10 @@ class OrdenCompra
         $this->db = Database::getInstance();
     }
 
-    // Probando OC por estado
+    // Probando OC por estado 
     public function getByEstado(string $estado = 'emitido'): ?array
     {
-        $query = '
-        SELECT 
-            oc.idordencompra,
-            oc.serie,
-            oc.emision,
-            oc.moneda,
-            con.razonsocial
-        FROM ordenescompra oc
-        JOIN tiendas t ON oc.idtienda = t.idtienda
-        JOIN concesionarios con ON t.idconcesionario = con.idconcesionario
-        WHERE oc.estado = :estado
-        ORDER BY oc.idordencompra DESC;
-    ';
-
+        $query = "CALL sp_oc_por_estado(:estado)";
         try {
             $stmt = $this->db->prepare($query);
             $stmt->bindParam(':estado', $estado, PDO::PARAM_STR);
@@ -43,13 +30,11 @@ class OrdenCompra
         }
     }
 
-    public function obtenerPorId(int $idorden): ?array
+
+    public function obtenerConcesionarioById(int $idorden): ?array
     {
         $query = "SELECT 
                 oc.idordencompra,
-                oc.serie,
-                oc.emision,
-                oc.estado,
                 c.nombrecomercial AS concesionario
             FROM ordenescompra oc
             INNER JOIN tiendas t ON oc.idtienda = t.idtienda
@@ -83,7 +68,7 @@ class OrdenCompra
 
     // TRAERA LOS DATOS DE LOS VEHICULOS A ACTUALIZAR EN LA TABLA DETALLE_OC, VERIFICAR SI HAN LLEGADO DE MANERA CORRECTA
 
-    public function getInfoEsCorrecto($idOC): ?array
+    public function getInfoAutosOC($idOC): ?array
     {
         $query = 'CALL sp_det_oc_escorrecto(:idOC)';
         try {

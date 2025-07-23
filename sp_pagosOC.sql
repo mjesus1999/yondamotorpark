@@ -1,3 +1,4 @@
+
 USE motorpark;
 SELECT * FROM pagosOC;
 SELECT * FROM detordencompra;
@@ -45,7 +46,7 @@ SELECT
        WHERE idorden = oc.idordencompra)
     ) AS saldoRestante
 FROM ordenescompra oc
-WHERE oc.idordencompra = 15;
+WHERE oc.idordencompra = 24;
 
 
 

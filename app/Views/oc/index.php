@@ -81,9 +81,9 @@
                                     <td><?= htmlspecialchars($ordenCompra['razonsocial']) ?></td>
                                     <td><?= htmlspecialchars($ordenCompra['emision']) ?></td>
                                     <td><?= htmlspecialchars($ordenCompra['moneda']) ?></td>
-                                    <td>N/A</td>
-                                    <td>N/A</td>
-                                    <td>N/A</td>
+                                    <td><?= htmlspecialchars(number_format($ordenCompra['totalOC']?? 0,2)) ?? 'N/A' ?></td>
+                                    <td><?=  htmlspecialchars(number_format($ordenCompra['totalPagado']?? 0,2)) ?? 'N/A'?></td>
+                                    <td><?=htmlspecialchars(number_format($ordenCompra['saldoRestante'] ?? 0,2)) ?></td>
                                     <?php if ($estadoActual == 'emitido'): ?>
                                         <td class="">
                                             <a href="#" title="Verificar estado de autos" class="p-1"

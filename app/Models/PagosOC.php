@@ -42,7 +42,7 @@ class PagosOC
     /**
      * Listar todos los pagos de una orden de compra
      */
-    public function listarPorOC(int $idorden): array
+    public function listarPagosByOC(int $idorden): array
     {
         $query = "SELECT 
                     p.idpagooc,

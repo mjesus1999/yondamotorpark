@@ -25,26 +25,25 @@ class OrdenCompraController extends Controller
     }
     
     
-    // METODO QUE  SOLO ME LLEVARA A LA VISTA PARA REGISTRAR LOS PAGOS
+    // METODO QUE LLEVARA A LA VISTA PARA REGISTRAR LOS PAGOS
     public function indexPagos($idorden): void
     {
         $idorden = (int)$idorden;
     
         $pagosModel = new PagosOC();
-        $ordenModel = new OrdenCompra();
-    
-        $pagos = $pagosModel->listarPorOC($idorden);
+        $pagos = $pagosModel->listarPagosByOC($idorden);
         $saldoRestante = $pagosModel->obtenerSaldoRestante($idorden);
-        $ordenCompra = $ordenModel->obtenerPorId($idorden);
+        $ordenCompra = $this->ordenCompraModel->obtenerConcesionarioById($idorden);
+        $infoAutos = $this->ordenCompraModel->getInfoAutosOC($idorden);
     
         $this->view('oc.pagos', [
             'pagos' => $pagos,
             'saldoRestante' => $saldoRestante,
-            'ordenCompra' => $ordenCompra
+            'ordenCompra' => $ordenCompra,
+            'autos' => $infoAutos
         ]);
     }
     
-
     public function html2pdfReport($id): void
     {
         // Solo necesitamos pasar el ID, los datos se cargarán via JavaScript
@@ -208,7 +207,7 @@ class OrdenCompraController extends Controller
     public function searchInfoAutos($idOC)
     {
         header('Content-Type: application/json');
-        $infoAuto = $this->ordenCompraModel->getInfoEsCorrecto($idOC);
+        $infoAuto = $this->ordenCompraModel->getInfoAutosOC($idOC);
 
         if ($infoAuto) {
             echo json_encode($infoAuto);

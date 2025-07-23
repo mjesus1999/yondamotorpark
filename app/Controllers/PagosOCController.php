@@ -19,58 +19,64 @@ class PagosOCController extends Controller
     public function store(): void
     {
         header('Content-Type: application/json');
-    
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $idorden = (int)($_POST['idorden'] ?? 0);
-            $idlogistica = (int)($_POST['idlogistica'] ?? 2); 
-            $amortizacion = (float)($_POST['amortizacion'] ?? 0);
-    
-            if ($idorden <= 0 || $amortizacion <= 0) {
-                echo json_encode(['status' => 'error', 'message' => 'Datos inválidos']);
-                return;
-            }
-    
-            
-            $rutaComprobante = '';
-            if (!empty($_FILES['comprobante']['name'])) {
-                $nombreArchivo = uniqid('comprobante_') . '_' . basename($_FILES['comprobante']['name']);
-                $directorioDestino = 'storage/comprobantes/';
-    
-                if (!is_dir($directorioDestino)) {
-                    mkdir($directorioDestino, 0777, true);
-                }
-    
-                $rutaCompleta =  $directorioDestino . $nombreArchivo;
-    
-                if (!move_uploaded_file($_FILES['comprobante']['tmp_name'], $rutaCompleta)) {
-                    echo json_encode(['status' => 'error', 'message' => 'No se pudo guardar el comprobante']);
-                    return;
-                }
-    
-                $rutaComprobante = '/'. $rutaCompleta;
-            }
-    
-            //  Registro en BD
-            $resultado = $this->pagoOCModel->create([
-                'idorden' => $idorden,
-                'idlogistica' => $idlogistica,
-                'amortizacion' => $amortizacion,
-                'comprobante' => $rutaComprobante
-            ]);
-    
-            if ($resultado > 0) {
-                echo json_encode(['success' => true, 'message' => 'Pago registrado correctamente']);
-            } else {
-                echo json_encode(['success' => false, 'message' => 'No se pudo registrar el pago']);
-            }
-        } else {
-            echo json_encode(['sucess' => false, 'message' => 'Método no permitido']);
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            echo json_encode(['success' => false, 'message' => 'Método no permitido', 'id' => 0]);
+            exit;
         }
+
+
+        $data = array_map([Validador::class, 'limpiar'], $_POST);
+
+        $registro = [
+            'idorden'      => (int)($data['idorden'] ?? 0),
+            'idlogistica'  => 2,
+            'amortizacion' => (float)($data['amortizacion'] ?? 0),
+            'comprobante'  => ''
+        ];
+
+
+        $errores = [];
+        $errores[] = Validador::campoObligatorio($registro['idorden'], 'Orden');
+        $errores[] = Validador::campoObligatorio($registro['amortizacion'], 'Monto a pagar');
+        $errores = array_filter($errores);
+
+        if (!empty($errores)) {
+            echo json_encode([
+                'success' => false,
+                'message' => implode('<br>', $errores),
+                'id'      => 0
+            ]);
+            exit;
+        }
+
+
+        if (!empty($_FILES['comprobante']['name'])) {
+            $nombreArchivo = uniqid('comprobante_') . '_' . basename($_FILES['comprobante']['name']);
+            $directorioDestino = 'storage/comprobantes/';
+
+            if (!is_dir($directorioDestino)) {
+                mkdir($directorioDestino, 0777, true);
+            }
+
+            $rutaCompleta = $directorioDestino . $nombreArchivo;
+
+            if (!move_uploaded_file($_FILES['comprobante']['tmp_name'], $rutaCompleta)) {
+                echo json_encode(['success' => false, 'message' => 'No se pudo guardar el comprobante', 'id' => 0]);
+                exit;
+            }
+
+            $registro['comprobante'] = '/' . $rutaCompleta;
+        }
+
+
+        $idPago = $this->pagoOCModel->create($registro);
+
+        echo json_encode([
+            'success' => $idPago > 0,
+            'message' => $idPago > 0 ? '¡Pago registrado correctamente!' : 'No se pudo registrar el pago',
+            'id'      => $idPago
+        ]);
     }
-    
-  
-
-    
-
-
 }
