@@ -248,7 +248,7 @@ CREATE TABLE formatocotizacion
 )ENGINE = INNODB;
 */
 
-drop table formatocotizacion;
+-- drop table formatocotizacion;
 CREATE TABLE formatocotizacion
 (
 	idformato 			INT PRIMARY KEY AUTO_INCREMENT,
@@ -259,7 +259,7 @@ CREATE TABLE formatocotizacion
     modificado 			DATETIME 		NULL
 )ENGINE = INNODB;
 
-drop table requisitos;
+-- drop table requisitos;
 CREATE TABLE requisitos
 (
 	idrequisito 		INT PRIMARY KEY AUTO_INCREMENT,
@@ -269,7 +269,7 @@ CREATE TABLE requisitos
     CONSTRAINT uk_requisito_req UNIQUE (requisito)
 )ENGINE = INNODB;
 
-drop table detallerequisitos;
+-- drop table detallerequisitos;
 CREATE TABLE detallerequisitos
 (
 	iddetrequisito		INT PRIMARY KEY AUTO_INCREMENT,
@@ -319,7 +319,7 @@ CREATE TABLE clientes
 )
 ENGINE = INNODB;
 
-drop table cotizaciones;
+-- drop table cotizaciones;
 CREATE TABLE cotizaciones
 (
 	idcotizacion		INT AUTO_INCREMENT PRIMARY KEY,

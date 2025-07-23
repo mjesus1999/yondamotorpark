@@ -1,21 +1,10 @@
 USE motorpark;
 
--- EMPRESAS
-INSERT INTO empresas (razonsocial, nombrecomercial, ruc, representante, email, telprimario)
-VALUES
-  ('Servicios Alpha S.A.C.', 'Alpha', '20512345678', 'Carlos Ruiz', 'ventas@alpha.com', '999888777');
-  
--- MOTORPARK
-INSERT INTO motorpark (ruc, razonsocial, nombrecomercial)
-VALUES
-  ('20500011122', 'Motorpark S.A.C.', 'Motorpark');
-
--- CLIENTES
-INSERT INTO clientes (tipocliente, idpersona, idempresa, idcolregistra)
-VALUES
-  ('P', 1, NULL,  3),  -- Cliente Persona
-  ('P', 2, NULL,  3),
-  ('E', NULL, 1,  3);   
+-- CONTRASEÑA ACTUALIZADA PARA PODER ENTRAR EN EL LOGIN
+-- anonimo$$123%
+UPDATE colaboradores
+SET userpassword = '$2y$10$cYt7.yHXNdzUaYGw0xktxuD9MJem51XAfTSClw7FZnL6a/XNeEOeS'
+WHERE usernick = 'leticiall';
 
 -- COMBUSTIBLE
 INSERT IGNORE INTO combustibles (idcombustible, combustible) VALUES
@@ -24,6 +13,11 @@ INSERT IGNORE INTO combustibles (idcombustible, combustible) VALUES
   (3, 'GLP'),
   (4, 'GNV'),
   (5, 'Dual: Gasolina, GLP');
+   
+-- MOTORPARK
+INSERT INTO motorpark (ruc, razonsocial, nombrecomercial)
+VALUES
+  ('20500011122', 'Motorpark S.A.C.', 'Motorpark');
 
 -- LOCALES
 INSERT INTO locales (
@@ -124,6 +118,19 @@ INSERT INTO detallerequisitos (idformato, idrequisito) VALUES
   (3, 11),
   (3, 12),
   (3, 13);
+
+-- EMPRESAS
+INSERT INTO empresas (razonsocial, nombrecomercial, ruc, representante, email, telprimario)
+VALUES
+  ('Servicios Alpha S.A.C.', 'Alpha', '20512345678', 'Carlos Ruiz', 'ventas@alpha.com', '999888777');
+
+-- CLIENTES
+INSERT INTO clientes (tipocliente, idpersona, idempresa, idcolregistra)
+VALUES
+  ('P', 1, NULL,  3),  -- Cliente Persona
+  ('P', 2, NULL,  3),
+  ('E', NULL, 1,  3);  
+
 
 /*
 INSERT INTO vehiculos
