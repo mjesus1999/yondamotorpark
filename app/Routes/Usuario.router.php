@@ -14,8 +14,8 @@ $router->add('POST', '/usuarios/disabled/{id}', 'UsuarioController', 'disabled')
 /* $router->add('POST', '/usuarios/delete/{id}', 'UsuarioController', 'delete'); */
 
 // PROFILE
-$router->add('GET', '/usuarios/profile/{id}', 'UsuarioController', 'profile');
-
+/* $router->add('GET', '/usuarios/profile/{id}', 'UsuarioController', 'profile');
+ */
 
 //API
 
