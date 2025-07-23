@@ -39,6 +39,7 @@ require APP_ROOT . '/app/Routes/Vehiculo.router.php';
 require APP_ROOT . '/app/Routes/DetalleOC.router.php';
 require APP_ROOT . '/app/Routes/PagosOC.router.php';
 
+
 // Un controlador básico para la página de inicio
 class HomeController extends App\Core\Controller
 {

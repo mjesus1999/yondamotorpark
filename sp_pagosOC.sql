@@ -22,8 +22,34 @@ WHERE idordencompra = 13;
 
 
 
-DROP trigger tr_set_saldo_pagoOC;
--- TRIGEGR PARA EL PAGO: 
+
+
+-- muestra el saldo que falta pagar(Saldo restante)
+SELECT 
+    oc.idordencompra AS idorden,
+    (SELECT IFNULL(SUM(preciocompra * 1.18),0) 
+     FROM detordencompra 
+     WHERE idordencompra = oc.idordencompra) AS totalOC,
+
+    (SELECT IFNULL(SUM(amortizacion),0) 
+     FROM pagosOC 
+     WHERE idorden = oc.idordencompra) AS totalPagado,
+
+    (
+      (SELECT IFNULL(SUM(preciocompra * 1.18),0) 
+       FROM detordencompra 
+       WHERE idordencompra = oc.idordencompra)
+      -
+      (SELECT IFNULL(SUM(amortizacion),0) 
+       FROM pagosOC 
+       WHERE idorden = oc.idordencompra)
+    ) AS saldoRestante
+FROM ordenescompra oc
+WHERE oc.idordencompra = 15;
+
+
+
+DROP TRIGGER IF EXISTS tr_set_saldo_pagoOC;
 DELIMITER //
 CREATE TRIGGER tr_set_saldo_pagoOC
 BEFORE INSERT ON pagosOC
@@ -32,26 +58,33 @@ BEGIN
     DECLARE totalOC DECIMAL(10,2);
     DECLARE totalPagado DECIMAL(10,2);
 
-    -- Total de la orden de compra
+    -- Total de la OC con IGV
     SELECT IFNULL(SUM(preciocompra * 1.18),0) INTO totalOC
     FROM detordencompra
     WHERE idordencompra = NEW.idorden;
 
-    -- Total pagado antes de este registro
+    -- Total pagado hasta ahora
     SELECT IFNULL(SUM(amortizacion),0) INTO totalPagado
     FROM pagosOC
     WHERE idorden = NEW.idorden;
 
-    -- Calcular saldo restante
-    SET NEW.saldo = totalOC - (totalPagado + NEW.amortizacion);
+    -- Validar que el nuevo pago no exceda el saldo
+    IF (totalPagado + NEW.amortizacion) > totalOC THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'El monto de amortizacion excede el saldo de la orden';
+    END IF;
+
+    -- Calcular saldo restante (mínimo 0)
+    SET NEW.saldo = GREATEST(0, totalOC - (totalPagado + NEW.amortizacion));
 END;
 //
 DELIMITER ;
 
+
 SELECT * FROM pagosOC; -- id 13
 
 INSERT INTO pagosOC (idorden, idlogistica, amortizacion, comprobante, fecha)
-VALUES (13, 2, 10404.00, 'comprobantes/pago1.pdf', NOW());
+VALUES (15, 2, 45548, 'comprobantes/pago1.pdf', NOW());
 
 
 SELECT * FROM detordencompra;
@@ -63,44 +96,18 @@ SELECT * FROM pagosOC;
 
 -- TRAER LO QEU FALTA PAGAR :
 
-SELECT 
-    oc.idordencompra AS idorden,
-    -- Total de la OC (vehículos)
-    (SELECT IFNULL(SUM(preciocompra * 1.18),0) 
-     FROM detordencompra 
-     WHERE idordencompra = oc.idordencompra) AS totalOC,
-
-    -- Total pagado
-    (SELECT IFNULL(SUM(amortizacion * 1.18),0) 
-     FROM pagosOC 
-     WHERE idorden = oc.idordencompra) AS totalPagado,
-
-    -- Saldo restante
-    (
-      (SELECT IFNULL(SUM(preciocompra),0) 
-       FROM detordencompra 
-       WHERE idordencompra = oc.idordencompra)
-      -
-      (SELECT IFNULL(SUM(amortizacion *1.18),0) 
-       FROM pagosOC 
-       WHERE idorden = oc.idordencompra)
-    ) AS saldoRestante
-
-FROM ordenescompra oc
-WHERE oc.idordencompra = 16;
-
-
 
 SELECT * FROM ordenescompra;
 SELECT * FROM 
 
 
+UPDATE ordenescompra SET estado='proceso' WHERE idordencompra = 6;
+
 
 
 -- TRIGGER PARA CUABDO EL SALDO SEA 0, OC PASA A PAGADO 
-
+DROP TRIGGER IF EXISTS tr_update_estado_oc_pagado;
 DELIMITER $$
-
 CREATE TRIGGER tr_update_estado_oc_pagado
 AFTER INSERT ON pagosOC
 FOR EACH ROW
@@ -108,30 +115,24 @@ BEGIN
     DECLARE totalOC DECIMAL(10,2);
     DECLARE totalPagado DECIMAL(10,2);
 
-    -- Total de la OC (precio total de los vehículos)
-    SELECT IFNULL(SUM(preciocompra * 1.18),0)
-    INTO totalOC
+    SELECT IFNULL(SUM(preciocompra * 1.18),0) INTO totalOC
     FROM detordencompra
     WHERE idordencompra = NEW.idorden;
 
-    -- Total pagado (incluyendo el nuevo pago)
-    SELECT IFNULL(SUM(amortizacion),0)
-    INTO totalPagado
+    SELECT IFNULL(SUM(amortizacion),0) INTO totalPagado
     FROM pagosOC
     WHERE idorden = NEW.idorden;
 
-    -- Si ya se pagó todo, se cambia el estado de la OC
     IF totalPagado >= totalOC AND totalOC > 0 THEN
         UPDATE ordenescompra
         SET estado = 'pagado'
-        WHERE idordencompra = NEW.idorden;
+        WHERE idordencompra = NEW.idorden
+        AND estado != 'anulado';
     END IF;
 END $$
-
 DELIMITER ;
 
 SELECT * FROM ordenescompra;
-
 
 
 

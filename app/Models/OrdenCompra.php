@@ -15,12 +15,10 @@ class OrdenCompra
         $this->db = Database::getInstance();
     }
 
-
-
-    // Probando OC por estado 
+    // Probando OC por estado
     public function getByEstado(string $estado = 'emitido'): ?array
     {
-        $query = "
+        $query = '
         SELECT 
             oc.idordencompra,
             oc.serie,
@@ -32,7 +30,7 @@ class OrdenCompra
         JOIN concesionarios con ON t.idconcesionario = con.idconcesionario
         WHERE oc.estado = :estado
         ORDER BY oc.idordencompra DESC;
-    ";
+    ';
 
         try {
             $stmt = $this->db->prepare($query);
@@ -45,21 +43,33 @@ class OrdenCompra
         }
     }
 
+    public function obtenerPorId(int $idorden): ?array
+    {
+        $query = "SELECT 
+                oc.idordencompra,
+                oc.serie,
+                oc.emision,
+                oc.estado,
+                c.nombrecomercial AS concesionario
+            FROM ordenescompra oc
+            INNER JOIN tiendas t ON oc.idtienda = t.idtienda
+            INNER JOIN concesionarios c ON t.idconcesionario = c.idconcesionario
+            WHERE oc.idordencompra = :idorden";
 
-
-
-
-
-
-
-
-
-
-
+        try {
+            $stmt = $this->db->prepare($query);
+            $stmt->execute([':idorden' => $idorden]);
+            $data = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $data ?: null;
+        } catch (PDOException $error) {
+            error_log('Error en obtenerPorId OrdenCompra: ' . $error->getMessage());
+            return null;
+        }
+    }
 
     public function getDetOCByIdOC($idOC): ?array
     {
-        $query = "CALL sp_detOC_By_IdOC(:idOC)";
+        $query = 'CALL sp_detOC_By_IdOC(:idOC)';
         try {
             $stmt = $this->db->prepare($query);
             $stmt->execute(array(':idOC' => $idOC));
@@ -71,16 +81,11 @@ class OrdenCompra
         }
     }
 
-
-
-
-
-
     // TRAERA LOS DATOS DE LOS VEHICULOS A ACTUALIZAR EN LA TABLA DETALLE_OC, VERIFICAR SI HAN LLEGADO DE MANERA CORRECTA
 
     public function getInfoEsCorrecto($idOC): ?array
     {
-        $query = "CALL sp_det_oc_escorrecto(:idOC)";
+        $query = 'CALL sp_det_oc_escorrecto(:idOC)';
         try {
             $stmt = $this->db->prepare($query);
             $stmt->execute(array(':idOC' => $idOC));
@@ -97,8 +102,7 @@ class OrdenCompra
 
     public function updateEscorrectoDetOC($params = []): int
     {
-
-        $query = "UPDATE detordencompra SET escorrecto=:escorrecto, modificado=NOW() WHERE idordencompra=:idordencompra;";
+        $query = 'UPDATE detordencompra SET escorrecto=:escorrecto, modificado=NOW() WHERE idordencompra=:idordencompra;';
         try {
             $stmt = $this->db->prepare($query);
             $stmt->execute(array(
@@ -106,28 +110,25 @@ class OrdenCompra
                 ':idordencompra' => $params['idordencompra']
             ));
 
-            return  (int) $stmt->rowCount();
+            return (int) $stmt->rowCount();
         } catch (PDOException $error) {
             error_log($error->getMessage());
             return -1;
         }
     }
 
-
-
     // METODO QUE EPRMITE ACTUALIZAR EL CAMPO ESTADO EN LA TABLA OC
     public function updateEstado($params = []): int
     {
-
         if ($params['estado'] == 'anulado') {
-            $query = "UPDATE ordenescompra 
+            $query = 'UPDATE ordenescompra 
               SET estado = :estado, observaciones = :observaciones, 
                   fechanulado = NOW(), anulacion = CURDATE()
-              WHERE idordencompra = :idordencompra;";
+              WHERE idordencompra = :idordencompra;';
         } else {
-            $query = "UPDATE ordenescompra 
+            $query = 'UPDATE ordenescompra 
               SET estado = :estado, observaciones = :observaciones 
-              WHERE idordencompra = :idordencompra;";
+              WHERE idordencompra = :idordencompra;';
         }
 
         try {
@@ -144,12 +145,9 @@ class OrdenCompra
         }
     }
 
-
-
-
     public function create($params = []): int
     {
-        $query = "call spu_oc_registrar(:idtienda,:idlogistica,:moneda,:serie,:numstock,:observaciones)";
+        $query = 'call spu_oc_registrar(:idtienda,:idlogistica,:moneda,:serie,:numstock,:observaciones)';
 
         try {
             $stmt = $this->db->prepare($query);
@@ -160,7 +158,6 @@ class OrdenCompra
                 ':serie' => $params['serie'],
                 ':numstock' => $params['numstock'],
                 ':observaciones' => $params['observaciones']
-
             ));
 
             $idOrdenCompra = $stmt->fetch(PDO::FETCH_ASSOC);

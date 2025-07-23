@@ -1,11 +1,11 @@
 <?php
 
-
 namespace App\Controllers;
 
 use App\Core\Controller;
 use App\Helpers\Validador;
 use App\Models\OrdenCompra;
+use App\Models\PagosOC;
 
 class OrdenCompraController extends Controller
 {
@@ -16,19 +16,34 @@ class OrdenCompraController extends Controller
         $this->ordenCompraModel = new OrdenCompra();
     }
 
-    // Me enlistara todas las ordenes de compras, dependiendo de su estado: 
+    // Me enlistara todas las ordenes de compras, dependiendo de su estado:
     public function index(string $estado = 'emitido'): void
     {
         $ordenCompraModel = new OrdenCompra();
         $ordenCompras = $ordenCompraModel->getByEstado($estado);
         $this->view('oc.index', ['ordenCompras' => $ordenCompras, 'estado' => $estado]);
     }
-
+    
+    
     // METODO QUE  SOLO ME LLEVARA A LA VISTA PARA REGISTRAR LOS PAGOS
-    public function indexPagos():void {
-        $this->view('oc.pagos');
+    public function indexPagos($idorden): void
+    {
+        $idorden = (int)$idorden;
+    
+        $pagosModel = new PagosOC();
+        $ordenModel = new OrdenCompra();
+    
+        $pagos = $pagosModel->listarPorOC($idorden);
+        $saldoRestante = $pagosModel->obtenerSaldoRestante($idorden);
+        $ordenCompra = $ordenModel->obtenerPorId($idorden);
+    
+        $this->view('oc.pagos', [
+            'pagos' => $pagos,
+            'saldoRestante' => $saldoRestante,
+            'ordenCompra' => $ordenCompra
+        ]);
     }
-
+    
 
     public function html2pdfReport($id): void
     {
@@ -37,8 +52,7 @@ class OrdenCompraController extends Controller
         $this->view('pdf/oc/oc-html2pdf', ['id' => $id]);
     }
 
-
-    // Me llevará a la voista de crear 
+    // Me llevará a la voista de crear
     public function create(): void
     {
         $this->view('oc.create');
@@ -46,7 +60,6 @@ class OrdenCompraController extends Controller
 
     public function store(): int
     {
-
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             http_response_code(405);
             echo json_encode(['success' => false, 'message' => 'Método no permitido']);
@@ -57,7 +70,7 @@ class OrdenCompraController extends Controller
         $data = array_map([Validador::class, 'limpiar'], $_POST);
         $registro = [
             'idtienda' => $data['idtienda'] ?? '',
-            'idlogistica' => 2, // Asignando un valor fijo de 2 para idlogistica
+            'idlogistica' => 2,  // Asignando un valor fijo de 2 para idlogistica
             'moneda' => $data['moneda'] ?? '',
             'serie' => $data['serie'] ?? '',
             'numstock' => $data['numstock'] ?? '',
@@ -80,10 +93,7 @@ class OrdenCompraController extends Controller
             exit;
         }
 
-
         $idOrdenCompra = $this->ordenCompraModel->create($registro);
-
-
 
         if ($idOrdenCompra > 0) {
             echo json_encode([
@@ -116,7 +126,7 @@ class OrdenCompraController extends Controller
         $data = array_map([Validador::class, 'limpiar'], $_POST);
 
         $registro = [
-            'estado' => $estado, // Viene desde la URL (proceso, anulado, etc.)
+            'estado' => $estado,  // Viene desde la URL (proceso, anulado, etc.)
             'observaciones' => $data['observaciones'] ?? '',
             'idordencompra' => $idOC
         ];
@@ -131,8 +141,6 @@ class OrdenCompraController extends Controller
         ]);
         exit();
     }
-
-
 
     public function update($idOC): int
     {
@@ -180,21 +188,10 @@ class OrdenCompraController extends Controller
         }
     }
 
-
-
-
-
-
-
-
-
-
-
     // API PARA TRAER EL DETALLE DE UNA PC OR SU ID:
 
     public function searchtDetOCByIdOc($idOC): void
     {
-
         header('Content-Type: application/json');
         $ocDet = $this->ordenCompraModel->getDetOCByIdOC($idOC);
 
@@ -210,7 +207,6 @@ class OrdenCompraController extends Controller
 
     public function searchInfoAutos($idOC)
     {
-
         header('Content-Type: application/json');
         $infoAuto = $this->ordenCompraModel->getInfoEsCorrecto($idOC);
 
