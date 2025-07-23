@@ -71,7 +71,7 @@
 										</a>
 										<!-- Eliminar -->
 										<button type="button" class="btn btn-sm btn-outline-danger btn-borrar"
-											title="Eliminar">
+											title="Eliminar" data-id="<?= htmlspecialchars($v['idvehiculo']) ?>">
 											<i class="fa-solid fa-trash"></i>
 										</button>
 									</td>
@@ -86,5 +86,35 @@
 	</div>
 
 </div>
+
+<script>
+	document.querySelectorAll('.btn-borrar').forEach(button => {
+		button.addEventListener('click', () => {
+			const id = button.getAttribute('data-id');
+			if (confirm(`¿Seguro que deseas eliminar el vehículo #${id}?`)) {
+				fetch('/vehiculos/delete', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/x-www-form-urlencoded'
+					},
+					body: `idvehiculo=${encodeURIComponent(id)}`
+				})
+					.then(response => response.json())
+					.then(data => {
+						if (data.success) {
+							alert(data.success);
+							window.location.reload(); // recarga la lista
+						} else {
+							alert(data.error || 'Ocurrió un error al eliminar');
+						}
+					})
+					.catch(error => {
+						alert('Error en la solicitud: ' + error);
+					});
+			}
+		});
+	});
+</script>
+
 
 <?php include __DIR__ . '/../layout/footer.php'; ?>

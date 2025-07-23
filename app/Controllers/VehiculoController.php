@@ -105,4 +105,30 @@ class VehiculoController extends Controller
     }
   }
 
+  public function delete(): void
+  {
+    $this->authRequired();
+    header('Content-Type: application/json; charset=utf-8');
+
+    $idvehiculo = (int) ($_POST['idvehiculo'] ?? 0);
+
+    if ($idvehiculo <= 0) {
+      echo json_encode(['error' => 'ID de vehículo inválido']);
+      exit;
+    }
+
+    try {
+      $success = $this->vehiculoModel->delete($idvehiculo);
+
+      if ($success) {
+        echo json_encode(['success' => 'Vehículo eliminado correctamente']);
+      } else {
+        echo json_encode(['error' => 'No se pudo eliminar el vehículo']);
+      }
+
+    } catch (\Exception $e) {
+      echo json_encode(['error' => 'Error: ' . $e->getMessage()]);
+    }
+  }
+
 }

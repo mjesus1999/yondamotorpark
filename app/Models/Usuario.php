@@ -189,7 +189,7 @@ class Usuario
   }
 
   //actualizar avatar
-  
+
   public function updateAvatar(int $idColab, string $url): bool
   {
     $stmt = $this->db->prepare("
@@ -203,32 +203,33 @@ class Usuario
   }
 
   //IDLOGISTICA:
+
   public function esDeLogistica(int $idcolaborador): bool
-    {
-        $stmt = $this->db->prepare("
-            SELECT a.idarea
-            FROM colaboradores c
-            INNER JOIN contratoslaborales cl ON c.idcontratolaboral = cl.idcontratolaboral
-            INNER JOIN cargos ca ON cl.idcargo = ca.idcargo
-            INNER JOIN areas a ON ca.idarea = a.idarea
-            WHERE c.idcolaborador = :id
-            LIMIT 1
-        ");
-        $stmt->execute([':id' => $idcolaborador]);
-        $areaId = $stmt->fetchColumn();
-
-        return (int)$areaId === 9; // Logística
-    }
-
-    /* public function delete(int $id): bool
   {
     $stmt = $this->db->prepare("
-      DELETE
-      FROM colaboradores
-      WHERE idcolaborador = :id
+      SELECT a.idarea
+      FROM colaboradores c
+      INNER JOIN contratoslaborales cl ON c.idcontratolaboral = cl.idcontratolaboral
+      INNER JOIN cargos ca ON cl.idcargo = ca.idcargo
+      INNER JOIN areas a ON ca.idarea = a.idarea
+      WHERE c.idcolaborador = :id
+      LIMIT 1
     ");
-    $stmt->bindParam(':id', $id, PDO::PARAM_INT);
-    return $stmt->execute();
-  } */
+    $stmt->execute([':id' => $idcolaborador]);
+    $areaId = $stmt->fetchColumn();
+
+    return (int) $areaId === 9; // Logística
+  }
+
+  /* public function delete(int $id): bool
+{
+  $stmt = $this->db->prepare("
+    DELETE
+    FROM colaboradores
+    WHERE idcolaborador = :id
+  ");
+  $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+  return $stmt->execute();
+} */
 
 }

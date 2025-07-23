@@ -65,66 +65,72 @@ class Vehiculo
     return (int) $idvehiculo;
   }
 
-/*   public function create1(array $data): int
+  public function delete(int $id): int
   {
-    $sql = "
-        INSERT INTO vehiculos (
-            idmodelo,
-            version,
-            condicion,
-            idcombustible,
-            color,
-            chasis,
-            placa,
-            placarotativa,
-            seriemotor,
-            moneda,
-            precioventa,
-            disponibilidad,
-            origen,
-            idlogistica,
-            idlocal
-        ) VALUES (
-            :idmodelo,
-            :version,
-            :condicion,
-            :idcombustible,
-            :color,
-            :chasis,
-            :placa,
-            :placarotativa,
-            :seriemotor,
-            :moneda,
-            :precioventa,
-            'proceso',
-            'CTZ',
-            :idlogistica,
-            :idlocal
-        )
-    ";
+    $stmt = $this->db->prepare("DELETE FROM vehiculos WHERE idvehiculo = :id");
+    return $stmt->execute([':id' => $id]);
+  }
 
-    try {
-      $stmt = $this->db->prepare($sql);
-      $stmt->bindParam(':idmodelo', $data['idmodelo'], PDO::PARAM_INT);
-      $stmt->bindParam(':version', $data['version'], PDO::PARAM_STR);
-      $stmt->bindParam(':condicion', $data['condicion'], PDO::PARAM_STR);
-      $stmt->bindParam(':idcombustible', $data['idcombustible'], PDO::PARAM_INT);
-      $stmt->bindParam(':color', $data['color'], PDO::PARAM_STR);
-      $stmt->bindParam(':chasis', $data['chasis'], PDO::PARAM_STR);
-      $stmt->bindParam(':placa', $data['placa'], PDO::PARAM_STR);
-      $stmt->bindParam(':placarotativa', $data['placarotativa'], PDO::PARAM_STR);
-      $stmt->bindParam(':seriemotor', $data['seriemotor'], PDO::PARAM_STR);
-      $stmt->bindParam(':moneda', $data['moneda'], PDO::PARAM_STR);
-      $stmt->bindParam(':precioventa', $data['precioventa'], PDO::PARAM_STR);
-      $stmt->bindParam(':idlogistica', $data['idlogistica'], PDO::PARAM_INT);
-      $stmt->bindParam(':idlocal', $data['idlocal'], PDO::PARAM_INT);
-      $stmt->execute();
+  /*   public function create1(array $data): int
+    {
+      $sql = "
+          INSERT INTO vehiculos (
+              idmodelo,
+              version,
+              condicion,
+              idcombustible,
+              color,
+              chasis,
+              placa,
+              placarotativa,
+              seriemotor,
+              moneda,
+              precioventa,
+              disponibilidad,
+              origen,
+              idlogistica,
+              idlocal
+          ) VALUES (
+              :idmodelo,
+              :version,
+              :condicion,
+              :idcombustible,
+              :color,
+              :chasis,
+              :placa,
+              :placarotativa,
+              :seriemotor,
+              :moneda,
+              :precioventa,
+              'proceso',
+              'CTZ',
+              :idlogistica,
+              :idlocal
+          )
+      ";
 
-      return (int) $this->db->lastInsertId();
-    } catch (Exception $e) {
-      throw new Exception("Error al registrar Vehiculo " . $e->getMessage());
-    }
-  } */
+      try {
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':idmodelo', $data['idmodelo'], PDO::PARAM_INT);
+        $stmt->bindParam(':version', $data['version'], PDO::PARAM_STR);
+        $stmt->bindParam(':condicion', $data['condicion'], PDO::PARAM_STR);
+        $stmt->bindParam(':idcombustible', $data['idcombustible'], PDO::PARAM_INT);
+        $stmt->bindParam(':color', $data['color'], PDO::PARAM_STR);
+        $stmt->bindParam(':chasis', $data['chasis'], PDO::PARAM_STR);
+        $stmt->bindParam(':placa', $data['placa'], PDO::PARAM_STR);
+        $stmt->bindParam(':placarotativa', $data['placarotativa'], PDO::PARAM_STR);
+        $stmt->bindParam(':seriemotor', $data['seriemotor'], PDO::PARAM_STR);
+        $stmt->bindParam(':moneda', $data['moneda'], PDO::PARAM_STR);
+        $stmt->bindParam(':precioventa', $data['precioventa'], PDO::PARAM_STR);
+        $stmt->bindParam(':idlogistica', $data['idlogistica'], PDO::PARAM_INT);
+        $stmt->bindParam(':idlocal', $data['idlocal'], PDO::PARAM_INT);
+        $stmt->execute();
+
+        return (int) $this->db->lastInsertId();
+      } catch (Exception $e) {
+        throw new Exception("Error al registrar Vehiculo " . $e->getMessage());
+      }
+    } */
 
   /*public function getDisponibles(int $idmarca, int $idtipovehiculo, string $modelo, string $anio): array
       {

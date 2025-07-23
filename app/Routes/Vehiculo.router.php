@@ -12,6 +12,7 @@ $router->add('GET', '/modelos/lista', 'ModeloController', 'getByMarcaYTipo');
 //registro del vehiculo:
 $router->add('POST', '/vehiculos/store', 'VehiculoController', 'store');
 
+$router->add('POST', '/vehiculos/delete', 'VehiculoController', 'delete');
 
 //CLIENTE DENTRO DE VEHICULO
 /* $router->add('GET', '/clientes/lista', 'ClienteController', 'getAllCliente'); */

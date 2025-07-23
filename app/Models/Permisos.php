@@ -27,7 +27,7 @@ class Permisos
         return $stmt->fetchAll(PDO::FETCH_COLUMN);
     }
 
-    public function tienePermiso(int $idCargo, string $modulo): bool
+    /* public function tienePermiso(int $idCargo, string $modulo): bool
     {
         $stmt = $this->db->prepare("
             SELECT COUNT(*) 
@@ -39,5 +39,5 @@ class Permisos
             ':modulo' => $modulo
         ]);
         return $stmt->fetchColumn() > 0;
-    }
+    } */
 }
