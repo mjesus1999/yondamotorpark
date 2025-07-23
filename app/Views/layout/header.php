@@ -15,12 +15,13 @@ if(!empty($_SESSION['user']['idcargo'])){
 
 //Definimos los modulos en un array
 $allModules = [
-  'OC' => ['url' => '/oc', 'icon' => 'fa-solid fa-list pe-2', 'label' => 'Orden de compra'],
-  'COMPRAS' => ['url' => '/compras', 'icon' => 'fa-solid fa-list pe-2', 'label' => 'Compras'],
-  'CONCESION' => ['url' => '/concesionarios', 'icon' => 'fa-solid fa-list pe-2', 'label' => 'Concesionarios'],
-  'MARCAS' => ['url' => '/marcas', 'icon' => 'fa-solid fa-list pe-2', 'label' => 'Marcas'],
-  'VEHICULOS' => ['url' => '/vehiculos', 'icon' => 'fa-solid fa-list pe-2', 'label' => 'Vehículos'],
-  'USUARIOS' => ['url' => '/usuarios', 'icon' => 'fa-solid fa-list pe-2', 'label' => 'Usuarios'],
+  'oc' => ['url' => '/oc', 'icon' => 'fa-solid fa-list pe-2', 'label' => 'Orden de compra'],
+  'compras' => ['url' => '/compras', 'icon' => 'fa-solid fa-list pe-2', 'label' => 'compras'],
+  'Concesionarios' => ['url' => '/concesionarios', 'icon' => 'fa-solid fa-list pe-2', 'label' => 'Concesionarios'],
+  'marcas' => ['url' => '/marcas', 'icon' => 'fa-solid fa-list pe-2', 'label' => 'marcas'],
+  'vehiculos' => ['url' => '/vehiculos', 'icon' => 'fa-solid fa-list pe-2', 'label' => 'vehiculos'],
+  'usuarios' => ['url' => '/usuarios', 'icon' => 'fa-solid fa-list pe-2', 'label' => 'usuarios'],
+  'formatoCotizacion' => ['url' => '/formatoCotizacion', 'icon' => 'fa-solid fa-list pe-2', 'label' => 'Requisitos']
 ]; */
 ?>
 <!DOCTYPE html>

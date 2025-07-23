@@ -44,6 +44,29 @@ class Vehiculo
 
   public function create(array $data): int
   {
+    $stmt = $this->db->prepare("CALL spu_vehiculos_registrar(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    $stmt->execute([
+      $data['idmodelo'],
+      $data['version'],
+      $data['condicion'],
+      $data['idcombustible'],
+      $data['color'],
+      $data['chasis'],
+      $data['placa'],
+      $data['placarotativa'],
+      $data['seriemotor'],
+      $data['moneda'],
+      $data['precioventa'],
+      $data['idlogistica'],
+      $data['idlocal']
+    ]);
+
+    $idvehiculo = $stmt->fetchColumn();
+    return (int) $idvehiculo;
+  }
+
+/*   public function create1(array $data): int
+  {
     $sql = "
         INSERT INTO vehiculos (
             idmodelo,
@@ -101,7 +124,7 @@ class Vehiculo
     } catch (Exception $e) {
       throw new Exception("Error al registrar Vehiculo " . $e->getMessage());
     }
-  }
+  } */
 
   /*public function getDisponibles(int $idmarca, int $idtipovehiculo, string $modelo, string $anio): array
       {

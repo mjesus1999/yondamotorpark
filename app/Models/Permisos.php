@@ -19,12 +19,25 @@ class Permisos
     public function getPermisosByCargo(int $idCargo): array
     {
         $stmt = $this->db->prepare("
-            SELECT modulo
-            FROM accesos
+            SELECT moduloapp
+            FROM permisos
             WHERE idcargo = :idCargo
-            AND permiso = 'S'
         ");
         $stmt->execute([':idCargo' => $idCargo]);
         return $stmt->fetchAll(PDO::FETCH_COLUMN);
+    }
+
+    public function tienePermiso(int $idCargo, string $modulo): bool
+    {
+        $stmt = $this->db->prepare("
+            SELECT COUNT(*) 
+            FROM permisos 
+            WHERE idcargo = :idCargo AND moduloapp = :modulo
+        ");
+        $stmt->execute([
+            ':idCargo' => $idCargo,
+            ':modulo' => $modulo
+        ]);
+        return $stmt->fetchColumn() > 0;
     }
 }

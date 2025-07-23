@@ -119,6 +119,30 @@ INSERT INTO detallerequisitos (idformato, idrequisito) VALUES
   (3, 12),
   (3, 13);
 
+-- PERMISOS
+
+-- Jefe de Logística (ID = 8) - Acceso total a todos los módulos
+INSERT INTO permisos (idcargo, moduloapp) VALUES
+(8, 'marcas'),
+(8, 'usuarios'),
+(8, 'vehiculos'),
+(8, 'formatoCotizacion');
+
+-- Jefe de Sistemas (ID = 1) - Acceso a todos los módulos también
+INSERT INTO permisos (idcargo, moduloapp) VALUES
+(1, 'marcas'),
+(1, 'usuarios'),
+(1, 'vehiculos'),
+(1, 'formatoCotizacion');
+
+-- Practicante (ID = 3) - Solo puede ver vehículos
+INSERT INTO permisos (idcargo, moduloapp) VALUES
+(3, 'vehiculos');
+
+
+/* --- SECUNDARIO --- */
+
+
 -- EMPRESAS
 INSERT INTO empresas (razonsocial, nombrecomercial, ruc, representante, email, telprimario)
 VALUES

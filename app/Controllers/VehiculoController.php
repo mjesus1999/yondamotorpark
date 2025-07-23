@@ -6,17 +6,20 @@ namespace App\Controllers;
 use App\Core\Controller;
 use App\Models\Vehiculo;
 use App\Models\Local;
+use App\Models\Usuario;
 
 class VehiculoController extends Controller
 {
 
   private Vehiculo $vehiculoModel;
   private Local $localModel;
+  private Usuario $usuarioModel;
 
   public function __construct()
   {
     $this->vehiculoModel = new Vehiculo();
     $this->localModel = new Local();
+    $this->usuarioModel = new Usuario();
   }
 
   public function index(): void
@@ -37,7 +40,14 @@ class VehiculoController extends Controller
     $this->authRequired();
     header('Content-Type: application/json; charset=utf-8');
 
-    $idlogistica = $_SESSION['user']['id'];
+    $idcolaborador = $_SESSION['user']['id'];
+
+    /* if (!$this->usuarioModel->esDeLogistica($idcolaborador)) {
+      $_SESSION['error_message'] = 'Solo el personal de Logística puede registrar vehículos';
+      header('Location: /vehiculos');
+      exit;
+    } */
+
     $local = $this->localModel->getByTienda('Chincha');
     $idlocal = $local['idlocal'] ?? 3;
 
@@ -78,7 +88,7 @@ class VehiculoController extends Controller
           'seriemotor' => $serieArr[$i] ?? null,
           'moneda' => $moneda,
           'precioventa' => $precioventa,
-          'idlogistica' => $idlogistica,
+          'idlogistica' => $idcolaborador,
           'idlocal' => $idlocal
         ];
         $this->vehiculoModel->create($data);
