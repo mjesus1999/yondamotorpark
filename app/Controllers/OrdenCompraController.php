@@ -33,13 +33,13 @@ class OrdenCompraController extends Controller
         $pagosModel = new PagosOC();
         $pagos = $pagosModel->listarPagosByOC($idorden);
         $saldoRestante = $pagosModel->obtenerSaldoRestante($idorden);
-        $ordenCompra = $this->ordenCompraModel->obtenerConcesionarioById($idorden);
+        $concesionario = $this->ordenCompraModel->obtenerConcesionarioById($idorden);
         $infoAutos = $this->ordenCompraModel->getInfoAutosOC($idorden);
     
         $this->view('oc.pagos', [
             'pagos' => $pagos,
             'saldoRestante' => $saldoRestante,
-            'ordenCompra' => $ordenCompra,
+            'concesionario' => $concesionario,
             'autos' => $infoAutos
         ]);
     }
@@ -51,7 +51,7 @@ class OrdenCompraController extends Controller
         $this->view('pdf/oc/oc-html2pdf', ['id' => $id]);
     }
 
-    // Me llevará a la voista de crear
+    // Me llevará a la vista de crear
     public function create(): void
     {
         $this->view('oc.create');
@@ -69,7 +69,7 @@ class OrdenCompraController extends Controller
         $data = array_map([Validador::class, 'limpiar'], $_POST);
         $registro = [
             'idtienda' => $data['idtienda'] ?? '',
-            'idlogistica' => 2,  // Asignando un valor fijo de 2 para idlogistica
+            'idlogistica' => 2,  
             'moneda' => $data['moneda'] ?? '',
             'serie' => $data['serie'] ?? '',
             'numstock' => $data['numstock'] ?? '',

@@ -4,17 +4,20 @@
 
     <?php if (!empty($autos)): ?>
 
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <strong>¡Detalles!</strong>
-            <ul class="mb-1">
-                <?php foreach ($autos as $auto): ?>
-                    <li class="m-1 fw-bold"><?= htmlspecialchars($auto['auto'])  ?> - (<?= htmlspecialchars($auto['cantidad']) ?>)</li>
+
+        <div class="alert alert-success mt-5" role="alert">
+            <h4 class="alert-heading">¡DETALLES DE LOS AUTOS!</h4>
+            <?php foreach($autos as $auto): ?>
+                
+                <p><?= htmlspecialchars($auto['auto'])?> - <?= htmlspecialchars($auto['cantidad'])?></p>
+                <hr>
                 <?php endforeach; ?>
-            </ul>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
 
+
     <?php endif; ?>
+
+
 
 
     <div class="row">
@@ -22,7 +25,7 @@
             <div class="card shadow-sm">
                 <div class="card-header bg-yonda text-white d-flex justify-content-between align-items-center">
                     <h6 class="mb-0">
-                        Pagos Realizados - <?= htmlspecialchars($ordenCompra['concesionario'] ?? '---') ?>
+                        Pagos Realizados - <?= htmlspecialchars($concesionario['concesionario'] ?? '---') ?>
                     </h6>
                 </div>
                 <div class="card-body p-2">
@@ -75,7 +78,7 @@
 
                     <!-- Botones -->
                     <div class="modal-footer">
-                        <a href="/oc" class="btn btn-outline-secondary btn-sm">
+                        <a href="/oc/listar/proceso" class="btn btn-outline-secondary btn-sm">
                             <i class="fa-solid "></i> Cancelar
                         </a>
                         <button class="btn btn-outline-primary btn-sm m-1" data-bs-toggle="modal" data-bs-target="#modalPago">
@@ -101,7 +104,7 @@
                     <form id="formPago" enctype="multipart/form-data" autocomplete="off">
                         <input type="hidden" name="idorden" value="<?= htmlspecialchars($ordenCompra['idordencompra'] ?? 0) ?>">
                         <div class="form-floating mb-3">
-                            <input type="number" min="150" name="amortizacion" id="amortizacion"
+                            <input type="number" min="1" name="amortizacion" id="amortizacion"
                                 class="form-control" placeholder="0.00" required>
                             <label for="amortizacion">Monto a pagar</label>
                         </div>
@@ -208,7 +211,7 @@
                     });
 
                     const data = await response.json();
-                    console.log(data);
+                    // console.log(data)
 
                     if (data.success) {
                         console.log('DATA:', data.success);
