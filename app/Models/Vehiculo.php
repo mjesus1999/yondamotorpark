@@ -21,13 +21,17 @@ class Vehiculo
     $query = "
     SELECT 
       v.idvehiculo,
+        mc.marca,
+        tv.tipovehiculo,
         m.modelo,
         v.version,
         v.condicion,
         v.color,
         v.disponibilidad
         FROM vehiculos v
-        INNER JOIN modelos m ON m.idmodelo = v.idmodelo;
+        INNER JOIN modelos m ON m.idmodelo = v.idmodelo
+        INNER JOIN marcas mc ON mc.idmarca = m.idmarca
+        INNER JOIN tipovehiculos tv ON tv.idtipovehiculo = m.idtipovehiculo;
     ";
     try {
       $stmt = $this->db->prepare($query);
@@ -95,12 +99,11 @@ class Vehiculo
 
       return (int) $this->db->lastInsertId();
     } catch (Exception $e) {
-      echo json_encode(['error' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
-      exit;
+      throw new Exception("Error al registrar Vehiculo " . $e->getMessage());
     }
   }
 
-  /*     public function getDisponibles(int $idmarca, int $idtipovehiculo, string $modelo, string $anio): array
+  /*public function getDisponibles(int $idmarca, int $idtipovehiculo, string $modelo, string $anio): array
       {
           $sql = "
             SELECT

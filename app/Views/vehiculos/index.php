@@ -2,6 +2,22 @@
 
 <div class="container-fluid">
 
+	<?php if (!empty($_SESSION['success_message'])): ?>
+		<div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+			<?= htmlspecialchars($_SESSION['success_message']) ?>
+			<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+		</div>
+		<?php unset($_SESSION['success_message']); ?>
+	<?php endif; ?>
+
+	<?php if (!empty($_SESSION['error_message'])): ?>
+		<div class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
+			<?= htmlspecialchars($_SESSION['error_message']) ?>
+			<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+		</div>
+		<?php unset($_SESSION['error_message']); ?>
+	<?php endif; ?>
+
 	<div class="alert alert-info mt-2" role="alert">
 		<div class="row">
 			<div class="col-md-6 d-flex aling-items-center justify-content-start">
@@ -26,6 +42,8 @@
 						<thead>
 							<tr>
 								<th>#</th>
+								<th>Marca</th>
+								<th>Tipo Vehiculo</th>
 								<th>Modelo</th>
 								<th>Version</th>
 								<th>Condicion</th>
@@ -39,6 +57,8 @@
 							<?php foreach ($vehiculos as $v): ?>
 								<tr>
 									<td><?= htmlspecialchars($v['idvehiculo']) ?></td>
+									<td><?= htmlspecialchars($v['marca']) ?></td>
+									<td><?= htmlspecialchars($v['tipovehiculo']) ?></td>
 									<td><?= htmlspecialchars($v['modelo']) ?></td>
 									<td><?= htmlspecialchars($v['version']) ?></td>
 									<td><?= htmlspecialchars($v['condicion']) ?></td>
@@ -46,8 +66,7 @@
 									<td><?= htmlspecialchars($v['disponibilidad']) ?></td>
 									<td class="text-center">
 										<!-- Editar -->
-										<a href="#"
-											class="btn btn-sm btn-outline-primary" title="Editar">
+										<a href="#" class="btn btn-sm btn-outline-primary" title="Editar">
 											<i class="fa-solid fa-pen"></i>
 										</a>
 										<!-- Eliminar -->
@@ -59,7 +78,7 @@
 								</tr>
 							<?php endforeach; ?>
 						</tbody>
-						
+
 					</table>
 				</div>
 			</div>

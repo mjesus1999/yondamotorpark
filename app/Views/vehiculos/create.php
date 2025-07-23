@@ -22,7 +22,7 @@
 		<form action="/vehiculos/store" method="POST" id="registrar-vehiculos" autocomplete="off">
 			<div class="card mb-2">
 				<div class="card-header bg-info">
-					<strong>Paso 1:</strong> <span class="fst-italic">Nuevo Vehiculos</span>
+					<strong>Paso 1:</strong> <span class="fst-italic">Registra Vehiculos</span>
 				</div>
 				<div class="card-body">
 
@@ -185,6 +185,8 @@
 
 <script>
 	document.addEventListener("DOMContentLoaded", () => {
+
+		/* generar chasis */
 		const hiddenModeloId = document.getElementById('idmodelo');
 		const cantidadInput = document.getElementById("cantidad");
 		const container = document.getElementById("inputs-dinamicos");
@@ -221,7 +223,8 @@
 		cantidadInput.addEventListener("change", () => generarInputs(cantidadInput.value));
 		cantidadInput.addEventListener("keyup", () => generarInputs(cantidadInput.value));
 
-		// Marcas > Tipos > Modelos > Años
+
+		// Cargar las Marcas > Tipos > Modelos > Años
 		const marcasSel = document.getElementById("marcas");
 		const tiposSel = document.getElementById("tipos");
 		const modelosSel = document.getElementById("modelos");
@@ -327,7 +330,7 @@
 					`<option value="${year}">${year}</option>`);
 			});
 
-			// limpiar campo oculto hasta que elijan año
+			//limpiar campo oculto hasta que elijan año
 			hiddenModeloId.value = '';
 		});
 
@@ -347,12 +350,12 @@
 				: '';
 		});
 
+		//boton de ESP
 		const versionLS = document.getElementById('version-ls');
 		const versionIN = document.getElementById('version-in');
 		const mostrarVersionLS = document.getElementById('mostrar-version-ls');
 		const bloqueVersionLista = document.getElementById("bloque-version-lista");
 		const bloqueVersionInput = document.getElementById("bloque-version-input");
-
 
 		versionLS.addEventListener("change", (event) => {
 			const opcion = event.target.value;
@@ -367,7 +370,6 @@
 				versionIN.focus();
 			} else {
 				// mantener select visible, input oculto
-				// (no hace falta cambiar aquí, lo haremos en el botón)
 				versionIN.value = opcion;
 			}
 		});
@@ -394,6 +396,13 @@
 		  }
 		  console.groupEnd();
 		}); */
+		const form = document.getElementById('registrar-vehiculos');
+
+		form.addEventListener('submit', function (e) {
+			if (!confirm("¿Estás seguro de registrar los vehículos?")) {
+				e.preventDefault(); // Cancela el envío si el usuario elige "No"
+			}
+		});
 	});
 </script>
 

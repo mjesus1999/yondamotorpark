@@ -37,15 +37,10 @@ class VehiculoController extends Controller
     $this->authRequired();
     header('Content-Type: application/json; charset=utf-8');
 
-    //usuario logueado
     $idlogistica = $_SESSION['user']['id'];
-
-    //Buscar dinámicamente el local “Chincha” -> termporal
-    $localModel = new Local();
-    $local = $localModel->getByTienda('Chincha');
+    $local = $this->localModel->getByTienda('Chincha');
     $idlocal = $local['idlocal'] ?? 3;
 
-    //Arrays dinámicos
     $chasisArr = $_POST['chasis'] ?? [];
     $placaArr = $_POST['placa'] ?? [];
     $placaRotArr = $_POST['placa_rotativa'] ?? [];
@@ -63,45 +58,41 @@ class VehiculoController extends Controller
       exit;
     }
 
-    /* $version = ($_POST['version-ls'] === 'ESP')
-      ? ($_POST['version-in'] ?? '')
-      : $_POST['version-ls']; */
-
     $condicion = $_POST['condicion'];
     $idcombustible = (int) ($_POST['combustible'] ?? 0);
     $color = $_POST['color'] ?? null;
     $moneda = $_POST['moneda'] ?? 'USD';
     $precioventa = $_POST['precio'];
 
-    $results = [];
-    foreach ($chasisArr as $i => $chasis) {
-      $data = [
-        'idmodelo' => $idmodelo,
-        'version' => $version,
-        'condicion' => $condicion,
-        'idcombustible' => $idcombustible,
-        'color' => $color,
-        'chasis' => $chasis,
-        'placa' => $placaArr[$i] ?? null,
-        'placarotativa' => $placaRotArr[$i] ?? null,
-        'seriemotor' => $serieArr[$i] ?? null,
-        'moneda' => $moneda,
-        'precioventa' => $precioventa,
-        'idlogistica' => $idlogistica,
-        'idlocal' => $idlocal
-      ];
-      $insertId = $this->vehiculoModel->create($data);
-      $results[] = $insertId > 0
-        ? ['success' => true, 'id' => $insertId]
-        : ['success' => false, 'error' => "Error en fila {$i}"];
+    try {
+      foreach ($chasisArr as $i => $chasis) {
+        $data = [
+          'idmodelo' => $idmodelo,
+          'version' => $version,
+          'condicion' => $condicion,
+          'idcombustible' => $idcombustible,
+          'color' => $color,
+          'chasis' => $chasis,
+          'placa' => $placaArr[$i] ?? null,
+          'placarotativa' => $placaRotArr[$i] ?? null,
+          'seriemotor' => $serieArr[$i] ?? null,
+          'moneda' => $moneda,
+          'precioventa' => $precioventa,
+          'idlogistica' => $idlogistica,
+          'idlocal' => $idlocal
+        ];
+        $this->vehiculoModel->create($data);
+      }
+
+      $_SESSION['success_message'] = 'Vehículos registrados correctamente';
+      header('Location: /vehiculos');
+      exit;
+
+    } catch (\Exception $e) {
+      $_SESSION['success_message'] = 'Error al registrar vehículos: ' . $e->getMessage();
+      header('Location: /vehiculos/create');
+      exit;
     }
-
-    $_SESSION['flash_success'] = 'Vehículos registrados correctamente';
-    header('Location: /vehiculos');
-    exit;
-
-    /* echo json_encode(['results' => $results], JSON_UNESCAPED_UNICODE);
-    exit; */
   }
 
 }
