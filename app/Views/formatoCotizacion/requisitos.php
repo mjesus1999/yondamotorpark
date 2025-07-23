@@ -31,12 +31,15 @@
                     <div class="row g-1 align-items-center">
 
                         <?php
-                        // Preparo lookup de IDs ya asignados:
+                        //Preparo lookup de IDs ya asignados:
                         $idsAsignados = array_column($asignados, 'idrequisito');
                         ?>
 
                         <!-- Muestra los Requisitos -->
                         <div class="col-md-5">
+                            <div class="card-header bg-warning">
+                                <span class="fst-italic">Selecciona</span>
+                            </div>
                             <div class="border rounded p-2 MostrarRequisitos"
                                 style="min-height:600px; overflow-y:auto;">
                                 <ul id="lista-disponibles" class="list-group list-group-flush">
@@ -65,6 +68,9 @@
 
                         <!-- Requisitos Seleccionados -->
                         <div class="col-md-5">
+                            <div class="card-header bg-success">
+                                <span class="fst-italic">Asigna</span>
+                            </div>
                             <div class="border rounded p-2 RequisitosAgregados"
                                 style="min-height:600px; overflow-y:auto;">
                                 <ul id="lista-seleccionados" class="list-group list-group-flush">
