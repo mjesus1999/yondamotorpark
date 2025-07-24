@@ -69,7 +69,6 @@ class VehiculoController extends Controller
     $placaRotArr = isset($_POST['placarotativa']) ? (array) $_POST['placarotativa'] : [];
     $serieArr = isset($_POST['seriemotor']) ? (array) $_POST['seriemotor'] : [];
 
-    // Validaciones
     $idmodelo = (int) ($_POST['idmodelo'] ?? 0);
     if ($idmodelo <= 0) {
       echo json_encode(['error' => 'Debe elegir modelo y año válidos'], JSON_UNESCAPED_UNICODE);

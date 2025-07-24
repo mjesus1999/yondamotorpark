@@ -27,7 +27,7 @@ require APP_ROOT . '/app/Routes/Usuario.router.php';
 require APP_ROOT . '/app/Routes/Ubigeo.router.php';
 require APP_ROOT . '/app/Routes/Persona.router.php';
 require APP_ROOT . '/app/Routes/Auth.router.php';
-require APP_ROOT . '/app/Routes/Cliente.router.php';
+/* require APP_ROOT . '/app/Routes/Cliente.router.php'; */
 require APP_ROOT . '/app/Routes/ForCotizacion.router.php';
 require APP_ROOT . '/app/Routes/TipoVehiculos.router.php';
 /* require APP_ROOT . '/app/Routes/Cotizacion.router.php'; */

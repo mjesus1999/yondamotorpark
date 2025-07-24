@@ -7,8 +7,9 @@
 $router->add('GET', '/formatoCotizacion', 'ForCotController', 'index');
 $router->add('GET', '/formatoCotizacion/create', 'ForCotController', 'create');
 $router->add('GET', '/formatoCotizacion/requisitos/{idformato}', 'ForCotController', 'getRequisitos');
-/* $router->add('POST', '/formatoCotizacion/requisitos/save', 'ForCotController', 'saveRequisitos'); */
+
 $router->add('POST', '/formatoCotizacion/store', 'ForCotController', 'store');
+
 $router->add('GET', '/formatoCotizacion/detalle/{id}', 'ForCotController', 'details');
 $router->add('POST', '/formatoCotizacion/delete/{id}', 'ForCotController', 'delete');
 
