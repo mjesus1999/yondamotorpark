@@ -54,7 +54,6 @@ class VehiculoController extends Controller
     header('Content-Type: application/json; charset=utf-8');
 
     $idcolaborador = $_SESSION['user']['id'];
-
     /* if (!$this->usuarioModel->esDeLogistica($idcolaborador)) {
       $_SESSION['error_message'] = 'Solo el personal de Logística puede registrar vehículos';
       header('Location: /vehiculos');
@@ -64,17 +63,18 @@ class VehiculoController extends Controller
     $local = $this->localModel->getByTienda('Chincha');
     $idlocal = $local['idlocal'] ?? 3;
 
-    $chasisArr = $_POST['chasis'] ?? [];
-    $placaArr = $_POST['placa'] ?? [];
-    $placaRotArr = $_POST['placa_rotativa'] ?? [];
-    $serieArr = $_POST['serie'] ?? [];
+    // Si vienen strings, los convertimos en arrays de un elemento:
+    $chasisArr = isset($_POST['chasis']) ? (array) $_POST['chasis'] : [];
+    $placaArr = isset($_POST['placa']) ? (array) $_POST['placa'] : [];
+    $placaRotArr = isset($_POST['placarotativa']) ? (array) $_POST['placarotativa'] : [];
+    $serieArr = isset($_POST['seriemotor']) ? (array) $_POST['seriemotor'] : [];
 
+    // Validaciones
     $idmodelo = (int) ($_POST['idmodelo'] ?? 0);
     if ($idmodelo <= 0) {
       echo json_encode(['error' => 'Debe elegir modelo y año válidos'], JSON_UNESCAPED_UNICODE);
       exit;
     }
-
     $version = trim((string) ($_POST['version'] ?? ''));
     if ($version === '') {
       echo json_encode(['error' => 'Debe indicar una versión válida'], JSON_UNESCAPED_UNICODE);
@@ -102,21 +102,22 @@ class VehiculoController extends Controller
           'moneda' => $moneda,
           'precioventa' => $precioventa,
           'idlogistica' => $idcolaborador,
-          'idlocal' => $idlocal
+          'idlocal' => $idlocal,
         ];
         $this->vehiculoModel->create($data);
       }
 
-      $_SESSION['success_message'] = 'Vehículos registrados correctamente';
+      $_SESSION['success_message'] = 'Vehículo(s) registrados correctamente';
       header('Location: /vehiculos?estado=proceso');
       exit;
 
     } catch (\Exception $e) {
-      $_SESSION['success_message'] = 'Error al registrar vehículos: ' . $e->getMessage();
+      $_SESSION['error_message'] = 'Error al registrar vehículos: ' . $e->getMessage();
       header('Location: /vehiculos/create');
       exit;
     }
   }
+
 
   public function delete(): void
   {

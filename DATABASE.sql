@@ -228,13 +228,17 @@ CREATE TABLE vehiculos
     idlogistica			INT 			NOT NULL COMMENT 'Usuario del área de logística',
     idlocal 			INT 			NULL COMMENT 'Piso: CHINCHA - ICA',
     origen 				ENUM ('OCP', 'OLD','CTZ') NOT NULL COMMENT 'OCP = Orden de compra (conducto regular), OLD (Contratos anteriores al sistema), CTZ (Cotizado por asesor)',
+    estado 				ENUM('0', '1') NULL DEFAULT '1',
 	creado 				DATETIME 		NOT NULL DEFAULT NOW(),
     modificado 			DATETIME 		NULL,
+    eliminado			DATETIME		NULL,
     CONSTRAINT fk_idmodelo_veh FOREIGN KEY (idvehiculo) REFERENCES modelos (idmodelo),
     CONSTRAINT fk_idcombustible_veh FOREIGN KEY (idcombustible) REFERENCES combustibles (idcombustible),
     CONSTRAINT fk_idlocal_veh FOREIGN KEY (idlocal) REFERENCES locales (idlocal),
     CONSTRAINT fk_idlogistica_veh FOREIGN KEY (idlogistica) REFERENCES colaboradores (idcolaborador)
 )ENGINE = INNODB;
+-- ALTER TABLE vehiculos ADD COLUMN estado ENUM('0', '1') NULL DEFAULT '1' AFTER `origen`;
+-- ALTER TABLE vehiculos ADD COLUMN eliminado DATETIME NULL;
 
 /*
 CREATE TABLE formatocotizacion

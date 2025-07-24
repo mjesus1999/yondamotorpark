@@ -27,13 +27,13 @@
 				<div class="card-body">
 
 					<div class="row g-2">
-						<div class="col-md-2 mb-2">
+						<!-- <div class="col-md-2 mb-2">
 							<div class="form-floating">
 								<input type="number" id="cantidad" value="1" min="1" max="20"
 									class="form-control text-center">
 								<label for="cantidad">Cantidad</label>
 							</div>
-						</div>
+						</div> -->
 						<div class="col-md-3 mb-2">
 							<div class="form-floating">
 								<select name="marcas" id="marcas" class="form-select" required>
@@ -70,7 +70,15 @@
 									title="Incrementa el año del modelo y lo guarda en la base de datos">+</button>
 							</div>
 						</div>
-
+						<div class="col-md-2 mb-2">
+							<div class="form-floating">
+								<select name="moneda" id="moneda" class="form-select" required>
+									<option value="USD" selected>Dolares</option>
+									<option value="PEN">Soles</option>
+								</select>
+								<label for="moneda">Moneda <span class="text-danger">*</span></label>
+							</div>
+						</div>
 					</div> <!-- ./row -->
 
 					<div class="row g-2">
@@ -142,33 +150,38 @@
 								<label for="precio">Precio <span class="text-danger">*</span></label>
 							</div>
 						</div>
+						
 					</div>
-					<hr>
-
-					<!-- Fila para agregar chasis, placa, placa rotativa y serie motor -->
 					<div class="row g-2">
-
-						<div class="row mt-2 g-2">
-							<div class="col-md-1 text-center">#</div>
-							<div class="col-md-4">Chasis</div>
-							<div class="col-md-2">Placa</div>
-							<div class="col-md-2">Placa rotativa</div>
-							<div class="col-md-3">Serie</div>
+						<div class="col-md-3 mb-2">
+							<div class="form-floating">
+								<input type="text" name="chasis" class="form-control text-center" placeholder="Chasis">
+								<label for="chasis">Chasis</label>
+							</div>
 						</div>
 
-						<!-- Se van a generar inputs para agregar los datos de los vehículos -->
-						<div class="content" id="inputs-dinamicos">
-							<!-- Contenido generado de forma dinámica -->
+						<div class="col-md-3 mb-2">
+							<div class="form-floating">
+								<input type="text" name="placa" class="form-control text-center" placeholder="Placa">
+								<label for="placa">Placa</label>
+							</div>
 						</div>
 
-						<!-- Fila para leyenda de campos obligatorios -->
-						<div class="row">
-							<div class="col-md-12">
-								<span class="fst-italic text-danger">* Campos obligatorios</span>
+						<div class="col-md-3 mb-2">
+							<div class="form-floating">
+								<input type="text" name="placarotativa" class="form-control text-center" placeholder="Placa Rotativa">
+								<label for="placarotativa">Placa Rotativa</label>
+							</div>
+						</div>
+
+						<div class="col-md-3 mb-2">
+							<div class="form-floating">
+								<input type="text" name="seriemotor" class="form-control text-center" placeholder="Serie Motor">
+								<label for="seriemotor">Serie Motor</label>
 							</div>
 						</div>
 					</div>
-
+					
 				</div> <!-- ./card-body -->
 
 				<div class="card-footer text-end">
@@ -180,7 +193,6 @@
 
 	</div>
 
-
 </div>
 
 <script>
@@ -188,41 +200,6 @@
 
 		/* generar chasis */
 		const hiddenModeloId = document.getElementById('idmodelo');
-		const cantidadInput = document.getElementById("cantidad");
-		const container = document.getElementById("inputs-dinamicos");
-
-		function generarInputs(cant) {
-			container.innerHTML = "";
-			cant = Number(cant) || 0;
-			for (let i = 1; i <= cant; i++) {
-				const row = document.createElement("div");
-				row.className = "row g-2 mb-2";
-				row.innerHTML = `
-					<div class="col-md-1">
-					<input type="text" class="form-control text-center" value="${i}" disabled>
-					</div>
-					<div class="col-md-4">
-					<input type="text" class="form-control" name="chasis[]" required>
-					</div>
-					<div class="col-md-2">
-					<input type="text" class="form-control" name="placa[]" required>
-					</div>
-					<div class="col-md-2">
-					<input type="text" class="form-control" name="placa_rotativa[]">
-					</div>
-					<div class="col-md-3">
-					<input type="text" class="form-control" name="serie[]" required>
-					</div>
-				`;
-				container.appendChild(row);
-			}
-		}
-
-		generarInputs(cantidadInput.value);
-
-		cantidadInput.addEventListener("change", () => generarInputs(cantidadInput.value));
-		cantidadInput.addEventListener("keyup", () => generarInputs(cantidadInput.value));
-
 
 		// Cargar las Marcas > Tipos > Modelos > Años
 		const marcasSel = document.getElementById("marcas");
