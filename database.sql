@@ -272,7 +272,11 @@ CREATE TABLE vehiculos (
     CONSTRAINT fk_idlogistica_veh FOREIGN KEY (idlogistica) REFERENCES colaboradores (idcolaborador)
 ) ENGINE = INNODB;
 
-ALTER TABLE vehiculos MODIFY COLUMN idlogistica INT NULL;
+USE motorpark
+
+-- ALTER TABLE vehiculos MODIFY COLUMN idlogistica INT NULL;
+-- ALTER TABLE vehiculos DROP CONSTRAINT fk_idmodelo_veh;
+ALTER TABLE vehiculos ADD CONSTRAINT fk_idmodelo_veh FOREIGN KEY(idmodelo) REFERENCES modelos(idmodelo);
 
 -- Cuando se compra un vehículo, este además de su valor, supone pagos adicioanles como:
 -- Tarjeta de propiedad y placa, Flete picanto, gastos administrativos
@@ -343,15 +347,20 @@ CREATE TABLE detordencompra
     preciocompra		DECIMAL(9,2)	NOT NULL, -- PRECIO
     escorrecto 			ENUM ('S', 'N') NULL COMMENT 'Define si el vehículo llego de acuerdo a los datos de la factura',
     creado              DATETIME        NOT NULL DEFAULT NOW(),
-    modificado          DATETIME        NULL;
+    modificado          DATETIME        NULL
 
 CONSTRAINT fk_idordencompra_doc FOREIGN KEY (idordencompra) REFERENCES ordenescompra (idordencompra),
     CONSTRAINT fk_idvehiculo_doc FOREIGN KEY (idvehiculo) REFERENCES vehiculos (idvehiculo),
     CONSTRAINT uk_idvehiculo_doc UNIQUE (idvehiculo) -- Relación uno a uno
 )ENGINE = INNODB;
--- ALTER TABLE detordencompra ADD COLUMN creado      DATETIME        NOT NULL DEFAULT NOW(),
--- ALTER TABLE detordencompra ADD COLUMN modificado  DATETIME        NULL;
 
+--ALTER TABLE detordencompra ADD COLUMN creado   DATETIME        NOT NULL DEFAULT NOW();
+
+
+--ALTER TABLE detordencompra ADD COLUMN modificado  DATETIME        NULL;
+
+show COLUMNS FROM detordencompra;
+SELECT * FROM detordencompra;
 CREATE TABLE compras (
     idcompra INT AUTO_INCREMENT PRIMARY KEY,
     idorden INT NOT NULL COMMENT 'De esta clave se obtendrán las datos de los vehículos',

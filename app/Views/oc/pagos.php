@@ -3,7 +3,7 @@
 <div class="container-fluid mt-4">
 
     <?php if (!empty($autos)): ?>
-
+        
 
         <div class="alert alert-success mt-5" role="alert">
             <h4 class="alert-heading">¡DETALLES DE LOS AUTOS!</h4>
@@ -96,13 +96,13 @@
             <div class="modal-content">
                 <div class="modal-header bg-yonda text-white">
                     <h5 class="modal-title" id="modalPagoLabel">
-                        Registrar Pago (OC #<?= htmlspecialchars($ordenCompra['idordencompra'] ?? '---') ?>)
+                        Registrar Pago (OC #<?= htmlspecialchars($concesionario['idordencompra'] ?? '---') ?>)
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <form id="formPago" enctype="multipart/form-data" autocomplete="off">
-                        <input type="hidden" name="idorden" value="<?= htmlspecialchars($ordenCompra['idordencompra'] ?? 0) ?>">
+                        <input type="hidden" name="idorden" value="<?= htmlspecialchars($concesionario['idordencompra'] ?? 0) ?>">
                         <div class="form-floating mb-3">
                             <input type="number" min="1" name="amortizacion" id="amortizacion"
                                 class="form-control" placeholder="0.00" required>

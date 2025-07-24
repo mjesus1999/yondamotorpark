@@ -13,7 +13,7 @@ BEGIN
     RETURN CONCAT(p_anio, '-', LPAD(p_idordencompra, 5, '0'));
 END //
 
--- DROP PROCEDURE IF EXISTS sp_detOC_By_IdOC; 
+DROP PROCEDURE IF EXISTS sp_detOC_By_IdOC; 
 
 DELIMITER //
 CREATE PROCEDURE sp_detOC_By_IdOC(
