@@ -44,7 +44,7 @@
 					<div class="btn-group m-1" id="botones-filtro">
 						<a href="/vehiculos?estado=libre"
 							class="btn btn-sm <?= $estadoActual === 'libre' ? 'btn-primary' : 'btn-outline-primary' ?>">
-							Emitido
+							Libre
 						</a>
 						<a href="/vehiculos?estado=proceso"
 							class="btn btn-sm <?= $estadoActual === 'proceso' ? 'btn-warning text-white' : 'btn-outline-warning' ?>">
@@ -112,22 +112,44 @@
 </div>
 
 <script>
-	document.querySelectorAll('.btn-borrar').forEach(button => {
-		button.addEventListener('click', () => {
-			const id = button.getAttribute('data-id');
-			if (confirm(`¿Seguro que deseas eliminar el vehículo #${id}?`)) {
+	document.addEventListener("DOMContentLoaded", function () {
+		// 1) Inicializar DataTable en español con paginación simbólica
+		$('#tabla-vehiculos').DataTable({
+			order: [[0, 'desc']],
+			pagingType: 'full_numbers',       // « ‹ 1 2 3 … › »
+			pageLength: 10,
+			lengthMenu: [[5, 10, 25, 50, -1], [5, 10, 25, 50, "Todos"]],
+			responsive: true,
+			language: {
+				url: "https://cdn.datatables.net/plug-ins/2.0.7/i18n/es-ES.json",
+				paginate: {
+					first: '«',
+					previous: '‹',
+					next: '›',
+					last: '»'
+				}
+			}
+		});
+
+		// 2) Asignar evento de borrado a cada botón
+		document.querySelectorAll('.btn-borrar').forEach(button => {
+			button.addEventListener('click', () => {
+				const id = button.getAttribute('data-id');
+				if (!confirm(`¿Seguro que deseas eliminar el vehículo #${id}?`)) {
+					return;
+				}
 				fetch('/vehiculos/delete', {
 					method: 'POST',
-					headers: {
-						'Content-Type': 'application/x-www-form-urlencoded'
-					},
+					headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
 					body: `idvehiculo=${encodeURIComponent(id)}`
 				})
 					.then(response => response.json())
 					.then(data => {
 						if (data.success) {
 							alert(data.success);
-							window.location.reload(); // recarga la lista
+							// para mantener el filtro actual en la recarga
+							const params = new URLSearchParams(window.location.search);
+							window.location.href = '/vehiculos?' + params.toString();
 						} else {
 							alert(data.error || 'Ocurrió un error al eliminar');
 						}
@@ -135,10 +157,9 @@
 					.catch(error => {
 						alert('Error en la solicitud: ' + error);
 					});
-			}
+			});
 		});
 	});
 </script>
-
 
 <?php include __DIR__ . '/../layout/footer.php'; ?>

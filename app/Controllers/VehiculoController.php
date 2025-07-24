@@ -26,10 +26,10 @@ class VehiculoController extends Controller
   {
     $this->authRequired();
     // ESTADO DEL VEHICULO
-    $estado = $_GET['estado'] ?? '';
+    $estado = $_GET['estado'] ?? 'libre';
     $allwed = ['libre', 'proceso', 'separado', 'vendido'];
-    if (!in_array($estado, $allwed)) {
-      $estado = '';
+    if (!in_array($estado, $allwed, true)) {
+      $estado = 'libre';
     }
 
     $vehiculos = $this->vehiculoModel->getAll($estado);

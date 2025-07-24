@@ -36,6 +36,7 @@ class Vehiculo
     if ($estado !== '') {
       $query .= " WHERE v.disponibilidad = :estado";
     }
+    $query .= " ORDER BY v.idvehiculo DESC";
     try {
       $stmt = $this->db->prepare($query);
       if ($estado !== '') {
