@@ -119,6 +119,51 @@ INSERT INTO detallerequisitos (idformato, idrequisito) VALUES
   (3, 12),
   (3, 13);
 
+
+-- VEHICULOS INSERT (disponibilidad)
+-- PROCESO
+INSERT INTO vehiculos (
+    idmodelo, version, condicion, idcombustible, disponibilidad, idlogistica, idlocal, origen, creado
+) VALUES (
+    1, 'Versión A', 'nuevo', 1, 'proceso', 2, 3, 'CTZ', NOW()
+);
+
+-- LIBRE
+INSERT INTO vehiculos (
+    idmodelo, version, condicion, idcombustible, disponibilidad, idlogistica, idlocal, origen, creado
+) VALUES (
+    1, 'Full', 'nuevo', 1, 'libre', 2, 3, 'CTZ', NOW()
+);
+
+-- SEPARADO
+INSERT INTO vehiculos (
+    idmodelo, version, condicion, idcombustible, disponibilidad, idlogistica, idlocal, origen, creado
+) VALUES (
+    1, 'Versión C', 'seminuevo', 1, 'separado', 2, 3, 'CTZ', NOW()
+);
+
+-- PAGADO
+INSERT INTO vehiculos (
+    idmodelo, version, condicion, idcombustible, disponibilidad, idlogistica, idlocal, origen, creado
+) VALUES (
+    1, 'Versión D', 'seminuevo', 1, 'vendido', 2, 3, 'CTZ', NOW()
+);
+
+/*
+UPDATE vehiculos
+SET
+	color = 'AZUL',
+	chasis = 'CHS6543210911',
+	placa = 'XYZ-711',
+	placarotativa = 'ROT-711',
+	seriemotor = 'SM987654311',
+	precioventa = 32500.00,
+	moneda = 'USD',
+	disponibilidad = 'vendido',
+	modificado = NOW()
+WHERE idvehiculo = 18;
+*/
+
 -- PERMISOS
 
 -- Jefe de Logística (ID = 8) - Acceso total a todos los módulos
@@ -139,8 +184,6 @@ INSERT INTO permisos (idcargo, moduloapp) VALUES
 INSERT INTO permisos (idcargo, moduloapp) VALUES
 (3, 'vehiculos');
 
-
-/* --- SECUNDARIO --- */
 
 
 -- EMPRESAS

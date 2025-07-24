@@ -37,6 +37,30 @@
 	<div class="row">
 		<div class="col-md-22">
 			<div class="card">
+
+				<div class="card-header">
+					<?php $estadoActual = $estadoActual ?? ''; ?>
+
+					<div class="btn-group m-1" id="botones-filtro">
+						<a href="/vehiculos?estado=libre"
+							class="btn btn-sm <?= $estadoActual === 'libre' ? 'btn-primary' : 'btn-outline-primary' ?>">
+							Emitido
+						</a>
+						<a href="/vehiculos?estado=proceso"
+							class="btn btn-sm <?= $estadoActual === 'proceso' ? 'btn-warning text-white' : 'btn-outline-warning' ?>">
+							Proceso
+						</a>
+						<a href="/vehiculos?estado=separado"
+							class="btn btn-sm <?= $estadoActual === 'separado' ? 'btn-success' : 'btn-outline-success' ?>">
+							Separado
+						</a>
+						<a href="/vehiculos?estado=vendido"
+							class="btn btn-sm <?= $estadoActual === 'vendido' ? 'btn-danger' : 'btn-outline-danger' ?>">
+							Pagado
+						</a>
+					</div>
+				</div>
+
 				<div class="card-body">
 					<table class="table table-sm table-hover table-hover-yonda" id="tabla-vehiculos">
 						<thead>

@@ -102,7 +102,7 @@ $allModules = [
             </a>
           </li>
           <li class="sidebar-item">
-            <a href="/vehiculos" class="sidebar-link">
+            <a href="/vehiculos?estado=libre" class="sidebar-link">
               <i class="fa-solid fa-list pe-2"></i>
               Vehículos
             </a>

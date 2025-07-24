@@ -25,8 +25,21 @@ class VehiculoController extends Controller
   public function index(): void
   {
     $this->authRequired();
-    $vehiculos = $this->vehiculoModel->getAll();
-    $this->view('vehiculos.index', ['vehiculos' => $vehiculos]);
+    // ESTADO DEL VEHICULO
+    $estado = $_GET['estado'] ?? '';
+    $allwed = ['libre', 'proceso', 'separado', 'vendido'];
+    if (!in_array($estado, $allwed)) {
+      $estado = '';
+    }
+
+    $vehiculos = $this->vehiculoModel->getAll($estado);
+    $this->view(
+      'vehiculos.index',
+      [
+        'vehiculos' => $vehiculos,
+        'estadoActual' => $estado,
+      ]
+    );
   }
 
   public function create(): void
@@ -95,7 +108,7 @@ class VehiculoController extends Controller
       }
 
       $_SESSION['success_message'] = 'Vehículos registrados correctamente';
-      header('Location: /vehiculos');
+      header('Location: /vehiculos?estado=proceso');
       exit;
 
     } catch (\Exception $e) {
