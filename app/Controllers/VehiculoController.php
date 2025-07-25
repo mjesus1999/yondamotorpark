@@ -56,18 +56,17 @@ class VehiculoController extends Controller
     $idcolaborador = $_SESSION['user']['id'];
     /* if (!$this->usuarioModel->esDeLogistica($idcolaborador)) {
       $_SESSION['error_message'] = 'Solo el personal de Logística puede registrar vehículos';
-      header('Location: /vehiculos');
+      header('Location: /vehiculos?estado=proceso');
       exit;
     } */
 
     $local = $this->localModel->getByTienda('Chincha');
-    $idlocal = $local['idlocal'] ?? 3;
+    $idlocal = $local['idlocal'] ?? 3; //CHINCHA POR DEFECTO - Temporal
 
-    // Si vienen strings, los convertimos en arrays de un elemento:
-    $chasisArr = isset($_POST['chasis']) ? (array) $_POST['chasis'] : [];
-    $placaArr = isset($_POST['placa']) ? (array) $_POST['placa'] : [];
-    $placaRotArr = isset($_POST['placarotativa']) ? (array) $_POST['placarotativa'] : [];
-    $serieArr = isset($_POST['seriemotor']) ? (array) $_POST['seriemotor'] : [];
+    $chasis = $_POST['chasis'] ?? null;
+    $placa = $_POST['placa'] ?? null;
+    $placaRotativa = $_POST['placarotativa'] ?? null;
+    $serieMotor = $_POST['seriemotor'] ?? null;
 
     $idmodelo = (int) ($_POST['idmodelo'] ?? 0);
     if ($idmodelo <= 0) {
@@ -87,24 +86,22 @@ class VehiculoController extends Controller
     $precioventa = $_POST['precio'];
 
     try {
-      foreach ($chasisArr as $i => $chasis) {
-        $data = [
-          'idmodelo' => $idmodelo,
-          'version' => $version,
-          'condicion' => $condicion,
-          'idcombustible' => $idcombustible,
-          'color' => $color,
-          'chasis' => $chasis,
-          'placa' => $placaArr[$i] ?? null,
-          'placarotativa' => $placaRotArr[$i] ?? null,
-          'seriemotor' => $serieArr[$i] ?? null,
-          'moneda' => $moneda,
-          'precioventa' => $precioventa,
-          'idlogistica' => $idcolaborador,
-          'idlocal' => $idlocal,
-        ];
-        $this->vehiculoModel->create($data);
-      }
+      $data = [
+        'idmodelo' => $idmodelo,
+        'version' => $version,
+        'condicion' => $condicion,
+        'idcombustible' => $idcombustible,
+        'color' => $color,
+        'chasis' => $chasis,
+        'placa' => $placa,
+        'placarotativa' => $placaRotativa,
+        'seriemotor' => $serieMotor,
+        'moneda' => $moneda,
+        'precioventa' => $precioventa,
+        'idlogistica' => $idcolaborador,
+        'idlocal' => $idlocal,
+      ];
+      $this->vehiculoModel->create($data);
 
       $_SESSION['success_message'] = 'Vehículo(s) registrados correctamente';
       header('Location: /vehiculos?estado=proceso');
@@ -116,7 +113,6 @@ class VehiculoController extends Controller
       exit;
     }
   }
-
 
   public function delete(): void
   {
@@ -141,6 +137,17 @@ class VehiculoController extends Controller
 
     } catch (\Exception $e) {
       echo json_encode(['error' => 'Error: ' . $e->getMessage()]);
+    }
+  }
+
+  public function edit(int $id): void
+  {
+    $vehiculo = $this->vehiculoModel->getById($id);
+    if ($vehiculo) {
+      $this->view('vehiculos.edit', ['vehiculo' => $vehiculo]);
+    } else {
+      http_response_code(404);
+      $this->view('error.404');
     }
   }
 

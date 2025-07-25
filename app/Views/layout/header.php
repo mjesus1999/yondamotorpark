@@ -102,7 +102,7 @@ $allModules = [
             </a>
           </li>
           <li class="sidebar-item">
-            <a href="/vehiculos?estado=libre" class="sidebar-link">
+            <a href="/vehiculos" class="sidebar-link">
               <i class="fa-solid fa-list pe-2"></i>
               Vehículos
             </a>
@@ -116,7 +116,14 @@ $allModules = [
           <li class="sidebar-item">
             <a href="/formatoCotizacion" class="sidebar-link">
               <i class="fa-solid fa-list pe-2"></i>
-              Requisitos
+              <!-- Requisitos -->
+              Formato de Cotizacion
+            </a>
+          </li>
+          <li class="sidebar-item">
+            <a href="#" class="sidebar-link">
+              <i class="fa-solid fa-list pe-2"></i>
+              Cotizacion
             </a>
           </li>
           <li class="sidebar-item">

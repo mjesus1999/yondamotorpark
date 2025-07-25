@@ -27,13 +27,6 @@
 				<div class="card-body">
 
 					<div class="row g-2">
-						<!-- <div class="col-md-2 mb-2">
-							<div class="form-floating">
-								<input type="number" id="cantidad" value="1" min="1" max="20"
-									class="form-control text-center">
-								<label for="cantidad">Cantidad</label>
-							</div>
-						</div> -->
 						<div class="col-md-3 mb-2">
 							<div class="form-floating">
 								<select name="marcas" id="marcas" class="form-select" required>
@@ -86,7 +79,6 @@
 
 							<!-- lista de versiones -->
 							<div class="form-floating" id="bloque-version-lista">
-								<!-- <select name="version-ls" id="version-ls" class="form-select" required> -->
 								<select id="version-ls" class="form-select" required name="version">
 									<option value="">Seleccione</option>
 									<optgroup label="Prestaciones">
@@ -106,7 +98,6 @@
 							<div class="input-group d-none" id="bloque-version-input">
 								<div class="form-floating">
 									<input type="text" class="form-control" id="version-in">
-									<!-- <input type="text" class="form-control" id="version-in" name="version-in"> -->
 									<label for="version-in">Describa la versión</label>
 								</div>
 								<button type="button" id="mostrar-version-ls" class="btn btn-outline-secondary"
@@ -150,7 +141,7 @@
 								<label for="precio">Precio <span class="text-danger">*</span></label>
 							</div>
 						</div>
-						
+
 					</div>
 					<div class="row g-2">
 						<div class="col-md-3 mb-2">
@@ -169,19 +160,20 @@
 
 						<div class="col-md-3 mb-2">
 							<div class="form-floating">
-								<input type="text" name="placarotativa" class="form-control text-center" placeholder="Placa Rotativa">
+								<input type="text" name="placarotativa" class="form-control text-center"
+									placeholder="Placa Rotativa">
 								<label for="placarotativa">Placa Rotativa</label>
 							</div>
 						</div>
 
 						<div class="col-md-3 mb-2">
 							<div class="form-floating">
-								<input type="text" name="seriemotor" class="form-control text-center" placeholder="Serie Motor">
+								<input type="text" name="seriemotor" class="form-control text-center"
+									placeholder="Serie Motor">
 								<label for="seriemotor">Serie Motor</label>
 							</div>
 						</div>
 					</div>
-					
 				</div> <!-- ./card-body -->
 
 				<div class="card-footer text-end">
@@ -192,13 +184,11 @@
 		</form>
 
 	</div>
-
 </div>
 
 <script>
 	document.addEventListener("DOMContentLoaded", () => {
 
-		/* generar chasis */
 		const hiddenModeloId = document.getElementById('idmodelo');
 
 		// Cargar las Marcas > Tipos > Modelos > Años
@@ -260,7 +250,6 @@
 			const idt = tiposSel.value;
 			modelosSel.innerHTML = `<option value="">Cargando Modelos</option>`;
 			modelosCache = [];
-
 			if (!idm || !idt) {
 				modelosSel.innerHTML = `<option value="">Seleccione marca y tipo primero</option>`;
 				return;
@@ -306,8 +295,6 @@
 				aniosSel.insertAdjacentHTML("beforeend",
 					`<option value="${year}">${year}</option>`);
 			});
-
-			//limpiar campo oculto hasta que elijan año
 			hiddenModeloId.value = '';
 		});
 
@@ -327,7 +314,7 @@
 				: '';
 		});
 
-		//boton de ESP
+		//boton de ESP (input de especificar)
 		const versionLS = document.getElementById('version-ls');
 		const versionIN = document.getElementById('version-in');
 		const mostrarVersionLS = document.getElementById('mostrar-version-ls');
@@ -337,22 +324,21 @@
 		versionLS.addEventListener("change", (event) => {
 			const opcion = event.target.value;
 			if (opcion === "ESP") {
-				// ocultar select, mostrar input
+				// ocultar
 				bloqueVersionLista.classList.add("d-none");
 				bloqueVersionInput.classList.remove("d-none");
-				// pasar el name al input
+				//pasar el nombre
 				versionLS.removeAttribute("name");
 				versionIN.setAttribute("name", "version");
 				versionIN.value = "";
 				versionIN.focus();
 			} else {
-				// mantener select visible, input oculto
 				versionIN.value = opcion;
 			}
 		});
 
 		mostrarVersionLS.addEventListener("click", () => {
-			// reverso: volvemos al <select>
+			// volver al select
 			versionIN.removeAttribute("name");
 			versionLS.setAttribute("name", "version");
 			versionIN.value = "";
@@ -377,7 +363,7 @@
 
 		form.addEventListener('submit', function (e) {
 			if (!confirm("¿Estás seguro de registrar los vehículos?")) {
-				e.preventDefault(); // Cancela el envío si el usuario elige "No"
+				e.preventDefault();
 			}
 		});
 	});

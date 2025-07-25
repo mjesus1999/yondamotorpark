@@ -90,7 +90,7 @@
 									<td><?= htmlspecialchars($v['disponibilidad']) ?></td>
 									<td class="text-center">
 										<!-- Editar -->
-										<a href="#" class="btn btn-sm btn-outline-primary" title="Editar">
+										<a href="/vehiculos/edit/<?= $v['idvehiculo'] ?>" class="btn btn-sm btn-outline-primary" title="Editar">
 											<i class="fa-solid fa-pen"></i>
 										</a>
 										<!-- Eliminar -->

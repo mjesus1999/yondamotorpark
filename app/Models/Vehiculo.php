@@ -78,4 +78,38 @@ class Vehiculo
     return $stmt->execute([':id' => $id]);
   }
 
+  public function getById(int $id): ?array
+  {
+    $stmt = $this->db->prepare('SELECT * FROM vehiculos WHERE idvehiculo = :idvehiculo');
+    $stmt->bindParam(':idvehiculo', $id);
+    $stmt->execute();
+    $vehiculo = $stmt->fetch();
+    return $vehiculo ?: null;
+  }
+
+  public function getModeloDetalle(int $idmodelo): ?array
+{
+    $query = "
+        SELECT 
+            m.idmodelo,
+            m.modelo,
+            m.anio,
+            m.idmarca,
+            mc.marca,
+            m.idtipovehiculo,
+            tv.tipovehiculo
+        FROM modelos m
+        INNER JOIN marcas mc ON mc.idmarca = m.idmarca
+        INNER JOIN tipovehiculos tv ON tv.idtipovehiculo = m.idtipovehiculo
+        WHERE m.idmodelo = :idmodelo
+    ";
+
+    $stmt = $this->db->prepare($query);
+    $stmt->bindValue(':idmodelo', $idmodelo, PDO::PARAM_INT);
+    $stmt->execute();
+    $detalle = $stmt->fetch(PDO::FETCH_ASSOC);
+    return $detalle ?: null;
+}
+
+
 }
