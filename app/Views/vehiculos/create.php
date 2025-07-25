@@ -66,15 +66,14 @@
 						<div class="col-md-2 mb-2">
 							<div class="form-floating">
 								<select name="moneda" id="moneda" class="form-select" required>
-									<option value="USD" selected>Dolares</option>
-									<option value="PEN">Soles</option>
+									<option value="USD" selected>Dolares (USD)</option>
+									<option value="PEN">Soles (PEN)</option>
 								</select>
 								<label for="moneda">Moneda <span class="text-danger">*</span></label>
 							</div>
 						</div>
 					</div> <!-- ./row -->
-
-					<div class="row g-2">
+  					<div class="row g-2">
 						<div class="col-md-2 mb-2">
 
 							<!-- lista de versiones -->

@@ -15,20 +15,18 @@ class CotizacionController extends Controller
         $this->cotizacionModel = new Cotizacion();
     }
 
-    /*     public function index(): void
-        {
-            $this->authRequired();
-            $formatos = $this->formatoModel->getAll();
-            $requisitos = $this->cotizacionModel->getRequisitos();
+    public function index(): void
+    {
+        $this->authRequired();
 
-            $this->view("cotizacion.index", compact('formatos', 'requisitos'));
-        }
+        $this->view("cotizacion.index");
+    }
 
-        public function create(): void
-        {
-            $this->authRequired();
-            $this->view('cotizacion.create');
-        } */
+    public function create(): void
+    {
+        $this->authRequired();
+        $this->view('cotizacion.create');
+    }
 
 
 
