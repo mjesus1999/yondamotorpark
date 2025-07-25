@@ -20,8 +20,8 @@ class PagosOC
      */
     public function create($params = []): int
     {
-        $query = 'INSERT INTO pagosOC(idorden, idlogistica, amortizacion, comprobante, fecha) 
-                      VALUES(:idorden, :idlogistica, :amortizacion, :comprobante, NOW())';
+        $query = 'INSERT INTO pagosOC(idorden, idlogistica, amortizacion, comprobante, fecharealpago) 
+                      VALUES(:idorden, :idlogistica, :amortizacion, :comprobante, :fecharealpago)';
 
         try {
             $stmt = $this->db->prepare($query);
@@ -29,7 +29,8 @@ class PagosOC
                 ':idorden' => $params['idorden'],
                 ':idlogistica' => $params['idlogistica'],
                 ':amortizacion' => $params['amortizacion'],
-                ':comprobante' => $params['comprobante']
+                ':comprobante' => $params['comprobante'],
+                ':fecharealpago' => $params['fecharealpago']
             ]);
 
             return (int) $this->db->lastInsertId();
@@ -44,16 +45,19 @@ class PagosOC
      */
     public function listarPagosByOC(int $idorden): array
     {
-        $query = "SELECT 
+        $query = "SELECT
                     p.idpagooc,
-                        p.amortizacion,
-                        p.saldo,
-                        p.comprobante,
-                        p.fecha
-                      FROM pagosOC p
-                      INNER JOIN colaboradores c ON p.idlogistica = c.idcolaborador
-                      WHERE p.idorden =:idorden
-                      ORDER BY p.fecha ASC";
+                    p.amortizacion,
+                    p.saldo,
+                    p.comprobante,
+                    p.fecharealpago,
+                    CONCAT(per.apellidos, ' ', per.nombres) AS logistica
+                FROM pagosOC p
+                INNER JOIN colaboradores col ON p.idlogistica = col.idcolaborador
+                INNER JOIN contratoslaborales cl ON col.idcontratolaboral = cl.idcontratolaboral
+                INNER JOIN personas per ON cl.idpersona = per.idpersona
+                WHERE p.idorden =:idorden
+                ORDER BY p.fecha ASC;";
 
         try {
             $stmt = $this->db->prepare($query);

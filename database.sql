@@ -264,19 +264,28 @@ CREATE TABLE vehiculos (
         'recuperado'
     ) NOT NULL,
     origen ENUM('OCP', 'OLD', 'CTZ') NOT NULL COMMENT 'OCP = Orden de compra (conducto regular), OLD (Contratos anteriores al sistema), CTZ (Cotizado por asesor)',
+    estado ENUM('0', '1') NULL DEFAULT '1',
     creado DATETIME NOT NULL DEFAULT NOW(),
     modificado DATETIME NULL,
-    CONSTRAINT fk_idmodelo_veh FOREIGN KEY (idvehiculo) REFERENCES modelos (idmodelo),
+    eliminado DATETIME NULL,
+    CONSTRAINT fk_idmodelo_veh FOREIGN KEY (idmodelo) REFERENCES modelos (idmodelo),
     CONSTRAINT fk_idcombustible_veh FOREIGN KEY (idcombustible) REFERENCES combustibles (idcombustible),
     CONSTRAINT fk_idlocal_veh FOREIGN KEY (idlocal) REFERENCES locales (idlocal),
     CONSTRAINT fk_idlogistica_veh FOREIGN KEY (idlogistica) REFERENCES colaboradores (idcolaborador)
 ) ENGINE = INNODB;
 
-USE motorpark
+USE motorpark;
 
+--ALTER TABLE vehiculos
+--ADD COLUMN estado ENUM('0', '1') NULL DEFAULT '1';
+
+--ALTER TABLE vehiculos ADD COLUMN eliminado DATETIME NULL;
+--SHOW COLUMNS FROM vehiculos;
 -- ALTER TABLE vehiculos MODIFY COLUMN idlogistica INT NULL;
--- ALTER TABLE vehiculos DROP CONSTRAINT fk_idmodelo_veh;
-ALTER TABLE vehiculos ADD CONSTRAINT fk_idmodelo_veh FOREIGN KEY(idmodelo) REFERENCES modelos(idmodelo);
+--ALTER TABLE vehiculos DROP CONSTRAINT fk_idmodelo_veh;
+
+--ALTER TABLE vehiculos
+--ADD CONSTRAINT fk_idmodelo_veh FOREIGN KEY (idmodelo) REFERENCES modelos (idmodelo);
 
 -- Cuando se compra un vehículo, este además de su valor, supone pagos adicioanles como:
 -- Tarjeta de propiedad y placa, Flete picanto, gastos administrativos
@@ -325,9 +334,12 @@ CREATE TABLE pagosOC (
     amortizacion DECIMAL(10, 2) NOT NULL, -- Lo que se ha adelantado
     saldo DECIMAL(10, 2) NOT NULL, -- El saldo a pagar o lo que falta pagar si es que se ha hehco amortización
     comprobante VARCHAR(300) NOT NULL, -- Ruta del comprobante
-    fecha DATETIME NOT NULL, -- Fecha y hora de que se regsitro el pago
+    fecha DATETIME NOT NULL NOW(), -- Fecha y hora de que se regsitro el pago
+    fecharealpago DATETIME NULL,
     CONSTRAINT fk_idlo_pagoOC FOREIGN KEY (idlogistica) REFERENCES colaboradores (idcolaborador) CONSTRAINT fk_idorde_pagosOC FOREIGN KEY (idorden) REFERENCES ordenescompra (idordencompra)
 ) ENGINE = InnoDB;
+USE motorpark;
+--ALTER TABLE pagosOC MODIFY COLUMN fecha DATETIME NULL DEFAULT NOW();
 
 --ALTER TABLE pagosOC CHANGE COLUMN amortizacon amortizacion DECIMAL(10, 2) NOT NULL;
 --ALTER TABLE pagosOC ADD COLUMN idorden INT NOT NULL;
@@ -339,28 +351,30 @@ CREATE TABLE pagosOC (
 
 -- La orden de compra es el documento que se genera para solicitar la compra de un vehículo
 -- Una orden de compra puede tener más de un equipo
-CREATE TABLE detordencompra
-(
-	iddetordencompra	INT AUTO_INCREMENT PRIMARY KEY,
-    idordencompra		INT 			NOT NULL,
-    idvehiculo			INT 			NOT NULL,
-    preciocompra		DECIMAL(9,2)	NOT NULL, -- PRECIO
-    escorrecto 			ENUM ('S', 'N') NULL COMMENT 'Define si el vehículo llego de acuerdo a los datos de la factura',
-    creado              DATETIME        NOT NULL DEFAULT NOW(),
-    modificado          DATETIME        NULL
+CREATE TABLE detordencompra (
+    iddetordencompra INT AUTO_INCREMENT PRIMARY KEY,
+    idordencompra INT NOT NULL,
+    idvehiculo INT NOT NULL,
+    preciocompra DECIMAL(9, 2) NOT NULL, -- PRECIO
+    escorrecto ENUM('S', 'N') NULL COMMENT 'Define si el vehículo llego de acuerdo a los datos de la factura',
+    creado DATETIME NOT NULL DEFAULT NOW(),
+    modificado DATETIME NULL CONSTRAINT fk_idordencompra_doc FOREIGN KEY (idordencompra) REFERENCES ordenescompra (idordencompra),
+    estado ENUM('0','1') NOT NULL DEFAULT '1';
 
-CONSTRAINT fk_idordencompra_doc FOREIGN KEY (idordencompra) REFERENCES ordenescompra (idordencompra),
-    CONSTRAINT fk_idvehiculo_doc FOREIGN KEY (idvehiculo) REFERENCES vehiculos (idvehiculo),
+CONSTRAINT fk_idvehiculo_doc FOREIGN KEY (idvehiculo) REFERENCES vehiculos (idvehiculo),
     CONSTRAINT uk_idvehiculo_doc UNIQUE (idvehiculo) -- Relación uno a uno
-)ENGINE = INNODB;
+) ENGINE = INNODB;
+
+--ALTER TABLE detordencompra ADD COLUMN estado ENUM('0','1') NOT NULL DEFAULT '1';
 
 --ALTER TABLE detordencompra ADD COLUMN creado   DATETIME        NOT NULL DEFAULT NOW();
-
 
 --ALTER TABLE detordencompra ADD COLUMN modificado  DATETIME        NULL;
 
 show COLUMNS FROM detordencompra;
+
 SELECT * FROM detordencompra;
+
 CREATE TABLE compras (
     idcompra INT AUTO_INCREMENT PRIMARY KEY,
     idorden INT NOT NULL COMMENT 'De esta clave se obtendrán las datos de los vehículos',

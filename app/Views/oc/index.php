@@ -41,7 +41,7 @@
                     Pagado
                 </a>
 
-                 <a href="/oc/listar/anulado"
+                <a href="/oc/listar/anulado"
                     class="btn btn-sm <?= $estadoActual === 'anulado' ? 'btn-danger' : 'btn-outline-danger' ?>">
                     Anulado
                 </a>
@@ -70,6 +70,9 @@
                                 <th>Operaciones</th>
                             <?php elseif ($estadoActual == 'proceso'): ?>
                                 <th>Pagar</th>
+
+                            <?php elseif ($estadoActual == 'pagado'): ?>
+                                <th>Detalles</th>
                             <?php endif; ?>
                         </tr>
                     </thead>
@@ -97,22 +100,15 @@
 
                                     <?php if ($estadoActual == 'emitido'): ?>
                                         <td>
-                                          
-
                                             <a href="/oc/reporte/<?= htmlspecialchars($ordenCompra['idordencompra']) ?>"
                                                 class="p-1" target="_blank" title="PDF OC">
-                                               <i class="bi bi-filetype-pdf text-danger fs-5"></i>
+                                                <i class="bi bi-filetype-pdf text-danger fs-5"></i>
                                             </a>
 
                                             <a href="#" class="show-details p-1"
                                                 data-idoc="<?= htmlspecialchars($ordenCompra['idordencompra']) ?>"
                                                 title="Ver detalle">
-                                               <i class="bi bi-info-circle text-primary fs-5"></i>
-                                            </a>
-
-                                              <a href="#" title="Verificar estado de autos" class="p-1"
-                                                data-idocmodal="<?= htmlspecialchars($ordenCompra['idordencompra']) ?>">
-                                                <i class="bi bi-bookmark-check text-success fs-5"></i>
+                                                <i class="bi bi-info-circle text-primary fs-5"></i>
                                             </a>
 
                                             <a href="#" class="p-1 btn-abrir-modal-estado"
@@ -120,7 +116,7 @@
                                                 data-accion="proceso"
                                                 data-ruta="/oc/updateEstado/proceso/<?= htmlspecialchars($ordenCompra['idordencompra']) ?>"
                                                 title="OC en proceso">
-                                              <i class="bi-hourglass-split text-warning fs-5"></i> 
+                                                <i class="bi-hourglass-split text-warning fs-5"></i>
                                             </a>
 
                                             <a href="#" class="p-1 btn-abrir-modal-estado"
@@ -128,15 +124,31 @@
                                                 data-accion="anulado"
                                                 data-ruta="/oc/updateEstado/anulado/<?= htmlspecialchars($ordenCompra['idordencompra']) ?>"
                                                 title="OC anulado">
-                                               <i class="bi bi-folder-x text-danger fs-5"></i>
+                                                <i class="bi bi-folder-x text-danger fs-5"></i>
                                             </a>
                                         </td>
                                     <?php elseif ($estadoActual == 'proceso'): ?>
                                         <td>
                                             <a href="/oc/pagos/<?= htmlspecialchars($ordenCompra['idordencompra']) ?>"
                                                 title="Pagar">
-                                               <i class="bi bi-currency-dollar text-success fs-5"></i>
+                                                <i class="bi bi-currency-dollar text-success fs-5"></i>
                                             </a>
+                                        </td>
+
+                                    <?php elseif ($estadoActual == 'pagado'): ?>
+                                        <td>
+                                            <a href="#" title="Verificar estado de autos" class="p-1"
+                                                data-idocmodal="<?= htmlspecialchars($ordenCompra['idordencompra']) ?>">
+                                                <i class="bi bi-bookmark-check text-success fs-5"></i>
+                                            </a>
+
+                                            <a href="#" class="show-details p-1"
+                                                data-idoc="<?= htmlspecialchars($ordenCompra['idordencompra']) ?>"
+                                                title="Ver detalle">
+                                                <i class="bi bi-info-circle text-primary fs-5"></i>
+                                            </a>
+
+                                            <a href="/oc/pagos/<?=htmlspecialchars($ordenCompra['idordencompra'])?>" title="Pagos realizados" > <i class="bi-receipt fs-5 text-warning"></i></a>
                                         </td>
                                     <?php endif; ?>
                                 </tr>
@@ -370,7 +382,7 @@
                     return;
                 }
 
-                if (confirm('¿Esta seguro de acttulizar el estado de la OC?'))
+                if (confirm('¿Esta seguro de actualizar el estado de la OC?'))
 
                 {
                     try {

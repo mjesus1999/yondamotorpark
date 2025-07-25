@@ -47,4 +47,36 @@ END $$
 DELIMITER ;
 
 
+
+DELIMITER //
+
+CREATE PROCEDURE sp__anular_OC(
+    IN estado_ VARCHAR(20),
+    IN observaciones_ VARCHAR(400),
+    IN idordencompra_ INT
+)
+BEGIN
+    -- 1. Actualizar la orden
+    UPDATE ordenescompra 
+    SET estado = estado_,
+        observaciones = observaciones_,
+        fechanulado = NOW(),
+        anulacion = CURDATE()
+    WHERE idordencompra = idordencompra_;
+
+    -- 2. Actualizar vehículos vinculados a la orden
+    UPDATE vehiculos v
+    INNER JOIN detordencompra d ON v.idvehiculo = d.idvehiculo
+    SET v.estado = '0',
+        v.eliminado = NOW()
+    WHERE d.idordencompra = idordencompra_;
+
+    -- 3. Actualizar detordencompra 
+    UPDATE detordencompra
+    SET estado = '0'
+    WHERE idordencompra = idordencompra_;
+END //
+
+DELIMITER ;
+
 SHOW FULL COLUMNS FROM ordenescompra;

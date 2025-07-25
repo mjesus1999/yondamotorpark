@@ -105,30 +105,34 @@ class OrdenCompra
     // METODO QUE EPRMITE ACTUALIZAR EL CAMPO ESTADO EN LA TABLA OC
     public function updateEstado($params = []): int
     {
-        if ($params['estado'] == 'anulado') {
-            $query = 'UPDATE ordenescompra 
-              SET estado = :estado, observaciones = :observaciones, 
-                  fechanulado = NOW(), anulacion = CURDATE()
-              WHERE idordencompra = :idordencompra;';
-        } else {
-            $query = 'UPDATE ordenescompra 
-              SET estado = :estado, observaciones = :observaciones 
-              WHERE idordencompra = :idordencompra;';
-        }
-
         try {
-            $stmt = $this->db->prepare($query);
-            $stmt->execute([
-                ':estado' => $params['estado'],
-                ':observaciones' => $params['observaciones'],
-                ':idordencompra' => $params['idordencompra']
-            ]);
-            return (int) $stmt->rowCount();
+            if ($params['estado'] == 'anulado') {
+                $stmt = $this->db->prepare("CALL sp__anular_OC(:estado, :observaciones, :idordencompra)");
+                $stmt->execute([
+                    ':estado' => $params['estado'],
+                    ':observaciones' => $params['observaciones'],
+                    ':idordencompra' => $params['idordencompra']
+                ]);
+                return $stmt->rowCount(); 
+            } else {
+                $query = 'UPDATE ordenescompra 
+                      SET estado = :estado, observaciones = :observaciones 
+                      WHERE idordencompra = :idordencompra;';
+                $stmt = $this->db->prepare($query);
+                $stmt->execute([
+                    ':estado' => $params['estado'],
+                    ':observaciones' => $params['observaciones'],
+                    ':idordencompra' => $params['idordencompra']
+                ]);
+                return (int)$stmt->rowCount();
+            }
         } catch (PDOException $error) {
             error_log($error->getMessage());
             return -1;
         }
     }
+
+
 
     public function create($params = []): int
     {

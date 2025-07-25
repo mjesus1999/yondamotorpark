@@ -10,17 +10,18 @@ use App\Models\PagosOC;
 class OrdenCompraController extends Controller
 {
     private OrdenCompra $ordenCompraModel;
+    private PagosOC $pagosModel;
 
     public function __construct()
     {
         $this->ordenCompraModel = new OrdenCompra();
+        $this->pagosModel =  new PagosOC();
     }
 
     // Me enlistara todas las ordenes de compras, dependiendo de su estado:
     public function index(string $estado = 'emitido'): void
     {
-        $ordenCompraModel = new OrdenCompra();
-        $ordenCompras = $ordenCompraModel->getByEstado($estado);
+        $ordenCompras = $this->ordenCompraModel->getByEstado($estado);
         $this->view('oc.index', ['ordenCompras' => $ordenCompras, 'estado' => $estado]);
     }
     
@@ -30,9 +31,9 @@ class OrdenCompraController extends Controller
     {
         $idorden = (int)$idorden;
     
-        $pagosModel = new PagosOC();
-        $pagos = $pagosModel->listarPagosByOC($idorden);
-        $saldoRestante = $pagosModel->obtenerSaldoRestante($idorden);
+
+        $pagos = $this->pagosModel->listarPagosByOC($idorden);
+        $saldoRestante = $this->pagosModel->obtenerSaldoRestante($idorden);
         $concesionario = $this->ordenCompraModel->obtenerConcesionarioById($idorden);
         $infoAutos = $this->ordenCompraModel->getInfoAutosOC($idorden);
     
@@ -43,7 +44,8 @@ class OrdenCompraController extends Controller
             'autos' => $infoAutos
         ]);
     }
-    
+
+   
     public function html2pdfReport($id): void
     {
         // Solo necesitamos pasar el ID, los datos se cargarán via JavaScript
@@ -141,6 +143,7 @@ class OrdenCompraController extends Controller
         exit();
     }
 
+    // ACTUALIZA SI ES CORRECTO 
     public function update($idOC): int
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {

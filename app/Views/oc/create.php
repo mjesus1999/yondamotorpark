@@ -760,9 +760,9 @@
 
                             showToast("¡OC y detalles registrados correctamente!", "SUCCESS", 2000);
 
-                            /*setTimeout(() => {
+                            setTimeout(() => {
                                 window.location = '/oc/';
-                            }, 2000);*/
+                            }, 2000);
 
                             // Limpiar
                             // dataVehiculos = [];

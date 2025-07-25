@@ -31,13 +31,15 @@ class PagosOCController extends Controller
             'idorden'      => (int)($data['idorden'] ?? 0),
             'idlogistica'  => 2,
             'amortizacion' => (float)($data['amortizacion'] ?? 0),
-            'comprobante'  => ''
+            'comprobante'  => '',
+            'fecharealpago' => $data['fecharealpago']
         ];
 
 
         $errores = [];
         $errores[] = Validador::campoObligatorio($registro['idorden'], 'Orden');
         $errores[] = Validador::campoObligatorio($registro['amortizacion'], 'Monto a pagar');
+        $errores[] = Validador::campoObligatorio($registro['fecharealpago'],'Fecha de pago');
         $errores = array_filter($errores);
 
         if (!empty($errores)) {

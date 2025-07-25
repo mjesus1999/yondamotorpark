@@ -134,6 +134,22 @@ END $$
 DELIMITER ;
 
 SELECT * FROM ordenescompra;
+SELECT * FROM detordencompra;
+SELECT * FROM vehiculos;
+
+
+DELIMITER //
+
+CREATE PROCEDURE sp_eliminar_OC(
+IN idordencompra_ INT
+)
+BEGIN
+	DELETE FROM detordencompra WHERE idordencompra = idordencompra_;
+    DELETE FROM ordenescompra WHERE idordencompra = idordencompra_;
+
+END //
+
+
 
 
 
