@@ -41,7 +41,7 @@
                             <div class="input-group">
                                 <div class="form-floating">
                                     <input type="text" class="form-control" id="documento" name="documento">
-                                    <label for="documento"></label>
+                                    <label for="documento">DNI / RUC</label>
                                 </div>
                                 <button type="button" class="btn btn-outline-success"
                                     title="Incrementa el año del modelo y lo guarda en la base de datos"><i
@@ -88,7 +88,7 @@
                         <!-- botón tamaño igual que modalidad -->
                         <div class="col-md-6 mb-2 d-flex justify-content-end align-items-start">
                             <button class="btn btn-primary w-30 h-30" type="button"
-                                style="min-height: calc(3.5rem + 2px);">
+                                style="min-height: calc(2.5rem + 2px);">
                                 Requisitos
                             </button>
                         </div>
@@ -105,40 +105,29 @@
                 </div>
                 <div class="card-body">
                     <div class="row g-2">
-                        <!-- marca -->
-                        <div class="col-md-3 mb-2">
+                        <!-- modal para listar vehiculos -->
+                        <div class="col-md-2">
+                            <button class="btn btn-primary" type="button"
+                                style="min-height: calc(3.5rem + 2px);">
+                                Mostrar Lista
+                            </button>
+                        </div>
+                        <div class="col-md-6">
                             <div class="form-floating">
-                                <select name="marcas" id="marcas" class="form-select" required>
-                                    <option value="">Seleccione</option>
-                                </select>
-                                <label for="marcas" class="form-label">Marca <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="descripcion" name="descripcion" readonly>
+                                <label for="descripcion">Descripcion del vehiculo</label>
                             </div>
                         </div>
-                        <!-- tipo vehiculo -->
-                        <div class="col-md-3 mb-2">
+                        <div class="col-md-2">
                             <div class="form-floating">
-                                <select name="tipos" id="tipos" class="form-select" required>
-                                    <option value="">Seleccione</option>
-                                </select>
-                                <label for="tipos">Tipo de vehículo <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="telefono" name="telefono">
+                                <label for="telefono">Teléfono</label>
                             </div>
                         </div>
-                        <!-- modelo -->
-                        <div class="col-md-3 mb-2">
+                        <div class="col-md-2">
                             <div class="form-floating">
-                                <select name="modelos" id="modelos" class="form-select" required>
-                                    <option value="">Seleccione</option>
-                                </select>
-                                <label for="modelos">Modelos disponibles <span class="text-danger">*</span></label>
-                            </div>
-                        </div>
-                        <!-- año -->
-                        <div class="col-md-3">
-                            <div class="form-floating">
-                                <select class="form-select" id="anio" name="anio" required>
-                                    <option value="">Seleccionar año</option>
-                                </select>
-                                <label for="anios">Año <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="telefono" name="telefono">
+                                <label for="telefono">Teléfono</label>
                             </div>
                         </div>
                     </div>
@@ -250,7 +239,7 @@
             </div>
 
             <!-- Formato de Cotización -->
-            <div class="card mb-4">
+            <div class="card mb-4">  
                 <div class="card-header bg-info">
                     <strong>Paso 4:</strong> <span class="fst-italic">
                         Formato de cotizacion
