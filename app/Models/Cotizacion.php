@@ -8,11 +8,11 @@ use PDO;
 
 class Cotizacion
 {
-    private PDO $pdo;
+    private PDO $db;
 
     public function __construct()
     {
-        $this->pdo = Database::getInstance();
+        $this->db = Database::getInstance();
     }
 
     /* public function getRequisitos(): array
@@ -21,5 +21,5 @@ class Cotizacion
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     } */
-    
+
 }

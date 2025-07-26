@@ -148,6 +148,7 @@ INSERT INTO vehiculos (
 ) VALUES (
     1, 'Versión D', 'seminuevo', 1, 'vendido', 2, 3, 'CTZ', NOW()
 );
+SELECT * FROM vehiculos;
 
 /*
 UPDATE vehiculos
@@ -159,9 +160,48 @@ SET
 	seriemotor = 'SM987654311',
 	precioventa = 32500.00,
 	moneda = 'USD',
+	disponibilidad = 'proceso',
+	modificado = NOW()
+WHERE idvehiculo = 1;
+
+UPDATE vehiculos
+SET
+	color = 'ROJO',
+	chasis = 'CHS6543210922',
+	placa = 'XYZ-722',
+	placarotativa = 'ROT-722',
+	seriemotor = 'SM987654322',
+	precioventa = 22500.00,
+	moneda = 'PEN',
+	disponibilidad = 'libre',
+	modificado = NOW()
+WHERE idvehiculo = 2;
+
+UPDATE vehiculos
+SET
+	color = 'VERDE',
+	chasis = 'CHS6543210933',
+	placa = 'XYZ-733',
+	placarotativa = 'ROT-733',
+	seriemotor = 'SM98765433',
+	precioventa = 33500.00,
+	moneda = 'USD',
+	disponibilidad = 'separado',
+	modificado = NOW()
+WHERE idvehiculo = 3;
+
+UPDATE vehiculos
+SET
+	color = 'MORADO',
+	chasis = 'CHS6543210944',
+	placa = 'XYZ-744',
+	placarotativa = 'ROT-744',
+	seriemotor = 'SM98765444',
+	precioventa = 24500.00,
+	moneda = 'USD',
 	disponibilidad = 'vendido',
 	modificado = NOW()
-WHERE idvehiculo = 18;
+WHERE idvehiculo = 4;
 */
 
 -- PERMISOS

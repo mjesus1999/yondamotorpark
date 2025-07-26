@@ -5,14 +5,17 @@ namespace App\Controllers;
 
 use App\Core\Controller;
 use App\Models\Cotizacion;
+use App\Models\Vehiculo;
 
 class CotizacionController extends Controller
 {
     private Cotizacion $cotizacionModel;
+    private Vehiculo $vehiculoModel;
 
     public function __construct()
     {
         $this->cotizacionModel = new Cotizacion();
+        $this->vehiculoModel = new Vehiculo();
     }
 
     public function index(): void
@@ -25,7 +28,8 @@ class CotizacionController extends Controller
     public function create(): void
     {
         $this->authRequired();
-        $this->view('cotizacion.create');
+        $vehiculos = $this->vehiculoModel->getAll();
+        $this->view('cotizacion.create', ['vehiculos' => $vehiculos]);
     }
 
 
