@@ -63,32 +63,37 @@
                         <!-- Teléfono -->
                         <div class="col-md-2">
                             <div class="form-floating">
-                                <input type="text" class="form-control" id="telefono" name="telefono">
-                                <label for="telefono">Teléfono</label>
+                                <input type="text" class="form-control" id="telprimario" name="telprimario">
+                                <label for="telprimario">Teléfono</label>
                             </div>
                         </div>
                         <!-- Telefono alternativo -->
                         <div class="col-md-2">
                             <div class="form-floating">
-                                <input type="text" class="form-control" id="telefono" name="telefono" readonly>
-                                <label for="telefono">Teléfono</label>
+                                <input type="text" class="form-control" id="telalternativo" name="telalternativo"
+                                    readonly>
+                                <label for="telalternativo">Teléfono Alternativo</label>
                             </div>
                         </div>
                         <!-- modalidad -->
                         <div class="col-md-6 mb-2">
                             <div class="form-floating">
                                 <select name="modalidad" id="modalidad" class="form-select" required>
-                                    <option value="">Seleccione</option>
+                                    <option value="">Seleccione modalidad</option>
+                                    <?php foreach ($formatos as $f): ?>
+                                        <option value="<?= htmlspecialchars($f['idformato']) ?>">
+                                            <?= htmlspecialchars($f['tipocotizacion']) ?>
+                                        </option>
+                                    <?php endforeach; ?>
                                 </select>
-                                <label for="modalidad" class="form-label">Modalidad <span
-                                        class="text-danger">*</span></label>
+                                <label for="modalidad">Modalidad <span class="text-danger">*</span></label>
                             </div>
                         </div>
                         <!-- botón tamaño igual que modalidad -->
                         <div class="col-md-2 mb-2">
                             <div class="form-floating h-100 btn-ver-requisitos">
-                                <button class="btn btn-outline-primary w-100 h-100" type="button" data-bs-toggle="modal"
-                                    data-bs-target="#modalRequisitos">
+                                <button type="button" class="btn btn-outline-primary w-100 h-100" data-bs-toggle="modal"
+                                    data-bs-target="#modalRequisitos" id="btnVerRequisitos">
                                     Lista Requisitos
                                 </button>
                             </div>
@@ -351,7 +356,7 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        // Inicializar DataTable del modal
+        // Inicializar DataTable del modal de Vehículos
         $('#tablaVehiculosModal').DataTable({
             order: [[0, 'desc']],
             pagingType: 'full_numbers',
@@ -360,16 +365,11 @@
             responsive: true,
             language: {
                 url: "https://cdn.datatables.net/plug-ins/2.0.7/i18n/es-ES.json",
-                paginate: {
-                    first: '«',
-                    previous: '‹',
-                    next: '›',
-                    last: '»'
-                }
+                paginate: { first: '«', previous: '‹', next: '›', last: '»' }
             }
         });
 
-        // Manejar selección
+        // Manejar selección de vehículo
         $('#tablaVehiculosModal').on('click', '.seleccionar-vehiculo', function () {
             const descripcion = $(this).data('descripcion');
             const placa = $(this).data('placa');
@@ -377,25 +377,51 @@
             $('#descripcion').val(descripcion);
             $('#placa').val(placa);
             $('#placarotativa').val(rotativa);
-            const modal = bootstrap.Modal.getInstance(document.getElementById('modalVehiculos'));
-            modal.hide();
+            bootstrap.Modal.getInstance(document.getElementById('modalVehiculos')).hide();
         });
 
         // FECHAS => emisión hoy y caducidad en 7 días
         const hoy = new Date();
-        const dd = String(hoy.getDate()).padStart(2, '0');
-        const mm = String(hoy.getMonth() + 1).padStart(2, '0');
-        const yyyy = hoy.getFullYear();
-        const fechaEmision = `${yyyy}-${mm}-${dd}`;
-        const fechaCaducidadObj = new Date(hoy);
-        fechaCaducidadObj.setDate(hoy.getDate() + 7);
-        const dd2 = String(fechaCaducidadObj.getDate()).padStart(2, '0');
-        const mm2 = String(fechaCaducidadObj.getMonth() + 1).padStart(2, '0');
-        const yyyy2 = fechaCaducidadObj.getFullYear();
-        const fechaCaducidad = `${yyyy2}-${mm2}-${dd2}`;
+        const pad = num => String(num).padStart(2, '0');
+        const fechaEmision = `${hoy.getFullYear()}-${pad(hoy.getMonth() + 1)}-${pad(hoy.getDate())}`;
+        const cad = new Date(hoy);
+        cad.setDate(hoy.getDate() + 7);
+        const fechaCaducidad = `${cad.getFullYear()}-${pad(cad.getMonth() + 1)}-${pad(cad.getDate())}`;
         document.getElementById('fechaEmision').value = fechaEmision;
         document.getElementById('fechaCaducidad').value = fechaCaducidad;
-        
+
+        // Abrir modal de requisitos y cargar según modalidad
+        const modalRequisitos = document.getElementById('modalRequisitos');
+        modalRequisitos.addEventListener('show.bs.modal', async function () {
+            const idformato = document.getElementById('modalidad').value;
+            const lista = document.getElementById('listaRequisitos');
+            lista.innerHTML = '';
+
+            if (!idformato) {
+                lista.innerHTML = '<li class="list-group-item text-muted">Selecciona primero una modalidad.</li>';
+                return;
+            }
+
+            try {
+                const resp = await fetch(`/cotizaciones/requisitos/${idformato}`);
+                if (!resp.ok) throw new Error(`Status ${resp.status}`);
+                const datos = await resp.json();
+
+                if (!Array.isArray(datos) || datos.length === 0) {
+                    lista.innerHTML = '<li class="list-group-item text-muted">No hay requisitos definidos para esta modalidad.</li>';
+                } else {
+                    datos.forEach(item => {
+                        const li = document.createElement('li');
+                        li.className = 'list-group-item';
+                        li.textContent = item.requisito;
+                        lista.appendChild(li);
+                    });
+                }
+            } catch (err) {
+                console.error(err);
+                lista.innerHTML = '<li class="list-group-item text-danger">Error cargando requisitos.</li>';
+            }
+        });
     });
 </script>
 

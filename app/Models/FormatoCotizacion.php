@@ -45,7 +45,7 @@ class FormatoCotizacion
     {
         $sql = "
             SELECT r.idrequisito, r.requisito
-            FROM requisitos AS r
+            FROM requisitos AS r    
             JOIN detallerequisitos AS dr ON dr.idrequisito = r.idrequisito
             WHERE dr.idformato = :idformato
             ORDER BY r.idrequisito
