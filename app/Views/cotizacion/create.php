@@ -280,7 +280,8 @@
 </div>
 
 <!-- MODAL DE LISTADO DE REQUISITOS -->
-<div class="modal fade" id="modalRequisitos" tabindex="-1" aria-labelledby="modalRequisitosLabel" aria-hidden="true">
+<div class="modal fade" id="modalRequisitos" tabindex="-1" aria-labelledby="modalRequisitosLabel" aria-hidden="true"
+    data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header bg-yonda">
@@ -302,7 +303,8 @@
 </div>
 
 <!-- MODAL SELECCIONAR VEHÍCULO -->
-<div class="modal fade" id="modalVehiculos" tabindex="-1" aria-labelledby="modalVehiculosLabel" aria-hidden="true">
+<div class="modal fade" id="modalVehiculos" tabindex="-1" aria-labelledby="modalVehiculosLabel" aria-hidden="true"
+    data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header bg-yonda text-white">
@@ -323,6 +325,7 @@
                             <th>Disponibilidad</th>
                             <th>Placa</th>
                             <th>Placa Rotativa</th>
+                            <th>Combustible</th>
                             <th>Seleccionar</th>
                         </tr>
                     </thead>
@@ -339,9 +342,10 @@
                                 <td><?= htmlspecialchars($v['disponibilidad']) ?></td>
                                 <td><?= htmlspecialchars($v['placa']) ?></td>
                                 <td><?= htmlspecialchars($v['placarotativa']) ?></td>
+                                <td><?= htmlspecialchars($v['combustible']) ?></td>
                                 <td class="text-center">
                                     <input type="checkbox" class="form-check-input seleccionar-vehiculo"
-                                        data-descripcion="<?= htmlspecialchars($v['marca'] . ' ' . $v['modelo'] . ' ' . $v['version'] . ' ' . $v['color']) ?>"
+                                        data-descripcion="<?= htmlspecialchars($v['marca'] . ' ' . $v['tipovehiculo'] . ' ' . $v['modelo'] . ' ' . $v['version'] . ' ' . $v['color']  . ' - ' . $v['combustible'])?>"
                                         data-placa="<?= htmlspecialchars($v['placa']) ?>"
                                         data-placarotativa="<?= htmlspecialchars($v['placarotativa']) ?>">
                                 </td>
@@ -371,12 +375,16 @@
 
         // Manejar selección de vehículo
         $('#tablaVehiculosModal').on('click', '.seleccionar-vehiculo', function () {
+            $('.seleccionar-vehiculo').not(this).prop('checked', false);
+
             const descripcion = $(this).data('descripcion');
             const placa = $(this).data('placa');
             const rotativa = $(this).data('placarotativa');
+
             $('#descripcion').val(descripcion);
             $('#placa').val(placa);
             $('#placarotativa').val(rotativa);
+
             bootstrap.Modal.getInstance(document.getElementById('modalVehiculos')).hide();
         });
 

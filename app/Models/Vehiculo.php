@@ -20,20 +20,23 @@ class Vehiculo
   {
     $query = "
       SELECT 
-          v.idvehiculo,
-          mc.marca,
-          tv.tipovehiculo,
-          m.modelo,
-          v.version,
-          v.condicion,
-          v.color,
-          v.disponibilidad,
-          v.placa,
-          v.placarotativa
+        v.idvehiculo,
+        mc.marca,
+        tv.tipovehiculo,
+        m.modelo,
+        v.version,
+        v.condicion,
+        v.color,
+        v.disponibilidad,
+        v.placa,
+        v.placarotativa,
+        c.idcombustible,
+        c.combustible
       FROM vehiculos v
       INNER JOIN modelos m ON m.idmodelo = v.idmodelo
       INNER JOIN marcas mc ON mc.idmarca = m.idmarca
       INNER JOIN tipovehiculos tv ON tv.idtipovehiculo = m.idtipovehiculo
+      INNER JOIN combustibles c ON c.idcombustible = v.idcombustible
     ";
 
     $params = [];
