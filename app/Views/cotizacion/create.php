@@ -300,7 +300,7 @@
 <div class="modal fade" id="modalVehiculos" tabindex="-1" aria-labelledby="modalVehiculosLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
+            <div class="modal-header bg-yonda text-white">
                 <h5 class="modal-title" id="modalVehiculosLabel">Seleccionar Vehículo</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
@@ -316,6 +316,8 @@
                             <th>Condición</th>
                             <th>Color</th>
                             <th>Disponibilidad</th>
+                            <th>Placa</th>
+                            <th>Placa Rotativa</th>
                             <th>Seleccionar</th>
                         </tr>
                     </thead>
@@ -330,9 +332,13 @@
                                 <td><?= htmlspecialchars($v['condicion']) ?></td>
                                 <td><?= htmlspecialchars($v['color']) ?></td>
                                 <td><?= htmlspecialchars($v['disponibilidad']) ?></td>
+                                <td><?= htmlspecialchars($v['placa']) ?></td>
+                                <td><?= htmlspecialchars($v['placarotativa']) ?></td>
                                 <td class="text-center">
                                     <input type="checkbox" class="form-check-input seleccionar-vehiculo"
-                                        data-descripcion="<?= htmlspecialchars($v['marca'] . ' ' . $v['modelo'] . ' ' . $v['version'] . ' ' . $v['color']) ?>">
+                                        data-descripcion="<?= htmlspecialchars($v['marca'] . ' ' . $v['modelo'] . ' ' . $v['version'] . ' ' . $v['color']) ?>"
+                                        data-placa="<?= htmlspecialchars($v['placa']) ?>"
+                                        data-placarotativa="<?= htmlspecialchars($v['placarotativa']) ?>">
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -366,10 +372,30 @@
         // Manejar selección
         $('#tablaVehiculosModal').on('click', '.seleccionar-vehiculo', function () {
             const descripcion = $(this).data('descripcion');
+            const placa = $(this).data('placa');
+            const rotativa = $(this).data('placarotativa');
             $('#descripcion').val(descripcion);
+            $('#placa').val(placa);
+            $('#placarotativa').val(rotativa);
             const modal = bootstrap.Modal.getInstance(document.getElementById('modalVehiculos'));
             modal.hide();
         });
+
+        // FECHAS => emisión hoy y caducidad en 7 días
+        const hoy = new Date();
+        const dd = String(hoy.getDate()).padStart(2, '0');
+        const mm = String(hoy.getMonth() + 1).padStart(2, '0');
+        const yyyy = hoy.getFullYear();
+        const fechaEmision = `${yyyy}-${mm}-${dd}`;
+        const fechaCaducidadObj = new Date(hoy);
+        fechaCaducidadObj.setDate(hoy.getDate() + 7);
+        const dd2 = String(fechaCaducidadObj.getDate()).padStart(2, '0');
+        const mm2 = String(fechaCaducidadObj.getMonth() + 1).padStart(2, '0');
+        const yyyy2 = fechaCaducidadObj.getFullYear();
+        const fechaCaducidad = `${yyyy2}-${mm2}-${dd2}`;
+        document.getElementById('fechaEmision').value = fechaEmision;
+        document.getElementById('fechaCaducidad').value = fechaCaducidad;
+        
     });
 </script>
 

@@ -28,7 +28,7 @@ class CotizacionController extends Controller
     public function create(): void
     {
         $this->authRequired();
-        $vehiculos = $this->vehiculoModel->getAll();
+        $vehiculos = $this->vehiculoModel->getAll(['Libre', 'Proceso']);
         $this->view('cotizacion.create', ['vehiculos' => $vehiculos]);
     }
 

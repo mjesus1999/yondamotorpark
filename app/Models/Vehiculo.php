@@ -16,7 +16,61 @@ class Vehiculo
     $this->db = Database::getInstance();
   }
 
-  public function getAll(string $estado = ''): array
+  public function getAll($estado = ''): array
+  {
+    $query = "
+      SELECT 
+          v.idvehiculo,
+          mc.marca,
+          tv.tipovehiculo,
+          m.modelo,
+          v.version,
+          v.condicion,
+          v.color,
+          v.disponibilidad,
+          v.placa,
+          v.placarotativa
+      FROM vehiculos v
+      INNER JOIN modelos m ON m.idmodelo = v.idmodelo
+      INNER JOIN marcas mc ON mc.idmarca = m.idmarca
+      INNER JOIN tipovehiculos tv ON tv.idtipovehiculo = m.idtipovehiculo
+    ";
+
+    $params = [];
+    if ($estado !== '') {
+      if (is_array($estado)) {
+        // Construir placeholders para IN
+        $placeholders = implode(", ", array_map(fn($i) => ":estado$i", array_keys($estado)));
+        $query .= " WHERE v.disponibilidad IN ($placeholders)";
+        foreach ($estado as $i => $est) {
+          $params[":estado$i"] = $est;
+        }
+      } else {
+        $query .= " WHERE v.disponibilidad = :estado";
+        $params[':estado'] = $estado;
+      }
+    }
+
+    $query .= " ORDER BY v.idvehiculo DESC";
+
+    try {
+      $stmt = $this->db->prepare($query);
+      foreach ($params as $key => $val) {
+        $stmt->bindValue($key, $val);
+      }
+      $stmt->execute();
+      return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (Exception $e) {
+      return [];
+    }
+  }
+
+  /**
+   * ejemplo de gellAll
+   * @param string $estado
+   * @return array
+   */
+  public function getAll1(string $estado = ''): array
   {
     $query = "
       SELECT 
@@ -87,8 +141,8 @@ class Vehiculo
     return $vehiculo ?: null;
   }
 
-  public function getModeloDetalle(int $idmodelo): ?array
-{
+  /* public function getModeloDetalle(int $idmodelo): ?array
+  {
     $query = "
         SELECT 
             m.idmodelo,
@@ -109,7 +163,7 @@ class Vehiculo
     $stmt->execute();
     $detalle = $stmt->fetch(PDO::FETCH_ASSOC);
     return $detalle ?: null;
-}
+  } */
 
 
 }

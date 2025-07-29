@@ -1,4 +1,4 @@
-USE motorpak;
+USE motorpark;
 -- CALL spu_vehiculos_registrar(43, 'Básico', 'seminuevo', 3, 'GRIS', 'CHASISX7777', 'YYY-777', 'ROT-777', 'SER-777', 'PEN', 30500, 2, 3);
 
 DELIMITER $$
