@@ -33,7 +33,7 @@ class CotizacionController extends Controller
         $formatos = $this->formatoModel->getAll();
         $vehiculos = $this->vehiculoModel->getAll(['Libre', 'Proceso']);
         $this->view('cotizacion.create', [
-            'vehiculos' => $vehiculos, 
+            'vehiculos' => $vehiculos,
             'formatos' => $formatos
         ]);
     }
@@ -42,8 +42,7 @@ class CotizacionController extends Controller
     {
         $this->authRequired();
 
-        $formatoModel = new FormatoCotizacion();
-        $detalle      = $formatoModel->getDetalleRequisitos($idformato);
+        $detalle = $this->formatoModel->getDetalleRequisitos($idformato);
 
         header('Content-Type: application/json; charset=utf-8');
         echo json_encode($detalle);
