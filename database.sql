@@ -102,6 +102,7 @@ CREATE TABLE clientes (
     CONSTRAINT fk_idcolregistra_client FOREIGN KEY (idcolregistra) REFERENCES colaboradores (idcolaborador),
     CONSTRAINT fk_idcolactualiza_client FOREIGN KEY (idcolactualiza) REFERENCES colaboradores (idcolaborador)
 ) ENGINE = INNODB;
+
 /* ALTER TABLE clientes ADD COLUMN estado ENUM('ACT', 'INACT') DEFAULT 'ACT' NOT NULL; */
 
 CREATE TABLE areas (
@@ -319,9 +320,12 @@ CREATE TABLE ordenescompra (
     ) NOT NULL DEFAULT 'emitido',
     creado DATETIME NOT NULL DEFAULT NOW(),
     fechanulado DATETIME NULL,
+    facturado ENUM('S','N') NOT NULL DEFAULT 'N' , -- Identificar que ya se haya registrado la factura que manda el Concesionario
     CONSTRAINT fk_idtienda_ocp FOREIGN KEY (idtienda) REFERENCES tiendas (idtienda),
     CONSTRAINT fk_idlogistica_ocp FOREIGN KEY (idlogistica) REFERENCES colaboradores (idcolaborador)
 ) ENGINE = INNODB;
+
+--ALTER TABLE ordenescompra ADD COLUMN  facturado ENUM('S','N') NOT NULL DEFAULT 'N' ;
 -- ALTER TABLE ordenescompra ADD COLUMN creado DATETIME NOT NULL DEFAULT NOW();
 -- ALTER TABLE ordenescompra ADD COLUMN fechanulado DATETIME NULL;
 ALTER TABLE ordenescompra MODIFY COLUMN estado ENUM('emitido','proceso','anulado','pagado') NOT NULL DEFAULT 'emitido';
@@ -381,16 +385,17 @@ CREATE TABLE compras (
     idlogistica INT NOT NULL COMMENT 'Colaborador que realiza el registro',
     fechacompra DATE NOT NULL,
     fecharecepcion DATE NULL,
-    tipodoc ENUM('B', 'F') NOT NULL DEFAULT 'F' COMMENT 'Boleta o Factura',
+    tipodoc ENUM('B', 'F') NOT NULL DEFAULT 'F' COMMENT 'Boleta o Factura', -- LA MAYORIA ES FACTURA
     serie VARCHAR(10) NOT NULL,
     numdocumento INT NOT NULL,
-    pathxml VARCHAR(200) NULL,
+    rutadoc VARCHAR(200) NULL, -- RUTA DEL PDF
     creado DATETIME NOT NULL DEFAULT NOW(),
     modificado DATETIME NULL,
     CONSTRAINT fk_idorden_cmp FOREIGN KEY (idorden) REFERENCES ordenescompra (idordencompra),
     CONSTRAINT fk_idlogistica_cmp FOREIGN KEY (idlogistica) REFERENCES colaboradores (idcolaborador)
 ) ENGINE = INNODB;
 
+--ALTER TABLE compras ADD COLUMN rutadoc VARCHAR(200) NULL;
 CREATE TABLE entidadespago (
     identidadpago INT AUTO_INCREMENT PRIMARY KEY,
     entidad VARCHAR(20) NOT NULL,

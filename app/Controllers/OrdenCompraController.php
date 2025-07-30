@@ -190,7 +190,8 @@ class OrdenCompraController extends Controller
         }
     }
 
-    // API PARA TRAER EL DETALLE DE UNA PC OR SU ID:
+
+// API PARA TRAER EL DETALLE DE UNA OC OR SU ID:
 
 public function searchtDetOCByIdOc($idOC): void
 {
@@ -254,6 +255,7 @@ public function searchtDetOCByIdOc($idOC): void
     ]);
     exit();
 }
+
 
 
     // API PARA TRAER LOS DATOS DEL AUTO A ACTULIZAR EN DETALLE_OC SI LLEGO CORRECTO
