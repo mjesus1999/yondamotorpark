@@ -19,6 +19,8 @@
 
     <div class="mb-2">
         <form id="formCotizacion" action="/cotizaciones" method="POST">
+            <input type="hidden" id="idcliente" name="idcliente" value="">
+            <input type="hidden" id="idvehiculo" name="idvehiculo" value="">
             <!-- Información del Cliente -->
             <div class="card mb-4">
                 <div class="card-header bg-info">
@@ -40,10 +42,11 @@
                         <div class="col-md-3">
                             <div class="input-group">
                                 <div class="form-floating">
-                                    <input type="text" class="form-control" id="documento" name="documento">
+                                    <input type="text" class="form-control" id="documento" name="documento"
+                                        placeholder="DNI / RUC">
                                     <label for="documento">DNI / RUC</label>
                                 </div>
-                                <button type="button" class="btn btn-outline-success"
+                                <button type="button" id="btnBuscarCliente" class="btn btn-outline-success"
                                     title="Incrementa el año del modelo y lo guarda en la base de datos"><i
                                         class="bi bi-search"></i></button>
                             </div>
@@ -52,7 +55,8 @@
                         <!-- Apellidos y Nombres -->
                         <div class="col-md-7">
                             <div class="form-floating">
-                                <input type="text" class="form-control" id="nombres" name="nombres">
+                                <input type="text" class="form-control" placeholder="Apellidos y Nombres / Razón Social"
+                                    id="nombres" name="nombres">
                                 <label for="nombres">Apellidos y Nombres / Razón Social</label>
                             </div>
                         </div>
@@ -63,15 +67,16 @@
                         <!-- Teléfono -->
                         <div class="col-md-2">
                             <div class="form-floating">
-                                <input type="text" class="form-control" id="telprimario" name="telprimario">
+                                <input type="text" class="form-control" placeholder="Teléfono" id="telprimario"
+                                    name="telprimario" maxlength="9" required>
                                 <label for="telprimario">Teléfono</label>
                             </div>
                         </div>
                         <!-- Telefono alternativo -->
                         <div class="col-md-2">
                             <div class="form-floating">
-                                <input type="text" class="form-control" id="telalternativo" name="telalternativo"
-                                    readonly>
+                                <input type="text" class="form-control" placeholder="Teléfono Alternativo"
+                                    id="telalternativo" name="telalternativo" maxlength="9">
                                 <label for="telalternativo">Teléfono Alternativo</label>
                             </div>
                         </div>
@@ -112,6 +117,7 @@
                 <div class="card-body">
                     <div class="row g-2">
 
+                        <!-- VEHICULOS -->
                         <div class="col-md-8">
                             <div class="input-group">
                                 <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
@@ -119,7 +125,8 @@
                                     Lista Vehículos
                                 </button>
                                 <div class="form-floating">
-                                    <input type="text" class="form-control" id="descripcion" name="descripcion">
+                                    <input type="text" class="form-control" placeholder="Descripcion del vehiculo"
+                                        id="descripcion" name="descripcion">
                                     <label for="descripcion">Descripcion del vehiculo</label>
                                 </div>
 
@@ -128,31 +135,35 @@
                         <!-- PLACA -->
                         <div class="col-md-2">
                             <div class="form-floating">
-                                <input type="text" class="form-control" id="placa" name="placa">
+                                <input type="text" placeholder="Placa" class="form-control" id="placa" name="placa">
                                 <label for="placa">Placa</label>
                             </div>
                         </div>
                         <!-- PLACA ROTATIVA -->
                         <div class="col-md-2">
                             <div class="form-floating">
-                                <input type="text" class="form-control" id="placarotativa" name="placarotativa">
+                                <input type="text" placeholder="Placa Rotativa" class="form-control" id="placarotativa"
+                                    name="placarotativa">
                                 <label for="placarotativa">Placa Rotativa</label>
                             </div>
                         </div>
                     </div>
 
                     <div class="row g-2 mt-1">
+
                         <!-- Tipo de moneda -->
                         <div class="col-md-2">
                             <div class="form-floating">
-                                <input type="text" class="form-control" value="$" id="moneda" name="moneda" readonly>
-                                <label for="moneda">Moneda</label>
+                                <input type="text" class="form-control" value="$" id="monedaprecio" name="monedaprecio"
+                                    disabled>
+                                <label for="monedaprecio">Moneda</label>
                             </div>
                         </div>
                         <!-- Valor -->
                         <div class="col-md-3">
                             <div class="form-floating">
-                                <input type="text" class="form-control" id="valor" name="valor">
+                                <input type="text" placeholder="Valor" class="form-control" id="valor" name="valor"
+                                    disabled>
                                 <label for="valor">Valor</label>
                             </div>
                         </div>
@@ -169,20 +180,23 @@
                         <!-- Tipo de cambio -->
                         <div class="col-md-2">
                             <div class="form-floating">
-                                <input type="text" class="form-control" id="tipoCambio" name="tipoCambio" readonly>
+                                <input type="text" placeholder="Tipo de cambio" class="form-control" id="tipoCambio"
+                                    name="tipoCambio">
                                 <label for="tipoCambio">Tipo de Cambio</label>
                             </div>
                         </div>
                         <!-- Valor en soles -->
                         <div class="col-md-3">
                             <div class="form-floating">
-                                <input type="text" class="form-control" id="valorSoles" name="valorSoles" readonly>
-                                <label for="valorSoles">Valor en Soles</label>
+                                <input type="text" placeholder="Valor de Moneda" class="form-control" id="valormoneda"
+                                    name="valormoneda">
+                                <label for="valormoneda">Valor de Moneda</label>
                             </div>
                         </div>
                     </div>
 
                 </div>
+                <input type="hidden" id="vehiculoMoneda" value="">
             </div>
 
             <!-- Condiciones de Cotización -->
@@ -197,44 +211,47 @@
                         <!-- Cuota Inicial -->
                         <div class="col-md-2">
                             <div class="form-floating">
-                                <input type="number" class="form-control" id="inicial" name="inicial" step="1" required>
+                                <input type="number" placeholder="Inicial" class="form-control" id="inicial"
+                                    name="inicial" step="1" required>
                                 <label for="inicial">Inicial</label>
                             </div>
                         </div>
                         <!-- Valor a Financiar -->
                         <div class="col-md-2">
                             <div class="form-floating">
-                                <input type="number" class="form-control" id="valorcuota" name="valorcuota" step="0.01"
-                                    min="0" required>
+                                <input type="number" placeholder="Valor Financiar" class="form-control" id="valorcuota"
+                                    name="valorcuota" step="1" min="0" required>
                                 <label for="valorcuota">Valor Financiar</label>
                             </div>
                         </div>
                         <!-- Meses -->
                         <div class="col-md-2">
                             <div class="form-floating">
-                                <input type="number" class="form-control" id="numcuotas" name="numcuotas" step="3"
-                                    min="0" required>
+                                <input type="number" placeholder="Meses" class="form-control" id="numcuotas"
+                                    name="numcuotas" step="3" min="0" required>
                                 <label for="numcuotas">Meses</label>
                             </div>
                         </div>
                         <!-- Tasa -->
                         <div class="col-md-2">
                             <div class="form-floating">
-                                <input type="text" class="form-control" id="tasa" name="tasa" readonly>
+                                <input type="text" placeholder="Tasa" class="form-control" id="tasa" name="tasa">
                                 <label for="tasa">Tasa</label>
                             </div>
                         </div>
                         <!-- Valor mensual -->
                         <div class="col-md-2">
                             <div class="form-floating">
-                                <input type="number" class="form-control" id="valorcuota" name="valorcuota" required>
+                                <input type="number" placeholder="Valor mensual" class="form-control" id="valorcuota"
+                                    name="valorcuota" step="1" min="0" required>
                                 <label for="valorcuota">Valor Mensual</label>
                             </div>
                         </div>
                         <!-- botón de Cronograma -->
                         <div class="col-md-2">
                             <div class="form-floating h-100">
-                                <button class="btn btn-outline-primary w-100 h-100" type="button">
+                                <button class="btn btn-outline-primary w-100 h-100" data-bs-toggle="modal"
+                                    data-bs-target="#modalCronograma" type="button">
                                     Cronograma
                                 </button>
                             </div>
@@ -250,7 +267,7 @@
                 <div class="card-footer">
                     <div class="row g-2 align-items-end">
                         <!-- Fecha de Emisión -->
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <div class="form-floating">
                                 <input type="date" class="form-control" id="fechaEmision" name="fechaEmision" required>
                                 <label for="fechaEmision">Fecha de Emisión</label>
@@ -258,7 +275,7 @@
                         </div>
 
                         <!-- Fecha de Caducidad -->
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <div class="form-floating">
                                 <input type="date" class="form-control" id="fechaCaducidad" name="fechaCaducidad"
                                     required>
@@ -267,7 +284,7 @@
                         </div>
 
                         <!-- Botones -->
-                        <div class="col-md-6 text-end">
+                        <div class="col-md-8 text-end">
                             <button type="reset" id="btn-cancelar-registro"
                                 class="btn btn-sm btn-outline-secondary">Cancelar</button>
                             <button type="submit" class="btn btn-primary btn-sm btnGuardarCotizacion">Registrar</button>
@@ -275,6 +292,7 @@
                     </div>
                 </div>
             </div>
+
         </form>
     </div>
 </div>
@@ -325,7 +343,6 @@
                             <th>Disponibilidad</th>
                             <th>Placa</th>
                             <th>Placa Rotativa</th>
-                            <th>Combustible</th>
                             <th>Seleccionar</th>
                         </tr>
                     </thead>
@@ -342,15 +359,20 @@
                                 <td><?= htmlspecialchars($v['disponibilidad']) ?></td>
                                 <td><?= htmlspecialchars($v['placa']) ?></td>
                                 <td><?= htmlspecialchars($v['placarotativa']) ?></td>
-                                <td><?= htmlspecialchars($v['combustible']) ?></td>
                                 <td class="text-center">
-                                    <input type="checkbox" class="form-check-input seleccionar-vehiculo"
+                                    <button type="button" class="btn btn-sm btn-primary seleccionar-vehiculo-btn"
+                                        data-idvehiculo="<?= htmlspecialchars($v['idvehiculo']) ?>"
+                                        data-precioventa="<?= htmlspecialchars($v['precioventa']) ?>"
+                                        data-moneda="<?= htmlspecialchars($v['moneda']) ?>"
                                         data-descripcion="<?= htmlspecialchars($v['marca'] . ' ' . $v['tipovehiculo'] . ' ' . $v['modelo'] . ' ' . $v['version'] . ' ' . $v['color'] . ' - ' . $v['combustible']) ?>"
                                         data-placa="<?= htmlspecialchars($v['placa']) ?>"
                                         data-placarotativa="<?= htmlspecialchars($v['placarotativa']) ?>">
+                                        Seleccionar
+                                    </button>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
+                        <!-- data-moneda="<?= htmlspecialchars($v['moneda']) ?>" -->
                     </tbody>
                 </table>
             </div>
@@ -358,9 +380,40 @@
     </div>
 </div>
 
+<!-- MODAL DEL CRONOGRAMA DE PAGOS -->
+<div class="modal fade" id="modalCronograma" tabindex="-1" aria-labelledby="modalCronogramaLabel" aria-hidden="true"
+    data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-yonda">
+                <h5 class="modal-title" id="modalCronogramaLabel">Cronograma de Pagos</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <ul id="listaPagos" class="list-group">
+                    <!-- se insertan datos dinámicamente -->
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        // Inicializar DataTable del modal de Vehículos
+    document.addEventListener("DOMContentLoaded", () => {
+        initDataTable();
+        initFechas();
+        initEventosCliente();
+        initEventosVehiculo();
+        initModalRequisitos();
+    });
+
+    // Inicializa DataTable
+    function initDataTable() {
         $('#tablaVehiculosModal').DataTable({
             order: [[0, 'desc']],
             pagingType: 'full_numbers',
@@ -369,68 +422,105 @@
             responsive: true,
             language: {
                 url: "https://cdn.datatables.net/plug-ins/2.0.7/i18n/es-ES.json",
-                paginate: { first: '«', previous: '‹', next: '›', last: '»' }
+                paginate: {
+                    first: '«',
+                    previous: '‹',
+                    next: '›',
+                    last: '»'
+                }
             }
         });
+    }
 
-        // Manejar selección de vehículo
-        $('#tablaVehiculosModal').on('click', '.seleccionar-vehiculo', function () {
-            $('.seleccionar-vehiculo').not(this).prop('checked', false);
-
-            const descripcion = $(this).data('descripcion');
-            const placa = $(this).data('placa');
-            const rotativa = $(this).data('placarotativa');
-
-            $('#descripcion').val(descripcion);
-            $('#placa').val(placa);
-            $('#placarotativa').val(rotativa);
-
-            bootstrap.Modal.getInstance(document.getElementById('modalVehiculos')).hide();
-        });
-
-        // FECHAS => emisión hoy y caducidad en 7 días
+    // Setea fecha emisión y caducidad
+    function initFechas() {
         const hoy = new Date();
-        const pad = num => String(num).padStart(2, '0');
-        const fechaEmision = `${hoy.getFullYear()}-${pad(hoy.getMonth() + 1)}-${pad(hoy.getDate())}`;
-        const cad = new Date(hoy);
-        cad.setDate(hoy.getDate() + 7);
-        const fechaCaducidad = `${cad.getFullYear()}-${pad(cad.getMonth() + 1)}-${pad(cad.getDate())}`;
-        document.getElementById('fechaEmision').value = fechaEmision;
-        document.getElementById('fechaCaducidad').value = fechaCaducidad;
+        const pad = n => String(n).padStart(2, '0');
+        document.getElementById('fechaEmision').value = formatDate(hoy, pad);
+        hoy.setDate(hoy.getDate() + 7);
+        document.getElementById('fechaCaducidad').value = formatDate(hoy, pad);
+    }
+    function formatDate(date, pad) {
+        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+    }
 
-        // Abrir modal de requisitos y cargar según modalidad
-        const modalRequisitos = document.getElementById('modalRequisitos');
-        modalRequisitos.addEventListener('show.bs.modal', async function () {
-            const idformato = document.getElementById('modalidad').value;
-            const lista = document.getElementById('listaRequisitos');
-            lista.innerHTML = '';
+    // Búsqueda de cliente por DNI/RUC
+    function initEventosCliente() {
+        const btn = document.getElementById('btnBuscarCliente');
+        const tipo = document.getElementById('tipoDocumento');
+        const doc = document.getElementById('documento');
+        const fields = { nombres: 'nombres', telprimario: 'telprimario', telalternativo: 'telalternativo' };
 
-            if (!idformato) {
-                lista.innerHTML = '<li class="list-group-item text-muted">Selecciona primero una modalidad.</li>';
-                return;
-            }
-
+        btn.addEventListener('click', async () => {
+            if (!doc.value.trim()) return alert('Ingresa un número de documento válido.');
             try {
-                const resp = await fetch(`/cotizaciones/requisitos/${idformato}`);
-                if (!resp.ok) throw new Error(`Status ${resp.status}`);
-                const datos = await resp.json();
-
-                if (!Array.isArray(datos) || datos.length === 0) {
-                    lista.innerHTML = '<li class="list-group-item text-muted">No hay requisitos definidos para esta modalidad.</li>';
+                const res = await fetch(`/cotizaciones/buscarCliente?tipo=${tipo.value}&doc=${doc.value}`);
+                const data = await res.json();
+                if (data.notFound) {
+                    alert('Cliente no encontrado. Ingresa datos manualmente.');
+                    Object.values(fields).forEach(id => document.getElementById(id).value = '');
                 } else {
-                    datos.forEach(item => {
-                        const li = document.createElement('li');
-                        li.className = 'list-group-item';
-                        li.textContent = item.requisito;
-                        lista.appendChild(li);
+                    document.getElementById('nombres').value = `${data.apellidos || ''} ${data.nombres || ''}`.trim();
+                    ['telprimario', 'telalternativo'].forEach(id => {
+                        document.getElementById(id).value = data[id] || '';
                     });
                 }
-            } catch (err) {
-                console.error(err);
-                lista.innerHTML = '<li class="list-group-item text-danger">Error cargando requisitos.</li>';
+            } catch {
+                alert('Hubo un error buscando el cliente.');
             }
         });
-    });
+    }
+
+    // Selección de vehículo y cálculo de montos
+    function initEventosVehiculo() {
+        $('#tablaVehiculosModal').on('click', '.seleccionar-vehiculo-btn', async function () {
+            const d = $(this).data();
+            fillPaso2(d);
+            clearConversion();
+            if (typeof actualizarMontos === 'function') await actualizarMontos();
+            bootstrap.Modal.getInstance($('#modalVehiculos')[0]).hide();
+        });
+    }
+
+    function fillPaso2({ idvehiculo, descripcion, placa, placarotativa, precioventa, moneda }) {
+        $('#idvehiculo').val(idvehiculo);
+        $('#descripcion').val(descripcion);
+        $('#placa').val(placa);
+        $('#placarotativa').val(placarotativa);
+        $('#valor').val(Number(precioventa).toFixed(2));
+        $('#monedaprecio').val(moneda === 'USD' ? '$' : 'S/.');
+        $('#vehiculoMoneda').val(moneda);
+
+        const $moneda = $('#moneda');
+        if (moneda === 'PEN') {
+            $moneda.val('PEN').prop('disabled', true)
+        } else {
+            $moneda.prop('disabled', false);
+        }
+    }
+
+    function clearConversion() {
+        $('#tipoCambio, #valormoneda').val('');
+    }
+
+    // Carga dinámica de requisitos según modalidad
+    function initModalRequisitos() {
+        $('#modalRequisitos').on('show.bs.modal', async () => {
+            const id = $('#modalidad').val();
+            const ul = $('#listaRequisitos').empty();
+            if (!id) return ul.append('<li class="list-group-item text-muted">Selecciona primero una modalidad.</li>');
+            try {
+                const resp = await fetch(`/cotizaciones/requisitos/${id}`);
+                const arr = await resp.json();
+                if (!arr.length) ul.append('<li class="list-group-item text-muted">No hay requisitos definidos.</li>');
+                else arr.forEach(i => ul.append(`<li class="list-group-item">${i.requisito}</li>`));
+            } catch {
+                ul.append('<li class="list-group-item text-danger">Error cargando requisitos.</li>');
+            }
+        });
+    }
+
 </script>
+
 
 <?php include __DIR__ . '/../layout/footer.php'; ?>

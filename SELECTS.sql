@@ -1,7 +1,29 @@
 use motorpark;
 
+SELECT * FROM personas;
+SELECT * FROM empresas;
 select * from areas;
 select * from cargos;
+
+-- COTIZACION
+SELECT
+	idpersona,
+	apellidos, 
+    nombres, 
+    telprimario, 
+    telalternativo, 
+    email 
+FROM personas 
+WHERE tipodoc = 'DNI'
+AND nrodoc  = '71689010'
+LIMIT 1;
+
+SELECT idempresa,
+	razonsocial AS apellidos, nombrecomercial AS nombres,
+	telprimario, telalternativo, email
+FROM empresas
+WHERE ruc = '20512345678'
+LIMIT 1;
 
 -- PERMISOS
 SELECT moduloapp
