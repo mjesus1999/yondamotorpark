@@ -32,6 +32,7 @@ class Vehiculo
         v.placarotativa,
         c.idcombustible,
         c.combustible
+        v.precioventa
       FROM vehiculos v
       INNER JOIN modelos m ON m.idmodelo = v.idmodelo
       INNER JOIN marcas mc ON mc.idmarca = m.idmarca

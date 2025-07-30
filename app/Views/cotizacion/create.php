@@ -345,7 +345,7 @@
                                 <td><?= htmlspecialchars($v['combustible']) ?></td>
                                 <td class="text-center">
                                     <input type="checkbox" class="form-check-input seleccionar-vehiculo"
-                                        data-descripcion="<?= htmlspecialchars($v['marca'] . ' ' . $v['tipovehiculo'] . ' ' . $v['modelo'] . ' ' . $v['version'] . ' ' . $v['color']  . ' - ' . $v['combustible'])?>"
+                                        data-descripcion="<?= htmlspecialchars($v['marca'] . ' ' . $v['tipovehiculo'] . ' ' . $v['modelo'] . ' ' . $v['version'] . ' ' . $v['color'] . ' - ' . $v['combustible']) ?>"
                                         data-placa="<?= htmlspecialchars($v['placa']) ?>"
                                         data-placarotativa="<?= htmlspecialchars($v['placarotativa']) ?>">
                                 </td>
