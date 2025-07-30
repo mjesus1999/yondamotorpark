@@ -107,7 +107,7 @@ class OrdenCompra
     {
         try {
             if ($params['estado'] == 'anulado') {
-                $stmt = $this->db->prepare("CALL sp__anular_OC(:estado, :observaciones, :idordencompra)");
+                $stmt = $this->db->prepare("CALL sp_anular_OC(:estado, :observaciones, :idordencompra)");
                 $stmt->execute([
                     ':estado' => $params['estado'],
                     ':observaciones' => $params['observaciones'],

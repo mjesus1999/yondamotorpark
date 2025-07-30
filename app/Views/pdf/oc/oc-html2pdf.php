@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
     <link rel="stylesheet" href="/assets/css/OC.css">
 
 </head>
+
 <body>
     <!-- Botón para generar PDF -->
     <button class="btn-generate-pdf" onclick="generatePDF()" style="display: none;">Generar PDF</button>
@@ -106,6 +108,7 @@
                             <th style="width: 10%;">COLOR</th>
                             <th style="width: 10%;">CANTIDAD</th>
                             <th style="width: 15%;">IMPORTE</th>
+
                         </tr>
                     </thead>
                     <tbody id="vehiculos-tbody">
@@ -168,8 +171,8 @@
 
     <!-- HTML2PDF.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    
-    
+
+
     <script>
 
         // Función para obtener parámetros de la URL
@@ -187,36 +190,35 @@
         }
 
         // Variable global para los datos
+        let ocOrden = null;
         let ocDetalles = [];
 
         // Función para cargar datos desde la API
         async function cargarDatosDesdeAPI() {
             try {
                 const ocId = getIdFromPath() || getUrlParameter('id');
-                
+
                 if (!ocId) {
                     console.error('No se encontró ID de orden de compra en la URL');
                     return;
                 }
 
                 const response = await fetch(`/api/oc/${ocId}`);
-                
+
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
 
                 const data = await response.json();
-                
-                if (data && Array.isArray(data) && data.length > 0) {
-                    ocDetalles = data;
-                    cargarDatos();
-                    // Generar PDF automáticamente después de cargar los datos
+
+                if (data && data.orden && Array.isArray(data.vehiculos)) {
+                    ocDetalles = data.vehiculos; // solo vehículos para agrupar
+                    cargarDatos(data.orden, data.vehiculos);
                     setTimeout(() => {
                         generarPDFAutomatico();
-                    }, 1000); // Esperar 1 segundo para que se renderice todo
+                    }, 1000);
                 } else {
-                    console.error('No se encontraron datos para esta orden de compra');
-                    // Cargar datos de ejemplo si no hay datos
+                    console.error('No se encontraron datos válidos en la respuesta');
                     cargarDatosEjemplo();
                     setTimeout(() => {
                         generarPDFAutomatico();
@@ -225,7 +227,6 @@
 
             } catch (error) {
                 console.error('Error al cargar los datos:', error);
-                // Si hay error, generar PDF con datos vacíos
                 setTimeout(() => {
                     generarPDFAutomatico();
                 }, 1000);
@@ -235,10 +236,10 @@
         // Función para agrupar vehículos similares
         function agruparVehiculos(vehiculos) {
             const grupos = {};
-            
+
             vehiculos.forEach(vehiculo => {
-                const clave = `${vehiculo.vehiculo_marca}-${vehiculo.vehiculo_modelo}-${vehiculo.vehiculo_version}-${vehiculo.vehiculo_combustible}-${vehiculo.vehiculo_anio_modelo}-${vehiculo.vehiculo_color}`;
-                
+                const clave = `${vehiculo.marca}-${vehiculo.modelo}-${vehiculo.version}-${vehiculo.combustible}-${vehiculo.anio_modelo}-${vehiculo.color}`;
+
                 if (!grupos[clave]) {
                     grupos[clave] = {
                         vehiculo: vehiculo,
@@ -247,177 +248,127 @@
                 }
                 grupos[clave].cantidad++;
             });
-            
+
             return Object.values(grupos);
         }
 
-        
 
         // Función para cargar los datos
-        function cargarDatos() {
-            if (ocDetalles.length > 0) {
-                const primerDetalle = ocDetalles[0];
-                
-                // Cargar datos generales
-                document.getElementById('numero-oc').textContent = primerDetalle.numero_oc_formateado || '2025-00007';
-                document.getElementById('punto-venta').textContent = primerDetalle.concesionario_ubigeo_completo || 'Chacoche / Abancay / Apurimac';
-                document.getElementById('razon-social').textContent = primerDetalle.concesionario_razon_social || 'HYUNDAI ENGINEERING & CONSTRUCTION CO., LTD-SUCURSAL DEL PERU';
-                document.getElementById('ruc').textContent = primerDetalle.concesionario_ruc || '20605661522';
-                document.getElementById('fecha').textContent = primerDetalle.fecha_emision_oc || '18/07/2025';
-                document.getElementById('direccion').textContent = primerDetalle.concesionario_direccion || 'Jiron San Martin 123';
-                document.getElementById('vendedor').textContent = primerDetalle.concesionario_vendedor_contacto || 'Arturo Magallanes Castro';
-                document.getElementById('telefono').textContent = primerDetalle.concesionario_telefono || '956888999';
-                document.getElementById('observaciones').textContent = primerDetalle.observaciones_oc || 'Pago al contado.';
-                
-                // Cargar resumen financiero
-                document.getElementById('valor-venta').textContent = `$ ${parseFloat(primerDetalle.total_valor_venta_orden || 42000).toLocaleString('en-US', {minimumFractionDigits: 2})}`;
-                document.getElementById('igv').textContent = `$ ${parseFloat(primerDetalle.total_igv_orden || 7560).toLocaleString('en-US', {minimumFractionDigits: 2})}`;
-                document.getElementById('total').textContent = `$ ${parseFloat(primerDetalle.total_general_orden || 49560).toLocaleString('en-US', {minimumFractionDigits: 2})}`;
-                
-                // Cargar vehículos agrupados
-                cargarVehiculosAgrupados();
-            } else {
-                // Si no hay datos, mostrar datos de ejemplo
-                cargarDatosEjemplo();
-            }
+        function cargarDatos(orden, vehiculos) {
+            // Datos del encabezado
+            document.getElementById('numero-oc').textContent = orden.numero_oc_formateado || '-';
+            document.getElementById('punto-venta').textContent = orden.concesionario.ubigeo || '-';
+            document.getElementById('razon-social').textContent = orden.concesionario.razon_social || '-';
+            document.getElementById('ruc').textContent = orden.concesionario.ruc || '-';
+            document.getElementById('fecha').textContent = orden.fecha_emision_oc || '-';
+            document.getElementById('direccion').textContent = orden.concesionario.direccion || '-';
+            document.getElementById('vendedor').textContent = orden.concesionario.vendedor_contacto || '-';
+            document.getElementById('telefono').textContent = orden.concesionario.telefono || '-';
+            document.getElementById('observaciones').textContent = orden.observaciones_oc || 'Sin observaciones';
+
+            // Resumen financiero
+            document.getElementById('valor-venta').textContent = `$ ${parseFloat(orden.totales.valor_venta || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+            document.getElementById('igv').textContent = `$ ${parseFloat(orden.totales.igv || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+            document.getElementById('total').textContent = `$ ${parseFloat(orden.totales.total || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+
+            // Guardamos en variable global para poder agrupar y usar en otras funciones
+            ocDetalles = vehiculos;
+            ocOrden = orden;
+
+            // Cargar vehículos agrupados
+            cargarVehiculosAgrupados();
         }
 
         // Función para cargar vehículos agrupados
         function cargarVehiculosAgrupados() {
             const tbody = document.getElementById('vehiculos-tbody');
             tbody.innerHTML = '';
-            
+
             const vehiculosAgrupados = agruparVehiculos(ocDetalles);
-            
+
             if (vehiculosAgrupados.length === 0) {
                 return;
             }
-            
-            // Si hay muchos vehículos, usar un enfoque diferente
+
+            // Si hay muchos vehículos, usar un enfoque diferente(Se podría poner precio unitario)
             if (vehiculosAgrupados.length >= 5) {
-                cargarVehiculosConPrecioIndividual(vehiculosAgrupados);
+                cargarVehiculosConRowSpan(vehiculosAgrupados);
             } else {
                 cargarVehiculosConRowSpan(vehiculosAgrupados);
             }
         }
-        
-        // Función para cargar vehículos con rowSpan (para pocos vehículos)
+
+        // Función para cargar vehículos con rowSpan
         function cargarVehiculosConRowSpan(vehiculosAgrupados) {
             const tbody = document.getElementById('vehiculos-tbody');
-            
+            tbody.innerHTML = '';
+
             vehiculosAgrupados.forEach((grupo, index) => {
                 const row = document.createElement('tr');
-                
-                // Agregar todas las celdas de datos
-                row.appendChild(createCell(grupo.vehiculo.vehiculo_marca));
-                row.appendChild(createCell(grupo.vehiculo.vehiculo_modelo));
-                row.appendChild(createCell(grupo.vehiculo.vehiculo_version));
-                row.appendChild(createCell(grupo.vehiculo.vehiculo_combustible));
-                row.appendChild(createCell(grupo.vehiculo.vehiculo_anio_modelo));
-                row.appendChild(createCell(grupo.vehiculo.vehiculo_color));
+
+                // Datos base
+                row.appendChild(createCell(grupo.vehiculo.marca));
+                row.appendChild(createCell(grupo.vehiculo.modelo));
+                row.appendChild(createCell(grupo.vehiculo.version));
+                row.appendChild(createCell(grupo.vehiculo.combustible));
+                row.appendChild(createCell(grupo.vehiculo.anio_modelo));
+                row.appendChild(createCell(grupo.vehiculo.color));
                 row.appendChild(createCell(grupo.cantidad));
-                
-                // Solo agregar la celda de precio en la primera fila
+
+                // Importe total 
                 if (index === 0) {
-                    const precioCell = document.createElement('td');
-                    precioCell.style.textAlign = 'center';
-                    precioCell.style.fontWeight = 'bold';
-                    precioCell.style.fontSize = '11px';
-                    precioCell.style.verticalAlign = 'middle';
-                    precioCell.rowSpan = vehiculosAgrupados.length;
-                    precioCell.textContent = `$ ${parseFloat(ocDetalles[0].total_general_orden).toLocaleString('en-US', {minimumFractionDigits: 2})}`;
-                    row.appendChild(precioCell);
+                    const totalCell = document.createElement('td');
+                    totalCell.style.textAlign = 'center';
+                    totalCell.style.fontWeight = 'bold';
+                    totalCell.style.fontSize = '11px';
+                    totalCell.style.verticalAlign = 'middle';
+                    totalCell.rowSpan = vehiculosAgrupados.length;
+                    totalCell.textContent = `$ ${parseFloat(ocOrden.totales.total).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+                    row.appendChild(totalCell);
                 }
-                
                 tbody.appendChild(row);
             });
         }
-        
-        // Función para cargar vehículos con precio individual (para muchos vehículos)
-        function cargarVehiculosConPrecioIndividual(vehiculosAgrupados) {
-            const tbody = document.getElementById('vehiculos-tbody');
-            const precioPorVehiculo = parseFloat(ocDetalles[0].total_general_orden) / ocDetalles.length;
-            
-            vehiculosAgrupados.forEach((grupo) => {
-                const row = document.createElement('tr');
-                
-                // Agregar todas las celdas de datos
-                row.appendChild(createCell(grupo.vehiculo.vehiculo_marca));
-                row.appendChild(createCell(grupo.vehiculo.vehiculo_modelo));
-                row.appendChild(createCell(grupo.vehiculo.vehiculo_version));
-                row.appendChild(createCell(grupo.vehiculo.vehiculo_combustible));
-                row.appendChild(createCell(grupo.vehiculo.vehiculo_anio_modelo));
-                row.appendChild(createCell(grupo.vehiculo.vehiculo_color));
-                row.appendChild(createCell(grupo.cantidad));
-                
-                // Agregar precio individual
-                const precioCell = document.createElement('td');
-                precioCell.style.textAlign = 'center';
-                precioCell.style.fontWeight = 'bold';
-                precioCell.style.fontSize = '11px';
-                precioCell.style.verticalAlign = 'middle';
-                precioCell.textContent = `$ ${precioPorVehiculo.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
-                row.appendChild(precioCell);
-                
-                tbody.appendChild(row);
-            });
-        }
-        
-        // Función auxiliar para crear celdas
+
         function createCell(text) {
             const cell = document.createElement('td');
             cell.textContent = text;
             return cell;
         }
 
-        // Función para generar PDF
-        function generatePDF() {
-            const btn = document.querySelector('.btn-generate-pdf');
-            btn.style.display = 'none';
-            
-            const element = document.querySelector('.container');
-            const opt = {
-                margin: [0.1, 0.3, 0.1, 0.3], // [top, right, bottom, left] - reducido el margen superior
-                filename: 'orden-compra-yonda.pdf',
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2 },
-                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-            };
-
-            html2pdf().set(opt).from(element).save().then(() => {
-                btn.style.display = 'block';
-            });
-        }
-
-        // Función para generar PDF automáticamente
         function generarPDFAutomatico() {
             const element = document.querySelector('.container');
             const loadingIndicator = document.getElementById('loading-indicator');
-            
+
             const opt = {
-                margin: [0.1, 0.3, 0.1, 0.3], // [top, right, bottom, left] - reducido el margen superior
+                margin: [0.3, 0.3, 0.3, 0.3], 
                 filename: `orden-compra-${getIdFromPath() || 'yonda'}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2 },
-                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+                image: {
+                    type: 'jpeg',
+                    quality: 0.98
+                },
+                html2canvas: {
+                    scale: 1.75, 
+                    useCORS: true },
+                jsPDF: {
+                    unit: 'in',
+                    format: 'a4',
+                    orientation: 'portrait'
+                }
             };
 
             html2pdf().set(opt).from(element).save().then(() => {
-                // Ocultar indicador de carga
                 if (loadingIndicator) {
                     loadingIndicator.style.display = 'none';
                 }
-                // Cerrar la ventana después de generar el PDF
                 setTimeout(() => {
                     window.close();
                 }, 500);
             }).catch(error => {
                 console.error('Error al generar PDF:', error);
-                // Ocultar indicador de carga
                 if (loadingIndicator) {
                     loadingIndicator.style.display = 'none';
                 }
-                // Si hay error, mostrar mensaje y cerrar
                 alert('Error al generar el PDF. La ventana se cerrará.');
                 setTimeout(() => {
                     window.close();
@@ -425,8 +376,10 @@
             });
         }
 
-        // Cargar datos cuando se carga la página
+
+      
         document.addEventListener('DOMContentLoaded', cargarDatosDesdeAPI);
     </script>
 </body>
-</html> 
+
+</html>

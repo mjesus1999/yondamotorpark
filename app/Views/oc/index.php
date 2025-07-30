@@ -148,7 +148,7 @@
                                                 <i class="bi bi-info-circle text-primary fs-5"></i>
                                             </a>
 
-                                            <a href="/oc/pagos/<?=htmlspecialchars($ordenCompra['idordencompra'])?>" title="Pagos realizados" > <i class="bi-receipt fs-5 text-warning"></i></a>
+                                            <a href="/oc/pagos/<?= htmlspecialchars($ordenCompra['idordencompra']) ?>" title="Pagos realizados"> <i class="bi-receipt fs-5 text-warning"></i></a>
                                         </td>
                                     <?php endif; ?>
                                 </tr>
@@ -481,7 +481,7 @@
                         console.warn('ID de Orden de Compra no encontrado en el enlace de detalle.');
                         return;
                     }
-                    // Limpiar vista antes de cargar nuevos datos
+
                     limpiarVistaDetalle();
 
                     const apiUrl = `/api/oc/${ocId}`;
@@ -493,62 +493,67 @@
                             throw new Error(`HTTP error! status: ${response.status}`);
                         }
 
-                        const ocDetails = await response.json();
+                        const data = await response.json();
 
-                        // Validar si hay datos válidos
-                        if (!ocDetails || !Array.isArray(ocDetails) || ocDetails.length === 0) {
-                            showToast('No hay datos para la OC', 'WARNING', 1200);
-                            return; // No mostrar la vista de detalles.
+                        // Validar si el nuevo JSON tiene la estructura esperada
+                        if (!data || !data.orden || !Array.isArray(data.vehiculos)) {
+                            showToast('No hay datos válidos para la OC', 'WARNING', 1200);
+                            return;
                         }
 
-                        // Mostrar la vista de detalle con animación
+                        const {
+                            orden,
+                            vehiculos
+                        } = data;
+
+                        // Mostrar vista
                         $("#lista-oc").slideUp(speedAnimation);
                         $("#detalle-oc").slideDown(speedAnimation);
 
-                        // Llenar información del encabezado
-                        const firstDetail = ocDetails[0];
-
+                        // Llenar encabezado
                         if (detailConcesionarioRazonSocial && detailOcSummary) {
-                            detailConcesionarioRazonSocial.textContent = firstDetail.concesionario_razon_social || 'N/A';
+                            detailConcesionarioRazonSocial.textContent = orden.concesionario.razon_social || 'N/A';
 
-                            const numeroOc = firstDetail.numero_oc_formateado || 'N/A';
-                            const fechaEmision = firstDetail.fecha_emision_oc || 'N/A';
-                            const moneda = firstDetail.moneda_oc || 'N/A';
-                            const total = firstDetail.total_general_orden ? parseFloat(firstDetail.total_general_orden).toFixed(2) : '0.00';
+                            const numeroOc = orden.numero_oc_formateado || 'N/A';
+                            const fechaEmision = orden.fecha_emision_oc || 'N/A';
+                            const moneda = orden.moneda_oc || 'N/A';
+                            const total = orden.totales.total ? parseFloat(orden.totales.total).toFixed(2) : '0.00';
 
                             detailOcSummary.textContent = `${numeroOc} | ${fechaEmision} | ${moneda} ${total}`;
                         }
 
-                        // Llenar tabla de detalles
+                        // Llenar tabla
                         if (tablaDetallesBody) {
                             tablaDetallesBody.innerHTML = '';
 
-                            ocDetails.forEach((detail, index) => {
+                            vehiculos.forEach((vehiculo, index) => {
                                 const row = document.createElement('tr');
                                 row.innerHTML = `
-                            <td>${index + 1}</td>
-                            <td>${detail.vehiculo_marca || 'N/A'}</td>
-                            <td>${detail.vehiculo_modelo || 'N/A'}</td>
-                            <td>${detail.vehiculo_version || 'N/A'}</td>
-                            <td>${detail.vehiculo_combustible || 'N/A'}</td>
-                            <td>${detail.vehiculo_anio_modelo || 'N/A'}</td>
-                            <td>${detail.vehiculo_chasis || 'N/A'}</td>
-                            <td>${detail.vehiculo_serie_motor || 'N/A'}</td>
-                            <td>${detail.vehiculo_placa || 'N/A'}</td>
-                            <td>${detail.vehiculo_placa_rotativa || 'N/A'}</td>
-                            <td>${detail.vehiculo_color || 'N/A'}</td>
-                            <td>${detail.moneda_oc || 'N/A'}</td>
-                            <td>${detail.vehiculo_precio_unitario ? parseFloat(detail.vehiculo_precio_unitario).toFixed(2) : '0.00'}</td>
-                        `;
+                        <td>${index + 1}</td>
+                        <td>${vehiculo.marca || 'N/A'}</td>
+                        <td>${vehiculo.modelo || 'N/A'}</td>
+                        <td>${vehiculo.version || 'N/A'}</td>
+                        <td>${vehiculo.combustible || 'N/A'}</td>
+                        <td>${vehiculo.anio_modelo || 'N/A'}</td>
+                        <td>${vehiculo.chasis || 'N/A'}</td>
+                        <td>${vehiculo.serie_motor || 'N/A'}</td>
+                        <td>${vehiculo.placa || 'N/A'}</td>
+                        <td>${vehiculo.placa_rotativa || 'N/A'}</td>
+                        <td>${vehiculo.color || 'N/A'}</td>
+                        <td>${orden.moneda_oc || 'N/A'}</td>
+                        <td>${vehiculo.precio_unitario ? parseFloat(vehiculo.precio_unitario).toFixed(2) : '0.00'}</td>
+                    `;
                                 tablaDetallesBody.appendChild(row);
                             });
                         }
 
                     } catch (error) {
+                        console.error(error);
                         showToast('No se ha podido cargar los datos', 'WARNING', 1200);
                     }
                 });
             });
+
 
 
             if (botonVolver) {
@@ -561,6 +566,7 @@
                     $("#lista-oc").slideDown(speedAnimation);
                 });
             }
+
 
 
         });

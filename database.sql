@@ -276,8 +276,7 @@ CREATE TABLE vehiculos (
 
 USE motorpark;
 
---ALTER TABLE vehiculos
---ADD COLUMN estado ENUM('0', '1') NULL DEFAULT '1';
+-- ALTER TABLE vehiculos ADD COLUMN estado ENUM('0', '1') NULL DEFAULT '1';
 
 --ALTER TABLE vehiculos ADD COLUMN eliminado DATETIME NULL;
 --SHOW COLUMNS FROM vehiculos;
@@ -325,7 +324,7 @@ CREATE TABLE ordenescompra (
 ) ENGINE = INNODB;
 -- ALTER TABLE ordenescompra ADD COLUMN creado DATETIME NOT NULL DEFAULT NOW();
 -- ALTER TABLE ordenescompra ADD COLUMN fechanulado DATETIME NULL;
---ALTER TABLE ordenescompra MODIFY COLUMN estado ENUM('emitido','proceso','anulado','pagado') NOT NULL DEFAULT 'emitido';
+ALTER TABLE ordenescompra MODIFY COLUMN estado ENUM('emitido','proceso','anulado','pagado') NOT NULL DEFAULT 'emitido';
 
 CREATE TABLE pagosOC (
     idpagooc INT AUTO_INCREMENT NOT NULL PRIMARY KEY,
@@ -334,9 +333,10 @@ CREATE TABLE pagosOC (
     amortizacion DECIMAL(10, 2) NOT NULL, -- Lo que se ha adelantado
     saldo DECIMAL(10, 2) NOT NULL, -- El saldo a pagar o lo que falta pagar si es que se ha hehco amortización
     comprobante VARCHAR(300) NOT NULL, -- Ruta del comprobante
-    fecha DATETIME NOT NULL NOW(), -- Fecha y hora de que se regsitro el pago
-    fecharealpago DATETIME NULL,
-    CONSTRAINT fk_idlo_pagoOC FOREIGN KEY (idlogistica) REFERENCES colaboradores (idcolaborador) CONSTRAINT fk_idorde_pagosOC FOREIGN KEY (idorden) REFERENCES ordenescompra (idordencompra)
+    fecha DATETIME NOT NULL DEFAULT NOW(), -- Fecha y hora de que se regsitro el pago
+    fecharealpago DATETIME NOT NULL,
+    CONSTRAINT fk_idlo_pagoOC FOREIGN KEY (idlogistica) REFERENCES colaboradores (idcolaborador),
+    CONSTRAINT fk_idorde_pagosOC FOREIGN KEY (idorden) REFERENCES ordenescompra (idordencompra)
 ) ENGINE = InnoDB;
 USE motorpark;
 --ALTER TABLE pagosOC MODIFY COLUMN fecha DATETIME NULL DEFAULT NOW();
@@ -365,7 +365,7 @@ CONSTRAINT fk_idvehiculo_doc FOREIGN KEY (idvehiculo) REFERENCES vehiculos (idve
     CONSTRAINT uk_idvehiculo_doc UNIQUE (idvehiculo) -- Relación uno a uno
 ) ENGINE = INNODB;
 
---ALTER TABLE detordencompra ADD COLUMN estado ENUM('0','1') NOT NULL DEFAULT '1';
+ALTER TABLE detordencompra ADD COLUMN estado ENUM('0','1') NOT NULL DEFAULT '1';
 
 --ALTER TABLE detordencompra ADD COLUMN creado   DATETIME        NOT NULL DEFAULT NOW();
 

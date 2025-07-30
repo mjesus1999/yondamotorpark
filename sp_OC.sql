@@ -47,10 +47,11 @@ END $$
 DELIMITER ;
 
 
+DROP PROCEDURE sp_anular_OC
 
 DELIMITER //
 
-CREATE PROCEDURE sp__anular_OC(
+CREATE PROCEDURE sp_anular_OC(
     IN estado_ VARCHAR(20),
     IN observaciones_ VARCHAR(400),
     IN idordencompra_ INT

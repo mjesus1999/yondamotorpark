@@ -5,15 +5,15 @@ SELECT * FROM detordencompra;
 SELECT * FROM ordenescompra;
 
 SHOW EVENTS;
-CREATE TABLE pagosOC(
-idpagooc		INT NOT NULL PRIMARY KEY,
-idlogistica		INT NOT NULL, -- Persona que regsitro el pago
-amortizacon		DECIMAL(10,2) NOT NULL,  -- Lo que se ha adelantado
-saldo			DECIMAL(10,2) NOT NULL, -- El saldo a pagar o lo que falta pagar si es que se ha hehco amortización
-comprobante    VARCHAR(300) NOT NULL, -- Ruta del comprobante
-fecha		   DATETIME NOT NULL,   -- Fecha y hora de que se regsitro el pago
-CONSTRAINT fk_idlo_pagoOC FOREIGN KEY(idlogistica) REFERENCES colaboradores(idcolaborador)
-)ENGINE=InnoDB;
+-- CREATE TABLE pagosOC(
+-- idpagooc		INT NOT NULL PRIMARY KEY,
+-- idlogistica		INT NOT NULL, -- Persona que regsitro el pago
+-- amortizacon		DECIMAL(10,2) NOT NULL,  -- Lo que se ha adelantado
+-- saldo			DECIMAL(10,2) NOT NULL, -- El saldo a pagar o lo que falta pagar si es que se ha hehco amortización
+-- comprobante    VARCHAR(300) NOT NULL, -- Ruta del comprobante
+-- fecha		   DATETIME NOT NULL,   -- Fecha y hora de que se regsitro el pago
+-- CONSTRAINT fk_idlo_pagoOC FOREIGN KEY(idlogistica) REFERENCES colaboradores(idcolaborador)
+-- )ENGINE=InnoDB;
 
 SELECT * FROM compras;
 SELECT * FROM ordenescompra;
@@ -139,6 +139,13 @@ SELECT * FROM vehiculos;
 
 
 DELIMITER //
+
+
+
+
+
+
+
 
 CREATE PROCEDURE sp_eliminar_OC(
 IN idordencompra_ INT

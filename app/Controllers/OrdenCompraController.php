@@ -192,18 +192,69 @@ class OrdenCompraController extends Controller
 
     // API PARA TRAER EL DETALLE DE UNA PC OR SU ID:
 
-    public function searchtDetOCByIdOc($idOC): void
-    {
-        header('Content-Type: application/json');
-        $ocDet = $this->ordenCompraModel->getDetOCByIdOC($idOC);
+public function searchtDetOCByIdOc($idOC): void
+{
+    header('Content-Type: application/json');
+    $ocDet = $this->ordenCompraModel->getDetOCByIdOC($idOC);
 
-        if ($ocDet) {
-            echo json_encode($ocDet);
-        } else {
-            echo json_encode([]);
-        }
+    if (!$ocDet || count($ocDet) === 0) {
+        echo json_encode([]);
         exit();
     }
+
+    // Tomar los datos generales de la primera fila
+    $first = $ocDet[0];
+
+    $orden = [
+        "numero_oc_interno" => $first["numero_oc_interno"],
+        "anio_oc" => $first["anio_oc"],
+        "numero_oc_formateado" => $first["numero_oc_formateado"],
+        "fecha_emision_oc" => $first["fecha_emision_oc"],
+        "observaciones_oc" => $first["observaciones_oc"],
+        "moneda_oc" => $first["moneda_oc"],
+        "concesionario" => [
+            "razon_social" => $first["concesionario_razon_social"],
+            "ruc" => $first["concesionario_ruc"],
+            "direccion" => $first["concesionario_direccion"],
+            "telefono" => $first["concesionario_telefono"],
+            "ubigeo" => $first["concesionario_ubigeo_completo"],
+            "vendedor_contacto" => $first["concesionario_vendedor_contacto"],
+        ],
+        "totales" => [
+            "valor_venta" => $first["total_valor_venta_orden"],
+            "igv" => $first["total_igv_orden"],
+            "total" => $first["total_general_orden"]
+        ]
+    ];
+
+    // Mapear los vehículos
+    $vehiculos = array_map(function($item) {
+        return [
+            "id" => $item["id_detalle_orden"],
+            "marca" => $item["vehiculo_marca"],
+            "modelo" => $item["vehiculo_modelo"],
+            "version" => $item["vehiculo_version"],
+            "combustible" => $item["vehiculo_combustible"],
+            "anio_modelo" => $item["vehiculo_anio_modelo"],
+            "placa" => $item["vehiculo_placa"],
+            "placa_rotativa" => $item["vehiculo_placa_rotativa"],
+            "chasis" => $item["vehiculo_chasis"],
+            "serie_motor" => $item["vehiculo_serie_motor"],
+            "color" => $item["vehiculo_color"],
+            "precio_unitario" => $item["vehiculo_precio_unitario"],
+            "valor_venta_unitario" => $item["valor_venta_unitario"],
+            "igv_unitario" => $item["igv_unitario"],
+            "total_unitario" => $item["total_unitario"]
+        ];
+    }, $ocDet);
+
+    echo json_encode([
+        "orden" => $orden,
+        "vehiculos" => $vehiculos
+    ]);
+    exit();
+}
+
 
     // API PARA TRAER LOS DATOS DEL AUTO A ACTULIZAR EN DETALLE_OC SI LLEGO CORRECTO
 
