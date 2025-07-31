@@ -129,4 +129,13 @@ class CotizacionController extends Controller
         }
     }
 
+    public function tipoCambio(): void
+    {
+        header('Content-Type: application/json; charset=utf-8');
+        require_once __DIR__ . '/../Helpers/Api.php';
+        $tc = obtenerTipoCambio();
+        echo json_encode(['tipo_cambio' => $tc]);
+        exit;
+    }
+
 }

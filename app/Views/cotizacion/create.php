@@ -469,7 +469,6 @@
         document.getElementById('inputVigenciaDias').value = 7;
     }
 
-
     // Si el usuario pudiera cambiar fechas manualmente:
     document.getElementById('fechaCaducidad').addEventListener('change', () => {
         const em = new Date(document.getElementById('fechaEmision').value);
@@ -521,12 +520,12 @@
             const d = $(this).data();
             fillPaso2(d);
             clearConversion();
-            if (typeof actualizarMontos === 'function') await actualizarMontos();
+            await actualizarMontos();          // <-- aquí vendrá el TC
+            await actualizarFinanciamiento();
             bootstrap.Modal.getInstance($('#modalVehiculos')[0]).hide();
         });
-        if (typeof actualizarMontos === 'function') {
-            actualizarMontos();
-        }
+        // Inicial al cargar la página
+        actualizarMontos();
     }
 
     function fillPaso2({ idvehiculo, descripcion, placa, placarotativa, precioventa, moneda }) {
@@ -551,14 +550,47 @@
         $('#tipoCambio, #valormoneda').val('');
     }
 
+    // 1) Función para llamar a tu propio endpoint
+    async function fetchTipoCambio() {
+        try {
+            const res = await fetch('/cotizacion/tipo-cambio');
+            if (!res.ok) throw new Error(res.statusText);
+            const { tipo_cambio } = await res.json();
+            return parseFloat(tipo_cambio) || 1;
+        } catch (err) {
+            console.error('Error al obtener tipo de cambio:', err);
+            return 1; // fallback
+        }
+    }
+
+    // 2) Reemplaza tu actualizarMontos() con esta versión que primero obtiene el TC
     async function actualizarMontos() {
         const precioOriginal = parseFloat($('#valor').val()) || 0;
-        const vehMoneda = $('#vehiculoMoneda').val();    // 'USD' o 'PEN'
-        const cotMoneda = $('#monedaSelect').val();      // input elegida por usuario
-        let tipoCam = parseFloat($('#tipoCambio').val()) || 1;
-        let precioFinal = precioOriginal;
+        const vehMoneda = $('#vehiculoMoneda').val();   // 'USD' o 'PEN'
+        const cotMoneda = $('#monedaSelect').val();     // 'USD' o 'PEN'
+        let tipoCam = 1;
 
-        // si la divisa del vehículo y la de cotización difieren, convierto:
+        if (!idvehiculo) {
+            $('#tipoCambio').val('');
+            $('#valormoneda').val('');
+            $('#inputPrecioventa').val('');
+            $('#inputMoneda').val('');
+            $('#inputTipoCambio').val('');
+            $('#inputValorConvertido').val('');
+            return;
+        }
+
+        // Si la moneda del vehículo y la de cotización difieren, traigo el TC
+        if (vehMoneda !== cotMoneda) {
+            tipoCam = await fetchTipoCambio();
+            $('#tipoCambio').val(tipoCam.toFixed(4));
+        } else {
+            // si es la misma, limpio el input
+            $('#tipoCambio').val('');
+        }
+
+        // Calculo conversión
+        let precioFinal = precioOriginal;
         if (vehMoneda !== cotMoneda) {
             if (vehMoneda === 'USD' && cotMoneda === 'PEN') {
                 precioFinal = precioOriginal * tipoCam;
@@ -567,12 +599,10 @@
             }
         }
 
-        // redondeo a 2 decimales
         precioFinal = Number(precioFinal.toFixed(2));
 
-        // relleno solo-lectura
+        // Relleno los campos de solo lectura y los hidden
         $('#valormoneda').val(precioFinal);
-        // relleno hidden para enviar al servidor
         $('#inputPrecioventa').val(precioFinal);
         $('#inputMoneda').val(cotMoneda);
         $('#inputTipoCambio').val(tipoCam);
@@ -580,7 +610,10 @@
     }
 
     // Disparadores: cuando cambie la moneda elegida o el tipo de cambio:
-    $('#monedaSelect, #tipoCambio').on('change', actualizarMontos);
+    $('#monedaSelect, #tipoCambio').on('change', async () => {
+        await actualizarMontos();
+        await actualizarFinanciamiento();
+    });
 
     async function actualizarFinanciamiento() {
         const inicial = parseFloat($('#inicial').val()) || 0;
@@ -617,8 +650,8 @@
 
     $('#inicial, #numcuotas, #tasaAnual, #tipoCambio, #monedaSelect')
         .on('input change', async () => {
-            await actualizarMontos();         // primero recalculas precioFinal
-            await actualizarFinanciamiento(); // luego la cuota via API
+            await actualizarMontos();         // primero recalcular precioFinal
+            await actualizarFinanciamiento(); // recalcular la cuota via API
         });
 
     $('#tasaAnual').val(65);
