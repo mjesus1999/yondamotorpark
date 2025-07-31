@@ -428,7 +428,7 @@
         return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
     }
     document.addEventListener("DOMContentLoaded", () => {
-        initDataTable();
+        /* initDataTable(); */
         initFechas();
         initEventosCliente();
         initEventosVehiculo();
@@ -436,7 +436,7 @@
     });
 
     // Inicializa DataTable
-    function initDataTable() {
+    /* function initDataTable() {
         $('#tablaVehiculosModal').DataTable({
             order: [[0, 'desc']],
             pagingType: 'full_numbers',
@@ -453,7 +453,7 @@
                 }
             }
         });
-    }
+    } */
 
     function initFechas() {
         const hoy = new Date();

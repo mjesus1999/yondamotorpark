@@ -238,6 +238,10 @@ VALUES
   ('P', 2, NULL,  3),
   ('E', NULL, 1,  3);  
 
+-- Supongamos que la persona con DNI 71689010 tiene idpersona = 3
+INSERT INTO clientes (tipocliente, idpersona, idempresa, idcolregistra)
+VALUES ('P', 3, NULL,  3);
+
 
 /*
 INSERT INTO vehiculos
