@@ -1,3 +1,4 @@
+
 USE motorpark;
 SELECT * FROM marcas;
 SELECT * FROM combustibles;

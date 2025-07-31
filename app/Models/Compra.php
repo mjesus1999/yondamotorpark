@@ -16,6 +16,38 @@ class Compra
     }
 
 
+    public function getAll(): array
+    {
+        $query = " SELECT 
+            c.idcompra,
+            c.idorden,
+            c.fechacompra,
+            c.fecharecepcion,
+            c.tipodoc,
+            c.serie,
+            c.numdocumento,
+            c.rutadoc,
+            con.razonsocial AS razon_concesionario
+            
+        FROM compras c
+        INNER JOIN ordenescompra o ON c.idorden = o.idordencompra
+        INNER JOIN tiendas t ON o.idtienda = t.idtienda
+        INNER JOIN concesionarios con ON t.idconcesionario = con.idconcesionario
+        ORDER BY c.creado DESC;";
+
+        try {
+            $stmt = $this->db->prepare($query);
+            $stmt->execute();
+            $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            return $data;
+        } catch (PDOException $error) {
+            error_log($error->getMessage());
+            return [];
+        }
+    }
+
+
+
     public function getDetOCByConcesionario(int $id): ?array
     {
         $query = "CALL sp_detalle_oc_por_concesionario(:idconcesionario);";
@@ -32,6 +64,8 @@ class Compra
             return [];
         }
     }
+
+
 
 
 

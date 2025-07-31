@@ -18,19 +18,112 @@ class CompraController extends Controller
 
     public function index(): void
     {
-        $this->view('compras.index');
+        $compras = $this->compraModel->getAll();
+        $this->view('compras.index', ['compras' => $compras]);
+        
     }
+
 
     public function create(): void
     {
         $this->view('compras.create');
     }
 
+   public function store(): void
+{
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        http_response_code(405);
+        echo json_encode(['success' => false, 'message' => 'Método no permitido']);
+        exit;
+    }
 
+    header('Content-Type: application/json');
 
+    $data = array_map([Validador::class, 'limpiar'], $_POST);
 
+    $registro = [
+        'idorden' => $data['idorden'] ?? 0,
+        'idlogistica' => 2,
+        'fechacompra' => $data['fechacompra'] ?? '',
+        'tipodoc' => $data['tipodoc'] ?? '',
+        'serie' => $data['serie'] ?? '',
+        'numdocumento' => $data['numdocumento'] ?? '',
+        'rutadoc' => '' // Inicializamos vacío, se asignará después de subir el archivo
+    ];
 
+    $errores = [];
+    $errores[] = Validador::campoObligatorio($registro['idorden'], 'Orden de Compra');
+    $errores[] = Validador::campoObligatorio($registro['idlogistica'], 'Logística');
+    $errores[] = Validador::campoObligatorio($registro['fechacompra'], 'Fecha de Compra');
+    $errores[] = Validador::campoObligatorio($registro['tipodoc'], 'Tipo de Documento');
+    $errores[] = Validador::campoObligatorio($registro['serie'], 'Serie');
+    $errores[] = Validador::campoObligatorio($registro['numdocumento'], 'Número de Documento');
+    $errores = array_filter($errores);
 
+    // Validar que se haya subido un archivo
+    if (empty($_FILES['rutadoc']['name'])) {
+        $errores[] = 'Debe subir un archivo PDF';
+    }
+
+    if (!empty($errores)) {
+        echo json_encode([
+            'success' => false,
+            'message' => implode('<br>', $errores),
+            'id' => 0
+        ]);
+        exit;
+    }
+
+    try {
+        // Procesar el archivo subido
+        $nombreArchivo = uniqid('factura_') . '_' . basename($_FILES['rutadoc']['name']);
+        $directorioDestino = 'storage/facturas/';
+
+        // Crear directorio si no existe
+        if (!is_dir($directorioDestino)) {
+            mkdir($directorioDestino, 0777, true);
+        }
+
+        $rutaCompleta = $directorioDestino . $nombreArchivo;
+
+        // Validar que sea un PDF
+        $extension = strtolower(pathinfo($_FILES['rutadoc']['name'], PATHINFO_EXTENSION));
+        if ($extension !== 'pdf') {
+            echo json_encode(['success' => false, 'message' => 'El archivo debe ser un PDF', 'id' => 0]);
+            exit;
+        }
+
+        // Mover el archivo subido al directorio destino
+        if (!move_uploaded_file($_FILES['rutadoc']['tmp_name'], $rutaCompleta)) {
+            echo json_encode(['success' => false, 'message' => 'No se pudo guardar el archivo PDF', 'id' => 0]);
+            exit;
+        }
+
+        // Asignar la ruta relativa al registro
+        $registro['rutadoc'] = '/' . $rutaCompleta;
+
+        // Guardar en la base de datos
+        $idCompra = $this->compraModel->create($registro);
+        
+        echo json_encode([
+            'success' => true, 
+            'message' => 'Compra registrada correctamente', 
+            'id' => $idCompra,
+            'ruta' => $registro['rutadoc'] // Opcional: devolver la ruta para referencia
+        ]);
+    } catch (\Exception $e) {
+        // Eliminar el archivo si hubo error en la base de datos
+        if (isset($rutaCompleta)) {
+            @unlink($rutaCompleta);
+        }
+        
+        echo json_encode([
+            'success' => false, 
+            'message' => 'Error al registrar la compra: ' . $e->getMessage(), 
+            'id' => 0
+        ]);
+    }
+}
 
 
 

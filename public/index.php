@@ -32,11 +32,11 @@ require APP_ROOT . '/app/Routes/Persona.router.php';
 require APP_ROOT . '/app/Routes/Cliente.router.php';
 require APP_ROOT . '/app/Routes/Tienda.router.php';
 require APP_ROOT . '/app/Routes/Concesionario.router.php';
-require APP_ROOT . '/app/Routes/OC.router.php';
 require APP_ROOT . '/app/Routes/TipoVehiculo.router.php';
 require APP_ROOT . '/app/Routes/Modelo.router.php';
 require APP_ROOT . '/app/Routes/Vehiculo.router.php';
 require APP_ROOT . '/app/Routes/DetalleOC.router.php';
+require APP_ROOT . '/app/Routes/OC.router.php';
 require APP_ROOT . '/app/Routes/PagosOC.router.php';
 require APP_ROOT . '/app/Routes/Compra.router.php';
 

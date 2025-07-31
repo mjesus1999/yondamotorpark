@@ -284,8 +284,8 @@ USE motorpark;
 -- ALTER TABLE vehiculos MODIFY COLUMN idlogistica INT NULL;
 --ALTER TABLE vehiculos DROP CONSTRAINT fk_idmodelo_veh;
 
---ALTER TABLE vehiculos
---ADD CONSTRAINT fk_idmodelo_veh FOREIGN KEY (idmodelo) REFERENCES modelos (idmodelo);
+-- ALTER TABLE vehiculos DROP CONSTRAINT fk_idmodelo_veh;
+--ALTER TABLE vehiculos ADD CONSTRAINT fk_idmodelo_veh FOREIGN KEY (idmodelo) REFERENCES modelos (idmodelo);
 
 -- Cuando se compra un vehículo, este además de su valor, supone pagos adicioanles como:
 -- Tarjeta de propiedad y placa, Flete picanto, gastos administrativos
