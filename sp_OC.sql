@@ -49,6 +49,8 @@ DELIMITER ;
 
 DROP PROCEDURE sp_anular_OC
 
+DROP PROCEDURE sp_anular_OC;
+
 DELIMITER //
 
 CREATE PROCEDURE sp_anular_OC(

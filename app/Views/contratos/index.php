@@ -17,7 +17,7 @@ include __DIR__ . '/../layout/header.php';
                 </nav>
             </div>
 
-            
+
         </div>
     </div>
 
@@ -42,32 +42,31 @@ include __DIR__ . '/../layout/header.php';
                             </thead>
                             <tbody>
 
-                            <tr>
-                                <td>1</td>
-                                <td>Flores Munayco Isabel María</td>
-                                <td>DNI</td>
-                                <td>85858525</td>
-                                <td>Chincha</td>
-                                <td>Hyundai / i10 / GLP / Negro</td>
-                                <td>24</td>
-                                <td>2500</td>
-                                <td><button class="btn btn-outline-primary btn-sm"><a href="/contrato/cronograma
-                                ">Cronograma</a></button></td>
+                                <tr>
+                                    <td>1</td>
+                                    <td>Flores Munayco Isabel María</td>
+                                    <td>DNI</td>
+                                    <td>85858525</td>
+                                    <td>Chincha</td>
+                                    <td>Hyundai / i10 / GLP / Negro</td>
+                                    <td>24</td>
+                                    <td>2500</td>
+                                    <td><a href="/contrato/cronograma" title="Ver Cronograma"><i class="bi-receipt fs-5 text-warning"></i></a></td>
 
-                            </tr>
-                            <tr>
-                                 <td>1</td>
-                                <td>Fuentes Marcelo Rodolfo Enrique</td>
-                                <td>DNI</td>
-                                <td>36369568</td>
-                                <td>Chincha</td>
-                                <td>Hyundai / i10 / GLP / Negro</td>
-                                <td>24</td>
-                                <td>3200</td>
-                                <td><button class="btn btn-outline-primary btn-sm"><a href="/contrato/cronograma">Cronograma</a></button></td>
-                            </tr>
+                                </tr>
+                                <tr>
+                                    <td>1</td>
+                                    <td>Fuentes Marcelo Rodolfo Enrique</td>
+                                    <td>DNI</td>
+                                    <td>36369568</td>
+                                    <td>Chincha</td>
+                                    <td>Hyundai / i10 / GLP / Negro</td>
+                                    <td>24</td>
+                                    <td>3200</td>
+                                    <td><a href="/contrato/cronograma" title="Ver Cronograma"><i class="bi-receipt fs-5 text-warning"></i></a></td>
+                                </tr>
 
-                                
+
                             </tbody>
                         </table>
                     </div>
