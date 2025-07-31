@@ -28,7 +28,8 @@ function obtenerTipoCambio():float{
       // Procesa los datos
       //echo json_encode($data); //PASAR A JSON
       //var_dump($data);
-      return $data['buy_price'];
+      //return $data['buy_price'];
+      return floatval($data['buy_price']) * 1.05;
   } else {
       //echo "Error al decodificar la respuesta";
       return 0;
