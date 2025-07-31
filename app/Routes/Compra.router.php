@@ -10,3 +10,5 @@ $router->add('POST','/compras/store','CompraController','store');
 // APIS
 
 $router->add('GET','/api/detOCConcesionario/{id}','CompraController','searchDetOCByConcesionario');
+$router->add('GET','/api/concesionarioOCActiva','CompraController','searchConcesionarioOCActiva');
+

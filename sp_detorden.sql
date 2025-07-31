@@ -144,3 +144,50 @@ SELECT * FROM ordenescompra;
 DELETE FROM ordenescompra 
 WHERE idordencompra NOT IN (6, 7);
 
+
+
+-- SP QUE ACTUALIZA EL CAMPO ESCORRECTO DE LA TABLA OC Y LA FECHARECEPCION EN TABLA COMPRAS.DELIMITER ;
+DROP PROCEDURE  sp_check_recepcion_OC
+
+DELIMITER $$
+
+CREATE PROCEDURE sp_check_recepcion_OC(
+    IN escorrecto_ CHAR(1),
+    IN idordencompra_ INT
+)
+BEGIN
+    DECLARE filas_detorden INT DEFAULT 0;
+    DECLARE filas_compras INT DEFAULT 0;
+    DECLARE rowCount INT DEFAULT 0;
+
+    START TRANSACTION;
+
+    -- Actualizar detordencompra
+    UPDATE detordencompra
+    SET escorrecto = escorrecto_,
+        modificado = NOW()
+    WHERE idordencompra = idordencompra_;
+
+    SET filas_detorden = ROW_COUNT();
+
+    -- Actualizar compras con fecharecepcion = NOW()
+    UPDATE compras com
+    INNER JOIN ordenescompra oc ON com.idorden = oc.idordencompra
+    SET com.fecharecepcion = NOW()
+    WHERE oc.idordencompra = idordencompra_;
+
+    SET filas_compras = ROW_COUNT();
+
+    COMMIT;
+    
+    SET rowCount = filas_detorden + filas_compras;
+
+    -- Devolver filas afectadas
+    SELECT rowCount;
+END $$
+
+DELIMITER ;
+
+
+
+	CALL sp_check_recepcion_OC('S',35);

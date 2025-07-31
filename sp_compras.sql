@@ -1,3 +1,4 @@
+
 USE motorpark;
 
 DROP PROCEDURE  sp_compra_registrar

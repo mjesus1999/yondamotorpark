@@ -87,7 +87,7 @@ class OrdenCompra
 
     public function updateEscorrectoDetOC($params = []): int
     {
-        $query = 'UPDATE detordencompra SET escorrecto=:escorrecto, modificado=NOW() WHERE idordencompra=:idordencompra;';
+        $query = 'CALL sp_check_recepcion_OC(:escorrecto,:idordencompra)';
         try {
             $stmt = $this->db->prepare($query);
             $stmt->execute(array(

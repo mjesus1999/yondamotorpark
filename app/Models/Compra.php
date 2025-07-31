@@ -16,6 +16,8 @@ class Compra
     }
 
 
+    // Listado para ls vista principal de compras
+
     public function getAll(): array
     {
         $query = " SELECT 
@@ -47,6 +49,29 @@ class Compra
     }
 
 
+    // Obtiene todos los Concesionarios de la DB CON OC en 'Proceso' o  en 'Pagado':
+    public function getConcesionariosConOCEnProcesoOPagado(): ?array
+    {
+        $query = "SELECT DISTINCT c.idconcesionario, c.razonsocial, c.nombrecomercial
+                    FROM concesionarios c
+                    JOIN tiendas t ON c.idconcesionario = t.idconcesionario
+                    JOIN ordenescompra oc ON t.idtienda = oc.idtienda
+                    WHERE oc.estado IN ('proceso', 'pagado');
+";
+        try {
+            $stmt = $this->db->prepare($query);
+            $stmt->execute();
+            $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            return $results;
+        } catch (PDOException $error) {
+            error_log($error->getMessage());
+
+            return [];
+        }
+    }
+
+
+    // OBTNER LOS DETALLES DE LA OC POR CONCESIONARIO - SIMEMPRE EN CUANDO LAS OC ESTE EN PROCEOS O PAGADO
 
     public function getDetOCByConcesionario(int $id): ?array
     {
@@ -64,8 +89,6 @@ class Compra
             return [];
         }
     }
-
-
 
 
 

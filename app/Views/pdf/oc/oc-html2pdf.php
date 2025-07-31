@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Orden de Compra - YONDA PERÚ</title>
-    <link rel="stylesheet" href="/assets/css/OC.css">
+    <link rel="stylesheet" href="/assets/css/OC-reporte.css">
 
 </head>
 
@@ -346,7 +346,7 @@
             }
 
             const opt = {
-                margin: [0.1, 0.1, 0.1, 0.1],
+                margin: [0.4, 0.1, 0.1, 0.1],
                 filename: `orden-compra-${getIdFromPath() || 'yonda'}.pdf`,
                 image: {
                     type: 'jpeg',
@@ -354,7 +354,7 @@
                 },
                 html2canvas: {
                     
-                    scale: 1.5,
+                    scale: 1.75,
                     useCORS: true,
                     // windowWidth y windowHeight para asegurar que html2canvas capture todo el contenido
                     windowWidth: document.documentElement.offsetWidth,

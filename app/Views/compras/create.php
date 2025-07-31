@@ -1,154 +1,6 @@
 <?php include __DIR__ . '/../layout/header.php'; ?>
+<link rel="stylesheet" href="/assets/css/create-compra.css">
 
-<style>
-    :root {
-        --card-bg: #ffffff;
-        --card-border: #dee2e6;
-        --text-primary: #212529;
-        --text-secondary: #6c757d;
-        --bg-light: #f8f9fa;
-        --border-color: #dee2e6;
-        --hover-bg: rgba(13, 110, 253, 0.05);
-        --modal-bg: #ffffff;
-        --input-bg: #ffffff;
-        --table-bg: #f8f9fa;
-    }
-
-    [data-bs-theme="dark"] {
-        --card-bg: #2d3748;
-        --card-border: #4a5568;
-        --text-primary: #e2e8f0;
-        --text-secondary: #a0aec0;
-        --bg-light: #1a202c;
-        --border-color: #4a5568;
-        --hover-bg: rgba(13, 110, 253, 0.15);
-        --modal-bg: #2d3748;
-        --input-bg: #2d3748;
-        --table-bg: #1a202c;
-    }
-
-    .card-orden {
-        transition: all 0.3s ease;
-        border: 1px solid var(--card-border);
-        cursor: pointer;
-        background-color: var(--card-bg);
-        color: var(--text-primary);
-    }
-
-    .card-orden:hover {
-        border-color: #0d6efd;
-        box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.25);
-        transform: translateY(-2px);
-    }
-
-    .card-orden.seleccionada {
-        border-color: #0d6efd;
-        background-color: var(--hover-bg);
-        box-shadow: 0 4px 12px rgba(13, 110, 253, 0.15);
-    }
-
-    .badge-orden {
-        font-size: 0.75rem;
-    }
-
-    .table-modal {
-        font-size: 0.85rem;
-        color: var(--text-primary);
-    }
-
-    .table-modal th {
-        background-color: var(--table-bg) !important;
-        color: var(--text-primary) !important;
-        border-color: var(--border-color) !important;
-    }
-
-    .table-modal td {
-        border-color: var(--border-color) !important;
-        color: var(--text-primary) !important;
-    }
-
-    .bg-light-custom {
-        background-color: var(--bg-light) !important;
-        border: 1px solid var(--border-color);
-        border-radius: 0.375rem;
-    }
-
-    .card {
-        background-color: var(--card-bg);
-        border-color: var(--card-border);
-        color: var(--text-primary);
-    }
-
-    .form-control, .form-select {
-        background-color: var(--input-bg);
-        border-color: var(--border-color);
-        color: var(--text-primary);
-    }
-
-    .form-control:focus, .form-select:focus {
-        background-color: var(--input-bg);
-        border-color: #0d6efd;
-        color: var(--text-primary);
-        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
-    }
-
-    .modal-content {
-        background-color: var(--modal-bg);
-        border-color: var(--border-color);
-    }
-
-    .modal-body {
-        color: var(--text-primary);
-    }
-
-    .alert-info {
-        background-color: rgba(13, 202, 240, 0.1);
-        border-color: rgba(13, 202, 240, 0.2);
-        color: var(--text-primary);
-    }
-
-    .text-muted {
-        color: var(--text-secondary) !important;
-    }
-
-    /* Animaciones mejoradas */
-    .card-orden {
-        animation: fadeInUp 0.5s ease-out;
-    }
-
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    .btn {
-        transition: all 0.2s ease;
-    }
-
-    .btn:hover {
-        transform: translateY(-1px);
-    }
-
-  
-    .resumen-card {
-        background: linear-gradient(135deg, rgba(13, 110, 253, 0.1), rgba(13, 110, 253, 0.05));
-        border-left: 4px solid #0d6efd;
-    }
-
-    .icon-animated {
-        transition: transform 0.2s ease;
-    }
-
-    .card-orden:hover .icon-animated {
-        transform: scale(1.1);
-    }
-</style>
 
 <div class="container-fluid px-4 py-3">
     <!-- Encabezado-->
@@ -160,7 +12,7 @@
         </div>
         <div>
             <a href="/compras" class="btn btn-sm btn-outline-secondary">
-                <i class="bi bi-arrow-left me-1"></i> Volver
+                <i class="bi bi-arrow-left me-1"></i> Mostrar lista
             </a>
         </div>
     </div>
@@ -236,7 +88,7 @@
                                     <label for="fechacompra" class="form-label">
                                         <i class="bi bi-calendar3 me-1"></i>Fecha compra
                                     </label>
-                                    <input type="datetime-local" id="fechacompra" name="fechacompra"
+                                    <input type="date" id="fechacompra" name="fechacompra"
                                         class="form-control" required>
                                 </div>
                                 <div class="col-md-4">
@@ -262,20 +114,20 @@
                                 </div>
                                 <div class="col-md-6">
                                     <label for="rutadoc" class="form-label">
-                                        <i class="bi bi-paperclip me-1"></i>Adjuntar PDF
+                                        <i class="bi bi-paperclip me-1"></i>Adjuntar Factura
                                     </label>
                                     <input type="file" name="rutadoc" id="rutadoc" class="form-control"
-                                        accept="application/pdf,image/*">
+                                        accept="application/pdf,image/*" required>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Botones -->
                         <div class="d-flex justify-content-end gap-2 mt-3">
-                            <button type="reset" class="btn btn-outline-secondary">
+                            <button type="reset" class="btn btn-outline-secondary btn-sm">
                                 <i class="bi bi-x-lg me-1"></i> Cancelar
                             </button>
-                            <button type="submit" class="btn btn-primary">
+                            <button type="submit" class="btn btn-primary btn-sm">
                                 <i class="bi bi-check-lg me-1"></i> Guardar Compra
                             </button>
                         </div>
@@ -288,7 +140,7 @@
 
 <!-- Modal para detalle de orden -->
 <div class="modal fade" id="ordenCompraModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 1250px;">
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title">
@@ -301,10 +153,10 @@
                 <!-- Contenido dinámico -->
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">
                     <i class="bi bi-x-lg me-1"></i> Cerrar
                 </button>
-                <button type="button" class="btn btn-primary" id="confirmarSeleccion">
+                <button type="button" class="btn btn-primary btn-sm" id="confirmarSeleccion">
                     <i class="bi bi-check-lg me-1"></i> Seleccionar
                 </button>
             </div>
@@ -334,7 +186,7 @@
         // Cargar concesionarios al iniciar
         async function getConcesionarios() {
             try {
-                const res = await fetch(`/api/concesionariosDB`);
+                const res = await fetch(`/api/concesionarioOCActiva`);
                 const data = await res.json();
                 concesionarios.innerHTML = '<option value="">Seleccione un concesionario</option>';
                 data.forEach(element => {
@@ -342,7 +194,7 @@
                 });
             } catch (error) {
                 console.error(error);
-                showToast('Error al cargar concesionarios', 'ERROR', 3000);
+                showToast('Error al cargar concesionarios', 'WARNING', 3000);
             }
         }
 
@@ -372,7 +224,10 @@
                     const agrupados = {};
                     orden.detalle.forEach(item => {
                         const key = `${item.marca}|${item.modelo}|${item.version}|${item.combustible}|${item.anio}|${item.color}|${item.condicion}|${item.moneda}|${item.preciocompra}`;
-                        agrupados[key] = agrupados[key] || { ...item, cantidad: 0 };
+                        agrupados[key] = agrupados[key] || {
+                            ...item,
+                            cantidad: 0
+                        };
                         agrupados[key].cantidad += 1;
                     });
 
@@ -385,7 +240,7 @@
                     const isSelected = idOCCompra === orden.idordencompra.toString();
 
                     html += `
-                <div class="col-md-12" style="animation-delay: ${index * 0.1}s">
+                <div class="col-md-6" style="animation-delay: ${index * 0.1}s">
                     <div class="card card-orden mb-3 ${isSelected ? 'seleccionada' : ''}" data-id="${orden.idordencompra}">
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-start mb-3">
@@ -399,7 +254,7 @@
                                 <span class="fw-bold">
                                     <i class="bi bi-car-front me-1 text-primary"></i>${totalItems} vehículos
                                 </span>
-                                <span class="text-success fw-bold fs-5">${orden.detalle[0].moneda} ${total.toFixed(2)}</span>
+                                <span class="text-success fw-bold fs-5">${orden.detalle[0].moneda} ${total.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span>
                             </div>
                             
                             <div class="d-grid gap-2">
@@ -421,12 +276,12 @@
                 sinOrdenes.classList.add('d-none');
             } catch (error) {
                 console.error('Error al cargar el detalle:', error);
-                showToast('Error al cargar órdenes de compra', 'ERROR', 3000);
+                showToast('Error al cargar órdenes de compra', 'WARNING', 1200);
             }
         });
 
         // Mostrar detalle en modal
-        detalleContent.addEventListener('click', function (e) {
+        detalleContent.addEventListener('click', function(e) {
             if (e.target.classList.contains('ver-detalle') || e.target.closest('.ver-detalle')) {
                 const btn = e.target.classList.contains('ver-detalle') ? e.target : e.target.closest('.ver-detalle');
                 const idOrden = btn.dataset.id;
@@ -450,7 +305,10 @@
             const agrupados = {};
             orden.detalle.forEach(item => {
                 const key = `${item.marca}|${item.modelo}|${item.version}|${item.combustible}|${item.anio}|${item.color}|${item.condicion}|${item.moneda}|${item.preciocompra}`;
-                agrupados[key] = agrupados[key] || { ...item, cantidad: 0 };
+                agrupados[key] = agrupados[key] || {
+                    ...item,
+                    cantidad: 0
+                };
                 agrupados[key].cantidad += 1;
             });
 
@@ -479,12 +337,19 @@
                     <table class="table table-modal table-sm table-hover">
                         <thead class="table-light">
                             <tr>
-                                <th><i class="bi bi-tag me-1"></i>Marca</th>
-                                <th><i class="bi bi-car-front me-1"></i>Modelo</th>
-                                <th><i class="bi bi-gear me-1"></i>Versión</th>
-                                <th class="text-end"><i class="bi bi-currency-dollar me-1"></i>Precio</th>
-                                <th class="text-center"><i class="bi bi-123 me-1"></i>Cant.</th>
-                                <th class="text-end"><i class="bi bi-calculator me-1"></i>Subtotal</th>
+                                <th><i class="bi bi-tag me-2"></i>Marca</th>
+                                <th><i class="bi bi-car-front me-2"></i>Modelo</th>
+                                <th><i class="bi bi-gear me-2"></i>Versión</th>
+                                <th><i class="bi bi-fuel-pump me-2"></i>Combustible</th>
+                                <th><i class="bi bi-calendar-event me-2"></i>Año</th>
+                                <th><i class="bi bi-hash me-2"></i>Chasis</th>
+                                <th><i class="bi bi-cpu me-2"></i>Serie motor</th>
+                                <th><i class="bi bi-card-text me-2"></i>Placa</th>
+                                <th><i class="bi bi-arrow-repeat me-2"></i>Placa rotativa</th>
+                                <th><i class="bi bi-palette me-2"></i>Color</th>
+                                <th class="text-end"><i class="bi bi-currency-dollar me-2"></i>Precio</th>
+                                <th class="text-center"><i class="bi bi-hash me-2"></i>Cantidad</th>
+                                <th class="text-end"><i class="bi bi-calculator me-2"></i>Subtotal</th>
                             </tr>
                         </thead>
                         <tbody>`;
@@ -493,32 +358,39 @@
                 const precio = parseFloat(item.preciocompra);
                 const itemSubtotal = precio * item.cantidad;
                 html += `
-                <tr>
+                <tr class="text-center">
                     <td class="fw-semibold">${item.marca}</td>
                     <td>${item.modelo}</td>
                     <td>${item.version}</td>
-                    <td class="text-end">${item.moneda} ${precio.toFixed(2)}</td>
+                    <td>${item.combustible}</td>
+                    <td>${item.anio ?? 'N/A'}</td>
+                    <td>${item.chasis ?? 'N/A'}</td>
+                    <td>${item.seriemotor ?? 'N/A'}</td>
+                    <td>${item.placa ?? 'N/A'}</td>
+                    <td>${item.placarotativa ?? 'N/A'}</td>
+                    <td>${item.color ?? 'N/A'}</td>
+                    <td class="text-end">${item.moneda} ${precio.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
                     <td class="text-center">
-                        <span class="badge bg-light text-dark">${item.cantidad}</span>
+                        <span class="badge bg-success text-light">${item.cantidad}</span>
                     </td>
-                    <td class="text-end fw-bold">${item.moneda} ${itemSubtotal.toFixed(2)}</td>
+                    <td class="text-end fw-bold">${item.moneda} ${itemSubtotal.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
                 </tr>`;
             });
 
             html += `
                         </tbody>
-                        <tfoot class="table-light">
+                        <tfoot class="table">
                             <tr>
-                                <th colspan="5" class="text-end">Subtotal:</th>
-                                <th class="text-end">${orden.detalle[0].moneda} ${subtotal.toFixed(2)}</th>
+                                <th colspan="12" class="text-end">Subtotal:</th>
+                                <th class="text-end">${orden.detalle[0].moneda} ${subtotal.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</th>
                             </tr>
                             <tr>
-                                <th colspan="5" class="text-end">IGV (18%):</th>
-                                <th class="text-end">${orden.detalle[0].moneda} ${igv.toFixed(2)}</th>
+                                <th colspan="12" class="text-end">IGV (18%):</th>
+                                <th class="text-end">${orden.detalle[0].moneda} ${igv.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</th>
                             </tr>
                             <tr class="table-success">
-                                <th colspan="5" class="text-end fs-5">TOTAL:</th>
-                                <th class="text-end fs-5">${orden.detalle[0].moneda} ${total.toFixed(2)}</th>
+                                <th colspan="12" class="text-end fs-6">TOTAL:</th>
+                                <th class="text-end fs-6">${orden.detalle[0].moneda} ${total.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</th>
                             </tr>
                         </tfoot>
                     </table>
@@ -529,6 +401,10 @@
             document.getElementById('modalOrdenContent').innerHTML = html;
         }
 
+
+
+        //  Función para los card de resumen que sde encunetran en la parte superior del form
+
         function seleccionarOrden(idOrden, btnElement = null) {
             idOCCompra = idOrden;
             const orden = data.find(o => o.idordencompra.toString() === idOrden);
@@ -538,7 +414,10 @@
                 const agrupados = {};
                 orden.detalle.forEach(item => {
                     const key = `${item.marca}|${item.modelo}|${item.version}|${item.combustible}|${item.anio}|${item.color}|${item.condicion}|${item.moneda}|${item.preciocompra}`;
-                    agrupados[key] = agrupados[key] || { ...item, cantidad: 0 };
+                    agrupados[key] = agrupados[key] || {
+                        ...item,
+                        cantidad: 0
+                    };
                     agrupados[key].cantidad += 1;
                 });
 
@@ -548,9 +427,10 @@
                 const total = subtotal + igv;
 
                 document.getElementById('resumen-orden-numero').textContent = `#${orden.idordencompra}`;
-                document.getElementById('resumen-subtotal').textContent = `${orden.detalle[0].moneda} ${subtotal.toFixed(2)}`;
-                document.getElementById('resumen-igv').textContent = `${orden.detalle[0].moneda} ${igv.toFixed(2)}`;
-                document.getElementById('resumen-total').textContent = `${orden.detalle[0].moneda} ${total.toFixed(2)}`;
+                document.getElementById('resumen-subtotal').textContent = `${orden.detalle[0].moneda} ${subtotal.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}`;
+                document.getElementById('resumen-igv').textContent = `${orden.detalle[0].moneda} ${igv.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}`;
+                document.getElementById('resumen-total').textContent = `${orden.detalle[0].moneda} ${total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+`;
 
                 resumenContainer.classList.remove('d-none');
             }
@@ -621,15 +501,21 @@
                     }
 
                     const result = await response.json();
-                    showToast(result.message, 'SUCCESS', 1200);
-                    form.reset();
-                    resumenContainer.classList.add('d-none');
-                    idOCCompra = null;
-                    detalleContainer.style.display = 'none';
-                    concesionarios.value = '';
-                    detalleContent.innerHTML = '';
-                    sinOrdenes.classList.remove('d-none');
-                    sinOrdenes.querySelector('p').textContent = 'Seleccione un concesionario para ver las órdenes';
+
+                    if (result.success) {
+                        showToast(result.message, 'SUCCESS', 1200);
+                        form.reset();
+                        resumenContainer.classList.add('d-none');
+                        idOCCompra = null;
+                        detalleContainer.style.display = 'none';
+                        concesionarios.value = '';
+                        detalleContent.innerHTML = '';
+                        sinOrdenes.classList.remove('d-none');
+                        sinOrdenes.querySelector('p').textContent = 'Seleccione un concesionario para ver las órdenes';
+                    } else {
+                        showToast(result.message, 'WARNING', 1200);
+                    }
+
                 } catch (error) {
                     console.error(error);
                     showToast(error.message || 'Error al registrar la compra', 'WARNING', 1200);

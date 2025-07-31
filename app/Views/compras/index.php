@@ -55,6 +55,10 @@
                                             <a href="#" class="show-details p-1" data-idoc="<?= htmlspecialchars($compra['idorden']) ?>" title="Ver detalle">
                                                 <i class="bi bi-info-circle text-primary fs-5"></i>
                                             </a>
+                                            <a href="#" class="ver-factura p-1" data-pdf="<?= htmlspecialchars($compra['rutadoc']) ?>" title="Ver Factura">
+                                                <i class="fa-solid fa-file-invoice fa-beat fs-5" style="color: #ff0000;"></i>
+                                            </a>
+
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
@@ -101,60 +105,96 @@
         </div>
     </div>
 
-<?php include __DIR__ . '/../layout/footer.php'; ?>
+    <div class="modal fade" id="modalFactura" tabindex="-1" aria-labelledby="modalFacturaLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-light">
+                    <h5 class="modal-title fw-bold" id="modalFacturaLabel">Factura PDF</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body" style="height: 80vh;">
+                    <iframe id="visorFactura" src="" width="100%" height="100%" style="border: none;"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', async () => {
-        const detailLinks = document.querySelectorAll('.show-details');
-        const detailConcesionarioRazonSocial = document.getElementById('detalle-concesionario-razon');
-        const detailOcSummary = document.getElementById('detalle-oc-summary');
-        const tablaDetallesBody = document.querySelector('#tabla-detalle-oc tbody');
-        const speedAnimation = 850;
-        const botonVolver = document.getElementById('btn-volver-detalle');
 
-        function limpiarVistaDetalle() {
-            if (tablaDetallesBody) tablaDetallesBody.innerHTML = '';
-            if (detailConcesionarioRazonSocial) detailConcesionarioRazonSocial.textContent = '';
-            if (detailOcSummary) detailOcSummary.textContent = '';
-        }
+    <?php include __DIR__ . '/../layout/footer.php'; ?>
 
-        detailLinks.forEach(link => {
-            link.addEventListener('click', async (event) => {
-                event.preventDefault();
-                const ocId = event.currentTarget.dataset.idoc;
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const detailLinks = document.querySelectorAll('.show-details');
+            const detailConcesionarioRazonSocial = document.getElementById('detalle-concesionario-razon');
+            const detailOcSummary = document.getElementById('detalle-oc-summary');
+            const tablaDetallesBody = document.querySelector('#tabla-detalle-oc tbody');
+            const speedAnimation = 850;
+            const botonVolver = document.getElementById('btn-volver-detalle');
 
-                if (!ocId) {
-                    console.warn('ID de Orden de Compra no encontrado.');
-                    return;
-                }
+            // Variables para poder visualizar la factura:            
+            const links = document.querySelectorAll('.ver-factura');
+            const modal = new bootstrap.Modal(document.getElementById('modalFactura'));
+            const iframe = document.getElementById('visorFactura');
 
-                limpiarVistaDetalle();
 
-                try {
-                    const response = await fetch(`/api/oc/${ocId}`);
-                    if (!response.ok) throw new Error(`Error ${response.status}`);
-                    const data = await response.json();
 
-                    if (!data || !data.orden || !Array.isArray(data.vehiculos)) {
-                        showToast('No hay datos válidos para la OC', 'WARNING', 1200);
+            links.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const pdfUrl = this.dataset.pdf;
+                    if (pdfUrl) {
+                        iframe.src = pdfUrl;
+                        modal.show();
+                    }
+                });
+            });
+
+            function limpiarVistaDetalle() {
+                if (tablaDetallesBody) tablaDetallesBody.innerHTML = '';
+                if (detailConcesionarioRazonSocial) detailConcesionarioRazonSocial.textContent = '';
+                if (detailOcSummary) detailOcSummary.textContent = '';
+            }
+
+            detailLinks.forEach(link => {
+                link.addEventListener('click', async (event) => {
+                    event.preventDefault();
+                    const ocId = event.currentTarget.dataset.idoc;
+
+                    if (!ocId) {
+                        console.warn('ID de Orden de Compra no encontrado.');
                         return;
                     }
 
-                    const { orden, vehiculos } = data;
+                    limpiarVistaDetalle();
 
-                    $("#lista-oc").slideUp(speedAnimation);
-                    $("#detalle-oc").slideDown(speedAnimation);
+                    try {
+                        const response = await fetch(`/api/oc/${ocId}`);
+                        if (!response.ok) throw new Error(`Error ${response.status}`);
+                        const data = await response.json();
 
-                    detailConcesionarioRazonSocial.textContent = orden.concesionario.razon_social || 'N/A';
-                    const numeroOc = orden.numero_oc_formateado || 'N/A';
-                    const fechaEmision = orden.fecha_emision_oc || 'N/A';
-                    const moneda = orden.moneda_oc || 'N/A';
-                    const total = orden.totales.total ? parseFloat(orden.totales.total).toFixed(2) : '0.00';
-                    detailOcSummary.textContent = `${numeroOc} | ${fechaEmision} | ${moneda} ${total}`;
+                        if (!data || !data.orden || !Array.isArray(data.vehiculos)) {
+                            showToast('No hay datos válidos para la OC', 'WARNING', 1200);
+                            return;
+                        }
 
-                    vehiculos.forEach((vehiculo, index) => {
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
+                        const {
+                            orden,
+                            vehiculos
+                        } = data;
+
+                        $("#lista-oc").slideUp(speedAnimation);
+                        $("#detalle-oc").slideDown(speedAnimation);
+
+                        detailConcesionarioRazonSocial.textContent = orden.concesionario.razon_social || 'N/A';
+                        const numeroOc = orden.numero_oc_formateado || 'N/A';
+                        const fechaEmision = orden.fecha_emision_oc || 'N/A';
+                        const moneda = orden.moneda_oc || 'N/A';
+                        const total = orden.totales.total ? parseFloat(orden.totales.total).toFixed(2) : '0.00';
+                        detailOcSummary.textContent = `${numeroOc} | ${fechaEmision} | ${moneda} ${total}`;
+
+                        vehiculos.forEach((vehiculo, index) => {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
                             <td>${index + 1}</td>
                             <td>${vehiculo.marca || 'N/A'}</td>
                             <td>${vehiculo.modelo || 'N/A'}</td>
@@ -169,22 +209,25 @@
                             <td>${orden.moneda_oc || 'N/A'}</td>
                             <td>${vehiculo.precio_unitario ? parseFloat(vehiculo.precio_unitario).toFixed(2) : '0.00'}</td>
                         `;
-                        tablaDetallesBody.appendChild(row);
-                    });
+                            tablaDetallesBody.appendChild(row);
+                        });
 
-                } catch (error) {
-                    console.error(error);
-                    showToast('No se ha podido cargar los datos', 'WARNING', 1200);
-                }
+                    } catch (error) {
+                        console.error(error);
+                        showToast('No se ha podido cargar los datos', 'WARNING', 1200);
+                    }
+                });
             });
+
+            if (botonVolver) {
+                botonVolver.addEventListener('click', () => {
+                    limpiarVistaDetalle();
+                    $("#detalle-oc").slideUp(speedAnimation);
+                    $("#lista-oc").slideDown(speedAnimation);
+                });
+            }
+
+
+
         });
-
-        if (botonVolver) {
-            botonVolver.addEventListener('click', () => {
-                limpiarVistaDetalle();
-                $("#detalle-oc").slideUp(speedAnimation);
-                $("#lista-oc").slideDown(speedAnimation);
-            });
-        }
-    });
-</script>
+    </script>

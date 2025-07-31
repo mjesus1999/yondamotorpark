@@ -265,7 +265,7 @@
         background-color: #b71c1c;
     }
 
-    /* Responsive */
+ 
     @media print {
         .btn-generate-pdf {
             display: none;

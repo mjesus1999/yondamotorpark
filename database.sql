@@ -328,7 +328,7 @@ CREATE TABLE ordenescompra (
 --ALTER TABLE ordenescompra ADD COLUMN  facturado ENUM('S','N') NOT NULL DEFAULT 'N' ;
 -- ALTER TABLE ordenescompra ADD COLUMN creado DATETIME NOT NULL DEFAULT NOW();
 -- ALTER TABLE ordenescompra ADD COLUMN fechanulado DATETIME NULL;
-ALTER TABLE ordenescompra MODIFY COLUMN estado ENUM('emitido','proceso','anulado','pagado') NOT NULL DEFAULT 'emitido';
+--ALTER TABLE ordenescompra MODIFY COLUMN estado ENUM('emitido','proceso','anulado','pagado') NOT NULL DEFAULT 'emitido';
 
 CREATE TABLE pagosOC (
     idpagooc INT AUTO_INCREMENT NOT NULL PRIMARY KEY,
@@ -394,6 +394,12 @@ CREATE TABLE compras (
     CONSTRAINT fk_idorden_cmp FOREIGN KEY (idorden) REFERENCES ordenescompra (idordencompra),
     CONSTRAINT fk_idlogistica_cmp FOREIGN KEY (idlogistica) REFERENCES colaboradores (idcolaborador)
 ) ENGINE = INNODB;
+
+USE motorpark;
+
+--SHOW COLUMNS FROM compras
+
+--ALTER TABLE compras DROP COLUMN pathxml
 
 --ALTER TABLE compras ADD COLUMN rutadoc VARCHAR(200) NULL;
 CREATE TABLE entidadespago (
