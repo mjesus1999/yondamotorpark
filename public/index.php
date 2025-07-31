@@ -39,6 +39,8 @@ require APP_ROOT . '/app/Routes/DetalleOC.router.php';
 require APP_ROOT . '/app/Routes/OC.router.php';
 require APP_ROOT . '/app/Routes/PagosOC.router.php';
 require APP_ROOT . '/app/Routes/Compra.router.php';
+require APP_ROOT . '/app/Routes/Contrato.router.php';
+
 
 
 // Un controlador básico para la página de inicio
