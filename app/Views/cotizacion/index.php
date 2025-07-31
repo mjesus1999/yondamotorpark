@@ -2,6 +2,22 @@
 
 <div class="container-fluid">
 
+    <?php if (!empty($_SESSION['success_message'])): ?>
+        <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+            <?= htmlspecialchars($_SESSION['success_message']) ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <?php unset($_SESSION['success_message']); ?>
+    <?php endif; ?>
+
+    <?php if (!empty($_SESSION['error_message'])): ?>
+        <div class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
+            <?= htmlspecialchars($_SESSION['error_message']) ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <?php unset($_SESSION['error_message']); ?>
+    <?php endif; ?>
+
     <div class="alert alert-info mt-2" role="alert">
         <div class="row">
             <div class="col-md-6 d-flex aling-items-center justify-content-start">
@@ -19,7 +35,7 @@
     </div>
 
 
-    
+
 </div>
 
 

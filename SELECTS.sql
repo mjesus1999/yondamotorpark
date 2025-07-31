@@ -1,6 +1,6 @@
 use motorpark;
 
-SELECT * FROM personas;
+SELECT * FROM cotizaciones;
 SELECT * FROM empresas;
 select * from areas;
 select * from cargos;

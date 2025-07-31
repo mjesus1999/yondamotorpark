@@ -15,6 +15,44 @@ class Cotizacion
         $this->db = Database::getInstance();
     }
 
+    public function getClienteByDoc(string $tipo, string $doc): ?array
+    {
+        // Solo personas por DNI
+        if (strtoupper($tipo) === 'DNI') {
+            $sql = "
+          SELECT c.idcliente,
+                 p.apellidos, p.nombres,
+                 p.telprimario, p.telalternativo, p.email
+            FROM clientes c
+            JOIN personas p ON p.idpersona = c.idpersona
+           WHERE p.tipodoc = 'DNI'
+             AND p.nrodoc  = :doc
+           LIMIT 1
+        ";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([':doc' => $doc]);
+            return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+        }
+
+        // Solo empresas por RUC
+        if (strtoupper($tipo) === 'RUC') {
+            $sql = "
+          SELECT c.idcliente,
+                 e.razonsocial AS apellidos,
+                 e.nombrecomercial AS nombres,
+                 e.telprimario, e.telalternativo, e.email
+            FROM clientes c
+            JOIN empresas e ON e.idempresa = c.idempresa
+           WHERE e.ruc = :doc
+           LIMIT 1
+        ";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([':doc' => $doc]);
+            return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+        }
+
+        return null;
+    }
     public function getPersonaByDoc(string $tipo, string $nrodoc): ?array
     {
         $query = "SELECT idpersona, apellidos, nombres, telprimario, telalternativo, email 
@@ -27,37 +65,6 @@ class Cotizacion
             ':tipo' => strtoupper($tipo),
             ':nrodoc' => $nrodoc
         ]);
-        return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
-    }
-
-    public function getClienteByDoc(string $tipo, string $doc): ?array
-    {
-        if (in_array(strtoupper($tipo), ['DNI', 'CEX', 'PAS'], true)) {
-            $sql = "
-          SELECT c.idcliente,
-                 p.apellidos, p.nombres,
-                 p.telprimario, p.telalternativo, p.email
-            FROM clientes c
-            JOIN personas p ON p.idpersona = c.idpersona
-           WHERE p.tipodoc = :tipo
-             AND p.nrodoc  = :doc
-           LIMIT 1";
-            $params = [':tipo' => strtoupper($tipo), ':doc' => $doc];
-        } else {
-            $sql = "
-          SELECT c.idcliente,
-                 e.razonsocial AS apellidos,
-                 e.nombrecomercial AS nombres,
-                 e.telprimario, e.telalternativo, e.email
-            FROM clientes c
-            JOIN empresas e ON e.idempresa = c.idempresa
-           WHERE e.ruc = :doc
-           LIMIT 1";
-            $params = [':doc' => $doc];
-        }
-
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute($params);
         return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
     }
 
@@ -74,7 +81,7 @@ class Cotizacion
     }
 
     // Inserta una nueva cotizacion
-    public function createCotizacion(array $d): void
+    public function create(array $d): void
     {
         $sql = "
       INSERT INTO cotizaciones

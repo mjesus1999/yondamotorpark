@@ -1,6 +1,7 @@
 <?php include __DIR__ . '/../layout/header.php'; ?>
 
 <div class="container-fluid">
+
     <div class="alert alert-info mt-2" role="alert">
         <div class="row">
             <div class="col-md-6 d-flex align-items-center justify-content-start">
@@ -19,8 +20,10 @@
 
     <div class="mb-2">
         <form id="formCotizacion" action="/cotizaciones" method="POST">
+
             <input type="hidden" id="idcliente" name="idcliente" value="">
             <input type="hidden" id="idvehiculo" name="idvehiculo" value="">
+
             <!-- Información del Cliente -->
             <div class="card mb-4">
                 <div class="card-header bg-info">
@@ -154,45 +157,53 @@
                         <!-- Tipo de moneda -->
                         <div class="col-md-2">
                             <div class="form-floating">
-                                <input type="text" class="form-control" value="$" id="monedaprecio" name="monedaprecio"
-                                    disabled>
-                                <label for="monedaprecio">Moneda</label>
+                                <input type="text" class="form-control" id="monedaprecio" readonly>
+                                <label for="monedaprecio">Moneda Vta.</label>
                             </div>
                         </div>
+                        <input type="hidden" name="moneda" id="inputMoneda">
+
                         <!-- Valor -->
                         <div class="col-md-3">
                             <div class="form-floating">
                                 <input type="text" placeholder="Valor" class="form-control" id="valor" name="valor"
-                                    disabled>
+                                    readonly>
                                 <label for="valor">Valor</label>
                             </div>
                         </div>
+                        <input type="hidden" name="precioventa" id="inputPrecioventa">
+
                         <!-- Moneda -->
                         <div class="col-md-2">
                             <div class="form-floating">
-                                <select name="moneda" id="moneda" class="form-select" required>
+                                <select id="monedaSelect" class="form-select" required>
                                     <option value="PEN" selected>Soles</option>
-                                    <option value="USD">Dolares</option>
+                                    <option value="USD">Dólares</option>
                                 </select>
-                                <label for="moneda">Moneda <span class="text-danger">*</span></label>
+                                <label for="monedaSelect">Moneda</label>
                             </div>
                         </div>
+
                         <!-- Tipo de cambio -->
                         <div class="col-md-2">
                             <div class="form-floating">
-                                <input type="text" placeholder="Tipo de cambio" class="form-control" id="tipoCambio"
-                                    name="tipoCambio">
+                                <input type="number" step="0.0001" class="form-control" id="tipoCambio"
+                                    name="tipoCambio" placeholder="Ej: 3.80">
                                 <label for="tipoCambio">Tipo de Cambio</label>
                             </div>
                         </div>
+                        <input type="hidden" name="tipoCambio" id="inputTipoCambio">
+
                         <!-- Valor en soles -->
                         <div class="col-md-3">
                             <div class="form-floating">
                                 <input type="text" placeholder="Valor de Moneda" class="form-control" id="valormoneda"
-                                    name="valormoneda">
+                                    name="valormoneda" readonly>
                                 <label for="valormoneda">Valor de Moneda</label>
                             </div>
                         </div>
+                        <input type="hidden" name="valorconvertido" id="inputValorConvertido">
+
                     </div>
 
                 </div>
@@ -216,14 +227,16 @@
                                 <label for="inicial">Inicial</label>
                             </div>
                         </div>
+
                         <!-- Valor a Financiar -->
                         <div class="col-md-2">
                             <div class="form-floating">
-                                <input type="number" placeholder="Valor Financiar" class="form-control" id="valorcuota"
-                                    name="valorcuota" step="1" min="0" required>
-                                <label for="valorcuota">Valor Financiar</label>
+                                <input type="text" class="form-control" id="valorFinanciar" readonly>
+                                <label for="valorFinanciar">Valor a Financiar</label>
                             </div>
                         </div>
+                        <input type="hidden" name="valorfinanciar" id="inputValorFinanciar">
+
                         <!-- Meses -->
                         <div class="col-md-2">
                             <div class="form-floating">
@@ -232,21 +245,25 @@
                                 <label for="numcuotas">Meses</label>
                             </div>
                         </div>
+
                         <!-- Tasa -->
                         <div class="col-md-2">
                             <div class="form-floating">
-                                <input type="text" placeholder="Tasa" class="form-control" id="tasa" name="tasa">
-                                <label for="tasa">Tasa</label>
+                                <input type="number" class="form-control" id="tasaAnual" step="0.01" name="tasa"
+                                    min="0">
+                                <label for="tasaAnual">Tasa anual (%)</label>
                             </div>
                         </div>
+
                         <!-- Valor mensual -->
                         <div class="col-md-2">
                             <div class="form-floating">
-                                <input type="number" placeholder="Valor mensual" class="form-control" id="valorcuota"
-                                    name="valorcuota" step="1" min="0" required>
-                                <label for="valorcuota">Valor Mensual</label>
+                                <input type="text" class="form-control" id="cuotaMensual" readonly>
+                                <label for="cuotaMensual">Valor Mensual</label>
                             </div>
                         </div>
+                        <input type="hidden" name="valorcuota" id="inputCuotaMensual">
+
                         <!-- botón de Cronograma -->
                         <div class="col-md-2">
                             <div class="form-floating h-100">
@@ -282,6 +299,7 @@
                                 <label for="fechaCaducidad">Fecha de Caducidad</label>
                             </div>
                         </div>
+                        <input type="hidden" name="vigenciadias" id="inputVigenciaDias" value="7">
 
                         <!-- Botones -->
                         <div class="col-md-8 text-end">
@@ -403,7 +421,12 @@
     </div>
 </div>
 
+<?php include __DIR__ . '/../layout/footer.php'; ?>
 <script>
+
+    function formatDate(date, pad) {
+        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+    }
     document.addEventListener("DOMContentLoaded", () => {
         initDataTable();
         initFechas();
@@ -432,41 +455,62 @@
         });
     }
 
-    // Setea fecha emisión y caducidad
     function initFechas() {
         const hoy = new Date();
         const pad = n => String(n).padStart(2, '0');
+
+        // Emisión hoy
         document.getElementById('fechaEmision').value = formatDate(hoy, pad);
-        hoy.setDate(hoy.getDate() + 7);
-        document.getElementById('fechaCaducidad').value = formatDate(hoy, pad);
+        // Caducidad +7 días
+        const fin = new Date();
+        fin.setDate(hoy.getDate() + 7);
+        document.getElementById('fechaCaducidad').value = formatDate(fin, pad);
+        // Grabo vigencia
+        document.getElementById('inputVigenciaDias').value = 7;
     }
-    function formatDate(date, pad) {
-        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
-    }
+
+
+    // Si el usuario pudiera cambiar fechas manualmente:
+    document.getElementById('fechaCaducidad').addEventListener('change', () => {
+        const em = new Date(document.getElementById('fechaEmision').value);
+        const ca = new Date(document.getElementById('fechaCaducidad').value);
+        const diff = Math.round((ca - em) / (1000 * 60 * 60 * 24));
+        document.getElementById('inputVigenciaDias').value = diff;
+    });
 
     // Búsqueda de cliente por DNI/RUC
-    function initEventosCliente() {
+    async function initEventosCliente() {
         const btn = document.getElementById('btnBuscarCliente');
         const tipo = document.getElementById('tipoDocumento');
-        const doc = document.getElementById('documento');
-        const fields = { nombres: 'nombres', telprimario: 'telprimario', telalternativo: 'telalternativo' };
+        const docIn = document.getElementById('documento');
+        const hid = document.getElementById('idcliente');
 
         btn.addEventListener('click', async () => {
-            if (!doc.value.trim()) return alert('Ingresa un número de documento válido.');
-            try {
-                const res = await fetch(`/cotizaciones/buscarCliente?tipo=${tipo.value}&doc=${doc.value}`);
-                const data = await res.json();
-                if (data.notFound) {
-                    alert('Cliente no encontrado. Ingresa datos manualmente.');
-                    Object.values(fields).forEach(id => document.getElementById(id).value = '');
-                } else {
-                    document.getElementById('nombres').value = `${data.apellidos || ''} ${data.nombres || ''}`.trim();
-                    ['telprimario', 'telalternativo'].forEach(id => {
-                        document.getElementById(id).value = data[id] || '';
-                    });
-                }
-            } catch {
-                alert('Hubo un error buscando el cliente.');
+            const tipoValue = tipo.value;           // 'dni' o 'ruc'
+            const docValue = docIn.value.trim();
+            if (!docValue) {
+                return alert('Ingresa un número de documento válido.');
+            }
+
+            const res = await fetch(`/cotizacion/buscarCliente?tipo=${tipoValue}&doc=${encodeURIComponent(docValue)}`);
+            const data = await res.json();
+
+            if (data.notFound) {
+                alert('Cliente no encontrado. Debes registrarlo primero en Clientes.');
+                hid.value = '';
+                document.getElementById('nombres').value = '';
+                document.getElementById('telprimario').value = '';
+                document.getElementById('telalternativo').value = '';
+            }
+            else if (data.error) {
+                alert(data.error);
+            }
+            else {
+                // Hay cliente: guardamos su id y rellenamos datos
+                hid.value = data.idcliente;
+                document.getElementById('nombres').value = `${data.apellidos} ${data.nombres}`.trim();
+                document.getElementById('telprimario').value = data.telprimario || '';
+                document.getElementById('telalternativo').value = data.telalternativo || '';
             }
         });
     }
@@ -480,6 +524,9 @@
             if (typeof actualizarMontos === 'function') await actualizarMontos();
             bootstrap.Modal.getInstance($('#modalVehiculos')[0]).hide();
         });
+        if (typeof actualizarMontos === 'function') {
+            actualizarMontos();
+        }
     }
 
     function fillPaso2({ idvehiculo, descripcion, placa, placarotativa, precioventa, moneda }) {
@@ -491,11 +538,12 @@
         $('#monedaprecio').val(moneda === 'USD' ? '$' : 'S/.');
         $('#vehiculoMoneda').val(moneda);
 
-        const $moneda = $('#moneda');
+        // Cambiado: referencia al select correcto
+        const $monedaSelect = $('#monedaSelect');
         if (moneda === 'PEN') {
-            $moneda.val('PEN').prop('disabled', true)
+            $monedaSelect.val('PEN').prop('disabled', true);
         } else {
-            $moneda.prop('disabled', false);
+            $monedaSelect.prop('disabled', false);
         }
     }
 
@@ -503,7 +551,70 @@
         $('#tipoCambio, #valormoneda').val('');
     }
 
-    // Carga dinámica de requisitos según modalidad
+    async function actualizarMontos() {
+        const precioOriginal = parseFloat($('#valor').val()) || 0;
+        const vehMoneda = $('#vehiculoMoneda').val();    // 'USD' o 'PEN'
+        const cotMoneda = $('#monedaSelect').val();      // divisa elegida por usuario
+        let tipoCam = parseFloat($('#tipoCambio').val()) || 1;
+        let precioFinal = precioOriginal;
+
+        // si la divisa del vehículo y la de cotización difieren, convierto:
+        if (vehMoneda !== cotMoneda) {
+            if (vehMoneda === 'USD' && cotMoneda === 'PEN') {
+                precioFinal = precioOriginal * tipoCam;
+            } else if (vehMoneda === 'PEN' && cotMoneda === 'USD') {
+                precioFinal = precioOriginal / tipoCam;
+            }
+        }
+
+        // redondeo a 2 decimales
+        precioFinal = Number(precioFinal.toFixed(2));
+
+        // relleno solo-lectura
+        $('#valormoneda').val(precioFinal);
+        // relleno hidden para enviar al servidor
+        $('#inputPrecioventa').val(precioFinal);
+        $('#inputMoneda').val(cotMoneda);
+        $('#inputTipoCambio').val(tipoCam);
+        $('#inputValorConvertido').val(precioFinal);
+    }
+
+    // Disparadores: cuando cambie la moneda elegida o el tipo de cambio:
+    $('#monedaSelect, #tipoCambio').on('change', actualizarMontos);
+
+    function actualizarFinanciamiento() {
+        const inicial = parseFloat($('#inicial').val()) || 0;
+        const precioFinal = parseFloat($('#inputPrecioventa').val()) || 0;
+        const valorF = Math.max(0, precioFinal - inicial);
+        $('#valorFinanciar').val(valorF.toFixed(2));
+        $('#inputValorFinanciar').val(valorF.toFixed(2));
+
+        // Ahora calculo cuota mensual
+        const n = parseInt($('#numcuotas').val(), 10) || 0;
+        const tasaA = parseFloat($('#tasaAnual').val()) || 0;
+        let cuota = 0;
+
+        if (n > 0) {
+            if (tasaA > 0) {
+                const r = (tasaA / 100) / 12;
+                cuota = valorF * (r / (1 - Math.pow(1 + r, -n)));
+            } else {
+                cuota = valorF / n;
+            }
+        }
+
+        cuota = cuota || 0;
+        $('#cuotaMensual').val(cuota.toFixed(2));
+        $('#inputCuotaMensual').val(cuota.toFixed(2));
+    }
+
+    // Disparadores Paso 3:
+    $('#inicial, #numcuotas, #tasaAnual').on('input change', actualizarFinanciamiento);
+
+    //cuando se termine de recalcular montos del Paso 2, vuelve a invocar:
+    if (typeof actualizarFinanciamiento === 'function') actualizarFinanciamiento();
+
+    // Cargar los requisitos segun la modalidad
     function initModalRequisitos() {
         $('#modalRequisitos').on('show.bs.modal', async () => {
             const id = $('#modalidad').val();
@@ -520,7 +631,5 @@
         });
     }
 
+
 </script>
-
-
-<?php include __DIR__ . '/../layout/footer.php'; ?>
