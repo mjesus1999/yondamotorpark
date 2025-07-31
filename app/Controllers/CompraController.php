@@ -109,7 +109,8 @@ class CompraController extends Controller
             'success' => true, 
             'message' => 'Compra registrada correctamente', 
             'id' => $idCompra,
-            'ruta' => $registro['rutadoc'] // Opcional: devolver la ruta para referencia
+            'ruta' => $registro['rutadoc'] 
+            
         ]);
     } catch (\Exception $e) {
         // Eliminar el archivo si hubo error en la base de datos
@@ -124,6 +125,7 @@ class CompraController extends Controller
         ]);
     }
 }
+
 
 
 
