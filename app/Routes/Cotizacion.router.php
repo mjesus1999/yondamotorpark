@@ -7,6 +7,7 @@ $router->add('GET', '/cotizaciones/requisitos/(\d+)', 'CotizacionController', 'r
 $router->add('GET', '/cotizacion/buscarCliente', 'CotizacionController', 'buscarCliente');
 $router->add('POST', '/cotizaciones', 'CotizacionController', 'store');
 
+
 /* $router->add('GET', '/cotizacion/requisitos/{idformato}', 'CotizacionController', 'getRequisitos');
 $router->add('POST', '/cotizacion/requisitos/save', 'CotizacionController', 'saveRequisitos'); */
 /* $router->add('GET', '/cotizacion/requisitos', 'CotizacionController', 'requisitos'); */

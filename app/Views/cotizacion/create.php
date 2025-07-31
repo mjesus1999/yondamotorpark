@@ -13,7 +13,7 @@
                 </nav>
             </div>
             <div class="col-md-6 text-end">
-                <a href="/cotizaciones/listar" class="">[ Mostrar Lista ]</a>
+                <a href="/cotizacion" class="">[ Mostrar Lista ]</a>
             </div>
         </div>
     </div>
@@ -535,7 +535,7 @@
         $('#placa').val(placa);
         $('#placarotativa').val(placarotativa);
         $('#valor').val(Number(precioventa).toFixed(2));
-        $('#monedaprecio').val(moneda === 'USD' ? '$' : 'S/.');
+        $('#monedaprecio').val(moneda === 'USD' ? 'Dolares' : 'Soles');
         $('#vehiculoMoneda').val(moneda);
 
         // Cambiado: referencia al select correcto
@@ -554,7 +554,7 @@
     async function actualizarMontos() {
         const precioOriginal = parseFloat($('#valor').val()) || 0;
         const vehMoneda = $('#vehiculoMoneda').val();    // 'USD' o 'PEN'
-        const cotMoneda = $('#monedaSelect').val();      // divisa elegida por usuario
+        const cotMoneda = $('#monedaSelect').val();      // input elegida por usuario
         let tipoCam = parseFloat($('#tipoCambio').val()) || 1;
         let precioFinal = precioOriginal;
 

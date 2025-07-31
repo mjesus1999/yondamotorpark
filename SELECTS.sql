@@ -2,10 +2,107 @@ use motorpark;
 
 SELECT * FROM cotizaciones;
 SELECT * FROM empresas;
+SELECT * FROM personas;
 select * from areas;
 select * from cargos;
+select * from clientes;
 
--- COTIZACION
+-- REPORTE DE COTIZACION
+SELECT
+    c.idcliente,
+    CASE 
+        WHEN c.tipocliente = 'P' THEN CONCAT(p.nombres, ' ', p.apellidos)
+        WHEN c.tipocliente = 'E' THEN e.razonsocial
+        ELSE 'Sin nombre'
+    END AS nombre_cliente,
+    c.tipocliente,
+    c.nrodoc
+FROM clientes c
+LEFT JOIN personas p ON c.idpersona = p.idpersona
+LEFT JOIN empresas e ON c.idempresa = e.idempresa;
+
+SELECT
+    CONCAT(p.nombres, ' ', p.apellidos) AS nombre_cliente,
+    p.nrodoc,
+    p.telprimario,
+    ma.marca AS marcaVehiculo,
+    mo.modelo AS modeloVehiculo,
+    mo.anio,
+    v.color,
+	c.creado AS fechaRegistro
+FROM cotizaciones c
+JOIN clientes cl ON c.idcliente = cl.idcliente
+JOIN personas p ON cl.idpersona = p.idpersona AND cl.tipocliente = 'P'
+JOIN vehiculos v ON c.idvehiculo = v.idvehiculo
+JOIN modelos mo ON v.idmodelo = mo.idmodelo
+JOIN marcas ma ON mo.idmarca = ma.idmarca
+WHERE c.idcotizacion = 1;
+
+/*
+c.moneda,
+c.precioventa,
+c.inicial,
+c.numcuotas,
+c.valorcuota,
+c.estadocotizacion,
+*/
+
+SELECT
+    c.idcotizacion,
+    COALESCE(
+      CASE WHEN cl.tipocliente = 'P' THEN CONCAT(p.nombres, ' ', p.apellidos) END,
+      e.razonsocial,
+      'Cliente no definido'
+    ) AS nombrecliente,
+    
+    COALESCE(
+      CASE WHEN cl.tipocliente = 'P' THEN p.nrodoc END,
+      e.ruc,
+      ''
+    ) AS documento,
+    
+    COALESCE(
+      CASE WHEN cl.tipocliente = 'P' THEN p.telprimario END,
+      e.telprimario,
+      ''
+    ) AS telefono,
+    
+    ma.marca AS marcaVehiculo,
+    mo.modelo AS modeloVehiculo,
+    mo.anio,
+    v.color,
+    c.creado AS fechaRegistro
+FROM cotizaciones c
+JOIN clientes cl ON c.idcliente = cl.idcliente
+LEFT JOIN personas p ON cl.idpersona = p.idpersona
+LEFT JOIN empresas e ON cl.idempresa = e.idempresa
+JOIN vehiculos v ON c.idvehiculo = v.idvehiculo
+JOIN modelos mo ON v.idmodelo = mo.idmodelo
+JOIN marcas ma ON mo.idmarca = ma.idmarca
+ORDER BY c.creado DESC
+LIMIT 10;
+
+
+SELECT
+    cl.idcliente,
+    cl.tipocliente,
+    cl.idpersona,
+    cl.idempresa,
+    p.nombres, p.apellidos, p.nrodoc, p.telprimario,
+    e.razonsocial, e.ruc, e.telprimario
+FROM clientes cl
+LEFT JOIN personas p ON cl.idpersona = p.idpersona
+LEFT JOIN empresas e ON cl.idempresa = e.idempresa
+WHERE cl.idcliente IN (SELECT idcliente FROM cotizaciones);
+
+
+SELECT cl.idcliente, cl.tipocliente, p.nrodoc, e.ruc
+FROM clientes cl
+LEFT JOIN personas p ON cl.idpersona = p.idpersona
+LEFT JOIN empresas e ON cl.idempresa = e.idempresa
+WHERE p.nrodoc = '71689010' OR e.ruc = '71689010';
+
+
 SELECT
 	idpersona,
 	apellidos, 

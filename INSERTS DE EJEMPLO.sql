@@ -242,6 +242,11 @@ VALUES
 INSERT INTO clientes (tipocliente, idpersona, idempresa, idcolregistra)
 VALUES ('P', 3, NULL,  3);
 
+INSERT INTO clientes (tipocliente, idpersona, idempresa, idcolregistra)
+VALUES 	('P', 1, NULL,  3), 
+		('P', 2, NULL,  3), 
+        ('P', NULL, 1,  3);
+
 
 /*
 INSERT INTO vehiculos

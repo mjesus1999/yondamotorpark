@@ -15,6 +15,50 @@ class Cotizacion
         $this->db = Database::getInstance();
     }
 
+    public function getAll(): array
+    {
+        $sql = "
+        SELECT
+            c.idcotizacion,
+            COALESCE(
+            CASE WHEN cl.tipocliente = 'P' THEN CONCAT(p.nombres, ' ', p.apellidos) END,
+            e.razonsocial,
+            'Cliente no definido'
+            ) AS nombrecliente,
+
+            COALESCE(
+            CASE WHEN cl.tipocliente = 'P' THEN p.nrodoc END,
+            e.ruc,
+            ''
+            ) AS documento,
+
+            COALESCE(
+            CASE WHEN cl.tipocliente = 'P' THEN p.telprimario END,
+            e.telprimario,
+            ''
+            ) AS telefono,
+
+            ma.marca AS marcaVehiculo,
+            mo.modelo AS modeloVehiculo,
+            mo.anio,
+            v.color,
+            c.creado AS fechaRegistro
+        FROM cotizaciones c
+        JOIN clientes cl ON c.idcliente = cl.idcliente
+        LEFT JOIN personas p ON cl.idpersona = p.idpersona
+        LEFT JOIN empresas e ON cl.idempresa = e.idempresa
+        JOIN vehiculos v ON c.idvehiculo = v.idvehiculo
+        JOIN modelos mo ON v.idmodelo = mo.idmodelo
+        JOIN marcas ma ON mo.idmarca = ma.idmarca
+        ORDER BY c.creado DESC
+        LIMIT 10
+        ";
+
+        $stmt = $this->db->query($sql);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+
     public function getClienteByDoc(string $tipo, string $doc): ?array
     {
         // Solo personas por DNI

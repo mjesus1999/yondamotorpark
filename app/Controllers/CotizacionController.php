@@ -24,8 +24,14 @@ class CotizacionController extends Controller
     public function index(): void
     {
         $this->authRequired();
-        $this->view("cotizacion.index");
+
+        $cotizaciones = $this->cotizacionModel->getAll();
+
+        $this->view("cotizacion.index", [
+            'cotizaciones' => $cotizaciones
+        ]);
     }
+
 
     public function create(): void
     {
@@ -75,15 +81,13 @@ class CotizacionController extends Controller
         $this->authRequired();
         header('Content-Type: application/json; charset=utf-8');
 
-        // 1) Obtén el ID del asesor desde la sesión:
         $idasesor = $_SESSION['user']['id'] ?? null;
         if (!$idasesor) {
-            $_SESSION['error'] = "No se pudo determinar el asesor.";
+            $_SESSION['error'] = "No se encontro al usuario.";
             header('Location: /cotizacion/create');
             exit;
         }
 
-        // 2) Prepara los datos
         $input = [
             'idformato' => $_POST['modalidad'] ?? null,
             'idcliente' => $_POST['idcliente'] ?? null,
@@ -94,17 +98,17 @@ class CotizacionController extends Controller
             'inicial' => $_POST['inicial'] ?? 0,
             'numcuotas' => $_POST['numcuotas'] ?? 0,
             'valorcuota' => $_POST['valorcuota'] ?? 0,
-            'idasesor' => $idasesor,               // aquí usas la sesión
+            'idasesor' => $idasesor,
         ];
 
-        // 3) Validar datos obligatorios
+        // Validar datos obligatorios
         if (!$input['idcliente'] || !$input['idvehiculo'] || !$input['idformato']) {
             $_SESSION['error'] = "Faltan datos obligatorios.";
             header('Location: /cotizacion/create');
             exit;
         }
 
-        // 4) Inserta la cotización
+        // Inserta la cotización
         try {
             $this->cotizacionModel->create($input);
             $_SESSION['success_message'] = "Cotización registrada correctamente.";
