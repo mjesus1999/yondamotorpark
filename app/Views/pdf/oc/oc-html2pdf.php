@@ -14,7 +14,8 @@
     <button class="btn-generate-pdf" onclick="generatePDF()" style="display: none;">Generar PDF</button>
 
     <!-- Indicador de carga -->
-    <div id="loading-indicator" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border: 2px solid #d32f2f; border-radius: 10px; z-index: 2000; text-align: center;">
+    <div id="loading-indicator"
+        style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border: 2px solid #d32f2f; border-radius: 10px; z-index: 2000; text-align: center;">
         <div style="color: #d32f2f; font-weight: bold; margin-bottom: 10px;">Generando PDF...</div>
         <div style="font-size: 12px;">Por favor espere...</div>
     </div>
@@ -335,40 +336,44 @@
             cell.textContent = text;
             return cell;
         }
-
         function generarPDFAutomatico() {
             const element = document.querySelector('.container');
             const loadingIndicator = document.getElementById('loading-indicator');
 
+            // Ocultar el indicador de carga inmediatamente antes de generar el PDF
+            if (loadingIndicator) {
+                loadingIndicator.style.display = 'none';
+            }
+
             const opt = {
-                margin: [0.3, 0.3, 0.3, 0.3], 
+                margin: [0.1, 0.1, 0.1, 0.1],
                 filename: `orden-compra-${getIdFromPath() || 'yonda'}.pdf`,
                 image: {
                     type: 'jpeg',
                     quality: 0.98
                 },
                 html2canvas: {
-                    scale: 1.75, 
-                    useCORS: true },
+                    
+                    scale: 1.5,
+                    useCORS: true,
+                    // windowWidth y windowHeight para asegurar que html2canvas capture todo el contenido
+                    windowWidth: document.documentElement.offsetWidth,
+                    windowHeight: document.documentElement.offsetHeight
+                },
                 jsPDF: {
                     unit: 'in',
-                    format: 'a4',
+                    format: 'letter', 
                     orientation: 'portrait'
                 }
             };
 
             html2pdf().set(opt).from(element).save().then(() => {
-                if (loadingIndicator) {
-                    loadingIndicator.style.display = 'none';
-                }
+                console.log('PDF generado y descargado.');
                 setTimeout(() => {
-                    window.close();
+                    window.close(); 
                 }, 500);
             }).catch(error => {
                 console.error('Error al generar PDF:', error);
-                if (loadingIndicator) {
-                    loadingIndicator.style.display = 'none';
-                }
                 alert('Error al generar el PDF. La ventana se cerrará.');
                 setTimeout(() => {
                     window.close();
@@ -377,7 +382,6 @@
         }
 
 
-      
         document.addEventListener('DOMContentLoaded', cargarDatosDesdeAPI);
     </script>
 </body>
