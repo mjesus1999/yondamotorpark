@@ -58,7 +58,6 @@ class Cotizacion
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-
     public function getClienteByDoc(string $tipo, string $doc): ?array
     {
         // Solo personas por DNI
@@ -97,6 +96,7 @@ class Cotizacion
 
         return null;
     }
+
     public function getPersonaByDoc(string $tipo, string $nrodoc): ?array
     {
         $query = "SELECT idpersona, apellidos, nombres, telprimario, telalternativo, email 
@@ -122,6 +122,27 @@ class Cotizacion
         $stmt = $this->db->prepare($query);
         $stmt->execute([':ruc' => $ruc]);
         return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+    }
+
+    private function Pago($tasaInteres, $numPagos, $montoPrestamo)
+    {
+        // Verificar si la tasa de interés es 0
+        if ($tasaInteres == 0) {
+            return $montoPrestamo / $numPagos;
+        }
+
+        // Calcular el pago utilizando la fórmula de anualidad
+        $pago = ($montoPrestamo * $tasaInteres) / (1 - pow(1 + $tasaInteres, -$numPagos));
+        return $pago;
+    }
+
+    public function calcularPagoMensual($importeTotal, $inicial, $meses)
+    {
+        $tasa = 0.65; //Tasa standard de YONDA 65%
+        $tasaMensual = pow((1 + $tasa), (1 / 12)) - 1;
+        $montoFinanciar = $importeTotal - $inicial;
+        $cuota = round($this->Pago($tasaMensual, $meses, $montoFinanciar), 2);
+        return $cuota;
     }
 
     // Inserta una nueva cotizacion

@@ -249,8 +249,8 @@
                         <!-- Tasa -->
                         <div class="col-md-2">
                             <div class="form-floating">
-                                <input type="number" class="form-control" id="tasaAnual" step="0.01" name="tasa"
-                                    min="0">
+                                <input type="number" class="form-control" id="tasaAnual" step="0.01" name="tasa" min="0"
+                                    value="65">
                                 <label for="tasaAnual">Tasa anual (%)</label>
                             </div>
                         </div>
@@ -582,37 +582,51 @@
     // Disparadores: cuando cambie la moneda elegida o el tipo de cambio:
     $('#monedaSelect, #tipoCambio').on('change', actualizarMontos);
 
-    function actualizarFinanciamiento() {
+    async function actualizarFinanciamiento() {
         const inicial = parseFloat($('#inicial').val()) || 0;
-        const precioFinal = parseFloat($('#inputPrecioventa').val()) || 0;
+        const precioFinal = parseFloat($('#inputValorConvertido').val()) || 0;
         const valorF = Math.max(0, precioFinal - inicial);
         $('#valorFinanciar').val(valorF.toFixed(2));
         $('#inputValorFinanciar').val(valorF.toFixed(2));
 
-        // Ahora calculo cuota mensual
         const n = parseInt($('#numcuotas').val(), 10) || 0;
         const tasaA = parseFloat($('#tasaAnual').val()) || 0;
-        let cuota = 0;
 
         if (n > 0) {
-            if (tasaA > 0) {
-                const r = (tasaA / 100) / 12;
-                cuota = valorF * (r / (1 - Math.pow(1 + r, -n)));
-            } else {
-                cuota = valorF / n;
-            }
-        }
+            try {
+                // Llamada al endpoint con precioFinal, inicial y cuotas
+                const res = await fetch(
+                    `/api/cotizacion/calcularpagomensual/${precioFinal}/${inicial}/${n}`,
+                    { headers: { 'Accept': 'application/json' } }
+                );
+                if (!res.ok) throw new Error(res.statusText);
+                const { pago_mensual } = await res.json();
 
-        cuota = cuota || 0;
-        $('#cuotaMensual').val(cuota.toFixed(2));
-        $('#inputCuotaMensual').val(cuota.toFixed(2));
+                $('#cuotaMensual').val(pago_mensual.toFixed(2));
+                $('#inputCuotaMensual').val(pago_mensual.toFixed(2));
+            } catch (err) {
+                console.error('Error calculando financiamiento:', err);
+                $('#cuotaMensual').val('');
+                $('#inputCuotaMensual').val('');
+            }
+        } else {
+            $('#cuotaMensual').val('');
+            $('#inputCuotaMensual').val('');
+        }
     }
 
-    // Disparadores Paso 3:
-    $('#inicial, #numcuotas, #tasaAnual').on('input change', actualizarFinanciamiento);
+    $('#inicial, #numcuotas, #tasaAnual, #tipoCambio, #monedaSelect')
+        .on('input change', async () => {
+            await actualizarMontos();         // primero recalculas precioFinal
+            await actualizarFinanciamiento(); // luego la cuota via API
+        });
 
-    //cuando se termine de recalcular montos del Paso 2, vuelve a invocar:
-    if (typeof actualizarFinanciamiento === 'function') actualizarFinanciamiento();
+    $('#tasaAnual').val(65);
+    // Y también al arrancar:
+    $(document).ready(async () => {
+        await actualizarMontos();
+        await actualizarFinanciamiento();
+    });
 
     // Cargar los requisitos segun la modalidad
     function initModalRequisitos() {
@@ -630,6 +644,5 @@
             }
         });
     }
-
 
 </script>

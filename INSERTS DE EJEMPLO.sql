@@ -243,9 +243,10 @@ INSERT INTO clientes (tipocliente, idpersona, idempresa, idcolregistra)
 VALUES ('P', 3, NULL,  3);
 
 INSERT INTO clientes (tipocliente, idpersona, idempresa, idcolregistra)
-VALUES 	('P', 1, NULL,  3), 
-		('P', 2, NULL,  3), 
-        ('P', NULL, 1,  3);
+VALUES 	('P', 1, NULL,  2), 
+		('P', 2, NULL,  2), 
+        ('P', 3, NULL,  2),
+        ('P', NULL, 1,  2);
 
 
 /*

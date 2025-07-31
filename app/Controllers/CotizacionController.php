@@ -76,6 +76,14 @@ class CotizacionController extends Controller
         exit;
     }
 
+    public function calcularPagoMensual(float $importeTotal, float $inicial, int $meses): void
+    {
+        header('Content-Type: application/json');
+        $pagoMensual = $this->cotizacionModel->calcularPagoMensual($importeTotal, $inicial, $meses);
+        echo json_encode(["pago_mensual" => $pagoMensual]);
+        exit();
+    }
+
     public function store(): void
     {
         $this->authRequired();
