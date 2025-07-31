@@ -7,5 +7,7 @@ $router->add('GET', '/cotizaciones/requisitos/(\d+)', 'CotizacionController', 'r
 $router->add('GET', '/cotizacion/buscarCliente', 'CotizacionController', 'buscarCliente');
 $router->add('POST', '/cotizaciones', 'CotizacionController', 'store');
 
+// TIPO DE CAMBIO SEGUN LA MONEDA (NOTITA
 $router->add('GET', '/cotizacion/tipo-cambio', 'CotizacionController', 'tipoCambio');
+
 $router->add('GET', '/api/cotizacion/calcularpagomensual/{importeTotal}/{inicial}/{meses}', 'CotizacionController', 'calcularPagoMensual');
