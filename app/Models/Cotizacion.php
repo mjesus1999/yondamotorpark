@@ -20,7 +20,8 @@ class Cotizacion
         $sql = "
         SELECT
             c.idcotizacion,
-            c.idformato
+            c.idformato,
+            fc.tipocotizacion,
             COALESCE(
             CASE WHEN cl.tipocliente = 'P' THEN CONCAT(p.nombres, ' ', p.apellidos) END,
             e.razonsocial,

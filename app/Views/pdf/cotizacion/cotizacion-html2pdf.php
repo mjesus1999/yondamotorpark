@@ -41,7 +41,6 @@
     <div class="content">
       <p class="tight small-text">Presente, atte. Yonda & Grupo Huaraca E.I.R.L.</p>
       <p class="tight small-text">RUC: 20609396866</p>
-      <br>
       <p class="small-text">
         De nuestra consideración, nos es grato dirigirnos a usted para brindarle una
         cotización vehicular de acuerdo al siguiente detalle:
@@ -128,21 +127,20 @@
         <p class="closing"><strong>Atte.</strong></p>
       </div>
     </div>
+    <div class="footer">
+      <div class="footer-text">
+        CHARLY YACTAYO ORTIZ<br>
+        Ejecutivo de Ventas<br>
+        TELÉFONO: (056) 934 008 037
+      </div>
+      <img src="/assets/images/logos/footer-yonda.png" alt="Piecera Yonda">
+    </div>
   </div>
 
-  <div class="footer">
-    <div class="footer-text">
-      CHARLY YACTAYO ORTIZ<br>
-      Ejecutivo de Ventas<br>
-      TELÉFONO: (056) 934 008 037
-    </div>
-    <img src="/assets/images/logos/footer-yonda.png" alt="Piecera Yonda" style="width:100%;display:block;">
-  </div>
 
   <!-- html2pdf.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script>
-    // Reemplaza el JavaScript en tu archivo HTML con este código mejorado
 
     const cotId = <?= json_encode($id, JSON_NUMERIC_CHECK) ?>;
 
@@ -153,7 +151,6 @@
 
     async function fetchAndFill() {
       try {
-        // Mostrar indicador de carga
         const loadingIndicator = document.getElementById('loading-indicator');
         if (loadingIndicator) {
           loadingIndicator.style.display = 'block';
@@ -165,7 +162,6 @@
           container.style.visibility = 'hidden';
         }
 
-        // Carga datos desde la API
         const res = await fetch(`/api/cotizacion/${cotId}`);
 
         if (!res.ok) {
@@ -195,13 +191,9 @@
           loadingIndicator.style.display = 'none';
         }
 
-        // Mostrar el contenido brevemente para el renderizado
         if (container) {
           container.style.visibility = 'visible';
         }
-
-        // Generar PDF inmediatamente después de cargar los datos
-        // Pequeño delay para asegurar que el DOM esté actualizado
         setTimeout(() => {
           generarPDFCotizacion();
         },
@@ -233,7 +225,7 @@
 
       // Opciones optimizadas para PDF
       const opt = {
-        margin: [0.4, 0.1, 0.1, 0.1],
+        margin: [0, 0, 0, 0],
         filename: `cotizacion-${getIdFromPath() || 'yonda'}.pdf`,
         image: {
           type: 'jpeg',

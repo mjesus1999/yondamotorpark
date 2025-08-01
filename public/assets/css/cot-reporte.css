@@ -1,8 +1,19 @@
+@page {
+  size: A4 portrait;
+  margin: 10mm;
+}
+
 .container {
+  /* convierte en columna flexible */
+  display: flex;
+  flex-direction: column;
+  /* igual de ancho que antes */
   max-width: 900px;
   margin: 0 auto;
-  padding: 0 20px;
-  visibility: visible;
+  padding: 0 10mm;
+  box-sizing: border-box;
+  /* ocupa toda la altura disponible */
+  min-height: 100%;
 }
 
 #loading-indicator {
@@ -85,13 +96,14 @@
 
 .title {
   text-align: center;
-  margin: 20px 0;
+  margin: 15px 0;
 }
 
 .content {
   max-width: 900px;
   margin-left: 50px;
   margin-right: 50px;
+  flex: 0 0 auto;
 }
 
 .content p {
@@ -106,6 +118,7 @@
 .detalle {
   border-collapse: collapse;
   font-weight: bold;
+  font-size: 10pt;
 }
 
 .detalle td.label {
@@ -126,6 +139,7 @@
   border-collapse: collapse;
   font-weight: bold;
   width: 100%;
+  font-size: 10pt;
 }
 
 .pricing,
@@ -134,16 +148,18 @@
 }
 
 .pricing td {
-  padding: 6px 12px;
+  padding: 4px 12px;
 }
 
 .instructions {
-  margin-top: 20px;
-  line-height: 1.4;
+  font-size: 10pt; /* Reduce tamaño de fuente */
+  margin-top: 10px; /* Menos espacio arriba */
+  margin-bottom: 10px; /* Menos espacio abajo */
+  line-height: 1.2; /* Línea más apretada */
 }
 
 .instructions p {
-  margin: 8px 0;
+  margin: 4px 0;
 }
 
 .instructions ol li {
@@ -172,19 +188,22 @@ body {
 
 body {
   padding-bottom: 160px;
+  min-height: calc(297mm - 20mm);
 }
 
 .footer {
-  position: absolute;
-  bottom: 0;
-  left: 0;
+  margin-top: auto;
+  text-align: right;
+}
+
+.footer img {
+  display: block;
   width: 100%;
+  margin-top: 4mm;
 }
 
 .footer .footer-text {
-  margin: 0 40px 4px auto;
-  font-size: 14pt;
-  text-align: right;
+  font-size: 12pt;
   line-height: 1.5;
   margin-bottom: 5px;
 }

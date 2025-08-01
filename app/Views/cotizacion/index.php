@@ -49,6 +49,7 @@
                                 <th>Marca de vehiculo</th>
                                 <th>Modelo</th>
                                 <th>Año</th>
+                                <th>Modalidad</th>
                                 <th>Opciones</th>
                             </tr>
                         </thead>
@@ -63,7 +64,8 @@
                                     <td><?= htmlspecialchars($c['marcaVehiculo']) ?></td>
                                     <td><?= htmlspecialchars($c['modeloVehiculo']) ?></td>
                                     <td><?= htmlspecialchars($c['anio']) ?></td>
-                                    <td>
+                                    <td><?= htmlspecialchars($c['tipocotizacion']) ?></td>
+                                    <td class="text-center">
                                         <!-- <a href="/reports/reporte-cotizacion-dependiente.php" target="_blank"
                                             class="btn btn-sm btn-primary">
                                             <i class="fa fa-file-pdf"></i> Hacer Reporte
