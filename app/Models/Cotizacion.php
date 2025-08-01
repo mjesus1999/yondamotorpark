@@ -20,6 +20,7 @@ class Cotizacion
         $sql = "
         SELECT
             c.idcotizacion,
+            c.idformato
             COALESCE(
             CASE WHEN cl.tipocliente = 'P' THEN CONCAT(p.nombres, ' ', p.apellidos) END,
             e.razonsocial,
@@ -50,6 +51,7 @@ class Cotizacion
         JOIN vehiculos v ON c.idvehiculo = v.idvehiculo
         JOIN modelos mo ON v.idmodelo = mo.idmodelo
         JOIN marcas ma ON mo.idmarca = ma.idmarca
+        JOIN formatocotizacion fc ON c.idformato = fc.idformato 
         ORDER BY c.creado DESC
         LIMIT 10
         ";
@@ -168,6 +170,61 @@ class Cotizacion
             ':valorcuota' => $d['valorcuota'],
             ':idasesor' => $d['idasesor']
         ]);
+    }
+
+
+    public function getById(int $idcotizacion): ?array
+    {
+        $sql = "
+      SELECT
+        c.idcotizacion,
+        c.idformato,
+        c.idcliente,
+        c.idvehiculo,
+        c.moneda,
+        c.precioventa,
+        c.vigenciadias,
+        c.inicial,
+        c.numcuotas,
+        c.valorcuota,
+        c.idasesor,
+        c.creado AS fechaRegistro,
+
+        -- Datos del cliente
+        COALESCE(
+          CASE WHEN cl.tipocliente = 'P' THEN CONCAT(p.nombres, ' ', p.apellidos) END,
+          e.razonsocial
+        ) AS cliente_nombre,
+        COALESCE(
+          CASE WHEN cl.tipocliente = 'P' THEN p.nrodoc END,
+          e.ruc
+        ) AS cliente_documento,
+        COALESCE(
+          CASE WHEN cl.tipocliente = 'P' THEN p.telprimario END,
+          e.telprimario
+        ) AS cliente_telefono,
+
+        -- Vehículo
+        ma.marca AS vehiculo_marca,
+        mo.modelo AS vehiculo_modelo,
+        mo.anio      AS vehiculo_anio,
+        v.color      AS vehiculo_color
+
+      FROM cotizaciones c
+      JOIN clientes cl    ON c.idcliente = cl.idcliente
+      LEFT JOIN personas p ON cl.idpersona = p.idpersona
+      LEFT JOIN empresas e ON cl.idempresa = e.idempresa
+
+      JOIN vehiculos v    ON c.idvehiculo = v.idvehiculo
+      JOIN modelos mo     ON v.idmodelo   = mo.idmodelo
+      JOIN marcas ma      ON mo.idmarca   = ma.idmarca
+
+      WHERE c.idcotizacion = :id
+      LIMIT 1
+    ";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([':id' => $idcotizacion]);
+        return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
     }
 
     /* public function getRequisitos(): array

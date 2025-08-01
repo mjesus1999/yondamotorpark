@@ -3,6 +3,10 @@
 $router->add('GET', '/cotizacion', 'CotizacionController', 'index');
 $router->add('GET', '/cotizacion/create', 'CotizacionController', 'create');
 
+$router->add('GET', '/cotizacion/reporte/(\d+)', 'CotizacionController', 'html2pdfReport');
+$router->add('GET', '/api/cotizacion/(\d+)', 'CotizacionController', 'apiShow');
+
+
 $router->add('GET', '/cotizaciones/requisitos/(\d+)', 'CotizacionController', 'requisitos');
 $router->add('GET', '/cotizacion/buscarCliente', 'CotizacionController', 'buscarCliente');
 $router->add('POST', '/cotizaciones', 'CotizacionController', 'store');

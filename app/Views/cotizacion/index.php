@@ -64,9 +64,13 @@
                                     <td><?= htmlspecialchars($c['modeloVehiculo']) ?></td>
                                     <td><?= htmlspecialchars($c['anio']) ?></td>
                                     <td>
-                                        <a href="/reports/reporte-cotizacion-dependiente.php" target="_blank"
+                                        <!-- <a href="/reports/reporte-cotizacion-dependiente.php" target="_blank"
                                             class="btn btn-sm btn-primary">
                                             <i class="fa fa-file-pdf"></i> Hacer Reporte
+                                        </a> -->
+                                        <a href="/cotizacion/reporte/<?= $c['idcotizacion'] ?>" class="p-1" target="_blank"
+                                            title="PDF Cotizacion">
+                                            <i class="bi bi-filetype-pdf text-danger fs-5"></i>
                                         </a>
                                     </td>
                                 </tr>
