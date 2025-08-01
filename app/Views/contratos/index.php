@@ -49,8 +49,8 @@ include __DIR__ . '/../layout/header.php';
                                     <td>85858525</td>
                                     <td>Chincha</td>
                                     <td>Hyundai / i10 / GLP / Negro</td>
-                                    <td>24</td>
-                                    <td>2500</td>
+                                    <td>36</td>
+                                    <td>2196.00</td>
                                     <td><a href="/contrato/cronograma" title="Ver Cronograma"><i class="bi-receipt fs-5 text-warning"></i></a></td>
 
                                 </tr>
@@ -61,8 +61,8 @@ include __DIR__ . '/../layout/header.php';
                                     <td>36369568</td>
                                     <td>Chincha</td>
                                     <td>Hyundai / i10 / GLP / Negro</td>
-                                    <td>24</td>
-                                    <td>3200</td>
+                                    <td>36</td>
+                                    <td>2196.00</td>
                                     <td><a href="/contrato/cronograma" title="Ver Cronograma"><i class="bi-receipt fs-5 text-warning"></i></a></td>
                                 </tr>
 

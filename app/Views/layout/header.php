@@ -59,18 +59,18 @@
               Concesionarios
             </a>
           </li>
-          <li class="sidebar-item">
+          <!-- <li class="sidebar-item">
             <a href="/marcas" class="sidebar-link">
               <i class="fa-solid fa-list pe-2"></i>
               Marcas
             </a>
-          </li>
-          <li class="sidebar-item">
+          </li> -->
+          <!-- <li class="sidebar-item">
             <a href="/vehiculos" class="sidebar-link">
               <i class="fa-solid fa-list pe-2"></i>
               Vehículos
             </a>
-          </li>
+          </li> -->
           <li class="sidebar-item">
             <a href="/locales" class="sidebar-link">
               <i class="fa-solid fa-list pe-2"></i>
@@ -91,7 +91,7 @@
               Caja
             </a>
           </li>
-          <li class="sidebar-item">
+          <!-- <li class="sidebar-item">
             <a href="#" class="sidebar-link collapsed" data-bs-target="#pages" data-bs-toggle="collapse"
               aria-expanded="false"><i class="fa-solid fa-file-lines pe-2"></i>
               Pages
@@ -104,8 +104,8 @@
                 <a href="#" class="sidebar-link">Page 2</a>
               </li>
             </ul>
-          </li>
-          <li class="sidebar-item">
+          </li> -->
+          <!-- <li class="sidebar-item">
             <a href="#" class="sidebar-link collapsed" data-bs-target="#posts" data-bs-toggle="collapse"
               aria-expanded="false"><i class="fa-solid fa-sliders pe-2"></i>
               Posts
@@ -121,8 +121,8 @@
                 <a href="#" class="sidebar-link">Post 3</a>
               </li>
             </ul>
-          </li>
-          <li class="sidebar-item">
+          </li> -->
+          <!-- <li class="sidebar-item">
             <a href="#" class="sidebar-link collapsed" data-bs-target="#auth" data-bs-toggle="collapse"
               aria-expanded="false"><i class="fa-regular fa-user pe-2"></i>
               Auth
@@ -138,8 +138,8 @@
                 <a href="#" class="sidebar-link">Forgot Password</a>
               </li>
             </ul>
-          </li>
-          <li class="sidebar-header">
+          </li> -->
+          <!-- <li class="sidebar-header">
             Multi Level Menu
           </li>
           <li class="sidebar-item">
@@ -161,7 +161,7 @@
                 </ul>
               </li>
             </ul>
-          </li>
+          </li> -->
         </ul>
       </div>
     </aside>

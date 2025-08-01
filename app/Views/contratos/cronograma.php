@@ -117,7 +117,7 @@
                         </table>
                     </div>
                 </div>
-               <div class="card-footer bg-body-tertiary text-body-secondary">
+                <div class="card-footer bg-body-tertiary text-body-secondary">
 
                     <div class="d-flex justify-content-between align-items-center">
                         <div class="text-muted" id="info-paginacion">
@@ -126,22 +126,29 @@
                         </div>
                         <nav aria-label="Page navigation">
                             <ul class="pagination pagination-sm mb-0" id="paginacion">
-                                <li class="page-item disabled" id="prev-page"><a class="page-link" href="#"
-                                        tabindex="-1" aria-disabled="true">Anterior</a></li>
+                                <li class="page-item disabled" id="prev-page">
+                                    <a class="page-link" href="#" data-page="1" tabindex="-1" aria-disabled="true">Anterior</a>
+                                </li>
+
                                 <?php for ($p = 1; $p <= ceil($plazo_meses / 10); $p++): ?>
-                                    <li class="page-item <?= $p == 1 ? 'active' : '' ?>"><a class="page-link" href="#"
-                                            data-page="<?= $p ?>"><?= $p ?></a></li>
+                                    <li class="page-item <?= $p == 1 ? 'active' : '' ?>">
+                                        <a class="page-link" href="#" data-page="<?= $p ?>"><?= $p ?></a>
+                                    </li>
                                 <?php endfor; ?>
-                                <li class="page-item" id="next-page"><a class="page-link" href="#"
-                                        data-page="2">Siguiente</a></li>
+
+                                <li class="page-item" id="next-page">
+                                    <a class="page-link" href="#" data-page="2">Siguiente</a>
+                                </li>
                             </ul>
                         </nav>
+
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
 
 <!-- Modal de Pago-->
 <div class="modal fade" id="modalPago" tabindex="-1" aria-labelledby="modalPagoLabel" aria-hidden="true">
@@ -170,28 +177,28 @@
                                     <div class="mb-2">
                                         <label class="form-label small text-muted">Saldo Cuota</label>
                                         <div class="input-group">
-                                            <span class="input-group-text bg-light"><i
+                                            <span class="input-group-text bg-body-tertiary"><i
                                                     class="fas fa-dollar-sign text-primary"></i></span>
-                                            <input type="text" class="form-control bg-light" value="2,196.00" readonly
+                                            <input type="text" class="form-control bg-body-tertiary" value="" disabled
                                                 id="saldocuota">
                                         </div>
                                     </div>
                                     <div class="mb-2">
                                         <label class="form-label small text-muted">Penalidad</label>
                                         <div class="input-group">
-                                            <span class="input-group-text bg-light"><i
+                                            <span class="input-group-text bg-body-tertiary"><i
                                                     class="fas fa-exclamation-circle text-danger"></i></span>
-                                            <input type="text" class="form-control bg-light" value="0.00" readonly
+                                            <input type="text" class="form-control bg-body-tertiary" value="0.00" disabled
                                                 id="penalidad">
                                         </div>
                                     </div>
                                     <div>
                                         <label class="form-label small text-muted">Total Deuda</label>
                                         <div class="input-group">
-                                            <span class="input-group-text bg-light"><i
+                                            <span class="input-group-text bg-body-tertiary"><i
                                                     class="fas fa-calculator text-success"></i></span>
-                                            <input type="text" class="form-control bg-light fw-bold" value="2,196.00"
-                                                readonly id="total-deuda">
+                                            <input type="text" class="form-control bg-body-tertiary fw-bold " disabled
+                                                id="total-deuda">
                                         </div>
                                     </div>
                                 </div>
@@ -206,24 +213,24 @@
                                     <div class="mb-2">
                                         <label class="form-label small text-muted">Amortización</label>
                                         <div class="input-group">
-                                            <span class="input-group-text bg-light"><i
+                                            <span class="input-group-text bg-body-tertiary"><i
                                                     class="fas fa-coins text-warning"></i></span>
-                                            <input type="text" class="form-control bg-light" id="amortizacion">
+                                            <input type="text" class="form-control bg-body-tertiary" id="amortizacion">
                                         </div>
                                     </div>
                                     <div class="mb-2">
                                         <label class="form-label small text-muted">Saldo Restante</label>
                                         <div class="input-group">
-                                            <span class="input-group-text bg-light"><i
+                                            <span class="input-group-text bg-body-tertiary"><i
                                                     class="fas fa-wallet text-info"></i></span>
-                                            <input type="text" class="form-control bg-light" value="0.00" readonly
+                                            <input type="text" class="form-control bg-body-tertiary" value="0.00" readonly
                                                 id="saldo-restante">
                                         </div>
                                     </div>
                                     <div>
                                         <label class="form-label small text-muted">Fecha de Pago</label>
                                         <div class="input-group">
-                                            <span class="input-group-text bg-light"><i
+                                            <span class="input-group-text bg-body-tertiary"><i
                                                     class="far fa-calendar-alt text-secondary"></i></span>
                                             <input type="date" class="form-control" value="<?= date('Y-m-d') ?>"
                                                 id="fecha-pago">
@@ -243,7 +250,7 @@
                                     </h6>
                                     <div class="mb-2">
                                         <label class="form-label small text-muted">Modalidad</label>
-                                        <select class="form-select">
+                                        <select class="form-select" id="metodo-pago">
                                             <option value="efectivo">Efectivo</option>
                                             <option value="yape">Yape</option>
                                             <option value="transferencia">Transferencia Bancaria</option>
@@ -253,7 +260,7 @@
                                     <div class="mb-2">
                                         <label class="form-label small text-muted">Número de Operación</label>
                                         <input type="text" class="form-control"
-                                            placeholder="Opcional para transferencias">
+                                            placeholder="Opcional para transferencias" id="numoperacion">
                                     </div>
                                 </div>
                             </div>
@@ -265,7 +272,7 @@
                                         <i class="fas fa-sticky-note me-2"></i>Observaciones
                                     </h6>
                                     <textarea class="form-control" rows="4"
-                                        placeholder="Ingrese cualquier observación..."></textarea>
+                                        placeholder="Ingrese cualquier observación..." id="observaciones"></textarea>
                                 </div>
                             </div>
                         </div>
@@ -289,7 +296,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function() {
 
 
 
@@ -382,7 +389,7 @@
 
             //cambio visual de la fila, para que me lo marque cn un fondo que identifique si esta pagado o no:
             if (cuotaData.pagado) {
-                fila.classList.add('table-success');
+                fila.classList.add('table-success', 'fw-bold');
             } else {
                 fila.classList.remove('table-success');
             }
@@ -396,7 +403,7 @@
 
         // Event listeners para botones de pago
         document.querySelectorAll('[id="btn-cuota"]').forEach(btn => {
-            btn.addEventListener('click', function (e) {
+            btn.addEventListener('click', function(e) {
                 cuotaActual = parseInt(this.dataset.cuota);
                 const datosCuota = cuotas[cuotaActual];
 
@@ -414,7 +421,7 @@
         });
 
         // Event listener para el cambio en el campo de amortización
-        document.getElementById('amortizacion').addEventListener('input', function () {
+        document.getElementById('amortizacion').addEventListener('input', function() {
             const nuevaAmortizacion = parseFloat(this.value) || 0;
             const datosCuota = cuotas[cuotaActual];
             const saldoRestanteCapital = datosCuota.valorCuota - datosCuota.abonoCapitalTotal;
@@ -433,7 +440,7 @@
         });
 
         // Evento para el envío del formulario de pago
-        document.getElementById('formPago').addEventListener('submit', function (e) {
+        document.getElementById('formPago').addEventListener('submit', function(e) {
             e.preventDefault();
 
             if (!cuotaActual) {
@@ -449,6 +456,7 @@
 
             const nuevaAmortizacion = parseFloat(document.getElementById('amortizacion').value) || 0;
             const datosCuota = cuotas[cuotaActual];
+            
             const fila = document.querySelector(`#tabla-body tr:nth-child(${cuotaActual})`);
             let saldoCapitalAnterior = datosCuota.valorCuota + datosCuota.penalidad - datosCuota.abonoCapitalTotal;
 
@@ -479,10 +487,17 @@
             // Actualizar estado de cuota
             datosCuota.penalidad -= pagoPenalidad;
             datosCuota.abonoCapitalTotal += pagoCapital;
+            datosCuota.amortizacion = document.querySelector('#amortizacion').value;
+            datosCuota.observaciones = document.querySelector('#observaciones').value;
+            datosCuota.fechaPago = document.querySelector('#fecha-pago').value;
+            datosCuota.metodoPago = document.querySelector('#metodo-pago').value;
+            datosCuota.numOperacion = document.querySelector('#numoperacion').value;
+
 
             if (datosCuota.abonoCapitalTotal >= datosCuota.valorCuota && datosCuota.penalidad <= 0) {
                 datosCuota.pagado = true;
             }
+
 
             // Actualizar DOM
             fila.querySelector('td:nth-child(4)').innerHTML = `S/ ${datosCuota.abonoCapitalTotal.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`;
@@ -495,9 +510,12 @@
             modal.hide();
             this.reset();
 
+
+            showToast('¡Pago realizado!','SUCCESS','1200');
+
+            const objetoJson = JSON.stringify(datosCuota);
+            console.log(objetoJson);
             
-            alert('El pago se ha guardado correctamente.');
-            console.log('Pago procesado correctamente.', datosCuota);
         });
 
 
@@ -547,7 +565,7 @@
 
 
         // Manejar clic en paginación
-        document.getElementById('paginacion').addEventListener('click', function (e) {
+        document.getElementById('paginacion').addEventListener('click', function(e) {
             const target = e.target.closest('.page-link');
             if (!target || target.parentElement.classList.contains('disabled')) return;
 
@@ -559,8 +577,10 @@
         });
 
 
+
+
         // Búsqueda por número de cuota
-        document.getElementById('inputBuscar').addEventListener('input', function () {
+        document.getElementById('inputBuscar').addEventListener('input', function() {
             const searchTerm = this.value.trim().toLowerCase();
 
             if (searchTerm === '') {
@@ -573,7 +593,8 @@
 
             rows.forEach(row => {
                 const cell = row.cells[0]; // Primera celda con el número si busco '1' - solo mostrara los que tienen '1' a la izquierda
-                const cuotaNum = cell.textContent.trim().toLowerCase();
+                const cuotaNum = cell.textContent.trim().toLowerCase(); // Traer el texto
+                console.log('CUOTANUM:', cuotaNum);
 
                 if (cuotaNum.includes(searchTerm)) {
                     row.style.display = '';
@@ -589,7 +610,7 @@
         });
 
 
-        document.getElementById('btnImprimir').addEventListener('click', function () {
+        document.getElementById('btnImprimir').addEventListener('click', function() {
             // Mostrar todas las filas
             document.querySelectorAll('#tabla-body tr').forEach(row => row.style.display = '');
 

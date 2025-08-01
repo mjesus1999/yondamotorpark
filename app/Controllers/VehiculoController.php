@@ -37,6 +37,7 @@ class VehiculoController extends Controller
       'idmodelo' => $data['idmodelo'] ?? '',
       'idcombustible' => $data['idcombustible'] ?? '',
       'version' => $data['version'] ?? '',
+      'condicion' => $data['condicion'] ??'',
       'color' => $data['color'] ?? '',
       'chasis' => $data['chasis'] ?? '',
       'placa' => $data['placa'] ?? '',

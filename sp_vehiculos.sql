@@ -18,6 +18,7 @@ CREATE PROCEDURE sp_vehiculo_OC_registrar(
 IN idmodelo_ INT,
 IN idcombustible_ INT,
 IN version_ VARCHAR(20),
+IN condicion_ VARCHAR(30),
 IN color_ VARCHAR(30), -- NULL
 IN chasis_ VARCHAR(30), -- NULL
 IN placa_ VARCHAR(10), -- NULL
@@ -26,11 +27,12 @@ IN seriemotor_ VARCHAR(20) -- NULL
 )
 BEGIN
 
-	INSERT INTO vehiculos(idmodelo,idcombustible,version,color,chasis,placa,placarotativa,seriemotor,disponibilidad,origen)
+	INSERT INTO vehiculos(idmodelo,idcombustible,version,condicion,color,chasis,placa,placarotativa,seriemotor,disponibilidad,origen)
 		VALUES(
         idmodelo_,
         idcombustible_,
         version_,
+        condicion_,
         NULLIF(color_,''),
         NULLIF(chasis_,''),
         NULLIF(placa_,''),

@@ -714,6 +714,7 @@
                                     formVeh.append("idmodelo", vehiculo.idmodelo);
                                     formVeh.append("idcombustible", vehiculo.idcombustible);
                                     formVeh.append("version", vehiculo.version);
+                                    formVeh.append("condicion",vehiculo.condicion);
                                     formVeh.append("color", vehiculo.color);
                                     formVeh.append("chasis", vehiculo.chasis);
                                     formVeh.append("placa", vehiculo.placa);
