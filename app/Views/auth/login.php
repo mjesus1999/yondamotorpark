@@ -8,10 +8,11 @@
     <link href="https://fonts.googleapis.com/css?family=Lato:300,400,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="/public/assets/css/login-style.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
 </head>
 
-<body>  
+<body>
 
     <style>
         .yonda {
@@ -22,7 +23,7 @@
     <section class="ftco-section">
         <div class="container">
             <div class="row justify-content-center">
-                <div class="col-md-12 col-lg-10">
+                <div class="col-md-12 col-lg-5">
                     <div class="wrap d-md-flex">
                         <div class="img" style="background-image: url('./public/images/motorpark-login.jpg');">
                         </div>
@@ -39,7 +40,8 @@
                                 <div class="form-group mb-3">
                                     <label class="label" for="name">Nombre de usuario</label>
                                     <input type="text" name="usernick" class="form-control"
-                                        placeholder="Nombre de usuario" required>
+                                        placeholder="Nombre de usuario" required
+                                        value="<?= isset($old['usernick']) ? htmlspecialchars($old['usernick']) : '' ?>">
                                 </div>
                                 <div class="form-group mb-3">
                                     <label class="label" for="password">Contraseña</label>
@@ -50,15 +52,23 @@
                                     <button type="submit"
                                         class="form-control btn yonda text-light rounded submit px-3">Acceder</button>
                                 </div>
-                                <div class="form-group d-md-flex">
-                                    <div class="w-50 text-left">
-                                        <label class="checkbox-wrap checkbox-primary mb-0">Recordar
+                                <div class="form-group">
+
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <label class="checkbox-wrap checkbox-primary mb-0">
+                                            Recordar
                                             <input type="checkbox" checked>
                                             <span class="checkmark"></span>
                                         </label>
+
+                                        <?php $prefill = isset($old['usernick']) ? urlencode($old['usernick']) : ''; ?>
+                                        <a href="/recoverAccount<?= $prefill ? '?usernick=' . $prefill : '' ?>">Recuperar
+                                            contraseña</a>
                                     </div>
-                                    <div class="w-50 text-md-right">
-                                        <a href="#">Recuperar contraseña</a>
+
+                                    <div class="mt-2 text-md-end text-center">
+                                        <span>¿No estás registrado? <a href="createAccount" class="fw-semibold">Crear
+                                                cuenta</a></span>
                                     </div>
                                 </div>
                             </form>
@@ -79,7 +89,7 @@
                 const usernick = document.querySelector('input[name="usernick"]').value;
                 const password = document.querySelector('input[name="userpassword"]').value;
 
-                /* console.log('▶️ Enviando login:', { usernick, password }); */
+                /* console.log('Enviando login:', { usernick, password }); */
 
                 form.submit();
             });
@@ -96,22 +106,10 @@
                 const usernick = document.querySelector('input[name="usernick"]').value;
                 const password = document.querySelector('input[name="userpassword"]').value;
 
-                console.log('▶️ Enviando login:', { usernick, password });
+                console.log('Enviando login:', { usernick, password });
 
                 // Espera 1 segundo antes de enviar
                 setTimeout(() => form.submit(), 1000);
-            });
-        });
-    </script> -->
-
-    <!--     <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const formulario = document.querySelector("#formulario-login");
-
-            formulario.addEventListener("submit", (event) => {
-                event.preventDefault();
-
-                window.location.href = './views/';
             });
         });
     </script> -->

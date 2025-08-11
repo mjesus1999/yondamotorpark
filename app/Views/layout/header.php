@@ -44,7 +44,7 @@ $allModules = [
   <!-- <link rel="stylesheet" href="//cdn.datatables.net/2.2.2/css/dataTables.dataTables.min.css"> -->
   <link rel="stylesheet" href="https://cdn.datatables.net/2.2.2/css/dataTables.bootstrap5.css">
   <link rel="stylesheet" href="https://cdn.datatables.net/select/3.0.0/css/select.bootstrap5.css">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
   <link rel="stylesheet" href="/assets/css/style-dashboard.css">
   <link rel="stylesheet" href="/assets/css/motorpark-style.css">
 
@@ -221,12 +221,13 @@ $allModules = [
                 <?php if (!empty($_SESSION['user'])): ?>
                   <a href="/usuarios/profile/<?= $_SESSION['user']['id'] ?>" class="dropdown-item">
                     <?php
-                    $primerNombre = explode(' ', trim($_SESSION['user']['nombres']))[0];
-                    $primerApellido = explode(' ', trim($_SESSION['user']['apellidos']))[0];
+                    $primerNombre = isset($_SESSION['user']['nombres']) ? explode(' ', trim($_SESSION['user']['nombres']))[0] : '';
+                    $primerApellido = isset($_SESSION['user']['apellidos']) ? explode(' ', trim($_SESSION['user']['apellidos']))[0] : '';
                     echo htmlspecialchars($primerNombre . ' ' . $primerApellido);
                     ?>
                   </a>
                 <?php endif; ?>
+
                 <a href="#" class="dropdown-item">Configuración</a>
                 <a href="#" class="dropdown-item">Cambiar contraseña</a>
                 <a href="/logout" class="dropdown-item">Cerrar sesión</a>

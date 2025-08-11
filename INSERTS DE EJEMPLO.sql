@@ -7,7 +7,7 @@ SET userpassword = '$2y$10$cYt7.yHXNdzUaYGw0xktxuD9MJem51XAfTSClw7FZnL6a/XNeEOeS
 WHERE usernick = 'leticiall';
 
 -- COMBUSTIBLE
-INSERT IGNORE INTO combustibles (idcombustible, combustible) VALUES
+INSERT INTO combustibles (idcombustible, combustible) VALUES
   (1, 'Gasolina'),
   (2, 'Diésel'),
   (3, 'GLP'),
@@ -225,7 +225,6 @@ INSERT INTO permisos (idcargo, moduloapp) VALUES
 (3, 'vehiculos');
 
 
-
 -- EMPRESAS
 INSERT INTO empresas (razonsocial, nombrecomercial, ruc, representante, email, telprimario)
 VALUES
@@ -233,11 +232,19 @@ VALUES
 
 -- CLIENTES
 INSERT INTO clientes (tipocliente, idpersona, idempresa, idcolregistra)
+VALUES 	('P', 1, NULL,  2), 
+		('P', 2, NULL,  2), 
+        ('P', 3, NULL,  2),
+        ('P', NULL, 1,  2);
+
+
+INSERT INTO clientes (tipocliente, idpersona, idempresa, idcolregistra)
 VALUES
   ('P', 1, NULL,  3),  -- Cliente Persona
   ('P', 2, NULL,  3),
   ('E', NULL, 1,  3);  
 
+/*
 -- Supongamos que la persona con DNI 71689010 tiene idpersona = 3
 INSERT INTO clientes (tipocliente, idpersona, idempresa, idcolregistra)
 VALUES ('P', 3, NULL,  3);
@@ -247,7 +254,7 @@ VALUES 	('P', 1, NULL,  2),
 		('P', 2, NULL,  2), 
         ('P', 3, NULL,  2),
         ('P', NULL, 1,  2);
-
+*/
 
 /*
 INSERT INTO vehiculos

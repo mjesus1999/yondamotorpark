@@ -3,6 +3,7 @@ use motorpark;
 SELECT * FROM cotizaciones;
 SELECT * FROM empresas;
 SELECT * FROM personas;
+SELECT * FROM Colaboradores;
 select * from areas;
 select * from cargos;
 select * from clientes;
@@ -49,6 +50,8 @@ c.estadocotizacion,
 
 SELECT
     c.idcotizacion,
+    c.idformato,
+    fc.tipocotizacion,
     COALESCE(
       CASE WHEN cl.tipocliente = 'P' THEN CONCAT(p.nombres, ' ', p.apellidos) END,
       e.razonsocial,
@@ -79,6 +82,7 @@ LEFT JOIN empresas e ON cl.idempresa = e.idempresa
 JOIN vehiculos v ON c.idvehiculo = v.idvehiculo
 JOIN modelos mo ON v.idmodelo = mo.idmodelo
 JOIN marcas ma ON mo.idmarca = ma.idmarca
+JOIN formatocotizacion fc ON c.idformato = fc.idformato
 ORDER BY c.creado DESC
 LIMIT 10;
 
