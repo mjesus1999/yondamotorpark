@@ -8,6 +8,26 @@ select * from areas;
 select * from cargos;
 select * from clientes;
 
+/*
+-- ENCONTRAR EL USERNICK Y EMAIL
+SELECT
+        cl.idcontratolaboral,
+        cl.idpersona,
+        p.apellidos,
+        p.nombres,
+        a.area,
+        cg.cargo,
+        DATE_FORMAT(cl.fechainicio, '%Y-%m-%d') AS fechainicio
+      FROM contratoslaborales cl
+      JOIN personas p ON p.idpersona = cl.idpersona
+      JOIN cargos cg ON cg.idcargo = cl.idcargo
+      JOIN areas a ON a.idarea = cg.idarea
+      LEFT JOIN colaboradores col ON col.idcontratolaboral = cl.idcontratolaboral
+      WHERE col.idcolaborador IS NULL
+      ORDER BY p.apellidos, p.nombres
+      LIMIT 0,1000;
+*/
+
 -- REPORTE DE COTIZACION
 SELECT
     c.idcliente,

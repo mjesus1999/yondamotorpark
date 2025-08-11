@@ -244,6 +244,29 @@ VALUES
   ('P', 2, NULL,  3),
   ('E', NULL, 1,  3);  
 
+INSERT INTO personas (
+  iddistrito, apellidos, nombres, tipodoc, nrodoc, genero, fechanac,
+  estadocivil, email, direccion, referencia, telprimario
+) VALUES (
+  2,
+  'Gómez', 'María Luisa', 'DNI', '87654321', 'F', '1992-11-20',
+  'CAS', 'maria.gomez@ejemplo.com', 'Jr. Los Olivos 45', 'Depto. 3', '976543210'
+);
+
+SET @idPersona2 = LAST_INSERT_ID();
+
+INSERT INTO contratoslaborales (
+  idpersona, idcargo, fechainicio, fechafin, tipocontrato
+) VALUES (
+  @idPersona2,
+  8,              -- idcargo existente
+  '2023-07-01',
+  '2024-09-01',   -- contrato con fecha de fin
+  'P'             -- tipo recibos/temporal
+);
+DELETE FROM colaboradores WHERE idcolaborador = 25;
+
+
 /*
 -- Supongamos que la persona con DNI 71689010 tiene idpersona = 3
 INSERT INTO clientes (tipocliente, idpersona, idempresa, idcolregistra)

@@ -175,7 +175,6 @@ class UsuarioController extends Controller
     //ID por URL, recógelo: $id = (int) $params['id'];
     $idColab = $_SESSION['user']['id'];
 
-    //Datos completos del usuario
     $usuario = $this->usuarioModel->getById($idColab);
     $this->view('usuarios.profile', ['usuario' => $usuario]);
   }
@@ -236,7 +235,6 @@ class UsuarioController extends Controller
       return;
     }
 
-    // 6) Responde éxito y nueva URL
     echo json_encode([
       'success' => true,
       'avatarUrl' => $avatarUrl
@@ -252,7 +250,6 @@ class UsuarioController extends Controller
   }
 
   // POST /createFromContract
-// POST /createFromContract
   public function createFromContract(): void
   {
     $idContrato = (int) ($_POST['idcontrato'] ?? 0);
@@ -286,7 +283,6 @@ class UsuarioController extends Controller
     }
 
     if ($errors) {
-      // Re-render form con errores y datos antiguos
       $contracts = $this->usuarioModel->getContractsWithoutColaborador();
       $this->view('usuarios.createAccount', [
         'contracts' => $contracts,
