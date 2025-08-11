@@ -314,7 +314,7 @@
                         </div>
 
                         <div class="modal-footer border-top-0 pt-0">
-                            <button type="button" class="btn btn-outline-secondary btn-sm px-4" data-bs-dismiss="modal">
+                            <button type="button" class="btn btn-outline-secondar   y btn-sm px-4" data-bs-dismiss="modal">
                                 Cancelar
                             </button>
                             <button type="submit" class="btn btn-primary btn-sm px-4" id="btn-agregar-pago">

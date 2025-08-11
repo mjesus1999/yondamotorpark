@@ -487,10 +487,14 @@ CREATE TABLE cronogramas
     CONSTRAINT fk_idcont_cronogramas FOREIGN KEY(idcontrato) REFERENCES contratos(idcontrato)
 )ENGINE = InnoDB;
 
+
+
+ALTER TABLE cronogramas MODIFY COLUMN penalidad DECIMAL(10,2) NULL DEFAULT 0;
 ALTER TABLE cronogramas MODIFY COLUMN estado ENUM('Pendiente','Pagado','Vencido') DEFAULT 'Pendiente';
 ALTER TABLE cronogramas MODIFY COLUMN interes DECIMAL(10,2) NOT NULL;
 ALTER TABLE cronogramas MODIFY COLUMN abonocapital DECIMAL(10,2) NOT NULL;
 USE motorpark;
+
 CREATE TABLE pagos(
     idpago              INT AUTO_INCREMENT PRIMARY KEY,
     idcronograma        INT NOT NULL,
@@ -501,7 +505,7 @@ CREATE TABLE pagos(
     fechapago           DATE NOT NULL,
     fecharegistro       DATETIME NOT NULL DEFAULT NOW(),
     amortizacion        DECIMAL(10,2) NOT NULL,
-    saldorestante        DECIMAL(10,2)  NOT NULL,
+    saldorestante        DECIMAL(10,2)  NULL,
     comprobante         VARCHAR(200) NOT NULL,
     observacion         VARCHAR(300) NULL,
     facturado ENUM('S', 'N') DEFAULT 'S',
@@ -512,16 +516,19 @@ CREATE TABLE pagos(
 
 
 )ENGINE = InnoDB;
+ALTER TABLE pagos MODIFY COLUMN saldorestante        DECIMAL(10,2)  NULL;
 
+ALTER TABLE 
 CREATE TABLE cuentaspago(
     idcuentapago        INT AUTO_INCREMENT PRIMARY KEY,
     identidadpago       INT NOT NULL,
-    monedad             ENUM('Soles','Dolares') NOT NULL,
+    moneda             ENUM('Soles','Dolares') NOT NULL,
     numcuenta           VARCHAR(35) NOT NULL,
     CONSTRAINT fk_identipago_cuentas FOREIGN KEY(identidadpago) REFERENCES entidadespago(identidadpago)
 )ENGINE = InnoDb;
 
 
+ALTER TABLE cuentaspago CHANGE COLUMN monedad   moneda             ENUM('Soles','Dolares') NOT NULL;
 
 
 CREATE TABLE entidadespago (

@@ -26,8 +26,9 @@ class CajaController extends Controller
         $this->view('caja.index', ['contratos' => $datos]);
     }
 
-    public function cronogramaByContrato():void {
-        $this->view('caja.cronograma');
+    public function cronogramaByContrato(int $id):void {
+        $datos = $this->cajaModel->getCronogramaByIdContrato($id);
+        $this->view('caja.cronograma',['cronograma' => $datos]);
     }
 
 

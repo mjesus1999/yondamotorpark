@@ -16,7 +16,7 @@
                 </nav>
             </div>
             <div class="col-md-6 d-flex justify-content-end">
-                <a href="/contratos/" class="btn btn-outline-primary btn-sm">
+                <a href="/caja/" class="btn btn-outline-primary btn-sm">
                     <i class="fas fa-list me-1"></i> Lista
                 </a>
                 <button class="btn btn-danger btn-sm ms-2" id="btnImprimir">
@@ -49,70 +49,88 @@
                                     <th><i class="fas fa-percentage me-1"></i> Interés</th>
                                     <th><i class="fas fa-piggy-bank me-1"></i> Abono Capital</th>
                                     <th><i class="fas fa-money-bill-wave me-1"></i> Valor Cuota</th>
+                                    <th>Amortización</th>
+                                    <th>Restante</th>
                                     <th><i class="fas fa-wallet me-1"></i> Saldo Capital</th>
                                     <th>Estado</th>
                                     <th>Acciones</th>
                                 </tr>
                             </thead>
                             <tbody id="tabla-body">
-                                <?php
-                                $monto_prestamo = 40050;
-                                $plazo_meses = 36;
-                                $cuota_fija = 2196.00;
-                                $saldo_capital_restante = $monto_prestamo;
-                                $fecha_base = new DateTimeImmutable('2025-06-27');
-                                $hoy = new DateTimeImmutable('today'); // Forzar la hora                                 
-                                for ($i = 1; $i <= $plazo_meses; $i++) {
-                                    $fecha_cuota = $fecha_base->modify("+$i month");
-                                    $fecha_formateada = $fecha_cuota->format('d/m/Y');
 
-                                    $vencido = ($hoy > $fecha_cuota);
-                                    $dias_restantes = $hoy->diff($fecha_cuota)->days;
+                                <?php if (empty($cronograma)) : ?>
+                                    <tr>
+                                        <td colspan="8" class="text-center">No hay datos para mostrar</td>
+                                    </tr>
+                                <?php else: ?>
+                                    <?php
+                                    $hoy = new DateTimeImmutable('today');
+                                    foreach ($cronograma as $index => $fila) {
+                                        $fecha_cuota = new DateTimeImmutable($fila['fechapago']);
+                                        $fecha_formateada = $fecha_cuota->format('d/m/Y');
 
-                                    $estado = 'Pendiente';
-                                    $clase_estado = 'estado-pendiente';
-                                    $icono = 'fa-clock';
-                                    $texto_vencimiento = "Vence en $dias_restantes días";
+                                        $vencido = ($hoy > $fecha_cuota);
+                                        $dias_restantes = $hoy->diff($fecha_cuota)->days;
 
-                                    if ($vencido) {
-                                        $estado = 'Vencido';
-                                        $clase_estado = 'estado-vencido';
-                                        $icono = 'fa-exclamation-triangle';
-                                        $texto_vencimiento = "Venció hace $dias_restantes días";
-                                    }
+                                        $estado = 'Pendiente';
+                                        $clase_estado = 'estado-pendiente';
+                                        $icono = 'fa-clock';
+                                        $texto_vencimiento = "Vence en $dias_restantes días";
 
-                                    $saldo_capital = $cuota_fija;
-                                    $abono_capital = 0.00;
-                                    $style_display = ($i <= 10) ? '' : 'style="display:none;"';
-                                    $data_page = ceil($i / 10);
+                                        $estado = $fila['estado'];
+                                        $clase_estado = 'estado-pendiente';
+                                        $icono = 'fa-clock';
+                                        $texto_vencimiento = "Vence en $dias_restantes días";
 
-                                    echo "<tr data-page='$data_page' $style_display>
-                                        <td><span class='badge bg-primary badge-cuota'>$i</span></td>
-                                        <td>
-                                            <div class='d-flex flex-column'>
-                                                <span class='fw-bold'>$fecha_formateada</span>
-                                                <small class='text-muted'>$texto_vencimiento</small>
-                                            </div>
-                                        </td>
-                                        <td>S/ 0.00</td>
-                                        <td>S/ " . number_format($abono_capital, 2) . "</td>
-                                        <td>S/ " . number_format($cuota_fija, 2) . "</td>
-                                        <td>S/ " . number_format($saldo_capital, 2) . "</td>
-                                        <td>
-                                            <span class='$clase_estado'>
-                                                <i class='fas $icono me-1'></i> $estado
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <button class='btn btn-pagar btn-sm text-white' data-bs-toggle='modal' data-bs-target='#modalPago' data-cuota='$i' id='btn-cuota'>
-                                                <i class='fa-solid fa-dollar-sign me-1'></i> Pagar
-                                            </button>
-                                        </td>
-                                    </tr>";
-                                }
+                                        if ($estado === 'Pagado') {
+                                            $clase_estado = 'estado-pagado';
+                                            $icono = 'fa-check-circle';
+                                            $texto_vencimiento = "Pagado";
+                                        } elseif ($hoy > $fecha_cuota) {
+                                            $clase_estado = 'estado-vencido';
+                                            $icono = 'fa-exclamation-triangle';
+                                            $texto_vencimiento = "Venció hace $dias_restantes días";
+                                        }
 
 
-                                ?>
+                                        $style_display = ($index < 10) ? '' : 'style="display:none;"';
+                                        $data_page = ceil(($index + 1) / 10);
+                                    ?>
+                                        <tr data-page="<?= $data_page ?>" <?= $style_display ?>>
+                                            <td><span class="badge bg-primary badge-cuota"><?= $fila['numcuota'] ?></span></td>
+                                            <td>
+                                                <div class="d-flex flex-column">
+                                                    <span class="fw-bold"><?= $fecha_formateada ?></span>
+                                                    <small class="text-muted"><?= $texto_vencimiento ?></small>
+                                                </div>
+                                            </td>
+                                            <td>S/ <?= number_format($fila['interes'], 2) ?></td>
+                                            <td>S/ <?= number_format($fila['abonocapital'], 2) ?></td>
+                                            <td>S/ <?= number_format($fila['valorcuota'], 2) ?></td>
+                                            <td><?= number_format($fila['amortizacion'], 2) ?></td>
+                                            <td><?= number_format($fila['saldorestante'], 2) ?></td>
+                                            <td>S/ <?= number_format($fila['saldocapital'], 2) ?></td>
+                                            <td>
+                                                <span class="<?= $clase_estado ?>">
+                                                    <i class="fas <?= $icono ?> me-1"></i> <?= $estado ?>
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <button class="btn btn-pagar btn-sm text-white"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#modalPago"
+                                                    data-cuota="<?= $fila['numcuota'] ?>"
+                                                    data-valorcuota="<?= $fila['valorcuota'] ?>"
+                                                    data-abonocapital="<?= $fila['abonocapital'] ?>"
+                                                    data-penalidad="<?= $fila['penalidad'] ?>">
+                                                    <i class="fa-solid fa-dollar-sign me-1"></i> Pagar
+                                                </button>
+
+                                            </td>
+                                        </tr>
+                                    <?php } ?>
+                                <?php endif; ?>
+
                             </tbody>
                         </table>
                     </div>
@@ -121,8 +139,8 @@
 
                     <div class="d-flex justify-content-between align-items-center">
                         <div class="text-muted" id="info-paginacion">
-                            Mostrando <span class="fw-bold">1-10</span> de <span
-                                class="fw-bold"><?= $plazo_meses ?></span> cuotas
+                            Mostrando <span class="fw-bold">1-10</span> de
+                            <span class="fw-bold"><?= count($cronograma) ?></span> cuotas
                         </div>
                         <nav aria-label="Page navigation">
                             <ul class="pagination pagination-sm mb-0" id="paginacion">
@@ -130,7 +148,7 @@
                                     <a class="page-link" href="#" data-page="1" tabindex="-1" aria-disabled="true">Anterior</a>
                                 </li>
 
-                                <?php for ($p = 1; $p <= ceil($plazo_meses / 10); $p++): ?>
+                                <?php for ($p = 1; $p <= ceil(count($cronograma) / 10); $p++): ?>
                                     <li class="page-item <?= $p == 1 ? 'active' : '' ?>">
                                         <a class="page-link" href="#" data-page="<?= $p ?>"><?= $p ?></a>
                                     </li>
@@ -141,13 +159,15 @@
                                 </li>
                             </ul>
                         </nav>
-
                     </div>
                 </div>
+
             </div>
         </div>
     </div>
 </div>
+
+
 
 
 <!-- Modal de Pago-->
@@ -188,7 +208,7 @@
                                         <div class="input-group">
                                             <span class="input-group-text bg-body-tertiary"><i
                                                     class="fas fa-exclamation-circle text-danger"></i></span>
-                                            <input type="text" class="form-control bg-body-tertiary" value="0.00" disabled
+                                            <input type="text" class="form-control bg-body-tertiary" disabled
                                                 id="penalidad">
                                         </div>
                                     </div>
@@ -223,7 +243,7 @@
                                         <div class="input-group">
                                             <span class="input-group-text bg-body-tertiary"><i
                                                     class="fas fa-wallet text-info"></i></span>
-                                            <input type="text" class="form-control bg-body-tertiary" value="0.00" readonly
+                                            <input type="text" class="form-control bg-body-tertiary" readonly
                                                 id="saldo-restante">
                                         </div>
                                     </div>
@@ -302,226 +322,50 @@
 
         // Variables globales
         const itemsPerPage = 10;
-        const totalItems = 36;
+        const totalItems = <?= count($cronograma) ?>;
         const totalPages = Math.ceil(totalItems / itemsPerPage);
         let currentPage = 1;
-        let cuotaActual = null;
-        let cuotas = {}; // Usaremos un objeto para almacenar el estado de cada cuota
-
-        // Inicializar el objeto de cuotas
-        document.querySelectorAll('#tabla-body tr').forEach((row, index) => {
-            const numCuota = index + 1;
-            const valorCuotaTexto = row.querySelector('td:nth-child(5)').textContent;
-            const valorCuota = parseFloat(valorCuotaTexto.replace('S/ ', '').replace(',', ''));
-            const fechaVencimientoTexto = row.querySelector('td:nth-child(2) .fw-bold').textContent;
-            const [dia, mes, anio] = fechaVencimientoTexto.split('/');
-            const fechaVencimiento = `${anio}-${mes.padStart(2, '0')}-${dia.padStart(2, '0')}`;
-
-            cuotas[numCuota] = {
-                id: numCuota,
-                valorCuota,
-                fechaVencimiento,
-                abonoCapitalTotal: 0.00,
-                penalidad: 0.00,
-                pagado: false
-            };
-            // Calcular penalidad inicial si la cuota ya está vencida al cargar la página
-            const diasVencimiento = calcularDiasVencimiento(fechaVencimiento);
-            if (diasVencimiento > 3) {
-                cuotas[numCuota].penalidad = 300.00;
-                // Actualiza la columna de saldo capital en la tabla
-                const saldoCapitalCell = row.querySelector('td:nth-child(6)');
-                const nuevoSaldo = valorCuota + cuotas[numCuota].penalidad;
-                saldoCapitalCell.innerHTML = `S/ ${nuevoSaldo.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`;
-            }
-            actualizarEstadoFila(row, cuotas[numCuota]);
-        });
-
-        // Función para calcular días de vencimiento
-        function calcularDiasVencimiento(fechaVencimiento) {
-            const hoy = new Date();
-            const fechaVenc = new Date(fechaVencimiento);
-            const diferencia = hoy.getTime() - fechaVenc.getTime();
-            return Math.ceil(diferencia / (1000 * 3600 * 24));
-        }
-
-        // Función para actualizar el estado visual de una fila de la tabla
-        function actualizarEstadoFila(fila, cuotaData) {
-            const estadoCell = fila.querySelector('td:nth-child(7)');
-            const btnPago = fila.querySelector('[id="btn-cuota"]');
-            const abonoCapitalCell = fila.querySelector('td:nth-child(4)');
-
-            let estadoHTML = '';
-
-            if (cuotaData.pagado) {
-                estadoHTML = `
-        <span class="estado-pagado">
-            <i class="fas fa-check-circle me-1"></i> Pagado
-        </span>`;
-                btnPago.disabled = true;
-                btnPago.innerHTML = '<i class="fas fa-check me-1"></i> Pagado';
-                btnPago.classList.remove('btn-pagar');
-                btnPago.classList.add('btn-secondary');
-            } else {
-                const diasVencimiento = calcularDiasVencimiento(cuotaData.fechaVencimiento);
-                if (diasVencimiento > 0) {
-                    estadoHTML = `
-            <span class="estado-vencido">
-                <i class="fas fa-exclamation-triangle me-1"></i> Vencido
-            </span>`;
-                    btnPago.disabled = false;
-                    btnPago.classList.remove('btn-secondary');
-                    btnPago.classList.add('btn-pagar');
-                    btnPago.innerHTML = '<i class="fa-solid fa-dollar-sign me-1"></i> Pagar';
-                } else {
-                    estadoHTML = `
-            <span class="estado-pendiente">
-                <i class="fas fa-clock me-1"></i> Pendiente
-            </span>`;
-                    btnPago.disabled = false;
-                    btnPago.classList.remove('btn-secondary');
-                    btnPago.classList.add('btn-pagar');
-                    btnPago.innerHTML = '<i class="fa-solid fa-dollar-sign me-1"></i> Pagar';
-                }
-            }
-
-            estadoCell.innerHTML = estadoHTML;
-
-            //cambio visual de la fila, para que me lo marque cn un fondo que identifique si esta pagado o no:
-            if (cuotaData.pagado) {
-                fila.classList.add('table-success', 'fw-bold');
-            } else {
-                fila.classList.remove('table-success');
-            }
-
-            // Mostrar abono capital acumulado si existe
-            if (cuotaData.abonoCapitalTotal > 0) {
-                abonoCapitalCell.innerHTML = `S/ ${cuotaData.abonoCapitalTotal.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`;
-            }
-        }
 
 
-        // Event listeners para botones de pago
-        document.querySelectorAll('[id="btn-cuota"]').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                cuotaActual = parseInt(this.dataset.cuota);
-                const datosCuota = cuotas[cuotaActual];
 
-                // Llenar los campos del modal
-                const saldoRestanteCapital = datosCuota.valorCuota - datosCuota.abonoCapitalTotal;
-                const totalDeuda = saldoRestanteCapital + datosCuota.penalidad;
+        // RELLENAR EL FORMUALRIO CON LOS DATOS DE LA DB.
+        document.querySelectorAll('.btn-pagar').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const valorCuota = parseFloat(this.dataset.valorcuota);
+                const abonoCapital = parseFloat(this.dataset.abonocapital);
+                const penalidad = parseFloat(this.dataset.penalidad) || 0;
 
-                document.getElementById('saldocuota').value = saldoRestanteCapital.toFixed(2);
-                document.getElementById('penalidad').value = datosCuota.penalidad.toFixed(2);
+
+                // Calcular total deuda
+                const totalDeuda = valorCuota + penalidad;
+
+                // Llenar campos en el modal
+                document.getElementById('saldocuota').value = valorCuota.toFixed(2);
+                document.getElementById('penalidad').value = penalidad.toFixed(2);
                 document.getElementById('total-deuda').value = totalDeuda.toFixed(2);
                 document.getElementById('amortizacion').value = '';
                 document.getElementById('saldo-restante').value = totalDeuda.toFixed(2);
-                document.getElementById('fecha-pago').value = new Date().toISOString().split('T')[0];
+
             });
-        });
-
-        // Event listener para el cambio en el campo de amortización
-        document.getElementById('amortizacion').addEventListener('input', function() {
-            const nuevaAmortizacion = parseFloat(this.value) || 0;
-            const datosCuota = cuotas[cuotaActual];
-            const saldoRestanteCapital = datosCuota.valorCuota - datosCuota.abonoCapitalTotal;
-            const totalDeuda = saldoRestanteCapital + datosCuota.penalidad;
-            const nuevoSaldoRestante = totalDeuda - nuevaAmortizacion;
-            document.getElementById('saldo-restante').value = Math.max(0, nuevoSaldoRestante).toFixed(2);
-
-            // Validaciones en tiempo real
-            if (nuevaAmortizacion > totalDeuda) {
-                this.classList.add('is-invalid');
-                document.getElementById('btn-form-submit').disabled = true;
-            } else {
-                this.classList.remove('is-invalid');
-                document.getElementById('btn-form-submit').disabled = false;
-            }
-        });
-
-        // Evento para el envío del formulario de pago
-        document.getElementById('formPago').addEventListener('submit', function(e) {
-            e.preventDefault();
-
-            if (!cuotaActual) {
-                alert('Error: No se ha seleccionado una cuota válida');
-                return;
-            }
-
-            // Confirmar si desea guardar el pago
-            const confirmar = confirm('¿Está seguro que desea guardar este pago?');
-            if (!confirmar) {
-                return;
-            }
-
-            const nuevaAmortizacion = parseFloat(document.getElementById('amortizacion').value) || 0;
-            const datosCuota = cuotas[cuotaActual];
-            
-            const fila = document.querySelector(`#tabla-body tr:nth-child(${cuotaActual})`);
-            let saldoCapitalAnterior = datosCuota.valorCuota + datosCuota.penalidad - datosCuota.abonoCapitalTotal;
-
-            // Validación
-            const totalDeuda = (datosCuota.valorCuota - datosCuota.abonoCapitalTotal) + datosCuota.penalidad;
-            if (nuevaAmortizacion > totalDeuda) {
-                alert('El monto a amortizar no puede ser mayor al total adeudado (cuota + penalidad).');
-                return;
-            }
-
-            // Desglosar el pago: penalidad primero, luego capital
-            let montoRestante = nuevaAmortizacion;
-            let pagoPenalidad = 0;
-            let pagoCapital = 0;
-
-            if (datosCuota.penalidad > 0) {
-                if (montoRestante >= datosCuota.penalidad) {
-                    pagoPenalidad = datosCuota.penalidad;
-                    montoRestante -= datosCuota.penalidad;
-                } else {
-                    pagoPenalidad = montoRestante;
-                    montoRestante = 0;
-                }
-            }
-
-            pagoCapital = montoRestante;
-
-            // Actualizar estado de cuota
-            datosCuota.penalidad -= pagoPenalidad;
-            datosCuota.abonoCapitalTotal += pagoCapital;
-            datosCuota.amortizacion = document.querySelector('#amortizacion').value;
-            datosCuota.observaciones = document.querySelector('#observaciones').value;
-            datosCuota.fechaPago = document.querySelector('#fecha-pago').value;
-            datosCuota.metodoPago = document.querySelector('#metodo-pago').value;
-            datosCuota.numOperacion = document.querySelector('#numoperacion').value;
-
-
-            if (datosCuota.abonoCapitalTotal >= datosCuota.valorCuota && datosCuota.penalidad <= 0) {
-                datosCuota.pagado = true;
-            }
-
-
-            // Actualizar DOM
-            fila.querySelector('td:nth-child(4)').innerHTML = `S/ ${datosCuota.abonoCapitalTotal.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`;
-            const nuevoSaldo = Math.max(0, saldoCapitalAnterior - nuevaAmortizacion);
-            fila.querySelector('td:nth-child(6)').innerHTML = `S/ ${nuevoSaldo.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`;
-
-            actualizarEstadoFila(fila, datosCuota);
-
-            const modal = bootstrap.Modal.getInstance(document.getElementById('modalPago'));
-            modal.hide();
-            this.reset();
-
-
-            showToast('¡Pago realizado!','SUCCESS','1200');
-
-            const objetoJson = JSON.stringify(datosCuota);
-            console.log(objetoJson);
-            
         });
 
 
 
 
         // ----------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
         // Mostrar página específica

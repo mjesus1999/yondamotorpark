@@ -54,15 +54,15 @@ include __DIR__ . '/../layout/header.php';
                                     <?php foreach ($contratos as $contrato) : ?>
                                         <tr>
 
-                                            <td><?php  htmlspecialchars($numeroFila++) ?></td>
-                                            <td><?php  htmlspecialchars($contrato['cliente']) ?></td>
-                                            <td><?php  htmlspecialchars($contrato['documento']) ?></td>
-                                            <td><?php  htmlspecialchars($contrato['ndocumento']) ?></td>
-                                            <td><?php  htmlspecialchars($contrato['tienda']) ?></td>
-                                            <td><?php  htmlspecialchars($contrato['vehiculo']) ?></td>
-                                            <td><?php  htmlspecialchars($contrato['meses']) ?></td>
-                                            <td><?php  htmlspecialchars($contrato['cuota']) ?></td>
-                                            <td><a href="/caja/cronograma/<?= htmlspecialchars($contrato['idcontrato'])?>" title="Ver Cronograma"><i class="bi-receipt fs-5 text-warning"></i></a></td>
+                                            <td><?= htmlspecialchars($numeroFila++) ?></td>
+                                            <td><?= htmlspecialchars($contrato['cliente']) ?></td>
+                                            <td><?= htmlspecialchars($contrato['documento']) ?></td>
+                                            <td><?= htmlspecialchars($contrato['ndocumento']) ?></td>
+                                            <td><?= htmlspecialchars($contrato['tienda']) ?></td>
+                                            <td><?= htmlspecialchars($contrato['vehiculo']) ?></td>
+                                            <td><?= htmlspecialchars($contrato['meses']) ?></td>
+                                            <td><?= htmlspecialchars($contrato['cuota']) ?></td>
+                                            <td><a href="/caja/cronograma/<?= htmlspecialchars($contrato['idcontrato']) ?>" title="Ver Cronograma"><i class="bi-receipt fs-5 text-warning"></i></a></td>
                                         </tr>
 
                                     <?php endforeach; ?>

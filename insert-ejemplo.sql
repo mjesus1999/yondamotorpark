@@ -109,7 +109,7 @@ INSERT INTO cotizaciones (
     10000.00,    -- inicial
     36,         -- numcuotas
     2196.00,    -- valorcuota
-    'P'         -- estado inicial 
+    'A'         -- estado inicial 
 );
 
 SELECT * FROM cotizaciones;
@@ -141,7 +141,7 @@ INSERT INTO contratos (
     1,         -- idcotizacion 
     2,         -- idlogistica 
     '2025-08-11', -- fechainicio
-    15,        -- día de pago
+    11,        -- día de pago
     '2025-09-11', -- fecharevision
     'Contrato inicial para entrega de vehículo.'
 );
@@ -150,6 +150,12 @@ SELECT * FROM contratos;
 
 USE motorpark;
 DROP PROCEDURE generar_cronograma;
+
+update cronogramas SET fechapago = '2025-08-07', penalidad = 300.00 WHERE numcuota = 1;
+
+
+
+
 DELIMITER $
 CREATE PROCEDURE generar_cronograma(IN p_idcontrato INT, IN p_tasaMensual DECIMAL(15,9))
 BEGIN

@@ -73,14 +73,18 @@ class Caja
     }
 
 
-    public function getCronogramaByIdContrato() {
-        $sql = "";
+    public function getCronogramaByIdContrato(int $id): array
+    {
+        $query = "CALL  sp_get_cronogramas_by_idcontrato(:idcontrato)";
 
         try {
 
+            $stmt = $this->db->prepare($query);
+            $stmt->execute(array(':idcontrato' => $id));
+            $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-
-        }catch(PDOException $error) {
+            return $results;
+        } catch (PDOException $error) {
             error_log($error->getMessage());
             return [];
         }

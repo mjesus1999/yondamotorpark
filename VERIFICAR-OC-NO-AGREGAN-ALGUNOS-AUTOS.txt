@@ -1,1 +1,0 @@
-    implemntar nuevo cvmapoa a la tabla vehciuslo, oc y detoc
