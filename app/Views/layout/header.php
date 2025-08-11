@@ -86,7 +86,7 @@
           </li>
 
           <li class="sidebar-item">
-            <a href="/contratos" class="sidebar-link">
+            <a href="/caja" class="sidebar-link">
               <i class="fa-solid fa-list pe-2"></i>
               Caja
             </a>

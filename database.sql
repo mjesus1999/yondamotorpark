@@ -402,6 +402,128 @@ USE motorpark;
 --ALTER TABLE compras DROP COLUMN pathxml
 
 --ALTER TABLE compras ADD COLUMN rutadoc VARCHAR(200) NULL;
+CREATE TABLE formatocotizacion
+(
+	idformato 			INT PRIMARY KEY AUTO_INCREMENT,
+    tipocotizacion		VARCHAR(200) NOT NULL,
+    fechainicio 		DATE 			NOT NULL,
+    fechafin 			DATE 			NULL,
+    creado 				DATETIME 		NOT NULL DEFAULT NOW(),
+    modificado 			DATETIME 		NULL
+)ENGINE = INNODB;
+
+CREATE TABLE requisitos
+(
+	idrequisito 		INT PRIMARY KEY AUTO_INCREMENT,
+    requisito 			VARCHAR(500)	NOT NULL,
+    creado 				DATETIME 		NOT NULL DEFAULT NOW(),
+    modificado 			DATETIME 		NULL,
+    CONSTRAINT uk_requisito_req UNIQUE (requisito)
+)ENGINE = INNODB;
+
+-- drop table detallerequisitos;
+CREATE TABLE detallerequisitos
+(
+	iddetrequisito		INT PRIMARY KEY AUTO_INCREMENT,
+    idformato 			INT 			NOT NULL,
+    idrequisito 		INT 			NOT NULL,
+    creado 				DATETIME 		NOT NULL DEFAULT NOW(),
+    CONSTRAINT fk_idformato_dre FOREIGN KEY (idformato) REFERENCES formatocotizacion (idformato),
+    CONSTRAINT fk_idrequisito_dre FOREIGN KEY (idrequisito) REFERENCES requisitos (idrequisito)
+)ENGINE = INNODB;
+
+CREATE TABLE cotizaciones
+(
+	idcotizacion		INT AUTO_INCREMENT PRIMARY KEY,
+    idformato 			INT 			NOT NULL,
+    idcliente			INT 				NULL,
+    idasesor 			INT 			NOT NULL COMMENT 'Colaborador del área de VENTA', -- 
+    idvehiculo 			INT 			NOT NULL,
+    moneda 				ENUM('PEN', 'USD') NOT NULL,
+    precioventa 		DECIMAL(9,2) 	NOT NULL,
+    vigenciadias 		TINYINT 		NOT NULL COMMENT 'Días válidos de la cotización' DEFAULT 7,
+    inicial 			DECIMAL(9,2) 	NOT NULL,
+    numcuotas 			SMALLINT		NOT NULL,
+    valorcuota 			DECIMAL(9,2) 	NOT NULL, -- Se usara en la tabla de cronogramas
+    estadocotizacion	ENUM('P','E','A','C','R') NOT NULL DEFAULT 'P' COMMENT 'Pendiente | Evaluación | Aprobada | Cancelada (cliente) | Rechazada (Analista crédito)',
+    creado 				DATETIME 		NOT NULL DEFAULT NOW(),
+    modificado 			DATETIME 		NULL,
+    CONSTRAINT fk_idformato_cot FOREIGN KEY (idformato) REFERENCES formatocotizacion (idformato),
+    CONSTRAINT fk_idcliente_cot FOREIGN KEY (idcliente) REFERENCES clientes (idcliente),
+    CONSTRAINT fk_idvehiculo_cot FOREIGN KEY (idvehiculo) REFERENCES vehiculos (idvehiculo),
+    CONSTRAINT fk_idcolventa_cot FOREIGN KEY (idasesor) REFERENCES colaboradores (idcolaborador)
+)ENGINE = INNODB;
+
+CREATE TABLE contratos(
+    idcontrato          INT AUTO_INCREMENT PRIMARY KEY,
+    idlocal             INT  NOT NULL,
+    idcotizacion        INT NOT NULL,
+    idlogistica         INT  NULL,
+    fechainicio         DATE NOT NULL,
+    diapago             TINYINT NOT NULL,
+    escredito           ENUM('S','N') NOT NULL DEFAULT 'S',
+    fecharevision       DATE NULL,
+    observaciones       VARCHAR(350) NULL,
+    estado              ENUM('ACT','INACT') DEFAULT 'ACT',
+    CONSTRAINT fk_idlocal_contrato FOREIGN KEY(idlocal) REFERENCES locales(idlocal),
+    CONSTRAINT fk_idcotizacion_contrato FOREIGN KEY(idcotizacion) REFERENCES cotizaciones(idcotizacion),
+    CONSTRAINT fk_idlogistica_contrato FOREIGN KEY(idlogistica) REFERENCES colaboradores(idcolaborador)
+)ENGINE = InnoDB;
+
+ALTER TABLE contratos MODIFY COLUMN estado ENUM('ACT','INACT') DEFAULT 'ACT';
+
+CREATE TABLE cronogramas
+(
+    idcronograma        INT AUTO_INCREMENT PRIMARY KEY,
+    idcontrato          INT NOT NULL, -- El valor de cuota se encuentra en contrato <---> cotizaciones
+    fechapago           DATE NOT NULL,
+    interes             DECIMAL(10,2) NOT NULL,
+    abonocapital        DECIMAL(10,2) NOT NULL,
+    numcuota            TINYINT NOT NULL,
+    penalidad           DECIMAL(10,2) NULL,
+    saldocapital        DECIMAL(10,2) NOT NULL,
+    aplicapenalidad     ENUM('S','N') NOT NULL  DEFAULT 'N',
+    estado              ENUM('Pendiente','Pagado','Vencido') DEFAULT 'Pendiente',
+    CONSTRAINT fk_idcont_cronogramas FOREIGN KEY(idcontrato) REFERENCES contratos(idcontrato)
+)ENGINE = InnoDB;
+
+ALTER TABLE cronogramas MODIFY COLUMN estado ENUM('Pendiente','Pagado','Vencido') DEFAULT 'Pendiente';
+ALTER TABLE cronogramas MODIFY COLUMN interes DECIMAL(10,2) NOT NULL;
+ALTER TABLE cronogramas MODIFY COLUMN abonocapital DECIMAL(10,2) NOT NULL;
+USE motorpark;
+CREATE TABLE pagos(
+    idpago              INT AUTO_INCREMENT PRIMARY KEY,
+    idcronograma        INT NOT NULL,
+    idcuentapago        INT NOT NULL,
+    idcolcaja           INT NULL,
+    mediopago           ENUM('Yape','Plin','Transferencia Bancaria','Efectivo') NOT NULL,
+    numerotransaccion   VARCHAR(30) NOT NULL,
+    fechapago           DATE NOT NULL,
+    fecharegistro       DATETIME NOT NULL DEFAULT NOW(),
+    amortizacion        DECIMAL(10,2) NOT NULL,
+    saldorestante        DECIMAL(10,2)  NOT NULL,
+    comprobante         VARCHAR(200) NOT NULL,
+    observacion         VARCHAR(300) NULL,
+    facturado ENUM('S', 'N') DEFAULT 'S',
+    declarado ENUM('S', 'N') DEFAULT 'N',
+    CONSTRAINT fk_idcronograma_pagos FOREIGN KEY(idcronograma) REFERENCES cronogramas(idcronograma),
+    CONSTRAINT fk_idcuentapago_pagos FOREIGN KEY(idcuentapago) REFERENCES cuentaspago(idcuentapago),
+    CONSTRAINT fk_idcolcaja_pagos FOREIGN KEY(idcolcaja) REFERENCES colaboradores(idcolaborador)
+
+
+)ENGINE = InnoDB;
+
+CREATE TABLE cuentaspago(
+    idcuentapago        INT AUTO_INCREMENT PRIMARY KEY,
+    identidadpago       INT NOT NULL,
+    monedad             ENUM('Soles','Dolares') NOT NULL,
+    numcuenta           VARCHAR(35) NOT NULL,
+    CONSTRAINT fk_identipago_cuentas FOREIGN KEY(identidadpago) REFERENCES entidadespago(identidadpago)
+)ENGINE = InnoDb;
+
+
+
+
 CREATE TABLE entidadespago (
     identidadpago INT AUTO_INCREMENT PRIMARY KEY,
     entidad VARCHAR(20) NOT NULL,

@@ -42,30 +42,31 @@ include __DIR__ . '/../layout/header.php';
                             </thead>
                             <tbody>
 
-                                <tr>
-                                    <td>1</td>
-                                    <td>Flores Munayco Isabel María</td>
-                                    <td>DNI</td>
-                                    <td>85858525</td>
-                                    <td>Chincha</td>
-                                    <td>Hyundai / i10 / GLP / Negro</td>
-                                    <td>36</td>
-                                    <td>2196.00</td>
-                                    <td><a href="/contrato/cronograma" title="Ver Cronograma"><i class="bi-receipt fs-5 text-warning"></i></a></td>
+                                <?php if (empty($contratos)) : ?>
 
-                                </tr>
-                                <tr>
-                                    <td>1</td>
-                                    <td>Fuentes Marcelo Rodolfo Enrique</td>
-                                    <td>DNI</td>
-                                    <td>36369568</td>
-                                    <td>Chincha</td>
-                                    <td>Hyundai / i10 / GLP / Negro</td>
-                                    <td>36</td>
-                                    <td>2196.00</td>
-                                    <td><a href="/contrato/cronograma" title="Ver Cronograma"><i class="bi-receipt fs-5 text-warning"></i></a></td>
-                                </tr>
+                                    <tr>
+                                        <td colspan="8" class="text-center">No hay datos para mostrar.</td>
+                                    </tr>
 
+                                <?php else: ?>
+
+                                    <?php $numeroFila = 1; ?>
+                                    <?php foreach ($contratos as $contrato) : ?>
+                                        <tr>
+
+                                            <td><?php  htmlspecialchars($numeroFila++) ?></td>
+                                            <td><?php  htmlspecialchars($contrato['cliente']) ?></td>
+                                            <td><?php  htmlspecialchars($contrato['documento']) ?></td>
+                                            <td><?php  htmlspecialchars($contrato['ndocumento']) ?></td>
+                                            <td><?php  htmlspecialchars($contrato['tienda']) ?></td>
+                                            <td><?php  htmlspecialchars($contrato['vehiculo']) ?></td>
+                                            <td><?php  htmlspecialchars($contrato['meses']) ?></td>
+                                            <td><?php  htmlspecialchars($contrato['cuota']) ?></td>
+                                            <td><a href="/caja/cronograma/<?= htmlspecialchars($contrato['idcontrato'])?>" title="Ver Cronograma"><i class="bi-receipt fs-5 text-warning"></i></a></td>
+                                        </tr>
+
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
 
                             </tbody>
                         </table>

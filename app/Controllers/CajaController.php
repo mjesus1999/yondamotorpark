@@ -4,29 +4,30 @@ namespace App\Controllers;
 
 use App\Core\Controller;
 use App\Helpers\Validador;
-use App\Models\Contrato;
+use App\Models\Caja;
 
 
-class ContratoController extends Controller
+class CajaController extends Controller
 {
-    private Contrato $contratoModel;
+    private Caja $cajaModel;
    
 
     public function __construct()
     {
-        $this->contratoModel = new Contrato();
+        $this->cajaModel = new Caja();
        
     }
 
     // Me enlistara todos los contratos
     public function index(): void
     {
+        $datos = $this->cajaModel->getAllContratosDatos();
        
-        $this->view('contratos.index');
+        $this->view('caja.index', ['contratos' => $datos]);
     }
 
     public function cronogramaByContrato():void {
-        $this->view('contratos.cronograma');
+        $this->view('caja.cronograma');
     }
 
 
