@@ -2,12 +2,16 @@
 <html lang="es">
 
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Crear cuenta — Motorpark</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Motorpark</title>
     <link href="https://fonts.googleapis.com/css?family=Lato:300,400,700&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/assets/css/login-style.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
 </head>
+
 
 <body>
     <style>
@@ -123,10 +127,17 @@
                                 placeholder="Confirmar Contraseña" required>
                         </div>
 
-                        <div class="d-grid mt-3">
+                        <div class="form-group">
+                            <button type="submit"
+                                class="mt-1 form-control btn yonda text-light rounded submit px-3">Crear cuenta</button>
+                            <a href="/login"
+                                class="form-control mt-2 btn btn-outline-secondary rounded text-center px-3 d-inline-block">Volver
+                                al login</a>
+                        </div>
+                        <!-- <div class="d-grid mt-3">
                             <button type="submit" class="btn yonda text-light">Crear cuenta</button>
                             <a href="/login" class="btn btn-outline-secondary mt-2">Volver al login</a>
-                        </div>
+                        </div> -->
                     </form>
                 </div>
             </div> <!-- ./row -->
