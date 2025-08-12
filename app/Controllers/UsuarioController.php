@@ -241,7 +241,12 @@ class UsuarioController extends Controller
     ]);
   }
 
-  // GET /createAccount
+  /**
+   * FUNCIONES PARA MOSTRAR VISTAS Y FORMULARIOS PARA REGISTRAR CONTRATOS DESDE EL LOGIN
+   * CREAR CUENTA (SOLO EL ADMIN)
+   */  
+
+  //Mostrar Crear Cuenta
   public function showCreateFromContracts(): void
   {
     //$this->authRequired(); // si solo administradores deben acceder
@@ -249,7 +254,7 @@ class UsuarioController extends Controller
     $this->view('auth.createAccount', ['contracts' => $contracts]);
   }
 
-  // POST /createFromContract
+  //CREAR CONTRATO
   public function createFromContract(): void
   {
     $idContrato = (int) ($_POST['idcontrato'] ?? 0);
@@ -259,7 +264,7 @@ class UsuarioController extends Controller
 
     $errors = [];
 
-    // Validaciones básicas
+    //algunas validaciones para el registro
     if ($idContrato <= 0) {
       $errors[] = 'Selecciona un contrato.';
     }
@@ -276,7 +281,7 @@ class UsuarioController extends Controller
       $errors[] = 'La contraseña debe tener al menos 8 caracteres.';
     }
 
-    // Comprobar si ya existe el usernick
+    //Comprobar si ya existe el usernick
     $exists = $this->usuarioModel->searchByUsernick($usernick);
     if ($exists) {
       $errors[] = 'El usernick ya existe.';

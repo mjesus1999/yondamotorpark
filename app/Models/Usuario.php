@@ -232,7 +232,7 @@ class Usuario
   return $stmt->execute();
 } */
 
-  //COLABORADOR
+  //Obtener CONTRATO SIN COLABORADOR (Sin usuario registrado)
 
   public function getContractsWithoutColaborador(): array
   {

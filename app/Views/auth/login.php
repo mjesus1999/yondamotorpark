@@ -57,7 +57,7 @@
                                     <div class="d-flex justify-content-between align-items-center">
                                         <label class="checkbox-wrap checkbox-primary mb-0">
                                             Recordar
-                                            <input type="checkbox" checked>
+                                            <input type="checkbox" name="remember" value="1" checked>
                                             <span class="checkmark"></span>
                                         </label>
 

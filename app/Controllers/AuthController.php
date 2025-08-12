@@ -30,6 +30,12 @@ class AuthController extends Controller
         $this->view('auth.login');
     }
 
+    /**
+     * MOSTRAR FORMULARIO DE RECUPERAR CUENTA (AL EXTRAVIO DE LA CLAVE)
+     * MOSTRANDO EL USERNICK (IDCOLABORADOR)
+     * MOSTRANDO EL EMAIL (DE ESE USERNICK = IDCOLABORADOR)
+     */
+
     public function showRecoverForm(): void
     {
         $usernick = trim($_GET['usernick'] ?? '');
@@ -72,6 +78,7 @@ class AuthController extends Controller
             $this->view('auth.login', ['error' => 'Contraseña incorrecta.', 'old' => ['usernick' => $usernick]]);
             return;
         }
+        
         //confirmacion
         $_SESSION['user'] = [
             'id' => $user['idcolaborador'],
@@ -97,6 +104,11 @@ class AuthController extends Controller
         header('Location: /login');
         exit;
     }
+
+    /**
+     * MANEJAR LA RECUPERACION DE CUENTA 
+     * AL PERDER LA CLAVE
+     */
 
     public function handleRecover(): void
     {

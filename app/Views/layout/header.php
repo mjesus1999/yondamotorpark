@@ -77,24 +77,24 @@ $allModules = [
             <?php endif ?>
           <?php endforeach ?> -->
 
-          <li class="sidebar-item">
+          <!-- <li class="sidebar-item">
             <a href="/oc" class="sidebar-link">
               <i class="fa-solid fa-list pe-2"></i>
               Orden de compra
             </a>
-          </li>
-          <li class="sidebar-item">
+          </li> -->
+          <!-- <li class="sidebar-item">
             <a href="/compras" class="sidebar-link">
               <i class="fa-solid fa-list pe-2"></i>
               Compras
             </a>
-          </li>
-          <li class="sidebar-item">
+          </li> -->
+          <!-- <li class="sidebar-item">
             <a href="/concesionarios" class="sidebar-link">
               <i class="fa-solid fa-list pe-2"></i>
               Concesionarios
             </a>
-          </li>
+          </li> -->
           <li class="sidebar-item">
             <a href="/marcas" class="sidebar-link">
               <i class="fa-solid fa-list pe-2"></i>
@@ -126,7 +126,7 @@ $allModules = [
               Cotizacion
             </a>
           </li>
-          <li class="sidebar-item">
+          <!-- <li class="sidebar-item">
             <a href="#" class="sidebar-link collapsed" data-bs-target="#pages" data-bs-toggle="collapse"
               aria-expanded="false"><i class="fa-solid fa-file-lines pe-2"></i>
               Pages
@@ -139,8 +139,8 @@ $allModules = [
                 <a href="#" class="sidebar-link">Page 2</a>
               </li>
             </ul>
-          </li>
-          <li class="sidebar-item">
+          </li> -->
+          <!-- <li class="sidebar-item">
             <a href="#" class="sidebar-link collapsed" data-bs-target="#posts" data-bs-toggle="collapse"
               aria-expanded="false"><i class="fa-solid fa-sliders pe-2"></i>
               Posts
@@ -156,7 +156,7 @@ $allModules = [
                 <a href="#" class="sidebar-link">Post 3</a>
               </li>
             </ul>
-          </li>
+          </li> -->
           <li class="sidebar-item">
             <a href="#" class="sidebar-link collapsed" data-bs-target="#auth" data-bs-toggle="collapse"
               aria-expanded="false"><i class="fa-regular fa-user pe-2"></i>
@@ -174,10 +174,10 @@ $allModules = [
               </li>
             </ul>
           </li>
-          <li class="sidebar-header">
+          <!-- <li class="sidebar-header">
             Multi Level Menu
-          </li>
-          <li class="sidebar-item">
+          </li> -->
+          <!-- <li class="sidebar-item">
             <a href="#" class="sidebar-link collapsed" data-bs-target="#multi" data-bs-toggle="collapse"
               aria-expanded="false"><i class="fa-solid fa-share-nodes pe-2"></i>
               Multi Dropdown
@@ -196,7 +196,7 @@ $allModules = [
                 </ul>
               </li>
             </ul>
-          </li>
+          </li> -->
         </ul>
       </div>
     </aside>

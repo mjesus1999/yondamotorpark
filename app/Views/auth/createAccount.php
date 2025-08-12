@@ -145,7 +145,7 @@
                 document.getElementById('nombresSel').value = nombres;
                 document.getElementById('apellidosSel').value = apellidos;
 
-                // sugerir usernick: nombre.apellido
+                // sugerir usernick
                 const base = (nombres && apellidos) ? (nombres + '.' + apellidos) : (nombres || apellidos || '');
                 let s = base.toLowerCase().replace(/\s+/g, '.').replace(/[^a-z0-9\.\-]/g, '');
                 const inputUser = document.getElementById('usernick');
@@ -160,7 +160,7 @@
                 alert('Selecciona primero el contrato de la lista.');
                 return;
             }
-            // contraseñas coinciden y longitud
+            //verificacion de que las contraseñas coinciden y longitud
             const p1 = this.password1.value;
             const p2 = this.password2.value;
             if (p1.length < 8) { e.preventDefault(); alert('Contraseña mínima 8 caracteres.'); return; }

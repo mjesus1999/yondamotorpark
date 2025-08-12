@@ -220,8 +220,8 @@
             <!-- Género / Fecha Nac. / Estado Civil -->
             <div class="col-md-2 form-floating">
               <select class="form-select" id="modal-genero" name="genero">
-                <option value="M">M</option>
-                <option value="F">F</option>
+                <option value="M">Masculino</option>
+                <option value="F">Femenino</option>
               </select>
               <label for="modal-genero">Género</label>
             </div>

@@ -152,7 +152,7 @@
 
 						<div class="col-md-3 mb-2">
 							<div class="form-floating">
-								<input type="text" name="placa" class="form-control text-center" placeholder="Placa">
+								<input type="text" name="placa" class="form-control text-center" placeholder="Placa" maxlength="10">
 								<label for="placa">Placa</label>
 							</div>
 						</div>
@@ -160,7 +160,7 @@
 						<div class="col-md-3 mb-2">
 							<div class="form-floating">
 								<input type="text" name="placarotativa" class="form-control text-center"
-									placeholder="Placa Rotativa">
+									placeholder="Placa Rotativa" maxlength="10">
 								<label for="placarotativa">Placa Rotativa</label>
 							</div>
 						</div>
