@@ -68,7 +68,7 @@ $allModules = [
           <li class="sidebar-header">
             Módulos
           </li>
-          <!-- <?php foreach ($allModules as $codigo => $m): ?>
+          <?php foreach ($allModules as $codigo => $m): ?>
             <?php if (in_array($codigo, $modulosPermitidos, true)): ?>
               <li class="sidebar-item">
                 <a href="<?= htmlspecialchars($m['url']) ?>" class="sidebar-link">
@@ -77,7 +77,7 @@ $allModules = [
                 </a>
               </li>
             <?php endif ?>
-          <?php endforeach ?> -->
+          <?php endforeach ?>
 
           <!-- <li class="sidebar-item">
             <a href="/oc" class="sidebar-link">
@@ -97,7 +97,7 @@ $allModules = [
               Concesionarios
             </a>
           </li> -->
-          <li class="sidebar-item">
+          <!-- <li class="sidebar-item">
             <a href="/marcas" class="sidebar-link">
               <i class="fa-solid fa-list pe-2"></i>
               Marcas
@@ -126,7 +126,7 @@ $allModules = [
               <i class="fa-solid fa-list pe-2"></i>
               Cotizacion
             </a>
-          </li>
+          </li> -->
           <!-- <li class="sidebar-item">
             <a href="#" class="sidebar-link collapsed" data-bs-target="#pages" data-bs-toggle="collapse"
               aria-expanded="false"><i class="fa-solid fa-file-lines pe-2"></i>
@@ -158,7 +158,44 @@ $allModules = [
               </li>
             </ul>
           </li> -->
-          <li class="sidebar-item">
+          <?php
+          // Mostrar bloque Auth si es visitante o si el cargo tiene permiso 'auth'
+          $showAuth = empty($_SESSION['user']) || in_array('auth', $modulosPermitidos, true);
+          if ($showAuth):
+            ?>
+            <li class="sidebar-item">
+              <a href="#" class="sidebar-link collapsed" data-bs-target="#auth" data-bs-toggle="collapse"
+                aria-expanded="false">
+                <i class="fa-regular fa-user pe-2"></i>
+                Auth
+              </a>
+
+              <ul id="auth" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
+                <?php if (empty($_SESSION['user'])): // visitante -> Login + Recuperar ?>
+                  <li class="sidebar-item">
+                    <a href="/login" class="sidebar-link">Login</a>
+                  </li>
+                  <li class="sidebar-item">
+                    <a href="/recoverAccount" class="sidebar-link">Recuperar contraseña</a>
+                  </li>
+                <?php endif; ?>
+
+                <?php if (in_array('auth', $modulosPermitidos, true)): // usuario con permiso 'auth' -> Registrar ?>
+                  <li class="sidebar-item">
+                    <a href="/createAccount" class="sidebar-link">Registrar cuenta</a>
+                  </li>
+                <?php endif; ?>
+
+                <!-- si quieres siempre mostrar "Forgot Password" para todos -->
+                <!--
+    <li class="sidebar-item">
+      <a href="/recoverAccount" class="sidebar-link">Forgot Password</a>
+    </li>
+    -->
+              </ul>
+            </li>
+          <?php endif; ?>
+          <!-- <li class="sidebar-item">
             <a href="#" class="sidebar-link collapsed" data-bs-target="#auth" data-bs-toggle="collapse"
               aria-expanded="false"><i class="fa-regular fa-user pe-2"></i>
               Auth
@@ -168,13 +205,13 @@ $allModules = [
                 <a href="#" class="sidebar-link">Login</a>
               </li>
               <li class="sidebar-item">
-                <a href="#" class="sidebar-link">Register</a>
+                <a href="/createAccount" class="sidebar-link">Register</a>
               </li>
               <li class="sidebar-item">
                 <a href="#" class="sidebar-link">Forgot Password</a>
               </li>
             </ul>
-          </li>
+          </li> -->
           <!-- <li class="sidebar-header">
             Multi Level Menu
           </li> -->
@@ -212,7 +249,6 @@ $allModules = [
           <ul class="navbar-nav">
             <li class="nav-item dropdown">
               <a href="#" data-bs-toggle="dropdown" class="nav-icon pe-md-0">
-                <!-- Validacion de la imagen -->
                 <img src="<?= htmlspecialchars($_SESSION['user']['avatar'] ?? '/assets/images/profile.jpg') ?>"
                   class="avatar img-fluid rounded" alt="Avatar" />
               </a>
@@ -235,7 +271,7 @@ $allModules = [
               </div>
             </li>
           </ul>
-        </div>
+        </div> 
       </nav>
 
       <main class="content px-3 py-2">

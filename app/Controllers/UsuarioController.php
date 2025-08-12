@@ -244,18 +244,93 @@ class UsuarioController extends Controller
   /**
    * FUNCIONES PARA MOSTRAR VISTAS Y FORMULARIOS PARA REGISTRAR CONTRATOS DESDE EL LOGIN
    * CREAR CUENTA (SOLO EL ADMIN)
-   */  
+   */
 
   //Mostrar Crear Cuenta
-  public function showCreateFromContracts(): void
+  public function showCreateFromContractsAuth(): void
   {
     //$this->authRequired(); // si solo administradores deben acceder
     $contracts = $this->usuarioModel->getContractsWithoutColaborador();
     $this->view('auth.createAccount', ['contracts' => $contracts]);
   }
+  public function showCreateFromContracts(): void
+  {
+    $contracts = $this->usuarioModel->getContractsWithoutColaborador();
+    $this->view('usuarios.createAccount', ['contracts' => $contracts]);
+  }
 
-  //CREAR CONTRATO
+  //CREAR CONTRATO (Dentro de auth/usuario->createAccount)
   public function createFromContract(): void
+  {
+    if (session_status() !== PHP_SESSION_ACTIVE)
+      session_start();
+    $prevUser = $_SESSION['user'] ?? null;
+
+    $idContrato = (int) ($_POST['idcontrato'] ?? 0);
+    $usernick = trim($_POST['usernick'] ?? '');
+    $p1 = $_POST['password1'] ?? '';
+    $p2 = $_POST['password2'] ?? '';
+
+    $errors = [];
+    if ($idContrato <= 0)
+      $errors[] = 'Selecciona un contrato.';
+    if ($usernick === '')
+      $errors[] = 'Introduce un nombre de usuario.';
+    if ($p1 === '' || $p2 === '')
+      $errors[] = 'Introduce y confirma la contraseña.';
+    if ($p1 !== $p2)
+      $errors[] = 'Las contraseñas no coinciden.';
+    if (strlen($p1) < 8)
+      $errors[] = 'La contraseña debe tener al menos 8 caracteres.';
+    if ($this->usuarioModel->searchByUsernick($usernick))
+      $errors[] = 'El usernick ya existe.';
+
+    $contracts = $this->usuarioModel->getContractsWithoutColaborador();
+
+    if ($errors) {
+      $this->view('usuarios.createAccount', [
+        'contracts' => $contracts,
+        'error' => implode('<br>', $errors),
+        'old' => $_POST
+      ]);
+      return;
+    }
+
+    // crear colaborador
+    try {
+      $passwordHash = password_hash($p1, PASSWORD_DEFAULT);
+      $idColab = $this->colaboradorModel->create($idContrato, $usernick, $passwordHash);
+      if (!$idColab)
+        throw new \RuntimeException('No se pudo crear colaborador.');
+    } catch (\Throwable $e) {
+      error_log('Error al crear colaborador: ' . $e->getMessage());
+      // restaurar sesión original si hacía falta
+      if ($prevUser !== null)
+        $_SESSION['user'] = $prevUser;
+      $this->view('usuarios.createAccount', [
+        'contracts' => $contracts,
+        'error' => 'No se pudo crear la cuenta. Contacta al administrador.',
+        'old' => $_POST
+      ]);
+      return;
+    }
+
+    // restaurar sesión original (evita login automático del nuevo usuario)
+    if ($prevUser !== null) {
+      $_SESSION['user'] = $prevUser;
+    } else {
+      unset($_SESSION['user']);
+    }
+
+    // actualizar lista
+    $contracts = $this->usuarioModel->getContractsWithoutColaborador();
+    $this->view('usuarios.createAccount', [
+      'contracts' => $contracts,
+      'success' => "Cuenta creada correctamente para <strong>" . htmlspecialchars($usernick) . "</strong>"
+    ]);
+  }
+
+  public function createFromContractAuth(): void
   {
     $idContrato = (int) ($_POST['idcontrato'] ?? 0);
     $usernick = trim($_POST['usernick'] ?? '');

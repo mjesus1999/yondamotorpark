@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 
 <head>
@@ -85,7 +85,7 @@
                 <!-- Formulario de creación de cuenta -->
                 <div class="col-md-6 mt-2">
                     <h6>Formulario de sesión</h6>
-                    <form method="POST" action="/createFromContract" id="form-create" autocomplete="off">
+                    <form method="POST" action="/createFromContractAuth" id="form-create" autocomplete="off">
                         <input type="hidden" name="idcontrato" id="idcontrato" value="<?= $old['idcontrato'] ?? '' ?>">
 
                         <div class="mb-2">
@@ -175,7 +175,7 @@
                 alert('Selecciona primero el contrato de la lista.');
                 return;
             }
-            // Verificación de que las contraseñas coinciden y longitud
+            //verificación de que las contraseñas coinciden y longitud
             const p1 = this.password1.value;
             const p2 = this.password2.value;
             if (p1.length < 8) { e.preventDefault(); alert('Contraseña mínima 8 caracteres.'); return; }

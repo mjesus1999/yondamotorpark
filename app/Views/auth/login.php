@@ -67,7 +67,8 @@
                                     </div>
 
                                     <div class="mt-3 text-center">
-                                        <span>¿No estás registrado? <a href="createAccount" class="fw-semibold">Crear
+                                        <span>¿No estás registrado? <a href="createAccountAuth"
+                                                class="fw-semibold">Crear
                                                 cuenta</a></span>
                                     </div>
                                 </div>

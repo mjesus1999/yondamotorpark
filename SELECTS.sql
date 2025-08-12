@@ -9,10 +9,33 @@ select * from areas;
 select * from cargos;
 select * from clientes;
 select * from accesos;
+-- DELETE FROM Colaboradores WHERE idcolaborador = 35;
+-- DELETE FROM cotizaciones WHERE idasesor = 26;
+-- DELETE FROM vehiculos WHERE idlogistica = 26;
+SELECT
+        cl.idcontratolaboral,
+        cl.idpersona,
+        p.apellidos,
+        p.nombres,
+        a.area,
+        cg.cargo,
+        DATE_FORMAT(cl.fechainicio, '%Y-%m-%d') AS fechainicio
+      FROM contratoslaborales cl
+      JOIN personas p ON p.idpersona = cl.idpersona
+      JOIN cargos cg ON cg.idcargo = cl.idcargo
+      JOIN areas a ON a.idarea = cg.idarea
+      LEFT JOIN colaboradores col ON col.idcontratolaboral = cl.idcontratolaboral
+      WHERE col.idcolaborador IS NULL
+      ORDER BY p.apellidos, p.nombres
+      LIMIT 0,1000;
 
 SELECT modulo
             FROM accesos
             WHERE idcargo = 8 AND permisos = 1;
+            
+SELECT 1 FROM accesos
+	WHERE idcargo = 1 AND modulo = 'usuarios' AND permisos = 1
+	LIMIT 1;
 /*
 -- ENCONTRAR EL USERNICK Y EMAIL
 SELECT
