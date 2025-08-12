@@ -12,7 +12,6 @@
         integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
 </head>
 
-
 <body>
     <style>
         .yonda {
@@ -85,7 +84,7 @@
 
                 <!-- Formulario de creación de cuenta -->
                 <div class="col-md-6 mt-2">
-                    <h6>Formulario de sesion</h6>
+                    <h6>Formulario de sesión</h6>
                     <form method="POST" action="/createFromContract" id="form-create" autocomplete="off">
                         <input type="hidden" name="idcontrato" id="idcontrato" value="<?= $old['idcontrato'] ?? '' ?>">
 
@@ -95,7 +94,7 @@
                         </div>
                         <div class="mb-2">
                             <label class="form-label small">Área Asignada</label>
-                            <input id="areaSel" class="form-control" placeholder="Area Asignada" readonly>
+                            <input id="areaSel" class="form-control" placeholder="Área Asignada" readonly>
                         </div>
                         <div class="mb-2">
                             <label class="form-label small">Cargo</label>
@@ -134,10 +133,6 @@
                                 class="form-control mt-2 btn btn-outline-secondary rounded text-center px-3 d-inline-block">Volver
                                 al login</a>
                         </div>
-                        <!-- <div class="d-grid mt-3">
-                            <button type="submit" class="btn yonda text-light">Crear cuenta</button>
-                            <a href="/login" class="btn btn-outline-secondary mt-2">Volver al login</a>
-                        </div> -->
                     </form>
                 </div>
             </div> <!-- ./row -->
@@ -153,20 +148,23 @@
                 const area = this.dataset.area || '';
                 const cargo = this.dataset.cargo || '';
 
+                // Actualiza los campos de selección
                 document.getElementById('idcontrato').value = id;
                 document.getElementById('nombreSel').value = (nombres + ' ' + apellidos).trim();
                 document.getElementById('areaSel').value = area;
                 document.getElementById('cargoSel').value = cargo;
 
-                // rellenar hidden inputs para enviar al servidor
+                // Rellenar hidden inputs para enviar al servidor
                 document.getElementById('nombresSel').value = nombres;
                 document.getElementById('apellidosSel').value = apellidos;
 
-                // sugerir usernick
+                // Limpiar y sugerir usernick
                 const base = (nombres && apellidos) ? (nombres + '.' + apellidos) : (nombres || apellidos || '');
                 let s = base.toLowerCase().replace(/\s+/g, '.').replace(/[^a-z0-9\.\-]/g, '');
                 const inputUser = document.getElementById('usernick');
-                if (!inputUser.value) inputUser.value = s;
+
+                // Limpia el campo antes de asignar un nuevo valor
+                inputUser.value = s;
                 inputUser.focus();
             });
         });
@@ -177,7 +175,7 @@
                 alert('Selecciona primero el contrato de la lista.');
                 return;
             }
-            //verificacion de que las contraseñas coinciden y longitud
+            // Verificación de que las contraseñas coinciden y longitud
             const p1 = this.password1.value;
             const p2 = this.password2.value;
             if (p1.length < 8) { e.preventDefault(); alert('Contraseña mínima 8 caracteres.'); return; }
