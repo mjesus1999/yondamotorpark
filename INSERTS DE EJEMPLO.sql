@@ -148,7 +148,8 @@ INSERT INTO vehiculos (
 ) VALUES (
     1, 'Versión D', 'seminuevo', 1, 'vendido', 2, 3, 'CTZ', NOW()
 );
-SELECT * FROM vehiculos;
+
+-- SELECT * FROM vehiculos;
 
 /*
 UPDATE vehiculos
@@ -204,46 +205,30 @@ SET
 WHERE idvehiculo = 4;
 */
 
--- PERMISOS
-
--- Jefe de Logística (ID = 8) - Acceso total a todos los módulos
-INSERT INTO permisos (idcargo, moduloapp) VALUES
-(8, 'marcas'),
-(8, 'usuarios'),
-(8, 'vehiculos'),
-(8, 'formatoCotizacion');
-
--- Jefe de Sistemas (ID = 1) - Acceso a todos los módulos también
-INSERT INTO permisos (idcargo, moduloapp) VALUES
-(1, 'marcas'),
-(1, 'usuarios'),
-(1, 'vehiculos'),
-(1, 'formatoCotizacion');
-
--- Practicante (ID = 3) - Solo puede ver vehículos
-INSERT INTO permisos (idcargo, moduloapp) VALUES
-(3, 'vehiculos');
-
-
 -- EMPRESAS
 INSERT INTO empresas (razonsocial, nombrecomercial, ruc, representante, email, telprimario)
 VALUES
   ('Servicios Alpha S.A.C.', 'Alpha', '20512345678', 'Carlos Ruiz', 'ventas@alpha.com', '999888777');
 
--- CLIENTES
+-- CLIENTES X4
 INSERT INTO clientes (tipocliente, idpersona, idempresa, idcolregistra)
 VALUES 	('P', 1, NULL,  2), 
 		('P', 2, NULL,  2), 
         ('P', 3, NULL,  2),
         ('P', NULL, 1,  2);
 
-
+/*
+-- CLIENTES X3
 INSERT INTO clientes (tipocliente, idpersona, idempresa, idcolregistra)
 VALUES
   ('P', 1, NULL,  3),  -- Cliente Persona
   ('P', 2, NULL,  3),
   ('E', NULL, 1,  3);  
+*/
 
+-- INSERT DE PERSONAS 
+
+-- Persona 1 (ejemplo)
 INSERT INTO personas (
   iddistrito, apellidos, nombres, tipodoc, nrodoc, genero, fechanac,
   estadocivil, email, direccion, referencia, telprimario
@@ -252,9 +237,7 @@ INSERT INTO personas (
   'Gómez', 'María Luisa', 'DNI', '87654321', 'F', '1992-11-20',
   'CAS', 'maria.gomez@ejemplo.com', 'Jr. Los Olivos 45', 'Depto. 3', '976543210'
 );
-
 SET @idPersona2 = LAST_INSERT_ID();
-
 INSERT INTO contratoslaborales (
   idpersona, idcargo, fechainicio, fechafin, tipocontrato
 ) VALUES (
@@ -264,8 +247,93 @@ INSERT INTO contratoslaborales (
   '2024-09-01',   -- contrato con fecha de fin
   'P'             -- tipo recibos/temporal
 );
-DELETE FROM colaboradores WHERE idcolaborador = 25;
 
+-- Persona 2 (ejemplo adicional)
+INSERT INTO personas (
+  iddistrito, apellidos, nombres, tipodoc, nrodoc, genero, fechanac,
+  estadocivil, email, direccion, referencia, telprimario
+) VALUES (
+  5,
+  'Ramírez', 'Carlos Alberto', 'DNI', '71234567', 'M', '1985-03-15',
+  'SOL', 'carlos.ramirez@ejemplo.com', 'Av. Siempre Viva 123', 'Casa', '987654321'
+);
+SET @idPersona3 = LAST_INSERT_ID();
+INSERT INTO contratoslaborales (
+  idpersona, idcargo, fechainicio, fechafin, tipocontrato
+) VALUES (
+  @idPersona3,
+  9,              -- idcargo existente
+  '2024-01-15',
+  NULL,           -- contrato indefinido / sin fecha de fin
+  'P'             -- tipo: Indefinido (ajusta según tus valores)
+);
+
+-- Persona 3 (otro ejemplo adicional)
+INSERT INTO personas (
+  iddistrito, apellidos, nombres, tipodoc, nrodoc, genero, fechanac,
+  estadocivil, email, direccion, referencia, telprimario
+) VALUES (
+  3,
+  'Pérez', 'Ana María', 'DNI', '71223344', 'F', '1990-06-30',
+  'CAS', 'ana.perez@ejemplo.com', 'Calle Falsa 100', 'Piso 2', '965432178'
+);
+SET @idPersona4 = LAST_INSERT_ID();
+INSERT INTO contratoslaborales (
+  idpersona, idcargo, fechainicio, fechafin, tipocontrato
+) VALUES (
+  @idPersona4,
+  2,             -- idcargo existente
+  '2022-05-01',
+  '2023-05-01',   -- contrato con fecha de fin
+  'P'             -- tipo: temporal (ajusta según tus valores)
+);
+
+-- PERMISOS
+
+INSERT INTO accesos (idcargo, modulo, permisos) VALUES
+(8, 'marcas', 1),
+(8, 'usuarios', 1),
+(8, 'vehiculos', 1),
+(8, 'formatoCotizacion', 1),
+(8, 'auth', 1),
+(8, 'cotizacion', 1);
+
+-- Jefe de Sistemas (ID = 1) - Acceso a todos los módulos también
+INSERT INTO accesos (idcargo, modulo, permisos) VALUES
+(1, 'marcas', 1),
+(1, 'usuarios', 1),
+(1, 'vehiculos', 1),
+(1, 'formatoCotizacion', 1),
+(1, 'auth', 1),
+(1, 'cotizacion', 1);
+
+-- Practicante (ID = 3) - Solo puede ver vehículos
+INSERT INTO accesos (idcargo, modulo, permisos) VALUES
+(3, 'vehiculos', 1);
+
+/*
+-- Jefe de Logística (ID = 8) - Acceso total a todos los módulos
+INSERT INTO permisos (idcargo, moduloapp) VALUES
+(8, 'marcas'),
+(8, 'usuarios'),
+(8, 'vehiculos'),
+(8, 'formatoCotizacion'),
+(8, 'auth'),
+(8, 'cotizacion');
+
+-- Jefe de Sistemas (ID = 1) - Acceso a todos los módulos también
+INSERT INTO permisos (idcargo, moduloapp) VALUES
+(1, 'marcas'),
+(1, 'usuarios'),
+(1, 'vehiculos'),
+(1, 'formatoCotizacion'),
+(1, 'auth'),
+(1, 'cotizacion');;
+
+-- Practicante (ID = 3) - Solo puede ver vehículos
+INSERT INTO permisos (idcargo, moduloapp) VALUES
+(3, 'vehiculos');
+*/
 
 /*
 -- Supongamos que la persona con DNI 71689010 tiene idpersona = 3

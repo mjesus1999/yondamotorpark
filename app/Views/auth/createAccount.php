@@ -30,11 +30,12 @@
                     <div class="card">
                         <div class="card-header">
                             <div class="row">
-                                <div class="col">Contratos</div>
+                                <div class="col">Lista de Contratos</div>
                             </div>
                         </div>
                         <div class="card-body">
-                            <table class="table table-sm table-hover contracts-table" id="tabla-contratos">
+                            <table class="table table-sm table-hover table-hover-yonda contracts-table"
+                                id="tabla-contratos">
                                 <colgroup>
                                     <col style="width: 5%;">
                                     <col style="width: 45%;">
@@ -71,27 +72,30 @@
                                     <?php endif; ?>
                                 </tbody>
                             </table>
+                            <div class="text-end">
+                                <span style="font-style: italic;">Seleccione un contrato</span>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Formulario de creación de cuenta -->
-                <div class="col-md-6">
-                    <!-- <h6>Crear cuenta</h6> -->
+                <div class="col-md-6 mt-2">
+                    <h6>Formulario de sesion</h6>
                     <form method="POST" action="/createFromContract" id="form-create" autocomplete="off">
                         <input type="hidden" name="idcontrato" id="idcontrato" value="<?= $old['idcontrato'] ?? '' ?>">
 
                         <div class="mb-2">
-                            <label class="form-label small">Nombre</label>
-                            <input id="nombreSel" class="form-control" readonly>
+                            <label class="form-label small">Nombres</label>
+                            <input id="nombreSel" class="form-control" placeholder="Nombres de la persona" readonly>
                         </div>
                         <div class="mb-2">
-                            <label class="form-label small">Área</label>
-                            <input id="areaSel" class="form-control" readonly>
+                            <label class="form-label small">Área Asignada</label>
+                            <input id="areaSel" class="form-control" placeholder="Area Asignada" readonly>
                         </div>
                         <div class="mb-2">
                             <label class="form-label small">Cargo</label>
-                            <input id="cargoSel" class="form-control" readonly>
+                            <input id="cargoSel" class="form-control" placeholder="Cargo Asignado" readonly>
                         </div>
 
                         <!-- Hidden inputs que SÍ se enviarán al servidor -->
@@ -101,8 +105,8 @@
                         <hr>
 
                         <div class="mb-2">
-                            <label class="form-label small">Usuario (usernick)</label>
-                            <input name="usernick" id="usernick" class="form-control"
+                            <label class="form-label small">Nombre de Usuario</label>
+                            <input name="usernick" id="usernick" class="form-control" placeholder="Nombre de Usuario"
                                 value="<?= $old['usernick'] ?? '' ?>" required>
                             <div class="form-text small text-muted">Sugerencia: pulsa el nombre en la lista para
                                 autocompletar.</div>
@@ -110,11 +114,13 @@
 
                         <div class="mb-2">
                             <label class="form-label small">Contraseña</label>
-                            <input name="password1" type="password" class="form-control" minlength="8" required>
+                            <input name="password1" type="password" class="form-control" minlength="8"
+                                placeholder="Contraseña" required>
                         </div>
                         <div class="mb-2">
                             <label class="form-label small">Confirmar contraseña</label>
-                            <input name="password2" type="password" class="form-control" minlength="8" required>
+                            <input name="password2" type="password" class="form-control" minlength="8"
+                                placeholder="Confirmar Contraseña" required>
                         </div>
 
                         <div class="d-grid mt-3">

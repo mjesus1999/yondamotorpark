@@ -4,10 +4,15 @@ SELECT * FROM cotizaciones;
 SELECT * FROM empresas;
 SELECT * FROM personas;
 SELECT * FROM Colaboradores;
+select * from contratoslaborales;
 select * from areas;
 select * from cargos;
 select * from clientes;
+select * from accesos;
 
+SELECT modulo
+            FROM accesos
+            WHERE idcargo = 8 AND permisos = 1;
 /*
 -- ENCONTRAR EL USERNICK Y EMAIL
 SELECT

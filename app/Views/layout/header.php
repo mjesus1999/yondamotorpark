@@ -5,9 +5,9 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
   session_start();
 }
 
-/* $permisosModel = new Permisos();
+$permisosModel = new Permisos();
 
-if(!empty($_SESSION['user']['idcargo'])){
+if (!empty($_SESSION['user']['idcargo'])) {
   $modulosPermitidos = $permisosModel->getPermisosByCargo((int) $_SESSION['user']['idcargo']);
 } else {
   $modulosPermitidos = [];
@@ -16,13 +16,15 @@ if(!empty($_SESSION['user']['idcargo'])){
 //Definimos los modulos en un array
 $allModules = [
   'oc' => ['url' => '/oc', 'icon' => 'fa-solid fa-list pe-2', 'label' => 'Orden de compra'],
-  'compras' => ['url' => '/compras', 'icon' => 'fa-solid fa-list pe-2', 'label' => 'compras'],
+  'compras' => ['url' => '/compras', 'icon' => 'fa-solid fa-list pe-2', 'label' => 'Compras'],
   'Concesionarios' => ['url' => '/concesionarios', 'icon' => 'fa-solid fa-list pe-2', 'label' => 'Concesionarios'],
-  'marcas' => ['url' => '/marcas', 'icon' => 'fa-solid fa-list pe-2', 'label' => 'marcas'],
-  'vehiculos' => ['url' => '/vehiculos', 'icon' => 'fa-solid fa-list pe-2', 'label' => 'vehiculos'],
-  'usuarios' => ['url' => '/usuarios', 'icon' => 'fa-solid fa-list pe-2', 'label' => 'usuarios'],
-  'formatoCotizacion' => ['url' => '/formatoCotizacion', 'icon' => 'fa-solid fa-list pe-2', 'label' => 'Requisitos']
-]; */
+  'marcas' => ['url' => '/marcas', 'icon' => 'fa-solid fa-list pe-2', 'label' => 'Marcas'],
+  'vehiculos' => ['url' => '/vehiculos', 'icon' => 'fa-solid fa-list pe-2', 'label' => 'Vehículos'],
+  'usuarios' => ['url' => '/usuarios', 'icon' => 'fa-solid fa-list pe-2', 'label' => 'Usuarios'],
+  'formatoCotizacion' => ['url' => '/formatoCotizacion', 'icon' => 'fa-solid fa-list pe-2', 'label' => 'Requisitos'],
+  'cotizacion' => ['url' => '/cotizacion', 'icon' => 'fa-solid fa-list pe-2', 'label' => 'Cotización']
+  /* 'auth' => ['url' => '/auth', 'icon' => 'fa-solid fa-list pe-2', 'label' => 'Auth'] */
+];
 ?>
 <!DOCTYPE html>
 
@@ -116,7 +118,6 @@ $allModules = [
           <li class="sidebar-item">
             <a href="/formatoCotizacion" class="sidebar-link">
               <i class="fa-solid fa-list pe-2"></i>
-              <!-- Requisitos -->
               Formato de Cotizacion
             </a>
           </li>

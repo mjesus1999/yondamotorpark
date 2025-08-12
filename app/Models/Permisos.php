@@ -19,9 +19,9 @@ class Permisos
     public function getPermisosByCargo(int $idCargo): array
     {
         $stmt = $this->db->prepare("
-            SELECT moduloapp
-            FROM permisos
-            WHERE idcargo = :idCargo
+            SELECT modulo
+            FROM accesos
+            WHERE idcargo = :idCargo AND permisos = 1
         ");
         $stmt->execute([':idCargo' => $idCargo]);
         return $stmt->fetchAll(PDO::FETCH_COLUMN);
