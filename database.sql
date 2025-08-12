@@ -498,15 +498,15 @@ USE motorpark;
 CREATE TABLE pagos(
     idpago              INT AUTO_INCREMENT PRIMARY KEY,
     idcronograma        INT NOT NULL,
-    idcuentapago        INT NOT NULL,
+    idcuentapago        INT  NULL,
     idcolcaja           INT NULL,
     mediopago           ENUM('Yape','Plin','Transferencia Bancaria','Efectivo') NOT NULL,
-    numerotransaccion   VARCHAR(30) NOT NULL,
+    numerotransaccion   VARCHAR(30) NULL,
     fechapago           DATE NOT NULL,
     fecharegistro       DATETIME NOT NULL DEFAULT NOW(),
     amortizacion        DECIMAL(10,2) NOT NULL,
     saldorestante        DECIMAL(10,2)  NULL,
-    comprobante         VARCHAR(200) NOT NULL,
+    comprobante         VARCHAR(200)  NULL,
     observacion         VARCHAR(300) NULL,
     facturado ENUM('S', 'N') DEFAULT 'S',
     declarado ENUM('S', 'N') DEFAULT 'N',
@@ -516,6 +516,10 @@ CREATE TABLE pagos(
 
 
 )ENGINE = InnoDB;
+
+SHOW COLUMNS FROM pagos;
+ALTER TABLE pagos MODIFY COLUMN idcuentapago INT NULL;
+
 ALTER TABLE pagos MODIFY COLUMN saldorestante        DECIMAL(10,2)  NULL;
 
 ALTER TABLE 

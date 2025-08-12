@@ -40,6 +40,7 @@ require APP_ROOT . '/app/Routes/OC.router.php';
 require APP_ROOT . '/app/Routes/PagosOC.router.php';
 require APP_ROOT . '/app/Routes/Compra.router.php';
 require APP_ROOT . '/app/Routes/Caja.router.php';
+require APP_ROOT . '/app/Routes/PagoCronograma.router.php';
 
 
 

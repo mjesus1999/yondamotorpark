@@ -57,10 +57,11 @@
                                 </tr>
                             </thead>
                             <tbody id="tabla-body">
-
                                 <?php if (empty($cronograma)) : ?>
                                     <tr>
-                                        <td colspan="8" class="text-center">No hay datos para mostrar</td>
+
+
+                                        <td colspan="10" class="text-center">No hay datos para mostrar</td>
                                     </tr>
                                 <?php else: ?>
                                     <?php
@@ -68,40 +69,54 @@
                                     foreach ($cronograma as $index => $fila) {
                                         $fecha_cuota = new DateTimeImmutable($fila['fechapago']);
                                         $fecha_formateada = $fecha_cuota->format('d/m/Y');
+                                        $estado = strtolower(trim($fila['estado']));
 
-                                        $vencido = ($hoy > $fecha_cuota);
                                         $dias_restantes = $hoy->diff($fecha_cuota)->days;
+                                        $texto_vencimiento = '';
+                                        $clase_estado = '';
+                                        $icono = '';
+                                        $clase_fila = '';
 
-                                        $estado = 'Pendiente';
-                                        $clase_estado = 'estado-pendiente';
-                                        $icono = 'fa-clock';
-                                        $texto_vencimiento = "Vence en $dias_restantes días";
+                                        $fila_deshabilitada = false;
 
-                                        $estado = $fila['estado'];
-                                        $clase_estado = 'estado-pendiente';
-                                        $icono = 'fa-clock';
-                                        $texto_vencimiento = "Vence en $dias_restantes días";
-
-                                        if ($estado === 'Pagado') {
+                                        if ($estado === 'pagado') {
+                                            $clase_fila = 'bg-success table-success fila-pagada';
                                             $clase_estado = 'estado-pagado';
                                             $icono = 'fa-check-circle';
-                                            $texto_vencimiento = "Pagado";
+                                            $texto_vencimiento = 'Pagado';
+
+                                            $fila_deshabilitada = true;
                                         } elseif ($hoy > $fecha_cuota) {
+                                            $clase_fila = 'table-danger';
                                             $clase_estado = 'estado-vencido';
                                             $icono = 'fa-exclamation-triangle';
                                             $texto_vencimiento = "Venció hace $dias_restantes días";
+                                        } else {
+                                            $clase_estado = 'estado-pendiente';
+                                            $icono = 'fa-clock';
+                                            $texto_vencimiento = "Vence en $dias_restantes días";
                                         }
-
 
                                         $style_display = ($index < 10) ? '' : 'style="display:none;"';
                                         $data_page = ceil(($index + 1) / 10);
                                     ?>
-                                        <tr data-page="<?= $data_page ?>" <?= $style_display ?>>
-                                            <td><span class="badge bg-primary badge-cuota"><?= $fila['numcuota'] ?></span></td>
+                                        <tr data-page="<?= $data_page ?>"
+                                            <?= $style_display ?>
+                                            class="<?= $clase_fila ?>"
+                                            style="<?= $estilo_fila ?>"
+                                            <?= $fila_deshabilitada ? 'data-disabled="true"' : '' ?>>
+
+                                            <td>
+                                                <span class="badge <?= $estado === 'pagado' ? 'bg-light text-success' : 'bg-primary' ?> badge-cuota">
+                                                    <?= $fila['numcuota'] ?>
+                                                </span>
+                                            </td>
                                             <td>
                                                 <div class="d-flex flex-column">
                                                     <span class="fw-bold"><?= $fecha_formateada ?></span>
-                                                    <small class="text-muted"><?= $texto_vencimiento ?></small>
+                                                    <small class="<?= $estado === 'pagado' ? 'text-light' : 'text-muted' ?>">
+                                                        <?= $texto_vencimiento ?>
+                                                    </small>
                                                 </div>
                                             </td>
                                             <td>S/ <?= number_format($fila['interes'], 2) ?></td>
@@ -112,26 +127,37 @@
                                             <td>S/ <?= number_format($fila['saldocapital'], 2) ?></td>
                                             <td>
                                                 <span class="<?= $clase_estado ?>">
-                                                    <i class="fas <?= $icono ?> me-1"></i> <?= $estado ?>
+                                                    <i class="fas <?= $icono ?> me-1"></i> <?= ucfirst($estado) ?>
                                                 </span>
                                             </td>
                                             <td>
-                                                <button class="btn btn-pagar btn-sm text-white"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#modalPago"
-                                                    data-cuota="<?= $fila['numcuota'] ?>"
-                                                    data-valorcuota="<?= $fila['valorcuota'] ?>"
-                                                    data-abonocapital="<?= $fila['abonocapital'] ?>"
-                                                    data-penalidad="<?= $fila['penalidad'] ?>">
-                                                    <i class="fa-solid fa-dollar-sign me-1"></i> Pagar
-                                                </button>
+                                                <?php if ($estado === 'pagado'): ?>
+                                                    <div class="d-flex align-items-center justify-content-center">
+                                                        <span class="badge bg-light text-success fs-6 px-3 py-2">
+                                                            <i class="fas fa-check-circle me-1"></i> Completado
+                                                        </span>
+                                                    </div>
+                                                <?php else: ?>
+                                                    <button class="btn btn-pagar btn-sm text-white"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#modalPago"
+                                                        data-cuota="<?= $fila['numcuota'] ?>"
+                                                        data-idcronograma="<?= $fila['idcronograma'] ?>"
+                                                        data-valorcuota="<?= $fila['valorcuota'] ?>"
+                                                        data-abonocapital="<?= $fila['abonocapital'] ?>"
+                                                        data-penalidad="<?= $fila['penalidad'] ?>"
+                                                        data-saldorestante="<?= $fila['saldorestante'] ?>">
+                                                        <i class="fa-solid fa-dollar-sign me-1"></i> Pagar
+                                                    </button>
 
+                                                <?php endif; ?>
                                             </td>
                                         </tr>
                                     <?php } ?>
                                 <?php endif; ?>
-
                             </tbody>
+
+
                         </table>
                     </div>
                 </div>
@@ -183,10 +209,10 @@
             </div>
             <div class="modal-body">
                 <div class="alert alert-info">
-                    <i class="fas fa-info-circle me-2"></i> Está a punto de registrar el pago de la cuota seleccionada.
+                    <i class="fas fa-info-circle me-2"></i> <span id="numero-cuota"></span>
                 </div>
 
-                <form id="formPago">
+                <form id="formPago" enctype="multipart/form-data">
                     <div class="row mb-3">
                         <div class="col-md-6 mb-3">
                             <div class="card border-left-primary h-100">
@@ -235,7 +261,7 @@
                                         <div class="input-group">
                                             <span class="input-group-text bg-body-tertiary"><i
                                                     class="fas fa-coins text-warning"></i></span>
-                                            <input type="text" class="form-control bg-body-tertiary" id="amortizacion">
+                                            <input type="text" class="form-control bg-body-tertiary" id="amortizacion" name="amortizacion">
                                         </div>
                                     </div>
                                     <div class="mb-2">
@@ -252,8 +278,8 @@
                                         <div class="input-group">
                                             <span class="input-group-text bg-body-tertiary"><i
                                                     class="far fa-calendar-alt text-secondary"></i></span>
-                                            <input type="date" class="form-control" value="<?= date('Y-m-d') ?>"
-                                                id="fecha-pago">
+                                            <input type="date" class="form-control" value="<?= date('Y-m-d') ?>" name="fechapago"
+                                                id="fechapago">
                                         </div>
                                     </div>
                                 </div>
@@ -270,18 +296,32 @@
                                     </h6>
                                     <div class="mb-2">
                                         <label class="form-label small text-muted">Modalidad</label>
-                                        <select class="form-select" id="metodo-pago">
-                                            <option value="efectivo">Efectivo</option>
-                                            <option value="yape">Yape</option>
-                                            <option value="transferencia">Transferencia Bancaria</option>
-                                            <option value="plin">Plin</option>
+                                        <select class="form-select" id="mediopago" name="mediopago">
+                                            <option value="Efectivo">Efectivo</option>
+                                            <option value="Yape">Yape</option>
+                                            <option value="Transferencia Bancaria">Transferencia Bancaria</option>
+                                            <option value="Plin">Plin</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-2 hidden select-cuentas">
+                                        <label class="form-label small text-muted">Número de cuenta</label>
+                                        <select class="form-select"
+                                            id="idcuentapago" name="idcuentapago">
+                                            <option>Seleccione</option>
                                         </select>
                                     </div>
                                     <div class="mb-2">
                                         <label class="form-label small text-muted">Número de Operación</label>
-                                        <input type="text" class="form-control"
-                                            placeholder="Opcional para transferencias" id="numoperacion">
+                                        <input type="text" class="form-control" name="numerotransaccion"
+                                            placeholder="Opcional para transferencias" id="numerotransaccion">
                                     </div>
+
+                                    <div class="mb-2">
+                                        <label class="form-label small text-muted">Comprobante</label>
+                                        <input id="comprobante" class="form-control" type="file" name="comprobante" placeholder="Seleccione un archivo" accept="image/*,.pdf">
+
+                                    </div>
+
                                 </div>
                             </div>
                         </div>
@@ -292,7 +332,7 @@
                                         <i class="fas fa-sticky-note me-2"></i>Observaciones
                                     </h6>
                                     <textarea class="form-control" rows="4"
-                                        placeholder="Ingrese cualquier observación..." id="observaciones"></textarea>
+                                        placeholder="Ingrese cualquier observación..." id="observacion" name="observacion"></textarea>
                                 </div>
                             </div>
                         </div>
@@ -318,13 +358,120 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
 
-
-
         // Variables globales
         const itemsPerPage = 10;
         const totalItems = <?= count($cronograma) ?>;
         const totalPages = Math.ceil(totalItems / itemsPerPage);
         let currentPage = 1;
+
+        // Variables del FORM
+        const numeroCuenta = document.querySelector('#idcuentapago');
+        const medioPago = document.querySelector('#mediopago');
+        const numeroTransaccion = document.querySelector('#numerotransaccion');
+        const fechaPago = document.querySelector('#fechapago');
+        const amortizacion = document.querySelector('#amortizacion');
+        const comprobante = document.querySelector('#comprobante');
+        const selectCuentas = document.querySelector('.select-cuentas');
+        const observacion = document.querySelector('#observacion');
+        const formPago = document.querySelector('#formPago');
+
+        let idCronogramaSeleccionado = null;
+
+
+        medioPago.addEventListener('change', async (e) => {
+            let valor = e.target.value;
+
+            if (valor.toLowerCase() === 'transferencia bancaria') {
+                selectCuentas.classList.remove('hidden');
+
+                try {
+                    const res = await fetch('/api/numcuentaspagos');
+                    const data = await res.json();
+
+                    numeroCuenta.innerHTML = '<option value="">Selecciona una cuenta</option>';
+
+                    if (data.length > 0) {
+                        data.forEach(e => {
+                            numeroCuenta.innerHTML += `<option value="${e.idcuentapago}">${e.nombrecuenta}</option>`;
+                        });
+                    }
+
+                } catch (error) {
+                    console.error(error);
+                }
+
+            } else {
+                selectCuentas.classList.add('hidden');
+                numeroCuenta.innerHTML = '';
+            }
+        });
+
+
+        formPago.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (!idCronogramaSeleccionado) {
+                showToast('No se seleccionó ninguna cuota. Intenta nuevamente.', 'INFO', 1200);
+                return;
+            }
+
+            // Validar cuenta si es transferencia
+            if (medioPago.value.toLowerCase() === 'transferencia bancaria' && numeroCuenta.value === '') {
+                alert('Debes seleccionar una cuenta bancaria.');
+                return;
+            }
+
+            const amortizacionValor = amortizacion.value;
+            if (!amortizacionValor || isNaN(parseFloat(amortizacionValor)) || parseFloat(amortizacionValor) <= 0) {
+                alert('Ingresa una amortización válida.');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('idcronograma', idCronogramaSeleccionado);
+            if (medioPago.value === 'Transferencia Bancaria') {
+                formData.append('idcuentapago', numeroCuenta.value);
+            }
+            formData.append('mediopago', medioPago.value);
+            formData.append('numerotransaccion', numeroTransaccion.value ?? null);
+            formData.append('fechapago', fechaPago.value);
+            formData.append('amortizacion', amortizacion.value);
+            formData.append('observacion', observacion.value);
+
+
+            if (comprobante.files.length > 0) {
+                formData.append('comprobante', comprobante.files[0]);
+            }
+
+            if (confirm('¿Seguro de registrar el pago?')) {
+                try {
+                    const res = await fetch('/pago/cronograma', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const data = await res.json();
+
+
+                    if (data.success) {
+                        showToast('Pago registrado correctamente.', 'SUCCESS', 1200);
+
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1200)
+
+                    } else {
+                        showToast(data.message, 'WARNING', 1200);
+                    }
+
+                } catch (err) {
+                    console.error('Error al enviar:', err);
+                    showToast('Ocurrió un error al procesar el pago.', 'WARNING', 1200);
+                }
+            }
+
+
+        });
 
 
 
@@ -334,40 +481,63 @@
                 const valorCuota = parseFloat(this.dataset.valorcuota);
                 const abonoCapital = parseFloat(this.dataset.abonocapital);
                 const penalidad = parseFloat(this.dataset.penalidad) || 0;
+                const saldoRestante = parseFloat(this.dataset.saldorestante);
 
-
-                // Calcular total deuda
                 const totalDeuda = valorCuota + penalidad;
 
-                // Llenar campos en el modal
                 document.getElementById('saldocuota').value = valorCuota.toFixed(2);
                 document.getElementById('penalidad').value = penalidad.toFixed(2);
                 document.getElementById('total-deuda').value = totalDeuda.toFixed(2);
                 document.getElementById('amortizacion').value = '';
-                document.getElementById('saldo-restante').value = totalDeuda.toFixed(2);
+                document.getElementById('saldo-restante').value = saldoRestante.toFixed(2);
+                idCronogramaSeleccionado = this.dataset.idcronograma;
 
+                document.querySelector('#numero-cuota').textContent = `Está a punto de registrar el pago de la cuota N°  ${this.dataset.cuota} `;
             });
         });
 
 
 
 
-        // ----------------------------------------------------------------------------------
+        // Deshabilitar completamente las filas pagadas
+        function deshabilitarFilasPagadas() {
+            const filasPagadas = document.querySelectorAll('tr.fila-pagada, tr[data-disabled="true"]');
+
+            filasPagadas.forEach(fila => {
+                // Prevenir todos los eventos en la fila
+                fila.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                }, true);
+
+                fila.addEventListener('mousedown', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                }, true);
+
+                // Deshabilitar botones dentro de la fila
+                const botones = fila.querySelectorAll('button');
+                botones.forEach(boton => {
+                    boton.disabled = true;
+                    boton.setAttribute('disabled', 'true');
+                    boton.style.pointerEvents = 'none';
+                    boton.style.opacity = '0.5';
+                });
 
 
+            });
+        }
+
+        // Ejecutar al cargar la página
+        deshabilitarFilasPagadas();
+
+        // Re-ejecutar después de la paginación.
+        document.addEventListener('paginationComplete', deshabilitarFilasPagadas);
 
 
-
-
-
-
-
-
-
-
-
-
-
+        
         // Mostrar página específica
         function showPage(page) {
             currentPage = page;
@@ -452,6 +622,9 @@
                 `Mostrando resultados para: <span class="fw-bold">${searchTerm}</span>` :
                 `No se encontraron resultados para: <span class="fw-bold">${searchTerm}</span>`;
         });
+
+
+
 
 
         document.getElementById('btnImprimir').addEventListener('click', function() {

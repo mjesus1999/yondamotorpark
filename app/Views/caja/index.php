@@ -2,8 +2,6 @@
 
 include __DIR__ . '/../layout/header.php';
 ?>
-
-
 <div class="container-fluid">
 
     <div class="alert alert-info mt-2" role="alert">
@@ -62,7 +60,10 @@ include __DIR__ . '/../layout/header.php';
                                             <td><?= htmlspecialchars($contrato['vehiculo']) ?></td>
                                             <td><?= htmlspecialchars($contrato['meses']) ?></td>
                                             <td><?= htmlspecialchars($contrato['cuota']) ?></td>
-                                            <td><a href="/caja/cronograma/<?= htmlspecialchars($contrato['idcontrato']) ?>" title="Ver Cronograma"><i class="bi-receipt fs-5 text-warning"></i></a></td>
+                                            <td>
+                                                <a href="/caja/cronograma/<?= htmlspecialchars($contrato['idcontrato']) ?>" title="Ver Cronograma"><i class="bi-receipt fs-5 text-info "></i></a>
+                                                <a href="/caja/historial/pagos/<?= htmlspecialchars($contrato['idcontrato'])?>" title="Ver historial de pagos"><i class="bi bi-clock-history fs-5"></i></a>
+                                            </td>
                                         </tr>
 
                                     <?php endforeach; ?>
@@ -77,6 +78,5 @@ include __DIR__ . '/../layout/header.php';
     </div>
 
 </div>
-
 
 <?php include __DIR__ . '/../layout/footer.php'; ?>

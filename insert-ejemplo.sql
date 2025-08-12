@@ -100,7 +100,7 @@ INSERT INTO cotizaciones (
     estadocotizacion
 ) VALUES (
     1,          -- idformato
-    1,          -- idcliente 
+    10,          -- idcliente 
     2,          -- idasesor
     47,          -- idvehiculo 
     'PEN',      -- moneda
@@ -138,11 +138,11 @@ INSERT INTO contratos (
     observaciones
 ) VALUES (
     1,         -- idlocal
-    1,         -- idcotizacion 
+    2,         -- idcotizacion 
     2,         -- idlogistica 
-    '2025-08-11', -- fechainicio
-    11,        -- día de pago
-    '2025-09-11', -- fecharevision
+    '2025-08-12', -- fechainicio
+    12,        -- día de pago
+    '2025-09-12', -- fecharevision
     'Contrato inicial para entrega de vehículo.'
 );
 
@@ -247,7 +247,7 @@ BEGIN
     END WHILE;
 END$
 DELIMITER ;
-CALL generar_cronograma(1, 4.263224089);
+CALL generar_cronograma(2, 4.263224089);
 SELECT * FROM cronogramas;
 
 
