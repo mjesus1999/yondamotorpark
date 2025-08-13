@@ -247,6 +247,7 @@ class UsuarioController extends Controller
    */
 
   //Mostrar Crear Cuenta
+
   public function showCreateFromContractsAuth(): void
   {
     //$this->authRequired(); // si solo administradores deben acceder
@@ -256,10 +257,20 @@ class UsuarioController extends Controller
   public function showCreateFromContracts(): void
   {
     $contracts = $this->usuarioModel->getContractsWithoutColaborador();
-    $this->view('usuarios.createAccount', ['contracts' => $contracts]);
+
+    if (session_status() !== PHP_SESSION_ACTIVE)
+      session_start();
+    $success = $_SESSION['success_message'] ?? null;
+    if (isset($_SESSION['success_message']))
+      unset($_SESSION['success_message']);
+
+    $this->view('usuarios.createAccount', [
+      'contracts' => $contracts,
+      'success' => $success
+    ]);
   }
 
-  //CREAR CONTRATO (Dentro de auth/usuario->createAccount)
+  //CREAR CONTRATO 
   public function createFromContract(): void
   {
     if (session_status() !== PHP_SESSION_ACTIVE)
@@ -296,11 +307,14 @@ class UsuarioController extends Controller
       return;
     }
 
+    // recoger restriccionhoraria (valor esperado 'S' o 'N')
+    $restr = (isset($_POST['restriccionhoraria']) && $_POST['restriccionhoraria'] === 'N') ? 'N' : 'S';
+
     // crear colaborador
     try {
       $passwordHash = password_hash($p1, PASSWORD_DEFAULT);
-      $idColab = $this->colaboradorModel->create($idContrato, $usernick, $passwordHash);
-      if (!$idColab)
+      $idColab = $this->colaboradorModel->create($idContrato, $usernick, $passwordHash, $restr);
+      if ($idColab <= 0)
         throw new \RuntimeException('No se pudo crear colaborador.');
     } catch (\Throwable $e) {
       error_log('Error al crear colaborador: ' . $e->getMessage());
@@ -315,6 +329,7 @@ class UsuarioController extends Controller
       return;
     }
 
+
     // restaurar sesión original (evita login automático del nuevo usuario)
     if ($prevUser !== null) {
       $_SESSION['user'] = $prevUser;
@@ -323,11 +338,11 @@ class UsuarioController extends Controller
     }
 
     // actualizar lista
-    $contracts = $this->usuarioModel->getContractsWithoutColaborador();
-    $this->view('usuarios.createAccount', [
-      'contracts' => $contracts,
-      'success' => "Cuenta creada correctamente para <strong>" . htmlspecialchars($usernick) . "</strong>"
-    ]);
+    if (session_status() !== PHP_SESSION_ACTIVE)
+      session_start();
+    $_SESSION['success_message'] = "Cuenta creada correctamente para <strong>" . htmlspecialchars($usernick) . "</strong>";
+    $this->redirect('/createAccount'); // o la ruta que muestra el formulario (ajusta si tu ruta es otra)
+    return;
   }
 
   public function createFromContractAuth(): void

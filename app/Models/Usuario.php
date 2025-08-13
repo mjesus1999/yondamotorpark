@@ -127,21 +127,23 @@ class Usuario
 
   public function searchByUsernick(string $usernick): ?array
   {
-    $query = "SELECT col.idcolaborador,
-              col.usernick,
-              col.userpassword,
-              col.habilitado,
-              col.avatar,
-              p.nombres,
-              p.apellidos,
-              cl.idcargo,
-              cg.cargo
-            FROM colaboradores col
-            JOIN contratoslaborales cl ON cl.idcontratolaboral = col.idcontratolaboral
-            JOIN personas p ON p.idpersona = cl.idpersona
-            JOIN cargos cg ON cg.idcargo = cl.idcargo
-            WHERE BINARY col.usernick = :usernick
-            LIMIT 1";
+    $query = "SELECT
+                col.idcolaborador,
+                col.usernick,
+                col.userpassword,
+                col.habilitado,
+                col.avatar,
+                col.restriccionhoraria,
+                p.nombres,
+                p.apellidos,
+                cl.idcargo,
+                cg.cargo
+              FROM colaboradores col
+              JOIN contratoslaborales cl ON cl.idcontratolaboral = col.idcontratolaboral
+              JOIN personas p ON p.idpersona = cl.idpersona
+              JOIN cargos cg ON cg.idcargo = cl.idcargo
+              WHERE BINARY col.usernick = :usernick
+              LIMIT 1";
     $stmt = $this->db->prepare($query);
     $stmt->bindParam(':usernick', $usernick);
     $stmt->execute();
@@ -158,6 +160,7 @@ class Usuario
         col.idcolaborador,
         col.usernick,
         col.avatar,
+        col.restriccionhoraria,
         p.apellidos,
         p.nombres,
         p.tipodoc,
@@ -188,6 +191,20 @@ class Usuario
     $stmt->bindValue(':id', $idColab, PDO::PARAM_INT);
     $stmt->execute();
     return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+  }
+
+  /**
+   * Actualiza el campo ultimoacceso a NOW()
+   */
+  public function updateLastAccess(int $idColab): bool
+  {
+    $stmt = $this->db->prepare("
+      UPDATE colaboradores
+      SET ultimoacceso = NOW()
+      WHERE idcolaborador = :id
+    ");
+    $stmt->bindValue(':id', $idColab, PDO::PARAM_INT);
+    return $stmt->execute();
   }
 
   //actualizar avatar

@@ -95,7 +95,7 @@
 
                 <!-- FORMULARIO DE SESION -->
                 <div class="card mb-4">
-                    
+
                     <div class="card-header">
                         <div class="row">
                             <div class="col-md-6 d-flex align-items-center justify-content-start">
@@ -169,6 +169,30 @@
                                 </div>
                             </div>
 
+                            <?php
+                            $start = getenv('STARTIME') ?: '07:30';
+                            $end = getenv('ENDTIME') ?: '19:30';
+                            ?>
+                            <!-- RESTRICCIÓN HORARIA -->
+                            <div class="col-md-12 mb-2">
+                                <label class="form-label">Restricción horaria - Lunes a Sábado
+                                    <strong><?= htmlspecialchars($start) ?></strong> -
+                                    <strong><?= htmlspecialchars($end) ?></strong>
+                                </label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="restriccionhoraria" id="rest_si"
+                                        value="S" required <?= (isset($old['restriccionhoraria']) && $old['restriccionhoraria'] === 'N') ? '' : 'checked' ?>>
+                                    <label class="form-check-label" for="rest_si">Sí</label>
+                                </div>
+
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="restriccionhoraria" id="rest_no"
+                                        value="N" required <?= (isset($old['restriccionhoraria']) && $old['restriccionhoraria'] === 'N') ? 'checked' : '' ?>>
+                                    <label class="form-check-label" for="rest_no">No</label>
+                                </div>
+                                <div class="form-text small text-muted">Selecciona si este usuario tendrá restricción
+                                    horaria.</div>
+                            </div>
                         </div>
                     </div>
                     <div class="card-footer text-end">
