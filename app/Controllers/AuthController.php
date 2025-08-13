@@ -65,7 +65,7 @@ class AuthController extends Controller
         $usernick = trim($_POST['usernick'] ?? '');
         $password = $_POST['userpassword'] ?? '';
 
-        // buscar colaborador (devuelve al menos idcolaborador y userpassword)
+        //Buscar usuario
         $user = $this->usuarioModel->searchByUsernick($usernick);
 
         if (!$user || ($user['habilitado'] ?? 'N') !== 'S') {
@@ -73,40 +73,43 @@ class AuthController extends Controller
             return;
         }
 
-        // verificar contraseña
+        //Verificar contraseña
         if (!password_verify($password, $user['userpassword'])) {
             $this->view('auth.login', ['error' => 'Contraseña incorrecta.', 'old' => ['usernick' => $usernick]]);
             return;
         }
 
-        // obtener fila completa (incluye restriccionhoraria ahora)
-        $full = $this->usuarioModel->getById((int) $user['idcolaborador']);
-        if (!$full) {
-            $this->view('auth.login', ['error' => 'No se pudo cargar el usuario.']);
-            return;
-        }
-
-        // comprobación de restricción horaria
-        $restr = $full['restriccionhoraria'] ?? 'N';
+        //Restricción horaria
+        $restr = $user['restriccionhoraria'] ?? 'N';
         if ($restr === 'S') {
+            //HH:MM
             $norm = function (string $t) {
                 $t = trim($t);
                 if ($t === '')
-                    return '00:00';
+                    return null;
                 if (strpos($t, ':') === false)
                     $t .= ':00';
                 $parts = explode(':', $t);
-                $h = str_pad($parts[0], 2, '0', STR_PAD_LEFT);
-                $m = isset($parts[1]) ? str_pad(substr($parts[1], 0, 2), 2, '0', STR_PAD_LEFT) : '00';
-                return "$h:$m";
+                $h = (int) $parts[0];
+                $m = isset($parts[1]) ? (int) $parts[1] : 0;
+                if ($h < 0 || $h > 23 || $m < 0 || $m > 59)
+                    return null;
+                return sprintf('%02d:%02d', $h, $m);
             };
 
             $start = $norm(getenv('STARTIME') ?: '07:30');
             $end = $norm(getenv('ENDTIME') ?: '19:30');
 
+            if ($start === null || $end === null) {
+                $this->view('auth.login', ['error' => 'Configuración de horario inválida. Contacta al administrador.']);
+                return;
+            }
+
             $tz = new \DateTimeZone('America/Lima');
-            $now = new \DateTime('now', $tz);
-            $dow = (int) $now->format('N'); // 1..7
+            //prueba para permitir forzar hora con env SIMULATE_NOW
+            $simulate = getenv('SIMULATE_NOW') ?: null;
+            $now = $simulate ? new \DateTime($simulate, $tz) : new \DateTime('now', $tz);
+            $dow = (int) $now->format('N'); //1=Lun a 7 =Dom
 
             if ($dow === 7) {
                 $this->view('auth.login', ['error' => "Acceso restringido los domingos. Acceso permitido sólo Lunes a Sábado entre $start y $end."]);
@@ -117,37 +120,45 @@ class AuthController extends Controller
             $startDT = \DateTime::createFromFormat('Y-m-d H:i', "$today $start", $tz);
             $endDT = \DateTime::createFromFormat('Y-m-d H:i', "$today $end", $tz);
 
-            if ($startDT === false || $endDT === false) {
-                $this->view('auth.login', ['error' => "Configuración de horario inválida. Contacta al administrador."]);
-                return;
+            // Manejar intervalos que cruzan medianoche (p. ej. 22:00 - 06:00)
+            $isInside = false;
+            if ($startDT <= $endDT) {
+                //para el horario normal:
+                $isInside = ($now >= $startDT && $now <= $endDT);
+            } else {
+                // cruza medianoche: acceso si ahora >= start o ahora <= end (siguiente día)
+                $endNext = clone $endDT;
+                $endNext->modify('+1 day');
+                if ($now >= $startDT || $now <= $endNext) {
+                    $isInside = true;
+                }
             }
 
-            if ($now < $startDT || $now > $endDT) {
+            if (!$isInside) {
                 $this->view('auth.login', ['error' => "Acceso permitido sólo Lunes a Sábado entre $start y $end."]);
                 return;
             }
         }
 
-        // Login OK
+        //regenerar id y poblar sesión => login
         session_regenerate_id(true);
         $_SESSION['user'] = [
-            'id' => $full['idcolaborador'],
-            'usernick' => $full['usernick'],
-            'nombres' => $full['nombres'] ?? '',
-            'apellidos' => $full['apellidos'] ?? '',
-            'avatar' => $full['avatar'] ?? '/assets/images/profile.jpg',
-            'idcargo' => $full['idcargo'] ?? null,
-            'cargo' => $full['cargo'] ?? null,
+            'id' => $user['idcolaborador'],
+            'usernick' => $user['usernick'],
+            'nombres' => $user['nombres'] ?? '',
+            'apellidos' => $user['apellidos'] ?? '',
+            'avatar' => $user['avatar'],
+            'idcargo' => $user['idcargo'] ?? null,
+            'cargo' => $user['cargo'] ?? null,
         ];
 
-        // actualizar ultimo acceso
-        $this->usuarioModel->updateLastAccess((int) $full['idcolaborador']);
+        $_SESSION['last_activity'] = time();
+        //Actualizar acceso
+        $this->usuarioModel->updateLastAccess((int) $user['idcolaborador']);
 
         header('Location: /');
         exit;
     }
-
-
 
     public function login1(): void
     {

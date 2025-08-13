@@ -51,6 +51,29 @@
 <!-- Sweet Alert -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="/assets/js/swalcustom.js"></script>
+<script>
+(function () {
+  // Inactividad en ms
+  const TIMEOUT_MS = 60 * 1000; // 1 minuto
+  let timer = null;
+
+  function resetTimer() {
+    if (timer) clearTimeout(timer);
+    timer = setTimeout(() => {
+      // redirigir al logout del servidor
+      window.location.href = '/logout';
+    }, TIMEOUT_MS);
+  }
+
+  // eventos que consideran "actividad"
+  ['mousemove', 'keydown', 'mousedown', 'touchstart', 'click'].forEach(evt => {
+    document.addEventListener(evt, resetTimer, { passive: true });
+  });
+
+  // iniciar
+  resetTimer();
+})();
+</script>
 
 </body>
 

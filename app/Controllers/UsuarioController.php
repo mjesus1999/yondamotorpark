@@ -316,8 +316,10 @@ class UsuarioController extends Controller
       $idColab = $this->colaboradorModel->create($idContrato, $usernick, $passwordHash, $restr);
       if ($idColab <= 0)
         throw new \RuntimeException('No se pudo crear colaborador.');
+      
     } catch (\Throwable $e) {
       error_log('Error al crear colaborador: ' . $e->getMessage());
+
       // restaurar sesión original si hacía falta
       if ($prevUser !== null)
         $_SESSION['user'] = $prevUser;

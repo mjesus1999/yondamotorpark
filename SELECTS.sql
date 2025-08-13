@@ -9,6 +9,10 @@ select * from areas;
 select * from cargos;
 select * from clientes;
 select * from accesos;
+SELECT idcolaborador, usernick, restriccionhoraria
+FROM colaboradores
+WHERE usernick = 'Deyanira' OR idcolaborador = 3;
+
 
 -- DELETE FROM Colaboradores WHERE idcolaborador = 39;
 -- DELETE FROM cotizaciones WHERE idasesor = 26;
