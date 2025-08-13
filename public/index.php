@@ -9,7 +9,32 @@ require APP_ROOT . '/vendor/autoload.php';
 
 //Variable de entorno desde .env
 $dotenv = Dotenv\Dotenv::createImmutable(APP_ROOT);
-$dotenv->load();
+$dotenv->safeLoad();
+
+//Fijar timezone por seguridad
+if (!ini_get('date.timezone')) {
+  date_default_timezone_set('America/Lima');
+}
+
+// 2) Asegurar que las variables cargadas por phpdotenv estén también
+// como variables de entorno accesibles por getenv() y en $_SERVER.
+foreach ($_ENV as $key => $value) {
+  // Sólo strings (evita arrays/objetos)
+  if (!is_string($value))
+    continue;
+
+  // setear en entorno C-level si no existe
+  if (getenv($key) === false) {
+    putenv(sprintf('%s=%s', $key, $value));
+  }
+
+  // mantener también en $_SERVER si no está
+  if (!isset($_SERVER[$key])) {
+    $_SERVER[$key] = $value;
+  }
+}
+
+//$dotenv->load();
 
 // Registra el autocargador
 //App\Core\Autoloader::register();
