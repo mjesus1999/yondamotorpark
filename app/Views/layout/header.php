@@ -159,7 +159,7 @@ $allModules = [
             </ul>
           </li> -->
           <?php
-          // Mostrar bloque Auth si es visitante o si el cargo tiene permiso 'auth'
+         
           $showAuth = empty($_SESSION['user']) || in_array('auth', $modulosPermitidos, true);
           if ($showAuth):
             ?>
@@ -186,7 +186,7 @@ $allModules = [
                   </li>
                 <?php endif; ?>
 
-                <!-- si quieres siempre mostrar "Forgot Password" para todos -->
+                <!-- mostrar "Forgot Password" para todos -->
                 <!--
                 <li class="sidebar-item">
                   <a href="/recoverAccount" class="sidebar-link">Forgot Password</a>
@@ -271,7 +271,7 @@ $allModules = [
               </div>
             </li>
           </ul>
-        </div> 
+        </div>
       </nav>
 
       <main class="content px-3 py-2">

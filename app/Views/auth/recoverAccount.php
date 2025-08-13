@@ -46,7 +46,7 @@
                             <?php endif; ?>
 
                             <!-- Formulario de Recuperación -->
-                            <form method="POST" action="/recoverAccount" id="form-recover">
+                            <form method="POST" action="/recoverAccount" id="form-recover" autocomplete="OFF">
                                 <div class="form-group mb-2">
                                     <label class="label">Nombre Usuario</label>
                                     <input name="usernick" id="usernick" class="form-control"

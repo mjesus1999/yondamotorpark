@@ -48,14 +48,14 @@
                                     <input type="password" name="userpassword" class="form-control"
                                         placeholder="Contraseña" required>
                                 </div>
-                                <div class="form-group">
+                                <div class="form-group mt-4">
                                     <button type="submit"
                                         class="form-control btn yonda text-light rounded submit px-3">Acceder</button>
                                 </div>
                                 <div class="form-group">
 
                                     <div class="d-flex justify-content-between align-items-center">
-                                        <label class="checkbox-wrap checkbox-primary mb-0">
+                                        <label class="checkbox-wrap checkbox-primary mb-0 mt-4">
                                             Recordar
                                             <input type="checkbox" name="remember" value="1" checked>
                                             <span class="checkmark"></span>
@@ -66,11 +66,11 @@
                                             contraseña</a>
                                     </div>
 
-                                    <div class="mt-3 text-center">
+                                    <!-- <div class="mt-3 text-center">
                                         <span>¿No estás registrado? <a href="createAccountAuth"
                                                 class="fw-semibold">Crear
                                                 cuenta</a></span>
-                                    </div>
+                                    </div> -->
                                 </div>
                             </form>
                         </div>

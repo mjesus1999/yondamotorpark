@@ -38,45 +38,45 @@ class CotizacionController extends Controller
         // El PDF se generará automáticamente sin mostrar la vista
         $this->view('pdf/cotizacion/cotizacion-html2pdf', ['id' => $id]);
     }
-    
-    public function apiShow(int $idcotizacion): void
-{
-    header('Content-Type: application/json; charset=utf-8');
 
-    $cot = $this->cotizacionModel->getById($idcotizacion);
-    if (! $cot) {
-        http_response_code(404);
-        echo json_encode(['error' => 'Cotización no encontrada']);
+    public function apiShow(int $idcotizacion): void
+    {
+        header('Content-Type: application/json; charset=utf-8');
+
+        $cot = $this->cotizacionModel->getById($idcotizacion);
+        if (!$cot) {
+            http_response_code(404);
+            echo json_encode(['error' => 'Cotización no encontrada']);
+            exit;
+        }
+
+        // Reestructura tu respuesta para que JS pueda hacer destructuring:
+        echo json_encode([
+            'cotizacion' => [
+                'fecha' => $cot['fechaRegistro'],
+                'cliente' => [
+                    'nombre' => $cot['cliente_nombre'],
+                    'dni' => $cot['cliente_documento'],
+                    'celular' => $cot['cliente_telefono'],
+                ],
+                'vehiculo' => [
+                    'marca' => $cot['vehiculo_marca'],
+                    'modelo' => $cot['vehiculo_modelo'],
+                    'anio' => $cot['vehiculo_anio'],
+                    'color' => $cot['vehiculo_color'],
+                ],
+                'precios' => [
+                    'precio_usd' => number_format($cot['precioventa'], 2, '.', ''),
+                    'inicial_soles' => number_format($cot['inicial'], 2, '.', ''),
+                    'meses_24' => $cot['numcuotas'] == 24 ? $cot['valorcuota'] : null,
+                    'meses_36' => $cot['numcuotas'] == 36 ? $cot['valorcuota'] : null,
+                    'meses_48' => $cot['numcuotas'] == 48 ? $cot['valorcuota'] : null,
+                    'meses_60' => $cot['numcuotas'] == 60 ? $cot['valorcuota'] : null,
+                ],
+            ]
+        ]);
         exit;
     }
-
-    // Reestructura tu respuesta para que JS pueda hacer destructuring:
-    echo json_encode([
-      'cotizacion' => [
-         'fecha'    => $cot['fechaRegistro'],
-         'cliente'  => [
-           'nombre'  => $cot['cliente_nombre'],
-           'dni'     => $cot['cliente_documento'],
-           'celular' => $cot['cliente_telefono'],
-         ],
-         'vehiculo' => [
-           'marca'  => $cot['vehiculo_marca'],
-           'modelo' => $cot['vehiculo_modelo'],
-           'anio'   => $cot['vehiculo_anio'],
-           'color'  => $cot['vehiculo_color'],
-         ],
-         'precios'  => [
-           'precio_usd'     => number_format($cot['precioventa'], 2, '.', ''),
-           'inicial_soles'  => number_format($cot['inicial'], 2, '.', ''),
-           'meses_24'       => $cot['numcuotas'] == 24 ? $cot['valorcuota'] : null,
-           'meses_36'       => $cot['numcuotas'] == 36 ? $cot['valorcuota'] : null,
-           'meses_48'       => $cot['numcuotas'] == 48 ? $cot['valorcuota'] : null,
-           'meses_60'       => $cot['numcuotas'] == 60 ? $cot['valorcuota'] : null,
-         ],
-      ]
-    ]);
-    exit;
-}
 
     public function create(): void
     {

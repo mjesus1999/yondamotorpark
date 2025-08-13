@@ -204,11 +204,11 @@
 
             //Limpiar y sugerir usernick
             const base = (nombres && apellidos) ? (nombres + '.' + apellidos) : (nombres || apellidos || '');
-            let s = base.toLowerCase().replace(/\s+/g, '.').replace(/[^a-z0-9\.\-]/g, '');
+            let sumpr = base.toLowerCase().replace(/\s+/g, '.').replace(/[^a-z0-9\.\-]/g, '');
             const inputUser = document.getElementById('usernick');
 
             //Limpiar los campos cantes de asignar un nuevo valor
-            inputUser.value = s;
+            inputUser.value = sumpr;
             inputUser.focus();
         });
     });

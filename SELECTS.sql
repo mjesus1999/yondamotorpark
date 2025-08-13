@@ -9,9 +9,11 @@ select * from areas;
 select * from cargos;
 select * from clientes;
 select * from accesos;
--- DELETE FROM Colaboradores WHERE idcolaborador = 35;
+
+-- DELETE FROM Colaboradores WHERE idcolaborador = 39;
 -- DELETE FROM cotizaciones WHERE idasesor = 26;
 -- DELETE FROM vehiculos WHERE idlogistica = 26;
+
 SELECT
         cl.idcontratolaboral,
         cl.idpersona,

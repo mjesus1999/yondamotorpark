@@ -290,6 +290,7 @@ INSERT INTO contratoslaborales (
 
 -- PERMISOS
 
+-- Jefe de logistica (ID = 8) Acceso a todos los modulos
 INSERT INTO accesos (idcargo, modulo, permisos) VALUES
 (8, 'marcas', 1),
 (8, 'usuarios', 1),
@@ -298,13 +299,12 @@ INSERT INTO accesos (idcargo, modulo, permisos) VALUES
 (8, 'auth', 1),
 (8, 'cotizacion', 1);
 
--- Jefe de Sistemas (ID = 1) - Acceso a todos los módulos también
+-- Jefe de Sistemas (ID = 1) - Acceso a todos los módulos menos registro de cuentas
 INSERT INTO accesos (idcargo, modulo, permisos) VALUES
 (1, 'marcas', 1),
 (1, 'usuarios', 1),
 (1, 'vehiculos', 1),
 (1, 'formatoCotizacion', 1),
-(1, 'auth', 1),
 (1, 'cotizacion', 1);
 
 -- Practicante (ID = 3) - Solo puede ver vehículos

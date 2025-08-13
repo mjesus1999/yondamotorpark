@@ -155,6 +155,7 @@ class Usuario
   {
     $stmt = $this->db->prepare("
       SELECT
+        col.idcolaborador,
         col.usernick,
         col.avatar,
         p.apellidos,
@@ -173,6 +174,7 @@ class Usuario
         p.telalternativo,
         DATE_FORMAT(cl.fechainicio, '%Y-%m-%d') AS fechainicio,
         IFNULL(DATE_FORMAT(cl.fechafin, '%Y-%m-%d'), 'Indeterminado') AS fechafin,
+        cl.idcargo AS idcargo,
         cg.cargo,
         a.area
       FROM colaboradores col
