@@ -188,10 +188,10 @@ $allModules = [
 
                 <!-- si quieres siempre mostrar "Forgot Password" para todos -->
                 <!--
-    <li class="sidebar-item">
-      <a href="/recoverAccount" class="sidebar-link">Forgot Password</a>
-    </li>
-    -->
+                <li class="sidebar-item">
+                  <a href="/recoverAccount" class="sidebar-link">Forgot Password</a>
+                </li>
+                -->
               </ul>
             </li>
           <?php endif; ?>
