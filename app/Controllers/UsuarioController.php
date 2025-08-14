@@ -6,6 +6,7 @@ use App\Core\Controller;
 use App\Models\Usuario;
 use App\Models\ContratoLaboral;
 use App\Models\Colaborador;
+use App\Helpers\Validador;
 use Exception;
 
 class UsuarioController extends Controller
@@ -45,6 +46,159 @@ class UsuarioController extends Controller
   }
 
   public function store(): void
+  {
+    // asegurar sesión disponible para evitar perder el user
+    if (session_status() !== PHP_SESSION_ACTIVE) {
+      session_start();
+    }
+
+    // DEBUG TEMPORAL: escribir el id de sesión y usuario en logs
+    error_log('STORE START - SID=' . session_id() . ' USER=' . json_encode($_SESSION['user'] ?? null));
+
+    // 1) Recoger todo lo del formulario completo
+    $idPersona = (int) ($_POST['idpersona'] ?? 0);
+    $idCargo = (int) ($_POST['idcargo'] ?? 0);
+    $fechaInicio = trim($_POST['fecha_inicio'] ?? '');
+    $fechaFin = isset($_POST['sin_fecha_fin']) ? null : trim($_POST['fecha_fin'] ?? null);
+    $usernick = trim($_POST['usuario'] ?? '');
+    $pass1 = $_POST['password1'] ?? '';
+    $pass2 = $_POST['password2'] ?? '';
+
+    // detectar AJAX
+    $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest';
+
+    // 2) Validaciones básicas (incluimos check de unicidad)
+    $errors = [];
+    if ($idPersona <= 0)
+      $errors[] = 'Debe registrar primero la persona.';
+    if ($idCargo <= 0)
+      $errors[] = 'Debe seleccionar un cargo.';
+    if ($fechaInicio === '')
+      $errors[] = 'La fecha de inicio es obligatoria.';
+    if ($pass1 !== $pass2)
+      $errors[] = 'Las contraseñas no coinciden.';
+    if ($usernick === '')
+      $errors[] = 'Introduce un nombre de usuario.';
+    if ($pass1 !== '' && strlen($pass1) < 8)
+      $errors[] = 'La contraseña debe tener al menos 8 caracteres.';
+
+    try {
+      if ($usernick !== '' && $this->usuarioModel->searchByUsernick($usernick)) {
+        $errors[] = 'El usernick ya existe.';
+      }
+    } catch (\Throwable $e) {
+      error_log('Error comprobando usernick: ' . $e->getMessage());
+      $errors[] = 'No se pudo comprobar la disponibilidad del usernick.';
+    }
+
+    if (!empty($errors)) {
+      if ($isAjax) {
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['success' => false, 'errors' => $errors]);
+        exit;
+      }
+      $areas = $this->usuarioModel->getAllAreas();
+      $this->view('usuarios.create', [
+        'areas' => $areas,
+        'error' => implode('<br>', $errors),
+        'old' => $_POST
+      ]);
+      return;
+    }
+
+    // 3) Crear contrato laboral
+    try {
+      $idContrato = $this->contratoModel->create(
+        $idPersona,
+        $idCargo,
+        $fechaInicio,
+        $fechaFin,
+        'P'
+      );
+      if ($idContrato <= 0) {
+        throw new \RuntimeException('No se pudo crear el contrato laboral');
+      }
+    } catch (\Throwable $e) {
+      error_log('Error al crear contrato: ' . $e->getMessage());
+      $msg = 'No se pudo crear el contrato laboral. Intente nuevamente.';
+      if ($isAjax) {
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['success' => false, 'errors' => [$msg]]);
+        exit;
+      }
+      $areas = $this->usuarioModel->getAllAreas();
+      $this->view('usuarios.create', [
+        'areas' => $areas,
+        'error' => $msg,
+        'old' => $_POST
+      ]);
+      return;
+    }
+
+    // 4) Crear colaborador (con rollback si falla)
+    try {
+      $passwordHash = password_hash($pass1, PASSWORD_DEFAULT);
+      $restr = 'S';
+      $idColab = $this->colaboradorModel->create($idContrato, $usernick, $passwordHash, $restr);
+
+      if (empty($idColab) || $idColab <= 0) {
+        if (method_exists($this->contratoModel, 'delete') && is_callable([$this->contratoModel, 'delete'])) {
+          try {
+            $this->contratoModel->delete($idContrato);
+          } catch (\Throwable $ex) {
+            error_log('Rollback fail: ' . $ex->getMessage());
+          }
+        }
+        throw new \RuntimeException('No se pudo crear el usuario');
+      }
+    } catch (\Throwable $e) {
+      error_log('Error al crear colaborador: ' . $e->getMessage());
+      $msg = 'No se pudo crear el usuario. Revisa los logs o contacta al administrador.';
+      if ($isAjax) {
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['success' => false, 'errors' => [$msg]]);
+        exit;
+      }
+      $areas = $this->usuarioModel->getAllAreas();
+      $this->view('usuarios.create', [
+        'areas' => $areas,
+        'error' => $msg,
+        'old' => $_POST
+      ]);
+      return;
+    }
+
+    // 5) Respuesta exitosa
+    // DEBUG: log final
+    error_log('STORE END - SID=' . session_id() . ' USER=' . json_encode($_SESSION['user'] ?? null));
+
+    if ($isAjax) {
+      header('Content-Type: application/json; charset=utf-8');
+      echo json_encode([
+        'success' => true,
+        'idcolaborador' => $idColab,
+        'idcontrato' => $idContrato
+      ]);
+      exit;
+    }
+
+    // asegurar sesión y dejar mensaje
+    if (session_status() !== PHP_SESSION_ACTIVE)
+      session_start();
+    $_SESSION['success_message'] = "Usuario creado con éxito. ID colaborador: {$idColab}";
+
+    // Evitar redirigir a ruta protegida; volver a la creación o mostrar la vista
+    $areas = $this->usuarioModel->getAllAreas();
+    $this->view('usuarios.create', [
+      'areas' => $areas,
+      'success' => $_SESSION['success_message'],
+      'old' => []
+    ]);
+    return;
+  }
+
+
+  public function store1(): void
   {
     // 1) Recoger todo lo del formulario completo
     $idPersona = (int) ($_POST['idpersona'] ?? 0);
@@ -126,9 +280,9 @@ class UsuarioController extends Controller
     }
 
     // flujo normal
-    $_SESSION['success_message'] =
-      "Usuario creado con éxito. ID colaborador: {$idColab}";
-    $this->redirect('/usuarios');
+    $_SESSION['success_message'] = "Usuario creado con éxito. ID colaborador: {$idColab}";
+    $this->redirect('/usuarios/create');
+    return;
   }
 
   public function changePassword(): void
@@ -211,7 +365,7 @@ class UsuarioController extends Controller
     $dest = $avatarsDir . '/' . $filename;
 
 
-    //Mueve el archivo ?
+    //Mueve el archivo
     if (!move_uploaded_file($tmp, $dest)) {
       http_response_code(500);
       echo json_encode([
@@ -248,12 +402,13 @@ class UsuarioController extends Controller
 
   //Mostrar Crear Cuenta
 
-  public function showCreateFromContractsAuth(): void
+  /* public function showCreateFromContractsAuth(): void
   {
     //$this->authRequired(); // si solo administradores deben acceder
     $contracts = $this->usuarioModel->getContractsWithoutColaborador();
     $this->view('auth.createAccount', ['contracts' => $contracts]);
-  }
+  } */
+
   public function showCreateFromContracts(): void
   {
     $contracts = $this->usuarioModel->getContractsWithoutColaborador();
@@ -270,7 +425,7 @@ class UsuarioController extends Controller
     ]);
   }
 
-  //CREAR CONTRATO 
+  //CREAR COLABORADOR CON PERSONAS QUE TIENEN CONTRATO PERO NO UNA CUENTA 
   public function createFromContract(): void
   {
     if (session_status() !== PHP_SESSION_ACTIVE)
@@ -310,13 +465,13 @@ class UsuarioController extends Controller
     // recoger restriccionhoraria (valor esperado 'S' o 'N')
     $restr = (isset($_POST['restriccionhoraria']) && $_POST['restriccionhoraria'] === 'N') ? 'N' : 'S';
 
-    // crear colaborador
+    //crear colaborador
     try {
       $passwordHash = password_hash($p1, PASSWORD_DEFAULT);
       $idColab = $this->colaboradorModel->create($idContrato, $usernick, $passwordHash, $restr);
       if ($idColab <= 0)
         throw new \RuntimeException('No se pudo crear colaborador.');
-      
+
     } catch (\Throwable $e) {
       error_log('Error al crear colaborador: ' . $e->getMessage());
 
@@ -335,19 +490,17 @@ class UsuarioController extends Controller
     // restaurar sesión original (evita login automático del nuevo usuario)
     if ($prevUser !== null) {
       $_SESSION['user'] = $prevUser;
-    } else {
-      unset($_SESSION['user']);
     }
 
     // actualizar lista
     if (session_status() !== PHP_SESSION_ACTIVE)
       session_start();
     $_SESSION['success_message'] = "Cuenta creada correctamente para <strong>" . htmlspecialchars($usernick) . "</strong>";
-    $this->redirect('/createAccount'); // o la ruta que muestra el formulario (ajusta si tu ruta es otra)
+    $this->redirect('/createAccount');
     return;
   }
 
-  public function createFromContractAuth(): void
+  /* public function createFromContractAuth(): void
   {
     $idContrato = (int) ($_POST['idcontrato'] ?? 0);
     $usernick = trim($_POST['usernick'] ?? '');
@@ -434,7 +587,7 @@ class UsuarioController extends Controller
 
     header('Location: /');
     exit;
-  }
+  } */
 
 
   /* public function delete(int $id): void

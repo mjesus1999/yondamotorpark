@@ -15,3 +15,5 @@ $router->add('GET', '/createAccount', 'UsuarioController', 'showCreateFromContra
 $router->add('GET', '/createAccountAuth', 'UsuarioController', 'showCreateFromContractsAuth');
 $router->add('POST', '/createFromContract', 'UsuarioController', 'createFromContract');
 $router->add('POST', '/createFromContractAuth', 'UsuarioController', 'createFromContractAuth');
+
+$router->add('GET', '/keepalive', 'AuthController', 'keepAlive');

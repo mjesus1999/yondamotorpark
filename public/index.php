@@ -9,32 +9,58 @@ require APP_ROOT . '/vendor/autoload.php';
 
 //Variable de entorno desde .env
 $dotenv = Dotenv\Dotenv::createImmutable(APP_ROOT);
-$dotenv->safeLoad();
+//$dotenv->safeLoad();
+$dotenv->load();
 
-//Fijar timezone por seguridad
+//para leer .ENV
+//fijar timezone (tmp)
 if (!ini_get('date.timezone')) {
   date_default_timezone_set('America/Lima');
 }
 
-// 2) Asegurar que las variables cargadas por phpdotenv estén también
-// como variables de entorno accesibles por getenv() y en $_SERVER.
+/**
+ * 2) Asegurar que las variables cargadas por phpdotenv estén también
+ * como variables de entorno accesibles por getenv() y en $_SERVER.
+ */
+
 foreach ($_ENV as $key => $value) {
-  // Sólo strings (evita arrays/objetos)
+  //solo strings (evita arrays/objetos)
   if (!is_string($value))
     continue;
-
   // setear en entorno C-level si no existe
   if (getenv($key) === false) {
     putenv(sprintf('%s=%s', $key, $value));
   }
-
   // mantener también en $_SERVER si no está
   if (!isset($_SERVER[$key])) {
     $_SERVER[$key] = $value;
   }
 }
 
-//$dotenv->load();
+/**
+ * SESSION: leer timeout desde .env y aplicar antes de session_start()
+ * Alinear para que no borre sesiones antes del timeout
+ */
+
+$timeout = (int) (getenv('SESSION_TIMEOUT') ?: 60);
+// opcional: ajustar gc_maxlifetime (asegúrate >= $timeout)
+ini_set('session.gc_maxlifetime', (string) max(1440, $timeout));
+
+// usar nombre de sesión propio y cookie params
+session_name('YONDASESSID');
+session_set_cookie_params([
+    'lifetime' => 0,    // 0 = expira al cerrar navegador (recomendado)
+    'path' => '/',
+    'domain' => '',
+    'secure' => false,  // poner true en producción con HTTPS
+    'httponly' => true,
+    'samesite' => 'Lax'
+]);
+
+if (session_status() !== PHP_SESSION_ACTIVE) {
+  session_start();
+}
+
 
 // Registra el autocargador
 //App\Core\Autoloader::register();

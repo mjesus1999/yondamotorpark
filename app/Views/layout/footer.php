@@ -36,15 +36,17 @@
 </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"
+  integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="
+  crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"
   integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" crossorigin="anonymous"></script>
 
- <script src="https://cdn.datatables.net/2.2.2/js/dataTables.js"></script>
- <script src="https://cdn.datatables.net/2.2.2/js/dataTables.bootstrap5.js"></script>
- <script src="https://cdn.datatables.net/select/3.0.0/js/dataTables.select.js"></script>
- <script src="https://cdn.datatables.net/select/3.0.0/js/select.bootstrap5.js"></script>
+<script src="https://cdn.datatables.net/2.2.2/js/dataTables.js"></script>
+<script src="https://cdn.datatables.net/2.2.2/js/dataTables.bootstrap5.js"></script>
+<script src="https://cdn.datatables.net/select/3.0.0/js/dataTables.select.js"></script>
+<script src="https://cdn.datatables.net/select/3.0.0/js/select.bootstrap5.js"></script>
 
 <script src="/assets/js/script-dashboard.js"></script>
 
@@ -52,6 +54,37 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="/assets/js/swalcustom.js"></script>
 <script>
+(function () {
+  const SERVER_TIMEOUT = parseInt("<?php echo (int) (getenv('SESSION_TIMEOUT') ?: 60); ?>", 10) || 60;
+  const INTERVAL_MS = Math.max(5, Math.floor(SERVER_TIMEOUT / 2)) * 1000;
+  const KEEPALIVE_URL = '/keepalive';
+
+  // Solo correr si hay usuario logueado (para no hacer pings en pantalla pública)
+  const IS_LOGGED = <?php echo !empty($_SESSION['user']) ? 'true' : 'false'; ?>;
+  if (!IS_LOGGED) return;
+
+  function sendKeepAlive() {
+    if (document.hidden || !navigator.onLine) return;
+    fetch(KEEPALIVE_URL, {
+      method: 'GET',
+      credentials: 'include',
+      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(res => {
+      if (res.status === 401) window.location.href = '/login';
+      return res.json().catch(()=>null);
+    })
+    .catch(()=>{ /* silencioso */ });
+  }
+
+  sendKeepAlive();
+  setInterval(sendKeepAlive, INTERVAL_MS);
+})();
+</script>
+
+
+
+<!-- <script>
 (function () {
   // Inactividad en ms
   const TIMEOUT_MS = 60 * 1000; // 1 minuto
@@ -73,7 +106,7 @@
   // iniciar
   resetTimer();
 })();
-</script>
+</script> -->
 
 </body>
 

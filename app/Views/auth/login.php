@@ -36,6 +36,10 @@
                             <?php if (!empty($error)): ?>
                                 <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
                             <?php endif; ?>
+
+                            <?php if (!empty($message)): ?>
+                                <div class="alert alert-success"><?= htmlspecialchars($message) ?></div>
+                            <?php endif; ?>
                             <form action="/login" method="POST" class="signin-form" id="formulario-login">
                                 <div class="form-group mb-3">
                                     <label class="label" for="name">Nombre de usuario</label>
@@ -94,6 +98,15 @@
 
                 form.submit();
             });
+            const alerts = document.querySelectorAll('.alert');
+            if (alerts.length > 0) {
+                setTimeout(() => {
+                    alerts.forEach(alert => {
+                        alert.style.opacity = '0';
+                        setTimeout(() => alert.remove(), 500); // Después de desvanecer
+                    });
+                }, 4000); // 4 segundos
+            }
         });
     </script>
 

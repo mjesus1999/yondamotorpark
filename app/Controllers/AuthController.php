@@ -27,7 +27,19 @@ class AuthController extends Controller
             header('Location: /');
             exit;
         }
-        $this->view('auth.login');
+        $error = $_SESSION['login_error'] ?? null;
+        $message = $_SESSION['login_success'] ?? null;
+        $old = $_SESSION['login_old'] ?? null;
+
+        // Eliminar después de usarlos (para que no persistan)
+        unset($_SESSION['login_error'], $_SESSION['login_success'], $_SESSION['login_old']);
+
+        $this->view('auth.login', [
+            'error' => $error,
+            'message' => $message,
+            'old' => $old
+        ]);
+        //$this->view('auth.login');
     }
 
     /**
@@ -69,14 +81,17 @@ class AuthController extends Controller
         $user = $this->usuarioModel->searchByUsernick($usernick);
 
         if (!$user || ($user['habilitado'] ?? 'N') !== 'S') {
-            $this->view('auth.login', ['error' => 'Usuario no encontrado o inactivo.']);
-            return;
+            $_SESSION['login_error'] = 'Usuario no encontrado o inactivo.';
+            header('Location: /login');
+            exit;
         }
 
         //Verificar contraseña
         if (!password_verify($password, $user['userpassword'])) {
-            $this->view('auth.login', ['error' => 'Contraseña incorrecta.', 'old' => ['usernick' => $usernick]]);
-            return;
+            $_SESSION['login_error'] = 'Contraseña incorrecta.';
+            $_SESSION['login_old'] = ['usernick' => $usernick];
+            header('Location: /login');
+            exit;
         }
 
         //Restricción horaria
@@ -97,8 +112,9 @@ class AuthController extends Controller
                 return sprintf('%02d:%02d', $h, $m);
             };
 
-            $start = $norm(getenv('STARTIME') ?: '07:30');
-            $end = $norm(getenv('ENDTIME') ?: '19:30');
+            $start = $norm(getenv('STARTIME'));
+            $end = $norm(getenv('ENDTIME'));
+
 
             if ($start === null || $end === null) {
                 $this->view('auth.login', ['error' => 'Configuración de horario inválida. Contacta al administrador.']);
@@ -135,8 +151,10 @@ class AuthController extends Controller
             }
 
             if (!$isInside) {
-                $this->view('auth.login', ['error' => "Acceso permitido sólo Lunes a Sábado entre $start y $end."]);
-                return;
+                $_SESSION['login_error'] = "Acceso permitido sólo Lunes a Sábado entre $start y $end.";
+                $_SESSION['login_old'] = ['usernick' => $usernick];
+                header('Location: /login');
+                exit;
             }
         }
 
@@ -160,43 +178,6 @@ class AuthController extends Controller
         exit;
     }
 
-    public function login1(): void
-    {
-        if (session_status() !== PHP_SESSION_ACTIVE)
-            session_start();
-
-        $usernick = trim($_POST['usernick'] ?? '');
-        $password = $_POST['userpassword'] ?? '';
-
-        //buscar colaborador
-        $user = $this->usuarioModel->searchByUsernick($usernick);
-
-        if (!$user || $user['habilitado'] !== 'S') {
-            $this->view('auth.login', ['error' => 'Usuario no encontrado o inactivo.']);
-            return;
-        }
-
-        //verificar contraseña
-        if (!password_verify($password, $user['userpassword'])) {
-            $this->view('auth.login', ['error' => 'Contraseña incorrecta.', 'old' => ['usernick' => $usernick]]);
-            return;
-        }
-
-        //confirmacion
-        $_SESSION['user'] = [
-            'id' => $user['idcolaborador'],
-            'usernick' => $user['usernick'],
-            'nombres' => $user['nombres'],
-            'apellidos' => $user['apellidos'],
-            'avatar' => $user['avatar'],
-            /* 'avatar' => $user['avatar'] ?? '/assets/images/profile.jpg', */ //prueba
-            'idcargo' => $user['idcargo'],
-            'cargo' => $user['cargo'],
-        ];
-
-        header('Location: /');
-        exit;
-    }
 
     public function logout(): void
     {
@@ -268,5 +249,24 @@ class AuthController extends Controller
         $this->view('auth.recoverAccount', ['error' => 'No se pudo actualizar la contraseña. Intenta más tarde.', 'usernick' => $usernick, 'email' => $email]);
     }
 
+    // si la sesion esta actuva:
+    public function keepAlive(): void
+    {
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_start();
+        }
+
+        header('Content-Type: application/json; charset=utf-8');
+
+        if (empty($_SESSION['user'])) {
+            http_response_code(401);
+            echo json_encode(['ok' => false, 'message' => 'No session']);
+            return;
+        }
+
+        $_SESSION['last_activity'] = time();
+
+        echo json_encode(['ok' => true, 'last_activity' => $_SESSION['last_activity']]);
+    }
 
 }

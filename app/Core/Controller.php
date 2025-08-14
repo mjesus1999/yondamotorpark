@@ -17,7 +17,59 @@ class Controller
     exit();
   }
 
+  //PERMISOS
   protected function authRequired(): void
+  {
+    if (session_status() !== PHP_SESSION_ACTIVE) {
+      session_start();
+    }
+
+    if (empty($_SESSION['user'])) {
+      header('Location: /login');
+      exit;
+    }
+
+    //lerr timeout desde .env (en segundos) / Si no existe, fallback a 60.
+    $rawTimeout = getenv('SESSION_TIMEOUT');
+    $timeoutSeconds = ($rawTimeout !== false && $rawTimeout !== '') ? (int) $rawTimeout : 60;
+
+    //si existe last_activity, comprobar inactividad
+    if (isset($_SESSION['last_activity'])) {
+      $inactive = time() - (int) $_SESSION['last_activity'];
+      if ($inactive > $timeoutSeconds) {
+        // cerrar sesión por inactividad
+        $_SESSION = [];
+        if (ini_get("session.use_cookies")) {
+          $params = session_get_cookie_params();
+          setcookie(
+            session_name(),
+            '',
+            time() - 42000,
+            $params["path"],
+            $params["domain"],
+            $params["secure"],
+            $params["httponly"]
+          );
+        }
+        session_destroy();
+
+        session_start();
+        $_SESSION['error_message'] = 'Sesión cerrada por inactividad.';
+        header('Location: /login');
+        exit;
+      }
+    }
+
+    // Actualizar last_activity para esta petición (si no expiró)
+    $_SESSION['last_activity'] = time();
+
+    // evita cache del navegador
+    header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+    header("Cache-Control: post-check=0, pre-check=0", false);
+    header("Pragma: no-cache");
+  }
+
+  /* protected function authRequired(): void
   {
     if (session_status() !== PHP_SESSION_ACTIVE) {
       session_start();
@@ -29,29 +81,13 @@ class Controller
     }
 
     // Tiempo máximo de inactividad en segundos
-    $timeoutSeconds = 60; // 1 minuto
-
-    // Si existe last_activity, comprobar inactividad
-    if (isset($_SESSION['last_activity'])) {
-        $inactive = time() - (int) $_SESSION['last_activity'];
-        if ($inactive > $timeoutSeconds) {
-            // cerrar sesión por inactividad
-            $_SESSION = [];
-            if (ini_get("session.use_cookies")) {
-                $params = session_get_cookie_params();
-                setcookie(session_name(), '', time() - 42000,
-                    $params["path"], $params["domain"],
-                    $params["secure"], $params["httponly"]
-                );
-            }
-            session_destroy();
-
-            // opcional: mensaje flash (se puede leer en /login)
-            session_start();
-            $_SESSION['error_message'] = 'Sesión cerrada por inactividad.';
-            header('Location: /login');
-            exit;
-        }
+    //$timeoutSeconds = 60; // 1 minuto
+    // Tiempo máximo de inactividad en segundos (leer de .env o fallback)
+    $rawTimeout = getenv('SESSION_TIMEOUT');
+    if ($rawTimeout !== false && $rawTimeout !== '') {
+      $timeoutSeconds = (int) $rawTimeout;
+    } else {
+      $timeoutSeconds = 1800; // fallback seguro
     }
 
     // Actualizar last_activity para esta petición
@@ -62,5 +98,7 @@ class Controller
     header("Cache-Control: post-check=0, pre-check=0", false);
     header("Pragma: no-cache");
   }
+ */
+
 
 }
