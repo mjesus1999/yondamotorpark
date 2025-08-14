@@ -44,7 +44,7 @@ END$$
 
 DELIMITER;
 
-CALL sp_get_cronogramas_by_idcontrato (1);
+CALL sp_get_cronogramas_by_idcontrato (2);
 
 SELECT * FROM cronogramas;
 
@@ -122,17 +122,20 @@ DATE_FORMAT(p.fechapago,'%m/%d/%Y') AS fecha_pago,
     ORDER BY c.numcuota, p.fechapago;
 END$$
 
-CALL sp_get_pagos_by_contrato (2);
+CALL sp_get_pagos_by_contrato (1);
 
 DELIMITER;
 
 USE motorpark;
 
+SELECT * FROM contratos;
 SELECT * FROM pagos;
 
 SELECT * FROM cronogramas;
 
-UPDATE cronogramas SET fechapago = '2025-08-08' WHERE numcuota = 11;
+UPDATE cronogramas SET fechapago = '2026-03-13', penalidad = 0, aplicapenalidad = 'N', estado = 'Pagado' WHERE idcronograma = 1519;
+SELECT * FROM cronogramas WHERE idcronograma = 1518;
+
 
 SELECT * FROM pagos;
 
@@ -149,11 +152,12 @@ INSERT INTO
 VALUES (
         1,
         'Soles',
-        '425895859658585258'
+        '4258958596585852'
     );
 
 SELECT *
-FROM entidadespago
+FROM entidadespago;
+
 INSERT INTO
     entidadespago (entidad, tipo)
 VALUES ('BCP', 'Banco');

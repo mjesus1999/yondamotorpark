@@ -24,7 +24,7 @@ include __DIR__ . '/../layout/header.php';
             <div class="card">
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-sm table-hover table-hover-yonda" id="tabla-clientes-personas">
+                        <table class="table table-sm table-hover table-hover-yonda" id="tabla-contratos">
                             <thead>
                                 <tr>
                                     <th>#</th>
@@ -62,7 +62,7 @@ include __DIR__ . '/../layout/header.php';
                                             <td><?= htmlspecialchars($contrato['cuota']) ?></td>
                                             <td>
                                                 <a href="/caja/cronograma/<?= htmlspecialchars($contrato['idcontrato']) ?>" title="Ver Cronograma"><i class="bi-receipt fs-5 text-info "></i></a>
-                                                <a href="/caja/historial/pagos/<?= htmlspecialchars($contrato['idcontrato'])?>" title="Ver historial de pagos"><i class="bi bi-clock-history fs-5"></i></a>
+                                                <a href="/caja/historial/pagos/<?= htmlspecialchars($contrato['idcontrato']) ?>" title="Ver historial de pagos"><i class="bi bi-clock-history fs-5"></i></a>
                                             </td>
                                         </tr>
 
@@ -80,3 +80,29 @@ include __DIR__ . '/../layout/header.php';
 </div>
 
 <?php include __DIR__ . '/../layout/footer.php'; ?>
+
+<script>
+    $('#tabla-contratos').DataTable({
+        language: {
+            emptyTable: "No hay datos disponibles en la tabla",
+            info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
+            infoEmpty: "Mostrando 0 a 0 de 0 entradas",
+            infoFiltered: "(filtrado de _MAX_ entradas totales)",
+            lengthMenu: "Mostrar _MENU_ registros",
+            loadingRecords: "Cargando...",
+            processing: "Procesando...",
+            search: "Buscar:",
+            zeroRecords: "No se encontraron registros coincidentes",
+            paginate: {
+                first: "Primero",
+                last: "Último",
+                next: "Siguiente",
+                previous: "Anterior"
+            },
+            aria: {
+                sortAscending: ": activar para ordenar la columna ascendente",
+                sortDescending: ": activar para ordenar la columna descendente"
+            }
+        }
+    });
+</script>

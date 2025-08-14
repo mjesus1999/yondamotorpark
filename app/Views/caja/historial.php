@@ -228,6 +228,7 @@
         document.querySelectorAll('.ver-comprobante-img').forEach(btn => {
             btn.addEventListener('click', function() {
                 const imgSrc = this.dataset.img;
+                console.log(imgSrc);
                 const imgElement = document.getElementById('imagenComprobante');
                 const downloadBtn = document.getElementById('descargarComprobante');
 

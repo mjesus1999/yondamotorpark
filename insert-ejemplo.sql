@@ -82,7 +82,8 @@ INSERT INTO detallerequisitos (idformato, idrequisito) VALUES
 
 
 
-  SELECT * FROM clientes
+  SELECT * FROM clientes;
+  SELECT * FROM vehiculos;
 
 -- INSERTAR EN COTIZACIONES:
 
@@ -100,11 +101,11 @@ INSERT INTO cotizaciones (
     estadocotizacion
 ) VALUES (
     1,          -- idformato
-    10,          -- idcliente 
+    8,          -- idcliente 
     2,          -- idasesor
     47,          -- idvehiculo 
     'PEN',      -- moneda
-    50050.00,   -- precioventa
+    60050.00,   -- precioventa
     7,          -- vigenciadias
     10000.00,    -- inicial
     36,         -- numcuotas
@@ -140,12 +141,13 @@ INSERT INTO contratos (
     1,         -- idlocal
     2,         -- idcotizacion 
     2,         -- idlogistica 
-    '2025-08-12', -- fechainicio
+    '2025-08-13', -- fechainicio
     12,        -- día de pago
-    '2025-09-12', -- fecharevision
+    '2025-09-13', -- fecharevision
     'Contrato inicial para entrega de vehículo.'
 );
 
+UPDATE contratos SET diapago = 13 WHERE idcontrato = 2;
 SELECT * FROM contratos;
 
 USE motorpark;
