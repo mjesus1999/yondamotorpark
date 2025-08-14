@@ -9,6 +9,7 @@ select * from areas;
 select * from cargos;
 select * from clientes;
 select * from accesos;
+
 SELECT idcolaborador, usernick, restriccionhoraria
 FROM colaboradores
 WHERE usernick = 'Deyanira' OR idcolaborador = 3;

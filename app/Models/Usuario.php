@@ -281,4 +281,93 @@ class Usuario
       return [];
     }
   }
+
+  //EJEMPLO PARA BUSCAR EL EMAIL Y EL TELEFONO
+  public function findByEmailOrPhoneOrUsernick(string $identifier): ?array
+  {
+    try {
+      $id = trim($identifier);
+
+      if (strpos($id, ':') !== false) {
+        $parts = explode(':', $id);
+        $id = trim($parts[0]);
+      }
+
+      $idLower = mb_strtolower($id);
+      $digits = preg_replace('/\D+/', '', $id);
+
+      // 1) usernick exacto
+      $stmt = $this->db->prepare("
+          SELECT col.idcolaborador, col.usernick, col.userpassword, col.habilitado,
+                  p.email, p.telprimario, p.telalternativo, p.apellidos, p.nombres
+          FROM colaboradores col
+          JOIN contratoslaborales cl ON cl.idcontratolaboral = col.idcontratolaboral
+          JOIN personas p ON p.idpersona = cl.idpersona
+          WHERE BINARY col.usernick = :usernick
+          LIMIT 1
+        ");
+      $stmt->bindValue(':usernick', $id);
+      $stmt->execute();
+      $row = $stmt->fetch(PDO::FETCH_ASSOC);
+      if ($row)
+        return $row;
+
+      // 2) email (case-insensitive)
+      $stmt = $this->db->prepare("
+          SELECT col.idcolaborador, col.usernick, col.userpassword, col.habilitado,
+                  p.email, p.telprimario, p.telalternativo, p.apellidos, p.nombres
+          FROM colaboradores col
+          JOIN contratoslaborales cl ON cl.idcontratolaboral = col.idcontratolaboral
+          JOIN personas p ON p.idpersona = cl.idpersona
+          WHERE LOWER(p.email) = :email
+          LIMIT 1
+        ");
+      $stmt->bindValue(':email', $idLower);
+      $stmt->execute();
+      $row = $stmt->fetch(PDO::FETCH_ASSOC);
+      if ($row)
+        return $row;
+
+      // 3) teléfono: buscar candidatos con LIKE y comparar últimos N dígitos
+      if ($digits !== '') {
+        $like = '%' . $digits . '%';
+
+        // Usamos nombres de parámetros diferentes (:like1 y :like2) para evitar problemas con parámetros repetidos
+        $stmt = $this->db->prepare("
+            SELECT col.idcolaborador, col.usernick, col.userpassword, col.habilitado,
+                    p.email, p.telprimario, p.telalternativo, p.apellidos, p.nombres
+            FROM colaboradores col
+            JOIN contratoslaborales cl ON cl.idcontratolaboral = col.idcontratolaboral
+            JOIN personas p ON p.idpersona = cl.idpersona
+            WHERE REPLACE(REPLACE(REPLACE(p.telprimario,' ',''),'+',''),'-','') LIKE :like1
+                OR REPLACE(REPLACE(REPLACE(p.telalternativo,' ',''),'+',''),'-','') LIKE :like2
+            LIMIT 20
+          ");
+        $stmt->bindValue(':like1', $like);
+        $stmt->bindValue(':like2', $like);
+        $stmt->execute();
+        $cands = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        if ($cands) {
+          $lastN = 9; // comparar últimos 9 dígitos (ajusta si es necesario)
+          $needle = substr($digits, -$lastN);
+          foreach ($cands as $c) {
+            $t1 = preg_replace('/\D+/', '', $c['telprimario'] ?? '');
+            $t2 = preg_replace('/\D+/', '', $c['telalternativo'] ?? '');
+            if ($t1 !== '' && substr($t1, -$lastN) === $needle)
+              return $c;
+            if ($t2 !== '' && substr($t2, -$lastN) === $needle)
+              return $c;
+          }
+        }
+      }
+
+      return null;
+    } catch (\Throwable $e) {
+      error_log('[Usuario::findByEmailOrPhoneOrUsernick] Exception: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
+      return null;
+    }
+  }
+
+
 }

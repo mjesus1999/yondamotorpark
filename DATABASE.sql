@@ -94,14 +94,12 @@ CREATE TABLE contratoslaborales
 )ENGINE = INNODB;
 
 CREATE TABLE accesos (
-  idaccesos 			INT NOT NULL AUTO_INCREMENT,
+  idaccesos 			INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
   idcargo 				INT NOT NULL,
   modulo 				VARCHAR(50) NOT NULL,
   permisos 				TINYINT(1) NOT NULL DEFAULT 0,
   creado 				DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   modificado 			DATETIME DEFAULT NULL,
-  PRIMARY KEY (idaccesos),
-  KEY fk_accesos_idcargo (idcargo),
   CONSTRAINT fk_accesos_idcargo FOREIGN KEY (idcargo) REFERENCES cargos (idcargo)
 )ENGINE = INNODB;
 
