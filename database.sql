@@ -532,10 +532,18 @@ CREATE TABLE pagos (
     observacion VARCHAR(300) NULL,
     facturado ENUM('S', 'N') DEFAULT 'S',
     declarado ENUM('S', 'N') DEFAULT 'N',
+    tipo        ENUM('Cuota','Penalidad') NOT NULL DEFAULT 'Cuota',
     CONSTRAINT fk_idcronograma_pagos FOREIGN KEY (idcronograma) REFERENCES cronogramas (idcronograma),
     CONSTRAINT fk_idcuentapago_pagos FOREIGN KEY (idcuentapago) REFERENCES cuentaspago (idcuentapago),
     CONSTRAINT fk_idcolcaja_pagos FOREIGN KEY (idcolcaja) REFERENCES colaboradores (idcolaborador)
 ) ENGINE = InnoDB;
+
+ALTER TABLE pagos
+ADD COLUMN tipo ENUM('Cuota', 'Penalidad') NOT NULL DEFAULT 'Cuota';
+-- USE motorpark;
+SELECT * FROM pagos;
+
+
 
 SHOW COLUMNS FROM pagos;
 

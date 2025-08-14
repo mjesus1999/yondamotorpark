@@ -1,7 +1,10 @@
+SHOW DATABASES;
 
+DROP DATABASE  motorpark2;
 -- Procedimiento almacenado modificado
-USE motorpark;
+USE motorpark2;
 
+SELECT * FROM cronogramas;
 DROP PROCEDURE IF EXISTS sp_get_cronogramas_by_idcontrato;
 
 DELIMITER $$
@@ -43,6 +46,22 @@ BEGIN
             WHERE pag.idcronograma = cro.idcronograma
         ), 0) AS saldorestante,
 
+
+        coti.valorcuota - COALESCE((
+            SELECT SUM(pag.amortizacion)
+            FROM pagos pag
+            WHERE pag.idcronograma = cro.idcronograma
+            AND pag.tipo = 'Cuota'
+        ), 0) AS saldocuota_pendiente,
+
+        --  CAMBIO CLAVE: CÁLCULO DEL SALDO PENDIENTE DE LA PENALIDAD
+        cro.penalidad - COALESCE((
+            SELECT SUM(pag.amortizacion)
+            FROM pagos pag
+            WHERE pag.idcronograma = cro.idcronograma
+            AND pag.tipo = 'Penalidad'
+        ), 0) AS penalidad_pendiente,
+
         cro.estado,
         cro.aplicapenalidad
 
@@ -56,20 +75,22 @@ END$$
 DELIMITER ;
 
 
-CALL sp_get_cronogramas_by_idcontrato (1);
+CALL sp_get_cronogramas_by_idcontrato (2);
 
 SELECT * FROM cronogramas;
+UPDATE cronogramas SET fechapago = '2025-08-13' WHERE  idcontrato = 2 AND numcuota = 6 ;
 SELECT * FROM contratos;
+
 SELECT * FROM pagos;
 
 SELECT * FROM pagos
 
-USE motorpark;
+
+USE motorpark2;
 
 DROP PROCEDURE sp_addPagoCronograma
 
 DROP PROCEDURE IF EXISTS sp_addPagoCronograma;
-
 DELIMITER $$
 
 CREATE PROCEDURE sp_addPagoCronograma(
@@ -81,7 +102,8 @@ CREATE PROCEDURE sp_addPagoCronograma(
     IN fechapago_ DATE,
     IN amortizacion_ DECIMAL(10,2),
     IN comprobante_ VARCHAR(200),
-    IN observacion_ VARCHAR(300)
+    IN observacion_ VARCHAR(300),
+    IN tipo_ ENUM('Cuota','Penalidad')
 )
 BEGIN
     INSERT INTO pagos(
@@ -92,8 +114,9 @@ BEGIN
         numerotransaccion,
         fechapago,
         amortizacion,
-        comprobante, 
-        observacion
+        comprobante,
+        observacion,
+        tipo 
     ) VALUES (
         idcronograma_,
         IFNULL(NULLIF(idcuentapago_,''),NULL),
@@ -102,15 +125,20 @@ BEGIN
         IFNULL(NULLIF(numerotransaccion_, ''), NULL),
         fechapago_,
         amortizacion_,
-        IFNULL(NULLIF(comprobante_, ''), NULL), 
-        IFNULL(NULLIF(observacion_, ''), NULL)
+        IFNULL(NULLIF(comprobante_, ''), NULL),
+        IFNULL(NULLIF(observacion_, ''), NULL),
+        tipo_ 
     );
-    
+
     SELECT LAST_INSERT_ID() AS last_insert_id;
 END$$
 
+DELIMITER ;
+
+
 DELIMITER;
 
+USE motorpark2;
 DROP PROCEDURE sp_get_pagos_by_contrato
 
 
@@ -129,7 +157,8 @@ DATE_FORMAT(p.fechapago,'%m/%d/%Y') AS fecha_pago,
         p.saldorestante,
         p.mediopago,
         p.numerotransaccion,
-        p.comprobante
+        p.comprobante,
+        p.tipo
     FROM pagos p
     INNER JOIN cronogramas c ON p.idcronograma = c.idcronograma
     WHERE c.idcontrato = p_idcontrato

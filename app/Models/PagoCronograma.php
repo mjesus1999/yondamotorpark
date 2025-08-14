@@ -15,33 +15,136 @@ class PagoCronograma
         $this->db = Database::getInstance();
     }
 
-    public function add($params = []): int
+    /**
+     * Registra múltiples pagos (cuota y penalidad) en una transacción y actualiza el estado del cronograma.
+     *
+     * @param array $pagoCuota
+     * @param array|null $pagoPenalidad
+     * @return array
+     */
+
+    public function addMultiplePaymentsAndCheckStatus(array $pagoCuota, ?array $pagoPenalidad = null): array
     {
-        $query = "CALL sp_addPagoCronograma(:idcronograma,:idcuentapago,:idcolcaja,:mediopago,:numerotransaccion,:fechapago,:amortizacion,:comprobante,:observacion)";
         try {
+            $this->db->beginTransaction();
+            $ids = [];
 
+            // Procesar el pago de la cuota si el monto es mayor que 0
+            if ($pagoCuota['amortizacion'] > 0) {
+                $idPagoCuota = $this->add($pagoCuota);
+                if ($idPagoCuota <= 0) {
+                    $this->db->rollBack();
+                    return [];
+                }
+                $ids[] = $idPagoCuota;
+            }
+
+            // Procesar el pago de la penalidad si existe y el monto es mayor que 0
+            if ($pagoPenalidad && $pagoPenalidad['amortizacion'] > 0) {
+                $idPagoPenalidad = $this->add($pagoPenalidad);
+                if ($idPagoPenalidad <= 0) {
+                    $this->db->rollBack();
+                    return [];
+                }
+                $ids[] = $idPagoPenalidad;
+            }
+
+            // Actualizar el estado del cronograma si se han registrado pagos
+            if (!empty($ids)) {
+                $this->checkAndMarkAsPaid($pagoCuota['idcronograma']);
+            }
+
+            $this->db->commit();
+            return $ids;
+        } catch (PDOException $error) {
+            $this->db->rollBack();
+            error_log("Error en la transacción de pagos: " . $error->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Inserta un único pago en la tabla `pagos` usando el SP.
+     *
+     * @param array $params
+     * @return int
+     */
+    protected function add(array $params): int
+    {
+        $query = "CALL sp_addPagoCronograma(:idcronograma, :idcuentapago, :idcolcaja, :mediopago, :numerotransaccion, :fechapago, :amortizacion, :comprobante, :observacion, :tipo)";
+        try {
             $stmt = $this->db->prepare($query);
-            $stmt->execute(array(
-                ':idcronograma' => $params['idcronograma'],
-                ':idcuentapago' => $params['idcuentapago'] ?? null,
-                ':idcolcaja' => $params['idcolcaja'],
-                ':mediopago' => $params['mediopago'],
+            $stmt->execute([
+                ':idcronograma'      => $params['idcronograma'],
+                ':idcuentapago'      => $params['idcuentapago'],
+                ':idcolcaja'         => $params['idcolcaja'],
+                ':mediopago'         => $params['mediopago'],
                 ':numerotransaccion' => $params['numerotransaccion'],
-                ':fechapago' => $params['fechapago'],
-                ':amortizacion' => $params['amortizacion'],
-                ':comprobante' => $params['comprobante'],
-                ':observacion' => $params['observacion']
-            ));
-
+                ':fechapago'         => $params['fechapago'],
+                ':amortizacion'      => $params['amortizacion'],
+                ':comprobante'       => $params['comprobante'],
+                ':observacion'       => $params['observacion'],
+                ':tipo'              => $params['tipo']
+            ]);
             $idPago = $stmt->fetch(PDO::FETCH_ASSOC);
             $stmt->closeCursor();
-
             return isset($idPago['last_insert_id']) ? (int) $idPago['last_insert_id'] : 0;
         } catch (PDOException $error) {
-            error_log($error->getMessage());
+            error_log("Error al agregar pago: " . $error->getMessage());
             return -1;
         }
     }
+
+    /**
+     * Obtiene el valor de la cuota y penalidad y el total amortizado para verificar si se ha pagado completamente.
+     *
+     * @param int $idCronograma
+     * @return void
+     */
+    protected function checkAndMarkAsPaid(int $idCronograma): void
+    {
+        $queryAmortizado = "SELECT tipo, COALESCE(SUM(amortizacion), 0) as total_amortizado FROM pagos WHERE idcronograma = :idcronograma GROUP BY tipo";
+        $stmtAmortizado = $this->db->prepare($queryAmortizado);
+        $stmtAmortizado->execute([':idcronograma' => $idCronograma]);
+        $pagosAmortizados = $stmtAmortizado->fetchAll(PDO::FETCH_KEY_PAIR);
+
+        $totalAmortizadoCuota = (float)($pagosAmortizados['Cuota'] ?? 0);
+        $totalAmortizadoPenalidad = (float)($pagosAmortizados['Penalidad'] ?? 0);
+
+        $queryCronograma = "SELECT coti.valorcuota, cro.penalidad FROM cronogramas cro JOIN contratos cont ON cro.idcontrato = cont.idcontrato JOIN cotizaciones coti ON cont.idcotizacion = coti.idcotizacion WHERE cro.idcronograma = :idcronograma";
+        $stmtCronograma = $this->db->prepare($queryCronograma);
+        $stmtCronograma->execute([':idcronograma' => $idCronograma]);
+        $cronograma = $stmtCronograma->fetch(PDO::FETCH_ASSOC);
+
+        $cuotaNecesaria = (float)$cronograma['valorcuota'];
+        $penalidadNecesaria = (float)$cronograma['penalidad'];
+
+        $pagadoCuota = $totalAmortizadoCuota >= $cuotaNecesaria;
+        $pagadoPenalidad = $penalidadNecesaria <= 0 || $totalAmortizadoPenalidad >= $penalidadNecesaria;
+
+        if ($pagadoCuota && $pagadoPenalidad) {
+            $queryUpdate = "UPDATE cronogramas SET estado = 'Pagado' WHERE idcronograma = :idcronograma";
+            $stmtUpdate = $this->db->prepare($queryUpdate);
+            $stmtUpdate->execute([':idcronograma' => $idCronograma]);
+        }
+    }
+
+
+    /**
+     * Obtiene los datos de un cronograma para validaciones en el controlador.
+     *
+     * @param int $idCronograma
+     * @return array|false
+     */
+    public function getCronogramaData(int $idCronograma): array|false
+    {
+        $query = "SELECT coti.valorcuota, cro.penalidad, cro.estado FROM cronogramas cro JOIN contratos cont ON cro.idcontrato = cont.idcontrato JOIN cotizaciones coti ON cont.idcotizacion = coti.idcotizacion WHERE cro.idcronograma = :idcronograma";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindValue(':idcronograma', $idCronograma);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
 
 
     // METODO PARA TRAER LOS NUEMROS DE CUNETAS PAGOS

@@ -49,6 +49,7 @@
                                 <th>Amortización</th>
                                 <th>Saldo</th>
                                 <th>Medio</th>
+                                <th>Concepto</th>
                                 <th>Transacción</th>
                                 <th class="no-imprimir" width="150">Comprobante</th>
                             </tr>
@@ -75,6 +76,7 @@
                                                 <?= htmlspecialchars($pago['mediopago']) ?>
                                             </span>
                                         </td>
+                                        <td class="text-muted"><?=  htmlspecialchars($pago['tipo'])?></td>
                                         <td class="text-muted"><?= htmlspecialchars($pago['numerotransaccion'] ?? 'N/A')  ?></td>
                                         <td class="text-center no-imprimir">
                                             <?php if (!empty($pago['comprobante'])): ?>

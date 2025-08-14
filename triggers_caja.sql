@@ -1,4 +1,6 @@
 
+USE motorpark2;
+
 DROP TRIGGER IF EXISTS tr_calcular_saldorestante_before_insert;
 
 DELIMITER $$
@@ -28,6 +30,11 @@ BEGIN
 END$$
 
 DELIMITER ;
+
+
+
+
+
 
 
 

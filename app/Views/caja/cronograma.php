@@ -183,16 +183,20 @@
                                                         </span>
                                                     </div>
                                                 <?php else: ?>
-                                                    <button class="btn btn-pagar btn-sm text-white"
+                                                    <button class="btn btn-pagar btn-sm text-white" id="btn-pagar"
                                                         data-bs-toggle="modal"
                                                         data-bs-target="#modalPago"
                                                         data-cuota="<?= $fila['numcuota'] ?>"
                                                         data-idcronograma="<?= $fila['idcronograma'] ?>"
                                                         data-valorcuota="<?= $fila['valorcuota'] ?>"
                                                         data-penalidad="<?= $fila['penalidad'] ?>"
-                                                        data-saldorestante="<?= $fila['saldorestante'] ?>">
+                                                        data-saldo-cuota="<?= $fila['saldocuota_pendiente'] ?>"
+                                                        data-saldorestante="<?= $fila['saldorestante'] ?>"
+                                                        data-saldo-penalidad="<?= $fila['penalidad_pendiente'] ?>">
                                                         <i class="fa-solid fa-dollar-sign me-1"></i> Pagar
                                                     </button>
+
+
                                                 <?php endif; ?>
 
                                             </td>
@@ -235,10 +239,8 @@
     </div>
 </div>
 
+<!-- MODAL DE PAGOS  -->
 
-
-
-<!-- Modal de Pago-->
 <div class="modal fade" id="modalPago" tabindex="-1" aria-labelledby="modalPagoLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content border-0">
@@ -255,6 +257,7 @@
                 </div>
 
                 <form id="formPago" enctype="multipart/form-data">
+                    <input type="hidden" name="idcronograma" id="idcronograma-input">
                     <div class="row mb-3">
                         <div class="col-md-6 mb-3">
                             <div class="card border-left-primary h-100">
@@ -268,7 +271,7 @@
                                             <span class="input-group-text bg-body-tertiary"><i
                                                     class="fas fa-dollar-sign text-primary"></i></span>
                                             <input type="text" class="form-control bg-body-tertiary" value="" disabled
-                                                id="saldocuota">
+                                                id="detalle-cuota">
                                         </div>
                                     </div>
                                     <div class="mb-2">
@@ -277,7 +280,7 @@
                                             <span class="input-group-text bg-body-tertiary"><i
                                                     class="fas fa-exclamation-circle text-danger"></i></span>
                                             <input type="text" class="form-control bg-body-tertiary" disabled
-                                                id="penalidad">
+                                                id="detalle-penalidad">
                                         </div>
                                     </div>
                                     <div>
@@ -286,7 +289,7 @@
                                             <span class="input-group-text bg-body-tertiary"><i
                                                     class="fas fa-calculator text-success"></i></span>
                                             <input type="text" class="form-control bg-body-tertiary fw-bold " disabled
-                                                id="total-deuda">
+                                                id="detalle-total-deuda">
                                         </div>
                                     </div>
                                 </div>
@@ -298,32 +301,47 @@
                                     <h6 class="card-title text-success">
                                         <i class="fas fa-hand-holding-usd me-2"></i>Detalles del Pago
                                     </h6>
-                                    <div class="mb-2">
-                                        <label class="form-label small text-muted">Amortización</label>
-                                        <div class="input-group">
-                                            <span class="input-group-text bg-body-tertiary"><i
-                                                    class="fas fa-coins text-warning"></i></span>
-                                            <input type="text" class="form-control bg-body-tertiary" id="amortizacion" name="amortizacion">
+                                    <div class="mb-3">
+                                        <label class="form-label small text-muted">Tipo de Pago</label>
+                                        <select class="form-select" id="tipoPago" name="tipoPago">
+                                            <option value="soloCuota">Solo Cuota</option>
+                                            <option value="soloPenalidad">Solo Penalidad</option>
+                                            <option value="ambas">Ambas</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Campos para pago de cuota -->
+                                    <div id="pagoCuota-group">
+                                        <div class="mb-2">
+                                            <label class="form-label small text-muted">Monto de cuota</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text bg-body-tertiary"><i
+                                                        class="fas fa-coins text-warning"></i></span>
+                                                <input type="text" class="form-control" id="amortizacionCuota" name="amortizacionCuota">
+                                            </div>
+                                        </div>
+                                        <div class="mb-2">
+                                            <label class="form-label small text-muted">Comprobante de Cuota</label>
+                                            <input id="comprobanteCuota" class="form-control" type="file" name="comprobanteCuota" placeholder="Seleccione un archivo" accept="image/*,.pdf">
                                         </div>
                                     </div>
 
-                                    <div class="mb-2">
-                                        <label class="form-label small text-muted">Penalidad</label>
-                                        <div class="input-group">
-                                            <span class="input-group-text bg-body-tertiary"><i
-                                                    class="fas fa-coins text-warning"></i></span>
-                                            <input type="text" class="form-control bg-body-tertiary" id="pago-penalidad" name="pago-penalidad" disabled>
+                                    <!-- Campos para pago de penalidad -->
+                                    <div id="pagoPenalidad-group" class="d-none">
+                                        <div class="mb-2">
+                                            <label class="form-label small text-muted">Monto de penalidad</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text bg-body-tertiary"><i
+                                                        class="fas fa-coins text-warning"></i></span>
+                                                <input type="text" class="form-control" id="amortizacionPenalidad" name="amortizacionPenalidad" disabled>
+                                            </div>
+                                        </div>
+                                        <div class="mb-2">
+                                            <label class="form-label small text-muted">Comprobante de Penalidad</label>
+                                            <input id="comprobantePenalidad" class="form-control" type="file" name="comprobantePenalidad" placeholder="Seleccione un archivo" accept="image/*,.pdf">
                                         </div>
                                     </div>
-                                    <div class="mb-2">
-                                        <label class="form-label small text-muted">Saldo Restante</label>
-                                        <div class="input-group">
-                                            <span class="input-group-text bg-body-tertiary"><i
-                                                    class="fas fa-wallet text-info"></i></span>
-                                            <input type="text" class="form-control bg-body-tertiary" readonly
-                                                id="saldo-restante">
-                                        </div>
-                                    </div>
+
                                     <div>
                                         <label class="form-label small text-muted">Fecha de Pago</label>
                                         <div class="input-group">
@@ -366,13 +384,6 @@
                                         <input type="text" class="form-control" name="numerotransaccion"
                                             placeholder="Opcional para transferencias" id="numerotransaccion">
                                     </div>
-
-                                    <div class="mb-2">
-                                        <label class="form-label small text-muted">Comprobante</label>
-                                        <input id="comprobante" class="form-control" type="file" name="comprobante" placeholder="Seleccione un archivo" accept="image/*,.pdf">
-
-                                    </div>
-
                                 </div>
                             </div>
                         </div>
@@ -398,11 +409,9 @@
                     </div>
                 </form>
             </div>
-
         </div>
     </div>
 </div>
-
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
@@ -420,28 +429,64 @@
         const totalPages = Math.ceil(totalItems / itemsPerPage);
         let currentPage = 1;
 
-        // Variables del FORM
         const numeroCuenta = document.querySelector('#idcuentapago');
         const medioPago = document.querySelector('#mediopago');
         const numeroTransaccion = document.querySelector('#numerotransaccion');
         const fechaPago = document.querySelector('#fechapago');
-        const amortizacion = document.querySelector('#amortizacion');
-        let pagoPenalidad = document.querySelector('#pago-penalidad');
-        const comprobante = document.querySelector('#comprobante');
         const selectCuentas = document.querySelector('.select-cuentas');
         const observacion = document.querySelector('#observacion');
         const formPago = document.querySelector('#formPago');
 
-        let inputPagopenalidad = null;
+        // Nuevos elementos para la lógica dinámica
+        const tipoPagoSelect = document.querySelector('#tipoPago');
+        const pagoCuotaGroup = document.querySelector('#pagoCuota-group');
+        const pagoPenalidadGroup = document.querySelector('#pagoPenalidad-group');
+
+
+        // INPUTS PARA EL DETALLE DE LA DEUDA 
+
+
+
+
+
+
+        // INPUTS PARA EL VALOR DE LOS PAGOS.
+        const amortizacionCuotaInput = document.querySelector('#amortizacionCuota');
+        const amortizacionPenalidadInput = document.querySelector('#amortizacionPenalidad');
+
+        const comprobanteCuotaInput = document.querySelector('#comprobanteCuota');
+        const comprobantePenalidadInput = document.querySelector('#comprobantePenalidad');
+        const idCronogramaInput = document.querySelector('#idcronograma-input');
+
+        // Variables globales
         let idCronogramaSeleccionado = null;
-        let saldoRestante = null;
+        let valorCuotaDeuda = document.querySelector('#btn-pagar').getAttribute('data-saldo-cuota');
+        let valorPenalidadDeuda = document.querySelector('#btn-pagar').getAttribute('data-saldo-penalidad');
 
+        // Función para mostrar/ocultar campos de pago
+        const actualizarCamposDePago = () => {
+            const tipoPago = tipoPagoSelect.value;
 
+            pagoCuotaGroup.classList.add('d-none');
+            pagoPenalidadGroup.classList.add('d-none');
+            amortizacionCuotaInput.disabled = true;
+            amortizacionPenalidadInput.disabled = true;
 
+            if (tipoPago === 'soloCuota' || tipoPago === 'ambas') {
+                pagoCuotaGroup.classList.remove('d-none');
+                amortizacionCuotaInput.disabled = false;
 
+            }
 
+            if (tipoPago === 'soloPenalidad' || tipoPago === 'ambas') {
+                pagoPenalidadGroup.classList.remove('d-none');
+                amortizacionPenalidadInput.disabled = false;
 
+            }
+        };
 
+        // Evento para el cambio en el select de tipo de pago
+        tipoPagoSelect.addEventListener('change', actualizarCamposDePago);
 
         medioPago.addEventListener('change', async (e) => {
             let valor = e.target.value;
@@ -460,7 +505,6 @@
                             numeroCuenta.innerHTML += `<option value="${e.idcuentapago}">${e.nombrecuenta}</option>`;
                         });
                     }
-
                 } catch (error) {
                     console.error(error);
                 }
@@ -471,12 +515,43 @@
             }
         });
 
-
         formPago.addEventListener('submit', async (e) => {
             e.preventDefault();
 
             if (!idCronogramaSeleccionado) {
                 showToast('No se seleccionó ninguna cuota. Intenta nuevamente.', 'INFO', 1200);
+                return;
+            }
+
+            const tipoPago = tipoPagoSelect.value;
+            const amortizacionCuota = parseFloat(amortizacionCuotaInput.value);
+            const amortizacionPenalidad = parseFloat(amortizacionPenalidadInput.value);
+
+            // Validaciones generales
+            if (tipoPago === 'soloCuota' && (isNaN(amortizacionCuota) || amortizacionCuota <= 0)) {
+                showToast('Ingresa un monto de cuota válido.', 'INFO', 1200);
+                return;
+            }
+            if (tipoPago === 'soloPenalidad' && (isNaN(amortizacionPenalidad) || amortizacionPenalidad <= 0)) {
+                showToast('Ingresa un monto de penalidad válido.', 'INFO', 1200);
+                return;
+            }
+            if (tipoPago === 'ambas' && ((isNaN(amortizacionCuota) || amortizacionCuota <= 0) && (isNaN(amortizacionPenalidad) || amortizacionPenalidad <= 0))) {
+                showToast('Ingresa al menos un monto de amortización válido (cuota o penalidad).', 'INFO', 1200);
+                return;
+            }
+
+            // Validación de montos contra la deuda
+            if (tipoPago === 'soloCuota' && amortizacionCuota > valorCuotaDeuda) {
+                showToast(`La amortización de la cuota no puede ser mayor a S/ ${valorCuotaDeuda.toFixed(2)}.`, 'INFO', 1200);
+                return;
+            }
+            if (tipoPago === 'soloPenalidad' && amortizacionPenalidad > valorPenalidadDeuda) {
+                showToast(`La amortización de la penalidad no puede ser mayor a S/ ${valorPenalidadDeuda.toFixed(2)}.`, 'INFO', 1200);
+                return;
+            }
+            if (tipoPago === 'ambas' && (amortizacionCuota > valorCuotaDeuda || amortizacionPenalidad > valorPenalidadDeuda)) {
+                showToast(`La amortización no puede ser mayor a la deuda restante.`, 'INFO', 1200);
                 return;
             }
 
@@ -486,31 +561,29 @@
                 return;
             }
 
-            const amortizacionValor = amortizacion.value;
-            if (!amortizacionValor || isNaN(parseFloat(amortizacionValor)) || parseFloat(amortizacionValor) <= 0) {
-                showToast('Ingresa una amortización válida', 'INFO', 1200);
-                return;
-            }
-
-            if (parseFloat(amortizacionValor) > saldoRestante) {
-                showToast(`La amortización no puede ser mayor al saldo restante de S/ ${saldoRestante.toFixed(2)}.`, 'INFO', 1200);
-                return;
-            }
-
             const formData = new FormData();
             formData.append('idcronograma', idCronogramaSeleccionado);
+            formData.append('mediopago', medioPago.value);
+            formData.append('numerotransaccion', numeroTransaccion.value ?? '');
+            formData.append('fechapago', fechaPago.value);
+            formData.append('observacion', observacion.value ?? '');
+
+            // Agregar los campos dinámicamente al FormData
+            if (tipoPago === 'soloCuota' || tipoPago === 'ambas') {
+                formData.append('amortizacionCuota', amortizacionCuota);
+                if (comprobanteCuotaInput.files.length > 0) {
+                    formData.append('comprobanteCuota', comprobanteCuotaInput.files[0]);
+                }
+            }
+            if (tipoPago === 'soloPenalidad' || tipoPago === 'ambas') {
+                formData.append('amortizacionPenalidad', amortizacionPenalidad);
+                if (comprobantePenalidadInput.files.length > 0) {
+                    formData.append('comprobantePenalidad', comprobantePenalidadInput.files[0]);
+                }
+            }
+
             if (medioPago.value === 'Transferencia Bancaria') {
                 formData.append('idcuentapago', numeroCuenta.value);
-            }
-            formData.append('mediopago', medioPago.value);
-            formData.append('numerotransaccion', numeroTransaccion.value ?? null);
-            formData.append('fechapago', fechaPago.value);
-            formData.append('amortizacion', amortizacion.value);
-            formData.append('observacion', observacion.value);
-
-
-            if (comprobante.files.length > 0) {
-                formData.append('comprobante', comprobante.files[0]);
             }
 
             if (confirm('¿Seguro de registrar el pago?')) {
@@ -522,14 +595,10 @@
 
                     const data = await res.json();
 
-
                     if (data.success) {
                         showToast('Pago registrado correctamente.', 'SUCCESS', 1200);
-
-                        // Guardar la posición del scroll en localStorage
                         const scrollPosition = window.scrollY;
                         localStorage.setItem('scrollPosition', scrollPosition);
-
                         setTimeout(() => {
                             location.reload();
                         }, 1200);
@@ -537,41 +606,49 @@
                         showToast(data.message, 'WARNING', 1200);
                     }
 
-
-
                 } catch (err) {
                     console.error('Error al enviar:', err);
                     showToast('Ocurrió un error al procesar el pago.', 'WARNING', 1200);
                 }
             }
-
-
         });
 
-
-
-        // RELLENAR EL FORMUALRIO CON LOS DATOS DE LA DB.
+        // RELLENAR EL FORMULARIO CON LOS DATOS DE LA DB.
         document.querySelectorAll('.btn-pagar').forEach(btn => {
             btn.addEventListener('click', function() {
-                const valorCuota = parseFloat(this.dataset.valorcuota);
-                const abonoCapital = parseFloat(this.dataset.abonocapital);
-                const penalidad = parseFloat(this.dataset.penalidad) || 0;
-                saldoRestante = parseFloat(this.dataset.saldorestante);
 
-                const totalDeuda = valorCuota + penalidad;
+                const detalleCuota = document.querySelector('#detalle-cuota');
+                const detallePenalidad = document.querySelector('#detalle-penalidad');
+                const detalleTotalDeuda = document.querySelector('#detalle-total-deuda');
+                amortizacionCuotaInput.value = this.getAttribute('data-saldo-cuota');
+                amortizacionPenalidadInput.value = this.getAttribute('data-saldo-penalidad');
 
-                document.getElementById('saldocuota').value = valorCuota.toFixed(2);
-                document.getElementById('penalidad').value = penalidad.toFixed(2);
-                document.getElementById('total-deuda').value = totalDeuda.toFixed(2);
-                document.getElementById('amortizacion').value = '';
-                document.getElementById('saldo-restante').value = saldoRestante.toFixed(2);
+                console.log(amortizacionCuotaInput.value);
+                console.log(amortizacionPenalidadInput.value);
+
+                detalleCuota.value = this.dataset.valorcuota;
+                detallePenalidad.value = this.dataset.penalidad;
+
+                const cuota = parseFloat(detalleCuota.value) || 0;
+                const penalidad = parseFloat(detallePenalidad.value) || 0;
+                const total = cuota + penalidad;
+
+                detalleTotalDeuda.value = total.toFixed(2);
                 idCronogramaSeleccionado = this.dataset.idcronograma;
-                inputPagopenalidad = this.dataset.penalidad;
-                pagoPenalidad.value = this.dataset.penalidad;
 
-                document.querySelector('#numero-cuota').textContent = `Está a punto de registrar el pago de la cuota N°  ${this.dataset.cuota} `;
+                document.querySelector('#numero-cuota').textContent = `Está a punto de registrar el pago de la cuota N° ${this.dataset.cuota} `;
+
+                // Establecer estado inicial del formulario
+                if (valorPenalidadDeuda > 0) {
+                    tipoPagoSelect.value = 'ambas';
+                } else {
+                    tipoPagoSelect.value = 'soloCuota';
+                }
+                actualizarCamposDePago();
             });
         });
+
+
 
 
 
@@ -786,7 +863,7 @@
 
                 doc.save('cronograma_pagos.pdf');
                 showToast('PDF GENERADO', 'SUCCESS', 3000);
-            },3000);
+            }, 3000);
         });
 
 
