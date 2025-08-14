@@ -249,7 +249,9 @@ BEGIN
     END WHILE;
 END$
 DELIMITER ;
-CALL generar_cronograma(2, 4.263224089);
+
+-- DELETE FROM pagos;
+CALL generar_cronograma(1, 4.263224089);
 SELECT * FROM cronogramas;
 
 
@@ -258,3 +260,6 @@ FROM cronogramas WHERE idcontrato = 1;
 
 SELECT SUM(interes)+SUM(abonocapital) AS TotalPagado
 FROM cronogramas WHERE idcontrato = 1;
+
+
+SELECT * FROM pagos;

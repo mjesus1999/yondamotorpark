@@ -1,4 +1,4 @@
-USE motorpark;
+
 -- Procedimiento almacenado modificado
 USE motorpark;
 
@@ -8,6 +8,19 @@ DELIMITER $$
 
 CREATE PROCEDURE sp_get_cronogramas_by_idcontrato(IN idcontrato_ INT)
 BEGIN
+    -- Primero actualizamos las cuotas vencidas
+    UPDATE cronogramas cro
+    INNER JOIN contratos cont ON cro.idcontrato = cont.idcontrato
+    INNER JOIN cotizaciones coti ON cont.idcotizacion = coti.idcotizacion
+    SET 
+        cro.estado = 'Vencido',
+        cro.aplicapenalidad = 'S',
+        cro.penalidad = coti.valorcuota * cont.penalidadbase
+    WHERE cro.fechapago < CURDATE()
+      AND cro.estado != 'Pagado'
+      AND cont.idcontrato = idcontrato_;
+
+    -- Luego seleccionamos los datos
     SELECT 
         cro.idcronograma,
         cro.numcuota,
@@ -18,14 +31,12 @@ BEGIN
         cro.penalidad,
         cro.saldocapital,
 
-        -- Total amortización acumulada
         COALESCE((
             SELECT SUM(pag.amortizacion)
             FROM pagos pag
             WHERE pag.idcronograma = cro.idcronograma
         ), 0) AS amortizacion,
 
-        -- Cálculo del saldo restante (dinámico)
         (coti.valorcuota + cro.penalidad) - COALESCE((
             SELECT SUM(pag.amortizacion)
             FROM pagos pag
@@ -42,11 +53,14 @@ BEGIN
     ORDER BY cro.numcuota;
 END$$
 
-DELIMITER;
+DELIMITER ;
 
-CALL sp_get_cronogramas_by_idcontrato (2);
+
+CALL sp_get_cronogramas_by_idcontrato (1);
 
 SELECT * FROM cronogramas;
+SELECT * FROM contratos;
+SELECT * FROM pagos;
 
 SELECT * FROM pagos
 
@@ -133,8 +147,8 @@ SELECT * FROM pagos;
 
 SELECT * FROM cronogramas;
 
-UPDATE cronogramas SET fechapago = '2026-03-13', penalidad = 0, aplicapenalidad = 'N', estado = 'Pagado' WHERE idcronograma = 1519;
-SELECT * FROM cronogramas WHERE idcronograma = 1518;
+UPDATE cronogramas SET fechapago = '2026-03-13', penalidad = 0, aplicapenalidad = 'N', estado = 'Pagado' WHERE idcronograma = 1521;
+UPDATE  cronogramas SET fechapago = '2026-05-13', penalidad = 0, aplicapenalidad ='N', estado = 'Pendiente' WHERE idcronograma = 1521;
 
 
 SELECT * FROM pagos;

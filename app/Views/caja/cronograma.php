@@ -19,7 +19,7 @@
                 <a href="/caja/" class="btn btn-outline-primary btn-sm">
                     <i class="fas fa-list me-1"></i> Lista
                 </a>
-                <button class="btn btn-danger btn-sm ms-2" id="btnImprimir">
+                <button class="btn btn-danger btn-sm ms-2" id="btn-pdf">
                     <i class="fa-regular fa-file-pdf"></i> PDF
                 </button>
             </div>
@@ -40,7 +40,7 @@
                     </div>
                 </div>
                 <div class="card-body p-0">
-                    <div class="table-responsive">
+                    <div class="table-responsive" id="area-pdf">
                         <table class="table table-hover cronograma-table mb-0" id="tabla-cronograma">
                             <thead>
                                 <tr>
@@ -404,12 +404,9 @@
 </div>
 
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-<!-- CSS -->
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
-<!-- JS -->
-<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+
 
 
 <script>
@@ -429,6 +426,7 @@
         const numeroTransaccion = document.querySelector('#numerotransaccion');
         const fechaPago = document.querySelector('#fechapago');
         const amortizacion = document.querySelector('#amortizacion');
+        let pagoPenalidad = document.querySelector('#pago-penalidad');
         const comprobante = document.querySelector('#comprobante');
         const selectCuentas = document.querySelector('.select-cuentas');
         const observacion = document.querySelector('#observacion');
@@ -437,6 +435,11 @@
         let inputPagopenalidad = null;
         let idCronogramaSeleccionado = null;
         let saldoRestante = null;
+
+
+
+
+
 
 
 
@@ -564,6 +567,7 @@
                 document.getElementById('saldo-restante').value = saldoRestante.toFixed(2);
                 idCronogramaSeleccionado = this.dataset.idcronograma;
                 inputPagopenalidad = this.dataset.penalidad;
+                pagoPenalidad.value = this.dataset.penalidad;
 
                 document.querySelector('#numero-cuota').textContent = `Está a punto de registrar el pago de la cuota N°  ${this.dataset.cuota} `;
             });
@@ -699,80 +703,93 @@
 
 
 
+        document.getElementById('btn-pdf').addEventListener('click', () => {
+            showToast('GENERANDO EL PDF.....', 'INFO', 3000);
 
-        document.getElementById('btnImprimir').addEventListener('click', function() {
-            // Mostrar todas las filas
-            document.querySelectorAll('#tabla-body tr').forEach(row => row.style.display = '');
+            setTimeout(() => {
+                const {
+                    jsPDF
+                } = window.jspdf;
+                const doc = new jsPDF('landscape', 'mm', 'a4');
 
-            // Clonar tabla
-            const originalTable = document.getElementById('tabla-cronograma');
-            const cloneTable = originalTable.cloneNode(true);
+                // Título
+                doc.setFontSize(18);
 
-            // Eliminar columna "Acciones"
-            cloneTable.querySelectorAll('thead tr th:last-child').forEach(th => th.remove());
-            cloneTable.querySelectorAll('tbody tr').forEach(tr => {
-                tr.removeChild(tr.lastElementChild);
-                tr.querySelectorAll('td').forEach(td => {
-                    td.querySelectorAll('i').forEach(icon => icon.remove());
+                doc.text("Cronograma de Pagos", doc.internal.pageSize.getWidth() / 2, 15, {
+                    align: 'center'
                 });
-            });
+                const fechaHora = new Date().toLocaleDateString();
+                doc.setFontSize(11);
+                doc.text(`FECHA: ${fechaHora} `, doc.internal.pageSize.getWidth() - 10, 22, {
+                    align: 'right'
+                });
 
-            // Quitar íconos en encabezados
-            cloneTable.querySelectorAll('thead th').forEach(th => {
-                th.querySelectorAll('i').forEach(icon => icon.remove());
-            });
+                // Cabeceras en el PDF
+                const head = [
+                    [
+                        "#", "Fecha Vencimiento", "Interés", "Abono Capital",
+                        "Valor Cuota", "Amortización", "Restante", "Saldo Capital", "Estado"
+                    ]
+                ];
 
+                const headStyles = {
+                    fillColor: [200, 200, 200],
+                    textColor: 20,
+                    fontStyle: 'bold',
+                    halign: 'center',
+                    fontSize: 12,
+                };
 
-            // Aplicar estilo al clonado
-            cloneTable.classList.remove('table-hover');
-            cloneTable.classList.add('table', 'table-bordered', 'table-sm');
+                // Extraer datos de la tabla original
+                const rows = [];
 
-            // Aplicar estilos mejorados
-            cloneTable.style.width = '100%';
-            cloneTable.style.borderCollapse = 'collapse';
-            cloneTable.querySelectorAll('th, td').forEach(cell => {
-                cell.style.border = '1px solid #000';
-                cell.style.padding = '6px 8px';
-                cell.style.fontSize = '12px';
-                cell.style.textAlign = 'center';
-            });
-            cloneTable.querySelectorAll('thead').forEach(thead => {
-                thead.style.backgroundColor = '#f0f0f0';
-            });
+                document.querySelectorAll('#tabla-body tr').forEach(tr => {
+                    const tds = tr.querySelectorAll('td');
 
-            // Crear contenedor limpio
-            const cleanContainer = document.createElement('div');
-            cleanContainer.style.padding = '30px';
-            cleanContainer.innerHTML = `
-            <div style="text-align:center; margin-bottom: 20px;">
-                <h1 style="margin: 0; font-size: 20px;">Cronograma de Pagos</h1>
-                <p style="margin: 5px 0; font-size: 12px;">Generado el: ${new Date().toLocaleString()}</p>
-            </div>
-        `;
-            cleanContainer.appendChild(cloneTable);
+                    if (tds.length >= 9) {
+                        const numCuota = tds[0].innerText.trim();
+                        const fecha = tds[1].querySelector('span.fw-bold')?.innerText.trim() || ''; // Solo la fecha
+                        const interes = tds[2].innerText.trim();
+                        const abono = tds[3].innerText.trim();
+                        const valorCuota = tds[4].innerText.trim();
+                        const amortizacion = tds[5].innerText.trim();
+                        const restante = tds[6].innerText.trim();
+                        const saldo = tds[7].innerText.trim();
+                        const estado = tds[8].innerText.trim();
+                        const estadoFormateado = estado.split('-')[0];
 
+                        rows.push([
+                            numCuota, fecha, interes, abono, valorCuota, amortizacion, restante, saldo, estadoFormateado
+                        ]);
+                    }
+                });
 
-            const options = {
-                margin: 0.5,
-                filename: 'cronograma_pagos.pdf',
-                image: {
-                    type: 'jpeg',
-                    quality: 0.98
-                },
-                html2canvas: {
-                    scale: 3
-                },
-                jsPDF: {
-                    unit: 'in',
-                    format: 'letter',
-                    orientation: 'landscape'
-                }
-            };
+                // Crear tabla en PDF
+                doc.autoTable({
+                    head,
+                    body: rows,
+                    startY: 25,
+                    styles: {
+                        fontSize: 10,
+                        halign: 'center',
+                    },
+                    headStyles: {
+                        headStyles
+                    },
+                    margin: {
+                        left: 10,
+                        right: 10
+                    },
+                    showHead: 'everyPage',
+                    pageBreak: 'auto'
+                });
 
-            html2pdf().set(options).from(cleanContainer).save().then(() => {
-                if (typeof showPage === 'function') showPage(1);
-            });
+                doc.save('cronograma_pagos.pdf');
+                showToast('PDF GENERADO', 'SUCCESS', 3000);
+            },3000);
         });
+
+
 
 
         showPage(1);

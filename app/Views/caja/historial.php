@@ -1,5 +1,6 @@
 <?php include __DIR__ . '/../layout/header.php'; ?>
 
+
 <div class="container-fluid">
     <div class="alert alert-info mt-2" role="alert" style="border-left: 4px solid #3498db; border-radius: 0 8px 8px 0;">
         <div class="row align-items-center">
@@ -17,7 +18,7 @@
                 <a href="/caja/" class="btn btn-outline-primary btn-sm">
                     <i class="fas fa-list me-1"></i> Lista
                 </a>
-                <button class="btn btn-danger btn-sm ms-2" id="btnImprimir">
+                <button class="btn btn-danger btn-sm ms-2" id="btn-pdf">
                     <i class="fa-regular fa-file-pdf"></i> PDF
                 </button>
             </div>
@@ -37,66 +38,68 @@
 
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover table-striped mb-0 bg-body-tertiary" id="tabla-historial-pagos">
-                    <thead>
-                        <tr>
-                            <th width="50">#</th>
-                            <th>N° Cuota</th>
-                            <th>Vencimiento</th>
-                            <th>Pago</th>
-                            <th>Amortización</th>
-                            <th>Saldo</th>
-                            <th>Medio</th>
-                            <th>Transacción</th>
-                            <th width="150">Comprobante</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabla-body">
-                        <?php if (empty($pagos)) : ?>
+                <div id="area-pdf">
+                    <table class="table table-hover table-striped mb-0 bg-body-tertiary" id="tabla-historial-pagos">
+                        <thead>
                             <tr>
-                                <td colspan="9" class="text-center py-4 text-muted">
-                                    <i class="fas fa-info-circle me-2"></i>No hay pagos registrados
-                                </td>
+                                <th width="50">#</th>
+                                <th>N° Cuota</th>
+                                <th>Vencimiento</th>
+                                <th>Fecha pago</th>
+                                <th>Amortización</th>
+                                <th>Saldo</th>
+                                <th>Medio</th>
+                                <th>Transacción</th>
+                                <th class="no-imprimir" width="150">Comprobante</th>
                             </tr>
-                        <?php else: ?>
-                            <?php $numeroFila = 1; ?>
-                            <?php foreach ($pagos as $pago) : ?>
+                        </thead>
+                        <tbody id="tabla-body">
+                            <?php if (empty($pagos)) : ?>
                                 <tr>
-                                    <td class="text-muted"><?= htmlspecialchars($numeroFila++) ?></td>
-                                    <td><?= htmlspecialchars($pago['numcuota']) ?></td>
-                                    <td><?= htmlspecialchars($pago['fecha_vencimiento']) ?></td>
-                                    <td><?= htmlspecialchars($pago['fecha_pago']) ?></td>
-                                    <td class="fw-bold"><?= htmlspecialchars($pago['amortizacion']) ?></td>
-                                    <td class=""><?= htmlspecialchars($pago['saldorestante'] ?? '') ?></td>
-                                    <td>
-                                        <span class="badge bg-info text-white">
-                                            <?= htmlspecialchars($pago['mediopago']) ?>
-                                        </span>
-                                    </td>
-                                    <td class="text-muted"><?= htmlspecialchars($pago['numerotransaccion'] ?? 'N/A')  ?></td>
-                                    <td class="text-center">
-                                        <?php if (!empty($pago['comprobante'])): ?>
-                                            <?php $esPdf = strtolower(pathinfo($pago['comprobante'], PATHINFO_EXTENSION)) === 'pdf'; ?>
-                                            <?php if ($esPdf): ?>
-                                                <a href="<?= htmlspecialchars($pago['comprobante']) ?>" target="_blank"
-                                                    class="btn btn-sm btn-danger">
-                                                    <i class="fas fa-file-pdf me-1"></i> PDF
-                                                </a>
-                                            <?php else: ?>
-                                                <button type="button" class="btn btn-sm btn-primary ver-comprobante-img"
-                                                    data-img="<?= htmlspecialchars($pago['comprobante']) ?>">
-                                                    <i class="fas fa-image me-1"></i> Comprobante
-                                                </button>
-                                            <?php endif; ?>
-                                        <?php else: ?>
-                                            <span class="badge bg-light text-muted">N/A</span>
-                                        <?php endif; ?>
+                                    <td colspan="9" class="text-center py-4 text-muted">
+                                        <i class="fas fa-info-circle me-2"></i>No hay pagos registrados
                                     </td>
                                 </tr>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
+                            <?php else: ?>
+                                <?php $numeroFila = 1; ?>
+                                <?php foreach ($pagos as $pago) : ?>
+                                    <tr>
+                                        <td class="text-muted"><?= htmlspecialchars($numeroFila++) ?></td>
+                                        <td><?= htmlspecialchars($pago['numcuota']) ?></td>
+                                        <td><?= htmlspecialchars($pago['fecha_vencimiento']) ?></td>
+                                        <td><?= htmlspecialchars($pago['fecha_pago']) ?></td>
+                                        <td class="fw-bold"><?= htmlspecialchars($pago['amortizacion']) ?></td>
+                                        <td class=""><?= htmlspecialchars($pago['saldorestante'] ?? '') ?></td>
+                                        <td>
+                                            <span class="badge bg-success text-white">
+                                                <?= htmlspecialchars($pago['mediopago']) ?>
+                                            </span>
+                                        </td>
+                                        <td class="text-muted"><?= htmlspecialchars($pago['numerotransaccion'] ?? 'N/A')  ?></td>
+                                        <td class="text-center no-imprimir">
+                                            <?php if (!empty($pago['comprobante'])): ?>
+                                                <?php $esPdf = strtolower(pathinfo($pago['comprobante'], PATHINFO_EXTENSION)) === 'pdf'; ?>
+                                                <?php if ($esPdf): ?>
+                                                    <a href="<?= htmlspecialchars($pago['comprobante']) ?>" target="_blank"
+                                                        class="btn btn-sm btn-danger">
+                                                        <i class="fas fa-file-pdf me-1"></i> PDF
+                                                    </a>
+                                                <?php else: ?>
+                                                    <button type="button" class="btn btn-sm btn-primary ver-comprobante-img"
+                                                        data-img="<?= htmlspecialchars($pago['comprobante']) ?>">
+                                                        <i class="fas fa-image me-1"></i> Comprobante
+                                                    </button>
+                                                <?php endif; ?>
+                                            <?php else: ?>
+                                                <span class="badge bg-light text-muted">N/A</span>
+                                            <?php endif; ?>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
@@ -163,12 +166,121 @@
     </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+
+
+
+
 <script>
     document.addEventListener('DOMContentLoaded', () => {
+        
+        const btnPDF = document.querySelector('#btn-pdf');
         const itemsPerPage = 10;
         const totalItems = <?= count($pagos) ?>;
         const totalPages = Math.ceil(totalItems / itemsPerPage);
         let currentPage = 1;
+
+        btnPDF.addEventListener('click', async () => {
+            showToast('GENERANDO EL PDF.....', 'INFO', 3000);
+
+            // Espera 3 segundos
+            await new Promise(resolve => setTimeout(resolve, 3000));
+
+            await generarPDF();
+
+            showToast('PDF GENERADO', 'SUCCESS', 3000);
+        });
+
+        async function generarPDF() {
+            const {
+                jsPDF
+            } = window.jspdf;
+            const doc = new jsPDF('landscape', 'mm', 'a4');
+
+            // Título
+            doc.setFontSize(18);
+            doc.text("Historial de Pagos", doc.internal.pageSize.getWidth() / 2, 15, {
+                align: 'center'
+            });
+
+            const fechaHora = new Date().toLocaleDateString();
+            doc.setFontSize(11);
+            doc.text(`FECHA: ${fechaHora}`, doc.internal.pageSize.getWidth() - 10, 22, {
+                align: 'right'
+            });
+
+            // Cabeceras para el PDF
+            const head = [
+                [
+                    "#", "N° Cuota", "Vencimiento", "Fecha pago",
+                    "Amortización", "Saldo", "Medio", "Transacción"
+                ]
+            ];
+
+            const headStyles = {
+                fillColor: [200, 200, 200],
+                textColor: 20,
+                fontStyle: 'bold',
+                halign: 'center',
+                fontSize: 12,
+            };
+
+            const areaPDF = document.querySelector('#area-pdf');
+            const columnasOcultas = areaPDF.querySelectorAll('.no-imprimir');
+            columnasOcultas.forEach(col => col.style.display = 'none');
+
+            // Mostrar todas las filas ocultas por paginación
+            const todasFilas = document.querySelectorAll('#tabla-body tr');
+            todasFilas.forEach(fila => fila.style.display = '');
+
+            // Extraer datos de todas las filas visibles
+            const rows = [];
+            todasFilas.forEach(tr => {
+                const tds = tr.querySelectorAll('td');
+                if (tds.length >= 8) {
+                    const fila = [
+                        tds[0].innerText.trim(), // #
+                        tds[1].innerText.trim(), // N° Cuota
+                        tds[2].innerText.trim(), // Vencimiento
+                        tds[3].innerText.trim(), // Fecha pago
+                        tds[4].innerText.trim(), // Amortización
+                        tds[5].innerText.trim(), // Saldo
+                        tds[6].innerText.trim(), // Medio
+                        tds[7].innerText.trim(), // Transacción
+                    ];
+                    rows.push(fila);
+                }
+            });
+
+            // Crear tabla en el PDF
+            doc.autoTable({
+                head,
+                body: rows,
+                startY: 25,
+                styles: {
+                    fontSize: 10,
+                    halign: 'center'
+                },
+                headStyles:{headStyles},
+                margin: {
+                    left: 10,
+                    right: 10
+                },
+                
+                showHead: 'everyPage',
+                pageBreak: 'auto'
+            });
+
+            
+            columnasOcultas.forEach(col => col.style.display = '');
+            if (typeof showPage === 'function' && typeof currentPage !== 'undefined') {
+                showPage(currentPage); 
+            }
+
+            doc.save('historial_pagos.pdf');
+        }
+
 
 
         // Mostrar página específica
@@ -239,12 +351,6 @@
                 const modal = new bootstrap.Modal(document.getElementById('modalcomprobante'));
                 modal.show();
             });
-        });
-
-        // Botón PDF
-        document.getElementById('btnImprimir').addEventListener('click', () => {
-
-            console.log('Generar PDF...');
         });
     });
 </script>
