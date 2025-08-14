@@ -103,7 +103,7 @@
                 setTimeout(() => {
                     alerts.forEach(alert => {
                         alert.style.opacity = '0';
-                        setTimeout(() => alert.remove(), 500); // Después de desvanecer
+                        setTimeout(() => alert.remove(), 600); // Después de desvanecer
                     });
                 }, 4000); // 4 segundos
             }

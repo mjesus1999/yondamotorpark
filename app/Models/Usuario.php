@@ -19,32 +19,31 @@ class Usuario
   public function getAll(): array
   {
     $query = "
-    SELECT
-      p.idpersona         AS idpersona,
-      p.apellidos         AS apellidos,
-      p.nombres           AS nombres,
-      a.area              AS area,
-      cg.cargo            AS cargo,
-      cl.fechainicio      AS fecha_inicio,
-      IFNULL(
-        DATE_FORMAT(cl.fechafin, '%Y-%m-%d'),
-        'Indeterminado'
-      )                   AS fecha_fin,
-      col.idcolaborador   AS idcolaborador, 
-      col.usernick        AS usuario
-    FROM personas p
-    INNER JOIN contratoslaborales cl
-      ON cl.idpersona = p.idpersona
-    INNER JOIN cargos cg
-      ON cg.idcargo = cl.idcargo
-    INNER JOIN areas a
-      ON a.idarea = cg.idarea
-    INNER JOIN colaboradores col
-      ON col.idcontratolaboral = cl.idcontratolaboral
-    WHERE col.habilitado = 'S'
-    ORDER BY p.idpersona
-    LIMIT 0,1000;
-    ";
+      SELECT
+        col.idcolaborador   AS idcolaborador,
+        p.apellidos         AS apellidos,
+        p.nombres           AS nombres,
+        a.area              AS area,
+        cg.cargo            AS cargo,
+        DATE_FORMAT(cl.fechainicio, '%Y-%m-%d') AS fecha_inicio,
+        IFNULL(
+          DATE_FORMAT(cl.fechafin, '%Y-%m-%d'),
+          'Indeterminado'
+        )                   AS fecha_fin,
+        col.usernick        AS usuario
+      FROM colaboradores col
+      INNER JOIN contratoslaborales cl
+        ON col.idcontratolaboral = cl.idcontratolaboral
+      INNER JOIN personas p
+        ON cl.idpersona = p.idpersona
+      INNER JOIN cargos cg
+        ON cg.idcargo = cl.idcargo
+      INNER JOIN areas a
+        ON a.idarea = cg.idarea
+      WHERE col.habilitado = 'S'
+      ORDER BY col.idcolaborador
+      LIMIT 0,1000;
+      ";
     try {
       $stmt = $this->db->prepare($query);
       $stmt->execute();
@@ -53,6 +52,7 @@ class Usuario
       return [];
     }
   }
+
 
   public function getAllAreas(): array
   {

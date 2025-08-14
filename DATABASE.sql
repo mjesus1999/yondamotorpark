@@ -93,6 +93,18 @@ CREATE TABLE contratoslaborales
     CONSTRAINT fk_idcargocla FOREIGN KEY (idcargo) REFERENCES cargos (idcargo)
 )ENGINE = INNODB;
 
+CREATE TABLE accesos (
+  idaccesos 			INT NOT NULL AUTO_INCREMENT,
+  idcargo 				INT NOT NULL,
+  modulo 				VARCHAR(50) NOT NULL,
+  permisos 				TINYINT(1) NOT NULL DEFAULT 0,
+  creado 				DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  modificado 			DATETIME DEFAULT NULL,
+  PRIMARY KEY (idaccesos),
+  KEY fk_accesos_idcargo (idcargo),
+  CONSTRAINT fk_accesos_idcargo FOREIGN KEY (idcargo) REFERENCES cargos (idcargo)
+)ENGINE = INNODB;
+
 CREATE TABLE colaboradores
 (
 	idcolaborador 		INT AUTO_INCREMENT PRIMARY KEY,
@@ -102,11 +114,16 @@ CREATE TABLE colaboradores
     avatar 				VARCHAR(150) 	NULL,
     ultimoacceso 		DATETIME 		NULL,
     habilitado			ENUM('S', 'N') 	NOT NULL DEFAULT 'S',
+    restriccionhoraria 	ENUM('S', 'N') 	NOT NULL DEFAULT 'S',
+    estado 				ENUM('0', '1') NULL DEFAULT '1',
 	creado 				DATETIME 		NOT NULL DEFAULT NOW(),
     modificado 			DATETIME 		NULL,
     CONSTRAINT fk_idcontratolaboral_col FOREIGN KEY (idcontratolaboral) REFERENCES contratoslaborales (idcontratolaboral),
     CONSTRAINT uk_usernick_col UNIQUE (usernick)
 )ENGINE = INNODB;
+-- ALTER TABLE colaboradores ADD COLUMN restriccionhoraria ENUM('S', 'N') 	NOT NULL DEFAULT 'S' AFTER `habilitado`;
+-- ALTER TABLE colaboradores ADD COLUMN estado ENUM('0', '1') NULL DEFAULT '1' AFTER `restriccionhoraria`;
+
 
 CREATE TABLE concesionarios
 (

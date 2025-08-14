@@ -57,7 +57,7 @@
             <tbody>
               <?php foreach ($Usuarios as $u): ?>
                 <tr>
-                  <td><?= htmlspecialchars($u['idpersona']) ?></td>
+                  <td><?= htmlspecialchars($u['idcolaborador']) ?></td>
                   <td><?= htmlspecialchars($u['apellidos']) ?></td>
                   <td><?= htmlspecialchars($u['nombres']) ?></td>
                   <td><?= htmlspecialchars($u['area']) ?></td>
@@ -67,8 +67,8 @@
                   <td><?= htmlspecialchars($u['usuario']) ?></td>
                   <td class="text-center">
                     <!-- Editar -->
-                    <a href="<?= $path ?>/usuarios/editar/<?= $u['idpersona'] ?>" class="btn btn-sm btn-outline-primary"
-                      title="Editar">
+                    <a href="<?= $path ?>/usuarios/editar/<?= $u['idcolaborador'] ?>"
+                      class="btn btn-sm btn-outline-primary" title="Editar">
                       <i class="fa-solid fa-pen"></i>
                     </a>
 

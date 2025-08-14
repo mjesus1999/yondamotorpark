@@ -5,6 +5,11 @@ USE motorpark;
 UPDATE colaboradores
 SET userpassword = '$2y$10$cYt7.yHXNdzUaYGw0xktxuD9MJem51XAfTSClw7FZnL6a/XNeEOeS'
 WHERE usernick = 'leticiall';
+-- PASAR DE SI A NO  EN RESTRICCION HORARIA
+UPDATE colaboradores
+SET restriccionhoraria = 'N',
+    modificado = NOW()
+WHERE idcolaborador = 2;
 
 -- COMBUSTIBLE
 INSERT INTO combustibles (idcombustible, combustible) VALUES
@@ -287,6 +292,17 @@ INSERT INTO contratoslaborales (
   '2023-05-01',   -- contrato con fecha de fin
   'P'             -- tipo: temporal (ajusta según tus valores)
 );
+
+-- CARGOS (OTROS)
+INSERT INTO cargos (idarea, cargo) VALUES
+(2, 'Jefe de Recursos Humanos'),
+(2, 'Analista de Recursos Humanos'),
+(2, 'Asistente de Recursos Humanos'),
+(3, 'Jefe de Contabilidad'),
+(4, 'Jefe de Marketing'),
+(4, 'Especialista en Marketing'),
+(5, 'Jefe de Ventas'),
+(6, 'Jefe de Caja');
 
 -- PERMISOS
 

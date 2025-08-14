@@ -2,7 +2,7 @@ use motorpark;
 
 SELECT * FROM cotizaciones;
 SELECT * FROM empresas;
-SELECT * FROM personas;
+SELECT * FROM personas LIMIT 200;
 SELECT * FROM Colaboradores;
 select * from contratoslaborales;
 select * from areas;
