@@ -22,7 +22,6 @@ if (!ini_get('date.timezone')) {
  * 2) Asegurar que las variables cargadas por phpdotenv estén también
  * como variables de entorno accesibles por getenv() y en $_SERVER.
  */
-
 foreach ($_ENV as $key => $value) {
   //solo strings (evita arrays/objetos)
   if (!is_string($value))
@@ -49,18 +48,17 @@ ini_set('session.gc_maxlifetime', (string) max(1440, $timeout));
 // usar nombre de sesión propio y cookie params
 session_name('YONDASESSID');
 session_set_cookie_params([
-    'lifetime' => 0,    // 0 = expira al cerrar navegador (recomendado)
-    'path' => '/',
-    'domain' => '',
-    'secure' => false,  // poner true en producción con HTTPS
-    'httponly' => true,
-    'samesite' => 'Lax'
+  'lifetime' => 0,    // 0 = expira al cerrar navegador (recomendado)
+  'path' => '/',
+  'domain' => '',
+  'secure' => false,  // poner true en producción con HTTPS
+  'httponly' => true,
+  'samesite' => 'Lax'
 ]);
 
 if (session_status() !== PHP_SESSION_ACTIVE) {
   session_start();
 }
-
 
 // Registra el autocargador
 //App\Core\Autoloader::register();

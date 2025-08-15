@@ -6,7 +6,8 @@ use App\Core\Controller;
 use App\Models\Usuario;
 use App\Models\ContratoLaboral;
 use App\Models\Colaborador;
-use App\Helpers\Validador;
+use App\Helpers\Validation;
+
 use Exception;
 
 class UsuarioController extends Controller
@@ -14,12 +15,15 @@ class UsuarioController extends Controller
   private Usuario $usuarioModel;
   private ContratoLaboral $contratoModel;
   private Colaborador $colaboradorModel;
+  private Validation $validator;
 
   public function __construct()
   {
+    parent::__construct();
     $this->usuarioModel = new Usuario();
     $this->contratoModel = new ContratoLaboral();
     $this->colaboradorModel = new Colaborador();
+    $this->validator = new Validation();
   }
 
   public function index(): void
@@ -47,15 +51,14 @@ class UsuarioController extends Controller
 
   public function store(): void
   {
-    // asegurar sesión disponible para evitar perder el user
-    if (session_status() !== PHP_SESSION_ACTIVE) {
+    /* if (session_status() !== PHP_SESSION_ACTIVE) {
       session_start();
-    }
+    } */
 
-    // DEBUG TEMPORAL: escribir el id de sesión y usuario en logs
-    error_log('STORE START - SID=' . session_id() . ' USER=' . json_encode($_SESSION['user'] ?? null));
+    // DEBUG TEMPORAL: id de sesión y usuario en logs
+    //error_log('STORE START - SID=' . session_id() . ' USER=' . json_encode($_SESSION['user'] ?? null));
 
-    // 1) Recoger todo lo del formulario completo
+    //obtener datos del formulario
     $idPersona = (int) ($_POST['idpersona'] ?? 0);
     $idCargo = (int) ($_POST['idcargo'] ?? 0);
     $fechaInicio = trim($_POST['fecha_inicio'] ?? '');
@@ -64,32 +67,20 @@ class UsuarioController extends Controller
     $pass1 = $_POST['password1'] ?? '';
     $pass2 = $_POST['password2'] ?? '';
 
-    // detectar AJAX
+    //detectar AJAX (para el modal)
     $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest';
 
-    // 2) Validaciones básicas (incluimos check de unicidad)
-    $errors = [];
-    if ($idPersona <= 0)
-      $errors[] = 'Debe registrar primero la persona.';
-    if ($idCargo <= 0)
-      $errors[] = 'Debe seleccionar un cargo.';
-    if ($fechaInicio === '')
-      $errors[] = 'La fecha de inicio es obligatoria.';
-    if ($pass1 !== $pass2)
-      $errors[] = 'Las contraseñas no coinciden.';
-    if ($usernick === '')
-      $errors[] = 'Introduce un nombre de usuario.';
-    if ($pass1 !== '' && strlen($pass1) < 8)
-      $errors[] = 'La contraseña debe tener al menos 8 caracteres.';
-
-    try {
-      if ($usernick !== '' && $this->usuarioModel->searchByUsernick($usernick)) {
-        $errors[] = 'El usernick ya existe.';
-      }
-    } catch (\Throwable $e) {
-      error_log('Error comprobando usernick: ' . $e->getMessage());
-      $errors[] = 'No se pudo comprobar la disponibilidad del usernick.';
-    }
+    //validaciones desde Helpers
+    $dataForValidation = [
+      'idpersona' => $idPersona,
+      'idcargo' => $idCargo,
+      'fecha_inicio' => $fechaInicio,
+      'fecha_fin' => $fechaFin,
+      'usuario' => $usernick,
+      'password1' => $pass1,
+      'password2' => $pass2
+    ];
+    $errors = $this->validator->validateUsuarioData($dataForValidation, $this->usuarioModel);
 
     if (!empty($errors)) {
       if ($isAjax) {
@@ -106,7 +97,7 @@ class UsuarioController extends Controller
       return;
     }
 
-    // 3) Crear contrato laboral
+    //Crear contrato laboral
     try {
       $idContrato = $this->contratoModel->create(
         $idPersona,
@@ -119,7 +110,7 @@ class UsuarioController extends Controller
         throw new \RuntimeException('No se pudo crear el contrato laboral');
       }
     } catch (\Throwable $e) {
-      error_log('Error al crear contrato: ' . $e->getMessage());
+      //error_log('Error al crear contrato: ' . $e->getMessage());
       $msg = 'No se pudo crear el contrato laboral. Intente nuevamente.';
       if ($isAjax) {
         header('Content-Type: application/json; charset=utf-8');
@@ -135,7 +126,7 @@ class UsuarioController extends Controller
       return;
     }
 
-    // 4) Crear colaborador (con rollback si falla)
+    //Crear colaborador (con rollback si falla) / por el momento
     try {
       $passwordHash = password_hash($pass1, PASSWORD_DEFAULT);
       $restr = 'S';
@@ -146,13 +137,13 @@ class UsuarioController extends Controller
           try {
             $this->contratoModel->delete($idContrato);
           } catch (\Throwable $ex) {
-            error_log('Rollback fail: ' . $ex->getMessage());
+            //error_log('Rollback fail: ' . $ex->getMessage());
           }
         }
         throw new \RuntimeException('No se pudo crear el usuario');
       }
     } catch (\Throwable $e) {
-      error_log('Error al crear colaborador: ' . $e->getMessage());
+      //error_log('Error al crear colaborador: ' . $e->getMessage());
       $msg = 'No se pudo crear el usuario. Revisa los logs o contacta al administrador.';
       if ($isAjax) {
         header('Content-Type: application/json; charset=utf-8');
@@ -168,9 +159,8 @@ class UsuarioController extends Controller
       return;
     }
 
-    // 5) Respuesta exitosa
-    // DEBUG: log final
-    error_log('STORE END - SID=' . session_id() . ' USER=' . json_encode($_SESSION['user'] ?? null));
+    //obtener respuesta exitosa
+    //error_log('STORE END - SID=' . session_id() . ' USER=' . json_encode($_SESSION['user'] ?? null));
 
     if ($isAjax) {
       header('Content-Type: application/json; charset=utf-8');
@@ -183,11 +173,10 @@ class UsuarioController extends Controller
     }
 
     // asegurar sesión y dejar mensaje
-    if (session_status() !== PHP_SESSION_ACTIVE)
-      session_start();
+    /* if (session_status() !== PHP_SESSION_ACTIVE)
+      session_start(); */
     $_SESSION['success_message'] = "Usuario creado con éxito. ID colaborador: {$idColab}";
 
-    // Evitar redirigir a ruta protegida; volver a la creación o mostrar la vista
     $areas = $this->usuarioModel->getAllAreas();
     $this->view('usuarios.create', [
       'areas' => $areas,
@@ -197,7 +186,7 @@ class UsuarioController extends Controller
     return;
   }
 
-
+  //STORE ANTERIORO (NO ESTA EN USO)
   public function store1(): void
   {
     // 1) Recoger todo lo del formulario completo
@@ -287,8 +276,49 @@ class UsuarioController extends Controller
 
   public function changePassword(): void
   {
-    session_start(); //tener sesión iniciada
+    header('Content-Type: application/json; charset=utf-8');
 
+    $idColab = (int) ($_POST['idcolaborador'] ?? 0);
+    $p1 = $_POST['password1'] ?? '';
+    $p2 = $_POST['password2'] ?? '';
+
+    $errors = $this->validator->validateChangePassword([
+      'idcolaborador' => $idColab,
+      'password1' => $p1,
+      'password2' => $p2
+    ]);
+    if (!empty($errors)) {
+      http_response_code(400);
+      echo json_encode(['success' => false, 'errors' => $errors]);
+      return;
+    }
+
+    try {
+      $newHash = password_hash($p1, PASSWORD_DEFAULT);
+      $ok = $this->usuarioModel->updatePassword($idColab, $newHash);
+
+      if ($ok) {
+        $_SESSION['success_message'] = 'Contraseña actualizada correctamente.';
+        echo json_encode(['success' => true]);
+      } else {
+        http_response_code(500);
+        $_SESSION['error_message'] = 'No se pudo actualizar la contraseña.';
+        echo json_encode(['success' => false, 'errors' => ['No se pudo actualizar la contraseña.']]);
+      }
+    } catch (\Throwable $e) {
+      error_log('Error changePassword: ' . $e->getMessage());
+      http_response_code(500);
+      echo json_encode(['success' => false, 'errors' => ['Error interno al procesar la solicitud.']]);
+    }
+  }
+
+  //ACTUALIZAR CONTRASEÑAS PERO POR EL MOMENTO NO ESTA EN USO
+  public function changePassword1(): void
+  {
+    /* if (session_status() !== PHP_SESSION_ACTIVE) {
+      session_start();
+    } */
+    header('Content-Type: application/json; charset=utf-8');
     $idColab = (int) ($_POST['idcolaborador'] ?? 0);
     $p1 = $_POST['password1'] ?? '';
     $p2 = $_POST['password2'] ?? '';
@@ -336,15 +366,13 @@ class UsuarioController extends Controller
   public function uploadAvatar(): void
   {
     $this->authRequired();
-
-    if (
-      !isset($_FILES['avatar']) ||
-      $_FILES['avatar']['error'] !== UPLOAD_ERR_OK
-    ) {
+    header('Content-Type: application/json; charset=utf-8');
+    $avatarErrors = $this->validator->validateAvatarUpload($_FILES['avatar'] ?? null);
+    if ($avatarErrors) {
       http_response_code(400);
       echo json_encode([
         'success' => false,
-        'error' => 'Archivo no recibido'
+        'error' => implode(' ', $avatarErrors)
       ]);
       return;
     }
@@ -356,14 +384,11 @@ class UsuarioController extends Controller
     if (!is_dir($avatarsDir)) {
       mkdir($avatarsDir, 0755, true);
     }
-
-    //Se le desgina un nombre al avatar
     $tmp = $_FILES['avatar']['tmp_name'];
     $ext = pathinfo($_FILES['avatar']['name'], PATHINFO_EXTENSION);
     $id = $_SESSION['user']['id'];
     $filename = "avatar_{$id}." . $ext;
     $dest = $avatarsDir . '/' . $filename;
-
 
     //Mueve el archivo
     if (!move_uploaded_file($tmp, $dest)) {
@@ -413,11 +438,8 @@ class UsuarioController extends Controller
   {
     $contracts = $this->usuarioModel->getContractsWithoutColaborador();
 
-    if (session_status() !== PHP_SESSION_ACTIVE)
-      session_start();
     $success = $_SESSION['success_message'] ?? null;
-    if (isset($_SESSION['success_message']))
-      unset($_SESSION['success_message']);
+    unset($_SESSION['success_message']);
 
     $this->view('usuarios.createAccount', [
       'contracts' => $contracts,
@@ -428,8 +450,8 @@ class UsuarioController extends Controller
   //CREAR COLABORADOR CON PERSONAS QUE TIENEN CONTRATO PERO NO UNA CUENTA 
   public function createFromContract(): void
   {
-    if (session_status() !== PHP_SESSION_ACTIVE)
-      session_start();
+    /* if (session_status() !== PHP_SESSION_ACTIVE)
+      session_start(); */
     $prevUser = $_SESSION['user'] ?? null;
 
     $idContrato = (int) ($_POST['idcontrato'] ?? 0);
@@ -437,19 +459,12 @@ class UsuarioController extends Controller
     $p1 = $_POST['password1'] ?? '';
     $p2 = $_POST['password2'] ?? '';
 
-    $errors = [];
-    if ($idContrato <= 0)
-      $errors[] = 'Selecciona un contrato.';
-    if ($usernick === '')
-      $errors[] = 'Introduce un nombre de usuario.';
-    if ($p1 === '' || $p2 === '')
-      $errors[] = 'Introduce y confirma la contraseña.';
-    if ($p1 !== $p2)
-      $errors[] = 'Las contraseñas no coinciden.';
-    if (strlen($p1) < 8)
-      $errors[] = 'La contraseña debe tener al menos 8 caracteres.';
-    if ($this->usuarioModel->searchByUsernick($usernick))
-      $errors[] = 'El usernick ya existe.';
+    $errors = $this->validator->validateCreateFromContract([
+      'idcontrato' => $idContrato,
+      'usernick' => $usernick,
+      'password1' => $p1,
+      'password2' => $p2
+    ], $this->usuarioModel);
 
     $contracts = $this->usuarioModel->getContractsWithoutColaborador();
 
@@ -475,7 +490,7 @@ class UsuarioController extends Controller
     } catch (\Throwable $e) {
       error_log('Error al crear colaborador: ' . $e->getMessage());
 
-      // restaurar sesión original si hacía falta
+      // restaurar sesion original si hacia falta
       if ($prevUser !== null)
         $_SESSION['user'] = $prevUser;
       $this->view('usuarios.createAccount', [
@@ -485,16 +500,14 @@ class UsuarioController extends Controller
       ]);
       return;
     }
-
-
-    // restaurar sesión original (evita login automático del nuevo usuario)
+    // restaurar sesion original (evita login automatico del nuevo usuario)
     if ($prevUser !== null) {
       $_SESSION['user'] = $prevUser;
     }
 
     // actualizar lista
-    if (session_status() !== PHP_SESSION_ACTIVE)
-      session_start();
+    /* if (session_status() !== PHP_SESSION_ACTIVE)
+      session_start(); */
     $_SESSION['success_message'] = "Cuenta creada correctamente para <strong>" . htmlspecialchars($usernick) . "</strong>";
     $this->redirect('/createAccount');
     return;

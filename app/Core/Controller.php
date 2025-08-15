@@ -5,40 +5,25 @@ namespace App\Core;
 
 class Controller
 {
-  protected function view(string $path, array $data = []): void
-  {
-    extract($data); // Extrae los datos para que estén disponibles como variables en la vista
-    require __DIR__ . '/../Views/' . str_replace('.', '/', $path) . '.php';
-  }
 
-  protected function redirect(string $path): void
-  {
-    header("Location: " . $path);
-    exit();
-  }
-
-  //PERMISOS
-  protected function authRequired(): void
+  public function __construct()
   {
     if (session_status() !== PHP_SESSION_ACTIVE) {
       session_start();
     }
 
-    if (empty($_SESSION['user'])) {
-      header('Location: /login');
-      exit;
-    }
-
-    //lerr timeout desde .env (en segundos) / Si no existe, fallback a 60.
+    // Leer timeout desde .env
     $rawTimeout = getenv('SESSION_TIMEOUT');
     $timeoutSeconds = ($rawTimeout !== false && $rawTimeout !== '') ? (int) $rawTimeout : 60;
 
-    //si existe last_activity, comprobar inactividad
+    // Si existe last_activity, comprobar inactividad y destruir sesion si corresponde
     if (isset($_SESSION['last_activity'])) {
       $inactive = time() - (int) $_SESSION['last_activity'];
       if ($inactive > $timeoutSeconds) {
-        // cerrar sesión por inactividad
-        $_SESSION = [];
+        // Cerrar sesión por inactividad
+        $_SESSION = [];  // Limpiar la sesión
+
+        // Borrar la cookie de la sesión
         if (ini_get("session.use_cookies")) {
           $params = session_get_cookie_params();
           setcookie(
@@ -55,13 +40,37 @@ class Controller
 
         session_start();
         $_SESSION['error_message'] = 'Sesión cerrada por inactividad.';
+
         header('Location: /login');
         exit;
       }
     }
 
-    // Actualizar last_activity para esta petición (si no expiró)
-    $_SESSION['last_activity'] = time();
+    // Actualizar last_activity solo si hay un usuario (para evitar crear last_activity en páginas públicas)
+    if (!empty($_SESSION['user'])) {
+      $_SESSION['last_activity'] = time();
+    }
+  }
+
+  protected function view(string $path, array $data = []): void
+  {
+    extract($data); // Extrae los datos para que estén disponibles como variables en la vista
+    require __DIR__ . '/../Views/' . str_replace('.', '/', $path) . '.php';
+  }
+
+  protected function redirect(string $path): void
+  {
+    header("Location: " . $path);
+    exit();
+  }
+
+  //PERMISOS
+  protected function authRequired(): void
+  {
+    if (empty($_SESSION['user'])) {
+      header('Location: /login');
+      exit;
+    }
 
     // evita cache del navegador
     header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
@@ -99,6 +108,5 @@ class Controller
     header("Pragma: no-cache");
   }
  */
-
 
 }

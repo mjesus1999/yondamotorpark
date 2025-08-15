@@ -282,7 +282,7 @@ class Usuario
     }
   }
 
-  //EJEMPLO PARA BUSCAR EL EMAIL Y EL TELEFONO
+  //EJEMPLO PARA BUSCAR EL EMAIL Y EL TELEFONO => PRUEBA
   public function findByEmailOrPhoneOrUsernick(string $identifier): ?array
   {
     try {

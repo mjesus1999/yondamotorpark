@@ -42,14 +42,14 @@
                             <?php endif; ?>
                             <form action="/login" method="POST" class="signin-form" id="formulario-login">
                                 <div class="form-group mb-3">
-                                    <label class="label" for="name">Nombre de usuario</label>
-                                    <input type="text" name="usernick" class="form-control"
+                                    <label class="label" for="usernick">Nombre de usuario</label>
+                                    <input type="text" id="usernick" name="usernick" class="form-control"
                                         placeholder="Nombre de usuario" required
                                         value="<?= isset($old['usernick']) ? htmlspecialchars($old['usernick']) : '' ?>">
                                 </div>
                                 <div class="form-group mb-3">
-                                    <label class="label" for="password">Contraseña</label>
-                                    <input type="password" name="userpassword" class="form-control"
+                                    <label class="label" for="userpassword">Contraseña</label>
+                                    <input type="password" id="userpassword" name="userpassword" class="form-control"
                                         placeholder="Contraseña" required>
                                 </div>
                                 <div class="form-group mt-4">

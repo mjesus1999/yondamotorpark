@@ -12,17 +12,11 @@ class AuthController extends Controller
 
     public function __construct()
     {
-        if (session_status() !== PHP_SESSION_ACTIVE) {
-            session_start();
-        }
         $this->usuarioModel = new Usuario();
     }
 
     public function showLogin(): void
     {
-        //redireccion al dashboard si inicia sesion
-        if (session_status() !== PHP_SESSION_ACTIVE)
-            session_start();
         if (!empty($_SESSION['user'])) {
             header('Location: /');
             exit;
@@ -39,14 +33,7 @@ class AuthController extends Controller
             'message' => $message,
             'old' => $old
         ]);
-        //$this->view('auth.login');
     }
-
-    /**
-     * MOSTRAR FORMULARIO DE RECUPERAR CUENTA (AL EXTRAVIO DE LA CLAVE)
-     * MOSTRANDO EL USERNICK (IDCOLABORADOR)
-     * MOSTRANDO EL EMAIL (DE ESE USERNICK = IDCOLABORADOR)
-     */
 
     public function showRecoverForm(): void
     {
@@ -54,7 +41,7 @@ class AuthController extends Controller
         $data = [];
 
         if ($usernick !== '') {
-            // buscar colaborador por usernick
+            // Buscar colaborador por usernick
             $user = $this->usuarioModel->searchByUsernick($usernick);
             if ($user) {
                 $full = $this->usuarioModel->getById((int) $user['idcolaborador']);
@@ -62,7 +49,6 @@ class AuthController extends Controller
                 $data['email'] = $full['email'] ?? '';
                 $data['telprimario'] = $full['telprimario'] ?? '';
             } else {
-                // si no existe, igual enviamos el usernick para mostrarlo
                 $data['usernick'] = $usernick;
             }
         }
@@ -72,13 +58,10 @@ class AuthController extends Controller
 
     public function login(): void
     {
-        if (session_status() !== PHP_SESSION_ACTIVE)
-            session_start();
-
         $usernick = trim($_POST['usernick'] ?? '');
         $password = $_POST['userpassword'] ?? '';
 
-        //Buscar usuario
+        // Buscar usuario
         $user = $this->usuarioModel->searchByUsernick($usernick);
 
         if (!$user || ($user['habilitado'] ?? 'N') !== 'S') {
@@ -87,7 +70,7 @@ class AuthController extends Controller
             exit;
         }
 
-        //Verificar contraseña
+        // Verificar contraseña
         if (!password_verify($password, $user['userpassword'])) {
             $_SESSION['login_error'] = 'Contraseña incorrecta.';
             $_SESSION['login_old'] = ['usernick' => $usernick];
@@ -95,10 +78,9 @@ class AuthController extends Controller
             exit;
         }
 
-        //Restricción horaria
+        // Restricción horaria
         $restr = $user['restriccionhoraria'] ?? 'N';
         if ($restr === 'S') {
-            //HH:MM
             $norm = function (string $t) {
                 $t = trim($t);
                 if ($t === '')
@@ -116,17 +98,15 @@ class AuthController extends Controller
             $start = $norm(getenv('STARTIME'));
             $end = $norm(getenv('ENDTIME'));
 
-
             if ($start === null || $end === null) {
                 $this->view('auth.login', ['error' => 'Configuración de horario inválida. Contacta al administrador.']);
                 return;
             }
 
             $tz = new \DateTimeZone('America/Lima');
-            //prueba para permitir forzar hora con env SIMULATE_NOW
             $simulate = getenv('SIMULATE_NOW') ?: null;
             $now = $simulate ? new \DateTime($simulate, $tz) : new \DateTime('now', $tz);
-            $dow = (int) $now->format('N'); //1=Lun a 7 =Dom
+            $dow = (int) $now->format('N'); // 1=Lun a 7=Dom
 
             if ($dow === 7) {
                 $this->view('auth.login', ['error' => "Acceso restringido los domingos. Acceso permitido sólo Lunes a Sábado entre $start y $end."]);
@@ -137,13 +117,11 @@ class AuthController extends Controller
             $startDT = \DateTime::createFromFormat('Y-m-d H:i', "$today $start", $tz);
             $endDT = \DateTime::createFromFormat('Y-m-d H:i', "$today $end", $tz);
 
-            // Manejar intervalos que cruzan medianoche (p. ej. 22:00 - 06:00)
+            // Manejar intervalos que cruzan medianoche
             $isInside = false;
             if ($startDT <= $endDT) {
-                //para el horario normal:
                 $isInside = ($now >= $startDT && $now <= $endDT);
             } else {
-                // cruza medianoche: acceso si ahora >= start o ahora <= end (siguiente día)
                 $endNext = clone $endDT;
                 $endNext->modify('+1 day');
                 if ($now >= $startDT || $now <= $endNext) {
@@ -159,7 +137,7 @@ class AuthController extends Controller
             }
         }
 
-        //regenerar id y poblar sesión => login
+        // Regenerar ID y poblar sesión
         session_regenerate_id(true);
         $_SESSION['user'] = [
             'id' => $user['idcolaborador'],
@@ -172,7 +150,6 @@ class AuthController extends Controller
         ];
 
         $_SESSION['last_activity'] = time();
-        //Actualizar acceso
         $this->usuarioModel->updateLastAccess((int) $user['idcolaborador']);
 
         header('Location: /');
@@ -181,18 +158,11 @@ class AuthController extends Controller
 
     public function logout(): void
     {
-        if (session_status() !== PHP_SESSION_ACTIVE)
-            session_start();
         $_SESSION = [];
         session_destroy();
         header('Location: /login');
         exit;
     }
-
-    /**
-     * MANEJAR LA RECUPERACION DE CUENTA 
-     * AL PERDER LA CLAVE
-     */
 
     public function handleRecover(): void
     {
@@ -201,8 +171,8 @@ class AuthController extends Controller
         $password = $_POST['password'] ?? '';
         $password_confirm = $_POST['password_confirm'] ?? '';
 
-        // validaciones mínimas
-        if ($usernick === '' || $email === '' || $password === '' || $password_confirm === '') {
+        // Validaciones
+        if (empty($usernick) || empty($email) || empty($password) || empty($password_confirm)) {
             $this->view('auth.recoverAccount', ['error' => 'Completa todos los campos.', 'usernick' => $usernick, 'email' => $email]);
             return;
         }
@@ -215,14 +185,14 @@ class AuthController extends Controller
             return;
         }
 
-        // buscar colaborador por usernick
+        // Buscar usuario por usernick
         $user = $this->usuarioModel->searchByUsernick($usernick);
         if (!$user) {
             $this->view('auth.recoverAccount', ['error' => 'Usuario no encontrado.', 'usernick' => $usernick, 'email' => $email]);
             return;
         }
 
-        // obtener email real desde getById
+        // Obtener email real desde getById
         $full = $this->usuarioModel->getById((int) $user['idcolaborador']);
         $emailStored = $full['email'] ?? '';
 
@@ -231,13 +201,13 @@ class AuthController extends Controller
             return;
         }
 
-        // comparar emails (case-insensitive)
+        // Comparar emails
         if (mb_strtolower(trim($emailStored)) !== mb_strtolower(trim($email))) {
             $this->view('auth.recoverAccount', ['error' => 'El email no coincide con el usuario.', 'usernick' => $usernick, 'email' => $email]);
             return;
         }
 
-        // actualizar contraseña
+        // Actualizar contraseña
         $newHash = password_hash($password, PASSWORD_DEFAULT);
         $ok = $this->usuarioModel->updatePassword((int) $user['idcolaborador'], $newHash);
 
@@ -249,13 +219,9 @@ class AuthController extends Controller
         $this->view('auth.recoverAccount', ['error' => 'No se pudo actualizar la contraseña. Intenta más tarde.', 'usernick' => $usernick, 'email' => $email]);
     }
 
-    // si la sesion esta actuva:
+    // Mantener la sesión activa
     public function keepAlive(): void
     {
-        if (session_status() !== PHP_SESSION_ACTIVE) {
-            session_start();
-        }
-
         header('Content-Type: application/json; charset=utf-8');
 
         if (empty($_SESSION['user'])) {
@@ -265,15 +231,11 @@ class AuthController extends Controller
         }
 
         $_SESSION['last_activity'] = time();
-
         echo json_encode(['ok' => true, 'last_activity' => $_SESSION['last_activity']]);
     }
 
-
     //pruebas para simular el codigo de verificacion
     //RECUPERACION DE CUENTA SEGUN LA CLAVE / CON SMS O EMAIL 
-
-    // app/Controllers/AuthController.php (dentro de la clase AuthController)
 
     private function sendMailSimple(string $to, string $subject, string $body): bool
     {
@@ -409,6 +371,5 @@ class AuthController extends Controller
             echo json_encode(['ok' => false, 'message' => 'No se pudo actualizar la contraseña. Intenta más tarde.']);
         }
     }
-
 
 }
