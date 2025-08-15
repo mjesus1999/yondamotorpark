@@ -23,7 +23,7 @@ class PagoCronograma
      * @return array
      */
 
-    public function addMultiplePaymentsAndCheckStatus(array $pagoCuota, ?array $pagoPenalidad = null): array
+    public function addMultiplePagos(array $pagoCuota, ?array $pagoPenalidad = null): array
     {
         try {
             $this->db->beginTransaction();
@@ -51,7 +51,7 @@ class PagoCronograma
 
             // Actualizar el estado del cronograma si se han registrado pagos
             if (!empty($ids)) {
-                $this->checkAndMarkAsPaid($pagoCuota['idcronograma']);
+                $this->checkCuotaPagada($pagoCuota['idcronograma']);
             }
 
             $this->db->commit();
@@ -101,7 +101,7 @@ class PagoCronograma
      * @param int $idCronograma
      * @return void
      */
-    protected function checkAndMarkAsPaid(int $idCronograma): void
+    protected function checkCuotaPagada(int $idCronograma): void
     {
         $queryAmortizado = "SELECT tipo, COALESCE(SUM(amortizacion), 0) as total_amortizado FROM pagos WHERE idcronograma = :idcronograma GROUP BY tipo";
         $stmtAmortizado = $this->db->prepare($queryAmortizado);
@@ -138,12 +138,27 @@ class PagoCronograma
      */
     public function getCronogramaData(int $idCronograma): array|false
     {
-        $query = "SELECT coti.valorcuota, cro.penalidad, cro.estado FROM cronogramas cro JOIN contratos cont ON cro.idcontrato = cont.idcontrato JOIN cotizaciones coti ON cont.idcotizacion = coti.idcotizacion WHERE cro.idcronograma = :idcronograma";
+        $query = "SELECT 
+                    cont.idcontrato,
+                    cro.penalidad,
+                    coti.valorcuota - COALESCE((
+                                SELECT SUM(pag.amortizacion)
+                                FROM pagos pag
+                                WHERE pag.idcronograma = cro.idcronograma
+                                AND pag.tipo = 'Cuota'
+                            ), 0) AS cuotapendiente,
+                    cro.estado 
+                    FROM cronogramas cro 
+                    JOIN contratos cont ON cro.idcontrato = cont.idcontrato 
+                    JOIN cotizaciones coti ON cont.idcotizacion = coti.idcotizacion 
+                    WHERE cro.idcronograma = :idcronograma;";
         $stmt = $this->db->prepare($query);
         $stmt->bindValue(':idcronograma', $idCronograma);
         $stmt->execute();
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
+
+
 
 
 

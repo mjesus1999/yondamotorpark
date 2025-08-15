@@ -67,21 +67,15 @@ input*:disabled {
 
 
 
-/* Fila deshabilitada (gris) */
-.fila-deshabilitada {
-  background-color: #5ba9cf !important;
-}
-
-
 /* Filas deshabilitadas específicas */
-tr[data-disabled="true"] {
+ tr[data-disabled="true"] {
   opacity: 0.75;
   pointer-events: none;
 }
 
 tr[data-disabled="true"]:hover {
   background-color: inherit !important;
-}
+} 
 
 /* Texto especial para cuotas sin pago */
 .text-sin-pago {

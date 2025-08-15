@@ -54,7 +54,7 @@ BEGIN
             AND pag.tipo = 'Cuota'
         ), 0) AS saldocuota_pendiente,
 
-        --  CAMBIO CLAVE: CÁLCULO DEL SALDO PENDIENTE DE LA PENALIDAD
+        --   CÁLCULO DEL SALDO PENDIENTE DE LA PENALIDAD
         cro.penalidad - COALESCE((
             SELECT SUM(pag.amortizacion)
             FROM pagos pag
@@ -169,13 +169,14 @@ CALL sp_get_pagos_by_contrato (1);
 
 DELIMITER;
 
-USE motorpark;
+USE motorpark2
 
 SELECT * FROM contratos;
 SELECT * FROM pagos;
 
 SELECT * FROM cronogramas;
 
+UPDATE cronogramas SET fechapago = '2025-08-14' WHERE idcronograma = 1648;
 UPDATE cronogramas SET fechapago = '2026-03-13', penalidad = 0, aplicapenalidad = 'N', estado = 'Pagado' WHERE idcronograma = 1521;
 UPDATE  cronogramas SET fechapago = '2026-05-13', penalidad = 0, aplicapenalidad ='N', estado = 'Pendiente' WHERE idcronograma = 1521;
 

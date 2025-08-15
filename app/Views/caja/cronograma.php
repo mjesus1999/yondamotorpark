@@ -64,7 +64,7 @@
                                 <?php else: ?>
                                     <?php
                                     $hoy = new DateTimeImmutable('today');
-                                    $cuotaHabilitada = false; // Controlamos si ya habilitamos una cuota pendiente
+                                    $cuotaHabilitada = false;
 
                                     foreach ($cronograma as $index => $fila) {
                                         $fecha_cuota = new DateTimeImmutable($fila['fechapago']);
@@ -81,6 +81,7 @@
                                         $fila_deshabilitada = false;
                                         $es_sin_pago = ($amortizacion == 0);
 
+                                        // Lógica para asignar las clases y el texto
                                         if ($estado === 'pagado') {
                                             $clase_fila = 'bg-success table-success';
                                             $clase_estado = 'estado-pagado';
@@ -88,30 +89,30 @@
                                             $texto_vencimiento = 'Pagado';
                                             $fila_deshabilitada = true;
                                         } elseif (!$cuotaHabilitada) {
-                                            // Primera cuota pendiente habilitada (sin importar si amortización es 0 o no)
-                                            $clase_fila = 'fila-pendiente-pago table-warning';
-                                            $clase_estado = ($es_sin_pago ? 'estado-sin-pago' : 'estado-pendiente');
-                                            $icono = ($es_sin_pago ? 'fa-exclamation-triangle' : 'fa-clock');
-
+                                            // Primera cuota pendiente habilitada
                                             if ($hoy > $fecha_cuota) {
                                                 $dias_vencido = $fecha_cuota->diff($hoy)->days;
                                                 $texto_vencimiento = "Venció hace $dias_vencido días";
                                                 $clase_estado = 'estado-vencido';
+                                                $clase_fila = 'bg-danger table-danger';
                                                 $icono = 'fa-exclamation-triangle';
                                             } else {
                                                 $dias_faltantes = $hoy->diff($fecha_cuota)->days;
                                                 $texto_vencimiento = "Vence en $dias_faltantes días";
+                                                $clase_estado = ($es_sin_pago ? 'estado-sin-pago' : 'estado-pendiente');
+                                                $icono = ($es_sin_pago ? 'fa-exclamation-triangle' : 'fa-clock');
+                                                $clase_fila = 'fila-pendiente-pago table-warning';
                                             }
 
                                             $fila_deshabilitada = false;
                                             $cuotaHabilitada = true; // Solo esta cuota se habilita
                                         } else {
-                                            // Futuras cuotas: deshabilitadas
+                                            // Futuras cuotas
                                             $clase_fila = 'fila-deshabilitada';
                                             $clase_estado = 'estado-pendiente';
                                             $icono = 'fa-lock';
-                                            if ($hoy > $fecha_cuota) {
 
+                                            if ($hoy > $fecha_cuota) {
                                                 $dias_vencido = $fecha_cuota->diff($hoy)->days;
                                                 $texto_vencimiento = "Venció hace $dias_vencido días";
                                                 $clase_estado = 'estado-vencido';
@@ -141,7 +142,7 @@
                                             <td>
                                                 <div class="d-flex flex-column">
                                                     <span class="fw-bold"><?= $fecha_formateada ?></span>
-                                                    <small class="<?= $estado === 'pagado' ? 'text-success fw-bold' : ($es_sin_pago ? 'text-danger fw-bold' : 'text-muted') ?>">
+                                                    <small class="<?= $clase_estado === 'estado-vencido' ? 'text-danger fw-bold' : ($estado === 'pagado' ? 'text-success fw-bold' : 'text-muted') ?>">
                                                         <?= $texto_vencimiento ?>
                                                     </small>
                                                 </div>
@@ -167,7 +168,6 @@
                                                     }
                                                     ?>
                                                 </span>
-
                                             </td>
                                             <td>
                                                 <?php if ($estado === 'pagado'): ?>
@@ -195,10 +195,7 @@
                                                         data-saldo-penalidad="<?= $fila['penalidad_pendiente'] ?>">
                                                         <i class="fa-solid fa-dollar-sign me-1"></i> Pagar
                                                     </button>
-
-
                                                 <?php endif; ?>
-
                                             </td>
                                         </tr>
                                     <?php } ?>
@@ -239,175 +236,171 @@
     </div>
 </div>
 
-<!-- MODAL DE PAGOS  -->
 
+<!-- MODAL DE PAGOS  -->
 <div class="modal fade" id="modalPago" tabindex="-1" aria-labelledby="modalPagoLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content border-0">
-            <div class="modal-header bg-gradient-primary text-white">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content shadow-lg">
+            <!-- Header -->
+            <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title" id="modalPagoLabel">
                     <i class="fas fa-cash-register me-2"></i> Procesar Pago
                 </h5>
-                <button type="button" class="btn-close btn-close-primary" data-bs-dismiss="modal"
-                    aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
-                <div class="alert alert-info">
-                    <i class="fas fa-info-circle me-2"></i> <span id="numero-cuota"></span>
+
+            <!-- Body -->
+            <div class="modal-body p-4 ">
+                <div class="alert alert-info py-2" role="alert">
+                    <i class="fas fa-info-circle me-2"></i> <span id="numero-cuota" class="fw-bold">N° 25</span>
                 </div>
 
                 <form id="formPago" enctype="multipart/form-data">
-                    <input type="hidden" name="idcronograma" id="idcronograma-input">
-                    <div class="row mb-3">
-                        <div class="col-md-6 mb-3">
-                            <div class="card border-left-primary h-100">
+                    <div class="row g-4">
+                        <!-- Detalles de la Deuda  -->
+                        <div class="col-md-5 col-lg-4">
+                            <div class="card h-70">
                                 <div class="card-body">
-                                    <h6 class="card-title text-primary">
-                                        <i class="fas fa-file-invoice-dollar me-2"></i>Detalles de la Deuda
+                                    <h6 class="card-title text-primary-dark mb-3">
+                                        <i class="fas fa-file-invoice-dollar me-2"></i> Detalles de la Deuda
                                     </h6>
-                                    <div class="mb-2">
-                                        <label class="form-label small text-muted">Saldo Cuota</label>
+
+                                    <div class="mb-4">
+                                        <label class="form-label fw-bold small text-muted">Saldo Cuota</label>
                                         <div class="input-group">
-                                            <span class="input-group-text bg-body-tertiary"><i
-                                                    class="fas fa-dollar-sign text-primary"></i></span>
-                                            <input type="text" class="form-control bg-body-tertiary" value="" disabled
-                                                id="detalle-cuota">
+                                            <span class="input-group-text bg-light border-0 text-primary fs-5"><i class="fas fa-dollar-sign"></i></span>
+                                            <input type="text" class="form-control form-control-lg bg-light border-0 fw-bold" value="" disabled id="detalle-cuota">
                                         </div>
                                     </div>
-                                    <div class="mb-2">
-                                        <label class="form-label small text-muted">Penalidad</label>
+
+                                    <div class="mb-4">
+                                        <label class="form-label fw-bold small text-muted">Penalidad</label>
                                         <div class="input-group">
-                                            <span class="input-group-text bg-body-tertiary"><i
-                                                    class="fas fa-exclamation-circle text-danger"></i></span>
-                                            <input type="text" class="form-control bg-body-tertiary" disabled
-                                                id="detalle-penalidad">
+                                            <span class="input-group-text bg-light border-0 text-danger fs-5"><i class="fas fa-exclamation-circle"></i></span>
+                                            <input type="text" class="form-control form-control-lg bg-light border-0 fw-bold" disabled id="detalle-penalidad">
                                         </div>
                                     </div>
-                                    <div>
-                                        <label class="form-label small text-muted">Total Deuda</label>
+
+                                    <hr class="my-4">
+
+                                    <div class="mb-1">
+                                        <label class="form-label fw-bold small text-muted">Total Deuda</label>
                                         <div class="input-group">
-                                            <span class="input-group-text bg-body-tertiary"><i
-                                                    class="fas fa-calculator text-success"></i></span>
-                                            <input type="text" class="form-control bg-body-tertiary fw-bold " disabled
-                                                id="detalle-total-deuda">
+                                            <span class="input-group-text bg-light border-0 text-success fs-5"><i class="fas fa-calculator"></i></span>
+                                            <input type="text" class="form-control form-control-lg bg-light border-0 fw-bold text-success fs-5" disabled id="detalle-total-deuda">
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <div class="card border-left-success h-100">
+
+                        <!-- Detalles de Pago & Método de Pago -->
+                        <div class="col-md-7 col-lg-8 d-flex flex-column gap-4">
+                            <!-- Card de Detalles del Pago -->
+                            <div class="card">
                                 <div class="card-body">
-                                    <h6 class="card-title text-success">
-                                        <i class="fas fa-hand-holding-usd me-2"></i>Detalles del Pago
+                                    <h6 class="card-title text-success mb-3">
+                                        <i class="fas fa-hand-holding-usd me-2"></i> Detalles del Pago
                                     </h6>
-                                    <div class="mb-3">
-                                        <label class="form-label small text-muted">Tipo de Pago</label>
-                                        <select class="form-select" id="tipoPago" name="tipoPago">
-                                            <option value="soloCuota">Solo Cuota</option>
-                                            <option value="soloPenalidad">Solo Penalidad</option>
-                                            <option value="ambas">Ambas</option>
-                                        </select>
+                                    <div class="row g-3">
+                                        <div class="col-md-6" id="contenedor-tipo-pago">
+                                            <label class="form-label small text-muted">Tipo de Pago</label>
+                                            <select class="form-select" id="tipoPago" name="tipoPago"></select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label small text-muted">Fecha de Pago</label>
+                                            <input type="date" class="form-control" value="2025-08-15" name="fechapago" id="fechapago">
+                                        </div>
                                     </div>
 
-                                    <!-- Campos para pago de cuota -->
-                                    <div id="pagoCuota-group">
-                                        <div class="mb-2">
-                                            <label class="form-label small text-muted">Monto de cuota</label>
-                                            <div class="input-group">
-                                                <span class="input-group-text bg-body-tertiary"><i
-                                                        class="fas fa-coins text-warning"></i></span>
+                                    <div id="pagoCuota-group" class="col-12 mt-4">
+                                        <hr class="my-3">
+                                        <h6 class="fw-bold text-muted small"><i class="fas fa-coins text-warning me-2"></i> Pago de Cuota</h6>
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label small text-muted">Monto de cuota</label>
                                                 <input type="text" class="form-control" id="amortizacionCuota" name="amortizacionCuota">
                                             </div>
-                                        </div>
-                                        <div class="mb-2">
-                                            <label class="form-label small text-muted">Comprobante de Cuota</label>
-                                            <input id="comprobanteCuota" class="form-control" type="file" name="comprobanteCuota" placeholder="Seleccione un archivo" accept="image/*,.pdf">
-                                        </div>
-                                    </div>
-
-                                    <!-- Campos para pago de penalidad -->
-                                    <div id="pagoPenalidad-group" class="d-none">
-                                        <div class="mb-2">
-                                            <label class="form-label small text-muted">Monto de penalidad</label>
-                                            <div class="input-group">
-                                                <span class="input-group-text bg-body-tertiary"><i
-                                                        class="fas fa-coins text-warning"></i></span>
-                                                <input type="text" class="form-control" id="amortizacionPenalidad" name="amortizacionPenalidad" disabled>
+                                            <div class="col-md-6">
+                                                <label class="form-label small text-muted">Comprobante de Cuota</label>
+                                                <input id="comprobanteCuota" class="form-control" type="file" name="comprobanteCuota" accept="image/*,.pdf">
                                             </div>
                                         </div>
-                                        <div class="mb-2">
-                                            <label class="form-label small text-muted">Comprobante de Penalidad</label>
-                                            <input id="comprobantePenalidad" class="form-control" type="file" name="comprobantePenalidad" placeholder="Seleccione un archivo" accept="image/*,.pdf">
-                                        </div>
                                     </div>
 
-                                    <div>
-                                        <label class="form-label small text-muted">Fecha de Pago</label>
-                                        <div class="input-group">
-                                            <span class="input-group-text bg-body-tertiary"><i
-                                                    class="far fa-calendar-alt text-secondary"></i></span>
-                                            <input type="date" class="form-control" value="<?= date('Y-m-d') ?>" name="fechapago"
-                                                id="fechapago">
+                                    <div id="pagoPenalidad-group" class="col-12 mt-4">
+                                        <hr class="my-3">
+                                        <h6 class="fw-bold text-muted small"><i class="fas fa-gavel text-danger me-2"></i> Pago de Penalidad</h6>
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label small text-muted">Monto de penalidad</label>
+                                                <input type="text" class="form-control" id="amortizacionPenalidad" name="amortizacionPenalidad">
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label small text-muted">Comprobante de Penalidad</label>
+                                                <input id="comprobantePenalidad" class="form-control" type="file" name="comprobantePenalidad" accept="image/*,.pdf">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Card de Método de Pago -->
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6 class="card-title text-info mb-3">
+                                        <i class="fas fa-credit-card me-2"></i> Método de Pago
+                                    </h6>
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label small text-muted">Modalidad</label>
+                                            <select class="form-select" id="mediopago" name="mediopago">
+                                                <option value="Efectivo">Efectivo</option>
+                                                <option value="Yape">Yape</option>
+                                                <option value="Transferencia Bancaria">Transferencia Bancaria</option>
+                                                <option value="Plin">Plin</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6 mb-3 hidden select-cuentas">
+                                            <label class="form-label small text-muted">N°cuenta</label>
+                                            <select class="form-select" id="idcuentapago" name="idcuentapago"></select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label small text-muted">N° operación</label>
+                                            <input type="text" class="form-control" name="numerotransaccion" placeholder="Opcional para transferencias" id="numerotransaccion" maxlength="30" minlength="6">
+                                        </div>
+                                        <div class=" hidden col-md-6">
+                                            <label class="form-label small text-muted">N° operación - penalidad</label>
+                                            <input type="text" class="form-control" name="numerotransaccion-penalidad" placeholder="Opcional para transferencias" id="numerotransaccion-penalidad">
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <div class="card border-left-info h-100">
+                        <!-- Observaciones -->
+                        <div class="col-12">
+                            <div class="card">
                                 <div class="card-body">
-                                    <h6 class="card-title text-info">
-                                        <i class="fas fa-credit-card me-2"></i>Método de Pago
+                                    <h6 class="card-title text-secondary mb-3">
+                                        <i class="fas fa-sticky-note me-2"></i> Observaciones
                                     </h6>
-                                    <div class="mb-2">
-                                        <label class="form-label small text-muted">Modalidad</label>
-                                        <select class="form-select" id="mediopago" name="mediopago">
-                                            <option value="Efectivo">Efectivo</option>
-                                            <option value="Yape">Yape</option>
-                                            <option value="Transferencia Bancaria">Transferencia Bancaria</option>
-                                            <option value="Plin">Plin</option>
-                                        </select>
-                                    </div>
-                                    <div class="mb-2 hidden select-cuentas">
-                                        <label class="form-label small text-muted">Número de cuenta</label>
-                                        <select class="form-select"
-                                            id="idcuentapago" name="idcuentapago">
-                                            <option>Seleccione</option>
-                                        </select>
-                                    </div>
-                                    <div class="mb-2">
-                                        <label class="form-label small text-muted">Número de Operación</label>
-                                        <input type="text" class="form-control" name="numerotransaccion"
-                                            placeholder="Opcional para transferencias" id="numerotransaccion">
-                                    </div>
+                                    <textarea class="form-control" rows="3" placeholder="Ingresa cualquier observación..." id="observacion" name="observacion"></textarea>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <div class="card border-left-secondary h-100">
-                                <div class="card-body">
-                                    <h6 class="card-title text-secondary">
-                                        <i class="fas fa-sticky-note me-2"></i>Observaciones
-                                    </h6>
-                                    <textarea class="form-control" rows="4"
-                                        placeholder="Ingrese cualquier observación..." id="observacion" name="observacion"></textarea>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-                            <i class="fas fa-times me-1"></i> Cancelar
-                        </button>
-                        <button type="submit" class="btn btn-success" id="btn-form-submit">
-                            <i class="fas fa-check-circle me-1"></i> Confirmar Pago
-                        </button>
                     </div>
                 </form>
+            </div>
+
+            <!-- Footer -->
+            <div class="modal-footer d-flex justify-content-end p-3 border-top">
+                <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i> Cancelar
+                </button>
+                <button type="submit" class="btn btn-success px-4" id="btn-confirmar-pago" form="formPago">
+                    <i class="fas fa-check-circle me-1"></i> Confirmar Pago
+                </button>
             </div>
         </div>
     </div>
@@ -415,328 +408,359 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
-
-
-
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', () => {
 
-
-
-        // Variables globales
-        const itemsPerPage = 10;
-        const totalItems = <?= count($cronograma) ?>;
-        const totalPages = Math.ceil(totalItems / itemsPerPage);
-        let currentPage = 1;
-
-        const numeroCuenta = document.querySelector('#idcuentapago');
-        const medioPago = document.querySelector('#mediopago');
-        const numeroTransaccion = document.querySelector('#numerotransaccion');
-        const fechaPago = document.querySelector('#fechapago');
-        const selectCuentas = document.querySelector('.select-cuentas');
-        const observacion = document.querySelector('#observacion');
-        const formPago = document.querySelector('#formPago');
-
-        // Nuevos elementos para la lógica dinámica
-        const tipoPagoSelect = document.querySelector('#tipoPago');
-        const pagoCuotaGroup = document.querySelector('#pagoCuota-group');
-        const pagoPenalidadGroup = document.querySelector('#pagoPenalidad-group');
-
-
-        // INPUTS PARA EL DETALLE DE LA DEUDA 
-
-
-
-
-
-
-        // INPUTS PARA EL VALOR DE LOS PAGOS.
-        const amortizacionCuotaInput = document.querySelector('#amortizacionCuota');
-        const amortizacionPenalidadInput = document.querySelector('#amortizacionPenalidad');
-
-        const comprobanteCuotaInput = document.querySelector('#comprobanteCuota');
-        const comprobantePenalidadInput = document.querySelector('#comprobantePenalidad');
-        const idCronogramaInput = document.querySelector('#idcronograma-input');
-
-        // Variables globales
+        // ========================
+        // 1. VARIABLES
+        // ========================
+        const config = {
+            itemsPerPage: 10,
+            totalItems: <?= count($cronograma) ?>,
+        };
+        config.totalPages = Math.ceil(config.totalItems / config.itemsPerPage);
+        let currentPage = parseInt(localStorage.getItem('currentPage') || '1');
         let idCronogramaSeleccionado = null;
-        let valorCuotaDeuda = document.querySelector('#btn-pagar').getAttribute('data-saldo-cuota');
-        let valorPenalidadDeuda = document.querySelector('#btn-pagar').getAttribute('data-saldo-penalidad');
+        let valorCuotaDeuda = 0;
+        let valorPenalidadDeuda = 0;
 
-        // Función para mostrar/ocultar campos de pago
-        const actualizarCamposDePago = () => {
-            const tipoPago = tipoPagoSelect.value;
-
-            pagoCuotaGroup.classList.add('d-none');
-            pagoPenalidadGroup.classList.add('d-none');
-            amortizacionCuotaInput.disabled = true;
-            amortizacionPenalidadInput.disabled = true;
-
-            if (tipoPago === 'soloCuota' || tipoPago === 'ambas') {
-                pagoCuotaGroup.classList.remove('d-none');
-                amortizacionCuotaInput.disabled = false;
-
-            }
-
-            if (tipoPago === 'soloPenalidad' || tipoPago === 'ambas') {
-                pagoPenalidadGroup.classList.remove('d-none');
-                amortizacionPenalidadInput.disabled = false;
-
-            }
+        const elements = {
+            tablaBody: document.getElementById('tabla-body'),
+            infoPaginacion: document.getElementById('info-paginacion'),
+            paginacion: document.getElementById('paginacion'),
+            inputBuscar: document.getElementById('inputBuscar'),
+            btnPdf: document.getElementById('btn-pdf'),
+            btnConfirmarPago: document.getElementById('btn-confirmar-pago'),
+            modalPago: new bootstrap.Modal(document.getElementById('modalPago')),
+            formPago: document.getElementById('formPago'),
+            numeroCuotaDisplay: document.getElementById('numero-cuota'),
+            detalleCuotaInput: document.getElementById('detalle-cuota'),
+            detallePenalidadInput: document.getElementById('detalle-penalidad'),
+            detalleTotalDeudaInput: document.getElementById('detalle-total-deuda'),
+            tipoPagoSelect: document.getElementById('tipoPago'),
+            contenedorTipoPago: document.getElementById('contenedor-tipo-pago'),
+            pagoCuotaGroup: document.getElementById('pagoCuota-group'),
+            pagoPenalidadGroup: document.getElementById('pagoPenalidad-group'),
+            amortizacionCuotaInput: document.getElementById('amortizacionCuota'),
+            amortizacionPenalidadInput: document.getElementById('amortizacionPenalidad'),
+            comprobanteCuotaInput: document.getElementById('comprobanteCuota'),
+            comprobantePenalidadInput: document.getElementById('comprobantePenalidad'),
+            medioPagoSelect: document.getElementById('mediopago'),
+            selectCuentas: document.querySelector('.select-cuentas'),
+            numeroCuentaSelect: document.getElementById('idcuentapago'),
+            numeroTransaccionInput: document.getElementById('numerotransaccion'),
+            fechaPagoInput: document.getElementById('fechapago'),
+            observacionInput: document.getElementById('observacion'),
+            contenedorInputMontoCuota: document.getElementById('contenedor-monto-cuota')
         };
 
-        // Evento para el cambio en el select de tipo de pago
-        tipoPagoSelect.addEventListener('change', actualizarCamposDePago);
+        // ========================
+        // 2. FUNCIONES 
+        // ========================
 
-        medioPago.addEventListener('change', async (e) => {
-            let valor = e.target.value;
-
-            if (valor.toLowerCase() === 'transferencia bancaria') {
-                selectCuentas.classList.remove('hidden');
-
-                try {
-                    const res = await fetch('/api/numcuentaspagos');
-                    const data = await res.json();
-
-                    numeroCuenta.innerHTML = '<option value="">Selecciona una cuenta</option>';
-
-                    if (data.length > 0) {
-                        data.forEach(e => {
-                            numeroCuenta.innerHTML += `<option value="${e.idcuentapago}">${e.nombrecuenta}</option>`;
-                        });
-                    }
-                } catch (error) {
-                    console.error(error);
-                }
-
-            } else {
-                selectCuentas.classList.add('hidden');
-                numeroCuenta.innerHTML = '';
-            }
-        });
-
-        formPago.addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            if (!idCronogramaSeleccionado) {
-                showToast('No se seleccionó ninguna cuota. Intenta nuevamente.', 'INFO', 1200);
-                return;
-            }
-
-            const tipoPago = tipoPagoSelect.value;
-            const amortizacionCuota = parseFloat(amortizacionCuotaInput.value);
-            const amortizacionPenalidad = parseFloat(amortizacionPenalidadInput.value);
-
-            // Validaciones generales
-            if (tipoPago === 'soloCuota' && (isNaN(amortizacionCuota) || amortizacionCuota <= 0)) {
-                showToast('Ingresa un monto de cuota válido.', 'INFO', 1200);
-                return;
-            }
-            if (tipoPago === 'soloPenalidad' && (isNaN(amortizacionPenalidad) || amortizacionPenalidad <= 0)) {
-                showToast('Ingresa un monto de penalidad válido.', 'INFO', 1200);
-                return;
-            }
-            if (tipoPago === 'ambas' && ((isNaN(amortizacionCuota) || amortizacionCuota <= 0) && (isNaN(amortizacionPenalidad) || amortizacionPenalidad <= 0))) {
-                showToast('Ingresa al menos un monto de amortización válido (cuota o penalidad).', 'INFO', 1200);
-                return;
-            }
-
-            // Validación de montos contra la deuda
-            if (tipoPago === 'soloCuota' && amortizacionCuota > valorCuotaDeuda) {
-                showToast(`La amortización de la cuota no puede ser mayor a S/ ${valorCuotaDeuda.toFixed(2)}.`, 'INFO', 1200);
-                return;
-            }
-            if (tipoPago === 'soloPenalidad' && amortizacionPenalidad > valorPenalidadDeuda) {
-                showToast(`La amortización de la penalidad no puede ser mayor a S/ ${valorPenalidadDeuda.toFixed(2)}.`, 'INFO', 1200);
-                return;
-            }
-            if (tipoPago === 'ambas' && (amortizacionCuota > valorCuotaDeuda || amortizacionPenalidad > valorPenalidadDeuda)) {
-                showToast(`La amortización no puede ser mayor a la deuda restante.`, 'INFO', 1200);
-                return;
-            }
-
-            // Validar cuenta si es transferencia
-            if (medioPago.value.toLowerCase() === 'transferencia bancaria' && numeroCuenta.value === '') {
-                showToast('Debes seleccionar una cuenta bancaria', 'INFO', 1200);
-                return;
-            }
-
-            const formData = new FormData();
-            formData.append('idcronograma', idCronogramaSeleccionado);
-            formData.append('mediopago', medioPago.value);
-            formData.append('numerotransaccion', numeroTransaccion.value ?? '');
-            formData.append('fechapago', fechaPago.value);
-            formData.append('observacion', observacion.value ?? '');
-
-            // Agregar los campos dinámicamente al FormData
-            if (tipoPago === 'soloCuota' || tipoPago === 'ambas') {
-                formData.append('amortizacionCuota', amortizacionCuota);
-                if (comprobanteCuotaInput.files.length > 0) {
-                    formData.append('comprobanteCuota', comprobanteCuotaInput.files[0]);
-                }
-            }
-            if (tipoPago === 'soloPenalidad' || tipoPago === 'ambas') {
-                formData.append('amortizacionPenalidad', amortizacionPenalidad);
-                if (comprobantePenalidadInput.files.length > 0) {
-                    formData.append('comprobantePenalidad', comprobantePenalidadInput.files[0]);
-                }
-            }
-
-            if (medioPago.value === 'Transferencia Bancaria') {
-                formData.append('idcuentapago', numeroCuenta.value);
-            }
-
-            if (confirm('¿Seguro de registrar el pago?')) {
-                try {
-                    const res = await fetch('/pago/cronograma', {
-                        method: 'POST',
-                        body: formData
-                    });
-
-                    const data = await res.json();
-
-                    if (data.success) {
-                        showToast('Pago registrado correctamente.', 'SUCCESS', 1200);
-                        const scrollPosition = window.scrollY;
-                        localStorage.setItem('scrollPosition', scrollPosition);
-                        setTimeout(() => {
-                            location.reload();
-                        }, 1200);
-                    } else {
-                        showToast(data.message, 'WARNING', 1200);
-                    }
-
-                } catch (err) {
-                    console.error('Error al enviar:', err);
-                    showToast('Ocurrió un error al procesar el pago.', 'WARNING', 1200);
-                }
-            }
-        });
-
-        // RELLENAR EL FORMULARIO CON LOS DATOS DE LA DB.
-        document.querySelectorAll('.btn-pagar').forEach(btn => {
-            btn.addEventListener('click', function() {
-
-                const detalleCuota = document.querySelector('#detalle-cuota');
-                const detallePenalidad = document.querySelector('#detalle-penalidad');
-                const detalleTotalDeuda = document.querySelector('#detalle-total-deuda');
-                amortizacionCuotaInput.value = this.getAttribute('data-saldo-cuota');
-                amortizacionPenalidadInput.value = this.getAttribute('data-saldo-penalidad');
-
-                console.log(amortizacionCuotaInput.value);
-                console.log(amortizacionPenalidadInput.value);
-
-                detalleCuota.value = this.dataset.valorcuota;
-                detallePenalidad.value = this.dataset.penalidad;
-
-                const cuota = parseFloat(detalleCuota.value) || 0;
-                const penalidad = parseFloat(detallePenalidad.value) || 0;
-                const total = cuota + penalidad;
-
-                detalleTotalDeuda.value = total.toFixed(2);
-                idCronogramaSeleccionado = this.dataset.idcronograma;
-
-                document.querySelector('#numero-cuota').textContent = `Está a punto de registrar el pago de la cuota N° ${this.dataset.cuota} `;
-
-                // Establecer estado inicial del formulario
-                if (valorPenalidadDeuda > 0) {
-                    tipoPagoSelect.value = 'ambas';
-                } else {
-                    tipoPagoSelect.value = 'soloCuota';
-                }
-                actualizarCamposDePago();
-            });
-        });
-
-
-
-
-
-
-        // Deshabilitar completamente las filas pagadas
-        function deshabilitarFilasPagadas() {
-            const filasPagadas = document.querySelectorAll('tr.fila-pagada, tr[data-disabled="true"]');
-
-            filasPagadas.forEach(fila => {
-                // Prevenir todos los eventos en la fila
-                fila.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    return false;
-                }, true);
-
-                fila.addEventListener('mousedown', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    return false;
-                }, true);
-
-                // Deshabilitar botones dentro de la fila
-                const botones = fila.querySelectorAll('button');
-                botones.forEach(boton => {
-                    boton.disabled = true;
-                    boton.setAttribute('disabled', 'true');
-                    boton.style.pointerEvents = 'none';
-                    boton.style.opacity = '0.5';
-                });
-
-
-            });
-        }
-
-        // Ejecutar al cargar la página
-        deshabilitarFilasPagadas();
-
-        // Re-ejecutar después de la paginación.
-        document.addEventListener('paginationComplete', deshabilitarFilasPagadas);
-
-
-
-        // Mostrar página específica
+        /**
+         * Gestiona la paginación de la tabla.
+         * @param {number} page La página a mostrar.
+         */
         function showPage(page) {
             currentPage = page;
+            localStorage.setItem('currentPage', currentPage);
 
-            const rows = document.querySelectorAll('#tabla-body tr');
+            const rows = Array.from(elements.tablaBody.querySelectorAll('tr'));
             rows.forEach(row => row.style.display = 'none');
 
-            const startIndex = (page - 1) * itemsPerPage;
-            const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
+            const startIndex = (currentPage - 1) * config.itemsPerPage;
+            const endIndex = Math.min(startIndex + config.itemsPerPage, config.totalItems);
 
             for (let i = startIndex; i < endIndex; i++) {
                 if (rows[i]) rows[i].style.display = '';
             }
 
-            // Actualizar información de paginación
-            const startItem = startIndex + 1;
-            const endItem = endIndex;
-            document.getElementById('info-paginacion').innerHTML =
-                `Mostrando <span class="fw-bold">${startItem}-${endItem}</span> de <span class="fw-bold">${totalItems}</span> cuotas`;
+            updatePagina(startIndex, endIndex);
+        }
 
-            // Actualizar estado de los botones de paginación
-            document.querySelectorAll('#paginacion .page-item').forEach(item => {
-                item.classList.remove('active');
-            });
+        /**
+         * Actualiza los elementos de la interfaz de usuario de paginación.
+         * @param {number} startItem Índice inicial del elemento.
+         * @param {number} endItem Índice final del elemento.
+         */
+        function updatePagina(startItem, endItem) {
+            elements.infoPaginacion.innerHTML = `Mostrando <span class="fw-bold">${startItem + 1}-${endItem}</span> de <span class="fw-bold">${config.totalItems}</span> cuotas`;
 
-            const activeLink = document.querySelector(`#paginacion .page-link[data-page="${page}"]`);
+            const pageItems = elements.paginacion.querySelectorAll('.page-item');
+            pageItems.forEach(item => item.classList.remove('active'));
+
+            const activeLink = elements.paginacion.querySelector(`.page-link[data-page="${currentPage}"]`);
             if (activeLink) activeLink.parentElement.classList.add('active');
 
-            document.getElementById('prev-page').classList.toggle('disabled', page === 1);
-            document.getElementById('next-page').classList.toggle('disabled', page === totalPages);
+            document.getElementById('prev-page').classList.toggle('disabled', currentPage === 1);
+            document.getElementById('next-page').classList.toggle('disabled', currentPage === config.totalPages);
 
-            if (page < totalPages) {
-                document.querySelector('#next-page .page-link').dataset.page = page + 1;
+            if (currentPage < config.totalPages) {
+                // Se puede ir a la siguiente página
+                document.getElementById('next-page').querySelector('.page-link').dataset.page = currentPage + 1;
             }
-            if (page > 1) {
-                document.querySelector('#prev-page .page-link').dataset.page = page - 1;
+            if (currentPage > 1) {
+                // Se puede ir a la página anterior
+                document.getElementById('prev-page').querySelector('.page-link').dataset.page = currentPage - 1;
             }
         }
 
+        /**
+         * Muestra u oculta los campos de pago en el modal según el tipo de pago seleccionado.
+         */
+        function updateSelectTipoPago() {
+            const tipoPago = elements.tipoPagoSelect.value;
+            const isCuotaVisible = tipoPago === 'soloCuota' || tipoPago === 'ambas';
+            const isPenalidadVisible = tipoPago === 'soloPenalidad' || tipoPago === 'ambas';
 
-        // Manejar clic en paginación
-        document.getElementById('paginacion').addEventListener('click', function(e) {
+            elements.pagoCuotaGroup.classList.toggle('d-none', !isCuotaVisible);
+            elements.pagoPenalidadGroup.classList.toggle('d-none', !isPenalidadVisible);
+
+            elements.amortizacionCuotaInput.disabled = !isCuotaVisible;
+            elements.amortizacionPenalidadInput.disabled = !isPenalidadVisible;
+
+            // La penalidad se paga completa, se hace de solo lectura
+            if (isPenalidadVisible) {
+                elements.amortizacionPenalidadInput.setAttribute('readonly', true);
+                elements.amortizacionPenalidadInput.style.backgroundColor = '#f8f9fa';
+            } else {
+                elements.amortizacionPenalidadInput.removeAttribute('readonly');
+                elements.amortizacionPenalidadInput.style.backgroundColor = '';
+            }
+        }
+
+        /**
+         * Carga las cuentas bancarias desde la API y las llena en el select.
+         */
+        async function cargarCuentasBancarias() {
+            try {
+                const res = await fetch('/api/numcuentaspagos');
+                const data = await res.json();
+                elements.numeroCuentaSelect.innerHTML = '<option value="">Selecciona una cuenta</option>';
+                data.forEach(cuenta => {
+                    elements.numeroCuentaSelect.innerHTML += `<option value="${cuenta.idcuentapago}">${cuenta.nombrecuenta}</option>`;
+                });
+            } catch (error) {
+                console.error('Error al cargar cuentas:', error);
+                showToast('Error al cargar cuentas bancarias.', 'ERROR', 2000);
+            }
+        }
+
+        /**
+         * Valida los datos del formulario antes del envío.
+         * @returns {boolean} True si los datos son válidos, de lo contrario, false.
+         */
+        function validarForm() {
+            if (!idCronogramaSeleccionado) {
+                showToast('No se seleccionó ninguna cuota.', 'INFO', 1200);
+                return false;
+            }
+
+            const tipoPago = elements.tipoPagoSelect.value;
+            const amortizacionCuota = parseFloat(elements.amortizacionCuotaInput.value) || 0;
+            const amortizacionPenalidad = parseFloat(elements.amortizacionPenalidadInput.value) || 0;
+            const fechaPagoValue = elements.fechaPagoInput.value;
+            const hoy = new Date();
+            const fechaPagoDate = new Date(fechaPagoValue);
+
+            // Lógica de validación
+            const isCuota = tipoPago === 'soloCuota' || (tipoPago === 'ambas' && amortizacionCuota > 0);
+            const isPenalidad = tipoPago === 'soloPenalidad' || (tipoPago === 'ambas' && amortizacionPenalidad > 0);
+
+            if (isCuota && (amortizacionCuota <= 0 || amortizacionCuota > valorCuotaDeuda)) {
+                showToast(amortizacionCuota <= 0 ? 'Monto de cuota inválido.' : `La amortización no puede ser> S/ ${valorCuotaDeuda.toFixed(2)}.`, 'INFO', 1200);
+                return false;
+            }
+            if (isPenalidad && (amortizacionPenalidad <= 0 || amortizacionPenalidad !== parseFloat(valorPenalidadDeuda))) {
+                showToast(amortizacionPenalidad <= 0 ? 'Monto de penalidad inválido.' : `La penalidad debe pagarse completa: S/ ${valorPenalidadDeuda.toFixed(2)}.`, 'INFO', 1200);
+                return false;
+            }
+            if (isCuota && elements.comprobanteCuotaInput.files.length === 0) {
+                showToast('Debe adjuntar el comprobante de la cuota.', 'INFO', 1200);
+                return false;
+            }
+            if (isPenalidad && elements.comprobantePenalidadInput.files.length === 0) {
+                showToast('Debe adjuntar el comprobante de la penalidad.', 'INFO', 1200);
+                return false;
+            }
+
+            if (elements.medioPagoSelect.value.toLowerCase() === 'transferencia bancaria' ) {
+                if (!elements.numeroCuentaSelect.value) {
+                    showToast('Debes seleccionar una cuenta bancaria.', 'INFO', 1200);
+                    return false;
+                }
+
+                const numeroTransaccion = elements.numeroTransaccionInput.value.trim();
+                if (numeroTransaccion === '') {
+                    showToast('El número de operación es obligatorio para transferencias.', 'INFO', 1500);
+                    return false;
+                }
+
+                // Expresión regular para validar solo dígitos.
+                const regex = /^\d{6,30}$/;
+                if (!regex.test(numeroTransaccion)) {
+                    showToast('El número de operación es inválido. Debe contener solo números y tener entre 6 y 30 dígitos.', 'INFO', 2000);
+                    return false;
+                }
+            }
+
+
+            if (!fechaPagoValue) {
+                showToast('La fecha de pago es obligatoria.', 'INFO', 1200);
+                return false;
+            }
+            if (fechaPagoDate > hoy) {
+                showToast('La fecha de pago no puede ser mayor a la actual.', 'INFO', 1200);
+                return false;
+            }
+
+            return true;
+        }
+
+        /**
+         * Envía los datos del formulario
+         */
+        async function submitForm() {
+            if (!confirm('¿Seguro de registrar el pago?')) return;
+
+            if (!validarForm()) return;
+
+            elements.btnConfirmarPago.disabled = true;
+            elements.btnConfirmarPago.classList.add('disabled', 'opacity-75');
+            elements.btnConfirmarPago.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Procesando...';
+
+            const formData = new FormData(elements.formPago);
+            formData.append('idcronograma', idCronogramaSeleccionado);
+            if (elements.medioPagoSelect.value === 'Transferencia Bancaria') {
+                formData.append('idcuentapago', elements.numeroCuentaSelect.value);
+            }
+
+            try {
+                const res = await fetch('/pago/cronograma', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    showToast('Pago registrado correctamente.', 'SUCCESS', 1200);
+                    elements.modalPago.hide();
+                    setTimeout(() => location.reload(), 1200);
+                } else {
+                    showToast(data.message || 'Error al registrar el pago.', 'WARNING', 2000);
+                }
+            } catch (err) {
+                console.error('Error de red o del servidor:', err);
+                showToast('Error de red o del servidor. Intente nuevamente.', 'ERROR', 2000);
+            } finally {
+                elements.btnConfirmarPago.disabled = false;
+                elements.btnConfirmarPago.classList.remove('disabled', 'opacity-75');
+                elements.btnConfirmarPago.innerHTML = '<i class="fas fa-check-circle me-1"></i> Confirmar Pago';
+            }
+        }
+
+        /**
+         * Filtra las filas de la tabla por el término de búsqueda.
+         * @param {string} searchTerm El término de búsqueda.
+         */
+        function filterTable(searchTerm) {
+            const rows = elements.tablaBody.querySelectorAll('tr');
+            let found = false;
+            rows.forEach(row => {
+                const cuotaNum = row.cells[0].textContent.trim().toLowerCase();
+                const showRow = cuotaNum.includes(searchTerm);
+                row.style.display = showRow ? '' : 'none';
+                if (showRow) found = true;
+            });
+
+            if (searchTerm === '') {
+                showPage(currentPage);
+            } else {
+                elements.infoPaginacion.innerHTML = found ?
+                    `Mostrando resultados para: <span class="fw-bold">${searchTerm}</span>` :
+                    `No se encontraron resultados para: <span class="fw-bold">${searchTerm}</span>`;
+            }
+        }
+
+        // ========================
+        // 3. EVENT LISTENERS
+        // ========================
+
+        // Inicialización de la tabla
+        showPage(currentPage);
+
+        // Click en botones de pagar
+        elements.tablaBody.addEventListener('click', function(e) {
+            const btn = e.target.closest('.btn-pagar');
+            if (!btn) return;
+
+            const saldoCuota = parseFloat(btn.dataset.saldoCuota) || 0;
+            const saldoPenalidad = parseFloat(btn.dataset.saldoPenalidad) || 0;
+
+            idCronogramaSeleccionado = btn.dataset.idcronograma;
+            valorCuotaDeuda = saldoCuota;
+            valorPenalidadDeuda = saldoPenalidad;
+
+            elements.amortizacionCuotaInput.value = saldoCuota.toFixed(2);
+            elements.amortizacionPenalidadInput.value = saldoPenalidad.toFixed(2);
+            elements.detalleCuotaInput.value = saldoCuota.toFixed(2);
+            elements.detallePenalidadInput.value = saldoPenalidad.toFixed(2);
+            elements.detalleTotalDeudaInput.value = (saldoCuota + saldoPenalidad).toFixed(2);
+            elements.numeroCuotaDisplay.textContent = `Está a punto de registrar el pago de la cuota N° ${btn.dataset.cuota}`;
+
+            // Lógica para mostrar/ocultar el select y los campos de pago
+
+            // Ocultar el select y mostrar el campo de penalidad
+            const mostrarSoloPenalidad = saldoCuota === 0 && saldoPenalidad > 0;
+            // Ocultar el select y mostrar el campo de cuota
+            const mostrarSoloCuota = saldoCuota > 0 && saldoPenalidad === 0;
+            // Mostrar el select
+            const mostrarSelectCompleto = saldoCuota > 0 && saldoPenalidad > 0;
+
+            elements.contenedorTipoPago.classList.toggle('hidden', !mostrarSelectCompleto);
+
+            if (mostrarSelectCompleto) {
+                elements.tipoPagoSelect.innerHTML = `
+            <option value='ambas'>Cuota y Penalidad</option>
+            <option value='soloCuota'>Solo Cuota</option>
+            <option value='soloPenalidad'>Solo Penalidad</option>
+        `;
+                elements.tipoPagoSelect.value = 'ambas';
+            } else if (mostrarSoloPenalidad) {
+                elements.tipoPagoSelect.innerHTML = `<option value='soloPenalidad'>Solo Penalidad</option>`;
+                elements.tipoPagoSelect.value = 'soloPenalidad';
+            } else if (mostrarSoloCuota) {
+                elements.tipoPagoSelect.innerHTML = `<option value='soloCuota'>Solo Cuota</option>`;
+                elements.tipoPagoSelect.value = 'soloCuota';
+            }
+
+
+            updateSelectTipoPago();
+        });
+
+
+        // Eventos del modal de pago
+        elements.tipoPagoSelect.addEventListener('change', updateSelectTipoPago);
+
+        elements.medioPagoSelect.addEventListener('change', (e) => {
+            const isTransferencia = e.target.value.toLowerCase() === 'transferencia bancaria';
+            elements.selectCuentas.classList.toggle('hidden', !isTransferencia);
+            if (isTransferencia) {
+                cargarCuentasBancarias();
+            } else {
+                elements.numeroCuentaSelect.innerHTML = '';
+            }
+        });
+        elements.formPago.addEventListener('submit', (e) => {
+            e.preventDefault();
+            submitForm();
+        });
+
+        // Eventos de paginación y búsqueda
+        elements.paginacion.addEventListener('click', function(e) {
             const target = e.target.closest('.page-link');
             if (!target || target.parentElement.classList.contains('disabled')) return;
-
             e.preventDefault();
             const newPage = parseInt(target.dataset.page);
             if (newPage && newPage !== currentPage) {
@@ -744,133 +768,78 @@
             }
         });
 
-
-
-
-        // Búsqueda por número de cuota
-        document.getElementById('inputBuscar').addEventListener('input', function() {
-            const searchTerm = this.value.trim().toLowerCase();
-
-            if (searchTerm === '') {
-                showPage(currentPage);
-                return;
-            }
-
-            const rows = document.querySelectorAll('#tabla-body tr');
-            let found = false;
-
-            rows.forEach(row => {
-                const cell = row.cells[0]; // Primera celda con el número si busco '1' - solo mostrara los que tienen '1' a la izquierda
-                const cuotaNum = cell.textContent.trim().toLowerCase(); // Traer el texto
-                console.log('CUOTANUM:', cuotaNum);
-
-                if (cuotaNum.includes(searchTerm)) {
-                    row.style.display = '';
-                    found = true;
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-
-            document.getElementById('info-paginacion').innerHTML = found ?
-                `Mostrando resultados para: <span class="fw-bold">${searchTerm}</span>` :
-                `No se encontraron resultados para: <span class="fw-bold">${searchTerm}</span>`;
+        elements.inputBuscar.addEventListener('input', (e) => {
+            filterTable(e.target.value.trim().toLowerCase());
         });
 
+        // Evento para limpiar la paginación al cambiar de vista
+        document.querySelector('a[href="/caja/"]').addEventListener('click', function() {
+            localStorage.removeItem('currentPage');
+            elements.inputBuscar.value = '';
+            showPage(1);
+        });
 
-
-
-        document.getElementById('btn-pdf').addEventListener('click', () => {
-            showToast('GENERANDO EL PDF.....', 'INFO', 3000);
-
+        // Generar PDF
+        elements.btnPdf.addEventListener('click', () => {
+            showToast('GENERANDO EL PDF.....', 'INFO', 2200);
             setTimeout(() => {
                 const {
                     jsPDF
                 } = window.jspdf;
                 const doc = new jsPDF('landscape', 'mm', 'a4');
 
-                // Título
                 doc.setFontSize(18);
-
                 doc.text("Cronograma de Pagos", doc.internal.pageSize.getWidth() / 2, 15, {
                     align: 'center'
                 });
+
                 const fechaHora = new Date().toLocaleDateString();
                 doc.setFontSize(11);
-                doc.text(`FECHA: ${fechaHora} `, doc.internal.pageSize.getWidth() - 10, 22, {
+                doc.text(`FECHA: ${fechaHora}`, doc.internal.pageSize.getWidth() - 10, 22, {
                     align: 'right'
                 });
 
-                // Cabeceras en el PDF
                 const head = [
-                    [
-                        "#", "Fecha Vencimiento", "Interés", "Abono Capital",
-                        "Valor Cuota", "Amortización", "Restante", "Saldo Capital", "Estado"
-                    ]
+                    ["#", "Fecha Vencimiento", "Interés", "Abono Capital", "Valor Cuota", "Amortización", "Restante", "Saldo Capital", "Estado"]
                 ];
-
-                const headStyles = {
-                    fillColor: [200, 200, 200],
-                    textColor: 20,
-                    fontStyle: 'bold',
-                    halign: 'center',
-                    fontSize: 12,
-                };
-
-                // Extraer datos de la tabla original
-                const rows = [];
-
-                document.querySelectorAll('#tabla-body tr').forEach(tr => {
+                const rows = Array.from(elements.tablaBody.querySelectorAll('tr')).map(tr => {
                     const tds = tr.querySelectorAll('td');
+                    return [
+                        tds[0].innerText.trim(),
+                        tds[1].querySelector('span.fw-bold')?.innerText.trim() || '',
+                        tds[2].innerText.trim(),
+                        tds[3].innerText.trim(),
+                        tds[4].innerText.trim(),
+                        tds[5].innerText.trim(),
+                        tds[6].innerText.trim(),
+                        tds[7].innerText.trim(),
+                        tds[8].innerText.trim().split('-')[0]
+                    ];
+                }).filter(row => row.length === 9);
 
-                    if (tds.length >= 9) {
-                        const numCuota = tds[0].innerText.trim();
-                        const fecha = tds[1].querySelector('span.fw-bold')?.innerText.trim() || ''; // Solo la fecha
-                        const interes = tds[2].innerText.trim();
-                        const abono = tds[3].innerText.trim();
-                        const valorCuota = tds[4].innerText.trim();
-                        const amortizacion = tds[5].innerText.trim();
-                        const restante = tds[6].innerText.trim();
-                        const saldo = tds[7].innerText.trim();
-                        const estado = tds[8].innerText.trim();
-                        const estadoFormateado = estado.split('-')[0];
-
-                        rows.push([
-                            numCuota, fecha, interes, abono, valorCuota, amortizacion, restante, saldo, estadoFormateado
-                        ]);
-                    }
-                });
-
-                // Crear tabla en PDF
                 doc.autoTable({
                     head,
                     body: rows,
                     startY: 25,
                     styles: {
                         fontSize: 10,
-                        halign: 'center',
+                        halign: 'center'
                     },
                     headStyles: {
-                        headStyles
+                        fillColor: [200, 200, 200],
+                        textColor: 20,
+                        fontStyle: 'bold'
                     },
                     margin: {
                         left: 10,
                         right: 10
-                    },
-                    showHead: 'everyPage',
-                    pageBreak: 'auto'
+                    }
                 });
 
                 doc.save('cronograma_pagos.pdf');
-                showToast('PDF GENERADO', 'SUCCESS', 3000);
+                showToast('PDF GENERADO', 'SUCCESS', 2200);
             }, 3000);
         });
-
-
-
-
-        showPage(1);
     });
 </script>
-
 <?php include __DIR__ . '/../layout/footer.php'; ?>

@@ -43,12 +43,12 @@
                         <thead>
                             <tr>
                                 <th width="50">#</th>
-                                <th>N° Cuota</th>
+                                <th width="80">N° Cuota</th>
                                 <th>Vencimiento</th>
                                 <th>Fecha pago</th>
                                 <th>Amortización</th>
                                 <th>Saldo</th>
-                                <th>Medio</th>
+                                <th width="100">Medio</th>
                                 <th>Concepto</th>
                                 <th>Transacción</th>
                                 <th class="no-imprimir" width="150">Comprobante</th>
@@ -76,7 +76,14 @@
                                                 <?= htmlspecialchars($pago['mediopago']) ?>
                                             </span>
                                         </td>
-                                        <td class="text-muted"><?=  htmlspecialchars($pago['tipo'])?></td>
+                                        <td>
+                                            <span class="badge <?= trim($pago['tipo']) === 'Cuota' ? 'bg-primary text-white' : 'bg-danger text-white' ?>">
+
+                                                <?= htmlspecialchars($pago['tipo']) ?>
+
+                                            </span>
+                                        </td>
+
                                         <td class="text-muted"><?= htmlspecialchars($pago['numerotransaccion'] ?? 'N/A')  ?></td>
                                         <td class="text-center no-imprimir">
                                             <?php if (!empty($pago['comprobante'])): ?>
@@ -176,7 +183,7 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        
+
         const btnPDF = document.querySelector('#btn-pdf');
         const itemsPerPage = 10;
         const totalItems = <?= count($pagos) ?>;
@@ -216,7 +223,7 @@
             const head = [
                 [
                     "#", "N° Cuota", "Vencimiento", "Fecha pago",
-                    "Amortización", "Saldo", "Medio", "Transacción"
+                    "Amortización", "Saldo", "Medio", "Concepto","Transacción"
                 ]
             ];
 
@@ -240,7 +247,7 @@
             const rows = [];
             todasFilas.forEach(tr => {
                 const tds = tr.querySelectorAll('td');
-                if (tds.length >= 8) {
+                if (tds.length >= 9) {
                     const fila = [
                         tds[0].innerText.trim(), // #
                         tds[1].innerText.trim(), // N° Cuota
@@ -249,7 +256,8 @@
                         tds[4].innerText.trim(), // Amortización
                         tds[5].innerText.trim(), // Saldo
                         tds[6].innerText.trim(), // Medio
-                        tds[7].innerText.trim(), // Transacción
+                        tds[7].innerText.trim(),
+                        tds[8].innerText.trim(), // Transacción
                     ];
                     rows.push(fila);
                 }
@@ -264,20 +272,22 @@
                     fontSize: 10,
                     halign: 'center'
                 },
-                headStyles:{headStyles},
+                headStyles: {
+                    headStyles
+                },
                 margin: {
                     left: 10,
                     right: 10
                 },
-                
+
                 showHead: 'everyPage',
                 pageBreak: 'auto'
             });
 
-            
+
             columnasOcultas.forEach(col => col.style.display = '');
             if (typeof showPage === 'function' && typeof currentPage !== 'undefined') {
-                showPage(currentPage); 
+                showPage(currentPage);
             }
 
             doc.save('historial_pagos.pdf');
