@@ -78,35 +78,4 @@ class Controller
     header("Pragma: no-cache");
   }
 
-  /* protected function authRequired(): void
-  {
-    if (session_status() !== PHP_SESSION_ACTIVE) {
-      session_start();
-    }
-
-    if (empty($_SESSION['user'])) {
-      header('Location: /login'); //accede
-      exit;
-    }
-
-    // Tiempo máximo de inactividad en segundos
-    //$timeoutSeconds = 60; // 1 minuto
-    // Tiempo máximo de inactividad en segundos (leer de .env o fallback)
-    $rawTimeout = getenv('SESSION_TIMEOUT');
-    if ($rawTimeout !== false && $rawTimeout !== '') {
-      $timeoutSeconds = (int) $rawTimeout;
-    } else {
-      $timeoutSeconds = 1800; // fallback seguro
-    }
-
-    // Actualizar last_activity para esta petición
-    $_SESSION['last_activity'] = time();
-
-    //evita cache del navegador
-    header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
-    header("Cache-Control: post-check=0, pre-check=0", false);
-    header("Pragma: no-cache");
-  }
- */
-
 }
