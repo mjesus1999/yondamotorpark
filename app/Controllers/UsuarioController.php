@@ -182,94 +182,6 @@ class UsuarioController extends Controller
     return;
   }
 
-  //STORE ANTERIORO (NO ESTA EN USO)
-  public function store1(): void
-  {
-    // 1) Recoger todo lo del formulario completo
-    $idPersona = (int) ($_POST['idpersona'] ?? 0);
-    $idCargo = (int) ($_POST['idcargo'] ?? 0);
-    $fechaInicio = trim($_POST['fecha_inicio'] ?? '');
-    $fechaFin = isset($_POST['sin_fecha_fin'])
-      ? null
-      : trim($_POST['fecha_fin'] ?? null);
-    $usernick = trim($_POST['usuario'] ?? '');
-    $pass1 = $_POST['password1'] ?? '';
-    $pass2 = $_POST['password2'] ?? '';
-
-    // 2) Validaciones
-    $errors = [];
-    if ($idPersona <= 0)
-      $errors[] = 'Debe registrar primero la persona.';
-    if ($idCargo <= 0)
-      $errors[] = 'Debe seleccionar un cargo.';
-    if ($fechaInicio === '')
-      $errors[] = 'La fecha de inicio es obligatoria.';
-    if ($pass1 !== $pass2)
-      $errors[] = 'Las contraseñas no coinciden.';
-
-    //peticion ajax
-    $isAjax =
-      !empty($_SERVER['HTTP_X_REQUESTED_WITH'])
-      && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest';
-
-    if ($errors) {
-      if ($isAjax) {
-        header('Content-Type: application/json; charset=utf-8');
-        $response = ['success' => false];
-        $response['errors'] = $errors;
-        echo json_encode($response);
-        exit;
-      }
-      // flujo normal (no-AJAX)
-      $areas = $this->usuarioModel->getAllAreas();
-      $this->view('usuarios.create', [
-        'areas' => $areas,
-        'error' => implode('<br>', $errors),
-        'old' => $_POST
-      ]);
-      return;
-
-    }
-
-    // 3) Crear contrato laboral
-    $idContrato = $this->contratoModel->create(
-      $idPersona,
-      $idCargo,
-      $fechaInicio,
-      $fechaFin,
-      'P'
-    );
-    if ($idContrato <= 0) {
-      throw new Exception('No se pudo crear el contrato laboral');
-    }
-
-    // 4) Crear colaborador
-    $passwordHash = password_hash($pass1, PASSWORD_DEFAULT);
-    $idColab = $this->colaboradorModel->create(
-      $idContrato,
-      $usernick,
-      $passwordHash
-    );
-    if ($idColab <= 0) {
-      throw new Exception('No se pudo crear el usuario');
-    }
-
-    // 5) Respuesta exitosa
-    if ($isAjax) {
-      header('Content-Type: application/json; charset=utf-8');
-      $response = ['success' => true];
-      $response['idcolaborador'] = $idColab;
-      $response['idcontrato'] = $idContrato;
-      echo json_encode($response);
-      exit;
-    }
-
-    // flujo normal
-    $_SESSION['success_message'] = "Usuario creado con éxito. ID colaborador: {$idColab}";
-    $this->redirect('/usuarios/create');
-    return;
-  }
-
   public function changePassword(): void
   {
     header('Content-Type: application/json; charset=utf-8');
@@ -305,35 +217,6 @@ class UsuarioController extends Controller
       error_log('Error changePassword: ' . $e->getMessage());
       http_response_code(500);
       echo json_encode(['success' => false, 'errors' => ['Error interno al procesar la solicitud.']]);
-    }
-  }
-
-  //ACTUALIZAR CONTRASEÑAS PERO POR EL MOMENTO NO ESTA EN USO
-  public function changePassword1(): void
-  {
-    /* if (session_status() !== PHP_SESSION_ACTIVE) {
-      session_start();
-    } */
-    header('Content-Type: application/json; charset=utf-8');
-    $idColab = (int) ($_POST['idcolaborador'] ?? 0);
-    $p1 = $_POST['password1'] ?? '';
-    $p2 = $_POST['password2'] ?? '';
-
-    if ($idColab <= 0 || $p1 === '' || $p1 !== $p2) {
-      $_SESSION['error_message'] = 'Datos inválidos o contraseñas no coinciden.';
-      echo json_encode(['success' => false]);
-      return;
-    }
-
-    $newHash = password_hash($p1, PASSWORD_DEFAULT);
-    $ok = $this->usuarioModel->updatePassword($idColab, $newHash);
-
-    if ($ok) {
-      $_SESSION['success_message'] = 'Contraseña actualizada correctamente.';
-      echo json_encode(['success' => true]);
-    } else {
-      $_SESSION['error_message'] = 'No se pudo actualizar la contraseña.';
-      echo json_encode(['success' => false]);
     }
   }
 

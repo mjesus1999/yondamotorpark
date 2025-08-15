@@ -53,7 +53,6 @@ class Usuario
     }
   }
 
-
   public function getAllAreas(): array
   {
     $query = "SELECT idarea, area FROM areas ORDER BY area";
@@ -122,7 +121,6 @@ class Usuario
   }
 
   // CONSULTAS PARA EL LOGIN
-
   //buscar por nombre de usuario
 
   public function searchByUsernick(string $usernick): ?array
@@ -222,7 +220,6 @@ class Usuario
   }
 
   //IDLOGISTICA:
-
   public function esDeLogistica(int $idcolaborador): bool
   {
     $stmt = $this->db->prepare("
@@ -239,18 +236,7 @@ class Usuario
 
     return (int) $areaId === 9; // Logística
   }
-
-  /* public function delete(int $id): bool
-{
-  $stmt = $this->db->prepare("
-    DELETE
-    FROM colaboradores
-    WHERE idcolaborador = :id
-  ");
-  $stmt->bindParam(':id', $id, PDO::PARAM_INT);
-  return $stmt->execute();
-} */
-
+ 
   //Obtener CONTRATO SIN COLABORADOR (Sin usuario registrado)
 
   public function getContractsWithoutColaborador(): array
