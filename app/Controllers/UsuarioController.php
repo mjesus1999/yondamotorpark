@@ -19,7 +19,7 @@ class UsuarioController extends Controller
 
   public function __construct()
   {
-    parent::__construct();
+    parent::__construct(); // INICIO DE SESION H/CONTROLLER
     $this->usuarioModel = new Usuario();
     $this->contratoModel = new ContratoLaboral();
     $this->colaboradorModel = new Colaborador();
@@ -67,7 +67,7 @@ class UsuarioController extends Controller
     $pass1 = $_POST['password1'] ?? '';
     $pass2 = $_POST['password2'] ?? '';
 
-    //detectar AJAX (para el modal)
+    //detectar AJAX (para el modal) de registro de personas
     $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest';
 
     //validaciones desde Helpers
@@ -159,9 +159,6 @@ class UsuarioController extends Controller
       return;
     }
 
-    //obtener respuesta exitosa
-    //error_log('STORE END - SID=' . session_id() . ' USER=' . json_encode($_SESSION['user'] ?? null));
-
     if ($isAjax) {
       header('Content-Type: application/json; charset=utf-8');
       echo json_encode([
@@ -172,7 +169,6 @@ class UsuarioController extends Controller
       exit;
     }
 
-    // asegurar sesión y dejar mensaje
     /* if (session_status() !== PHP_SESSION_ACTIVE)
       session_start(); */
     $_SESSION['success_message'] = "Usuario creado con éxito. ID colaborador: {$idColab}";
@@ -427,13 +423,6 @@ class UsuarioController extends Controller
 
   //Mostrar Crear Cuenta
 
-  /* public function showCreateFromContractsAuth(): void
-  {
-    //$this->authRequired(); // si solo administradores deben acceder
-    $contracts = $this->usuarioModel->getContractsWithoutColaborador();
-    $this->view('auth.createAccount', ['contracts' => $contracts]);
-  } */
-
   public function showCreateFromContracts(): void
   {
     $contracts = $this->usuarioModel->getContractsWithoutColaborador();
@@ -513,104 +502,4 @@ class UsuarioController extends Controller
     return;
   }
 
-  /* public function createFromContractAuth(): void
-  {
-    $idContrato = (int) ($_POST['idcontrato'] ?? 0);
-    $usernick = trim($_POST['usernick'] ?? '');
-    $p1 = $_POST['password1'] ?? '';
-    $p2 = $_POST['password2'] ?? '';
-
-    $errors = [];
-
-    //algunas validaciones para el registro
-    if ($idContrato <= 0) {
-      $errors[] = 'Selecciona un contrato.';
-    }
-    if ($usernick === '') {
-      $errors[] = 'Introduce un nombre de usuario.';
-    }
-    if ($p1 === '' || $p2 === '') {
-      $errors[] = 'Introduce y confirma la contraseña.';
-    }
-    if ($p1 !== $p2) {
-      $errors[] = 'Las contraseñas no coinciden.';
-    }
-    if (strlen($p1) < 8) {
-      $errors[] = 'La contraseña debe tener al menos 8 caracteres.';
-    }
-
-    //Comprobar si ya existe el usernick
-    $exists = $this->usuarioModel->searchByUsernick($usernick);
-    if ($exists) {
-      $errors[] = 'El usernick ya existe.';
-    }
-
-    if ($errors) {
-      $contracts = $this->usuarioModel->getContractsWithoutColaborador();
-      $this->view('usuarios.createAccount', [
-        'contracts' => $contracts,
-        'error' => implode('<br>', $errors),
-        'old' => $_POST
-      ]);
-      return;
-    }
-
-    // Crear colaborador: delegar creación al modelo correspondiente
-    $passwordHash = password_hash($p1, PASSWORD_DEFAULT);
-
-    try {
-      $idColab = $this->colaboradorModel->create($idContrato, $usernick, $passwordHash);
-    } catch (\Throwable $e) {
-      error_log('Error al crear colaborador: ' . $e->getMessage());
-      $contracts = $this->usuarioModel->getContractsWithoutColaborador();
-      $this->view('usuarios.createAccount', [
-        'contracts' => $contracts,
-        'error' => 'No se pudo crear la cuenta. Contacta al administrador.',
-        'old' => $_POST
-      ]);
-      return;
-    }
-
-    if (empty($idColab) || $idColab <= 0) {
-      $contracts = $this->usuarioModel->getContractsWithoutColaborador();
-      $this->view('usuarios.createAccount', [
-        'contracts' => $contracts,
-        'error' => 'No se pudo crear la cuenta. Revisa los logs.',
-        'old' => $_POST
-      ]);
-      return;
-    }
-
-    // Obtener datos reales desde la BD para poblar la sesión
-    $full = $this->usuarioModel->getById((int) $idColab);
-
-    if (session_status() !== PHP_SESSION_ACTIVE) {
-      session_start();
-    }
-
-    $_SESSION['user'] = [
-      'id' => $full['idcolaborador'] ?? $idColab,
-      'usernick' => $full['usernick'] ?? $usernick,
-      'nombres' => $full['nombres'] ?? ($_POST['nombres'] ?? ''),
-      'apellidos' => $full['apellidos'] ?? ($_POST['apellidos'] ?? ''),
-      'avatar' => $full['avatar'] ?? '/assets/images/profile.jpg',
-      'idcargo' => $full['idcargo'] ?? '',
-      'cargo' => $full['cargo'] ?? '',
-    ];
-
-    header('Location: /');
-    exit;
-  } */
-
-
-  /* public function delete(int $id): void
-  {
-    $deleted = $this->usuarioModel->delete($id);
-    if ($deleted) {
-      $_SESSION['success_message'] = 'Usuario eliminado correctamente.';
-    } else {
-      $_SESSION['error_message'] = 'No se pudo eliminar el usuario.';
-    }
-    $this->redirect('/usuarios');
-  } */
 }
