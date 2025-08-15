@@ -8,19 +8,16 @@ use DateTime;
 
 class Validation
 {
+
     /**
-     * Valida los datos del formulario de usuario.
-     * Devuelve un array con mensajes de error (vacío si no hay errores).
-     *
+     * validateUsuarioData / Valida los datos del formulario de usuario.
      * @param array $data
-     * @param Usuario $usuarioModel
-     * @return array
+     * @param \App\Models\Usuario $usuarioModel
+     * @return string[]
      */
     public static function validateUsuarioData(array $data, Usuario $usuarioModel): array
     {
         $errors = [];
-
-        // Normalizar campos (por si no vienen definidos)
         $idpersona = (int) ($data['idpersona'] ?? 0);
         $idcargo = (int) ($data['idcargo'] ?? 0);
         $fechaInicio = trim((string) ($data['fecha_inicio'] ?? ''));
@@ -78,8 +75,9 @@ class Validation
     }
 
     /**
-     * Valida cambio de contraseña.
-     * Espera ['idcolaborador'=>int,'password1'=>string,'password2'=>string]
+     * validateChangePassword /Valida cambio de contraseña.
+     * @param array $data
+     * @return string[] / Espera ['idcolaborador'=>int,'password1'=>string,'password2'=>string]
      */
     public function validateChangePassword(array $data): array
     {
@@ -105,8 +103,9 @@ class Validation
     }
 
     /**
-     * Valida subida de avatar. Recibe el array equivalente a $_FILES['avatar'] o null.
-     * Devuelve array de errores.
+     * validateAvatarUpload / Valida subida de avatar. Recibe el array equivalente a $_FILES['avatar'] o null.
+     * @param mixed $file
+     * @return string[]
      */
     public function validateAvatarUpload(?array $file): array
     {
@@ -144,8 +143,10 @@ class Validation
     }
 
     /**
-     * Valida creación de colaborador a partir de contrato.
-     * Espera ['idcontrato'=>int,'usernick'=>string,'password1'=>string,'password2'=>string]
+     * validateCreateFromContract / Valida creación de colaborador a partir de contrato.
+     * @param array $data
+     * @param \App\Models\Usuario $usuarioModel
+     * @return string[] / Espera ['idcontrato'=>int,'usernick'=>string,'password1'=>string,'password2'=>string]
      */
     public function validateCreateFromContract(array $data, Usuario $usuarioModel): array
     {
@@ -182,4 +183,5 @@ class Validation
 
         return $errors;
     }
+
 }

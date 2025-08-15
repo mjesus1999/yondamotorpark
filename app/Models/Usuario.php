@@ -191,9 +191,7 @@ class Usuario
     return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
   }
 
-  /**
-   * Actualiza el campo ultimoacceso a NOW()
-   */
+  //Actualiza el campo ultimoacceso a NOW()
   public function updateLastAccess(int $idColab): bool
   {
     $stmt = $this->db->prepare("
@@ -236,7 +234,7 @@ class Usuario
 
     return (int) $areaId === 9; // Logística
   }
- 
+
   //Obtener CONTRATO SIN COLABORADOR (Sin usuario registrado)
 
   public function getContractsWithoutColaborador(): array
