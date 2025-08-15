@@ -12,8 +12,10 @@ $dotenv = Dotenv\Dotenv::createImmutable(APP_ROOT);
 //$dotenv->safeLoad();
 $dotenv->load();
 
-//para leer .ENV
-//fijar timezone (tmp)
+/**
+ * para leer .ENV
+ * fijar timezone (tmp)
+ */
 if (!ini_get('date.timezone')) {
   date_default_timezone_set('America/Lima');
 }
