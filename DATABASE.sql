@@ -361,6 +361,20 @@ CREATE TABLE cotizaciones
     CONSTRAINT fk_idcolventa_cot FOREIGN KEY (idasesor) REFERENCES colaboradores (idcolaborador)
 )ENGINE = INNODB;
 
+/*
+-- SOLO PRUEBA
+CREATE TABLE password_resets (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  idcolaborador INT NOT NULL,
+  token_hash CHAR(64) NOT NULL,
+  expires_at DATETIME NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  INDEX (token_hash),
+  CONSTRAINT fk_pr_col FOREIGN KEY (idcolaborador) REFERENCES colaboradores(idcolaborador) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+*/
+
 -- Cuando se compra un vehículo, este además de su valor, supone pagos adicioanles como:
 -- Tarjeta de propiedad y placa, Flete picanto, gastos administrativos
 -- No se requiere indiciar la moneda porque esto se especifica al momento de realizar la comrpa
