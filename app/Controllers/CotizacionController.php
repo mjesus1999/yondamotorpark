@@ -34,8 +34,7 @@ class CotizacionController extends Controller
 
     public function html2pdfReport($id): void
     {
-        // Solo necesitamos pasar el ID, los datos se cargarán via JavaScript
-        // El PDF se generará automáticamente sin mostrar la vista
+        //solo necesitamos el id para pasar los datos 
         $this->view('pdf/cotizacion/cotizacion-html2pdf', ['id' => $id]);
     }
 

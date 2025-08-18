@@ -49,7 +49,7 @@ ini_set('session.gc_maxlifetime', (string) max(1440, $timeout));
 //sesion y cookie params
 session_name('YONDASESSID');
 session_set_cookie_params([
-  'lifetime' => 0,    // 0 = expira al cerrar navegador (recomendado)
+  'lifetime' => 0,    // 0 = expira al cerrar navegador
   'path' => '/',
   'domain' => '',
   'secure' => false,  // poner true en producción con HTTPS
