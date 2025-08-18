@@ -30,8 +30,8 @@
     </div>
 
     <div class="row">
-      <div class="left"><!-- espacio a la izquierda, por ejemplo logos u otros datos --></div>
-      <div class="right fecha" id="fecha"><!-- Aquí irá: "Chincha, 18 de Agosto de 2025" --></div>
+      <div class="left"></div>
+      <div class="right fecha" id="fecha"></div>
     </div>
 
     <h2 class="title"><strong>COTIZACIÓN VEHICULAR</strong></h2>
