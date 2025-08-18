@@ -371,7 +371,7 @@
 				showCancelButton: true,
 				confirmButtonText: 'Sí, registrar',
 				cancelButtonText: 'Cancelar',
-				reverseButtons: true,
+				reverseButtons: true
 			});
 
 			if (isConfirmed) {

@@ -9,6 +9,8 @@ use DateTime;
 class Validation
 {
 
+    // VALIDACIONES DE USUARIOS
+
     /**
      * validateUsuarioData / Valida los datos del formulario de usuario.
      * @param array $data

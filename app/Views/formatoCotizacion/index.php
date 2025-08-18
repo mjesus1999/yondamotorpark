@@ -37,7 +37,8 @@
                         <!-- FECHA INICIO -->
                         <div class="col-md-3 mb-2">
                             <div class="form-floating">
-                                <input type="date" class="form-control" id="fechainicio" name="fechainicio" required>
+                                <input type="date" class="form-control" id="fechainicio" name="fechainicio" required
+                                    value="<?= date('Y-m-d') ?>">
                                 <label for="fechainicio">Fecha Inicio</label>
                             </div>
                         </div>
@@ -217,6 +218,35 @@
                 }
             });
         });
+
+        const formCot = document.getElementById('formCotizacion');
+        if (formCot) {
+            formCot.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const { isConfirmed } = await Swal.fire({
+                    title: '¿Registrar nuevo formato?',
+                    text: 'Esta acción agregará un nuevo formato de cotización.',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sí, agregar',
+                    cancelButtonText: 'Cancelar',
+                    reverseButtons: true
+                });
+
+                if (isConfirmed) {
+                    // (opcional) desactivar botón submit para evitar doble clic
+                    const submitBtn = formCot.querySelector('button[type="submit"]');
+                    if (submitBtn) {
+                        submitBtn.disabled = true;
+                        submitBtn.dataset.origText = submitBtn.innerHTML;
+                        submitBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Agregando...';
+                    }
+
+                    formCot.submit();
+                }
+            });
+        }
     });
 
 </script>
