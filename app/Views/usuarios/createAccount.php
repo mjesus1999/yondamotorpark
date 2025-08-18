@@ -208,46 +208,117 @@
 </div>
 
 <script>
-    document.querySelectorAll('.contracts-table tbody tr[data-id]').forEach(function (row) {
-        row.addEventListener('click', function () {
-            const id = this.dataset.id || '';
-            const nombres = this.dataset.nombres || '';
-            const apellidos = this.dataset.apellidos || '';
-            const area = this.dataset.area || '';
-            const cargo = this.dataset.cargo || '';
+    document.addEventListener('DOMContentLoaded', () => {
 
-            //Actualizar los campos de selección
-            document.getElementById('idcontrato').value = id;
-            document.getElementById('nombreSel').value = (nombres + ' ' + apellidos).trim();
-            document.getElementById('areaSel').value = area;
-            document.getElementById('cargoSel').value = cargo;
+        document.querySelectorAll('.contracts-table tbody tr[data-id]').forEach(function (row) {
+            row.addEventListener('click', function () {
+                const id = this.dataset.id || '';
+                const nombres = this.dataset.nombres || '';
+                const apellidos = this.dataset.apellidos || '';
+                const area = this.dataset.area || '';
+                const cargo = this.dataset.cargo || '';
 
-            //Rellenar hidden inputs para enviarlos al servidor
-            document.getElementById('nombresSel').value = nombres;
-            document.getElementById('apellidosSel').value = apellidos;
+                //Actualizar los campos de seleccion
+                document.getElementById('idcontrato').value = id;
+                document.getElementById('nombreSel').value = (nombres + ' ' + apellidos).trim();
+                document.getElementById('areaSel').value = area;
+                document.getElementById('cargoSel').value = cargo;
 
-            //Limpiar y sugerir usernick
-            const base = (nombres && apellidos) ? (nombres + '.' + apellidos) : (nombres || apellidos || '');
-            let sumpr = base.toLowerCase().replace(/\s+/g, '.').replace(/[^a-z0-9\.\-]/g, '');
-            const inputUser = document.getElementById('usernick');
+                //Rellenar hidden inputs para enviarlos al servidor
+                document.getElementById('nombresSel').value = nombres;
+                document.getElementById('apellidosSel').value = apellidos;
 
-            //Limpiar los campos cantes de asignar un nuevo valor
-            inputUser.value = sumpr;
-            inputUser.focus();
+                //Limpiar y sugerir usernick
+                const base = (nombres && apellidos) ? (nombres + '.' + apellidos) : (nombres || apellidos || '');
+
+                // Normalizar y construir sugerencia permitiendo letras Unicode (incluye tildes / ñ)
+                let sumpr = base
+                    .normalize('NFKC')                 // normaliza compuestos unicode
+                    .toLowerCase()                    // lowercase (acepta acentos)
+                    .replace(/\s+/g, '.')             // espacios -> puntos
+                    // permite cualquier letra Unicode (\p{L}), numeros, punto y guion 
+                    .replace(/[^\p{L}0-9.\-]/gu, '')
+                    .replace(/\.{2,}/g, '.')          // evitar puntos dobles
+                    .replace(/^\.|\.$/g, '');         // quitar punto al inicio/fin
+
+                const inputUser = document.getElementById('usernick');
+                inputUser.value = sumpr;
+                inputUser.focus();
+            });
         });
-    });
 
-    document.getElementById('form-create').addEventListener('submit', function (e) {
-        if (!document.getElementById('idcontrato').value) {
+        const formCreate = document.getElementById('form-create');
+        if (!formCreate) return;
+
+        formCreate.addEventListener('submit', async (e) => {
             e.preventDefault();
-            alert('Selecciona primero el contrato de la lista.');
-            return;
-        }
-        //verificación de que las contraseñas coinciden y longitud
-        const p1 = this.password1.value;
-        const p2 = this.password2.value;
-        if (p1.length < 8) { e.preventDefault(); alert('Contraseña mínima 8 caracteres.'); return; }
-        if (p1 !== p2) { e.preventDefault(); alert('Las contraseñas no coinciden.'); return; }
+
+            // validations client-side
+            const idContrato = document.getElementById('idcontrato').value || '';
+            if (!idContrato) {
+                await Swal.fire({
+                    icon: 'warning',
+                    title: 'Selecciona un contrato',
+                    text: 'Debes seleccionar primero el contrato de la lista.',
+                    confirmButtonText: 'OK',
+                    width: 420
+                });
+                return;
+            }
+
+            const p1 = formCreate.password1.value || '';
+            const p2 = formCreate.password2.value || '';
+
+            if (p1.length < 8) {
+                await Swal.fire({
+                    icon: 'error',
+                    title: 'Contraseña inválida',
+                    text: 'La contraseña debe tener al menos 8 caracteres.',
+                    confirmButtonText: 'OK',
+                    width: 420
+                });
+                return;
+            }
+
+            if (p1 !== p2) {
+                await Swal.fire({
+                    icon: 'error',
+                    title: 'Contraseñas no coinciden',
+                    text: 'Por favor verifica que ambas contraseñas coincidan.',
+                    confirmButtonText: 'OK',
+                    width: 420
+                });
+                return;
+            }
+
+            // también permitir que el navegador muestre errores 'required' si existen
+            if (!formCreate.checkValidity()) {
+                formCreate.reportValidity();
+                return;
+            }
+
+            const { isConfirmed } = await Swal.fire({
+                title: '¿Crear cuenta?',
+                text: '¿Deseas crear la cuenta para este contrato?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, crear',
+                cancelButtonText: 'Cancelar',
+                reverseButtons: true
+            });
+
+            if (!isConfirmed) return;
+
+            // Evitar doble envío: deshabilitar botón y mostrar spinner pequeño
+            const submitBtn = formCreate.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.dataset.origText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Creando...';
+            }
+
+            formCreate.submit();
+        });
     });
 </script>
 
