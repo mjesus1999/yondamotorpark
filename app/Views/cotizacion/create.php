@@ -223,7 +223,7 @@
                         <div class="col-md-2">
                             <div class="form-floating">
                                 <input type="number" placeholder="Inicial" class="form-control" id="inicial"
-                                    name="inicial" step="1" required>
+                                    name="inicial" step="0.01" min="0" required>
                                 <label for="inicial">Inicial</label>
                             </div>
                         </div>
@@ -677,5 +677,35 @@
             }
         });
     }
+
+    (function attachCotizacionConfirm() {
+        const formCot = document.getElementById('formCotizacion');
+        if (!formCot) return;
+
+        formCot.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const submitButton = formCot.querySelector('button[type="submit"]');
+
+            const { isConfirmed } = await Swal.fire({
+                title: '¿Registrar cotización?',
+                text: '¿Desea confirmar el registro de esta cotización?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, registrar',
+                cancelButtonText: 'Cancelar',
+                reverseButtons: true
+            });
+
+            if (isConfirmed) {
+                // prevenir dobles envíos visualmente
+                if (submitButton) {
+                    submitButton.disabled = true;
+                    submitButton.innerHTML = 'Registrando...';
+                }
+                formCot.submit();
+            }
+        });
+    })();
 
 </script>
