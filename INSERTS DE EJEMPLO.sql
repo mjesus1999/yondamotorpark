@@ -217,7 +217,7 @@ VALUES
 
 -- CLIENTES X4
 INSERT INTO clientes (tipocliente, idpersona, idempresa, idcolregistra)
-VALUES 	('P', 3, NULL,  2);
+VALUES 	('P', 4, NULL,  2);
 /*
 INSERT INTO clientes (tipocliente, idpersona, idempresa, idcolregistra)
 VALUES 	('P', 1, NULL,  2), 

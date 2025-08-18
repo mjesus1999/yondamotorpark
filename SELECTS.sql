@@ -294,6 +294,8 @@ SELECT idtipovehiculo, tipovehiculo
 	ORDER BY tipovehiculo;
 
 -- FORMATO DE COTIZACION & (REQUISITOS - DETALLE REQUISITOS)
+SELECT * from formatoCotizacion;
+SELECT * from requisitos LIMIT 100;
 SELECT idrequisito, requisito FROM requisitos ORDER BY idrequisito;
 
 SELECT
@@ -301,8 +303,20 @@ SELECT
   r.requisito
 FROM detallerequisitos dr
 JOIN requisitos r USING (idrequisito)
-WHERE dr.idformato = 5
+WHERE dr.idformato = 7
 ORDER BY r.idrequisito;
+
+SELECT TABLE_NAME, COLUMN_NAME, CONSTRAINT_NAME, REFERENCED_TABLE_NAME
+FROM information_schema.KEY_COLUMN_USAGE
+WHERE REFERENCED_TABLE_NAME = 'formatocotizacion'
+  AND REFERENCED_TABLE_SCHEMA = DATABASE();
+SELECT COUNT(*) AS cnt FROM cotizaciones WHERE idformato = 7;
+SELECT idcotizacion, idcliente, creado FROM cotizaciones WHERE idformato = 7 LIMIT 50;
+SELECT COUNT(*) AS cnt FROM detallerequisitos WHERE idformato = 7;
+SELECT idformato, idrequisito FROM detallerequisitos WHERE idformato = 7 LIMIT 50;
+SELECT idcotizacion, idcliente, creado
+FROM cotizaciones
+WHERE idformato = 7;
 
 -- CLIENTE (PERSONA NATURAL / EMPRESA)
 SELECT
