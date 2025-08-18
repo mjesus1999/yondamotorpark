@@ -73,7 +73,7 @@
 							</div>
 						</div>
 					</div> <!-- ./row -->
-  					<div class="row g-2">
+					<div class="row g-2">
 						<div class="col-md-2 mb-2">
 
 							<!-- lista de versiones -->
@@ -152,7 +152,8 @@
 
 						<div class="col-md-3 mb-2">
 							<div class="form-floating">
-								<input type="text" name="placa" class="form-control text-center" placeholder="Placa" maxlength="10">
+								<input type="text" name="placa" class="form-control text-center" placeholder="Placa"
+									maxlength="10">
 								<label for="placa">Placa</label>
 							</div>
 						</div>
@@ -358,11 +359,23 @@
 		  }
 		  console.groupEnd();
 		}); */
-		const form = document.getElementById('registrar-vehiculos');
 
-		form.addEventListener('submit', function (e) {
-			if (!confirm("¿Estás seguro de registrar los vehículos?")) {
-				e.preventDefault();
+		const formVeh = document.getElementById('registrar-vehiculos');
+		formVeh.addEventListener('submit', async (e) => {
+			e.preventDefault();
+
+			const { isConfirmed } = await Swal.fire({
+				title: '¿Registrar nuevo vehículo?',
+				text: 'Esta acción registrará el vehículo en el sistema.',
+				icon: 'question',
+				showCancelButton: true,
+				confirmButtonText: 'Sí, registrar',
+				cancelButtonText: 'Cancelar',
+				reverseButtons: true,
+			});
+
+			if (isConfirmed) {
+				formVeh.submit();
 			}
 		});
 	});
