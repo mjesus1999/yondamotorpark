@@ -16,7 +16,7 @@ FROM colaboradores
 WHERE usernick = 'Deyanira' OR idcolaborador = 3;
 
 
--- DELETE FROM Colaboradores WHERE idcolaborador = 7;
+-- DELETE FROM Colaboradores WHERE idcolaborador = 6;
 -- DELETE FROM cotizaciones WHERE idasesor = 26;
 -- DELETE FROM vehiculos WHERE idlogistica = 26;
 
