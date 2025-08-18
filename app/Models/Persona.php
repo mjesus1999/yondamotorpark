@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Core\Database;
 use PDO;
 use PDOException;
+use Exception;
 
 class Persona
 {
@@ -47,6 +48,21 @@ class Persona
 
     public function searchByDNI(string $dni): ?array
     {
+        $query = "SELECT idpersona, apellidos, nombres FROM personas WHERE nrodoc = :dni LIMIT 1";
+        try {
+            $stmt = $this->db->prepare($query);
+            $stmt->bindValue(':dni', $dni, PDO::PARAM_STR);
+            $stmt->execute();
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $row ?: null;
+        } catch (Exception $e) {
+            // log $e->getMessage()
+            return null;
+        }
+    }
+
+    /* public function searchByDNI1(string $dni): ?array
+    {
         $query = "
             SELECT idpersona, apellidos, nombres
             FROM personas
@@ -58,6 +74,6 @@ class Persona
         $stmt->execute();
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         return $row ?: null;
-    }
+    } */
 
 }

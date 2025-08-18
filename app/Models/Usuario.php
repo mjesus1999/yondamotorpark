@@ -18,37 +18,13 @@ class Usuario
 
   public function getAll(): array
   {
-    $query = "
-      SELECT
-        col.idcolaborador   AS idcolaborador,
-        p.apellidos         AS apellidos,
-        p.nombres           AS nombres,
-        a.area              AS area,
-        cg.cargo            AS cargo,
-        DATE_FORMAT(cl.fechainicio, '%Y-%m-%d') AS fecha_inicio,
-        IFNULL(
-          DATE_FORMAT(cl.fechafin, '%Y-%m-%d'),
-          'Indeterminado'
-        )                   AS fecha_fin,
-        col.usernick        AS usuario
-      FROM colaboradores col
-      INNER JOIN contratoslaborales cl
-        ON col.idcontratolaboral = cl.idcontratolaboral
-      INNER JOIN personas p
-        ON cl.idpersona = p.idpersona
-      INNER JOIN cargos cg
-        ON cg.idcargo = cl.idcargo
-      INNER JOIN areas a
-        ON a.idarea = cg.idarea
-      WHERE col.habilitado = 'S'
-      ORDER BY col.idcolaborador
-      LIMIT 0,1000;
-      ";
+    $query = "SELECT * FROM vwGetAllUser LIMIT 1000";
     try {
       $stmt = $this->db->prepare($query);
       $stmt->execute();
       return $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (Exception $e) {
+      // log $e->getMessage()
       return [];
     }
   }
@@ -61,207 +37,148 @@ class Usuario
       $stmt->execute();
       return $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (Exception $e) {
+      // log $e->getMessage()
       return [];
     }
   }
 
   public function getCargosByArea(int $idArea): array
   {
-    $query = "SELECT idcargo, cargo
-            FROM cargos
-            WHERE idarea = :idarea
-            ORDER BY cargo";
+    $query = "SELECT idcargo, cargo FROM cargos WHERE idarea = :idarea ORDER BY cargo";
     try {
       $stmt = $this->db->prepare($query);
       $stmt->bindValue(':idarea', $idArea, PDO::PARAM_INT);
       $stmt->execute();
       return $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (Exception $e) {
+      // log $e->getMessage()
       return [];
     }
   }
 
-  public function searchByDNI(string $dni): ?array
-  {
-    $query = "
-      SELECT idpersona, apellidos, nombres
-      FROM personas
-      WHERE nrodoc = :dni
-      LIMIT 1
-    ";
-    $stmt = $this->db->prepare($query);
-    $stmt->bindParam(':dni', $dni);
-    $stmt->execute();
-    $row = $stmt->fetch(PDO::FETCH_ASSOC);
-    return $row ?: null;
-  }
-
   public function updatePassword(int $idColaborador, string $newHash): bool
   {
-    $query = "
-      UPDATE colaboradores
-        SET userpassword = :userpassword
-      WHERE idcolaborador = :idcolaborador
-    ";
-    $stmt = $this->db->prepare($query);
-    $stmt->bindParam(':userpassword', $newHash);
-    $stmt->bindParam(':idcolaborador', $idColaborador, PDO::PARAM_INT);
-    return $stmt->execute();
+    $query = "UPDATE colaboradores SET userpassword = :userpassword WHERE idcolaborador = :idcolaborador";
+    try {
+      $stmt = $this->db->prepare($query);
+      $stmt->bindValue(':userpassword', $newHash, PDO::PARAM_STR);
+      $stmt->bindValue(':idcolaborador', $idColaborador, PDO::PARAM_INT);
+      return $stmt->execute();
+    } catch (Exception $e) {
+      // log $e->getMessage()
+      return false;
+    }
   }
 
   public function disabled(int $id): bool
   {
-    $stmt = $this->db->prepare("
-        UPDATE colaboradores
-        SET habilitado = 'N'
-        WHERE idcolaborador = :id
-    ");
-    $stmt->bindParam(':id', $id, PDO::PARAM_INT);
-    return $stmt->execute();
+    $query = "UPDATE colaboradores SET habilitado = 'N' WHERE idcolaborador = :id";
+    try {
+      $stmt = $this->db->prepare($query);
+      $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+      return $stmt->execute();
+    } catch (Exception $e) {
+      // log $e->getMessage()
+      return false;
+    }
   }
 
   // CONSULTAS PARA EL LOGIN
-  //buscar por nombre de usuario
-
   public function searchByUsernick(string $usernick): ?array
   {
-    $query = "SELECT
-                col.idcolaborador,
-                col.usernick,
-                col.userpassword,
-                col.habilitado,
-                col.avatar,
-                col.restriccionhoraria,
-                p.nombres,
-                p.apellidos,
-                cl.idcargo,
-                cg.cargo
-              FROM colaboradores col
-              JOIN contratoslaborales cl ON cl.idcontratolaboral = col.idcontratolaboral
-              JOIN personas p ON p.idpersona = cl.idpersona
-              JOIN cargos cg ON cg.idcargo = cl.idcargo
-              WHERE BINARY col.usernick = :usernick
-              LIMIT 1";
-    $stmt = $this->db->prepare($query);
-    $stmt->bindParam(':usernick', $usernick);
-    $stmt->execute();
-
-    $row = $stmt->fetch(PDO::FETCH_ASSOC);
-    return $row ?: null;
+    $query = "SELECT * FROM vwSearchUsernick WHERE BINARY usernick = :usernick LIMIT 1";
+    try {
+      $stmt = $this->db->prepare($query);
+      $stmt->bindValue(':usernick', $usernick, PDO::PARAM_STR);
+      $stmt->execute();
+      $row = $stmt->fetch(PDO::FETCH_ASSOC);
+      return $row ?: null;
+    } catch (Exception $e) {
+      // log $e->getMessage()
+      return null;
+    }
   }
 
-  //mostrar el usuario por id
+  // mostrar el usuario por id
   public function getById(int $idColab): ?array
   {
-    $stmt = $this->db->prepare("
-      SELECT
-        col.idcolaborador,
-        col.usernick,
-        col.avatar,
-        col.restriccionhoraria,
-        p.apellidos,
-        p.nombres,
-        p.tipodoc,
-        p.nrodoc,
-        p.genero,
-        DATE_FORMAT(p.fechanac, '%Y-%m-%d') AS fechanac,
-        p.estadocivil,
-        p.email,
-        p.iddistrito,
-        d.distrito AS nombre_distrito,
-        p.direccion,
-        p.referencia,
-        p.telprimario,
-        p.telalternativo,
-        DATE_FORMAT(cl.fechainicio, '%Y-%m-%d') AS fechainicio,
-        IFNULL(DATE_FORMAT(cl.fechafin, '%Y-%m-%d'), 'Indeterminado') AS fechafin,
-        cl.idcargo AS idcargo,
-        cg.cargo,
-        a.area
-      FROM colaboradores col
-      JOIN contratoslaborales cl ON cl.idcontratolaboral = col.idcontratolaboral
-      JOIN personas p         ON p.idpersona       = cl.idpersona
-      JOIN cargos cg          ON cg.idcargo        = cl.idcargo
-      JOIN areas a            ON a.idarea          = cg.idarea
-      LEFT JOIN distritos d   ON d.iddistrito      = p.iddistrito
-      WHERE col.idcolaborador = :id
-    ");
-    $stmt->bindValue(':id', $idColab, PDO::PARAM_INT);
-    $stmt->execute();
-    return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+    $query = "SELECT * FROM vwGetUserDetail WHERE idcolaborador = :id";
+    try {
+      $stmt = $this->db->prepare($query);
+      $stmt->bindValue(':id', $idColab, PDO::PARAM_INT);
+      $stmt->execute();
+      return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+    } catch (Exception $e) {
+      // log $e->getMessage()
+      return null;
+    }
   }
 
-  //Actualiza el campo ultimoacceso a NOW()
+  // Actualiza el campo ultimoacceso a NOW()
   public function updateLastAccess(int $idColab): bool
   {
-    $stmt = $this->db->prepare("
-      UPDATE colaboradores
-      SET ultimoacceso = NOW()
-      WHERE idcolaborador = :id
-    ");
-    $stmt->bindValue(':id', $idColab, PDO::PARAM_INT);
-    return $stmt->execute();
+    $query = "UPDATE colaboradores SET ultimoacceso = NOW() WHERE idcolaborador = :id";
+    try {
+      $stmt = $this->db->prepare($query);
+      $stmt->bindValue(':id', $idColab, PDO::PARAM_INT);
+      return $stmt->execute();
+    } catch (Exception $e) {
+      // log $e->getMessage()
+      return false;
+    }
   }
 
-  //actualizar avatar
-
+  // actualizar avatar
   public function updateAvatar(int $idColab, string $url): bool
   {
-    $stmt = $this->db->prepare("
-      UPDATE colaboradores 
-      SET avatar = :url, modificado = NOW() 
-      WHERE idcolaborador = :id
-    ");
-    $stmt->bindValue(':url', $url);
-    $stmt->bindValue(':id', $idColab, PDO::PARAM_INT);
-    return $stmt->execute();
+    $query = "UPDATE colaboradores SET avatar = :url, modificado = NOW() WHERE idcolaborador = :id";
+    try {
+      $stmt = $this->db->prepare($query);
+      $stmt->bindValue(':url', $url, PDO::PARAM_STR);
+      $stmt->bindValue(':id', $idColab, PDO::PARAM_INT);
+      return $stmt->execute();
+    } catch (Exception $e) {
+      // log $e->getMessage()
+      return false;
+    }
   }
 
-  //IDLOGISTICA:
+  // IDLOGISTICA:
   public function esDeLogistica(int $idcolaborador): bool
   {
-    $stmt = $this->db->prepare("
+    $query = "
       SELECT a.idarea
       FROM colaboradores c
       INNER JOIN contratoslaborales cl ON c.idcontratolaboral = cl.idcontratolaboral
       INNER JOIN cargos ca ON cl.idcargo = ca.idcargo
       INNER JOIN areas a ON ca.idarea = a.idarea
       WHERE c.idcolaborador = :id
-      LIMIT 1
-    ");
-    $stmt->execute([':id' => $idcolaborador]);
-    $areaId = $stmt->fetchColumn();
-
-    return (int) $areaId === 9; // Logística
+      LIMIT 1";
+    try {
+      $stmt = $this->db->prepare($query);
+      $stmt->bindValue(':id', $idcolaborador, PDO::PARAM_INT);
+      $stmt->execute();
+      $areaId = $stmt->fetchColumn();
+      if ($areaId === false) {
+        return false;
+      }
+      return ((int) $areaId === 9); // 9 => Logística
+    } catch (Exception $e) {
+      // log $e->getMessage()
+      return false;
+    }
   }
 
-  //Obtener CONTRATO SIN COLABORADOR (Sin usuario registrado)
-
+  // Obtener CONTRATO SIN COLABORADOR (Sin usuario registrado)
   public function getContractsWithoutColaborador(): array
   {
-    $query = "
-      SELECT
-        cl.idcontratolaboral,
-        cl.idpersona,
-        p.apellidos,
-        p.nombres,
-        a.area,
-        cg.cargo,
-        DATE_FORMAT(cl.fechainicio, '%Y-%m-%d') AS fechainicio
-      FROM contratoslaborales cl
-      JOIN personas p ON p.idpersona = cl.idpersona
-      JOIN cargos cg ON cg.idcargo = cl.idcargo
-      JOIN areas a ON a.idarea = cg.idarea
-      LEFT JOIN colaboradores col ON col.idcontratolaboral = cl.idcontratolaboral
-      WHERE col.idcolaborador IS NULL
-      ORDER BY p.apellidos, p.nombres
-      LIMIT 0,1000
-    ";
+    $query = "SELECT * FROM vwContractsWithoutColaborador LIMIT 0,1000";
     try {
       $stmt = $this->db->prepare($query);
       $stmt->execute();
       return $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (Exception $e) {
+      // log $e->getMessage()
       return [];
     }
   }
@@ -352,6 +269,5 @@ class Usuario
       return null;
     }
   }
-
 
 }
