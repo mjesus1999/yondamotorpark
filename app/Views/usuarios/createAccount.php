@@ -309,7 +309,7 @@
 
             if (!isConfirmed) return;
 
-            // Evitar doble envío: deshabilitar botón y mostrar spinner pequeño
+            // Evitar doble envio: deshabilitar boton mostrar spinner pequeño
             const submitBtn = formCreate.querySelector('button[type="submit"]');
             if (submitBtn) {
                 submitBtn.disabled = true;
