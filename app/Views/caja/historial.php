@@ -51,6 +51,7 @@
                                 <th width="100">Medio</th>
                                 <th>Concepto</th>
                                 <th>Transacción</th>
+                                <th>Observaciones</th>
                                 <th class="no-imprimir" width="150">Comprobante</th>
                             </tr>
                         </thead>
@@ -67,8 +68,15 @@
                                     <tr>
                                         <td class="text-muted"><?= htmlspecialchars($numeroFila++) ?></td>
                                         <td><?= htmlspecialchars($pago['numcuota']) ?></td>
-                                        <td><?= htmlspecialchars($pago['fecha_vencimiento']) ?></td>
-                                        <td><?= htmlspecialchars($pago['fecha_pago']) ?></td>
+                                        <td>
+                                            <span class="badge bg-info text-white">
+                                                <?= htmlspecialchars($pago['fecha_vencimiento']) ?>
+                                            </span>
+                                        </td>
+
+                                        <td> <span class="badge bg-info text-white">
+                                                <?= htmlspecialchars($pago['fecha_pago']) ?>
+                                            </span></td>
                                         <td class="fw-bold"><?= htmlspecialchars($pago['amortizacion']) ?></td>
                                         <td class=""><?= htmlspecialchars($pago['saldorestante'] ?? '') ?></td>
                                         <td>
@@ -85,18 +93,28 @@
                                         </td>
 
                                         <td class="text-muted"><?= htmlspecialchars($pago['numerotransaccion'] ?? 'N/A')  ?></td>
-                                        <td class="text-center no-imprimir">
+                                        <td class="text-center">
+                                            <button type="button"
+                                                class="btn btn-sm btn-outline-secondary ver-observacion"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#modalObservacion"
+                                                data-observacion="<?= htmlspecialchars($pago['observacion'] ?? 'Sin observaciones') ?>" title="Ver observación">
+                                                <i class="fas fa-eye"></i> Detalle
+                                            </button>
+                                        </td>
+
+                                        <td class="no-imprimir">
                                             <?php if (!empty($pago['comprobante'])): ?>
                                                 <?php $esPdf = strtolower(pathinfo($pago['comprobante'], PATHINFO_EXTENSION)) === 'pdf'; ?>
                                                 <?php if ($esPdf): ?>
                                                     <a href="<?= htmlspecialchars($pago['comprobante']) ?>" target="_blank"
-                                                        class="btn btn-sm btn-danger">
-                                                        <i class="fas fa-file-pdf me-1"></i> PDF
+                                                        class="btn btn-sm btn-danger" title="Ver comprobante">
+                                                        <i class="fas fa-file-pdf me-1"></i>PDF
                                                     </a>
                                                 <?php else: ?>
                                                     <button type="button" class="btn btn-sm btn-primary ver-comprobante-img"
-                                                        data-img="<?= htmlspecialchars($pago['comprobante']) ?>">
-                                                        <i class="fas fa-image me-1"></i> Comprobante
+                                                        data-img="<?= htmlspecialchars($pago['comprobante']) ?>" title="Ver comprobante">
+                                                        <i class="fas fa-image me-1"></i>Comprobante
                                                     </button>
                                                 <?php endif; ?>
                                             <?php else: ?>
@@ -175,6 +193,22 @@
     </div>
 </div>
 
+<!-- MODAL DE Observaciones -->
+<div class="modal fade top" id="modalObservacion" tabindex="-1" aria-labelledby="modalObservacionLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm mt-0">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white fw-bold">
+                <h5 class="modal-title" id="modalObservacionLabel">Observación</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body" id="contenidoObservacion">
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 
@@ -188,11 +222,25 @@
         const itemsPerPage = 10;
         const totalItems = <?= count($pagos) ?>;
         const totalPages = Math.ceil(totalItems / itemsPerPage);
-        let currentPage = 1;
+        let currentPage = parseInt(localStorage.getItem('pageHistorialPago') || '1');
+        const botonesObservacion = document.querySelectorAll('.ver-observacion');
+        const contenidoModal = document.getElementById('contenidoObservacion');
+
+
+
+        botonesObservacion.forEach((boton) => {
+            boton.addEventListener('click', (e) => {
+                const btn = e.target.closest('.ver-observacion');
+                if (!btn) return;
+                const observacion = btn.getAttribute('data-observacion');
+                contenidoModal.textContent = observacion === null ? 'Sin observaciones' : observacion;
+            });
+        });
+
+
 
         btnPDF.addEventListener('click', async () => {
             showToast('GENERANDO EL PDF.....', 'INFO', 3000);
-
             // Espera 3 segundos
             await new Promise(resolve => setTimeout(resolve, 3000));
 
@@ -223,7 +271,7 @@
             const head = [
                 [
                     "#", "N° Cuota", "Vencimiento", "Fecha pago",
-                    "Amortización", "Saldo", "Medio", "Concepto","Transacción"
+                    "Amortización", "Saldo", "Medio", "Concepto", "Transacción"
                 ]
             ];
 
@@ -295,9 +343,12 @@
 
 
 
+
+
         // Mostrar página específica
         function showPage(page) {
             currentPage = page;
+            localStorage.setItem('pageHistorialPago', page);
             const rows = document.querySelectorAll('#tabla-body tr:not(.no-results)');
             rows.forEach(row => row.style.display = 'none');
 
@@ -324,6 +375,7 @@
             document.getElementById('next-page').classList.toggle('disabled', page === totalPages);
         }
 
+
         // Manejar paginación
         document.getElementById('paginacion').addEventListener('click', function(e) {
             e.preventDefault();
@@ -345,7 +397,10 @@
         });
 
         // Mostrar primera página
-        if (totalItems > 0) showPage(1);
+        if (totalItems > 0) showPage(currentPage);
+
+        localStorage.removeItem('page');
+
 
 
         // Manejar comprobantes
@@ -364,7 +419,16 @@
                 modal.show();
             });
         });
+
+
+        // Evento para limpiar la paginación al cambiar de vista
+        document.querySelector('a[href="/caja/"]').addEventListener('click', function() {
+            localStorage.removeItem('pageHistorialPago');
+            showPage(1);
+        });
     });
+
+    // localStorage.removeItem('currentPage');
 </script>
 
 <?php include __DIR__ . '/../layout/footer.php'; ?>

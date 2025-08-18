@@ -251,7 +251,7 @@ END$
 DELIMITER ;
 
 -- DELETE FROM pagos;
-CALL generar_cronograma(1, 4.263224089);
+CALL generar_cronograma(2, 4.263224089);
 SELECT * FROM cronogramas;
 
 

@@ -94,6 +94,7 @@ class PagoCronograma
             return -1;
         }
     }
+    
 
     /**
      * Obtiene el valor de la cuota y penalidad y el total amortizado para verificar si se ha pagado completamente.
@@ -147,7 +148,8 @@ class PagoCronograma
                                 WHERE pag.idcronograma = cro.idcronograma
                                 AND pag.tipo = 'Cuota'
                             ), 0) AS cuotapendiente,
-                    cro.estado 
+                    cro.estado, 
+                    cro.numcuota
                     FROM cronogramas cro 
                     JOIN contratos cont ON cro.idcontrato = cont.idcontrato 
                     JOIN cotizaciones coti ON cont.idcotizacion = coti.idcotizacion 
@@ -160,9 +162,7 @@ class PagoCronograma
 
 
 
-
-
-    // METODO PARA TRAER LOS NUEMROS DE CUNETAS PAGOS
+    // METODO PARA TRAER LOS NUEMROS DE CUENTAS PAGOS
 
     public function getNumCuentasPagos(): ?array
     {
@@ -190,7 +190,7 @@ class PagoCronograma
     public function getHistorialPagosByContrato(int $id): array
     {
 
-        $query = "CALL  sp_get_pagos_by_contrato(:idcontrato)";
+        $query = "CALL sp_get_pagos_by_contrato(:idcontrato)";
         try {
             $stmt = $this->db->prepare($query);
             $stmt->execute(array(':idcontrato' => $id));

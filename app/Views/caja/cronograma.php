@@ -56,7 +56,7 @@
                                     <th>Acciones</th>
                                 </tr>
                             </thead>
-                            <tbody id="tabla-body">
+                            <tbody id="tabla-body" data-total-items="<?= count($cronograma) ?>">
                                 <?php if (empty($cronograma)) : ?>
                                     <tr>
                                         <td colspan="10" class="text-center">No hay datos para mostrar</td>
@@ -239,7 +239,7 @@
 
 <!-- MODAL DE PAGOS  -->
 <div class="modal fade" id="modalPago" tabindex="-1" aria-labelledby="modalPagoLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-dialog  modal-dialog-centered" style="max-width: 750px;">
         <div class="modal-content shadow-lg">
             <!-- Header -->
             <div class="modal-header bg-primary text-white">
@@ -261,7 +261,7 @@
                         <div class="col-md-5 col-lg-4">
                             <div class="card h-70">
                                 <div class="card-body">
-                                    <h6 class="card-title text-primary-dark mb-3">
+                                    <h6 class="card-title text-info fw-bold mb-3">
                                         <i class="fas fa-file-invoice-dollar me-2"></i> Detalles de la Deuda
                                     </h6>
 
@@ -299,7 +299,7 @@
                             <!-- Card de Detalles del Pago -->
                             <div class="card">
                                 <div class="card-body">
-                                    <h6 class="card-title text-success mb-3">
+                                    <h6 class="card-title text-success fw-bold mb-3">
                                         <i class="fas fa-hand-holding-usd me-2"></i> Detalles del Pago
                                     </h6>
                                     <div class="row g-3">
@@ -309,7 +309,9 @@
                                         </div>
                                         <div class="col-md-6">
                                             <label class="form-label small text-muted">Fecha de Pago</label>
-                                            <input type="date" class="form-control" value="2025-08-15" name="fechapago" id="fechapago">
+                                            <input type="date" class="form-control" value="<?= date('Y-m-d') ?>" name="fechapago" id="fechapago">
+                                            <div class="invalid-feedback">La fecha de pago no puede estar vacía y no puede ser una fecha futura</div>
+                                            <div class="valid-feedback">Fecha válida.</div>
                                         </div>
                                     </div>
 
@@ -320,6 +322,8 @@
                                             <div class="col-md-6">
                                                 <label class="form-label small text-muted">Monto de cuota</label>
                                                 <input type="text" class="form-control" id="amortizacionCuota" name="amortizacionCuota">
+                                                <div class="invalid-feedback" id="invalid-amortizacionCuota"></div>
+                                                <div class="valid-feedback">Correcto.</div>
                                             </div>
                                             <div class="col-md-6">
                                                 <label class="form-label small text-muted">Comprobante de Cuota</label>
@@ -348,7 +352,7 @@
                             <!-- Card de Método de Pago -->
                             <div class="card">
                                 <div class="card-body">
-                                    <h6 class="card-title text-info mb-3">
+                                    <h6 class="card-title text-success fw-bold mb-3">
                                         <i class="fas fa-credit-card me-2"></i> Método de Pago
                                     </h6>
                                     <div class="row g-3">
@@ -365,13 +369,18 @@
                                             <label class="form-label small text-muted">N°cuenta</label>
                                             <select class="form-select" id="idcuentapago" name="idcuentapago"></select>
                                         </div>
-                                        <div class="col-md-6">
-                                            <label class="form-label small text-muted">N° operación</label>
-                                            <input type="text" class="form-control" name="numerotransaccion" placeholder="Opcional para transferencias" id="numerotransaccion" maxlength="30" minlength="6">
+                                        <div class="col-md-6" id="group-numTransaccionCuota">
+                                            <label class="form-label small text-muted">N° operación(Cuota)</label>
+                                            <input type="text" class="form-control numeros-transacciones" name="numerotransaccion" placeholder="N° de operación 6654.." id="numerotransaccion" maxlength="30" minlength="6" pattern="[0-9]{6,30}"
+                                                title="Solo números, entre 6 y 30 dígitos">
+                                            <div class="invalid-feedback">Debe tener entre 6 y 30 dígitos numéricos.</div>
+                                            <div class="valid-feedback">Número válido.</div>
                                         </div>
-                                        <div class=" hidden col-md-6">
-                                            <label class="form-label small text-muted">N° operación - penalidad</label>
-                                            <input type="text" class="form-control" name="numerotransaccion-penalidad" placeholder="Opcional para transferencias" id="numerotransaccion-penalidad">
+                                        <div class="hidden col-md-6" id="group-numTransaccionPenalidad">
+                                            <label class="form-label small text-muted">N° operación(Penalidad)</label>
+                                            <input type="text" class="form-control numeros-transacciones" name="numeroTransaccionPenalidad" placeholder="N° de operación 6654.." id="numerotransaccion-penalidad" maxlength="30" minlength="6" pattern="[0-9]{6,30}">
+                                             <div class="invalid-feedback">Debe tener entre 6 y 30 dígitos numéricos.</div>
+                                            <div class="valid-feedback">Número válido.</div>
                                         </div>
                                     </div>
                                 </div>
@@ -382,7 +391,7 @@
                         <div class="col-12">
                             <div class="card">
                                 <div class="card-body">
-                                    <h6 class="card-title text-secondary mb-3">
+                                    <h6 class="card-title text-warning fw-bold mb-3">
                                         <i class="fas fa-sticky-note me-2"></i> Observaciones
                                     </h6>
                                     <textarea class="form-control" rows="3" placeholder="Ingresa cualquier observación..." id="observacion" name="observacion"></textarea>
@@ -406,8 +415,11 @@
     </div>
 </div>
 
+<!-- USADO PARA GENERAR EL PDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+<script src="/assets/js/cronograma.js" type="module"></script>
+<!-- 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
 
@@ -419,10 +431,23 @@
             totalItems: <?= count($cronograma) ?>,
         };
         config.totalPages = Math.ceil(config.totalItems / config.itemsPerPage);
-        let currentPage = parseInt(localStorage.getItem('currentPage') || '1');
+        let currentPage = parseInt(localStorage.getItem('pageCronograma') || '1');
         let idCronogramaSeleccionado = null;
         let valorCuotaDeuda = 0;
         let valorPenalidadDeuda = 0;
+
+        const TIPOS_PAGO = {
+            soloCuota: 'soloCuota',
+            soloPenalidad: 'soloPenalidad',
+            ambas: 'ambas'
+        };
+
+        const MEDIOS_PAGO = {
+            efectivo: 'Efectivo',
+            yape: 'Yape',
+            transferenciaBancaria: 'Transferencia Bancaria',
+            plin: 'Plin'
+        };
 
         const elements = {
             tablaBody: document.getElementById('tabla-body'),
@@ -454,6 +479,7 @@
             contenedorInputMontoCuota: document.getElementById('contenedor-monto-cuota')
         };
 
+
         // ========================
         // 2. FUNCIONES 
         // ========================
@@ -464,7 +490,7 @@
          */
         function showPage(page) {
             currentPage = page;
-            localStorage.setItem('currentPage', currentPage);
+            localStorage.setItem('pageCronograma', currentPage);
 
             const rows = Array.from(elements.tablaBody.querySelectorAll('tr'));
             rows.forEach(row => row.style.display = 'none');
@@ -511,8 +537,8 @@
          */
         function updateSelectTipoPago() {
             const tipoPago = elements.tipoPagoSelect.value;
-            const isCuotaVisible = tipoPago === 'soloCuota' || tipoPago === 'ambas';
-            const isPenalidadVisible = tipoPago === 'soloPenalidad' || tipoPago === 'ambas';
+            const isCuotaVisible = tipoPago === TIPOS_PAGO.soloCuota || tipoPago === TIPOS_PAGO.ambas;
+            const isPenalidadVisible = tipoPago === TIPOS_PAGO.soloPenalidad || tipoPago === TIPOS_PAGO.ambas;
 
             elements.pagoCuotaGroup.classList.toggle('d-none', !isCuotaVisible);
             elements.pagoPenalidadGroup.classList.toggle('d-none', !isPenalidadVisible);
@@ -529,6 +555,7 @@
                 elements.amortizacionPenalidadInput.style.backgroundColor = '';
             }
         }
+
 
         /**
          * Carga las cuentas bancarias desde la API y las llena en el select.
@@ -547,11 +574,51 @@
             }
         }
 
+        // Función para validar la longitud del número de transacción
+        function validarNumeroTransaccion() {
+            const numeroTransaccion = elements.numeroTransaccionInput.value.trim();
+            const regex = /^\d{6,30}$/;
+            return regex.test(numeroTransaccion);
+        }
+
+        function validarAmortizacionCuota(valorDeuda) {
+            const monto = parseFloat(elements.amortizacionCuotaInput.value);
+
+
+            if (isNaN(monto) || monto <= 0) {
+                return false;
+            }
+
+            if (monto > valorDeuda) {
+                return false;
+            }
+
+            return true;
+        }
+
+        function fechaVacia() {
+            return !elements.fechaPagoInput.value;
+        }
+
+
+        function fechaEsFutura() {
+            const fechaPagoValue = elements.fechaPagoInput.value;
+            const fechaPagoDate = new Date(fechaPagoValue);
+            const hoy = new Date();
+
+            // Formatea ambas fechas a YYYY-MM-DD para una comparación precisa
+            const fechaPagoFormato = fechaPagoDate.toISOString().slice(0, 10);
+            const hoyFormato = hoy.toISOString().slice(0, 10);
+
+            return fechaPagoFormato > hoyFormato;
+        }
+
         /**
          * Valida los datos del formulario antes del envío.
          * @returns {boolean} True si los datos son válidos, de lo contrario, false.
          */
         function validarForm() {
+            elements.numeroTransaccionInput.classList.remove('is-valid', 'is-invalid');
             if (!idCronogramaSeleccionado) {
                 showToast('No se seleccionó ninguna cuota.', 'INFO', 1200);
                 return false;
@@ -560,17 +627,24 @@
             const tipoPago = elements.tipoPagoSelect.value;
             const amortizacionCuota = parseFloat(elements.amortizacionCuotaInput.value) || 0;
             const amortizacionPenalidad = parseFloat(elements.amortizacionPenalidadInput.value) || 0;
-            const fechaPagoValue = elements.fechaPagoInput.value;
-            const hoy = new Date();
-            const fechaPagoDate = new Date(fechaPagoValue);
 
             // Lógica de validación
-            const isCuota = tipoPago === 'soloCuota' || (tipoPago === 'ambas' && amortizacionCuota > 0);
-            const isPenalidad = tipoPago === 'soloPenalidad' || (tipoPago === 'ambas' && amortizacionPenalidad > 0);
+            const isCuota = tipoPago === TIPOS_PAGO.soloCuota || (tipoPago === TIPOS_PAGO.ambas && amortizacionCuota > 0);
+            const isPenalidad = tipoPago === TIPOS_PAGO.soloPenalidad || (tipoPago === TIPOS_PAGO.ambas && amortizacionPenalidad > 0);
 
-            if (isCuota && (amortizacionCuota <= 0 || amortizacionCuota > valorCuotaDeuda)) {
-                showToast(amortizacionCuota <= 0 ? 'Monto de cuota inválido.' : `La amortización no puede ser> S/ ${valorCuotaDeuda.toFixed(2)}.`, 'INFO', 1200);
-                return false;
+            if (isCuota) {
+                const monto = parseFloat(elements.amortizacionCuotaInput.value);
+                if (monto <= 0) {
+                    showToast('Monto de cuota inválido.', 'INFO', 1200);
+                    elements.amortizacionCuotaInput.classList.add('is-invalid');
+                    return false;
+                }
+
+                if (!validarAmortizacionCuota(valorCuotaDeuda)) {
+                    showToast(`La amortización no puede ser mayor a S/ ${valorCuotaDeuda.toFixed(2)}.`, 'INFO', 1200);
+                    elements.amortizacionCuotaInput.classList.add('is-invalid');
+                    return false;
+                }
             }
             if (isPenalidad && (amortizacionPenalidad <= 0 || amortizacionPenalidad !== parseFloat(valorPenalidadDeuda))) {
                 showToast(amortizacionPenalidad <= 0 ? 'Monto de penalidad inválido.' : `La penalidad debe pagarse completa: S/ ${valorPenalidadDeuda.toFixed(2)}.`, 'INFO', 1200);
@@ -585,7 +659,8 @@
                 return false;
             }
 
-            if (elements.medioPagoSelect.value.toLowerCase() === 'transferencia bancaria' ) {
+
+            if (elements.medioPagoSelect.value === MEDIOS_PAGO.transferenciaBancaria) {
                 if (!elements.numeroCuentaSelect.value) {
                     showToast('Debes seleccionar una cuenta bancaria.', 'INFO', 1200);
                     return false;
@@ -594,45 +669,81 @@
                 const numeroTransaccion = elements.numeroTransaccionInput.value.trim();
                 if (numeroTransaccion === '') {
                     showToast('El número de operación es obligatorio para transferencias.', 'INFO', 1500);
+                    elements.numeroTransaccionInput.classList.add('is-invalid');
                     return false;
                 }
 
-                // Expresión regular para validar solo dígitos.
-                const regex = /^\d{6,30}$/;
-                if (!regex.test(numeroTransaccion)) {
+                if (!validarNumeroTransaccion()) {
                     showToast('El número de operación es inválido. Debe contener solo números y tener entre 6 y 30 dígitos.', 'INFO', 2000);
+                    elements.numeroTransaccionInput.classList.add('is-invalid');
                     return false;
                 }
+                elements.numeroTransaccionInput.classList.add('is-valid');
             }
 
-
-            if (!fechaPagoValue) {
+            if (fechaVacia()) {
                 showToast('La fecha de pago es obligatoria.', 'INFO', 1200);
+                elements.fechaPagoInput.classList.add('is-invalid');
                 return false;
             }
-            if (fechaPagoDate > hoy) {
+
+            if (fechaEsFutura()) {
                 showToast('La fecha de pago no puede ser mayor a la actual.', 'INFO', 1200);
+                elements.fechaPagoInput.classList.add('is-invalid');
                 return false;
             }
 
             return true;
         }
 
+
+        elements.numeroTransaccionInput.addEventListener('input', () => {
+            elements.numeroTransaccionInput.classList.remove('is-valid', 'is-invalid');
+            if (elements.numeroTransaccionInput.value.trim().length > 0) {
+                if (validarNumeroTransaccion()) {
+                    elements.numeroTransaccionInput.classList.add('is-valid');
+                } else {
+                    elements.numeroTransaccionInput.classList.add('is-invalid');
+                }
+            }
+        });
+
+
+        elements.amortizacionCuotaInput.addEventListener('input', () => {
+            elements.amortizacionCuotaInput.classList.remove('is-valid', 'is-invalid');
+            const monto = parseFloat(elements.amortizacionCuotaInput.value);
+
+            // Valida si es un número y > 0
+            if (!isNaN(monto) && monto > 0) {
+                elements.amortizacionCuotaInput.classList.add('is-valid');
+            } else if (elements.amortizacionCuotaInput.value.trim().length > 0) {
+                // Muestra como inválido si el usuario está escribiendo un valor incorrecto
+                elements.amortizacionCuotaInput.classList.add('is-invalid');
+            }
+        });
+
+        elements.fechaPagoInput.addEventListener('change', () => {
+            elements.fechaPagoInput.classList.remove('is-valid', 'is-invalid');
+
+            if (fechaVacia() || fechaEsFutura()) {
+                elements.fechaPagoInput.classList.add('is-invalid');
+            } else {
+                elements.fechaPagoInput.classList.add('is-valid');
+            }
+        });
+
         /**
          * Envía los datos del formulario
          */
         async function submitForm() {
             if (!confirm('¿Seguro de registrar el pago?')) return;
-
-            if (!validarForm()) return;
-
             elements.btnConfirmarPago.disabled = true;
             elements.btnConfirmarPago.classList.add('disabled', 'opacity-75');
             elements.btnConfirmarPago.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Procesando...';
 
             const formData = new FormData(elements.formPago);
             formData.append('idcronograma', idCronogramaSeleccionado);
-            if (elements.medioPagoSelect.value === 'Transferencia Bancaria') {
+            if (elements.medioPagoSelect.value === MEDIOS_PAGO.transferenciaBancaria) {
                 formData.append('idcuentapago', elements.numeroCuentaSelect.value);
             }
 
@@ -709,32 +820,26 @@
             elements.detalleTotalDeudaInput.value = (saldoCuota + saldoPenalidad).toFixed(2);
             elements.numeroCuotaDisplay.textContent = `Está a punto de registrar el pago de la cuota N° ${btn.dataset.cuota}`;
 
-            // Lógica para mostrar/ocultar el select y los campos de pago
-
-            // Ocultar el select y mostrar el campo de penalidad
             const mostrarSoloPenalidad = saldoCuota === 0 && saldoPenalidad > 0;
-            // Ocultar el select y mostrar el campo de cuota
             const mostrarSoloCuota = saldoCuota > 0 && saldoPenalidad === 0;
-            // Mostrar el select
             const mostrarSelectCompleto = saldoCuota > 0 && saldoPenalidad > 0;
 
             elements.contenedorTipoPago.classList.toggle('hidden', !mostrarSelectCompleto);
 
             if (mostrarSelectCompleto) {
                 elements.tipoPagoSelect.innerHTML = `
-            <option value='ambas'>Cuota y Penalidad</option>
-            <option value='soloCuota'>Solo Cuota</option>
-            <option value='soloPenalidad'>Solo Penalidad</option>
+            <option value='${TIPOS_PAGO.ambas}'>Cuota y Penalidad</option>
+            <option value='${TIPOS_PAGO.soloCuota}'>Solo Cuota</option>
+            <option value='${TIPOS_PAGO.soloPenalidad}'>Solo Penalidad</option>
         `;
-                elements.tipoPagoSelect.value = 'ambas';
+                elements.tipoPagoSelect.value = TIPOS_PAGO.ambas;
             } else if (mostrarSoloPenalidad) {
-                elements.tipoPagoSelect.innerHTML = `<option value='soloPenalidad'>Solo Penalidad</option>`;
-                elements.tipoPagoSelect.value = 'soloPenalidad';
+                elements.tipoPagoSelect.innerHTML = `<option value='${TIPOS_PAGO.soloPenalidad}'>Solo Penalidad</option>`;
+                elements.tipoPagoSelect.value = TIPOS_PAGO.soloPenalidad;
             } else if (mostrarSoloCuota) {
-                elements.tipoPagoSelect.innerHTML = `<option value='soloCuota'>Solo Cuota</option>`;
-                elements.tipoPagoSelect.value = 'soloCuota';
+                elements.tipoPagoSelect.innerHTML = `<option value='${TIPOS_PAGO.soloCuota}'>Solo Cuota</option>`;
+                elements.tipoPagoSelect.value = TIPOS_PAGO.soloCuota;
             }
-
 
             updateSelectTipoPago();
         });
@@ -744,7 +849,7 @@
         elements.tipoPagoSelect.addEventListener('change', updateSelectTipoPago);
 
         elements.medioPagoSelect.addEventListener('change', (e) => {
-            const isTransferencia = e.target.value.toLowerCase() === 'transferencia bancaria';
+            const isTransferencia = e.target.value === MEDIOS_PAGO.transferenciaBancaria;
             elements.selectCuentas.classList.toggle('hidden', !isTransferencia);
             if (isTransferencia) {
                 cargarCuentasBancarias();
@@ -752,10 +857,16 @@
                 elements.numeroCuentaSelect.innerHTML = '';
             }
         });
+
         elements.formPago.addEventListener('submit', (e) => {
             e.preventDefault();
-            submitForm();
+            if (validarForm()) {
+                submitForm();
+
+            }
         });
+
+
 
         // Eventos de paginación y búsqueda
         elements.paginacion.addEventListener('click', function(e) {
@@ -774,7 +885,7 @@
 
         // Evento para limpiar la paginación al cambiar de vista
         document.querySelector('a[href="/caja/"]').addEventListener('click', function() {
-            localStorage.removeItem('currentPage');
+            localStorage.removeItem('pageCronograma');
             elements.inputBuscar.value = '';
             showPage(1);
         });
@@ -840,6 +951,8 @@
                 showToast('PDF GENERADO', 'SUCCESS', 2200);
             }, 3000);
         });
+
+        // localStorage.removeItem('currentPage');
     });
-</script>
+</script> -->
 <?php include __DIR__ . '/../layout/footer.php'; ?>

@@ -6,6 +6,7 @@ use App\Core\Controller;
 use App\Helpers\Validador;
 use App\Models\PagoCronograma;
 use App\Models\Caja;
+use DateTime;
 
 class PagoCronogramaController extends Controller
 {
@@ -27,7 +28,6 @@ class PagoCronogramaController extends Controller
         $datos = $this->pagoCronogramaModel->getHistorialPagosByContrato($id);
         $this->view('caja.historial', ['pagos' => $datos]);
     }
-
 
     private function guardarComprobante(array $archivo): ?string
     {
@@ -51,165 +51,211 @@ class PagoCronogramaController extends Controller
     {
         header('Content-Type: application/json');
 
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            http_response_code(405);
-            echo json_encode(['success' => false, 'message' => 'Método no permitido']);
-            return;
-        }
 
-        $data = array_map([Validador::class, 'limpiar'], $_POST);
-
-        $idCronograma = (int)($data['idcronograma'] ?? 0);
-        $amortizacionCuota = (float)($data['amortizacionCuota'] ?? 0);
-        $amortizacionPenalidad = (float)($data['amortizacionPenalidad'] ?? 0);
-        $medioPago = $data['mediopago'] ?? '';
-        $idCuentaPago = $data['idcuentapago'] ?? null;
-        $fechaPago = $data['fechapago'] ?? '';
-
-        // VALIDACIONES BÁSICAS
-        if ($idCronograma <= 0) {
-            echo json_encode(['success' => false, 'message' => 'Cuota a pagar no es válida.']);
-            return;
-        }
-     
-    
-        if (empty($medioPago)) {
-            echo json_encode(['success' => false, 'message' => 'Método de pago es obligatorio.']);
-            return;
-        }
-
-        if ($medioPago === 'Transferencia Bancaria' && empty($idCuentaPago)) {
-            echo json_encode(['success' => false, 'message' => 'Debes seleccionar una cuenta bancaria.']);
-            return;
-        }
-
-        // Debe haber al menos un monto
-        if ($amortizacionCuota <= 0 && $amortizacionPenalidad <= 0) {
-            echo json_encode(['success' => false, 'message' => 'Debes ingresar un monto válido (cuota o penalidad).']);
-            return;
-        }
-
-        // OBTENER DATOS DEL CRONOGRAMA
-        $cronogramaData = $this->pagoCronogramaModel->getCronogramaData($idCronograma);
-        if (!$cronogramaData) {
-            echo json_encode(['success' => false, 'message' => 'No se encontró la cuota.']);
-            return;
-        }
-        
-        $idContrato = $cronogramaData['idcontrato'];
-
-        // VALIDACIONES ESPECÍFICAS DE MONTOS
-
-        // Si se paga cuota, validar que no exceda el saldo
-        if ($amortizacionCuota > 0) {
-            if ($amortizacionCuota > $cronogramaData['cuotapendiente']) {
-                echo json_encode(['success' => false, 'message' => "La cuota no puede exceder S/ {$cronogramaData['cuotapendiente']}"]);
+        try {
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                http_response_code(405);
+                echo json_encode(['success' => false, 'message' => 'Método no permitido']);
                 return;
             }
-        }
 
-        // Si se paga penalidad, DEBE ser el monto completo
-        if ($amortizacionPenalidad > 0) {
-            if ($amortizacionPenalidad != $cronogramaData['penalidad']) {
-                echo json_encode(['success' => false, 'message' => "La penalidad debe pagarse completa: S/ {$cronogramaData['penalidad']}"]);
+
+            $data = array_map([Validador::class, 'limpiar'], $_POST);
+            $errores = [];
+
+            //Asignar y validar campos básicos
+            $idCronograma = (int)($data['idcronograma'] ?? 0);
+            $amortizacionCuota = (float)($data['amortizacionCuota'] ?? 0);
+            $amortizacionPenalidad = (float)($data['amortizacionPenalidad'] ?? 0);
+            $numeroTransaccionPenalidad = (string)($data['numeroTransaccionPenalidad'] ?? '');
+            $medioPago = $data['mediopago'] ?? '';
+            $idCuentaPago = $data['idcuentapago'] ?? null;
+            $fechaPago = $data['fechapago'] ?? '';
+            $numeroTransaccion = $data['numerotransaccion'] ?? '';
+            $observacion = $data['observacion'] ?? '';
+
+            // Validaciones básicas de campos
+            if ($idCronograma <= 0) {
+                $errores[] = 'Cuota a pagar no es válida.';
+            }
+
+            if (empty($medioPago)) {
+                $errores[] = 'Método de pago es obligatorio.';
+            }
+
+            if ($amortizacionCuota <= 0 && $amortizacionPenalidad <= 0) {
+                $errores[] = 'Debes ingresar un monto válido mayor a 0  (cuota o penalidad).';
+            }
+
+            if (empty($fechaPago)) {
+                $errores[] = 'La fecha de pago es obligatoria.';
+            }
+
+            if (!empty($fechaPago)) {
+                $fechaActual = new DateTime();
+                $fechaPagoObj = new DateTime($fechaPago);
+                if ($fechaPagoObj > $fechaActual) {
+                    $errores[] = 'La fecha de pago no puede ser futura.';
+                }
+            }
+
+            // Validaciones condicionales
+            if ($medioPago === 'Transferencia Bancaria' && empty($idCuentaPago)) {
+                $errores[] = 'Debes seleccionar una cuenta bancaria.';
+            }
+
+            if ($amortizacionCuota > 0 && empty($numeroTransaccion)) {
+                $errores[] = 'El número de transacción de la cuota es obligatorio.';
+            }
+
+            if ($amortizacionPenalidad > 0 && empty($numeroTransaccionPenalidad)) {
+                $errores[] = 'El número de transacción de la penalidad es obligatorio.';
+            }
+
+            // Si hay errores en los campos básicos, no continuamos con la lógica de negocio
+            if (!empty($errores)) {
+                echo json_encode([
+                    'success' => false,
+                    'message' => implode('<br>', $errores)
+                ]);
                 return;
             }
-        }
 
-        // PROCESAR COMPROBANTES
-
-        // Comprobante de cuota
-        $rutaComprobanteCuota = null;
-        if ($amortizacionCuota > 0 && isset($_FILES['comprobanteCuota']) && !empty($_FILES['comprobanteCuota']['name'])) {
-            $rutaComprobanteCuota = $this->guardarComprobante($_FILES['comprobanteCuota']);
-            if (!$rutaComprobanteCuota) {
-                echo json_encode(['success' => false, 'message' => 'Error al guardar comprobante de cuota.']);
+            // Obtener datos del cronograma 
+            $cronogramaData = $this->pagoCronogramaModel->getCronogramaData($idCronograma);
+            if (!$cronogramaData) {
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'No se encontró la cuota.'
+                ]);
                 return;
             }
-        }
 
-        // Comprobante de penalidad
-        $rutaComprobantePenalidad = null;
-        if ($amortizacionPenalidad > 0 && isset($_FILES['comprobantePenalidad']) && !empty($_FILES['comprobantePenalidad']['name'])) {
-            $rutaComprobantePenalidad = $this->guardarComprobante($_FILES['comprobantePenalidad']);
-            if (!$rutaComprobantePenalidad) {
-                echo json_encode(['success' => false, 'message' => 'Error al guardar comprobante de penalidad.']);
+            $idContrato = $cronogramaData['idcontrato'];
+
+            //  Validaciones de negocio con los datos del cronograma
+            if ($amortizacionCuota > 0) {
+                if ($amortizacionCuota > $cronogramaData['cuotapendiente']) {
+                    $errores[] = "La cuota no puede exceder S/ {$cronogramaData['cuotapendiente']}";
+                }
+            }
+
+            if ($amortizacionPenalidad > 0) {
+                if ($cronogramaData['penalidad'] > 0) {
+
+                    if ($amortizacionPenalidad != $cronogramaData['penalidad']) {
+                        $errores[] = "La penalidad debe pagarse completa: S/ {$cronogramaData['penalidad']}";
+                    }
+                } else {
+                    $errores[] = "No hay penalidad pendiente para esta cuota, la penalidad es: S/ {$cronogramaData['penalidad']}";
+                }
+            }
+
+
+            // Validar y guardar archivos
+            $rutaComprobanteCuota = null;
+            if ($amortizacionCuota > 0) {
+                if (!isset($_FILES['comprobanteCuota']) || empty($_FILES['comprobanteCuota']['name'])) {
+                    $errores[] = 'Debe adjuntar un comprobante para el pago de cuota.';
+                } else {
+                    $rutaComprobanteCuota = $this->guardarComprobante($_FILES['comprobanteCuota']);
+                    if (!$rutaComprobanteCuota) {
+                        $errores[] = 'Error al guardar comprobante de cuota.';
+                    }
+                }
+            }
+
+            $rutaComprobantePenalidad = null;
+            if ($amortizacionPenalidad > 0) {
+                if (!isset($_FILES['comprobantePenalidad']) || empty($_FILES['comprobantePenalidad']['name'])) {
+                    $errores[] = 'Debe adjuntar un comprobante para el pago de penalidad.';
+                } else {
+                    $rutaComprobantePenalidad = $this->guardarComprobante($_FILES['comprobantePenalidad']);
+                    if (!$rutaComprobantePenalidad) {
+                        $errores[] = 'Error al guardar comprobante de penalidad.';
+                    }
+                }
+            }
+
+            // Si hay errores en las validaciones de negocio o archivos
+            if (!empty($errores)) {
+                echo json_encode([
+                    'success' => false,
+                    'message' => implode('<br>', $errores)
+                ]);
                 return;
             }
-        }
 
-        // PREPARAR ARRAYS DE PAGO
+            // Si no hay errores, se procede a preparar y registrar los pagos
+            $pagoCuota = null;
+            if ($amortizacionCuota > 0) {
+                $pagoCuota = [
+                    'idcronograma' => $idCronograma,
+                    'idcuentapago' => empty($idCuentaPago) ? null : (int)$idCuentaPago,
+                    'idcolcaja' => 2,
+                    'mediopago' => $medioPago,
+                    'numerotransaccion' => $numeroTransaccion,
+                    'fechapago' => $fechaPago,
+                    'amortizacion' => $amortizacionCuota,
+                    'comprobante' => $rutaComprobanteCuota,
+                    'observacion' => $observacion,
+                    'tipo' => 'Cuota'
+                ];
+            }
 
-        $pagoCuota = null;
-        if ($amortizacionCuota > 0) {
-            $pagoCuota = [
-                'idcronograma' => $idCronograma,
-                'idcuentapago' => empty($idCuentaPago) ? null : (int)$idCuentaPago,
-                'idcolcaja' => 2,
-                'mediopago' => $medioPago,
-                'numerotransaccion' => $data['numerotransaccion'] ?? null,
-                'fechapago' => $fechaPago,
-                'amortizacion' => $amortizacionCuota,
-                'comprobante' => $rutaComprobanteCuota,
-                'observacion' => $data['observacion'] ?? null,
-                'tipo' => 'Cuota'
-            ];
-        }
+            $pagoPenalidad = null;
+            if ($amortizacionPenalidad > 0) {
+                $pagoPenalidad = [
+                    'idcronograma' => $idCronograma,
+                    'idcuentapago' => empty($idCuentaPago) ? null : (int)$idCuentaPago,
+                    'idcolcaja' => 2,
+                    'mediopago' => $medioPago,
+                    'numerotransaccion' => $numeroTransaccionPenalidad,
+                    'fechapago' => $fechaPago,
+                    'amortizacion' => $amortizacionPenalidad,
+                    'comprobante' => $rutaComprobantePenalidad,
+                    'observacion' => 'Pago de penalidad - ' . $observacion,
+                    'tipo' => 'Penalidad'
+                ];
+            }
 
-        $pagoPenalidad = null;
-        if ($amortizacionPenalidad > 0) {
-            $pagoPenalidad = [
-                'idcronograma' => $idCronograma,
-                'idcuentapago' => empty($idCuentaPago) ? null : (int)$idCuentaPago,
-                'idcolcaja' => 2,
-                'mediopago' => $medioPago,
-                'numerotransaccion' => $data['numerotransaccion'] ?? null,
-                'fechapago' => $fechaPago,
-                'amortizacion' => $amortizacionPenalidad,
-                'comprobante' => $rutaComprobantePenalidad,
-                'observacion' => 'Pago de penalidad - ' . ($data['observacion'] ?? ''),
-                'tipo' => 'Penalidad'
-            ];
-        }
+            if ($pagoCuota === null && $pagoPenalidad !== null) {
+                $pagoCuota = [
+                    'idcronograma' => $idCronograma,
+                    'amortizacion' => 0
+                ];
+            }
 
-        // Si solo se paga penalidad, crear array vacío para cuota
-        if ($pagoCuota === null && $pagoPenalidad !== null) {
-            $pagoCuota = [
-                'idcronograma' => $idCronograma,
-                'amortizacion' => 0
-            ];
-        }
-
-        // REGISTRAR PAGOS
-        if ($pagoCuota !== null) {
             $idPagos = $this->pagoCronogramaModel->addMultiplePagos($pagoCuota, $pagoPenalidad);
-
             if (!empty($idPagos)) {
                 $cronogramaActualizado = $this->cajaModel->getCronogramaByIdContrato($idContrato);
                 echo json_encode([
                     'success' => true,
-                    'message' => '¡Pagos registrados correctamente!',
+                    'message' => '¡Pago registrado correctamente!',
                     'ids' => $idPagos,
                     'cronograma' => $cronogramaActualizado
                 ]);
             } else {
                 echo json_encode([
                     'success' => false,
-                    'message' => 'No se pudo registrar los pagos'
+                    'message' => 'No se pudo registrar el pago'
                 ]);
             }
-        } else {
+        } catch (\Throwable $th) {
+            http_response_code(500);
+            error_log($th->getMessage());
             echo json_encode([
                 'success' => false,
-                'message' => 'No se pudo procesar el pago'
+                'message' => 'Error inesperado del servidor. Intente más tarde.'
             ]);
         }
     }
 
 
 
-    // TRAER LOS NUMEROS DE CUENTAS
 
+
+    // TRAER LOS NUMEROS DE CUENTAS
     public function searchNumCuentasPagos(): void
     {
         header('Content-Type: application/json');

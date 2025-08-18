@@ -158,7 +158,8 @@ DATE_FORMAT(p.fechapago,'%m/%d/%Y') AS fecha_pago,
         p.mediopago,
         p.numerotransaccion,
         p.comprobante,
-        p.tipo
+        p.tipo,
+        p.observacion
     FROM pagos p
     INNER JOIN cronogramas c ON p.idcronograma = c.idcronograma
     WHERE c.idcontrato = p_idcontrato
@@ -172,11 +173,12 @@ DELIMITER;
 USE motorpark2
 
 SELECT * FROM contratos;
+
 SELECT * FROM pagos;
 
 SELECT * FROM cronogramas;
 
-UPDATE cronogramas SET fechapago = '2025-08-14' WHERE idcronograma = 1648;
+UPDATE cronogramas SET fechapago = '2025-08-14' WHERE idcronograma = 1658;
 UPDATE cronogramas SET fechapago = '2026-03-13', penalidad = 0, aplicapenalidad = 'N', estado = 'Pagado' WHERE idcronograma = 1521;
 UPDATE  cronogramas SET fechapago = '2026-05-13', penalidad = 0, aplicapenalidad ='N', estado = 'Pendiente' WHERE idcronograma = 1521;
 
@@ -242,3 +244,6 @@ SET
 WHERE
     estado = 'Pendiente'
     AND fechapago < CURDATE();
+
+
+DELETE  FROM pagos;
