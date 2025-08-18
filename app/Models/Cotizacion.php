@@ -5,6 +5,7 @@ namespace App\Models;
 
 use App\Core\Database;
 use PDO;
+use Exception;
 
 class Cotizacion
 {
@@ -17,49 +18,11 @@ class Cotizacion
 
     public function getAll(): array
     {
-        $sql = "
-        SELECT
-            c.idcotizacion,
-            c.idformato,
-            fc.tipocotizacion,
-            COALESCE(
-            CASE WHEN cl.tipocliente = 'P' THEN CONCAT(p.nombres, ' ', p.apellidos) END,
-            e.razonsocial,
-            'Cliente no definido'
-            ) AS nombrecliente,
-
-            COALESCE(
-            CASE WHEN cl.tipocliente = 'P' THEN p.nrodoc END,
-            e.ruc,
-            ''
-            ) AS documento,
-
-            COALESCE(
-            CASE WHEN cl.tipocliente = 'P' THEN p.telprimario END,
-            e.telprimario,
-            ''
-            ) AS telefono,
-
-            ma.marca AS marcaVehiculo,
-            mo.modelo AS modeloVehiculo,
-            mo.anio,
-            v.color,
-            c.creado AS fechaRegistro
-        FROM cotizaciones c
-        JOIN clientes cl ON c.idcliente = cl.idcliente
-        LEFT JOIN personas p ON cl.idpersona = p.idpersona
-        LEFT JOIN empresas e ON cl.idempresa = e.idempresa
-        JOIN vehiculos v ON c.idvehiculo = v.idvehiculo
-        JOIN modelos mo ON v.idmodelo = mo.idmodelo
-        JOIN marcas ma ON mo.idmarca = ma.idmarca
-        JOIN formatocotizacion fc ON c.idformato = fc.idformato 
-        ORDER BY c.creado DESC
-        LIMIT 10
-        ";
-
-        $stmt = $this->db->query($sql);
+        $query = "SELECT * FROM vwGetAllCotizacion ORDER BY fechaRegistro DESC LIMIT 10";
+        $stmt = $this->db->query($query);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
 
     public function getClienteByDoc(string $tipo, string $doc): ?array
     {
@@ -98,33 +61,6 @@ class Cotizacion
         }
 
         return null;
-    }
-
-    public function getPersonaByDoc(string $tipo, string $nrodoc): ?array
-    {
-        $query = "SELECT idpersona, apellidos, nombres, telprimario, telalternativo, email 
-                FROM personas 
-                WHERE tipodoc = :tipo
-                AND nrodoc  = :nrodoc
-                LIMIT 1";
-        $stmt = $this->db->prepare($query);
-        $stmt->execute([
-            ':tipo' => strtoupper($tipo),
-            ':nrodoc' => $nrodoc
-        ]);
-        return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
-    }
-
-    public function getEmpresaByRuc(string $ruc): ?array
-    {
-        $query = "SELECT idempresa, razonsocial AS apellidos, nombrecomercial AS nombres,
-                    telprimario, telalternativo, email
-                FROM empresas
-                WHERE ruc = :ruc
-                LIMIT 1";
-        $stmt = $this->db->prepare($query);
-        $stmt->execute([':ruc' => $ruc]);
-        return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
     }
 
     private function Pago($tasaInteres, $numPagos, $montoPrestamo)
@@ -173,61 +109,19 @@ class Cotizacion
         ]);
     }
 
-
     public function getById(int $idcotizacion): ?array
     {
-        $sql = "
-      SELECT
-        c.idcotizacion,
-        c.idformato,
-        c.idcliente,
-        c.idvehiculo,
-        c.moneda,
-        c.precioventa,
-        c.vigenciadias,
-        c.inicial,
-        c.numcuotas,
-        c.valorcuota,
-        c.idasesor,
-        c.creado AS fechaRegistro,
-
-        -- Datos del cliente
-        COALESCE(
-          CASE WHEN cl.tipocliente = 'P' THEN CONCAT(p.nombres, ' ', p.apellidos) END,
-          e.razonsocial
-        ) AS cliente_nombre,
-        COALESCE(
-          CASE WHEN cl.tipocliente = 'P' THEN p.nrodoc END,
-          e.ruc
-        ) AS cliente_documento,
-        COALESCE(
-          CASE WHEN cl.tipocliente = 'P' THEN p.telprimario END,
-          e.telprimario
-        ) AS cliente_telefono,
-
-        -- Vehículo
-        ma.marca AS vehiculo_marca,
-        mo.modelo AS vehiculo_modelo,
-        mo.anio      AS vehiculo_anio,
-        v.color      AS vehiculo_color
-
-      FROM cotizaciones c
-      JOIN clientes cl    ON c.idcliente = cl.idcliente
-      LEFT JOIN personas p ON cl.idpersona = p.idpersona
-      LEFT JOIN empresas e ON cl.idempresa = e.idempresa
-
-      JOIN vehiculos v    ON c.idvehiculo = v.idvehiculo
-      JOIN modelos mo     ON v.idmodelo   = mo.idmodelo
-      JOIN marcas ma      ON mo.idmarca   = ma.idmarca
-
-      WHERE c.idcotizacion = :id
-      LIMIT 1
-    ";
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute([':id' => $idcotizacion]);
-        return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+        $query = "SELECT * FROM vwGetCotizacionDetail WHERE idcotizacion = :id LIMIT 1";
+        try {
+            $stmt = $this->db->prepare($query);
+            $stmt->bindValue(':id', $idcotizacion, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+        } catch (Exception $e) {
+            // log $e->getMessage()
+            return null;
+        }
     }
-
     /* public function getRequisitos(): array
     {
         $stmt = $this->pdo->prepare("SELECT idrequisito, requisito FROM requisitos ORDER BY idrequisito");

@@ -30,10 +30,8 @@
     </div>
 
     <div class="row">
-      <div class="left fecha" id="fecha">
-        <!-- Fecha será cargada dinámicamente -->
-      </div>
-      <div class="right"></div>
+      <div class="left"><!-- espacio a la izquierda, por ejemplo logos u otros datos --></div>
+      <div class="right fecha" id="fecha"><!-- Aquí irá: "Chincha, 18 de Agosto de 2025" --></div>
     </div>
 
     <h2 class="title"><strong>COTIZACIÓN VEHICULAR</strong></h2>
@@ -106,8 +104,9 @@
           Con la finalidad de iniciar el proceso de desembolso de su crédito agradeceremos entregar a nuestro
           ejecutivo de ventas la siguiente documentación:
         </p>
-        <ol>
-          <li>FOTOCOPIA DNI DEL TITULAR Y CÓNYUGE</li>
+        <!-- <p><strong>Modalidad: </strong><span id="format-name"></span></p> -->
+        <ol id="instructions-list">
+          <!-- <li>FOTOCOPIA DNI DEL TITULAR Y CÓNYUGE</li>
           <li>COPIA DEL ÚLTIMO RECIBO PAGADO DE SERVICIOS (LUZ O AGUA)</li>
           <li>COPIA SIMPLE DE VIVIENDA (TÍTULO DE PROPIEDAD / CERTIFICADO DE POSESIÓN, COPIA LITERAL)</li>
           <li>BOLETAS DE PAGO</li>
@@ -117,7 +116,7 @@
           <li>VERIFICACIÓN DOMICILIARIA Y LABORAL</li>
           <li>PAGO ÚNICO POR GASTOS ADMINISTRATIVOS S/ 1,500.00</li>
           <li>SEGURO VEHICULAR (bajo evaluación)</li>
-          <li>GPS SATELITAL</li>
+          <li>GPS SATELITAL</li> -->
         </ol>
         <p><span class="selected">ENTREGA DE LA UNIDAD EN UN MÁXIMO DE 25 DÍAS HÁBILES</span></p>
         <p class="closing">
@@ -141,12 +140,44 @@
   <!-- html2pdf.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script>
-
     const cotId = <?= json_encode($id, JSON_NUMERIC_CHECK) ?>;
 
     function getIdFromPath() {
       const parts = window.location.pathname.split('/');
       return parts[parts.length - 1];
+    }
+
+    function formatDateSpanish(dateInput, ciudad = 'Chincha') {
+      const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Setiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+      let dt;
+
+      if (!dateInput) {
+        dt = new Date();
+      } else if (dateInput instanceof Date) {
+        dt = dateInput;
+      } else {
+        // normalizamos cadenas: "YYYY-MM-DD HH:MM:SS" -> "YYYY-MM-DDTHH:MM:SS"
+        const normalized = String(dateInput).replace(' ', 'T');
+        dt = new Date(normalized);
+        if (isNaN(dt.getTime())) {
+          // intento alternativo: parseo por partes (por si la cadena viene sin hora)
+          const parts = String(dateInput).split(/[-T ]/);
+          if (parts.length >= 3) {
+            const y = parseInt(parts[0], 10);
+            const m = parseInt(parts[1], 10) - 1;
+            const d = parseInt(parts[2], 10);
+            dt = new Date(y, m, d);
+          } else {
+            dt = new Date();
+          }
+        }
+      }
+
+      const day = dt.getDate();
+      const month = months[dt.getMonth()] || '';
+      const year = dt.getFullYear();
+
+      return `${ciudad}, ${day} de ${month} de ${year}`;
     }
 
     async function fetchAndFill() {
@@ -168,36 +199,80 @@
           throw new Error(`Error ${res.status}: ${res.statusText}`);
         }
 
-        const { cotizacion } = await res.json();
+        const payload = await res.json();
+        const cotizacion = payload.cotizacion ?? payload; // por compatibilidad
 
-        // Rellena campos con los datos obtenidos
-        document.getElementById('fecha').textContent = cotizacion.fecha || '';
-        document.getElementById('cliente-nombre').textContent = cotizacion.cliente.nombre;
-        document.getElementById('cliente-dni').textContent = cotizacion.cliente.dni;
-        document.getElementById('cliente-celular').textContent = cotizacion.cliente.celular;
-        document.getElementById('vehiculo-marca').textContent = cotizacion.vehiculo.marca;
-        document.getElementById('vehiculo-modelo').textContent = cotizacion.vehiculo.modelo;
-        document.getElementById('vehiculo-anio').textContent = cotizacion.vehiculo.anio;
-        document.getElementById('vehiculo-color').textContent = cotizacion.vehiculo.color;
-        document.getElementById('precio-usd').textContent = `$ ${cotizacion.precios.precio_usd}`;
-        document.getElementById('inicial-soles').textContent = `S/ ${cotizacion.precios.inicial_soles}`;
-        document.getElementById('cuota-24').textContent = cotizacion.precios.meses_24 || '-';
-        document.getElementById('cuota-36').textContent = cotizacion.precios.meses_36 || '-';
-        document.getElementById('cuota-48').textContent = cotizacion.precios.meses_48 || '-';
-        document.getElementById('cuota-60').textContent = cotizacion.precios.meses_60 || '-';
+        // Rellena campos con los datos obtenidos (comprobando existencia)
+        const fechaStr = formatDateSpanish(cotizacion.fecha, 'Chincha');
+        // forzar espacios no separables para fecha
+        document.getElementById('fecha').textContent = fechaStr.replace(/ /g, '\u00A0');
+        document.getElementById('cliente-nombre').textContent = (cotizacion.cliente && cotizacion.cliente.nombre) ? cotizacion.cliente.nombre : '';
+        document.getElementById('cliente-dni').textContent = (cotizacion.cliente && cotizacion.cliente.dni) ? cotizacion.cliente.dni : '';
+        document.getElementById('cliente-celular').textContent = (cotizacion.cliente && cotizacion.cliente.celular) ? cotizacion.cliente.celular : '';
+        document.getElementById('vehiculo-marca').textContent = (cotizacion.vehiculo && cotizacion.vehiculo.marca) ? cotizacion.vehiculo.marca : '';
+        document.getElementById('vehiculo-modelo').textContent = (cotizacion.vehiculo && cotizacion.vehiculo.modelo) ? cotizacion.vehiculo.modelo : '';
+        document.getElementById('vehiculo-anio').textContent = (cotizacion.vehiculo && cotizacion.vehiculo.anio) ? cotizacion.vehiculo.anio : '';
+        document.getElementById('vehiculo-color').textContent = (cotizacion.vehiculo && cotizacion.vehiculo.color) ? cotizacion.vehiculo.color : '';
+        document.getElementById('precio-usd').textContent = cotizacion.precios ? `$ ${cotizacion.precios.precio_usd}` : '';
+        document.getElementById('inicial-soles').textContent = cotizacion.precios ? `S/ ${cotizacion.precios.inicial_soles}` : '';
+        document.getElementById('cuota-24').textContent = (cotizacion.precios && cotizacion.precios.meses_24) ? cotizacion.precios.meses_24 : '-';
+        document.getElementById('cuota-36').textContent = (cotizacion.precios && cotizacion.precios.meses_36) ? cotizacion.precios.meses_36 : '-';
+        document.getElementById('cuota-48').textContent = (cotizacion.precios && cotizacion.precios.meses_48) ? cotizacion.precios.meses_48 : '-';
+        document.getElementById('cuota-60').textContent = (cotizacion.precios && cotizacion.precios.meses_60) ? cotizacion.precios.meses_60 : '-';
 
-        // Ocultar indicador de carga
+        // --- renderizar nombre de formato + requisitos ---
+        const formatNameEl = document.getElementById('format-name');
+        const instructionsOl = document.getElementById('instructions-list');
+
+        if (instructionsOl) instructionsOl.innerHTML = '';
+
+        if (formatNameEl) {
+          formatNameEl.textContent = cotizacion.tipocotizacion || (cotizacion.idformato ? `Formato #${cotizacion.idformato}` : '');
+        }
+
+        const requisitos = cotizacion.requisitos ?? [];
+
+        if (requisitos.length > 0) {
+          requisitos.forEach(r => {
+            const li = document.createElement('li');
+            li.textContent = r.requisito;
+            instructionsOl.appendChild(li);
+          });
+        } else {
+          // fallback: lista por defecto
+          const defaults = [
+            'FOTOCOPIA DNI DEL TITULAR Y CÓNYUGE',
+            'COPIA DEL ÚLTIMO RECIBO PAGADO DE SERVICIOS (LUZ O AGUA)',
+            'COPIA SIMPLE DE VIVIENDA (TÍTULO DE PROPIEDAD / CERTIFICADO DE POSESIÓN, COPIA LITERAL)',
+            'BOLETAS DE PAGO',
+            'DNI AVAL (DNI CÓNYUGE DE SER NECESARIO)',
+            'EVALUACIÓN DE GASTOS FAMILIARES',
+            '30% DE INICIAL COMO MÍNIMO (aumenta según precio de la unidad)',
+            'VERIFICACIÓN DOMICILIARIA Y LABORAL',
+            'PAGO ÚNICO POR GASTOS ADMINISTRATIVOS S/ 1,500.00',
+            'SEGURO VEHICULAR (bajo evaluación)',
+            'GPS SATELITAL'
+          ];
+          defaults.forEach(text => {
+            const li = document.createElement('li');
+            li.textContent = text;
+            instructionsOl.appendChild(li);
+          });
+        }
+        // --- fin renderizado requisitos ---
+
+        // Ocultar indicador de carga y mostrar container
         if (loadingIndicator) {
           loadingIndicator.style.display = 'none';
         }
-
         if (container) {
           container.style.visibility = 'visible';
         }
+
+        // Pequeño delay para asegurar que DOM quedó listo y luego generar PDF
         setTimeout(() => {
           generarPDFCotizacion();
-        },
-          10);
+        }, 10);
 
       } catch (error) {
         console.error('Error al cargar datos:', error);
@@ -218,37 +293,27 @@
       const element = document.querySelector('.container');
       const loadingIndicator = document.getElementById('loading-indicator');
 
-      // Asegurar que el indicador esté oculto
       if (loadingIndicator) {
         loadingIndicator.style.display = 'none';
       }
 
-      // Opciones optimizadas para PDF
       const opt = {
         margin: [0, 0, 0, 0],
         filename: `cotizacion-${getIdFromPath() || 'yonda'}.pdf`,
-        image: {
-          type: 'jpeg',
-          quality: 0.98
-        },
+        image: { type: 'jpeg', quality: 0.98 },
         html2canvas: {
           scale: 1.75,
           useCORS: true,
           allowTaint: true,
-          logging: false, // Desactivar logs para mejor rendimiento
+          logging: false,
           windowWidth: document.documentElement.offsetWidth,
           windowHeight: document.documentElement.offsetHeight,
           scrollX: 0,
           scrollY: 0
         },
-        jsPDF: {
-          unit: 'in',
-          format: 'letter',
-          orientation: 'portrait'
-        }
+        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
       };
 
-      // Mostrar mensaje mientras se genera el PDF
       const statusMessage = document.createElement('div');
       statusMessage.id = 'pdf-status';
       statusMessage.style.cssText = `
@@ -270,38 +335,21 @@
       `;
       document.body.appendChild(statusMessage);
 
-      // Generar y descargar PDF
       html2pdf()
         .set(opt)
         .from(element)
         .save()
         .then(() => {
-          console.log('PDF de cotización generado y descargado exitosamente.');
-
-          // Remover mensaje de estado
           const status = document.getElementById('pdf-status');
-          if (status) {
-            status.remove();
-          }
-
-          // Cerrar ventana después de un breve delay
-          setTimeout(() => {
-            window.close();
-          }, 1000);
+          if (status) status.remove();
+          setTimeout(() => window.close(), 1000);
         })
         .catch(error => {
           console.error('Error al generar PDF de cotización:', error);
-
-          // Remover mensaje de estado
           const status = document.getElementById('pdf-status');
-          if (status) {
-            status.remove();
-          }
-
+          if (status) status.remove();
           alert('Error al generar el PDF. La ventana se cerrará.');
-          setTimeout(() => {
-            window.close();
-          }, 1000);
+          setTimeout(() => window.close(), 1000);
         });
     }
 
@@ -312,7 +360,6 @@
 
     // Inicializar cuando la página esté completamente cargada
     window.addEventListener('DOMContentLoaded', async () => {
-      // Ejecutar la carga de datos y generación de PDF
       await fetchAndFill();
     });
   </script>

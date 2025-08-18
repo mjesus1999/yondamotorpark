@@ -1,5 +1,6 @@
 use motorpark;
 
+SELECT * FROM vehiculos;
 SELECT * FROM cotizaciones;
 SELECT * FROM empresas;
 SELECT * FROM personas LIMIT 200;

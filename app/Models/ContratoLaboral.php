@@ -16,12 +16,12 @@ class ContratoLaboral
 
     public function create(int $idPersona, int $idCargo, string $fechaInicio, ?string $fechaFin, string $tipoContrato): int
     {
-        $sql = "INSERT INTO contratoslaborales
+        $query = "INSERT INTO contratoslaborales
                   (idpersona, idcargo, fechainicio, fechafin, tipocontrato)
                 VALUES
                   (:idpersona, :idcargo, :fechainicio, :fechafin, :tipocontrato)";
         try {
-            $stmt = $this->db->prepare($sql);
+            $stmt = $this->db->prepare($query);
             $stmt->execute([
                 ':idpersona' => $idPersona,
                 ':idcargo' => $idCargo,

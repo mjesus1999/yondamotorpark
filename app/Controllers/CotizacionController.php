@@ -49,10 +49,27 @@ class CotizacionController extends Controller
             echo json_encode(['error' => 'Cotización no encontrada']);
             exit;
         }
+        // obtener requisitos del formato (si existe idformato)
+        $idformato = isset($cot['idformato']) ? (int) $cot['idformato'] : null;
+        $requisitos = [];
+        $tipocotizacion = null;
+        if ($idformato) {
+            $requisitos = $this->formatoModel->getDetalleRequisitos($idformato);
+            // opcional: obtener el nombre del formato (tipocotizacion)
+            $formatos = $this->formatoModel->getAll(); // getAll devuelve idformato y tipocotizacion
+            foreach ($formatos as $f) {
+                if ((int) $f['idformato'] === $idformato) {
+                    $tipocotizacion = $f['tipocotizacion'];
+                    break;
+                }
+            }
+        }
 
         // Reestructura tu respuesta para que JS pueda hacer destructuring:
         echo json_encode([
             'cotizacion' => [
+                'idformato' => $idformato,
+                'tipocotizacion' => $tipocotizacion,
                 'fecha' => $cot['fechaRegistro'],
                 'cliente' => [
                     'nombre' => $cot['cliente_nombre'],
@@ -73,6 +90,8 @@ class CotizacionController extends Controller
                     'meses_48' => $cot['numcuotas'] == 48 ? $cot['valorcuota'] : null,
                     'meses_60' => $cot['numcuotas'] == 60 ? $cot['valorcuota'] : null,
                 ],
+                // incluimos requisitos aquí para que el front no haga otra petición
+                'requisitos' => $requisitos
             ]
         ]);
         exit;

@@ -76,22 +76,32 @@
 }
 
 .fecha {
-  margin-left: 450px;
+  white-space: nowrap; /* evita que el texto haga wrap */
+  display: inline-block; /* ocupa su ancho natural */
+  font-size: 12pt; /* ajusta si quieres más pequeño/grande */
+  margin: 0;
+  padding-top: 2px;
 }
 
 .row {
   display: flex;
+  align-items: flex-start;
   width: 100%;
 }
 
 .row > .left {
-  flex: 1;
-  text-align: left;
+  flex: 1 1 auto;
 }
 
 .row > .right {
-  flex: 1;
-  text-align: right;
+  flex: 0 0 auto;
+}
+
+@media (max-width: 480px) {
+  .fecha {
+    white-space: normal;
+    font-size: 11pt;
+  } /* si realmente no cabe, puede romperse */
 }
 
 .title {
@@ -195,6 +205,57 @@ body {
   margin-top: auto;
   text-align: right;
 }
+.footer img {
+  display: block;
+  width: 100%;
+  margin-top: 4mm;
+}
+.footer .footer-text {
+  font-size: 11pt;
+  line-height: 1.5;
+  margin-bottom: 5px;
+}
+
+@media print {
+  /* Ocultar el indicador de carga en impresión */
+  #loading-indicator {
+    display: none !important;
+  }
+
+  /* Forzar que elementos fixed se traten como relativos (evita duplicados en html2pdf) */
+  *[style*="position: fixed"],
+  *[style*="position:fixed"] {
+    position: relative !important;
+  }
+
+  /* Pequeños ajustes de padding para impresión */
+  .container {
+    padding: 6mm;
+    max-width: 100%;
+  }
+  .footer {
+    height: auto;
+    padding-top: 4mm;
+  }
+}
+
+/* html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  position: relative;
+}
+
+body {
+  padding-bottom: 160px;
+  min-height: calc(297mm - 20mm);
+}
+
+.footer {
+  margin-top: auto;
+  text-align: right;
+}
 
 .footer img {
   display: block;
@@ -207,3 +268,4 @@ body {
   line-height: 1.5;
   margin-bottom: 5px;
 }
+ */
