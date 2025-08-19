@@ -54,10 +54,6 @@ class UsuarioController extends Controller
     /* if (session_status() !== PHP_SESSION_ACTIVE) {
       session_start();
     } */
-
-    // DEBUG TEMPORAL: id de sesión y usuario en logs
-    //error_log('STORE START - SID=' . session_id() . ' USER=' . json_encode($_SESSION['user'] ?? null));
-
     //obtener datos del formulario
     $idPersona = (int) ($_POST['idpersona'] ?? 0);
     $idCargo = (int) ($_POST['idcargo'] ?? 0);
@@ -67,22 +63,11 @@ class UsuarioController extends Controller
     $pass1 = $_POST['password1'] ?? '';
     $pass2 = $_POST['password2'] ?? '';
 
-    //detectar AJAX (para el modal) de registro de personas
+    // detectar AJAX (para el modal)
     $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest';
 
-    //validaciones desde Helpers
-    $dataForValidation = [
-      'idpersona' => $idPersona,
-      'idcargo' => $idCargo,
-      'fecha_inicio' => $fechaInicio,
-      'fecha_fin' => $fechaFin,
-      'usuario' => $usernick,
-      'password1' => $pass1,
-      'password2' => $pass2
-    ];
-    $errors = $this->validator->validateUsuarioData($dataForValidation, $this->usuarioModel);
-
-    if (!empty($errors)) {
+    // helper local para responder errores (JSON o renderizar vista)
+    $respondError = function (array $errors) use ($isAjax) {
       if ($isAjax) {
         header('Content-Type: application/json; charset=utf-8');
         echo json_encode(['success' => false, 'errors' => $errors]);
@@ -94,45 +79,43 @@ class UsuarioController extends Controller
         'error' => implode('<br>', $errors),
         'old' => $_POST
       ]);
+    };
+
+    // validaciones
+    $dataForValidation = [
+      'idpersona' => $idPersona,
+      'idcargo' => $idCargo,
+      'fecha_inicio' => $fechaInicio,
+      'fecha_fin' => $fechaFin,
+      'usuario' => $usernick,
+      'password1' => $pass1,
+      'password2' => $pass2
+    ];
+    $errors = $this->validator->validateUsuarioData($dataForValidation, $this->usuarioModel);
+    if (!empty($errors)) {
+      $respondError($errors);
       return;
     }
 
-    //Crear contrato laboral
+    // Crear contrato laboral
     try {
-      $idContrato = $this->contratoModel->create(
-        $idPersona,
-        $idCargo,
-        $fechaInicio,
-        $fechaFin,
-        'P'
-      );
+      $idContrato = $this->contratoModel->create($idPersona, $idCargo, $fechaInicio, $fechaFin, 'P');
       if ($idContrato <= 0) {
         throw new \RuntimeException('No se pudo crear el contrato laboral');
       }
     } catch (\Throwable $e) {
-      //error_log('Error al crear contrato: ' . $e->getMessage());
-      $msg = 'No se pudo crear el contrato laboral. Intente nuevamente.';
-      if ($isAjax) {
-        header('Content-Type: application/json; charset=utf-8');
-        echo json_encode(['success' => false, 'errors' => [$msg]]);
-        exit;
-      }
-      $areas = $this->usuarioModel->getAllAreas();
-      $this->view('usuarios.create', [
-        'areas' => $areas,
-        'error' => $msg,
-        'old' => $_POST
-      ]);
+      $respondError(['No se pudo crear el contrato laboral. Intente nuevamente.']);
       return;
     }
 
-    //Crear colaborador (con rollback si falla) / por el momento
+    // Crear colaborador con rollback si falla
     try {
       $passwordHash = password_hash($pass1, PASSWORD_DEFAULT);
       $restr = 'S';
       $idColab = $this->colaboradorModel->create($idContrato, $usernick, $passwordHash, $restr);
 
       if (empty($idColab) || $idColab <= 0) {
+        // rollback contrato si existe método delete
         if (method_exists($this->contratoModel, 'delete') && is_callable([$this->contratoModel, 'delete'])) {
           try {
             $this->contratoModel->delete($idContrato);
@@ -143,19 +126,7 @@ class UsuarioController extends Controller
         throw new \RuntimeException('No se pudo crear el usuario');
       }
     } catch (\Throwable $e) {
-      //error_log('Error al crear colaborador: ' . $e->getMessage());
-      $msg = 'No se pudo crear el usuario. Revisa los logs o contacta al administrador.';
-      if ($isAjax) {
-        header('Content-Type: application/json; charset=utf-8');
-        echo json_encode(['success' => false, 'errors' => [$msg]]);
-        exit;
-      }
-      $areas = $this->usuarioModel->getAllAreas();
-      $this->view('usuarios.create', [
-        'areas' => $areas,
-        'error' => $msg,
-        'old' => $_POST
-      ]);
+      $respondError(['No se pudo crear el usuario. Revisa los logs o contacta al administrador.']);
       return;
     }
 
@@ -168,9 +139,6 @@ class UsuarioController extends Controller
       ]);
       exit;
     }
-
-    /* if (session_status() !== PHP_SESSION_ACTIVE)
-      session_start(); */
     $_SESSION['success_message'] = "Usuario creado con éxito. ID colaborador: {$idColab}";
 
     $areas = $this->usuarioModel->getAllAreas();
@@ -179,8 +147,8 @@ class UsuarioController extends Controller
       'success' => $_SESSION['success_message'],
       'old' => []
     ]);
-    return;
   }
+
 
   public function changePassword(): void
   {

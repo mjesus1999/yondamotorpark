@@ -331,6 +331,57 @@ INSERT INTO accesos (idcargo, modulo, permisos) VALUES
 INSERT INTO accesos (idcargo, modulo, permisos) VALUES
 (3, 'vehiculos', 1);
 
+-- analista desarrollador (ID = 2) - solo puede ver marcas, vehiculos, formato cotizacion y cotizacion
+INSERT INTO accesos (idcargo, modulo, permisos) VALUES
+(2, 'marcas', 1),
+(2, 'vehiculos', 1),
+(2, 'formatoCotizacion', 1),
+(2, 'cotizacion', 1);
+
+-- Asistente de logistica (ID = 9) - solo puede ver vehiculos y cotizaciones
+INSERT INTO accesos (idcargo, modulo, permisos) VALUES
+(9, 'vehiculos', 1),
+(9, 'cotizacion', 1);
+
+-- Jefe de recursos humanos (ID = 10) - solo puede ver usuarios y crear cuentas
+INSERT INTO accesos (idcargo, modulo, permisos) VALUES
+(10, 'usuarios', 1),
+(10, 'auth', 1);
+
+-- Analista de recursos humanos (ID = 11) - solo puede ver los usuarios
+INSERT INTO accesos (idcargo, modulo, permisos) VALUES
+(11, 'usuarios', 1);
+
+-- Asistente de recursos humanos (ID = 12) - solo puede ver los usuarios
+INSERT INTO accesos (idcargo, modulo, permisos) VALUES
+(12, 'usuarios', 1);
+
+-- Jefe de contactabilidad (ID = 13) - solo puede ver las cotizaciones y formato cotizacion
+INSERT INTO accesos (idcargo, modulo, permisos) VALUES
+(13, 'cotizacion', 1),
+(13, 'formatoCotizacion', 1);
+
+-- Jefe de marketing (ID = 14) - solo puede ver marcas. formato cotizacion y cotizaciones
+INSERT INTO accesos (idcargo, modulo, permisos) VALUES
+(14, 'marcas', 1),
+(14, 'formatoCotizacion', 1),
+(14, 'cotizacion', 1);
+
+-- Jefe de ventas (ID = 16) - solo puede ver marcas, vehiculos, formato cotizacion y cotizaciones
+INSERT INTO accesos (idcargo, modulo, permisos) VALUES
+(16, 'marcas', 1),
+(16, 'vehiculos', 1),
+(16, 'formatoCotizacion', 1),
+(16, 'cotizacion', 1);
+
+/*
+-- Jefe de caja (ID = 17) - por el momento no
+INSERT INTO accesos (idcargo, modulo, permisos) VALUES
+(17, 'caja', 1),
+(17, 'cobranza', 1),
+(17, 'auth', 1);
+*/
+
 /*
 -- Jefe de Logística (ID = 8) - Acceso total a todos los módulos
 INSERT INTO permisos (idcargo, moduloapp) VALUES

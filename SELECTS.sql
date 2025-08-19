@@ -5,9 +5,9 @@ SELECT * FROM cotizaciones;
 SELECT * FROM empresas;
 SELECT * FROM personas LIMIT 200;
 SELECT * FROM Colaboradores;
-select * from contratoslaborales;
+select * from contratoslaborales LIMIT 200;
 select * from areas;
-select * from cargos;
+select * from cargos LIMIT 200;
 select * from clientes;
 select * from accesos;
 
