@@ -99,7 +99,7 @@
                     <div class="card-header">
                         <div class="row">
                             <div class="col-md-6 d-flex align-items-center justify-content-start">
-                                <strong id="marca-activa">Formulario de sesion</strong>
+                                <strong id="marca-activa">Formulario de Crear sesión</strong>
                             </div>
                         </div>
                     </div> <!-- ./card-header -->

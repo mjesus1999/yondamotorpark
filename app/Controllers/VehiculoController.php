@@ -54,11 +54,12 @@ class VehiculoController extends Controller
     header('Content-Type: application/json; charset=utf-8');
 
     $idcolaborador = $_SESSION['user']['id'];
-    /* if (!$this->usuarioModel->esDeLogistica($idcolaborador)) {
+    //SOLO PODRA REGISTRAR USUARIO DE LOGISTICA
+    if (!$this->usuarioModel->esDeLogistica($idcolaborador)) {
       $_SESSION['error_message'] = 'Solo el personal de Logística puede registrar vehículos';
       header('Location: /vehiculos?estado=proceso');
       exit;
-    } */
+    }
 
     $local = $this->localModel->getByTienda('Chincha');
     $idlocal = $local['idlocal'] ?? 3; //CHINCHA POR DEFECTO - Temporal

@@ -169,6 +169,8 @@ class Usuario
     }
   }
 
+
+
   // Obtener CONTRATO SIN COLABORADOR (Sin usuario registrado)
   public function getContractsWithoutColaborador(): array
   {
