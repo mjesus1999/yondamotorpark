@@ -1,15 +1,15 @@
-use motorpark;
+USE motorpark;
 
 SELECT * FROM vehiculos;
 SELECT * FROM cotizaciones;
 SELECT * FROM empresas;
 SELECT * FROM personas LIMIT 200;
 SELECT * FROM Colaboradores;
-select * from contratoslaborales LIMIT 200;
-select * from areas;
-select * from cargos LIMIT 200;
-select * from clientes;
-select * from accesos;
+SELECT * FROM contratoslaborales LIMIT 200;
+SELECT * FROM areas;
+SELECT * FROM cargos LIMIT 200;
+SELECT * FROM clientes;
+SELECT * FROM accesos;
 
 SELECT idcolaborador, usernick, restriccionhoraria
 FROM colaboradores
