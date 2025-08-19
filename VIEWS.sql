@@ -2,7 +2,26 @@
 -- VISTAS DE USUARIO.PHP 
 */
 
+/*
+CREATE OR REPLACE VIEW vwGetAllUser AS
+SELECT
+  c.idcolaborador,
+  p.apellidos,
+  p.nombres,
+  a.area,
+  ca.cargo,
+  cl.fecha_inicio,
+  cl.fecha_fin,
+  c.usernick AS usuario,
+  c.restriccionhoraria  -- <--- añadir aquí
+FROM colaboradores c
+JOIN contratolaborales cl ON c.idcontratolaboral = cl.idcontratolaboral
+JOIN cargos ca ON cl.idcargo = ca.idcargo
+JOIN areas a ON ca.idarea = a.idarea
+JOIN personas p ON cl.idpersona = p.idpersona;
+*/
 -- VISTA DE OBTENER TODOS LOS USUARIOS Y MOSTRARLOS / getAll
+DROP VIEW IF EXISTS vwGetAllUser;
 CREATE VIEW vwGetAllUser AS
 	SELECT
 	  col.idcolaborador   AS idcolaborador,
@@ -15,7 +34,13 @@ CREATE VIEW vwGetAllUser AS
 		DATE_FORMAT(cl.fechafin, '%Y-%m-%d'),
 		'Indeterminado'
 	  )                   AS fecha_fin,
-	  col.usernick        AS usuario
+	  col.usernick        AS usuario,
+      
+    CASE
+    WHEN UPPER(COALESCE(col.restriccionhoraria, 'N')) IN ('S','1','Y','YES','TRUE') THEN 'S'
+    ELSE 'N'
+	END AS restriccionhoraria
+    
 	FROM colaboradores col
 	INNER JOIN contratoslaborales cl
 	  ON col.idcontratolaboral = cl.idcontratolaboral

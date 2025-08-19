@@ -12,6 +12,12 @@ SET restriccionhoraria = 'N',
     modificado = NOW()
 WHERE idcolaborador = 2;
 
+
+UPDATE colaboradores
+SET restriccionhoraria = 'N',
+    modificado = NOW()
+WHERE idcolaborador = 5;
+
 -- COMBUSTIBLE
 INSERT INTO combustibles (idcombustible, combustible) VALUES
   (1, 'Gasolina'),
@@ -315,6 +321,9 @@ VALUES 	('P', 1, NULL,  2),
         ('P', NULL, 1,  2);
 */
 
+-- CONTRATO
+INSERT INTO contratoslaborales (idpersona, idcargo, fechainicio, fechafin, tipocontrato) VALUES
+(6, 1, now(), null, 1);
 -- INSERT DE PERSONAS 
 
 -- Persona 1 (ejemplo)

@@ -46,7 +46,7 @@
                 <th>#</th>
                 <th>Apellidos</th>
                 <th>Nombres</th>
-                <th>Area</th>
+                <th>Aréa</th>
                 <th>Cargo</th>
                 <th>Fecha Inicio</th>
                 <th>Fecha Fin</th>
@@ -64,7 +64,18 @@
                   <td><?= htmlspecialchars($u['cargo']) ?></td>
                   <td><?= htmlspecialchars($u['fecha_inicio']) ?></td>
                   <td><?= htmlspecialchars($u['fecha_fin']) ?></td>
-                  <td><?= htmlspecialchars($u['usuario']) ?></td>
+
+                  <!-- Usuario con restricción horaria -->
+                  <td>
+                    <?= htmlspecialchars($u['usuario']) ?>
+                    <?php if (!empty($u['restriccionhoraria']) && $u['restriccionhoraria'] === 'S'): ?>
+                      <span class="clock-emoji" role="img" aria-label="Usuario con restricción horaria"
+                        data-bs-toggle="tooltip" data-bs-title="Restricción horaria">
+                        🕜
+                      </span>
+                    <?php endif; ?>
+                  </td>
+
                   <td class="text-center">
                     <!-- Editar -->
                     <a href="<?= $path ?>/usuarios/editar/<?= $u['idcolaborador'] ?>"
@@ -84,6 +95,23 @@
                       data-idcolab="<?= $u['idcolaborador'] ?>">
                       <i class="fa-solid fa-trash"></i>
                     </button>
+
+                    <!-- Toggle restricción horaria (envío por POST) -->
+                    <form method="POST" action="/usuarios/toggleRestriccion" class="d-inline-block toggle-restr-form">
+                      <input type="hidden" name="idcolaborador" value="<?= (int)$u['idcolaborador'] ?>">
+                      <?php $isRestr = (!empty($u['restriccionhoraria']) && strtoupper($u['restriccionhoraria']) === 'S'); ?>
+                      <button type="submit"
+                              class="btn btn-sm <?= $isRestr ? 'btn-outline-secondary' : 'btn-outline-info' ?>"
+                              title="<?= $isRestr ? 'Quitar restricción horaria' : 'Poner restricción horaria' ?>"
+                              data-idcolab="<?= $u['idcolaborador'] ?>">
+                        <?php if ($isRestr): ?>
+                          <i class="fa-solid fa-clock"></i>
+                        <?php else: ?>
+                          <i class="fa-regular fa-clock"></i>
+                        <?php endif; ?>
+                      </button>
+                    </form>
+
                   </td>
                 </tr>
               <?php endforeach; ?>
@@ -192,6 +220,26 @@
         form.action = `/usuarios/disabled/${id}`;
         document.body.appendChild(form);
         form.submit();
+      });
+    });
+    // toggle restricción con confirmación
+    document.querySelectorAll('.toggle-restr-form').forEach(form => {
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const btn = form.querySelector('button[type="submit"]');
+        const id = btn.getAttribute('data-idcolab');
+        const isActive = btn.classList.contains('btn-outline-secondary'); // si estaba activo
+
+        Swal.fire({
+          title: isActive ? 'Quitar restricción horaria?' : 'Poner restricción horaria?',
+          text: isActive ? 'Se quitará la restricción horaria de este usuario.' : 'Se activará la restricción horaria a este usuario.',
+          icon: 'question',
+          showCancelButton: true,
+          confirmButtonText: 'Sí',
+          cancelButtonText: 'Cancelar'
+        }).then(result => {
+          if (result.isConfirmed) form.submit();
+        });
       });
     });
 

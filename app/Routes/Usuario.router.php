@@ -16,14 +16,17 @@ $router->add('POST', '/usuarios/disabled/{id}', 'UsuarioController', 'disabled')
 // PROFILE
 $router->add('GET', '/usuarios/profile/{id}', 'UsuarioController', 'profile');
 
+// TOGGLE RESTRICCION HORARIA
+$router->add('POST', '/usuarios/toggleRestriccion', 'UsuarioController', 'toggleRestriccion');
+
 
 //API
 
 // MOSTRAR
-$router->add('GET',  '/api/usuarios/cargos', 'UsuarioController', 'getCargosByArea');
+$router->add('GET', '/api/usuarios/cargos', 'UsuarioController', 'getCargosByArea');
 
 // ACTUALIZAR
-$router->add('POST', '/api/usuarios/changePassword',  'UsuarioController', 'changePassword');
+$router->add('POST', '/api/usuarios/changePassword', 'UsuarioController', 'changePassword');
 
 // PROFILE
-$router->add('POST', '/api/usuarios/profile/avatar',  'UsuarioController', 'uploadAvatar');
+$router->add('POST', '/api/usuarios/profile/avatar', 'UsuarioController', 'uploadAvatar');

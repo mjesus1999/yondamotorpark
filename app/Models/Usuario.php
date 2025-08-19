@@ -169,8 +169,6 @@ class Usuario
     }
   }
 
-
-
   // Obtener CONTRATO SIN COLABORADOR (Sin usuario registrado)
   public function getContractsWithoutColaborador(): array
   {
@@ -182,6 +180,38 @@ class Usuario
     } catch (Exception $e) {
       // log $e->getMessage()
       return [];
+    }
+  }
+
+  // RESTRICCION HORARIA "SI" o "NO"
+  public function getRestriccionHoraria(int $idcolaborador): ?string
+  {
+    $sql = "SELECT restriccionhoraria FROM colaboradores WHERE idcolaborador = :id LIMIT 1";
+    try {
+      $stmt = $this->db->prepare($sql);
+      $stmt->bindValue(':id', $idcolaborador, \PDO::PARAM_INT);
+      $stmt->execute();
+      $val = $stmt->fetchColumn();
+      return $val === false ? null : (string) $val;
+    } catch (\Throwable $e) {
+      //log $e->getMessage()
+      return null;
+    }
+  }
+
+  //Actualizar restriccionhoraria a 'S' o 'N'.
+  public function setRestriccionHoraria(int $idcolaborador, string $valor): bool
+  {
+    $valor = strtoupper($valor) === 'S' ? 'S' : 'N';
+    $sql = "UPDATE colaboradores SET restriccionhoraria = :v, modificado = NOW() WHERE idcolaborador = :id";
+    try {
+      $stmt = $this->db->prepare($sql);
+      $stmt->bindValue(':v', $valor, \PDO::PARAM_STR);
+      $stmt->bindValue(':id', $idcolaborador, \PDO::PARAM_INT);
+      return $stmt->execute();
+    } catch (\Throwable $e) {
+      //log $e->getMessage()
+      return false;
     }
   }
 

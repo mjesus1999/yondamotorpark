@@ -149,7 +149,6 @@ class UsuarioController extends Controller
     ]);
   }
 
-
   public function changePassword(): void
   {
     header('Content-Type: application/json; charset=utf-8');
@@ -352,5 +351,54 @@ class UsuarioController extends Controller
     $this->redirect('/createAccount');
     return;
   }
+
+  /**
+   * Toggle de restricción horaria (S <-> N)
+   * Accesible via POST /usuarios/toggleRestriccion/{id}
+   */
+  public function toggleRestriccion(): void
+  {
+    $this->authRequired();
+
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+      $this->redirect('/usuarios');
+      return;
+    }
+
+    $idColab = (int) ($_POST['idcolaborador'] ?? 0);
+    if ($idColab <= 0) {
+      $_SESSION['error_message'] = 'ID inválido.';
+      $this->redirect('/usuarios');
+      return;
+    }
+
+    // obtener valor actual (usa el método del modelo que agregamos)
+    $actual = $this->usuarioModel->getRestriccionHoraria($idColab);
+    if ($actual === null) {
+      $_SESSION['error_message'] = 'No se pudo obtener el estado actual.';
+      $this->redirect('/usuarios');
+      return;
+    }
+
+    $nuevo = (strtoupper($actual) === 'S') ? 'N' : 'S';
+
+    try {
+      $ok = $this->usuarioModel->setRestriccionHoraria($idColab, $nuevo);
+      if ($ok) {
+        $_SESSION['success_message'] = ($nuevo === 'S')
+          ? 'Restricción horaria activada.'
+          : 'Restricción horaria desactivada.';
+      } else {
+        $_SESSION['error_message'] = 'No se pudo actualizar la restricción horaria.';
+      }
+    } catch (\Throwable $e) {
+      //error_log($e->getMessage());
+      $_SESSION['error_message'] = 'Error al actualizar.';
+    }
+
+    // vuelve al listado
+    $this->redirect('/usuarios');
+  }
+
 
 }

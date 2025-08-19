@@ -228,18 +228,34 @@
                 document.getElementById('nombresSel').value = nombres;
                 document.getElementById('apellidosSel').value = apellidos;
 
-                //Limpiar y sugerir usernick
-                const base = (nombres && apellidos) ? (nombres + '.' + apellidos) : (nombres || apellidos || '');
+                // Limpiar y sugerir usernick: primer nombre + inicial del primer apellido
+                const nombresStr = (nombres || '').trim();
+                const apellidosStr = (apellidos || '').trim();
+
+                let firstName = '';
+                let lastInitial = '';
+
+                if (nombresStr) {
+                // primer nombre (maneja nombres compuestos)
+                firstName = nombresStr.split(/\s+/u)[0];
+                }
+                if (apellidosStr) {
+                // primer apellido -> toma la primera letra
+                const firstApellido = apellidosStr.split(/\s+/u)[0];
+                lastInitial = firstApellido.charAt(0);
+                }
+
+                const base = firstName ? (firstName + (lastInitial ? '' + lastInitial : '')) : (apellidosStr || '');
 
                 // Normalizar y construir sugerencia permitiendo letras Unicode (incluye tildes / ñ)
                 let sumpr = base
-                    .normalize('NFKC')                 // normaliza compuestos unicode
-                    .toLowerCase()                    // lowercase (acepta acentos)
-                    .replace(/\s+/g, '.')             // espacios -> puntos
-                    // permite cualquier letra Unicode (\p{L}), numeros, punto y guion 
-                    .replace(/[^\p{L}0-9.\-]/gu, '')
-                    .replace(/\.{2,}/g, '.')          // evitar puntos dobles
-                    .replace(/^\.|\.$/g, '');         // quitar punto al inicio/fin
+                .normalize('NFKC')                 // normaliza compuestos unicode
+                .toLowerCase()                    // lowercase (acepta acentos)
+                .replace(/\s+/g, '.')             // espacios -> puntos (por si queda alguno)
+                // permite cualquier letra Unicode (\p{L}), numeros, punto y guion 
+                .replace(/[^\p{L}0-9.\-]/gu, '')
+                .replace(/\.{2,}/g, '.')          // evitar puntos dobles
+                .replace(/^\.|\.$/g, '');         // quitar punto al inicio/fin
 
                 const inputUser = document.getElementById('usernick');
                 inputUser.value = sumpr;

@@ -93,6 +93,7 @@ CREATE TABLE contratoslaborales
     CONSTRAINT fk_idcargocla FOREIGN KEY (idcargo) REFERENCES cargos (idcargo)
 )ENGINE = INNODB;
 
+
 CREATE TABLE accesos (
   idaccesos 			INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
   idcargo 				INT NOT NULL,
