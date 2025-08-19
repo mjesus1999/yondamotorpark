@@ -75,6 +75,7 @@
         font-weight: 600;
     }
 
+    
     .form-floating-pago label {
         color: #6c757d;
     }
@@ -132,13 +133,13 @@
                                 $datos = explode(' / ', $auto['auto']);
                             ?>
                                 <tr>
-                                    <td class="fw-bold"><?= htmlspecialchars($datos[0] ?? '') ?> <?= htmlspecialchars($datos[1] ?? '') ?></td>
-                                    <td><?= htmlspecialchars($datos[2] ?? '') ?></td>
-                                    <td><?= htmlspecialchars($datos[3] ?? '') ?></td>
-                                    <td><?= htmlspecialchars($datos[4] ?? '') ?></td>
-                                    <td><?= htmlspecialchars($datos[5] ?? '') ?></td>
-                                    <td><?= htmlspecialchars($datos[6] ?? '') ?></td>
-                                    <td><span class="badge bg-<?= ($datos[7] ?? '') == 'Nuevo' ? 'success' : 'warning' ?>"><?= htmlspecialchars($datos[7] ?? '') ?></span></td>
+                                    <td class="fw-bold text-center"><?= htmlspecialchars($datos[0] ?? '') ?> <?= htmlspecialchars($datos[1] ?? '') ?></td>
+                                    <td class="text-center"><?= htmlspecialchars($datos[2] ?? '') ?></td>
+                                    <td class="text-center"><?= htmlspecialchars($datos[3] ?? '') ?></td>
+                                    <td class="text-center"><?= htmlspecialchars($datos[4] ?? '') ?></td>
+                                    <td class="text-center"><?= htmlspecialchars($datos[5] ?? '') ?></td>
+                                    <td class="text-center"><?= htmlspecialchars($datos[6] ?? '') ?></td>
+                                    <td class="text-center"><span class="badge bg-<?= ($datos[7] ?? '') == 'Nuevo' ? 'success' : 'warning' ?>"><?= htmlspecialchars($datos[7] ?? '') ?></span></td>
                                     <td class="text-center fw-bold"><?= htmlspecialchars($auto['cantidad']) ?></td>
                                 </tr>
                             <?php endforeach; ?>
@@ -249,7 +250,7 @@
                     </div>
 
 
-                    <div class="card-footer bg-white d-flex justify-content-end align-items-center border-top gap-3">
+                    <div class="card-footer d-flex justify-content-end align-items-center border-top gap-3">
                         <a href="<?= $saldoRestante > 0 ? '/oc/listar/proceso' : '/oc/listar/pagado' ?>"
                             class="btn btn-outline-secondary btn-sm">
                             <i class="fas fa-arrow-left me-1"></i> Volver
@@ -288,7 +289,7 @@
                         <input type="hidden" name="idorden" value="<?= htmlspecialchars($concesionario['idordencompra'] ?? 0) ?>">
 
                         <div class="form-floating form-floating-pago mb-4">
-                            <input type="number" min="0.01" step="0.01" name="amortizacion" id="amortizacion"
+                            <input type="number" min="500" step="500" name="amortizacion" id="amortizacion"
                                 class="form-control" placeholder="0.00" required>
                             <label for="amortizacion"><i class="fas fa-dollar-sign me-1"></i> Monto a pagar</label>
                         </div>
@@ -296,7 +297,7 @@
                         <div class="form-floating form-floating-pago mb-4">
                             <input type="text" id="saldo" name="saldo" class="form-control bg-light"
                                 value="<?= number_format($saldoRestante ?? 0, 2) ?>" disabled>
-                            <label for="saldo"><i class="fas fa-wallet me-1"></i> Saldo restante</label>
+                            <label for="saldo" class="text-success"><i class="fas fa-wallet me-1"></i> Saldo restante</label>
                         </div>
 
                         <div class="form-floating form-floating-pago mb-4">
@@ -305,7 +306,7 @@
                         </div>
 
                         <div class="mb-4">
-                            <label for="comprobante" class="form-label fw-semibold mb-3">
+                            <label for="comprobante" class="form-label text-info fw-semibold mb-3">
                                 <i class="fas fa-file-upload me-1"></i> Comprobante de pago
                             </label>
                             <input type="file" name="comprobante" id="comprobante" class="form-control"
@@ -314,7 +315,7 @@
                         </div>
 
                         <div class="modal-footer border-top-0 pt-0">
-                            <button type="button" class="btn btn-outline-secondar   y btn-sm px-4" data-bs-dismiss="modal">
+                            <button type="button" class="btn btn-outline-secondary btn-sm px-4" data-bs-dismiss="modal">
                                 Cancelar
                             </button>
                             <button type="submit" class="btn btn-primary btn-sm px-4" id="btn-agregar-pago">
@@ -329,8 +330,8 @@
 
     <!-- Modal para Visualizar Imagen -->
     <div class="modal fade" id="modalImagenComprobante" tabindex="-1" aria-labelledby="modalImagenComprobanteLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content border-0">
+        <div class="modal-dialog modal-dialog-centered modal-md">
+            <div class="border-0">
                 <div class="modal-header bg-dark text-white">
                     <h5 class="modal-title" id="modalImagenComprobanteLabel">
                         <i class="fas fa-image me-2"></i> Comprobante de Pago
@@ -340,17 +341,12 @@
                 <div class="modal-body p-0">
                     <img id="imagenAmpliada" src="" class="img-fluid w-100" alt="Comprobante de Pago" style="max-height: 80vh; object-fit: contain;">
                 </div>
-                <div class="modal-footer bg-light justify-content-center">
-                    <button type="button" class="btn btn-outline-dark rounded-pill" data-bs-dismiss="modal">
-                        <i class="fas fa-times me-1"></i> Cerrar
-                    </button>
-                </div>
+               
             </div>
         </div>
     </div>
 
-    <?php include __DIR__ . '/../layout/footer.php'; ?>
-
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <script>
@@ -370,7 +366,7 @@
             const btnGuardar = document.querySelector("#btn-agregar-pago");
 
             const saldo = parseFloat(saldoInput.value.replace(/,/g, "")) || 0;
-
+            
             amortizacionInput.addEventListener("input", () => {
                 const amortizacion = parseFloat(amortizacionInput.value);
 
@@ -388,16 +384,16 @@
                     btnGuardar.disabled = false;
                 }
             });
-
+            
             document.getElementById("formPago").addEventListener("submit", async function(e) {
                 e.preventDefault();
                 const amortizacion = parseFloat(amortizacionInput.value);
-
+                
                 if (isNaN(amortizacion) || amortizacion <= 0) {
                     alert("Ingrese un monto válido mayor a 0.");
                     return;
                 }
-
+                
                 if (amortizacion > saldo) {
                     alert(`La amortización no debe ser mayor al saldo (${saldo.toFixed(2)}).`);
                     return;
@@ -410,9 +406,9 @@
                             method: "POST",
                             body: formData
                         });
-
+                        
                         const data = await response.json();
-
+                        
                         if (data.success) {
                             console.log('DATA:', data.message);
                             showToast(data.message, "SUCCESS", 1200);
@@ -420,12 +416,12 @@
                         } else {
                             console.error('ERROR:', data.message);
                             showToast(data.message, "WARNING", 1200);
-
+                            
                         }
                     } catch (error) {
                         console.error('FETCH ERROR:', error);
-                        showToast(error, "DANGER", 1200);
-
+                        showToast(error, "ERROR", 1200);
+                        
                     }
                 }
             });
@@ -451,14 +447,14 @@
                     title.style.color = '#3a7bd5';
                     title.style.marginBottom = '5px';
                     title.style.fontWeight = 'bold';
-
+                    
                     const subtitle = document.createElement('h3');
                     subtitle.textContent = 'DETALLE DE VEHÍCULOS';
                     subtitle.style.textAlign = 'center';
                     subtitle.style.color = '#555';
                     subtitle.style.marginTop = '0';
                     subtitle.style.fontSize = '18px';
-
+                    
                     header.appendChild(title);
                     header.appendChild(subtitle);
                     element.appendChild(header);
@@ -503,7 +499,7 @@
 
                         element.appendChild(clonedAutosTable);
                     }
-
+                    
                     // 3. Sección de pagos
                     const pagosSection = document.createElement('div');
                     pagosSection.style.marginTop = '30px';
@@ -542,12 +538,12 @@
                         clonedPagosTable.querySelectorAll('th:nth-child(5), td:nth-child(5), th:nth-child(6), td:nth-child(6)').forEach(el => {
                             el.style.display = 'none';
                         });
-
+                        
                         pagosSection.appendChild(clonedPagosTable);
                     }
 
                     element.appendChild(pagosSection);
-
+                    
                     // 4. Totales con mejor formato
                     const totalesDiv = document.createElement('div');
                     totalesDiv.style.marginTop = '30px';
@@ -574,7 +570,7 @@
                     totalPagado.style.color = '#28a745';
                     totalPagado.style.fontSize = '16px';
                     totalPagado.style.marginBottom = '10px';
-
+                    
                     const saldoRestanteP = document.createElement('p');
                     saldoRestanteP.textContent = `SALDO RESTANTE: $${saldoRestante.toFixed(2)}`;
                     saldoRestanteP.style.color = '#dc3545';
@@ -585,7 +581,7 @@
                     fechaPago.textContent = `FECHA DE GENERACIÓN: ${new Date().toLocaleDateString()}`;
                     fechaPago.style.color = '#6c757d';
                     fechaPago.style.fontSize = '14px';
-
+                    
                     totalesDiv.appendChild(totalPagado);
                     totalesDiv.appendChild(saldoRestanteP);
                     totalesDiv.appendChild(fechaPago);
@@ -625,4 +621,4 @@
         });
     </script>
 
-    <?php ?>
+ <?php include __DIR__ . '/../layout/footer.php'; ?>

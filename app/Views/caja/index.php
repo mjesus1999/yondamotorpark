@@ -54,10 +54,10 @@ include __DIR__ . '/../layout/header.php';
 
                                             <td><?= htmlspecialchars($numeroFila++) ?></td>
                                             <td><?= htmlspecialchars($contrato['cliente']) ?></td>
-                                            <td><?= htmlspecialchars($contrato['documento']) ?></td>
-                                            <td><?= htmlspecialchars($contrato['ndocumento']) ?></td>
-                                            <td><?= htmlspecialchars($contrato['tienda']) ?></td>
-                                            <td><?= htmlspecialchars($contrato['vehiculo']) ?></td>
+                                            <td class="text-center"><?= htmlspecialchars($contrato['documento']) ?></td>
+                                            <td class="text-center"><?= htmlspecialchars($contrato['ndocumento']) ?></td>
+                                            <td><span class="badge bg-primary fw-bold text-white"><?= htmlspecialchars($contrato['tienda']) ?></span></td>
+                                            <td><span class="badge bg-primary fw-bold text-white"><?= htmlspecialchars($contrato['vehiculo']) ?></span></td>
                                             <td><?= htmlspecialchars($contrato['meses']) ?></td>
                                             <td><?= htmlspecialchars($contrato['cuota']) ?></td>
                                             <td>

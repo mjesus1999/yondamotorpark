@@ -19,17 +19,19 @@ class Caja
     public function getAllContratosDatos(): ?array
     {
         $query = "
+                      
                 SELECT
                     con.idcontrato,
                     CONCAT(p.apellidos, ' ', p.nombres) AS cliente,
                     p.tipodoc AS documento,
                     p.nrodoc AS ndocumento,
-
-                    
-                    l.tienda,
-
+				CONCAT(
+                l.tienda, ' / ',
+                dep.departamento,' / ',
+                d.distrito, ' / ',
+                pro.provincia) AS tienda,
                     CONCAT(
-                        IFNULL(mar.marca, 'Sin marca'), '/',
+                        IFNULL(mar.marca, 'Sin marca'), ' / ',
                         IFNULL(model.modelo, 'Sin modelo'),
                         ' / ',
                         IFNULL(c.combustible, 'Sin combustible'),
@@ -57,8 +59,11 @@ class Caja
                 LEFT JOIN
                     contratos AS con ON cot.idcotizacion = con.idcotizacion
                 LEFT JOIN
-                    locales AS l ON con.idlocal = l.idlocal;
-
+                    locales AS l ON con.idlocal = l.idlocal
+				JOIN distritos AS d ON l.iddistrito = d.iddistrito
+                JOIN provincias AS pro ON d.idprovincia = pro.idprovincia
+                JOIN departamentos AS dep ON pro.iddepartamento = dep.iddepartamento;
+                    
                 ";
         try {
 
@@ -71,7 +76,6 @@ class Caja
             return [];
         }
     }
-
 
     public function getCronogramaByIdContrato(int $id): array
     {

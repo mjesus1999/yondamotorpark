@@ -140,6 +140,7 @@ class PagoCronograma
     public function getCronogramaData(int $idCronograma): array|false
     {
         $query = "SELECT 
+                    cro.idcronograma,
                     cont.idcontrato,
                     cro.penalidad,
                     coti.valorcuota - COALESCE((
@@ -148,6 +149,14 @@ class PagoCronograma
                                 WHERE pag.idcronograma = cro.idcronograma
                                 AND pag.tipo = 'Cuota'
                             ), 0) AS cuotapendiente,
+
+                    cro.penalidad - COALESCE((
+                                SELECT SUM(pag.amortizacion)
+                                FROM pagos pag
+                                WHERE pag.idcronograma = cro.idcronograma
+                                AND pag.tipo = 'Penalidad'
+                            ), 0) AS penalidadpendiente,
+                            cro.penalidad,
                     cro.estado, 
                     cro.numcuota
                     FROM cronogramas cro 

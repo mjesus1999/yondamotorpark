@@ -7,6 +7,7 @@ use App\Helpers\Validador;
 use App\Models\PagoCronograma;
 use App\Models\Caja;
 use DateTime;
+use GrahamCampbell\ResultType\Success;
 
 class PagoCronogramaController extends Controller
 {
@@ -47,6 +48,26 @@ class PagoCronogramaController extends Controller
         return null;
     }
 
+    private function esCuotaHabilitadaParaPago(int $idContrato, int $idCronograma): bool
+    {
+        $cronograma = $this->cajaModel->getCronogramaByIdContrato($idContrato);
+        $primeraCuotaPendienteId = null;
+        foreach ($cronograma as $cuota) {
+            $cuotaPendiente = (float)($cuota['saldocuota_pendiente'] ?? 0);
+            $penalidadPendiente = (float)($cuota['penalidad_pendiente'] ?? 0);
+
+
+            if ($cuotaPendiente > 0 || $penalidadPendiente > 0) {
+                $primeraCuotaPendienteId = intval($cuota['idcronograma']);
+                break;
+            }
+        }
+
+        return $primeraCuotaPendienteId !== null && $primeraCuotaPendienteId === $idCronograma;
+    }
+
+
+
     public function store(): void
     {
         header('Content-Type: application/json');
@@ -58,7 +79,6 @@ class PagoCronogramaController extends Controller
                 echo json_encode(['success' => false, 'message' => 'Método no permitido']);
                 return;
             }
-
 
             $data = array_map([Validador::class, 'limpiar'], $_POST);
             $errores = [];
@@ -133,21 +153,24 @@ class PagoCronogramaController extends Controller
 
             $idContrato = $cronogramaData['idcontrato'];
 
+            if (!$this->esCuotaHabilitadaParaPago($idContrato, $idCronograma)) {
+                $errores[] = 'Solo puedes pagar la primera cuota pendiente';
+            }
+
             //  Validaciones de negocio con los datos del cronograma
             if ($amortizacionCuota > 0) {
                 if ($amortizacionCuota > $cronogramaData['cuotapendiente']) {
                     $errores[] = "La cuota no puede exceder S/ {$cronogramaData['cuotapendiente']}";
                 }
             }
+            // Validación de la penalidad usando el saldo pendiente
+            $penalidadPendiente = (float)($cronogramaData['penalidadpendiente'] ?? 0);
 
             if ($amortizacionPenalidad > 0) {
-                if ($cronogramaData['penalidad'] > 0) {
-
-                    if ($amortizacionPenalidad != $cronogramaData['penalidad']) {
-                        $errores[] = "La penalidad debe pagarse completa: S/ {$cronogramaData['penalidad']}";
-                    }
-                } else {
-                    $errores[] = "No hay penalidad pendiente para esta cuota, la penalidad es: S/ {$cronogramaData['penalidad']}";
+                if ($penalidadPendiente <= 0) {
+                    $errores[] = "No hay penalidad pendiente para esta cuota, la penalidad es: S/ {$penalidadPendiente}";
+                } else if ($amortizacionPenalidad != $penalidadPendiente) {
+                    $errores[] = "La penalidad debe pagarse completa: S/ {$penalidadPendiente}";
                 }
             }
 

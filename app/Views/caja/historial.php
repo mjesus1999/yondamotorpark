@@ -58,7 +58,7 @@
                         <tbody id="tabla-body">
                             <?php if (empty($pagos)) : ?>
                                 <tr>
-                                    <td colspan="9" class="text-center py-4 text-muted">
+                                    <td colspan="12" class="text-center py-4 text-muted">
                                         <i class="fas fa-info-circle me-2"></i>No hay pagos registrados
                                     </td>
                                 </tr>
@@ -211,8 +211,6 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
-
-
 
 
 <script>

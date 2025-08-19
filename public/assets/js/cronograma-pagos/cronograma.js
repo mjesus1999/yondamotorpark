@@ -1,11 +1,8 @@
-import { validarAmortizacionCuota, validarNumeroTransaccion, fechaEsFutura, fechaVacia, marcarInput } from "./helpers-cronograma.js";
+import { validarAmortizacionCuota, validarNumeroTransaccion, fechaEsFutura, fechaVacia, marcarInput} from './helpers-cronograma.js';
 import { TIPOS_PAGO, MEDIOS_PAGO } from "./constantes-cronograma.js";
+import { configurarValidacionesFormulario } from './eventos-cronograma.js';
 
 document.addEventListener('DOMContentLoaded', () => {
-
-    // ========================
-    // 1. VARIABLES
-    // ========================
 
     const totalItems = document.getElementById('tabla-body').dataset.totalItems;
 
@@ -51,11 +48,6 @@ document.addEventListener('DOMContentLoaded', () => {
         observacionInput: document.getElementById('observacion'),
         contenedorInputMontoCuota: document.getElementById('contenedor-monto-cuota')
     };
-
-
-    // ========================
-    // 2. FUNCIONES 
-    // ========================
 
     /**
      * Gestiona la paginación de la tabla.
@@ -177,8 +169,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 return false;
             }
             if (!validarAmortizacionCuota(monto, valorCuotaDeuda)) {
-                showToast(`La amortización no puede ser mayor a S/ ${valorCuotaDeuda.toFixed(2)}.`, 'INFO', 1200);
                 marcarInput(elements.amortizacionCuotaInput, false);
+                showToast(`La amortización no puede ser mayor a S/ ${valorCuotaDeuda.toFixed(2)}.`, 'INFO', 1200);
                 // elements.amortizacionCuotaInput.classList.add('is-invalid');
                 return false;
             }
@@ -188,16 +180,19 @@ document.addEventListener('DOMContentLoaded', () => {
             return false;
         }
         if (isCuota && elements.comprobanteCuotaInput.files.length === 0) {
+            marcarInput(elements.comprobanteCuotaInput, false);
             showToast('Debe adjuntar el comprobante de la cuota.', 'INFO', 1200);
             return false;
         }
         if (isPenalidad && elements.comprobantePenalidadInput.files.length === 0) {
+            marcarInput(elements.comprobantePenalidadInput, false);
             showToast('Debe adjuntar el comprobante de la penalidad.', 'INFO', 1200);
             return false;
         }
 
         if (elements.medioPagoSelect.value === MEDIOS_PAGO.transferenciaBancaria) {
             if (elements.numeroCuentaSelect.value === '') {
+                marcarInput(elements.numeroCuentaSelect, false);
                 showToast('Debe seleccionar un núnmero de cuenta', 'INFO', 1200);
                 return false;
             }
@@ -206,13 +201,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isCuota) {
             const numeroTransaccionCuota = elements.numeroTransaccionInput.value.trim();
             if (numeroTransaccionCuota === '') {
-                showToast('El número de operación de la cuota es obligatorio.', 'INFO', 1500);
                 marcarInput(elements.numeroTransaccionInput, false);
+                showToast('El número de operación de la cuota es obligatorio.', 'INFO', 1500);
                 // elements.numeroTransaccionInput.classList.add('is-invalid');
             }
             if (!validarNumeroTransaccion(numeroTransaccionCuota)) {
-                showToast('El número de operación de la cuota es inválido.', 'INFO', 2000);
                 marcarInput(elements.numeroTransaccionInput, false);
+                showToast('El número de operación de la cuota es inválido.', 'INFO', 2000);
                 // elements.numeroTransaccionInput.classList.add('is-invalid');
                 return false;
             }
@@ -221,48 +216,36 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isPenalidad) {
             const numeroTransaccionPenalidad = elements.numeroTransaccionPenalidadInput.value.trim();
             if (numeroTransaccionPenalidad === '') {
-                showToast('El número de operación de la penalidad es obligatorio.', 'INFO', 1500);
                 marcarInput(elements.numeroTransaccionPenalidadInput, false);
+                showToast('El número de operación de la penalidad es obligatorio.', 'INFO', 1500);
                 // elements.numeroTransaccionPenalidadInput.classList.add('is-invalid');
                 return false;
             }
             if (!validarNumeroTransaccion(numeroTransaccionPenalidad)) {
-                showToast('El número de operación de la penalidad es inválido.', 'INFO', 2000);
                 marcarInput(elements.numeroTransaccionPenalidadInput, false);
+                showToast('El número de operación de la penalidad es inválido.', 'INFO', 2000);
                 // elements.numeroTransaccionPenalidadInput.classList.add('is-invalid');
                 return false;
             }
         }
 
         if (fechaVacia(elements.fechaPagoInput.value)) {
-            showToast('La fecha de pago es obligatoria.', 'INFO', 1200);
             marcarInput(elements.fechaPagoInput, false);
+            showToast('La fecha de pago es obligatoria.', 'INFO', 1200);
             // elements.fechaPagoInput.classList.add('is-invalid');
             return false;
         }
         if (fechaEsFutura(elements.fechaPagoInput.value)) {
-            showToast('La fecha de pago no puede ser mayor a la actual.', 'INFO', 1200);
             marcarInput(elements.fechaPagoInput, false);
+            showToast('La fecha de pago no puede ser mayor a la actual.', 'INFO', 1200);
             // elements.fechaPagoInput.classList.add('is-invalid');
             return false;
         }
         return true;
     }
 
-    document.querySelectorAll('.numeros-transacciones').forEach((input) => {
-        input.addEventListener('input', () => {
-            // input.classList.remove('is-valid', 'is-invalid');
-            if (input.value.trim().length > 0) {
-                if (validarNumeroTransaccion(input.value.trim())) {
-                    marcarInput(input, true);
 
-                } else {
-                    marcarInput(input, false);
-
-                }
-            }
-        });
-    });
+    configurarValidacionesFormulario(elements);
 
     elements.amortizacionCuotaInput.addEventListener('input', () => {
 
@@ -272,30 +255,20 @@ document.addEventListener('DOMContentLoaded', () => {
         containerInavlidText.textContent = '';
         if (!isNaN(monto) && monto > 0) {
             if (monto <= valorCuotaDeuda) {
-                marcarInput(elements.amortizacionCuotaInput,true);
-                // elements.amortizacionCuotaInput.classList.add('is-valid');
+                marcarInput(elements.amortizacionCuotaInput, true);
+                //   elements.amortizacionCuotaInput.classList.add('is-valid');
             } else {
-                marcarInput(elements.amortizacionCuotaInput,false);
-                // elements.amortizacionCuotaInput.classList.add('is-invalid');
+                marcarInput(elements.amortizacionCuotaInput, false);
+                //   elements.amortizacionCuotaInput.classList.add('is-invalid');
                 containerInavlidText.textContent = `Debe ser menor o igual al saldo pendiente de la cuota: S/${valorCuotaDeuda.toFixed(2)}`;
             }
         } else if (elements.amortizacionCuotaInput.value.trim().length > 0) {
-            marcarInput(elements.amortizacionCuotaInput,false);
-            // elements.amortizacionCuotaInput.classList.add('is-invalid');
+            marcarInput(elements.amortizacionCuotaInput, false);
+            //   elements.amortizacionCuotaInput.classList.add('is-invalid');
             containerInavlidText.textContent = 'Debe ser un monto válido y mayor a 0.';
         }
     });
 
-    elements.fechaPagoInput.addEventListener('change', () => {
-        elements.fechaPagoInput.classList.remove('is-valid', 'is-invalid');
-        if (fechaVacia(elements.fechaPagoInput.value) || fechaEsFutura(elements.fechaPagoInput.value)) {
-            marcarInput(elements.fechaPagoInput,false);
-            // elements.fechaPagoInput.classList.add('is-invalid');
-        } else {
-            marcarInput(elements.fechaPagoInput,true);
-            // elements.fechaPagoInput.classList.add('is-valid');
-        }
-    });
 
     /**
      * Envía los datos del formulario
@@ -317,29 +290,31 @@ document.addEventListener('DOMContentLoaded', () => {
             formData.append('numeroTransaccionPenalidad', elements.numeroTransaccionPenalidadInput.value);
         }
 
+        setTimeout(async () => {
+            try {
+                const res = await fetch('/pago/cronograma', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
 
-        try {
-            const res = await fetch('/pago/cronograma', {
-                method: 'POST',
-                body: formData
-            });
-            const data = await res.json();
-
-            if (data.success) {
-                showToast(data.message, 'SUCCESS', 1200);
-                elements.modalPago.hide();
-                setTimeout(() => location.reload(), 1200);
-            } else {
-                showToast(data.message || 'Error al registrar el pago.', 'WARNING', 2000);
+                if (data.success) {
+                    showToast(data.message, 'SUCCESS', 1200);
+                    elements.modalPago.hide();
+                    setTimeout(() => location.reload(), 1200);
+                } else {
+                    showToast(data.message || 'Error al registrar el pago.', 'WARNING', 2000);
+                }
+            } catch (err) {
+                console.error('Error de red o del servidor:', err);
+                showToast('Error de red o del servidor. Intente nuevamente.', 'ERROR', 2000);
+            } finally {
+                elements.btnConfirmarPago.disabled = false;
+                elements.btnConfirmarPago.classList.remove('disabled', 'opacity-75');
+                elements.btnConfirmarPago.innerHTML = '<i class="fas fa-check-circle me-1"></i> Confirmar Pago';
             }
-        } catch (err) {
-            console.error('Error de red o del servidor:', err);
-            showToast('Error de red o del servidor. Intente nuevamente.', 'ERROR', 2000);
-        } finally {
-            elements.btnConfirmarPago.disabled = false;
-            elements.btnConfirmarPago.classList.remove('disabled', 'opacity-75');
-            elements.btnConfirmarPago.innerHTML = '<i class="fas fa-check-circle me-1"></i> Confirmar Pago';
-        }
+
+        }, 2000);
     }
 
     /**
@@ -365,10 +340,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    
-    // ========================
-    // 3. EVENT LISTENERS
-    // ========================
 
     // Inicialización de la tabla
     showPage(currentPage);
@@ -397,6 +368,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const mostrarSelectCompleto = saldoCuota > 0 && saldoPenalidad > 0;
 
         elements.contenedorTipoPago.classList.toggle('hidden', !mostrarSelectCompleto);
+        configurarValidacionesFormulario(elements, valorCuotaDeuda);
 
         if (mostrarSelectCompleto) {
             elements.tipoPagoSelect.innerHTML = `

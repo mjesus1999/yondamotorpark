@@ -75,7 +75,7 @@ END$$
 DELIMITER ;
 
 
-CALL sp_get_cronogramas_by_idcontrato (2);
+CALL sp_get_cronogramas_by_idcontrato (1);
 
 SELECT * FROM cronogramas;
 UPDATE cronogramas SET fechapago = '2025-08-13' WHERE  idcontrato = 2 AND numcuota = 6 ;
@@ -178,7 +178,7 @@ SELECT * FROM pagos;
 
 SELECT * FROM cronogramas;
 
-UPDATE cronogramas SET fechapago = '2025-08-14' WHERE idcronograma = 1658;
+UPDATE cronogramas SET fechapago = '2025-08-14' WHERE idcronograma = 1665;
 UPDATE cronogramas SET fechapago = '2026-03-13', penalidad = 0, aplicapenalidad = 'N', estado = 'Pagado' WHERE idcronograma = 1521;
 UPDATE  cronogramas SET fechapago = '2026-05-13', penalidad = 0, aplicapenalidad ='N', estado = 'Pendiente' WHERE idcronograma = 1521;
 

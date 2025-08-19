@@ -5,7 +5,7 @@
 }
 
 .cronograma-table thead th {
-  background-color: #fe7d14;
+  background-color:  rgb(255, 95, 0);;
   color: white;
   font-weight: 500;
   text-transform: uppercase;
@@ -105,7 +105,7 @@ tr[data-disabled="true"]:hover {
 }
 
 .card-header-cronograma {
-  background-color:  #fe7d14;
+  background-color:  rgb(255, 95, 0);
   color: white;
   border-radius: 10px 10px 0 0 !important;
   padding: 1rem 1.5rem;
