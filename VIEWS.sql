@@ -110,29 +110,29 @@ ORDER BY p.apellidos, p.nombres;
 -- OBTENER TODAS LAS COTIZACIONES REALIZADAS / getAll
 CREATE OR REPLACE VIEW vwGetAllCotizacion AS
 SELECT
-    c.idcotizacion,
-    c.idformato,
-    fc.tipocotizacion,
-    COALESCE(
-      CASE WHEN cl.tipocliente = 'P' THEN CONCAT(p.nombres, ' ', p.apellidos) END,
-      e.razonsocial,
-      'Cliente no definido'
-    ) AS nombrecliente,
-    COALESCE(
-      CASE WHEN cl.tipocliente = 'P' THEN p.nrodoc END,
-      e.ruc,
-      ''
-    ) AS documento,
-    COALESCE(
-      CASE WHEN cl.tipocliente = 'P' THEN p.telprimario END,
-      e.telprimario,
-      ''
-    ) AS telefono,
-    ma.marca AS marcaVehiculo,
-    mo.modelo AS modeloVehiculo,
-    mo.anio,
-    v.color,
-    c.creado AS fechaRegistro
+  c.idcotizacion,
+  c.idformato,
+  fc.tipocotizacion,
+  COALESCE(
+    CASE WHEN cl.tipocliente = 'P' THEN CONCAT(p.nombres, ' ', p.apellidos) END,
+    e.razonsocial,
+    'Cliente no definido'
+  ) AS nombrecliente,
+  COALESCE(
+    CASE WHEN cl.tipocliente = 'P' THEN p.nrodoc END,
+    e.ruc,
+    ''
+  ) AS documento,
+  COALESCE(
+    CASE WHEN cl.tipocliente = 'P' THEN p.telprimario END,
+    e.telprimario,
+    ''
+  ) AS telefono,
+  ma.marca AS marcaVehiculo,
+  mo.modelo AS modeloVehiculo,
+  mo.anio,
+  v.color,
+  c.creado AS fechaRegistro
 FROM cotizaciones c
 JOIN clientes cl ON c.idcliente = cl.idcliente
 LEFT JOIN personas p ON cl.idpersona = p.idpersona
