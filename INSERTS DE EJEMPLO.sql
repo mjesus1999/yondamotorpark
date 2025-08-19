@@ -9,7 +9,7 @@ WHERE usernick = 'leticiall';
 -- PASAR DE SI A NO EN RESTRICCION HORARIA a leticiall
 UPDATE colaboradores
 SET restriccionhoraria = 'N',
-  modificado = NOW()
+    modificado = NOW()
 WHERE idcolaborador = 2;
 
 -- COMBUSTIBLE
@@ -128,91 +128,91 @@ INSERT INTO detallerequisitos (idformato, idrequisito) VALUES
 
 -- VEHICULOS INSERT (disponibilidad)
 INSERT INTO vehiculos (
-  idmodelo, 
-  version, 
-  condicion, 
-  idcombustible, 
-  disponibilidad, 
-  idlogistica, 
-  idlocal, 
-  origen, 
-  creado, 
-  color, 
-  chasis, 
-  placa, 
-  placarotativa, 
-  seriemotor, 
-  precioventa, 
-  moneda
+    idmodelo, 
+    version, 
+    condicion, 
+    idcombustible, 
+    disponibilidad, 
+    idlogistica, 
+    idlocal, 
+    origen, 
+    creado, 
+    color, 
+    chasis, 
+    placa, 
+    placarotativa, 
+    seriemotor, 
+    precioventa, 
+    moneda
 ) VALUES
 	-- PROCESO
 	(1, 			-- idmodelo
-  'Versión A',  	-- version
-  'nuevo',     	-- condicion
-  1, 				-- idcombustible
-  'proceso',  	-- disponibilidad
-  2, 				-- idlogistica
-  3, 				-- idlocal
-  'CTZ', 			-- origen
-  NOW(), 			-- creado
+    'Versión A',  	-- version
+    'nuevo',     	-- condicion
+    1, 				-- idcombustible
+    'proceso',  	-- disponibilidad
+    2, 				-- idlogistica
+    3, 				-- idlocal
+    'CTZ', 			-- origen
+    NOW(), 			-- creado
 	'AZUL',  		-- color
-  'CHS6543210911', -- chasis
-  'XYZ-711', 		-- placa
-  'ROT-711', 		-- placa rotativa
-  'SM987654311', 	-- serie motor
-  32500.00, 		-- precio venta
-  'USD'),			-- moneda
-  -- LIBRE
+    'CHS6543210911', -- chasis
+    'XYZ-711', 		-- placa
+    'ROT-711', 		-- placa rotativa
+    'SM987654311', 	-- serie motor
+    32500.00, 		-- precio venta
+    'USD'),			-- moneda
+    -- LIBRE
 	(1, 			-- idmodelo
-  'Full',       	-- version
-  'nuevo',     	-- condicion
-  1, 				-- idcombustible
-  'libre',    	-- disponibilidad
-  2, 				-- idlogistica
-  3, 				-- idlocal
-  'CTZ', 			-- origen
-  NOW(), 			-- creado
+    'Full',       	-- version
+    'nuevo',     	-- condicion
+    1, 				-- idcombustible
+    'libre',    	-- disponibilidad
+    2, 				-- idlogistica
+    3, 				-- idlocal
+    'CTZ', 			-- origen
+    NOW(), 			-- creado
 	'ROJO',  		-- color
-  'CHS6543210922', -- chasis
-  'XYZ-722', 		-- placa
-  'ROT-722', 		-- placa rotativa
-  'SM987654322', 	-- serie motor
-  22500.00, 		-- precio venta
-  'PEN'),
-  -- SEPARADO
+    'CHS6543210922', -- chasis
+    'XYZ-722', 		-- placa
+    'ROT-722', 		-- placa rotativa
+    'SM987654322', 	-- serie motor
+    22500.00, 		-- precio venta
+    'PEN'),
+    -- SEPARADO
 	(1, 			-- idmodelo
-  'Versión C',  	-- versión
-  'seminuevo', 	-- condición
-  1, 				-- idcombustible
-  'separado', 	-- disponibilidad
-  2, 				-- idlogistica
-  3, 				-- idlocal
-  'CTZ', 			-- origen
-  NOW(), 			-- creado
+    'Versión C',  	-- versión
+    'seminuevo', 	-- condición
+    1, 				-- idcombustible
+    'separado', 	-- disponibilidad
+    2, 				-- idlogistica
+    3, 				-- idlocal
+    'CTZ', 			-- origen
+    NOW(), 			-- creado
 	'VERDE', 		-- color
-  'CHS6543210933', -- chasis
-  'XYZ-733', 		-- placa
-  'ROT-733', 		-- placa rotativa
-  'SM98765433',  	-- serie motor
-  33500.00, 		-- precio venta
-  'USD'),			-- moneda
-  -- PAGADO
+    'CHS6543210933', -- chasis
+    'XYZ-733', 		-- placa
+    'ROT-733', 		-- placa rotativa
+    'SM98765433',  	-- serie motor
+    33500.00, 		-- precio venta
+    'USD'),			-- moneda
+    -- PAGADO
 	(1, 			-- idmodelo
-  'Versión D',  	-- versión
-  'seminuevo', 	-- condición
-  1, 				-- idcombustible
-  'vendido',  	-- disponibilidad
-  2, 				-- idlogistica
-  3, 				-- idlocal
-  'CTZ', 			-- origen
-  NOW(),			-- creado
+    'Versión D',  	-- versión
+    'seminuevo', 	-- condición
+    1, 				-- idcombustible
+    'vendido',  	-- disponibilidad
+    2, 				-- idlogistica
+    3, 				-- idlocal
+    'CTZ', 			-- origen
+    NOW(),			-- creado
 	'MORADO',		-- color
-  'CHS6543210944', -- chasis
-  'XYZ-744', 		-- placa
-  'ROT-744', 		-- placa rotativa
-  'SM98765444',  	-- serie motor
-  24500.00, 		-- precio venta
-  'USD');			-- moneda
+    'CHS6543210944', -- chasis
+    'XYZ-744', 		-- placa
+    'ROT-744', 		-- placa rotativa
+    'SM98765444',  	-- serie motor
+    24500.00, 		-- precio venta
+    'USD');			-- moneda
 
 /*
 -- PROCESO
@@ -307,14 +307,12 @@ VALUES
 -- CLIENTES X4
 INSERT INTO clientes (tipocliente, idpersona, idempresa, idcolregistra)
 VALUES 	('P', 4, NULL,  2);
-
 /*
 INSERT INTO clientes (tipocliente, idpersona, idempresa, idcolregistra)
-VALUES 	
-  ('P', 1, NULL,  2), 
-  ('P', 2, NULL,  2), 
-  ('P', 3, NULL,  2),
-  ('P', NULL, 1,  2);
+VALUES 	('P', 1, NULL,  2), 
+		('P', 2, NULL,  2), 
+        ('P', 3, NULL,  2),
+        ('P', NULL, 1,  2);
 */
 
 -- INSERT DE PERSONAS 
@@ -464,6 +462,7 @@ INSERT INTO accesos (idcargo, modulo, permisos) VALUES
 (17, 'auth', 1);
 */
 
+
 -- --------------------------------------------------------------
 /*
 -- Jefe de Logística (ID = 8) - Acceso total a todos los módulos
@@ -495,11 +494,10 @@ INSERT INTO clientes (tipocliente, idpersona, idempresa, idcolregistra)
 VALUES ('P', 3, NULL,  3);
 
 INSERT INTO clientes (tipocliente, idpersona, idempresa, idcolregistra)
-VALUES 	
-  ('P', 1, NULL,  2), 
-  ('P', 2, NULL,  2), 
-  ('P', 3, NULL,  2),
-  ('P', NULL, 1,  2);
+VALUES 	('P', 1, NULL,  2), 
+		('P', 2, NULL,  2), 
+        ('P', 3, NULL,  2),
+        ('P', NULL, 1,  2);
 */
 
 /*
