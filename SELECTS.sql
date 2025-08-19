@@ -21,47 +21,44 @@ WHERE usernick = 'Deyanira' OR idcolaborador = 3;
 -- DELETE FROM vehiculos WHERE idlogistica = 26;
 
 SELECT
-        cl.idcontratolaboral,
-        cl.idpersona,
-        p.apellidos,
-        p.nombres,
-        a.area,
-        cg.cargo,
-        DATE_FORMAT(cl.fechainicio, '%Y-%m-%d') AS fechainicio
-      FROM contratoslaborales cl
-      JOIN personas p ON p.idpersona = cl.idpersona
-      JOIN cargos cg ON cg.idcargo = cl.idcargo
-      JOIN areas a ON a.idarea = cg.idarea
-      LEFT JOIN colaboradores col ON col.idcontratolaboral = cl.idcontratolaboral
-      WHERE col.idcolaborador IS NULL
-      ORDER BY p.apellidos, p.nombres
-      LIMIT 0,1000;
+  cl.idcontratolaboral,
+  cl.idpersona,
+  p.apellidos,
+  p.nombres,
+  a.area,
+  cg.cargo,
+  DATE_FORMAT(cl.fechainicio, '%Y-%m-%d') AS fechainicio
+FROM contratoslaborales cl
+JOIN personas p ON p.idpersona = cl.idpersona
+JOIN cargos cg ON cg.idcargo = cl.idcargo
+JOIN areas a ON a.idarea = cg.idarea
+LEFT JOIN colaboradores col ON col.idcontratolaboral = cl.idcontratolaboral
+WHERE col.idcolaborador IS NULL
+ORDER BY p.apellidos, p.nombres
+LIMIT 0,1000;
 
-SELECT modulo
-            FROM accesos
-            WHERE idcargo = 8 AND permisos = 1;
+SELECT modulo FROM accesos WHERE idcargo = 8 AND permisos = 1;
             
-SELECT 1 FROM accesos
-	WHERE idcargo = 1 AND modulo = 'usuarios' AND permisos = 1
-	LIMIT 1;
+SELECT 1 FROM accesos WHERE idcargo = 1 AND modulo = 'usuarios' AND permisos = 1 LIMIT 1;
+
 /*
 -- ENCONTRAR EL USERNICK Y EMAIL
 SELECT
-        cl.idcontratolaboral,
-        cl.idpersona,
-        p.apellidos,
-        p.nombres,
-        a.area,
-        cg.cargo,
-        DATE_FORMAT(cl.fechainicio, '%Y-%m-%d') AS fechainicio
-      FROM contratoslaborales cl
-      JOIN personas p ON p.idpersona = cl.idpersona
-      JOIN cargos cg ON cg.idcargo = cl.idcargo
-      JOIN areas a ON a.idarea = cg.idarea
-      LEFT JOIN colaboradores col ON col.idcontratolaboral = cl.idcontratolaboral
-      WHERE col.idcolaborador IS NULL
-      ORDER BY p.apellidos, p.nombres
-      LIMIT 0,1000;
+  cl.idcontratolaboral,
+  cl.idpersona,
+  p.apellidos,
+  p.nombres,
+  a.area,
+  cg.cargo,
+  DATE_FORMAT(cl.fechainicio, '%Y-%m-%d') AS fechainicio
+FROM contratoslaborales cl
+JOIN personas p ON p.idpersona = cl.idpersona
+JOIN cargos cg ON cg.idcargo = cl.idcargo
+JOIN areas a ON a.idarea = cg.idarea
+LEFT JOIN colaboradores col ON col.idcontratolaboral = cl.idcontratolaboral
+WHERE col.idcolaborador IS NULL
+ORDER BY p.apellidos, p.nombres
+LIMIT 0,1000;
 */
 
 -- Buscar por usernick pero trae todo acerca de ese usuario
@@ -94,33 +91,33 @@ FROM colaboradores col
 JOIN contratoslaborales cl ON cl.idcontratolaboral = col.idcontratolaboral
 JOIN personas p ON p.idpersona = cl.idpersona
 WHERE REPLACE(REPLACE(REPLACE(p.telprimario,' ',''),'+',''),'-','') LIKE '%919629135%'
-   OR REPLACE(REPLACE(REPLACE(p.telalternativo,' ',''),'+',''),'-','') LIKE '%919629135%'
-   OR col.usernick = 'Deyanirayc'
+  OR REPLACE(REPLACE(REPLACE(p.telalternativo,' ',''),'+',''),'-','') LIKE '%919629135%'
+  OR col.usernick = 'Deyanirayc'
 LIMIT 20;
 
 -- REPORTE DE COTIZACION
 SELECT
-    c.idcliente,
-    CASE 
-        WHEN c.tipocliente = 'P' THEN CONCAT(p.nombres, ' ', p.apellidos)
-        WHEN c.tipocliente = 'E' THEN e.razonsocial
-        ELSE 'Sin nombre'
-    END AS nombre_cliente,
-    c.tipocliente,
-    c.nrodoc
+  c.idcliente,
+  CASE 
+      WHEN c.tipocliente = 'P' THEN CONCAT(p.nombres, ' ', p.apellidos)
+      WHEN c.tipocliente = 'E' THEN e.razonsocial
+      ELSE 'Sin nombre'
+  END AS nombre_cliente,
+  c.tipocliente,
+  c.nrodoc
 FROM clientes c
 LEFT JOIN personas p ON c.idpersona = p.idpersona
 LEFT JOIN empresas e ON c.idempresa = e.idempresa;
 
 SELECT
-    CONCAT(p.nombres, ' ', p.apellidos) AS nombre_cliente,
-    p.nrodoc,
-    p.telprimario,
-    ma.marca AS marcaVehiculo,
-    mo.modelo AS modeloVehiculo,
-    mo.anio,
-    v.color,
-	c.creado AS fechaRegistro
+  CONCAT(p.nombres, ' ', p.apellidos) AS nombre_cliente,
+  p.nrodoc,
+  p.telprimario,
+  ma.marca AS marcaVehiculo,
+  mo.modelo AS modeloVehiculo,
+  mo.anio,
+  v.color,
+  c.creado AS fechaRegistro
 FROM cotizaciones c
 JOIN clientes cl ON c.idcliente = cl.idcliente
 JOIN personas p ON cl.idpersona = p.idpersona AND cl.tipocliente = 'P'
@@ -139,32 +136,32 @@ c.estadocotizacion,
 */
 
 SELECT
-    c.idcotizacion,
-    c.idformato,
-    fc.tipocotizacion,
-    COALESCE(
-      CASE WHEN cl.tipocliente = 'P' THEN CONCAT(p.nombres, ' ', p.apellidos) END,
-      e.razonsocial,
-      'Cliente no definido'
-    ) AS nombrecliente,
-    
-    COALESCE(
-      CASE WHEN cl.tipocliente = 'P' THEN p.nrodoc END,
-      e.ruc,
-      ''
-    ) AS documento,
-    
-    COALESCE(
-      CASE WHEN cl.tipocliente = 'P' THEN p.telprimario END,
-      e.telprimario,
-      ''
-    ) AS telefono,
-    
-    ma.marca AS marcaVehiculo,
-    mo.modelo AS modeloVehiculo,
-    mo.anio,
-    v.color,
-    c.creado AS fechaRegistro
+  c.idcotizacion,
+  c.idformato,
+  fc.tipocotizacion,
+  COALESCE(
+    CASE WHEN cl.tipocliente = 'P' THEN CONCAT(p.nombres, ' ', p.apellidos) END,
+    e.razonsocial,
+    'Cliente no definido'
+  ) AS nombrecliente,
+  
+  COALESCE(
+    CASE WHEN cl.tipocliente = 'P' THEN p.nrodoc END,
+    e.ruc,
+    ''
+  ) AS documento,
+  
+  COALESCE(
+    CASE WHEN cl.tipocliente = 'P' THEN p.telprimario END,
+    e.telprimario,
+    ''
+  ) AS telefono,
+  
+  ma.marca AS marcaVehiculo,
+  mo.modelo AS modeloVehiculo,
+  mo.anio,
+  v.color,
+  c.creado AS fechaRegistro
 FROM cotizaciones c
 JOIN clientes cl ON c.idcliente = cl.idcliente
 LEFT JOIN personas p ON cl.idpersona = p.idpersona
@@ -178,12 +175,12 @@ LIMIT 10;
 
 
 SELECT
-    cl.idcliente,
-    cl.tipocliente,
-    cl.idpersona,
-    cl.idempresa,
-    p.nombres, p.apellidos, p.nrodoc, p.telprimario,
-    e.razonsocial, e.ruc, e.telprimario
+  cl.idcliente,
+  cl.tipocliente,
+  cl.idpersona,
+  cl.idempresa,
+  p.nombres, p.apellidos, p.nrodoc, p.telprimario,
+  e.razonsocial, e.ruc, e.telprimario
 FROM clientes cl
 LEFT JOIN personas p ON cl.idpersona = p.idpersona
 LEFT JOIN empresas e ON cl.idempresa = e.idempresa
@@ -200,10 +197,10 @@ WHERE p.nrodoc = '71689010' OR e.ruc = '71689010';
 SELECT
 	idpersona,
 	apellidos, 
-    nombres, 
-    telprimario, 
-    telalternativo, 
-    email 
+  nombres, 
+  telprimario, 
+  telalternativo, 
+  email 
 FROM personas 
 WHERE tipodoc = 'DNI'
 AND nrodoc  = '71689010'
@@ -221,9 +218,7 @@ SELECT moduloapp
 	FROM permisos
 	WHERE idcargo = 1;
     
-SELECT COUNT(*) 
-            FROM permisos 
-            WHERE idcargo = 3 AND moduloapp = 'marcas';
+SELECT COUNT(*) FROM permisos WHERE idcargo = 3 AND moduloapp = 'marcas';
             
 -- IDLOGISTICA
 SELECT a.idarea
@@ -242,36 +237,36 @@ SELECT * FROM colaboradores;
 
 SELECT 
 	v.idvehiculo,
-    mc.marca,
-    tv.tipovehiculo,
-    m.modelo,
-    v.version,
-    v.condicion,
-    v.color,
-    v.disponibilidad,
-    v.placa,
-    v.placarotativa,
-    c.idcombustible,
-    c.combustible,
-    v.moneda,
-    v.precioventa
-    FROM vehiculos v
-    INNER JOIN modelos m ON m.idmodelo = v.idmodelo
-    INNER JOIN marcas mc ON mc.idmarca = m.idmarca
-    INNER JOIN tipovehiculos tv ON tv.idtipovehiculo = m.idtipovehiculo
-    INNER JOIN combustibles c ON c.idcombustible = v.idcombustible
-    ORDER BY v.idvehiculo DESC
-    LIMIT 100 ;
+  mc.marca,
+  tv.tipovehiculo,
+  m.modelo,
+  v.version,
+  v.condicion,
+  v.color,
+  v.disponibilidad,
+  v.placa,
+  v.placarotativa,
+  c.idcombustible,
+  c.combustible,
+  v.moneda,
+  v.precioventa
+  FROM vehiculos v
+  INNER JOIN modelos m ON m.idmodelo = v.idmodelo
+  INNER JOIN marcas mc ON mc.idmarca = m.idmarca
+  INNER JOIN tipovehiculos tv ON tv.idtipovehiculo = m.idtipovehiculo
+  INNER JOIN combustibles c ON c.idcombustible = v.idcombustible
+  ORDER BY v.idvehiculo DESC
+  LIMIT 100 ;
 
 SELECT 
-    v.idvehiculo,
-    mc.marca,
-    tv.tipovehiculo,
-    m.modelo,
-    v.version,
-    v.condicion,
-    v.color,
-    v.disponibilidad
+  v.idvehiculo,
+  mc.marca,
+  tv.tipovehiculo,
+  m.modelo,
+  v.version,
+  v.condicion,
+  v.color,
+  v.disponibilidad
 FROM vehiculos v
 INNER JOIN modelos m ON m.idmodelo = v.idmodelo
 INNER JOIN marcas mc ON mc.idmarca = m.idmarca
@@ -279,7 +274,7 @@ INNER JOIN tipovehiculos tv ON tv.idtipovehiculo = m.idtipovehiculo
 WHERE v.disponibilidad = 'proceso'
 ORDER BY v.idvehiculo DESC;
 
-SELECT * FROM vehiculos WHERE idvehiculo = '5';
+-- SELECT * FROM vehiculos WHERE idvehiculo = '5';
 /*
 -- PRUEBA
 SELECT 
@@ -313,19 +308,18 @@ WHERE m.idmarca = :idmarca
   AND m.modelo = :modelo
   AND m.anio = :anio
   AND v.disponibilidad = 'libre'
-ORDER BY v.version, v.placa;*/
+ORDER BY v.version, v.placa;
+*/
 
 -- VEHICULOS (MARCA - TIPO - MODELO- AÑO)
 SELECT
-    DISTINCT(TV.tipovehiculo), MD.idtipovehiculo 
-    FROM modelos MD
-      INNER JOIN tipovehiculos TV ON MD.idtipovehiculo = TV.idtipovehiculo
-      WHERE MD.idmarca = 12
-      ORDER BY TV. tipovehiculo;
+  DISTINCT(TV.tipovehiculo), MD.idtipovehiculo 
+  FROM modelos MD
+  INNER JOIN tipovehiculos TV ON MD.idtipovehiculo = TV.idtipovehiculo
+  WHERE MD.idmarca = 12
+  ORDER BY TV. tipovehiculo;
       
-SELECT idtipovehiculo, tipovehiculo
-	FROM tipovehiculos
-	ORDER BY tipovehiculo;
+SELECT idtipovehiculo, tipovehiculo FROM tipovehiculos ORDER BY tipovehiculo;
 
 -- FORMATO DE COTIZACION & (REQUISITOS - DETALLE REQUISITOS)
 SELECT * from formatoCotizacion;
@@ -375,4 +369,4 @@ LEFT JOIN personas p ON c.idpersona = p.idpersona
 LEFT JOIN empresas e ON c.idempresa = e.idempresa
 ORDER BY label;
 
-SELECT * FROM combustibles;
+-- SELECT * FROM combustibles;
