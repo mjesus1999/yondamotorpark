@@ -5,7 +5,8 @@ USE motorpark;
 UPDATE colaboradores
 SET userpassword = '$2y$10$cYt7.yHXNdzUaYGw0xktxuD9MJem51XAfTSClw7FZnL6a/XNeEOeS'
 WHERE usernick = 'leticiall';
--- PASAR DE SI A NO  EN RESTRICCION HORARIA
+
+-- PASAR DE SI A NO EN RESTRICCION HORARIA a leticiall
 UPDATE colaboradores
 SET restriccionhoraria = 'N',
     modificado = NOW()
@@ -126,6 +127,94 @@ INSERT INTO detallerequisitos (idformato, idrequisito) VALUES
 
 
 -- VEHICULOS INSERT (disponibilidad)
+INSERT INTO vehiculos (
+    idmodelo, 
+    version, 
+    condicion, 
+    idcombustible, 
+    disponibilidad, 
+    idlogistica, 
+    idlocal, 
+    origen, 
+    creado, 
+    color, 
+    chasis, 
+    placa, 
+    placarotativa, 
+    seriemotor, 
+    precioventa, 
+    moneda
+) VALUES
+	-- PROCESO
+	(1, 			-- idmodelo
+    'Versión A',  	-- version
+    'nuevo',     	-- condicion
+    1, 				-- idcombustible
+    'proceso',  	-- disponibilidad
+    2, 				-- idlogistica
+    3, 				-- idlocal
+    'CTZ', 			-- origen
+    NOW(), 			-- creado
+	'AZUL',  		-- color
+    'CHS6543210911', -- chasis
+    'XYZ-711', 		-- placa
+    'ROT-711', 		-- placa rotativa
+    'SM987654311', 	-- serie motor
+    32500.00, 		-- precio venta
+    'USD'),			-- moneda
+    -- LIBRE
+	(1, 			-- idmodelo
+    'Full',       	-- version
+    'nuevo',     	-- condicion
+    1, 				-- idcombustible
+    'libre',    	-- disponibilidad
+    2, 				-- idlogistica
+    3, 				-- idlocal
+    'CTZ', 			-- origen
+    NOW(), 			-- creado
+	'ROJO',  		-- color
+    'CHS6543210922', -- chasis
+    'XYZ-722', 		-- placa
+    'ROT-722', 		-- placa rotativa
+    'SM987654322', 	-- serie motor
+    22500.00, 		-- precio venta
+    'PEN'),
+    -- SEPARADO
+	(1, 			-- idmodelo
+    'Versión C',  	-- versión
+    'seminuevo', 	-- condición
+    1, 				-- idcombustible
+    'separado', 	-- disponibilidad
+    2, 				-- idlogistica
+    3, 				-- idlocal
+    'CTZ', 			-- origen
+    NOW(), 			-- creado
+	'VERDE', 		-- color
+    'CHS6543210933', -- chasis
+    'XYZ-733', 		-- placa
+    'ROT-733', 		-- placa rotativa
+    'SM98765433',  	-- serie motor
+    33500.00, 		-- precio venta
+    'USD'),			-- moneda
+    -- PAGADO
+	(1, 			-- idmodelo
+    'Versión D',  	-- versión
+    'seminuevo', 	-- condición
+    1, 				-- idcombustible
+    'vendido',  	-- disponibilidad
+    2, 				-- idlogistica
+    3, 				-- idlocal
+    'CTZ', 			-- origen
+    NOW(),			-- creado
+	'MORADO',		-- color
+    'CHS6543210944', -- chasis
+    'XYZ-744', 		-- placa
+    'ROT-744', 		-- placa rotativa
+    'SM98765444',  	-- serie motor
+    24500.00, 		-- precio venta
+    'USD');			-- moneda
+
+/*
 -- PROCESO
 INSERT INTO vehiculos (
     idmodelo, version, condicion, idcombustible, disponibilidad, idlogistica, idlocal, origen, creado
@@ -155,8 +244,8 @@ INSERT INTO vehiculos (
 );
 
 -- SELECT * FROM vehiculos;
+-- ACTULIZAR LOS VEHICULOS CON LOS DATOS FALTANTES
 
-/*
 UPDATE vehiculos
 SET
 	color = 'AZUL',
@@ -226,15 +315,6 @@ VALUES 	('P', 1, NULL,  2),
         ('P', NULL, 1,  2);
 */
 
-/*
--- CLIENTES X3
-INSERT INTO clientes (tipocliente, idpersona, idempresa, idcolregistra)
-VALUES
-  ('P', 1, NULL,  3),  -- Cliente Persona
-  ('P', 2, NULL,  3),
-  ('E', NULL, 1,  3);  
-*/
-
 -- INSERT DE PERSONAS 
 
 -- Persona 1 (ejemplo)
@@ -297,7 +377,7 @@ INSERT INTO contratoslaborales (
   'P'             -- tipo: temporal (ajusta según tus valores)
 );
 
--- CARGOS (OTROS)
+-- CARGOS (OTROS) / PARA PRUEBAS
 INSERT INTO cargos (idarea, cargo) VALUES
 (2, 'Jefe de Recursos Humanos'),
 (2, 'Analista de Recursos Humanos'),
@@ -308,7 +388,7 @@ INSERT INTO cargos (idarea, cargo) VALUES
 (5, 'Jefe de Ventas'),
 (6, 'Jefe de Caja');
 
--- PERMISOS
+-- PERMISOS (ACCESOS A LOS MODULOS)
 
 -- Jefe de logistica (ID = 8) Acceso a todos los modulos
 INSERT INTO accesos (idcargo, modulo, permisos) VALUES
@@ -331,7 +411,7 @@ INSERT INTO accesos (idcargo, modulo, permisos) VALUES
 INSERT INTO accesos (idcargo, modulo, permisos) VALUES
 (3, 'vehiculos', 1);
 
--- analista desarrollador (ID = 2) - solo puede ver marcas, vehiculos, formato cotizacion y cotizacion
+-- Analista desarrollador (ID = 2) - solo puede ver marcas, vehiculos, formato cotizacion y cotizacion
 INSERT INTO accesos (idcargo, modulo, permisos) VALUES
 (2, 'marcas', 1),
 (2, 'vehiculos', 1),
@@ -382,6 +462,8 @@ INSERT INTO accesos (idcargo, modulo, permisos) VALUES
 (17, 'auth', 1);
 */
 
+
+-- --------------------------------------------------------------
 /*
 -- Jefe de Logística (ID = 8) - Acceso total a todos los módulos
 INSERT INTO permisos (idcargo, moduloapp) VALUES

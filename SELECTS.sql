@@ -64,6 +64,40 @@ SELECT
       LIMIT 0,1000;
 */
 
+-- Buscar por usernick pero trae todo acerca de ese usuario
+SELECT
+	col.idcolaborador,
+	col.usernick,
+	col.userpassword,
+	col.habilitado,
+	p.email,
+	p.telprimario,
+	p.telalternativo,
+	p.apellidos,
+	p.nombres
+FROM colaboradores col
+JOIN contratoslaborales cl ON cl.idcontratolaboral = col.idcontratolaboral
+JOIN personas p ON p.idpersona = cl.idpersona
+WHERE BINARY col.usernick = 'Deyanirayc'
+LIMIT 1;
+
+-- BUscar por userNick
+SELECT col.idcolaborador, col.usernick, col.habilitado, p.email, p.telprimario, p.telalternativo
+FROM colaboradores col
+JOIN contratoslaborales cl ON cl.idcontratolaboral = col.idcontratolaboral
+JOIN personas p ON p.idpersona = cl.idpersona
+WHERE col.usernick = 'Deyanirayc';
+
+-- bucar por numero de telefono
+SELECT col.idcolaborador, col.usernick, col.habilitado, p.email, p.telprimario, p.telalternativo
+FROM colaboradores col
+JOIN contratoslaborales cl ON cl.idcontratolaboral = col.idcontratolaboral
+JOIN personas p ON p.idpersona = cl.idpersona
+WHERE REPLACE(REPLACE(REPLACE(p.telprimario,' ',''),'+',''),'-','') LIKE '%919629135%'
+   OR REPLACE(REPLACE(REPLACE(p.telalternativo,' ',''),'+',''),'-','') LIKE '%919629135%'
+   OR col.usernick = 'Deyanirayc'
+LIMIT 20;
+
 -- REPORTE DE COTIZACION
 SELECT
     c.idcliente,

@@ -1,6 +1,5 @@
 /*
 -- VISTAS DE USUARIO.PHP 
--- 
 */
 
 -- VISTA DE OBTENER TODOS LOS USUARIOS Y MOSTRARLOS / getAll
@@ -61,6 +60,7 @@ JOIN personas p            ON p.idpersona          = cl.idpersona
 JOIN cargos cg             ON cg.idcargo           = cl.idcargo
 JOIN areas a               ON a.idarea             = cg.idarea
 LEFT JOIN distritos d      ON d.iddistrito         = p.iddistrito;
+
 
 -- SELECT * FROM vwGetUserDetail WHERE idcolaborador = 1;
 
