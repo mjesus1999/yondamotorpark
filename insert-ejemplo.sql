@@ -260,6 +260,6 @@ FROM cronogramas WHERE idcontrato = 1;
 
 SELECT SUM(interes)+SUM(abonocapital) AS TotalPagado
 FROM cronogramas WHERE idcontrato = 1;
-
+DELETE FROM pagos;
 
 SELECT * FROM pagos;

@@ -543,7 +543,7 @@ ADD COLUMN tipo ENUM('Cuota', 'Penalidad') NOT NULL DEFAULT 'Cuota';
 -- USE motorpark;
 SELECT * FROM pagos;
 
-
+    use motorpark2;
 
 SHOW COLUMNS FROM pagos;
 

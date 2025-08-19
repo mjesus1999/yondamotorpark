@@ -7,7 +7,7 @@ use App\Helpers\Validador;
 use App\Models\PagoCronograma;
 use App\Models\Caja;
 use DateTime;
-use GrahamCampbell\ResultType\Success;
+
 
 class PagoCronogramaController extends Controller
 {
@@ -66,8 +66,6 @@ class PagoCronogramaController extends Controller
         return $primeraCuotaPendienteId !== null && $primeraCuotaPendienteId === $idCronograma;
     }
 
-
-
     public function store(): void
     {
         header('Content-Type: application/json');
@@ -85,13 +83,20 @@ class PagoCronogramaController extends Controller
 
             //Asignar y validar campos básicos
             $idCronograma = (int)($data['idcronograma'] ?? 0);
+
+            $numeroTransaccion = $data['numerotransaccion'] ?? ''; // NUMERO DE TRANSACCION DE CUOTA
+            $numeroTransaccionPenalidad = (string)($data['numeroTransaccionPenalidad'] ?? ''); // NUMERO DE TRANSACCION DE PENALIDAD
+
             $amortizacionCuota = (float)($data['amortizacionCuota'] ?? 0);
             $amortizacionPenalidad = (float)($data['amortizacionPenalidad'] ?? 0);
-            $numeroTransaccionPenalidad = (string)($data['numeroTransaccionPenalidad'] ?? '');
-            $medioPago = $data['mediopago'] ?? '';
-            $idCuentaPago = $data['idcuentapago'] ?? null;
+
+            $medioPagoPenalidad=  $data['mediopagopenalidad'] ?? ''; // ESTE ES EL MEDIO DE PAGO DE PENALIDAD
+            $medioPago = $data['mediopago'] ?? ''; // ESTE ES EL MEDIO DE PAGO DE CUOTa
+
+            $idCuentaPago = $data['idcuentapago'] ?? null; // ESTE ES EL IDCUENTAPAGO DE CUOTA
+            $idCuentaPagoPenalidad = $data['idcuentapagopenalidad']  ?? null; // ESTE ES EL IDCUENTAPAGO DE PENALIDAD
+            
             $fechaPago = $data['fechapago'] ?? '';
-            $numeroTransaccion = $data['numerotransaccion'] ?? '';
             $observacion = $data['observacion'] ?? '';
 
             // Validaciones básicas de campos
@@ -273,8 +278,6 @@ class PagoCronogramaController extends Controller
             ]);
         }
     }
-
-
 
 
 

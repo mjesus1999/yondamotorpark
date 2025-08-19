@@ -1,8 +1,8 @@
-import { validarAmortizacionCuota, validarNumeroTransaccion, fechaEsFutura, fechaVacia, marcarInput} from './helpers-cronograma.js';
+import { validarAmortizacionCuota, validarNumeroTransaccion, fechaEsFutura, fechaVacia, marcarInput } from './helpers-cronograma.js';
 import { TIPOS_PAGO, MEDIOS_PAGO } from "./constantes-cronograma.js";
 import { configurarValidacionesFormulario } from './eventos-cronograma.js';
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
 
     const totalItems = document.getElementById('tabla-body').dataset.totalItems;
 
@@ -46,8 +46,10 @@ document.addEventListener('DOMContentLoaded', () => {
         numeroTransaccionPenalidadInput: document.getElementById('numerotransaccion-penalidad'),
         fechaPagoInput: document.getElementById('fechapago'),
         observacionInput: document.getElementById('observacion'),
-        contenedorInputMontoCuota: document.getElementById('contenedor-monto-cuota')
+        contenedorInputMontoCuota: document.getElementById('contenedor-monto-cuota'),
+        
     };
+
 
     /**
      * Gestiona la paginación de la tabla.
@@ -135,12 +137,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 elements.numeroCuentaSelect.innerHTML += `<option value="${cuenta.idcuentapago}">${cuenta.nombrecuenta}</option>`;
             });
         } catch (error) {
-            console.error('Error al cargar cuentas:', error);
             showToast('Error al cargar cuentas bancarias.', 'ERROR', 2000);
         }
     }
-
-
 
     /**
      * Valida los datos del formulario antes del envío.
@@ -164,13 +163,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isCuota) {
             const monto = parseFloat(elements.amortizacionCuotaInput.value);
             if (monto <= 0) {
-                showToast('Monto de cuota inválido.', 'INFO', 1200);
+                showToast('Monto de cuota inválido.', 'WARNING', 1200);
                 elements.amortizacionCuotaInput.classList.add('is-invalid');
                 return false;
             }
             if (!validarAmortizacionCuota(monto, valorCuotaDeuda)) {
                 marcarInput(elements.amortizacionCuotaInput, false);
-                showToast(`La amortización no puede ser mayor a S/ ${valorCuotaDeuda.toFixed(2)}.`, 'INFO', 1200);
+                showToast(`La amortización no puede ser mayor a S/ ${valorCuotaDeuda.toFixed(2)}.`, 'WARNING', 1200);
                 // elements.amortizacionCuotaInput.classList.add('is-invalid');
                 return false;
             }
@@ -181,19 +180,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (isCuota && elements.comprobanteCuotaInput.files.length === 0) {
             marcarInput(elements.comprobanteCuotaInput, false);
-            showToast('Debe adjuntar el comprobante de la cuota.', 'INFO', 1200);
+            showToast('Debe adjuntar el comprobante de la cuota.', 'WARNING', 1200);
             return false;
         }
         if (isPenalidad && elements.comprobantePenalidadInput.files.length === 0) {
             marcarInput(elements.comprobantePenalidadInput, false);
-            showToast('Debe adjuntar el comprobante de la penalidad.', 'INFO', 1200);
+            showToast('Debe adjuntar el comprobante de la penalidad.', 'WARNING', 1200);
             return false;
         }
 
         if (elements.medioPagoSelect.value === MEDIOS_PAGO.transferenciaBancaria) {
             if (elements.numeroCuentaSelect.value === '') {
                 marcarInput(elements.numeroCuentaSelect, false);
-                showToast('Debe seleccionar un núnmero de cuenta', 'INFO', 1200);
+                showToast('Debe seleccionar un núnmero de cuenta', 'WARNING', 1200);
                 return false;
             }
         }
@@ -207,7 +206,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             if (!validarNumeroTransaccion(numeroTransaccionCuota)) {
                 marcarInput(elements.numeroTransaccionInput, false);
-                showToast('El número de operación de la cuota es inválido.', 'INFO', 2000);
+                showToast('El número de operación de la cuota es inválido.', 'WARNING', 2000);
                 // elements.numeroTransaccionInput.classList.add('is-invalid');
                 return false;
             }
@@ -223,7 +222,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             if (!validarNumeroTransaccion(numeroTransaccionPenalidad)) {
                 marcarInput(elements.numeroTransaccionPenalidadInput, false);
-                showToast('El número de operación de la penalidad es inválido.', 'INFO', 2000);
+                showToast('El número de operación de la penalidad es inválido.', 'WARNING', 2000);
                 // elements.numeroTransaccionPenalidadInput.classList.add('is-invalid');
                 return false;
             }
@@ -237,7 +236,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (fechaEsFutura(elements.fechaPagoInput.value)) {
             marcarInput(elements.fechaPagoInput, false);
-            showToast('La fecha de pago no puede ser mayor a la actual.', 'INFO', 1200);
+            showToast('La fecha de pago no puede ser mayor a la actual.', 'WARNING', 1200);
             // elements.fechaPagoInput.classList.add('is-invalid');
             return false;
         }
@@ -274,7 +273,8 @@ document.addEventListener('DOMContentLoaded', () => {
      * Envía los datos del formulario
      */
     async function submitForm() {
-        if (!confirm('¿Seguro de registrar el pago?')) return;
+        if (!await ask('¿Resgitrar el pago?','Caja')) return;
+        // if (!confirm('¿Seguro de registrar el pago?')) return;
         elements.btnConfirmarPago.disabled = true;
         elements.btnConfirmarPago.classList.add('disabled', 'opacity-75');
         elements.btnConfirmarPago.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Procesando...';
@@ -433,7 +433,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Generar PDF
     elements.btnPdf.addEventListener('click', () => {
-        showToast('GENERANDO EL PDF.....', 'INFO', 2200);
+        showToast('GENERANDO EL PDF.....', 'INFO', 1500);
         setTimeout(() => {
             const {
                 jsPDF
@@ -489,7 +489,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             doc.save('cronograma_pagos.pdf');
-            showToast('PDF GENERADO', 'SUCCESS', 2200);
-        }, 3000);
+            showToast('PDF GENERADO', 'SUCCESS', 1500);
+        }, 1500);
     });
 });

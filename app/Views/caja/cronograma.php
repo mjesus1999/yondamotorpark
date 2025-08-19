@@ -360,8 +360,9 @@
                                         <i class="fas fa-credit-card me-2"></i> Método de Pago
                                     </h6>
                                     <div class="row g-3">
+                                        <!-- ESTE ES EL MODALIDAD DE PAGO DE CUOTA-->
                                         <div class="col-md-6">
-                                            <label class="form-label small text-muted">Modalidad</label>
+                                            <label class="form-label small text-muted">Modalidad(cuota)</label>
                                             <select class="form-select" id="mediopago" name="mediopago">
                                                 <option value="Efectivo">Efectivo</option>
                                                 <option value="Yape">Yape</option>
@@ -369,12 +370,34 @@
                                                 <option value="Plin">Plin</option>
                                             </select>
                                         </div>
-                                        <div class="col-md-6 mb-3 hidden select-cuentas">
-                                            <label class="form-label small text-muted">N°cuenta</label>
-                                            <select class="form-select" id="idcuentapago" name="idcuentapago"></select>
-                                              <div class="invalid-feedback">Seleccione un número de cuenta.</div>
-                                            
+                                        <!-- ESTE ES LA MODALIDAD DE PAGO DE PENALIDAD -->
+                                        <div class="hidden col-md-6" id="group-medioPagoPenalidad">
+                                            <label class="form-label small text-muted">Modalidad(penalidad)</label>
+                                            <select class="form-select" id="mediopagopenalidad" name="mediopagopenalidad">
+                                                <option value="Efectivo">Efectivo</option>
+                                                <option value="Yape">Yape</option>
+                                                <option value="Transferencia Bancaria">Transferencia Bancaria</option>
+                                                <option value="Plin">Plin</option>
+                                            </select>
                                         </div>
+
+                                        
+                                        <!-- ESTE ES EL SELECT DE NUMERO DE CUENTA DE CUOTA -->
+                                        <div class="col-md-6 mb-3 hidden select-cuentas">
+                                            <label class="form-label small text-muted">N°cuenta(cuota)</label>
+                                            <select class="form-select" id="idcuentapago" name="idcuentapago"></select>
+                                            <div class="invalid-feedback">Seleccione un número de cuenta.</div>
+
+                                        </div>
+
+                                        <!-- ESTE ES EL SELECT DE NUMERO DE CUENTA DE PENALIDAD. -->
+                                        <div class="hidden col-md-6 mb-3 select-cuentas">
+                                            <label class="form-label small text-muted">N°cuenta(penalidad)</label>
+                                            <select class="form-select" id="idcuentapagopenalidad" name="idcuentapagopenalidad"></select>
+                                            <div class="invalid-feedback">Seleccione un número de cuenta.</div>
+
+                                        </div>
+
                                         <div class="col-md-6" id="group-numTransaccionCuota">
                                             <label class="form-label small text-muted">N° operación(Cuota)</label>
                                             <input type="text" class="form-control numeros-transacciones" name="numerotransaccion" placeholder="N° de operación 6654.." id="numerotransaccion" maxlength="30" minlength="6" pattern="[0-9]{6,30}"

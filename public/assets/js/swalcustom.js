@@ -13,7 +13,9 @@ async function ask(pregunta = ``, modulo = `Yonda`){
     confirmButtonText: 'Aceptar',
     cancelButtonText: 'Cancelar',
     confirmButtonColor: '#3498db',
-    footer: 'Motorpark Yonda Perú App Ver. 1.0'
+    footer: 'Motorpark Yonda Perú App Ver. 1.0',
+    width:'24em',
+    height:'15em'
   });
 
   return respuesta.isConfirmed;
