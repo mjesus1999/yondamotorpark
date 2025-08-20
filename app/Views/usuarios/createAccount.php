@@ -1,20 +1,27 @@
 <?php include __DIR__ . '/../layout/header.php'; ?>
 
-<?php if (!empty($error)): ?>
-    <div class="alert alert-danger"><?= $error ?></div>
-<?php endif; ?>
 
-<?php if (!empty($success)): ?>
-    <div class="alert alert-success"><?= $success ?></div>
-<?php endif; ?>
 
 <style>
     .yonda {
         background-color: #FF5F00;
     }
+
+    /* cursor mano para filas clicables */
+    .contracts-table tbody tr[data-id] {
+        cursor: pointer;
+    }
 </style>
 
 <div class="container-fluid">
+
+    <?php if (!empty($error)): ?>
+        <div class="alert alert-danger"><?= $error ?></div>
+    <?php endif; ?>
+
+    <?php if (!empty($success)): ?>
+        <div class="alert alert-success"><?= $success ?></div>
+    <?php endif; ?>
 
     <div class="alert alert-info mt-2" role="alert">
         <div class="row">
@@ -211,7 +218,16 @@
     document.addEventListener('DOMContentLoaded', () => {
 
         document.querySelectorAll('.contracts-table tbody tr[data-id]').forEach(function (row) {
+            row.setAttribute('role', 'button');
+            row.tabIndex = 0; // permite foco con TAB
+
+            //llenar los campos 
             row.addEventListener('click', function () {
+                // remover seleccion previa
+                document.querySelectorAll('.contracts-table tbody tr.table-active').forEach(r => r.classList.remove('table-active'));
+                // marcar esta fila
+                this.classList.add('table-active');
+
                 const id = this.dataset.id || '';
                 const nombres = this.dataset.nombres || '';
                 const apellidos = this.dataset.apellidos || '';
@@ -228,38 +244,45 @@
                 document.getElementById('nombresSel').value = nombres;
                 document.getElementById('apellidosSel').value = apellidos;
 
-                // Limpiar y sugerir usernick: primer nombre + inicial del primer apellido
+                // Generar sugerencia usernick 
                 const nombresStr = (nombres || '').trim();
                 const apellidosStr = (apellidos || '').trim();
 
                 let firstName = '';
-                let lastInitial = '';
+                let apellidosIniciales = '';
 
                 if (nombresStr) {
-                // primer nombre (maneja nombres compuestos)
-                firstName = nombresStr.split(/\s+/u)[0];
+                    firstName = nombresStr.split(/\s+/u)[0];
                 }
                 if (apellidosStr) {
-                // primer apellido -> toma la primera letra
-                const firstApellido = apellidosStr.split(/\s+/u)[0];
-                lastInitial = firstApellido.charAt(0);
+                    const partes = apellidosStr.split(/\s+/u).filter(Boolean);
+                    const primerasDos = partes.slice(0, 2);
+                    apellidosIniciales = primerasDos.map(p => p.charAt(0)).join('');
                 }
 
-                const base = firstName ? (firstName + (lastInitial ? '' + lastInitial : '')) : (apellidosStr || '');
+                const base = firstName
+                    ? (firstName + (apellidosIniciales ? apellidosIniciales : ''))
+                    : (apellidosIniciales || apellidosStr || '');
 
-                // Normalizar y construir sugerencia permitiendo letras Unicode (incluye tildes / ñ)
                 let sumpr = base
-                .normalize('NFKC')                 // normaliza compuestos unicode
-                .toLowerCase()                    // lowercase (acepta acentos)
-                .replace(/\s+/g, '.')             // espacios -> puntos (por si queda alguno)
-                // permite cualquier letra Unicode (\p{L}), numeros, punto y guion 
-                .replace(/[^\p{L}0-9.\-]/gu, '')
-                .replace(/\.{2,}/g, '.')          // evitar puntos dobles
-                .replace(/^\.|\.$/g, '');         // quitar punto al inicio/fin
+                    .normalize('NFKC')
+                    .toLowerCase()
+                    .replace(/\s+/g, '.')
+                    .replace(/[^\p{L}0-9.\-]/gu, '')
+                    .replace(/\.{2,}/g, '.')
+                    .replace(/^\.|\.$/g, '');
 
                 const inputUser = document.getElementById('usernick');
                 inputUser.value = sumpr;
                 inputUser.focus();
+            });
+
+            // permitir seleccionar con teclado (Enter / Space)
+            row.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    this.click();
+                }
             });
         });
 

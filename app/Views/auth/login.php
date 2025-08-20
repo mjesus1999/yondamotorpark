@@ -33,6 +33,7 @@
                                     <h3 class="mb-4">Motorpark App 1.0</h3>
                                 </div>
                             </div>
+
                             <?php if (!empty($error)): ?>
                                 <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
                             <?php endif; ?>
@@ -40,7 +41,9 @@
                             <?php if (!empty($message)): ?>
                                 <div class="alert alert-success"><?= htmlspecialchars($message) ?></div>
                             <?php endif; ?>
-                            <form action="/login" method="POST" class="signin-form" id="formulario-login">
+
+                            <form action="/login" method="POST" class="signin-form" id="formulario-login"
+                                autocomplete="ON">
                                 <div class="form-group mb-3">
                                     <label class="label" for="usernick">Nombre de usuario</label>
                                     <input type="text" id="usernick" name="usernick" class="form-control"

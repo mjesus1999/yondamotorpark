@@ -11,12 +11,17 @@ SELECT * FROM cargos LIMIT 200;
 SELECT * FROM clientes;
 SELECT * FROM accesos;
 
+SELECT * 
+      FROM vwContractsWithoutColaborador
+      ORDER BY fechainicio DESC
+      LIMIT 0,1000;
+      
 SELECT idcolaborador, usernick, restriccionhoraria
 FROM colaboradores
 WHERE usernick = 'Deyanira' OR idcolaborador = 3;
 
 
--- DELETE FROM Colaboradores WHERE idcolaborador = 6;
+-- DELETE FROM Colaboradores WHERE idcolaborador = 11;
 -- DELETE FROM cotizaciones WHERE idasesor = 26;
 -- DELETE FROM vehiculos WHERE idlogistica = 26;
 

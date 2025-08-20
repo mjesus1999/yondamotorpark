@@ -18,7 +18,7 @@ class Usuario
 
   public function getAll(): array
   {
-    $query = "SELECT * FROM vwGetAllUser LIMIT 1000";
+    $query = "SELECT * FROM vwGetAllUser ORDER BY idcolaborador DESC LIMIT 1000";
     try {
       $stmt = $this->db->prepare($query);
       $stmt->execute();
@@ -172,7 +172,7 @@ class Usuario
   // Obtener CONTRATO SIN COLABORADOR (Sin usuario registrado)
   public function getContractsWithoutColaborador(): array
   {
-    $query = "SELECT * FROM vwContractsWithoutColaborador LIMIT 0,1000";
+    $query = "SELECT * FROM vwContractsWithoutColaborador ORDER BY fechainicio DESC LIMIT 0,1000";
     try {
       $stmt = $this->db->prepare($query);
       $stmt->execute();
@@ -211,6 +211,74 @@ class Usuario
       return $stmt->execute();
     } catch (\Throwable $e) {
       //log $e->getMessage()
+      return false;
+    }
+  }
+
+  //ACTUALIZAR DATOS DE LA PERSONA Y CONTRATO
+  public function update(int $idColaborador, string $nombres, string $apellidos, int $idArea, int $idCargo, string $nrodoc, string $fechaInicio): bool
+  {
+    try {
+      $this->db->beginTransaction();
+
+      // 1) obtener idcontratolaboral desde colaboradores
+      $sql = "SELECT idcontratolaboral FROM colaboradores WHERE idcolaborador = :id LIMIT 1";
+      $stmt = $this->db->prepare($sql);
+      $stmt->bindValue(':id', $idColaborador, PDO::PARAM_INT);
+      $stmt->execute();
+      $idContrato = $stmt->fetchColumn();
+      if ($idContrato === false) {
+        $this->db->rollBack();
+        return false; // colaborador no encontrado
+      }
+
+      // 2) obtener idpersona desde contratoslaborales
+      $sql = "SELECT idpersona FROM contratoslaborales WHERE idcontratolaboral = :id LIMIT 1";
+      $stmt = $this->db->prepare($sql);
+      $stmt->bindValue(':id', $idContrato, PDO::PARAM_INT);
+      $stmt->execute();
+      $idPersona = $stmt->fetchColumn();
+      if ($idPersona === false) {
+        $this->db->rollBack();
+        return false; // contrato sin persona (raro)
+      }
+
+      // 3) validar que el cargo pertenezca al area (opcional pero recomendable)
+      $sql = "SELECT COUNT(1) FROM cargos WHERE idcargo = :idcargo AND idarea = :idarea";
+      $stmt = $this->db->prepare($sql);
+      $stmt->bindValue(':idcargo', $idCargo, PDO::PARAM_INT);
+      $stmt->bindValue(':idarea', $idArea, PDO::PARAM_INT);
+      $stmt->execute();
+      $validCargo = (bool) $stmt->fetchColumn();
+      if (!$validCargo) {
+        $this->db->rollBack();
+        return false; // cargo no pertenece al area indicada
+      }
+
+      // 4) actualizar tabla personas (nombres, apellidos, nrodoc)
+      $sql = "UPDATE personas SET nombres = :nombres, apellidos = :apellidos, nrodoc = :nrodoc WHERE idpersona = :idpersona";
+      $stmt = $this->db->prepare($sql);
+      $stmt->bindValue(':nombres', $nombres, PDO::PARAM_STR);
+      $stmt->bindValue(':apellidos', $apellidos, PDO::PARAM_STR);
+      $stmt->bindValue(':nrodoc', $nrodoc, PDO::PARAM_STR);
+      $stmt->bindValue(':idpersona', (int) $idPersona, PDO::PARAM_INT);
+      $stmt->execute();
+
+      // 5) actualizar contrato (idcargo y fechainicio)
+      $sql = "UPDATE contratoslaborales SET idcargo = :idcargo, fechainicio = :fechainicio, modificado = NOW() WHERE idcontratolaboral = :idcontrato";
+      $stmt = $this->db->prepare($sql);
+      $stmt->bindValue(':idcargo', $idCargo, PDO::PARAM_INT);
+      $stmt->bindValue(':fechainicio', $fechaInicio, PDO::PARAM_STR);
+      $stmt->bindValue(':idcontrato', (int) $idContrato, PDO::PARAM_INT);
+      $stmt->execute();
+
+      $this->db->commit();
+      return true;
+    } catch (\Throwable $e) {
+      // log $e->getMessage() si tienes logger
+      if ($this->db->inTransaction()) {
+        $this->db->rollBack();
+      }
       return false;
     }
   }

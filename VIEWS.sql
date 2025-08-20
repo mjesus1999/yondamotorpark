@@ -54,6 +54,7 @@ CREATE VIEW vwGetAllUser AS
 
 
 -- VISTA DE OBTENER EL USUARIO POR ID Y MOSTRARLO / GET BY ID
+/*
 CREATE VIEW vwGetUserDetail AS
 SELECT
   col.idcolaborador,
@@ -85,6 +86,42 @@ JOIN personas p            ON p.idpersona          = cl.idpersona
 JOIN cargos cg             ON cg.idcargo           = cl.idcargo
 JOIN areas a               ON a.idarea             = cg.idarea
 LEFT JOIN distritos d      ON d.iddistrito         = p.iddistrito;
+*/
+
+CREATE OR REPLACE VIEW vwGetUserDetail AS
+SELECT
+  col.idcolaborador,
+  col.usernick,
+  col.avatar,
+  col.restriccionhoraria,
+  p.apellidos,
+  p.nombres,
+  p.tipodoc,
+  p.nrodoc,
+  p.genero,
+  DATE_FORMAT(p.fechanac, '%Y-%m-%d') AS fechanac,
+  p.estadocivil,
+  p.email,
+  p.iddistrito,
+  d.distrito AS nombre_distrito,
+  p.direccion,
+  p.referencia,
+  p.telprimario,
+  p.telalternativo,
+  DATE_FORMAT(cl.fechainicio, '%Y-%m-%d') AS fechainicio,
+  IFNULL(DATE_FORMAT(cl.fechafin, '%Y-%m-%d'), 'Indeterminado') AS fechafin,
+  cl.idcargo AS idcargo,
+  cg.cargo,
+  a.area,
+  a.idarea AS idarea,                       -- <- agregado
+  cl.idcontratolaboral AS idcontratolaboral,-- <- agregado
+  p.idpersona AS idpersona                  -- <- agregado
+FROM colaboradores col
+JOIN contratoslaborales cl ON cl.idcontratolaboral = col.idcontratolaboral
+JOIN personas p            ON p.idpersona          = cl.idpersona
+JOIN cargos cg             ON cg.idcargo           = cl.idcargo
+JOIN areas a               ON a.idarea             = cg.idarea
+LEFT JOIN distritos d      ON d.iddistrito         = p.iddistrito;
 
 
 -- SELECT * FROM vwGetUserDetail WHERE idcolaborador = 1;
@@ -110,6 +147,7 @@ JOIN cargos cg ON cg.idcargo = cl.idcargo;
 
 
 -- VISTA DE MOSTRAR CONTRATOS / QUE NO ESTAN REGISTRADOS COMO COLABORADORES
+/*
 CREATE VIEW vwContractsWithoutColaborador AS
 SELECT
   cl.idcontratolaboral,
@@ -124,6 +162,28 @@ JOIN personas p ON p.idpersona = cl.idpersona
 JOIN cargos cg ON cg.idcargo = cl.idcargo
 JOIN areas a ON a.idarea = cg.idarea
 LEFT JOIN colaboradores col ON col.idcontratolaboral = cl.idcontratolaboral
+WHERE col.idcolaborador IS NULL
+ORDER BY p.apellidos, p.nombres;
+*/
+
+-- VISTA PRUEBA (VISTA DE MOSTRAR CONTRATOS / SI SE DESHABILITA UN USUARIO PASA A SER UN CONTRATO SIN CUENTA)
+CREATE OR REPLACE VIEW vwContractsWithoutColaborador AS
+SELECT
+  cl.idcontratolaboral,
+  cl.idpersona,
+  p.apellidos,
+  p.nombres,
+  a.area,
+  cg.cargo,
+  DATE_FORMAT(cl.fechainicio, '%Y-%m-%d') AS fechainicio
+FROM contratoslaborales cl
+JOIN personas p ON p.idpersona = cl.idpersona
+JOIN cargos cg ON cg.idcargo = cl.idcargo
+JOIN areas a ON a.idarea = cg.idarea
+-- sólo "unimos" colaboradores que estén habilitados:
+LEFT JOIN colaboradores col
+  ON col.idcontratolaboral = cl.idcontratolaboral
+  AND col.habilitado = 'S'
 WHERE col.idcolaborador IS NULL
 ORDER BY p.apellidos, p.nombres;
 

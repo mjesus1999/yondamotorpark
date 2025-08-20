@@ -400,5 +400,81 @@ class UsuarioController extends Controller
     $this->redirect('/usuarios');
   }
 
+  //VISTA DE EDIT / USUARIO
+  public function edit(int $id): void
+  {
+    $this->authRequired();
+
+    $idColab = (int) $id;
+    if ($idColab <= 0) {
+      http_response_code(404);
+      $this->view('errors.404');
+      return;
+    }
+
+    $usuario = $this->usuarioModel->getById($idColab);
+    if (!$usuario) {
+      http_response_code(404);
+      $this->view('errors.404');
+      return;
+    }
+    $areas = $this->usuarioModel->getAllAreas();
+
+    $idAreaUsuario = isset($usuario['idarea']) ? (int) $usuario['idarea'] : 0;
+    $cargos = $this->usuarioModel->getCargosByArea($idAreaUsuario);
+
+    $this->view('usuarios.edit', [
+      'usuario' => $usuario,
+      'areas' => $areas,
+      'cargos' => $cargos
+    ]);
+  }
+
+  //ACTUALIZAR / EDIT
+  public function update(): void
+  {
+    $this->authRequired();
+
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+      $this->redirect('/usuarios');
+      return;
+    }
+
+    $idColab = (int) ($_POST['idcolaborador'] ?? 0);
+    $nombres = trim($_POST['nombres'] ?? '');
+    $apellidos = trim($_POST['apellidos'] ?? '');
+    $idArea = (int) ($_POST['idarea'] ?? 0);
+    $idCargo = (int) ($_POST['idcargo'] ?? 0);
+    $nrodoc = trim($_POST['nrodoc'] ?? '');
+    $fechainicio = trim($_POST['fechainicio'] ?? '');
+
+    // Validaciones básicas
+    $errors = $this->validator->validateUpdateUsuario([
+      'idcolaborador' => $idColab,
+      'nombres' => $nombres,
+      'apellidos' => $apellidos,
+      'idarea' => $idArea,
+      'idcargo' => $idCargo,
+      'nrodoc' => $nrodoc,
+      'fechainicio' => $fechainicio,
+    ]);
+
+    if (!empty($errors)) {
+      $_SESSION['error_message'] = implode(' ', $errors);
+      $this->redirect('/usuarios/edit/' . $idColab);
+      return;
+    }
+
+    // ejecutar actualización
+    $ok = $this->usuarioModel->update($idColab, $nombres, $apellidos, $idArea, $idCargo, $nrodoc, $fechainicio);
+
+    if ($ok) {
+      $_SESSION['success_message'] = 'Datos actualizados de' . ' ' . $nombres . ' ' . $apellidos . ' ' . 'correctamente.';
+    } else {
+      $_SESSION['error_message'] = 'No se pudo actualizar. Verifica los datos o contacta al administrador.';
+    }
+
+    $this->redirect('/usuarios');
+  }
 
 }

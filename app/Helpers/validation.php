@@ -186,4 +186,73 @@ class Validation
         return $errors;
     }
 
+    /**
+     * validateUpdateUsuario / Valida los datos del formulario de edición de usuario.
+     * @param array $data Espera keys: idcolaborador, nombres, apellidos, idarea, idcargo, nrodoc, fechainicio
+     * @return string[] lista de errores
+     */
+    public function validateUpdateUsuario(array $data): array
+    {
+        $errors = [];
+
+        $idColab = (int) ($data['idcolaborador'] ?? 0);
+        $nombres = trim((string) ($data['nombres'] ?? ''));
+        $apellidos = trim((string) ($data['apellidos'] ?? ''));
+        $idArea = (int) ($data['idarea'] ?? 0);
+        $idCargo = (int) ($data['idcargo'] ?? 0);
+        $nrodoc = trim((string) ($data['nrodoc'] ?? ''));
+        $fechaInicio = trim((string) ($data['fechainicio'] ?? ''));
+
+        if ($idColab <= 0) {
+            $errors[] = 'ID de colaborador inválido.';
+        }
+
+        if ($nombres === '' || mb_strlen($nombres) < 2) {
+            $errors[] = 'Nombres inválidos o demasiado cortos.';
+        }
+
+        if ($apellidos === '' || mb_strlen($apellidos) < 2) {
+            $errors[] = 'Apellidos inválidos o demasiado cortos.';
+        }
+
+        if ($idArea <= 0) {
+            $errors[] = 'Selecciona un área válida.';
+        }
+
+        if ($idCargo <= 0) {
+            $errors[] = 'Selecciona un cargo válido.';
+        }
+
+        // DNI: solo dígitos, longitud razonable (6-12)
+        if ($nrodoc === '') {
+            $errors[] = 'DNI no puede estar vacío.';
+        } else {
+            $digits = preg_replace('/\D+/', '', $nrodoc);
+            if ($digits === '') {
+                $errors[] = 'DNI inválido. Solo números permitidos.';
+            } elseif (strlen($digits) < 6 || strlen($digits) > 12) {
+                $errors[] = 'DNI inválido (longitud entre 6 y 12 dígitos).';
+            }
+        }
+
+        // Fecha inicio: formato YYYY-MM-DD y no futura
+        if ($fechaInicio === '') {
+            $errors[] = 'Fecha de inicio es obligatoria.';
+        } else {
+            $d = DateTime::createFromFormat('Y-m-d', $fechaInicio);
+            if (!($d && $d->format('Y-m-d') === $fechaInicio)) {
+                $errors[] = 'Formato de fecha de inicio inválido (esperado YYYY-MM-DD).';
+            } else {
+                // Opcional: evitar fecha futura
+                $hoy = new DateTime('today');
+                if ($d > $hoy) {
+                    $errors[] = 'La fecha de inicio no puede ser futura.';
+                }
+            }
+        }
+
+        return $errors;
+    }
+
+
 }

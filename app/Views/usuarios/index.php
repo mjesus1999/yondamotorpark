@@ -78,8 +78,8 @@
 
                   <td class="text-center">
                     <!-- Editar -->
-                    <a href="<?= $path ?>/usuarios/editar/<?= $u['idcolaborador'] ?>"
-                      class="btn btn-sm btn-outline-primary" title="Editar">
+                    <a href="/usuarios/edit/<?= $u['idcolaborador'] ?>" class="btn btn-sm btn-outline-primary"
+                      title="Editar">
                       <i class="fa-solid fa-pen"></i>
                     </a>
 
@@ -96,14 +96,14 @@
                       <i class="fa-solid fa-trash"></i>
                     </button>
 
-                    <!-- Toggle restricción horaria (envío por POST) -->
+                    <!-- Restricción horaria  -->
                     <form method="POST" action="/usuarios/toggleRestriccion" class="d-inline-block toggle-restr-form">
-                      <input type="hidden" name="idcolaborador" value="<?= (int)$u['idcolaborador'] ?>">
+                      <input type="hidden" name="idcolaborador" value="<?= (int) $u['idcolaborador'] ?>">
                       <?php $isRestr = (!empty($u['restriccionhoraria']) && strtoupper($u['restriccionhoraria']) === 'S'); ?>
                       <button type="submit"
-                              class="btn btn-sm <?= $isRestr ? 'btn-outline-secondary' : 'btn-outline-info' ?>"
-                              title="<?= $isRestr ? 'Quitar restricción horaria' : 'Poner restricción horaria' ?>"
-                              data-idcolab="<?= $u['idcolaborador'] ?>">
+                        class="btn btn-sm <?= $isRestr ? 'btn-outline-secondary' : 'btn-outline-info' ?>"
+                        title="<?= $isRestr ? 'Quitar restricción horaria' : 'Poner restricción horaria' ?>"
+                        data-idcolab="<?= $u['idcolaborador'] ?>">
                         <?php if ($isRestr): ?>
                           <i class="fa-solid fa-clock"></i>
                         <?php else: ?>
@@ -162,7 +162,6 @@
   </div>
 </div>
 
-
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.btn-cambiar-clave').forEach(btn => {
@@ -170,7 +169,6 @@
         const idColab = btn.getAttribute('data-idcolab');
         const usuario = btn.getAttribute('data-usuario');
 
-        // Asegúrate de apuntar al mismo id que tu input hidden:
         document.getElementById('cc-idcolaborador').value = idColab;
         document.getElementById('cc-usuario').value = usuario;
 
@@ -214,7 +212,7 @@
         });
         if (!isConfirmed) return;
 
-        // Creamos y enviamos un formulario POST tradicional:
+        //enviamos un formulario POST
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = `/usuarios/disabled/${id}`;
@@ -222,7 +220,7 @@
         form.submit();
       });
     });
-    // toggle restricción con confirmación
+
     document.querySelectorAll('.toggle-restr-form').forEach(form => {
       form.addEventListener('submit', function (e) {
         e.preventDefault();
