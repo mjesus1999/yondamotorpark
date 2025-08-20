@@ -16,7 +16,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     let valorCuotaDeuda = 0;
     let valorPenalidadDeuda = 0;
 
+
     const elements = {
+
+        // Nuevos elementos para diferente tipo pago de penalidad:
+        diferenteMetodoPagoPenalidadCheck: document.getElementById('diferente-metodo-penalidad'), // CHECKBOX DE esOtroPagoPenalidad ?
+        groupMedioPagoPenalidad: document.getElementById('group-medioPagoPenalidad'), // CONTENEDOR DE MEDIO PAGO DE PENALIDAD
+        idCuentaPagoPenalidadSelect: document.getElementById('idcuentapagopenalidad'), // SELECT DE CUENTA DE PAGO PENALIDAD
+        selectMedioPagoPenalidad: document.getElementById('mediopagopenalidad'), //  SELECT MEDIO DE PAGO DE PENALIDAD
+        groupNumCuentaPenalidad: document.getElementById('group-select-numero-cuenta'), // CONTENEDOR DE NUMERO DE CUENTAS PENALIDAD. 
+        groupMedioPagoCuota: document.getElementById('group-medioPagoCuota'), // CONTENEDOR DEL SELECT DE MEDIO DE PAGO DE cuota
+
+
+        //-------------------------------------------------------------------------------
         tablaBody: document.getElementById('tabla-body'),
         infoPaginacion: document.getElementById('info-paginacion'),
         paginacion: document.getElementById('paginacion'),
@@ -39,7 +51,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         amortizacionPenalidadInput: document.getElementById('amortizacionPenalidad'),
         comprobanteCuotaInput: document.getElementById('comprobanteCuota'),
         comprobantePenalidadInput: document.getElementById('comprobantePenalidad'),
-        medioPagoSelect: document.getElementById('mediopago'),
+        medioPagoSelect: document.getElementById('mediopago'),// cuota
         selectCuentas: document.querySelector('.select-cuentas'),
         numeroCuentaSelect: document.getElementById('idcuentapago'),
         numeroTransaccionInput: document.getElementById('numerotransaccion'),
@@ -47,9 +59,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         fechaPagoInput: document.getElementById('fechapago'),
         observacionInput: document.getElementById('observacion'),
         contenedorInputMontoCuota: document.getElementById('contenedor-monto-cuota'),
-        
-    };
 
+    };
 
     /**
      * Gestiona la paginación de la tabla.
@@ -101,40 +112,57 @@ document.addEventListener('DOMContentLoaded', async () => {
      * Muestra u oculta los campos de pago en el modal según el tipo de pago seleccionado.
      */
     function updateSelectTipoPago() {
+        elements.numeroTransaccionInput.value = '';
+        elements.numeroTransaccionPenalidadInput.value = '';
+        elements.selectMedioPagoPenalidad.value = '';
+        elements.medioPagoSelect.value = '';
         const tipoPago = elements.tipoPagoSelect.value;
         const isCuotaVisible = tipoPago === TIPOS_PAGO.soloCuota || tipoPago === TIPOS_PAGO.ambas;
         const isPenalidadVisible = tipoPago === TIPOS_PAGO.soloPenalidad || tipoPago === TIPOS_PAGO.ambas;
+        const isPenalidadFieldsVisible = tipoPago === TIPOS_PAGO.ambas || tipoPago === TIPOS_PAGO.soloPenalidad;
 
+        // Grupos principales
         elements.pagoCuotaGroup.classList.toggle('hidden', !isCuotaVisible);
         elements.pagoPenalidadGroup.classList.toggle('hidden', !isPenalidadVisible);
 
+        // Deshabilitar inputs
         elements.amortizacionCuotaInput.disabled = !isCuotaVisible;
         elements.amortizacionPenalidadInput.disabled = !isPenalidadVisible;
-
-
         elements.numeroTransaccionCuotaGroup.classList.toggle('hidden', !isCuotaVisible);
+
+        elements.groupMedioPagoCuota.classList.toggle('hidden', !isCuotaVisible);
+
+
+        elements.groupMedioPagoPenalidad.classList.toggle('hidden', !isPenalidadFieldsVisible);
+        elements.numeroTransaccionPenalidadGroup.classList.toggle('hidden', !isPenalidadFieldsVisible);
+
+
+        if (!isPenalidadFieldsVisible || elements.selectMedioPagoPenalidad.value !== MEDIOS_PAGO.transferenciaBancaria) {
+            elements.groupNumCuentaPenalidad.classList.add('hidden');
+        }
+
 
         if (isPenalidadVisible) {
             elements.amortizacionPenalidadInput.setAttribute('readonly', true);
             elements.amortizacionPenalidadInput.style.backgroundColor = '#BDB7B7';
-            elements.numeroTransaccionPenalidadGroup.classList.remove('hidden');
         } else {
             elements.amortizacionPenalidadInput.removeAttribute('readonly');
             elements.amortizacionPenalidadInput.style.backgroundColor = '';
-            elements.numeroTransaccionPenalidadGroup.classList.add('hidden');
         }
     }
+
+
 
     /**
      * Carga las cuentas bancarias desde la API y las llena en el select.
      */
-    async function cargarCuentasBancarias() {
+    async function cargarCuentasBancarias(selectElement) {
         try {
             const res = await fetch('/api/numcuentaspagos');
             const data = await res.json();
-            elements.numeroCuentaSelect.innerHTML = '<option value="">Selecciona una cuenta</option>';
+            selectElement.innerHTML = '<option value="">Selecciona una cuenta</option>';
             data.forEach(cuenta => {
-                elements.numeroCuentaSelect.innerHTML += `<option value="${cuenta.idcuentapago}">${cuenta.nombrecuenta}</option>`;
+                selectElement.innerHTML += `<option value="${cuenta.idcuentapago}">${cuenta.nombrecuenta}</option>`;
             });
         } catch (error) {
             showToast('Error al cargar cuentas bancarias.', 'ERROR', 2000);
@@ -272,51 +300,76 @@ document.addEventListener('DOMContentLoaded', async () => {
     /**
      * Envía los datos del formulario
      */
+  
     async function submitForm() {
-        if (!await ask('¿Resgitrar el pago?','Caja')) return;
-        // if (!confirm('¿Seguro de registrar el pago?')) return;
+        // Confirmación al usuario antes de proceder con el envío
+        if (!await ask('¿Estás seguro de registrar este pago?', 'Confirmar')) {
+            return;
+        }
+
+        // Deshabilitar el botón de confirmación y mostrar un indicador de carga
         elements.btnConfirmarPago.disabled = true;
         elements.btnConfirmarPago.classList.add('disabled', 'opacity-75');
         elements.btnConfirmarPago.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Procesando...';
 
+        // Crear un objeto FormData con los datos del formulario
         const formData = new FormData(elements.formPago);
         formData.append('idcronograma', idCronogramaSeleccionado);
+
+        // Lógica para el pago de la CUOTA
         if (elements.medioPagoSelect.value === MEDIOS_PAGO.transferenciaBancaria) {
             formData.append('idcuentapago', elements.numeroCuentaSelect.value);
         }
 
-        // Agregar el número de transacción de la penalidad al formData si existe un valor
+        // Lógica para el pago de la PENALIDAD 
+        // Solo se procesan los campos de penalidad si el monto es mayor que 0
         if (elements.amortizacionPenalidadInput.value > 0) {
+            // Se añade explícitamente el medio de pago de la penalidad al FormData
+            formData.append('mediopagopenalidad', elements.selectMedioPagoPenalidad.value);
+
+            // Si el pago de penalidad es una transferencia, se añade la cuenta
+            if (elements.selectMedioPagoPenalidad.value === MEDIOS_PAGO.transferenciaBancaria) {
+                formData.append('idcuentapagopenalidad', elements.idCuentaPagoPenalidadSelect.value);
+            }
+
+            // Se añade el número de transacción de la penalidad
             formData.append('numeroTransaccionPenalidad', elements.numeroTransaccionPenalidadInput.value);
         }
 
+
         setTimeout(async () => {
             try {
+                
                 const res = await fetch('/pago/cronograma', {
                     method: 'POST',
                     body: formData
                 });
+
                 const data = await res.json();
 
                 if (data.success) {
+                    
                     showToast(data.message, 'SUCCESS', 1200);
                     elements.modalPago.hide();
                     setTimeout(() => location.reload(), 1200);
                 } else {
+               
                     showToast(data.message || 'Error al registrar el pago.', 'WARNING', 2000);
                 }
             } catch (err) {
+                
                 console.error('Error de red o del servidor:', err);
-                showToast('Error de red o del servidor. Intente nuevamente.', 'ERROR', 2000);
+                showToast('Error de red o del servidor. Intenta de nuevo.', 'ERROR', 2000);
             } finally {
+              
                 elements.btnConfirmarPago.disabled = false;
                 elements.btnConfirmarPago.classList.remove('disabled', 'opacity-75');
                 elements.btnConfirmarPago.innerHTML = '<i class="fas fa-check-circle me-1"></i> Confirmar Pago';
             }
-
         }, 2000);
     }
 
+    
     /**
      * Filtra las filas de la tabla por el término de búsqueda.
      * @param {string} searchTerm El término de búsqueda.
@@ -392,15 +445,36 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Eventos del modal de pago
     elements.tipoPagoSelect.addEventListener('change', updateSelectTipoPago);
 
+
+    // CUOTA
     elements.medioPagoSelect.addEventListener('change', (e) => {
+        elements.numeroTransaccionInput.value = '';
+        console.info('MEDIO DE PAGO CUOTA: ', e.target.value);
         const isTransferencia = e.target.value === MEDIOS_PAGO.transferenciaBancaria;
         elements.selectCuentas.classList.toggle('hidden', !isTransferencia);
         if (isTransferencia) {
-            cargarCuentasBancarias();
+            cargarCuentasBancarias(elements.numeroCuentaSelect);
         } else {
             elements.numeroCuentaSelect.innerHTML = '';
         }
     });
+
+    // PENALIDAD.
+    elements.selectMedioPagoPenalidad.addEventListener('change', (e) => {
+        elements.numeroTransaccionPenalidadInput.value = '';
+        console.error('MEDIO DE PAGO PENALIDAD: ', e.target.value);
+        const isTransferencia = e.target.value === MEDIOS_PAGO.transferenciaBancaria;
+        elements.groupNumCuentaPenalidad.classList.toggle('hidden', !isTransferencia);
+        if (isTransferencia) {
+            cargarCuentasBancarias(elements.idCuentaPagoPenalidadSelect);
+
+        } else {
+            elements.idCuentaPagoPenalidadSelect.innerHTML = '';
+        }
+    });
+
+
+
 
     elements.formPago.addEventListener('submit', (e) => {
         e.preventDefault();

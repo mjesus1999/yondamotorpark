@@ -122,7 +122,7 @@
                                                 $dias_faltantes = $hoy->diff($fecha_cuota)->days;
                                                 $texto_vencimiento = "Vence en $dias_faltantes días";
                                             }
-                                            $fila_deshabilitada = true;
+                                            $fila_deshabilitada = false;
                                         }
 
                                         $style_display = ($index < 10) ? '' : 'style="display:none;"';
@@ -237,10 +237,10 @@
 </div>
 
 
-<!-- MODAL DE PAGOS  -->
+<!-- MODAL DE PAGOS -->
 <div class="modal fade" id="modalPago" tabindex="-1" aria-labelledby="modalPagoLabel" aria-hidden="true">
-    <div class="modal-dialog  modal-dialog-centered" style="max-width: 750px;">
-        <div class="modal-content shadow-lg">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content shadow-xl">
             <!-- Header -->
             <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title" id="modalPagoLabel">
@@ -250,17 +250,17 @@
             </div>
 
             <!-- Body -->
-            <div class="modal-body p-4 ">
+            <div class="modal-body ">
                 <div class="alert alert-info py-2" role="alert">
                     <i class="fas fa-info-circle me-2"></i> <span id="numero-cuota" class="fw-bold">N° 25</span>
                 </div>
 
                 <form id="formPago" enctype="multipart/form-data">
                     <div class="row g-4">
-                        <!-- Detalles de la Deuda  -->
-                        <div class="col-md-5 col-lg-4">
-                            <div class="card h-70">
-                                <div class="card-body">
+                        <!-- Detalles de la Deuda -->
+                        <div class="col-lg-4">
+                            <div class="card h-100">
+                                <div class="card-body d-flex flex-column">
                                     <h6 class="card-title text-info fw-bold mb-3">
                                         <i class="fas fa-file-invoice-dollar me-2"></i> Detalles de la Deuda
                                     </h6>
@@ -283,7 +283,7 @@
 
                                     <hr class="my-4">
 
-                                    <div class="mb-1">
+                                    <div class="mt-auto">
                                         <label class="form-label fw-bold small text-muted">Total Deuda</label>
                                         <div class="input-group">
                                             <span class="input-group-text bg-light border-0 text-success fs-5"><i class="fas fa-calculator"></i></span>
@@ -294,8 +294,8 @@
                             </div>
                         </div>
 
-                        <!-- Detalles de Pago & Método de Pago -->
-                        <div class="col-md-7 col-lg-8 d-flex flex-column gap-4">
+                        <!-- Detalles de Pago -->
+                        <div class="col-md-7 col-lg-8 d-flex flex-column gap-2">
                             <!-- Card de Detalles del Pago -->
                             <div class="card">
                                 <div class="card-body">
@@ -314,66 +314,75 @@
                                             <div class="valid-feedback">Fecha válida.</div>
                                         </div>
                                     </div>
+                                </div>
+                            </div>
 
-                                    <div id="pagoCuota-group" class="col-12 mt-4">
-                                        <hr class="my-3">
-                                        <h6 class="fw-bold text-muted small"><i class="fas fa-coins text-warning me-2"></i> Pago de Cuota</h6>
-                                        <div class="row g-3">
-                                            <div class="col-md-6">
-                                                <label class="form-label small text-muted">Monto de cuota</label>
-                                                <input type="text" class="form-control" id="amortizacionCuota" name="amortizacionCuota">
-                                                <div class="invalid-feedback" id="invalid-amortizacionCuota"></div>
-                                                <div class="valid-feedback">Correcto.</div>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <label class="form-label small text-muted">Comprobante de Cuota</label>
-                                                <input id="comprobanteCuota" class="form-control" type="file" name="comprobanteCuota" accept="image/*,.pdf">
-                                                <div class="invalid-feedback">Ingrese un comprobante.</div>
-                                                <div class="valid-feedback">Comprobante valido</div>
-                                            </div>
+                            <!-- Card de Pago de Cuota -->
+                            <div class="card" id="pagoCuota-group">
+                                <div class="card-body">
+                                    <h6 class="card-title fw-bold text-warning mb-3">
+                                        <i class="fas fa-coins text-warning me-2"></i> Pago de Cuota
+                                    </h6>
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label small text-muted">Monto de cuota</label>
+                                            <input type="text" class="form-control" id="amortizacionCuota" name="amortizacionCuota">
+                                            <div class="invalid-feedback" id="invalid-amortizacionCuota"></div>
+                                            <div class="valid-feedback">Correcto.</div>
                                         </div>
-                                    </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label small text-muted">Comprobante de Cuota</label>
+                                            <input id="comprobanteCuota" class="form-control" type="file" name="comprobanteCuota" accept="image/*,.pdf">
+                                            <div class="invalid-feedback">Ingrese un comprobante.</div>
+                                            <div class="valid-feedback">Comprobante válido</div>
+                                        </div>
+                                        <div class="col-md-6" id="group-medioPagoCuota">
+                                            <label class="form-label small text-muted">Modalidad (cuota)</label>
+                                            <select class="form-select" id="mediopago" name="mediopago">
+                                                <option value="">Seleccione un medio de pago</option>
+                                                <option value="Efectivo">Efectivo</option>
+                                                <option value="Yape">Yape</option>
+                                                <option value="Transferencia Bancaria">Transferencia Bancaria</option>
+                                                <option value="Plin">Plin</option>
+                                            </select>
+                                        </div>
 
-                                    <div id="pagoPenalidad-group" class="col-12 mt-4">
-                                        <hr class="my-3">
-                                        <h6 class="fw-bold text-muted small"><i class="fas fa-gavel text-danger me-2"></i> Pago de Penalidad</h6>
-                                        <div class="row g-3">
-                                            <div class="col-md-6">
-                                                <label class="form-label small text-muted">Monto de penalidad</label>
-                                                <input type="text" class="form-control" id="amortizacionPenalidad" name="amortizacionPenalidad">
-                                            </div>
-                                            <div class="col-md-6">
-                                                <label class="form-label small text-muted">Comprobante de Penalidad</label>
-                                                <input id="comprobantePenalidad" class="form-control" type="file" name="comprobantePenalidad" accept="image/*,.pdf">
-                                                <div class="invalid-feedback">Ingrese un comprobante.</div>
-                                                <div class="valid-feedback">Comprobante valido</div>
-                                            </div>
+                                        <div class="col-6" id="group-numTransaccionCuota">
+                                            <label class="form-label small text-muted">N° operación (Cuota)</label>
+                                            <input type="text" class="form-control numeros-transacciones" name="numerotransaccion" placeholder="N° de operación 6654.." id="numerotransaccion" maxlength="30" minlength="6" pattern="[0-9]{6,30}" title="Solo números, entre 6 y 30 dígitos">
+                                            <div class="invalid-feedback">Debe tener entre 6 y 30 dígitos numéricos.</div>
+                                            <div class="valid-feedback">Número válido.</div>
+                                        </div>
+                                        <div class="col-md-6 hidden select-cuentas">
+                                            <label class="form-label small text-muted">N° cuenta (cuota)</label>
+                                            <select class="form-select" id="idcuentapago" name="idcuentapago"></select>
+                                            <div class="invalid-feedback">Seleccione un número de cuenta.</div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Card de Método de Pago -->
-                            <div class="card">
+                            <!-- Card de Pago de Penalidad -->
+                            <div class="card" id="pagoPenalidad-group">
                                 <div class="card-body">
-                                    <h6 class="card-title text-success fw-bold mb-3">
-                                        <i class="fas fa-credit-card me-2"></i> Método de Pago
+                                    <h6 class="card-title fw-bold text-danger mb-3">
+                                        <i class="fas fa-gavel text-danger me-2"></i> Pago de Penalidad
                                     </h6>
                                     <div class="row g-3">
-                                        <!-- ESTE ES EL MODALIDAD DE PAGO DE CUOTA-->
                                         <div class="col-md-6">
-                                            <label class="form-label small text-muted">Modalidad(cuota)</label>
-                                            <select class="form-select" id="mediopago" name="mediopago">
-                                                <option value="Efectivo">Efectivo</option>
-                                                <option value="Yape">Yape</option>
-                                                <option value="Transferencia Bancaria">Transferencia Bancaria</option>
-                                                <option value="Plin">Plin</option>
-                                            </select>
+                                            <label class="form-label small text-muted">Monto de penalidad</label>
+                                            <input type="text" class="form-control" id="amortizacionPenalidad" name="amortizacionPenalidad">
                                         </div>
-                                        <!-- ESTE ES LA MODALIDAD DE PAGO DE PENALIDAD -->
-                                        <div class="hidden col-md-6" id="group-medioPagoPenalidad">
-                                            <label class="form-label small text-muted">Modalidad(penalidad)</label>
+                                        <div class="col-md-6">
+                                            <label class="form-label small text-muted">Comprobante de Penalidad</label>
+                                            <input id="comprobantePenalidad" class="form-control" type="file" name="comprobantePenalidad" accept="image/*,.pdf">
+                                            <div class="invalid-feedback">Ingrese un comprobante.</div>
+                                            <div class="valid-feedback">Comprobante válido</div>
+                                        </div>
+                                        <div class="col-md-6 hidden" id="group-medioPagoPenalidad">
+                                            <label class="form-label small text-muted">Modalidad (penalidad)</label>
                                             <select class="form-select" id="mediopagopenalidad" name="mediopagopenalidad">
+                                                <option value="">Seleccione un medio de pago</option>
                                                 <option value="Efectivo">Efectivo</option>
                                                 <option value="Yape">Yape</option>
                                                 <option value="Transferencia Bancaria">Transferencia Bancaria</option>
@@ -381,36 +390,18 @@
                                             </select>
                                         </div>
 
-                                        
-                                        <!-- ESTE ES EL SELECT DE NUMERO DE CUENTA DE CUOTA -->
-                                        <div class="col-md-6 mb-3 hidden select-cuentas">
-                                            <label class="form-label small text-muted">N°cuenta(cuota)</label>
-                                            <select class="form-select" id="idcuentapago" name="idcuentapago"></select>
-                                            <div class="invalid-feedback">Seleccione un número de cuenta.</div>
-
-                                        </div>
-
-                                        <!-- ESTE ES EL SELECT DE NUMERO DE CUENTA DE PENALIDAD. -->
-                                        <div class="hidden col-md-6 mb-3 select-cuentas">
-                                            <label class="form-label small text-muted">N°cuenta(penalidad)</label>
-                                            <select class="form-select" id="idcuentapagopenalidad" name="idcuentapagopenalidad"></select>
-                                            <div class="invalid-feedback">Seleccione un número de cuenta.</div>
-
-                                        </div>
-
-                                        <div class="col-md-6" id="group-numTransaccionCuota">
-                                            <label class="form-label small text-muted">N° operación(Cuota)</label>
-                                            <input type="text" class="form-control numeros-transacciones" name="numerotransaccion" placeholder="N° de operación 6654.." id="numerotransaccion" maxlength="30" minlength="6" pattern="[0-9]{6,30}"
-                                                title="Solo números, entre 6 y 30 dígitos">
-                                            <div class="invalid-feedback">Debe tener entre 6 y 30 dígitos numéricos.</div>
-                                            <div class="valid-feedback">Número válido.</div>
-                                        </div>
-                                        <div class="hidden col-md-6" id="group-numTransaccionPenalidad">
-                                            <label class="form-label small text-muted">N° operación(Penalidad)</label>
+                                         <div class="col-md-6 hidden" id="group-numTransaccionPenalidad">
+                                            <label class="form-label small text-muted">N° operación (Penalidad)</label>
                                             <input type="text" class="form-control numeros-transacciones" name="numeroTransaccionPenalidad" placeholder="N° de operación 6654.." id="numerotransaccion-penalidad" maxlength="30" minlength="6" pattern="[0-9]{6,30}">
                                             <div class="invalid-feedback">Debe tener entre 6 y 30 dígitos numéricos.</div>
                                             <div class="valid-feedback">Número válido.</div>
                                         </div>
+                                        <div class="col-md-6 hidden" id="group-select-numero-cuenta">
+                                            <label class="form-label small text-muted">N° cuenta (penalidad)</label>
+                                            <select class="form-select" id="idcuentapagopenalidad" name="idcuentapagopenalidad"></select>
+                                            <div class="invalid-feedback">Seleccione un número de cuenta.</div>
+                                        </div>
+                                       
                                     </div>
                                 </div>
                             </div>
@@ -420,7 +411,7 @@
                         <div class="col-12">
                             <div class="card">
                                 <div class="card-body">
-                                    <h6 class="card-title text-warning fw-bold mb-3">
+                                    <h6 class="card-title text-warning fw-bold">
                                         <i class="fas fa-sticky-note me-2"></i> Observaciones
                                     </h6>
                                     <textarea class="form-control" rows="3" placeholder="Ingresa cualquier observación..." id="observacion" name="observacion"></textarea>
@@ -432,7 +423,7 @@
             </div>
 
             <!-- Footer -->
-            <div class="modal-footer d-flex justify-content-end p-3 border-top">
+            <div class="modal-footer d-flex justify-content-end p-1 border-top">
                 <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">
                     <i class="fas fa-times me-1"></i> Cancelar
                 </button>
@@ -442,6 +433,7 @@
             </div>
         </div>
     </div>
+
 </div>
 
 <!-- USADO PARA GENERAR EL PDF -->
