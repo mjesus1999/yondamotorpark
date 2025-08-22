@@ -174,8 +174,6 @@ document.addEventListener('DOMContentLoaded', async () => {
      * @returns {boolean} True si los datos son válidos, de lo contrario, false.
      */
     function validarForm() {
-
-
         if (!idCronogramaSeleccionado) {
             showToast('No se seleccionó ninguna cuota.', 'INFO', 1200);
             return false;
@@ -192,26 +190,30 @@ document.addEventListener('DOMContentLoaded', async () => {
             const monto = parseFloat(elements.amortizacionCuotaInput.value);
             if (monto <= 0) {
                 showToast('Monto de cuota inválido.', 'WARNING', 1200);
-                elements.amortizacionCuotaInput.classList.add('is-invalid');
+                marcarInput(elements.amortizacionCuotaInput, false);
                 return false;
             }
             if (!validarAmortizacionCuota(monto, valorCuotaDeuda)) {
                 marcarInput(elements.amortizacionCuotaInput, false);
                 showToast(`La amortización no puede ser mayor a S/ ${valorCuotaDeuda.toFixed(2)}.`, 'WARNING', 1200);
-                // elements.amortizacionCuotaInput.classList.add('is-invalid');
                 return false;
             }
         }
+
         if (isPenalidad && (amortizacionPenalidad <= 0 || amortizacionPenalidad !== parseFloat(valorPenalidadDeuda))) {
             showToast(amortizacionPenalidad <= 0 ? 'Monto de penalidad inválido.' : `La penalidad debe pagarse completa: S/ ${valorPenalidadDeuda.toFixed(2)}.`, 'INFO', 1200);
             return false;
         }
-        if (isCuota && elements.comprobanteCuotaInput.files.length === 0) {
+
+        // Validación de comprobante de CUOTA solo si el medio de pago NO es efectivo
+        if (isCuota && elements.medioPagoSelect.value !== MEDIOS_PAGO.efectivo && elements.comprobanteCuotaInput.files.length === 0) {
             marcarInput(elements.comprobanteCuotaInput, false);
             showToast('Debe adjuntar el comprobante de la cuota.', 'WARNING', 1200);
             return false;
         }
-        if (isPenalidad && elements.comprobantePenalidadInput.files.length === 0) {
+
+        // Validación de comprobante de PENALIDAD solo si el medio de pago NO es efectivo
+        if (isPenalidad && elements.selectMedioPagoPenalidad.value !== MEDIOS_PAGO.efectivo && elements.comprobantePenalidadInput.files.length === 0) {
             marcarInput(elements.comprobantePenalidadInput, false);
             showToast('Debe adjuntar el comprobante de la penalidad.', 'WARNING', 1200);
             return false;
@@ -220,38 +222,35 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (elements.medioPagoSelect.value === MEDIOS_PAGO.transferenciaBancaria) {
             if (elements.numeroCuentaSelect.value === '') {
                 marcarInput(elements.numeroCuentaSelect, false);
-                showToast('Debe seleccionar un núnmero de cuenta', 'WARNING', 1200);
+                showToast('Debe seleccionar un número de cuenta', 'WARNING', 1200);
                 return false;
             }
         }
 
         if (isCuota) {
             const numeroTransaccionCuota = elements.numeroTransaccionInput.value.trim();
-            if (numeroTransaccionCuota === '') {
+            if (elements.medioPagoSelect.value !== MEDIOS_PAGO.efectivo && numeroTransaccionCuota === '') {
                 marcarInput(elements.numeroTransaccionInput, false);
                 showToast('El número de operación de la cuota es obligatorio.', 'INFO', 1500);
-                // elements.numeroTransaccionInput.classList.add('is-invalid');
+                return false;
             }
-            if (!validarNumeroTransaccion(numeroTransaccionCuota)) {
+            if (numeroTransaccionCuota !== '' && !validarNumeroTransaccion(numeroTransaccionCuota)) {
                 marcarInput(elements.numeroTransaccionInput, false);
                 showToast('El número de operación de la cuota es inválido.', 'WARNING', 2000);
-                // elements.numeroTransaccionInput.classList.add('is-invalid');
                 return false;
             }
         }
 
         if (isPenalidad) {
             const numeroTransaccionPenalidad = elements.numeroTransaccionPenalidadInput.value.trim();
-            if (numeroTransaccionPenalidad === '') {
+            if (elements.selectMedioPagoPenalidad.value !== MEDIOS_PAGO.efectivo && numeroTransaccionPenalidad === '') {
                 marcarInput(elements.numeroTransaccionPenalidadInput, false);
                 showToast('El número de operación de la penalidad es obligatorio.', 'INFO', 1500);
-                // elements.numeroTransaccionPenalidadInput.classList.add('is-invalid');
                 return false;
             }
-            if (!validarNumeroTransaccion(numeroTransaccionPenalidad)) {
+            if (numeroTransaccionPenalidad !== '' && !validarNumeroTransaccion(numeroTransaccionPenalidad)) {
                 marcarInput(elements.numeroTransaccionPenalidadInput, false);
                 showToast('El número de operación de la penalidad es inválido.', 'WARNING', 2000);
-                // elements.numeroTransaccionPenalidadInput.classList.add('is-invalid');
                 return false;
             }
         }
@@ -259,15 +258,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (fechaVacia(elements.fechaPagoInput.value)) {
             marcarInput(elements.fechaPagoInput, false);
             showToast('La fecha de pago es obligatoria.', 'INFO', 1200);
-            // elements.fechaPagoInput.classList.add('is-invalid');
             return false;
         }
+
         if (fechaEsFutura(elements.fechaPagoInput.value)) {
             marcarInput(elements.fechaPagoInput, false);
             showToast('La fecha de pago no puede ser mayor a la actual.', 'WARNING', 1200);
-            // elements.fechaPagoInput.classList.add('is-invalid');
             return false;
         }
+
         return true;
     }
 
@@ -300,7 +299,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     /**
      * Envía los datos del formulario
      */
-  
+
     async function submitForm() {
         // Confirmación al usuario antes de proceder con el envío
         if (!await ask('¿Estás seguro de registrar este pago?', 'Confirmar')) {
@@ -336,40 +335,51 @@ document.addEventListener('DOMContentLoaded', async () => {
             formData.append('numeroTransaccionPenalidad', elements.numeroTransaccionPenalidadInput.value);
         }
 
+        let delay = 1000;
+        const delayPromise = new Promise(resolve => setTimeout(resolve, delay));
 
-        setTimeout(async () => {
-            try {
-                
-                const res = await fetch('/pago/cronograma', {
+
+        try {
+
+            const [res] = await Promise.all([
+
+                fetch('/pago/cronograma', {
                     method: 'POST',
                     body: formData
-                });
+                }),
+                delayPromise
+            ]);
 
-                const data = await res.json();
 
-                if (data.success) {
-                    
-                    showToast(data.message, 'SUCCESS', 1200);
+            const data = await res.json();
+
+            if (data.debug_info) {
+                console.error("Mensaje de Depuración:", data.debug_info);
+            }
+
+
+            if (data.success) {
+                showToast(data.message, 'SUCCESS', 1200);
+                setTimeout(() => {
                     elements.modalPago.hide();
-                    setTimeout(() => location.reload(), 1200);
-                } else {
-               
-                    showToast(data.message || 'Error al registrar el pago.', 'WARNING', 2000);
-                }
-            } catch (err) {
-                
-                console.error('Error de red o del servidor:', err);
-                showToast('Error de red o del servidor. Intenta de nuevo.', 'ERROR', 2000);
-            } finally {
-              
+                    setTimeout(() => location.reload(), 500);
+                }, 500);
+            } else {
+
+                showToast(data.message || 'Error al registrar el pago.', 'WARNING', 2000);
                 elements.btnConfirmarPago.disabled = false;
                 elements.btnConfirmarPago.classList.remove('disabled', 'opacity-75');
                 elements.btnConfirmarPago.innerHTML = '<i class="fas fa-check-circle me-1"></i> Confirmar Pago';
             }
-        }, 2000);
+        } catch (err) {
+
+            console.error('Error de red o del servidor:', err);
+            showToast('Error de red o del servidor. Intenta de nuevo.', 'ERROR', 2000);
+        }
+
     }
 
-    
+
     /**
      * Filtra las filas de la tabla por el término de búsqueda.
      * @param {string} searchTerm El término de búsqueda.
@@ -483,6 +493,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
+    
     // Eventos de paginación y búsqueda
     elements.paginacion.addEventListener('click', function (e) {
         const target = e.target.closest('.page-link');
@@ -563,7 +574,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
 
             doc.save('cronograma_pagos.pdf');
-            showToast('PDF GENERADO', 'SUCCESS', 1500);
+            showToast('PDF GENERADO', 'SUCCESS', 1200);
         }, 1500);
     });
 });

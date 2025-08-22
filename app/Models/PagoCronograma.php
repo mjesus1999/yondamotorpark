@@ -22,47 +22,53 @@ class PagoCronograma
      * @param array|null $pagoPenalidad
      * @return array
      */
+public function addMultiplePagos(?array $pagoCuota = null, ?array $pagoPenalidad = null): array
+{
+    try {
+        $this->db->beginTransaction();
+        $ids = [];
+        $idCronogramaParaValidar = null;
 
-    public function addMultiplePagos(array $pagoCuota, ?array $pagoPenalidad = null): array
-    {
-        try {
-            $this->db->beginTransaction();
-            $ids = [];
-
-            // Procesar el pago de la cuota si el monto es mayor que 0
-            if ($pagoCuota['amortizacion'] > 0) {
-                $idPagoCuota = $this->add($pagoCuota);
-                if ($idPagoCuota <= 0) {
-                    $this->db->rollBack();
-                    return [];
-                }
-                $ids[] = $idPagoCuota;
+        // Procesar el pago de la cuota si el monto es mayor que 0
+        if ($pagoCuota && $pagoCuota['amortizacion'] > 0) {
+            $idPagoCuota = $this->add($pagoCuota);
+            if ($idPagoCuota <= 0) {
+                $this->db->rollBack();
+                return [];
             }
-
-            // Procesar el pago de la penalidad si existe y el monto es mayor que 0
-            if ($pagoPenalidad && $pagoPenalidad['amortizacion'] > 0) {
-                $idPagoPenalidad = $this->add($pagoPenalidad);
-                if ($idPagoPenalidad <= 0) {
-                    $this->db->rollBack();
-                    return [];
-                }
-                $ids[] = $idPagoPenalidad;
-            }
-
-            // Actualizar el estado del cronograma si se han registrado pagos
-            if (!empty($ids)) {
-                $this->checkCuotaPagada($pagoCuota['idcronograma']);
-            }
-
-            $this->db->commit();
-            return $ids;
-        } catch (PDOException $error) {
-            $this->db->rollBack();
-            error_log("Error en la transacción de pagos: " . $error->getMessage());
-            return [];
+            $ids[] = $idPagoCuota;
+           
+            $idCronogramaParaValidar = $pagoCuota['idcronograma'];
         }
-    }
 
+        //  Procesar el pago de la penalidad si existe y el monto es mayor que 0
+        if ($pagoPenalidad && $pagoPenalidad['amortizacion'] > 0) {
+            $idPagoPenalidad = $this->add($pagoPenalidad);
+            if ($idPagoPenalidad <= 0) {
+                $this->db->rollBack();
+                return [];
+            }
+            $ids[] = $idPagoPenalidad;
+            // Si solo se pagó la penalidad, usar su ID de cronograma
+            if ($idCronogramaParaValidar === null) {
+                $idCronogramaParaValidar = $pagoPenalidad['idcronograma'];
+            }
+        }
+
+        // Actualizar el estado del cronograma si se ha registrado al menos un pago
+        if (!empty($ids) && $idCronogramaParaValidar !== null) {
+            $this->checkCuotaPagada($idCronogramaParaValidar);
+        }
+
+        $this->db->commit();
+        return $ids;
+
+    } catch (PDOException $error) {
+        $this->db->rollBack();
+        error_log("Error en la transacción de pagos: " . $error->getMessage());
+        return [];
+    }
+}
     /**
      * Inserta un único pago en la tabla `pagos` usando el SP.
      *
@@ -94,7 +100,7 @@ class PagoCronograma
             return -1;
         }
     }
-    
+
 
     /**
      * Obtiene el valor de la cuota y penalidad y el total amortizado para verificar si se ha pagado completamente.

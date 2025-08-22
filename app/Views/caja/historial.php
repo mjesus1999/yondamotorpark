@@ -106,14 +106,17 @@
                                         <td class="no-imprimir">
                                             <?php if (!empty($pago['comprobante'])): ?>
                                                 <?php $esPdf = strtolower(pathinfo($pago['comprobante'], PATHINFO_EXTENSION)) === 'pdf'; ?>
+                                                <?php
+                                                $urlSegura = "/archivos/" . htmlspecialchars($pago['comprobante']);
+                                                ?>
                                                 <?php if ($esPdf): ?>
-                                                    <a href="<?= htmlspecialchars($pago['comprobante']) ?>" target="_blank"
+                                                    <a href="<?= $urlSegura ?>" target="_blank"
                                                         class="btn btn-sm btn-danger" title="Ver comprobante">
                                                         <i class="fas fa-file-pdf me-1"></i>PDF
                                                     </a>
                                                 <?php else: ?>
                                                     <button type="button" class="btn btn-sm btn-primary ver-comprobante-img"
-                                                        data-img="<?= htmlspecialchars($pago['comprobante']) ?>" title="Ver comprobante">
+                                                        data-img="<?= htmlspecialchars($urlSegura) ?>" title="Ver comprobante">
                                                         <i class="fas fa-image me-1"></i>Comprobante
                                                     </button>
                                                 <?php endif; ?>
@@ -405,10 +408,12 @@
         document.querySelectorAll('.ver-comprobante-img').forEach(btn => {
             btn.addEventListener('click', function() {
                 const imgSrc = this.dataset.img;
-                console.log(imgSrc);
+                console.log("Ruta segura del comprobante:", imgSrc); // Para depuración
+
                 const imgElement = document.getElementById('imagenComprobante');
                 const downloadBtn = document.getElementById('descargarComprobante');
 
+                // Asignar la URL segura al src de la imagen
                 imgElement.src = imgSrc;
                 imgElement.style.display = 'block';
                 downloadBtn.href = imgSrc;

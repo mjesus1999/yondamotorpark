@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Controllers;
 
 use App\Core\Controller;
@@ -39,7 +40,7 @@ class PagosOCController extends Controller
         $errores = [];
         $errores[] = Validador::campoObligatorio($registro['idorden'], 'Orden');
         $errores[] = Validador::campoObligatorio($registro['amortizacion'], 'Monto a pagar');
-        $errores[] = Validador::campoObligatorio($registro['fecharealpago'],'Fecha de pago');
+        $errores[] = Validador::campoObligatorio($registro['fecharealpago'], 'Fecha de pago');
         $errores = array_filter($errores);
 
         if (!empty($errores)) {
@@ -54,7 +55,9 @@ class PagosOCController extends Controller
 
         if (!empty($_FILES['comprobante']['name'])) {
             $nombreArchivo = uniqid('comprobante_') . '_' . basename($_FILES['comprobante']['name']);
-            $directorioDestino = 'storage/comprobantes/';
+
+
+            $directorioDestino = __DIR__ . '/../../storage/comprobantes/';
 
             if (!is_dir($directorioDestino)) {
                 mkdir($directorioDestino, 0777, true);
@@ -67,7 +70,7 @@ class PagosOCController extends Controller
                 exit;
             }
 
-            $registro['comprobante'] = '/' . $rutaCompleta;
+            $registro['comprobante'] = "comprobantes/{$nombreArchivo}";
         }
 
 

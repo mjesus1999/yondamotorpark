@@ -55,11 +55,16 @@
                                             <a href="#" class="show-details p-1" data-idoc="<?= htmlspecialchars($compra['idorden']) ?>" title="Ver detalle">
                                                 <i class="bi bi-info-circle text-primary fs-5"></i>
                                             </a>
-                                            <a href="#" class="ver-factura p-1" data-pdf="<?= htmlspecialchars($compra['rutadoc']) ?>" title="Ver Factura">
-                                                <i class="fa-solid fa-file-invoice fa-beat fs-5" style="color: #ff0000;"></i>
-                                            </a>
 
+                                            <?php if (!empty($compra['rutadoc'])): ?>
+                                                <a href="#" class="ver-documento p-1" data-url="/archivos/<?= htmlspecialchars($compra['rutadoc']) ?>" title="Ver Documento">
+                                                    <i class="fa-solid fa-file-invoice fa-beat fs-5" style="color: #ff0000;"></i>
+                                                </a>
+                                            <?php else: ?>
+                                                <span class="badge bg-light text-muted">N/A</span>
+                                            <?php endif; ?>
                                         </td>
+
                                     </tr>
                                 <?php endforeach; ?>
                             <?php endif; ?>
@@ -132,22 +137,23 @@
             const botonVolver = document.getElementById('btn-volver-detalle');
 
             // Variables para poder visualizar la factura:            
-            const links = document.querySelectorAll('.ver-factura');
+            const links = document.querySelectorAll('.ver-documento');
             const modal = new bootstrap.Modal(document.getElementById('modalFactura'));
             const iframe = document.getElementById('visorFactura');
-
 
 
             links.forEach(link => {
                 link.addEventListener('click', function(e) {
                     e.preventDefault();
-                    const pdfUrl = this.dataset.pdf;
+                    const pdfUrl = this.dataset.url;
                     if (pdfUrl) {
                         iframe.src = pdfUrl;
                         modal.show();
                     }
                 });
             });
+
+
 
             function limpiarVistaDetalle() {
                 if (tablaDetallesBody) tablaDetallesBody.innerHTML = '';

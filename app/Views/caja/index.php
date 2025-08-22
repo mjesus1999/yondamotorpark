@@ -1,5 +1,5 @@
 <?php
-
+// phpinfo();
 include __DIR__ . '/../layout/header.php';
 ?>
 <div class="container-fluid">

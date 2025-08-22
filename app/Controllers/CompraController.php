@@ -27,7 +27,6 @@ class CompraController extends Controller
     {
         $this->view('compras.create');
     }
-
     public function store(): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -74,11 +73,24 @@ class CompraController extends Controller
         }
 
         try {
-            // Procesar el archivo subido
-            $nombreArchivo = uniqid('factura_') . '_' . basename($_FILES['rutadoc']['name']);
-            $directorioDestino = 'storage/facturas/';
+        
+            $subdirectorio = '';
+            switch ($registro['tipodoc']) {
+                case 'F':
+                    $subdirectorio = 'facturas';
+                    break;
+                case 'B':
+                    $subdirectorio = 'boletas';
+                    break;
+                default:
+                    echo json_encode(['success' => false, 'message' => 'Tipo de documento no válido', 'id' => 0]);
+                    exit;
+            }
 
-            // Crear directorio si no existe
+            $nombreArchivo = uniqid($subdirectorio . '_') . '_' . basename($_FILES['rutadoc']['name']);
+
+            $directorioDestino = __DIR__ . '/../../storage/' . $subdirectorio . '/';
+
             if (!is_dir($directorioDestino)) {
                 mkdir($directorioDestino, 0777, true);
             }
@@ -92,28 +104,22 @@ class CompraController extends Controller
                 exit;
             }
 
-            // Mover el archivo subido al directorio destino
             if (!move_uploaded_file($_FILES['rutadoc']['tmp_name'], $rutaCompleta)) {
                 echo json_encode(['success' => false, 'message' => 'No se pudo guardar el archivo PDF', 'id' => 0]);
                 exit;
             }
 
-            // Asignar la ruta relativa al registro
-            $registro['rutadoc'] = '/' . $rutaCompleta;
+            $registro['rutadoc'] = $subdirectorio . '/' . $nombreArchivo;
 
-            // Guardar en la base de datos
             $idCompra = $this->compraModel->create($registro);
 
             echo json_encode([
                 'success' => true,
                 'message' => 'Compra registrada correctamente',
-                'id' => $idCompra,
-                'ruta' => $registro['rutadoc']
-
+                'id' => $idCompra
             ]);
         } catch (\Exception $e) {
-            // Eliminar el archivo si hubo error en la base de datos
-            if (isset($rutaCompleta)) {
+            if (isset($rutaCompleta) && file_exists($rutaCompleta)) {
                 @unlink($rutaCompleta);
             }
 

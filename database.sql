@@ -344,7 +344,9 @@ CREATE TABLE pagosOC (
     CONSTRAINT fk_idorde_pagosOC FOREIGN KEY (idorden) REFERENCES ordenescompra (idordencompra)
 ) ENGINE = InnoDB;
 
-USE motorpark;
+SELECT * FROM pagosOC;
+SELECT * FROM pagos;
+USE motorpark2;
 --ALTER TABLE pagosOC MODIFY COLUMN fecha DATETIME NULL DEFAULT NOW();
 
 --ALTER TABLE pagosOC CHANGE COLUMN amortizacon amortizacion DECIMAL(10, 2) NOT NULL;
@@ -398,8 +400,10 @@ CREATE TABLE compras (
     CONSTRAINT fk_idlogistica_cmp FOREIGN KEY (idlogistica) REFERENCES colaboradores (idcolaborador)
 ) ENGINE = INNODB;
 
-USE motorpark;
+USE motorpark2;
 
+SELECT * FROM COMPRAS;
+SELECT * FROM pagos;
 --SHOW COLUMNS FROM compras
 
 --ALTER TABLE compras DROP COLUMN pathxml
@@ -538,7 +542,8 @@ CREATE TABLE pagos (
     CONSTRAINT fk_idcolcaja_pagos FOREIGN KEY (idcolcaja) REFERENCES colaboradores (idcolaborador)
 ) ENGINE = InnoDB;
 
-ALTER TABLE pagos
+ALTER TABLE pagos MODIFY COLUMN comprobante VARCHAR(200) NULL;
+ALTER TABLE pagos MODIFY COLUMN numerotransaccion VARCHAR(30) NULL;
 ADD COLUMN tipo ENUM('Cuota', 'Penalidad') NOT NULL DEFAULT 'Cuota';
 -- USE motorpark;
 SELECT * FROM pagos;
@@ -548,6 +553,8 @@ SELECT * FROM pagos;
 SHOW COLUMNS FROM pagos;
 
 ALTER TABLE pagos MODIFY COLUMN idcuentapago INT NULL;
+
+
 
 ALTER TABLE pagos
 MODIFY COLUMN saldorestante DECIMAL(10, 2) NULL;

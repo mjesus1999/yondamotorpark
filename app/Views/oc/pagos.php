@@ -1,7 +1,6 @@
 <?php include __DIR__ . '/../layout/header.php'; ?>
 
 <style>
-    
     .card-pagos {
         border: none;
         border-radius: 10px;
@@ -75,7 +74,7 @@
         font-weight: 600;
     }
 
-    
+
     .form-floating-pago label {
         color: #6c757d;
     }
@@ -209,17 +208,21 @@
                                                     <span class="text-muted">N/A</span>
                                                 <?php endif; ?>
                                             </td>
-                                            <td>
+                                            <td class="no-imprimir">
                                                 <?php if (!empty($pago['comprobante'])): ?>
                                                     <?php $esPdf = strtolower(pathinfo($pago['comprobante'], PATHINFO_EXTENSION)) === 'pdf'; ?>
+                                                    <?php
+                                                    
+                                                    $urlSegura = "/archivos/" . htmlspecialchars($pago['comprobante']);
+                                                    ?>
                                                     <?php if ($esPdf): ?>
-                                                        <a href="<?= htmlspecialchars($pago['comprobante']) ?>" target="_blank"
+                                                        <a href="<?= $urlSegura ?>" target="_blank"
                                                             class="btn btn-sm btn-outline-danger">
                                                             <i class="fas fa-file-pdf me-1"></i> Ver PDF
                                                         </a>
                                                     <?php else: ?>
                                                         <button type="button" class="btn btn-sm btn-outline-primary ver-comprobante-img"
-                                                            data-img="<?= htmlspecialchars($pago['comprobante']) ?>">
+                                                            data-img="<?= $urlSegura ?>">
                                                             <i class="fas fa-image me-1"></i> Ver Imagen
                                                         </button>
                                                     <?php endif; ?>
@@ -341,12 +344,12 @@
                 <div class="modal-body p-0">
                     <img id="imagenAmpliada" src="" class="img-fluid w-100" alt="Comprobante de Pago" style="max-height: 80vh; object-fit: contain;">
                 </div>
-               
+
             </div>
         </div>
     </div>
 
-    
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <script>
@@ -366,7 +369,7 @@
             const btnGuardar = document.querySelector("#btn-agregar-pago");
 
             const saldo = parseFloat(saldoInput.value.replace(/,/g, "")) || 0;
-            
+
             amortizacionInput.addEventListener("input", () => {
                 const amortizacion = parseFloat(amortizacionInput.value);
 
@@ -384,16 +387,16 @@
                     btnGuardar.disabled = false;
                 }
             });
-            
+
             document.getElementById("formPago").addEventListener("submit", async function(e) {
                 e.preventDefault();
                 const amortizacion = parseFloat(amortizacionInput.value);
-                
+
                 if (isNaN(amortizacion) || amortizacion <= 0) {
                     alert("Ingrese un monto válido mayor a 0.");
                     return;
                 }
-                
+
                 if (amortizacion > saldo) {
                     alert(`La amortización no debe ser mayor al saldo (${saldo.toFixed(2)}).`);
                     return;
@@ -406,9 +409,9 @@
                             method: "POST",
                             body: formData
                         });
-                        
+
                         const data = await response.json();
-                        
+
                         if (data.success) {
                             console.log('DATA:', data.message);
                             showToast(data.message, "SUCCESS", 1200);
@@ -416,12 +419,12 @@
                         } else {
                             console.error('ERROR:', data.message);
                             showToast(data.message, "WARNING", 1200);
-                            
+
                         }
                     } catch (error) {
                         console.error('FETCH ERROR:', error);
                         showToast(error, "ERROR", 1200);
-                        
+
                     }
                 }
             });
@@ -447,14 +450,14 @@
                     title.style.color = '#3a7bd5';
                     title.style.marginBottom = '5px';
                     title.style.fontWeight = 'bold';
-                    
+
                     const subtitle = document.createElement('h3');
                     subtitle.textContent = 'DETALLE DE VEHÍCULOS';
                     subtitle.style.textAlign = 'center';
                     subtitle.style.color = '#555';
                     subtitle.style.marginTop = '0';
                     subtitle.style.fontSize = '18px';
-                    
+
                     header.appendChild(title);
                     header.appendChild(subtitle);
                     element.appendChild(header);
@@ -499,7 +502,7 @@
 
                         element.appendChild(clonedAutosTable);
                     }
-                    
+
                     // 3. Sección de pagos
                     const pagosSection = document.createElement('div');
                     pagosSection.style.marginTop = '30px';
@@ -538,12 +541,12 @@
                         clonedPagosTable.querySelectorAll('th:nth-child(5), td:nth-child(5), th:nth-child(6), td:nth-child(6)').forEach(el => {
                             el.style.display = 'none';
                         });
-                        
+
                         pagosSection.appendChild(clonedPagosTable);
                     }
 
                     element.appendChild(pagosSection);
-                    
+
                     // 4. Totales con mejor formato
                     const totalesDiv = document.createElement('div');
                     totalesDiv.style.marginTop = '30px';
@@ -570,7 +573,7 @@
                     totalPagado.style.color = '#28a745';
                     totalPagado.style.fontSize = '16px';
                     totalPagado.style.marginBottom = '10px';
-                    
+
                     const saldoRestanteP = document.createElement('p');
                     saldoRestanteP.textContent = `SALDO RESTANTE: $${saldoRestante.toFixed(2)}`;
                     saldoRestanteP.style.color = '#dc3545';
@@ -581,7 +584,7 @@
                     fechaPago.textContent = `FECHA DE GENERACIÓN: ${new Date().toLocaleDateString()}`;
                     fechaPago.style.color = '#6c757d';
                     fechaPago.style.fontSize = '14px';
-                    
+
                     totalesDiv.appendChild(totalPagado);
                     totalesDiv.appendChild(saldoRestanteP);
                     totalesDiv.appendChild(fechaPago);
@@ -621,4 +624,4 @@
         });
     </script>
 
- <?php include __DIR__ . '/../layout/footer.php'; ?>
+    <?php include __DIR__ . '/../layout/footer.php'; ?>

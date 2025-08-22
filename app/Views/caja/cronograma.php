@@ -295,7 +295,7 @@
                         </div>
 
                         <!-- Detalles de Pago -->
-                        <div class="col-md-7 col-lg-8 d-flex flex-column gap-2">
+                        <div class="col-md-12 col-sm-12 col-lg-8 d-flex flex-column gap-2">
                             <!-- Card de Detalles del Pago -->
                             <div class="card">
                                 <div class="card-body">
@@ -347,7 +347,7 @@
                                             </select>
                                         </div>
 
-                                        <div class="col-6" id="group-numTransaccionCuota">
+                                        <div class="col-md-6" id="group-numTransaccionCuota">
                                             <label class="form-label small text-muted">N° operación (Cuota)</label>
                                             <input type="text" class="form-control numeros-transacciones" name="numerotransaccion" placeholder="N° de operación 6654.." id="numerotransaccion" maxlength="30" minlength="6" pattern="[0-9]{6,30}" title="Solo números, entre 6 y 30 dígitos">
                                             <div class="invalid-feedback">Debe tener entre 6 y 30 dígitos numéricos.</div>
@@ -437,7 +437,7 @@
 </div>
 
 <!-- USADO PARA GENERAR EL PDF -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
-<script src="/assets/js/cronograma-pagos/cronograma.js" type="module"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js" defer></script>
+<script src="/assets/js/cronograma-pagos/cronograma.js" type="module" defer></script>
 <?php include __DIR__ . '/../layout/footer.php'; ?>
