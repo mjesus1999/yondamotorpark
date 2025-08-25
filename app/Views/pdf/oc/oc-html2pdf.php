@@ -346,7 +346,7 @@
             }
 
             const opt = {
-                margin: [0.2, 0.1, 0.1, 0.1],
+                margin: [0.1, 0.1, 0.1, 0.1],
                 filename: `orden-compra-${getIdFromPath() || 'yonda'}.pdf`,
                 image: {
                     type: 'jpeg',

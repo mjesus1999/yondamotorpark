@@ -4,6 +4,59 @@ DROP DATABASE  motorpark2;
 -- Procedimiento almacenado modificado
 USE motorpark2;
 
+
+DROP PROCEDURE sp_getAll_contratos_caja;
+DELIMITER $$
+CREATE PROCEDURE sp_getAll_contratos_caja()
+BEGIN 
+     SELECT
+                    con.idcontrato,
+                    CONCAT(p.apellidos, ' ', p.nombres) AS cliente,
+                    p.tipodoc AS documento,
+                    p.nrodoc AS ndocumento,
+				CONCAT(
+                l.tienda, ' / ',
+                dep.departamento,' / ',
+                d.distrito, ' / ',
+                pro.provincia) AS tienda,
+                    CONCAT(
+                        IFNULL(mar.marca, 'Sin marca'), ' / ',
+                        IFNULL(model.modelo, 'Sin modelo'),
+                        ' / ',
+                        IFNULL(c.combustible, 'Sin combustible'),
+                        ' / ',
+                        IFNULL(v.color, 'Sin color')
+                    ) AS vehiculo,
+
+                    cot.numcuotas AS meses,
+                    cot.valorcuota AS cuota
+                FROM
+                    cotizaciones AS cot
+                JOIN
+                    clientes AS cli ON cot.idcliente = cli.idcliente
+                JOIN
+                    personas AS p ON cli.idpersona = p.idpersona
+                JOIN
+                    vehiculos AS v ON cot.idvehiculo = v.idvehiculo
+                JOIN
+                    modelos AS model ON v.idmodelo = model.idmodelo
+                JOIN
+                    marcas AS mar ON model.idmarca = mar.idmarca
+                JOIN
+                    combustibles AS c ON v.idcombustible = c.idcombustible
+                LEFT JOIN
+                    contratos AS con ON cot.idcotizacion = con.idcotizacion
+                LEFT JOIN
+                    locales AS l ON con.idlocal = l.idlocal
+				JOIN distritos AS d ON l.iddistrito = d.iddistrito
+                JOIN provincias AS pro ON d.idprovincia = pro.idprovincia
+                JOIN departamentos AS dep ON pro.iddepartamento = dep.iddepartamento
+                WHERE con.estado  = 'ACT';
+                    
+END $$
+DELIMITER;
+CALL sp_getAll_contratos_caja();
+
 SELECT * FROM cronogramas;
 DROP PROCEDURE IF EXISTS sp_get_cronogramas_by_idcontrato;
 
@@ -135,12 +188,7 @@ DELIMITER $$
 
 
 
-
-
-
-
-
-CALL sp_get_cronogramas_by_idcontrato (2);
+CALL sp_get_cronogramas_by_idcontrato (1);
 
 SELECT * FROM cronogramas;
 UPDATE cronogramas SET fechapago = '2025-08-13' WHERE  idcontrato = 2 AND numcuota = 6 ;
@@ -244,7 +292,7 @@ SELECT * FROM pagos;
 SELECT * FROM cronogramas;
 
 
-UPDATE cronogramas SET fechapago = '2025-08-14' WHERE idcronograma = 1783;
+UPDATE cronogramas SET fechapago = '2025-08-14' WHERE idcronograma = 1803;
 UPDATE cronogramas SET fechapago = '2026-03-13', penalidad = 0, aplicapenalidad = 'N', estado = 'Pagado' WHERE idcronograma = 1521;
 UPDATE  cronogramas SET fechapago = '2026-05-13', penalidad = 0, aplicapenalidad ='N', estado = 'Pendiente' WHERE idcronograma = 1521;
 

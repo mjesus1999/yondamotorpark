@@ -143,6 +143,10 @@ tr[data-disabled="true"]:hover {
   font-weight: 700;
 }
 
+
+
+
+
 /* Responsive improvements */
 @media (max-width: 768px) {
   .cronograma-table {

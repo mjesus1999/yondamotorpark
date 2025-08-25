@@ -41,8 +41,10 @@ include __DIR__ . '/../layout/header.php';
         <div class="col-md-12">
             <div class="card">
                 <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-sm table-hover table-hover-yonda" id="tabla-clientes-personas">
+
+                    <!-- VISTA DE ESCRITORIO (tabla) -->
+                    <div class="table-responsive d-none d-md-block">
+                        <table class="table table-sm table-hover" id="tabla-clientes-personas">
                             <thead>
                                 <tr>
                                     <th>#</th>
@@ -57,31 +59,30 @@ include __DIR__ . '/../layout/header.php';
                                 </tr>
                             </thead>
                             <tbody>
-
                                 <?php if (empty($personClientes)): ?>
                                     <tr>
-                                        <td colspan="8" class="text-center">No hay clientes personas registradas.</td>
+                                        <td colspan="9" class="text-center">No hay clientes personas registradas.</td>
                                     </tr>
                                 <?php else: ?>
                                     <?php $numeroFila = 1 ?>
                                     <?php foreach ($personClientes as $personCliente): ?>
                                         <tr>
-                                            <td class='align-middle m-1'><?= htmlspecialchars($numeroFila++) ?></td>
-                                            <td class='align-middle m-1'><?= htmlspecialchars($personCliente['ubicacion']) ?></td>
-                                            <td class='align-middle m-1'><?= htmlspecialchars($personCliente['direccion'] ?? 'No asignado') ?></td>
-                                            <td class='align-middle m-1'><?= htmlspecialchars($personCliente['nombrecompleto']) ?></td>
-                                            <td class='align-middle m-1'><?= htmlspecialchars($personCliente['tipodoc']) ?></td>
-                                            <td class='align-middle m-1'><?= htmlspecialchars($personCliente['nrodoc']) ?></td>
-                                            <td class='align-middle m-1'><?= htmlspecialchars($personCliente['email'] ?? 'No asignado')  ?></td>
-                                            <td class='align-middle m-1'><?= htmlspecialchars($personCliente['telprimario']) ?></td>
-                                            <td class='align-middle m-1'>
+                                            <td><?= htmlspecialchars($numeroFila++) ?></td>
+                                            <td><?= htmlspecialchars($personCliente['ubicacion']) ?></td>
+                                            <td><?= htmlspecialchars($personCliente['direccion'] ?? 'No asignado') ?></td>
+                                            <td><?= htmlspecialchars($personCliente['nombrecompleto']) ?></td>
+                                            <td><?= htmlspecialchars($personCliente['tipodoc']) ?></td>
+                                            <td><?= htmlspecialchars($personCliente['nrodoc']) ?></td>
+                                            <td><?= htmlspecialchars($personCliente['email'] ?? 'No asignado') ?></td>
+                                            <td><?= htmlspecialchars($personCliente['telprimario']) ?></td>
+                                            <td>
                                                 <div class="d-flex gap-1">
-                                                    <a href="/personaCliente/edit/<?= htmlspecialchars($personCliente['idpersona']) ?>"
-                                                        class="btn btn-sm btn-outline-primary"> <i class="fa-solid fa-pen"></i></a>
-
+                                                    <a href="/personaCliente/edit/<?= htmlspecialchars($personCliente['idpersona']) ?>" class="btn btn-sm btn-outline-primary">
+                                                        <i class="fa-solid fa-pen"></i>
+                                                    </a>
                                                     <form action="/personaCliente/delete/<?= htmlspecialchars($personCliente['idcliente']) ?>" method="POST" class="d-inline"
                                                         onsubmit="return confirm('¿Estás seguro de que quieres eliminar este cliente?');">
-                                                        <button type="submit" class='btn btn-sm btn-outline-danger delete' title='Eliminar'>
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger delete" title="Eliminar">
                                                             <i class="fa-solid fa-trash"></i>
                                                         </button>
                                                     </form>
@@ -93,10 +94,60 @@ include __DIR__ . '/../layout/header.php';
                             </tbody>
                         </table>
                     </div>
+
+                    <!-- VISTA MÓVIL (ACORDEÓN) -->
+                    <div class="d-block d-md-none">
+                        <?php if (!empty($personClientes)): ?>
+                            <?php $numeroFila = 1; ?>
+                            <?php foreach ($personClientes as $personCliente): ?>
+                                <div class="card mb-2 shadow-sm">
+                                    <div class="card-header d-flex justify-content-between align-items-center"
+                                        data-bs-toggle="collapse"
+                                        data-bs-target="#collapseCliente<?= $personCliente['idcliente'] ?>"
+                                        aria-expanded="false"
+                                        aria-controls="collapseCliente<?= $personCliente['idcliente'] ?>"
+                                        style="cursor: pointer;">
+                                        <span><i class="bi bi-person-fill me-2 text-primary fw-bold"></i><?= htmlspecialchars($personCliente['nombrecompleto']) ?></span>
+                                        <i class="bi bi-chevron-down"></i>
+                                    </div>
+                                    <div id="collapseCliente<?= $personCliente['idcliente'] ?>" class="collapse">
+                                        <div class="card-body">
+                                            <p><strong>#:</strong> <?= $numeroFila++ ?></p>
+                                            <p><strong>Ubicación:</strong> <?= htmlspecialchars($personCliente['ubicacion']) ?></p>
+                                            <p><strong>Dirección:</strong> <?= htmlspecialchars($personCliente['direccion'] ?? 'No asignado') ?></p>
+                                            <p><strong>Tipo documento:</strong> <?= htmlspecialchars($personCliente['tipodoc']) ?></p>
+                                            <p><strong>N° documento:</strong> <?= htmlspecialchars($personCliente['nrodoc']) ?></p>
+                                            <p><strong>Correo:</strong> <?= htmlspecialchars($personCliente['email'] ?? 'No asignado') ?></p>
+                                            <p><strong>Teléfono:</strong> <?= htmlspecialchars($personCliente['telprimario']) ?></p>
+                                            <p><strong>Acciones:</strong></p>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <a href="/personaCliente/edit/<?= htmlspecialchars($personCliente['idpersona']) ?>"
+                                                    class="btn btn-sm btn-outline-primary" title="Editar">
+                                                    <i class="fa-solid fa-pen"></i>
+                                                </a>
+
+                                                <form action="/personaCliente/delete/<?= htmlspecialchars($personCliente['idcliente']) ?>" method="POST"
+                                                    onsubmit="return confirm('¿Estás seguro de que quieres eliminar este cliente?');" class="m-0 p-0">
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger delete" title="Eliminar">
+                                                        <i class="fa-solid fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <div class="text-center text-muted p-3">No hay clientes personas registradas.</div>
+                        <?php endif; ?>
+                    </div>
+
                 </div>
             </div>
         </div>
     </div>
+
 
 </div>
 

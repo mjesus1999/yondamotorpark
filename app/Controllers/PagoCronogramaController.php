@@ -11,7 +11,6 @@ use DateTime;
 
 class PagoCronogramaController extends Controller
 {
-
     private PagoCronograma $pagoCronogramaModel;
     private Caja $cajaModel;
 
@@ -20,8 +19,6 @@ class PagoCronogramaController extends Controller
         $this->pagoCronogramaModel = new PagoCronograma();
         $this->cajaModel = new Caja();
     }
-
-
 
     public function indexHistorialPagos(int $id): void
     {
@@ -60,7 +57,7 @@ class PagoCronogramaController extends Controller
 
     private function guardarComprobante(array $archivo): ?string
     {
-   
+
         if (!isset($archivo['error']) || is_array($archivo['error'])) {
             return null;
         }
@@ -76,7 +73,7 @@ class PagoCronogramaController extends Controller
         $rutaCompleta = $directorioDestino . $nombreArchivo;
 
         if (move_uploaded_file($archivo['tmp_name'], $rutaCompleta)) {
-           
+
             return 'comprobantes/' . $nombreArchivo;
         }
 
@@ -301,8 +298,8 @@ class PagoCronogramaController extends Controller
                     'ids' => $idPagos
 
                 ]);
-
-                $cacheFile = __DIR__ . "/../../storage/cache/cronograma-contrato{$idContrato}.json";
+                // Identificar la ruta
+                $cacheFile = __DIR__ . "/../../storage/cache/cronograma-contratos/cronograma-contrato{$idContrato}.json";
 
                 if (file_exists($cacheFile)) {
                     unlink($cacheFile);

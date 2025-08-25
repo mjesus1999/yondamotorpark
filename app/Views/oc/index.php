@@ -20,6 +20,7 @@
         </div>
     </div>
 
+
     <div class="card">
 
         <div class="card-header">
@@ -48,9 +49,11 @@
             </div>
 
         </div>
-
+        
         <div class="card-body" id="lista-oc">
-            <div class="table-responsive">
+
+            <!-- Vista de ESCRITORIO-->
+            <div class="table-responsive d-none d-md-block">
                 <table class="table table-sm table-hover" id="tabla-oc">
                     <thead>
                         <tr>
@@ -70,13 +73,11 @@
                                 <th>Operaciones</th>
                             <?php elseif ($estadoActual == 'proceso'): ?>
                                 <th>Pagar</th>
-
                             <?php elseif ($estadoActual == 'pagado'): ?>
                                 <th>Detalles</th>
                             <?php endif; ?>
                         </tr>
                     </thead>
-
                     <tbody>
                         <?php if (empty($ordenCompras)): ?>
                             <tr>
@@ -86,80 +87,65 @@
                             <?php $numeroFila = 1; ?>
                             <?php foreach ($ordenCompras as $ordenCompra): ?>
                                 <tr>
-                                    <td><?= htmlspecialchars($numeroFila++) ?></td>
+                                    <td><?= $numeroFila++ ?></td>
                                     <td><?= htmlspecialchars($ordenCompra['serie']) ?></td>
                                     <td><?= htmlspecialchars($ordenCompra['razonsocial']) ?></td>
                                     <td><?= htmlspecialchars($ordenCompra['emision']) ?></td>
                                     <td><?= htmlspecialchars($ordenCompra['moneda']) ?></td>
 
                                     <?php if ($estadoActual == 'proceso' || $estadoActual == 'pagado'): ?>
-                                        <td><?= htmlspecialchars(number_format($ordenCompra['totalOC'] ?? 0, 2)) ?></td>
-                                        <td><?= htmlspecialchars(number_format($ordenCompra['totalPagado'] ?? 0, 2)) ?></td>
-                                        <td><?= htmlspecialchars(number_format($ordenCompra['saldoRestante'] ?? 0, 2)) ?></td>
+                                        <td><?= number_format($ordenCompra['totalOC'] ?? 0, 2) ?></td>
+                                        <td><?= number_format($ordenCompra['totalPagado'] ?? 0, 2) ?></td>
+                                        <td><?= number_format($ordenCompra['saldoRestante'] ?? 0, 2) ?></td>
                                     <?php endif; ?>
 
-                                    <?php if ($estadoActual == 'emitido'): ?>
-                                        <td>
-                                            <a href="/oc/reporte/<?= htmlspecialchars($ordenCompra['idordencompra']) ?>"
-                                                class="p-1" target="_blank" title="PDF OC">
-                                                <i class="bi bi-filetype-pdf text-danger fs-5"></i>
-                                            </a>
-
-                                            <a href="#" class="show-details p-1"
-                                                data-idoc="<?= htmlspecialchars($ordenCompra['idordencompra']) ?>"
-                                                title="Ver detalle">
-                                                <i class="bi bi-info-circle text-primary fs-5"></i>
-                                            </a>
-
-                                            <a href="#" class="p-1 btn-abrir-modal-estado"
-                                                data-id="<?= htmlspecialchars($ordenCompra['idordencompra']) ?>"
-                                                data-accion="proceso"
-                                                data-ruta="/oc/updateEstado/proceso/<?= htmlspecialchars($ordenCompra['idordencompra']) ?>"
-                                                title="OC en proceso">
-                                                <i class="bi-hourglass-split text-warning fs-5"></i>
-                                            </a>
-
-                                            <a href="#" class="p-1 btn-abrir-modal-estado"
-                                                data-id="<?= htmlspecialchars($ordenCompra['idordencompra']) ?>"
-                                                data-accion="anulado"
-                                                data-ruta="/oc/updateEstado/anulado/<?= htmlspecialchars($ordenCompra['idordencompra']) ?>"
-                                                title="OC anulado">
-                                                <i class="bi bi-folder-x text-danger fs-5"></i>
-                                            </a>
-                                        </td>
-                                    <?php elseif ($estadoActual == 'proceso'): ?>
-                                        <td>
-                                            <a href="/oc/pagos/<?= htmlspecialchars($ordenCompra['idordencompra']) ?>"
-                                                title="Pagar">
-                                                <i class="bi bi-currency-dollar text-success fs-5"></i>
-                                            </a>
-                                        </td>
-
-                                    <?php elseif ($estadoActual == 'pagado'): ?>
-                                        <td>
-                                            <a href="#" title="Verificar estado de autos" class="p-1"
-                                                data-idocmodal="<?= htmlspecialchars($ordenCompra['idordencompra']) ?>">
-                                                <i class="bi bi-bookmark-check text-success fs-5"></i>
-                                            </a>
-
-                                            <a href="#" class="show-details p-1"
-                                                data-idoc="<?= htmlspecialchars($ordenCompra['idordencompra']) ?>"
-                                                title="Ver detalle">
-                                                <i class="bi bi-info-circle text-primary fs-5"></i>
-                                            </a>
-
-                                            <a href="/oc/pagos/<?= htmlspecialchars($ordenCompra['idordencompra']) ?>" title="Pagos realizados"> <i class="bi-receipt fs-5 text-warning"></i></a>
-                                        </td>
-                                    <?php endif; ?>
+                                    <!-- Acciones según estado -->
+                                    <td>
+                                        <?php include 'acciones_oc.php'; ?>
+                                    </td>
                                 </tr>
                             <?php endforeach; ?>
                         <?php endif; ?>
                     </tbody>
-
-
                 </table>
-            </div> <!-- ./table-responsive -->
-        </div> <!-- ./card-body -->
+            </div>
+
+            <!-- Vista de MÓVIL (Acordeón) -->
+            <div class="d-block d-md-none">
+                <?php if (!empty($ordenCompras)): ?>
+                    <?php $numeroFila = 1; ?>
+                    <?php foreach ($ordenCompras as $ordenCompra): ?>
+                        <div class="card mb-2 shadow-sm">
+                            <div class="card-header d-flex justify-content-between align-items-center" data-bs-toggle="collapse" href="#collapse-oc-<?= $ordenCompra['idordencompra'] ?>" style="cursor: pointer;">
+                                <span><i class="bi bi-receipt me-2 text-primary fw-bold"></i><?= htmlspecialchars($ordenCompra['serie']) ?> - <?= htmlspecialchars($ordenCompra['razonsocial']) ?></span>
+                                <i class="bi bi-chevron-down"></i>
+                            </div>
+                            <div id="collapse-oc-<?= $ordenCompra['idordencompra'] ?>" class="collapse">
+                                <div class="card-body">
+                                    <p><strong>#:</strong> <?= $numeroFila++ ?></p>
+                                    <p><strong>Fecha:</strong> <?= htmlspecialchars($ordenCompra['emision']) ?></p>
+                                    <p><strong>Moneda:</strong> <?= htmlspecialchars($ordenCompra['moneda']) ?></p>
+
+                                    <?php if ($estadoActual == 'proceso' || $estadoActual == 'pagado'): ?>
+                                        <p><strong>Total:</strong> <?= number_format($ordenCompra['totalOC'] ?? 0, 2) ?></p>
+                                        <p><strong>Amortización:</strong> <?= number_format($ordenCompra['totalPagado'] ?? 0, 2) ?></p>
+                                        <p><strong>Saldo:</strong> <?= number_format($ordenCompra['saldoRestante'] ?? 0, 2) ?></p>
+                                    <?php endif; ?>
+
+                                    <!-- Acciones -->
+                                    <div><strong>Acciones:</strong><br>
+                                        <?php include 'acciones_oc.php'; ?>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <div class="text-center">No hay ordénes de compras registradas.</div>
+                <?php endif; ?>
+            </div>
+
+        </div>
 
 
 

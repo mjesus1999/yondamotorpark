@@ -34,22 +34,23 @@
         <div class="col-md-12">
             <div class="card">
                 <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-sm table-hover table-hover-yonda" id="tabla-locales">
+
+                    <!-- Vista de escritorio (tabla) -->
+                    <div class="table-responsive d-none d-md-block">
+                        <table class="table table-sm table-hover" id="tabla-locales">
                             <thead>
                                 <tr>
                                     <th>#</th>
                                     <th>Tienda</th>
                                     <th>Ubicación</th>
-                                    <th>Direccion</th>
+                                    <th>Dirección</th>
                                     <th>Responsable</th>
                                     <th>Correo</th>
-                                    <th>Telefono</th>
+                                    <th>Teléfono</th>
                                     <th>Acciones</th>
                                 </tr>
                             </thead>
                             <tbody>
-
                                 <?php if (empty($locales)): ?>
                                     <tr>
                                         <td colspan="8" class="text-center">No hay locales registrados.</td>
@@ -69,9 +70,9 @@
                                                 <a class="btn btn-sm btn-outline-primary btn-edit-local"
                                                     data-bs-toggle="modal" data-bs-target="#modal-locales"
                                                     data-idlocal="<?= htmlspecialchars($local['idlocal']) ?>"
-                                                    title="Editar"> <i class="fa-solid fa-pen" data-idlocal="<?= htmlspecialchars($local['idlocal']) ?>"></i> </a>
-
-
+                                                    title="Editar">
+                                                    <i class="fa-solid fa-pen"></i>
+                                                </a>
                                                 <form action="/locales/delete/<?= htmlspecialchars($local['idlocal']) ?>" method="POST" class="d-inline"
                                                     onsubmit="return confirm('¿Estás seguro de que quieres eliminar este local?');">
                                                     <button type="submit" class='btn btn-sm btn-outline-danger delete' title='Eliminar'>
@@ -85,10 +86,60 @@
                             </tbody>
                         </table>
                     </div>
+
+                    <!-- Vista móvil (acordeón) -->
+                    <div class="d-block d-md-none">
+                        <?php if (!empty($locales)) : ?>
+                            <?php $numeroFila = 1; ?>
+                            <?php foreach ($locales as $local): ?>
+                                <div class="card mb-2 shadow-sm">
+                                    <div class="card-header d-flex justify-content-between align-items-center"
+                                        data-bs-toggle="collapse"
+                                        data-bs-target="#collapseLocal<?= $local['idlocal'] ?>"
+                                        aria-expanded="false"
+                                        aria-controls="collapseLocal<?= $local['idlocal'] ?>"
+                                        style="cursor: pointer;">
+                                        <span><i class="bi bi-shop me-2 text-primary fw-bold"></i><?= htmlspecialchars($local['tienda']) ?></span>
+                                        <i class="bi bi-chevron-down"></i>
+                                    </div>
+                                    <div id="collapseLocal<?= $local['idlocal'] ?>" class="collapse">
+                                        <div class="card-body">
+                                            <p><strong>#:</strong> <?= htmlspecialchars($numeroFila++) ?></p>
+                                            <p><strong>Ubicación:</strong> <?= htmlspecialchars($local['departamento'] . "/" . $local['provincia'] . '/' . $local['distrito']) ?></p>
+                                            <p><strong>Dirección:</strong> <?= htmlspecialchars($local['direccion']) ?? 'No asignado' ?></p>
+                                            <p><strong>Responsable:</strong> <?= htmlspecialchars($local['responsable']) ?></p>
+                                            <p><strong>Correo:</strong> <?= $local['correo'] ? htmlspecialchars($local['correo']) : 'No asignado' ?></p>
+                                            <p><strong>Teléfono:</strong> <?= htmlspecialchars($local['telefono']) ?></p>
+                                            <p><strong>Acciones:</strong>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <a class="btn btn-sm btn-outline-primary btn-edit-local"
+                                                    data-bs-toggle="modal" data-bs-target="#modal-locales"
+                                                    data-idlocal="<?= htmlspecialchars($local['idlocal']) ?>"
+                                                    title="Editar">
+                                                    <i class="fa-solid fa-pen" data-idlocal="<?= htmlspecialchars($local['idlocal']) ?>"></i>
+                                                </a>
+                                            <form action="/locales/delete/<?= htmlspecialchars($local['idlocal']) ?>" method="POST" class="d-inline"
+                                                onsubmit="return confirm('¿Estás seguro de que quieres eliminar este local?');">
+                                                <button type="submit" class='btn btn-sm btn-outline-danger delete' title='Eliminar'>
+                                                    <i class="fa-solid fa-trash"></i>
+                                                </button>
+                                            </form>
+                                            </div>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <div class="text-center text-muted p-3">No hay locales registrados.</div>
+                        <?php endif; ?>
+                    </div>
+
                 </div>
             </div>
         </div>
     </div>
+
     <div class="modal fade" id="modal-locales" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
         aria-labelledby="modal-locales-label" aria-hidden="true">
         <div class="modal-dialog">

@@ -16,9 +16,11 @@
             </div>
         </div>
     </div>
+<!-- Lista principal -->
+<div id="lista-oc">
 
-    <!-- Lista principal -->
-    <div id="lista-oc">
+    <!-- Vista de ESCRITORIO -->
+    <div class="d-none d-md-block">
         <div class="card">
             <div class="card-body">
                 <div class="table-responsive">
@@ -44,27 +46,25 @@
                                 <?php $numeroFila = 1; ?>
                                 <?php foreach ($compras as $compra): ?>
                                     <tr>
-                                        <td><?= htmlspecialchars($numeroFila++) ?></td>
+                                        <td><?= $numeroFila++ ?></td>
                                         <td><?= htmlspecialchars($compra['razon_concesionario']) ?></td>
                                         <td><?= htmlspecialchars($compra['fechacompra']) ?></td>
                                         <td><?= htmlspecialchars($compra['fecharecepcion'] ?? 'N/A') ?></td>
-                                        <td><?= htmlspecialchars($compra['tipodoc'] == 'B' ? 'Boleta' : 'Factura') ?></td>
+                                        <td><?= $compra['tipodoc'] == 'B' ? 'Boleta' : 'Factura' ?></td>
                                         <td><?= htmlspecialchars($compra['serie']) ?></td>
                                         <td><?= htmlspecialchars($compra['numdocumento']) ?></td>
                                         <td>
-                                            <a href="#" class="show-details p-1" data-idoc="<?= htmlspecialchars($compra['idorden']) ?>" title="Ver detalle">
+                                            <a href="#" class="show-details" data-idoc="<?= $compra['idorden'] ?>" title="Ver detalle">
                                                 <i class="bi bi-info-circle text-primary fs-5"></i>
                                             </a>
-
                                             <?php if (!empty($compra['rutadoc'])): ?>
-                                                <a href="#" class="ver-documento p-1" data-url="/archivos/<?= htmlspecialchars($compra['rutadoc']) ?>" title="Ver Documento">
-                                                    <i class="fa-solid fa-file-invoice fa-beat fs-5" style="color: #ff0000;"></i>
+                                                <a href="#" class="ver-documento" data-url="/archivos/<?= htmlspecialchars($compra['rutadoc']) ?>" title="Ver Documento">
+                                                    <i class="fa-solid fa-file-invoice  fs-5" style="color: #ff0000;"></i>
                                                 </a>
                                             <?php else: ?>
                                                 <span class="badge bg-light text-muted">N/A</span>
                                             <?php endif; ?>
                                         </td>
-
                                     </tr>
                                 <?php endforeach; ?>
                             <?php endif; ?>
@@ -74,6 +74,56 @@
             </div>
         </div>
     </div>
+
+    <!-- VISTA MÓVIL: Acordeón colapsable -->
+    <div class="d-block d-md-none">
+        <?php if (!empty($compras)) : ?>
+            <?php $numeroFila = 1; ?>
+            <?php foreach ($compras as $compra): ?>
+                <div class="card mb-2 shadow-sm">
+                    <div class="card-header d-flex justify-content-between align-items-center"
+                         data-bs-toggle="collapse" 
+                         data-bs-target="#collapseCompra<?= $compra['idorden'] ?>"
+                         aria-expanded="false"
+                         aria-controls="collapseCompra<?= $compra['idorden'] ?>"
+                         style="cursor:pointer;">
+                        <span><i class="bi bi-truck me-2 text-primary fw-bold"></i><?= htmlspecialchars($compra['razon_concesionario']) ?></span>
+                        <i class="bi bi-chevron-down"></i>
+                    </div>
+                    <div id="collapseCompra<?= $compra['idorden'] ?>" class="collapse">
+                        <div class="card-body">
+                            <p><strong>#:</strong> <?= $numeroFila++ ?></p>
+                            <p><strong>Fecha entrega:</strong> <?= htmlspecialchars($compra['fechacompra']) ?></p>
+                            <p><strong>Fecha recepción:</strong> <?= htmlspecialchars($compra['fecharecepcion'] ?? 'N/A') ?></p>
+                            <p><strong>Tipo documento:</strong> <?= $compra['tipodoc'] == 'B' ? 'Boleta' : 'Factura' ?></p>
+                            <p><strong>Serie:</strong> <?= htmlspecialchars($compra['serie']) ?></p>
+                            <p><strong>Número:</strong> <?= htmlspecialchars($compra['numdocumento']) ?></p>
+                            <p>
+                                <strong>Acciones:</strong><br>
+                                <a href="#" class="show-details" data-idoc="<?= $compra['idorden'] ?>" title="Ver detalle">
+                                    <i class="bi bi-info-circle text-primary fs-5 me-2"></i>
+                                </a>
+                                <?php if (!empty($compra['rutadoc'])): ?>
+                                    <a href="#" class="ver-documento" data-url="/archivos/<?= htmlspecialchars($compra['rutadoc']) ?>" title="Ver Documento">
+                                        <i class="fa-solid fa-file-invoice fa-beat fs-5" style="color: #ff0000;"></i>
+                                    </a>
+                                <?php else: ?>
+                                    <span class="badge bg-light text-muted">N/A</span>
+                                <?php endif; ?>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <div class="text-center text-muted p-3">No hay compras registradas.</div>
+        <?php endif; ?>
+    </div>
+</div>
+
+
+
+</div>
 
     <!-- Detalle OC (inicialmente oculto) -->
     <div id="detalle-oc" style="display: none;">

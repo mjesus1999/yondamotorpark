@@ -37,7 +37,7 @@ class CajaController extends Controller
         $tiempoInicio = microtime(true);
 
         // Definir la ruta del archivo de caché y el tiempo de vida (TTL)
-        $cacheFile = __DIR__ . "/../../storage/cache/cronograma-contrato{$id}.json";
+        $cacheFile = __DIR__ . "/../../storage/cache/cronograma-contratos/cronograma-contrato{$id}.json";
         $ttl = 3600; //  1 hora  en segundos
 
         $datos = [];
