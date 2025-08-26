@@ -4,6 +4,8 @@ DROP DATABASE  motorpark2;
 -- Procedimiento almacenado modificado
 USE motorpark2;
 
+SELECT * FROM pagosOC;
+SELECT * FROM compras;
 
 DROP PROCEDURE sp_getAll_contratos_caja;
 DELIMITER $$

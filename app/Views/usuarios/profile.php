@@ -35,8 +35,14 @@
                 <div class="position-relative d-inline-block" style="width:200px; height:200px;">
                   <!-- La imagen de perfil -->
                   <img src="<?= htmlspecialchars($usuario['avatar'] ?? '/assets/images/profile.jpg') ?>"
-                    class="rounded-circle" style="width:100%; height:100%; object-fit:cover; cursor:pointer;" alt="Avatar"
-                    id="profile-avatar">
+                    class="rounded-circle"
+                    style="width:100%; height:100%; object-fit:cover; cursor:pointer;"
+                    alt="Avatar"
+                    id="profile-avatar"
+                    data-bs-toggle="modal"
+                    data-bs-target="#avatarModal">
+
+                    <a href="#" data-bs-toggle="modal" data-bs-target="#avatarModal">Ver foto</a>
 
                   <!-- Overlay oculto que aparece al hover -->
                   <div id="avatar-overlay" class="position-absolute top-0 start-0 w-100 h-100 rounded-circle"
@@ -52,7 +58,7 @@
                   Guardar foto
                 </button>
 
-                <h5 class="mt-2"><?= htmlspecialchars($usuario['usernick']) ?></h5>
+                <h5 class="mt-2"> <span class="badge bg-info"><?= htmlspecialchars($usuario['usernick']) ?></span></h5>
                 <p class="text-white  badge bg-primary mb-0"><?= htmlspecialchars($usuario['email'] ?? '—') ?></p>
               </div>
               <div class="col-md-8 mt-2">
@@ -131,6 +137,17 @@
       </div><!-- ./card -->
 
     </form>
+  </div>
+
+  <div class="modal fade" id="avatarModal" tabindex="-1" aria-labelledby="avatarModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content bg-transparent border-0">
+        <div class="modal-body p-0">
+          <img src="<?= htmlspecialchars($usuario['avatar'] ?? '/assets/images/profile.jpg') ?>" alt="Avatar Grande" class="img-fluid rounded">
+        </div>
+        <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+    </div>
   </div>
 
 </div>
