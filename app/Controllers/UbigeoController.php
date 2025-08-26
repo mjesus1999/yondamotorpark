@@ -2,8 +2,8 @@
 
 namespace App\Controllers;
 
-use App\Core\Controller; 
-use App\Models\Ubigeo;   
+use App\Core\Controller;
+use App\Models\Ubigeo;
 
 class UbigeoController extends Controller
 {
@@ -22,13 +22,13 @@ class UbigeoController extends Controller
     {
         $departamentos = $this->ubigeoModel->getAllDepartamentos();
 
-        
+
         header('Content-Type: application/json');
-        
+
         http_response_code(200);
-        
+
         echo json_encode($departamentos);
-        
+
         exit;
     }
 
@@ -76,5 +76,11 @@ class UbigeoController extends Controller
         http_response_code(200);
         echo json_encode($distritos);
         exit;
+    }
+
+    public function getAllDistritosAll(): void
+    {
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($this->ubigeoModel->getAllDistritosAll());
     }
 }

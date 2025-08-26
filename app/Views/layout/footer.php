@@ -41,19 +41,48 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"
   integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" crossorigin="anonymous"></script>
 
- <script src="https://cdn.datatables.net/2.2.2/js/dataTables.js" ></script>
- <script src="https://cdn.datatables.net/2.2.2/js/dataTables.bootstrap5.js" ></script>
- <script src="https://cdn.datatables.net/select/3.0.0/js/dataTables.select.js"></script>
- <script src="https://cdn.datatables.net/select/3.0.0/js/select.bootstrap5.js"></script>
-<script src="/assets/js/script-dashboard.js" ></script>
+<script src="https://cdn.datatables.net/2.2.2/js/dataTables.js"></script>
+<script src="https://cdn.datatables.net/2.2.2/js/dataTables.bootstrap5.js"></script>
+<script src="https://cdn.datatables.net/select/3.0.0/js/dataTables.select.js"></script>
+<script src="https://cdn.datatables.net/select/3.0.0/js/select.bootstrap5.js"></script>
+<script src="/assets/js/script-dashboard.js"></script>
 
 <!-- Sweet Alert -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" ></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="/assets/js/swalcustom.js"></script>
 
 
-<script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
-<script src="https://cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap5.min.js"></script>
+<script>
+  (() => {
+    const SERVER_TIMEOUT = parseInt("<?php echo (int) (getenv('SESSION_TIMEOUT') ?: 60); ?>", 10) || 60;
+    const INTERVAL_MS = Math.max(5, Math.floor(SERVER_TIMEOUT / 2)) * 1000;
+    const KEEPALIVE_URL = '/keepalive';
+
+    // Solo correr si hay usuario logueado (para no hacer pings en pantalla pública)
+    const IS_LOGGED = <?php echo !empty($_SESSION['user']) ? 'true' : 'false'; ?>;
+    if (!IS_LOGGED) return;
+
+    function sendKeepAlive() {
+      if (document.hidden || !navigator.onLine) return;
+      fetch(KEEPALIVE_URL, {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        })
+        .then(res => {
+          if (res.status === 401) window.location.href = '/login';
+          return res.json().catch(() => null);
+        })
+        .catch(() => {
+          /* silencioso */ });
+    }
+
+    sendKeepAlive();
+    setInterval(sendKeepAlive, INTERVAL_MS);
+  })();
+</script>
 
 
 </body>

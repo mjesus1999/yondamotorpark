@@ -1,5 +1,5 @@
 
-USE motorpark;
+USE motorpark2;
 
 DROP procedure sp_oc_por_estado
 
@@ -83,3 +83,10 @@ END //
 DELIMITER ;
 
 SHOW FULL COLUMNS FROM ordenescompra;
+
+
+SELECT COUNT(*) 
+FROM information_schema.tables 
+WHERE table_schema = 'motorpark2';
+
+SELECT

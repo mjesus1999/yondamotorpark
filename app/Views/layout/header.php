@@ -1,3 +1,33 @@
+<?php
+use App\Models\Permisos;
+
+if (session_status() !== PHP_SESSION_ACTIVE) {
+  session_start();
+}
+
+$permisosModel = new Permisos();
+
+if (!empty($_SESSION['user']['idcargo'])) {
+  $modulosPermitidos = $permisosModel->getPermisosByCargo((int) $_SESSION['user']['idcargo']);
+} else {
+  $modulosPermitidos = [];
+}
+
+//Definimos los modulos en un array
+$allModules = [
+  'oc' => ['url' => '/oc', 'icon' => 'fa-solid fa-list pe-2', 'label' => 'Orden de compra'],
+  'compras' => ['url' => '/compras', 'icon' => 'fa-solid fa-list pe-2', 'label' => 'Compras'],
+  'Concesionarios' => ['url' => '/concesionarios', 'icon' => 'fa-solid fa-list pe-2', 'label' => 'Concesionarios'],
+  'marcas' => ['url' => '/marcas', 'icon' => 'fa-solid fa-list pe-2', 'label' => 'Marcas'],
+  'vehiculos' => ['url' => '/vehiculos', 'icon' => 'fa-solid fa-list pe-2', 'label' => 'Vehículos'],
+  'usuarios' => ['url' => '/usuarios', 'icon' => 'fa-solid fa-list pe-2', 'label' => 'Usuarios'],
+  'formatoCotizacion' => ['url' => '/formatoCotizacion', 'icon' => 'fa-solid fa-list pe-2', 'label' => 'Requisitos'],
+  'cotizacion' => ['url' => '/cotizacion', 'icon' => 'fa-solid fa-list pe-2', 'label' => 'Cotización']
+  /* 'auth' => ['url' => '/auth', 'icon' => 'fa-solid fa-list pe-2', 'label' => 'Auth'] */
+];
+?>
+
+
 <!DOCTYPE html>
 
 <html lang="es" data-bs-theme="dark">
@@ -42,6 +72,61 @@
           <li class="sidebar-header">
             Módulos
           </li>
+
+          <?php foreach ($allModules as $codigo => $m): ?>
+            <?php if (in_array($codigo, $modulosPermitidos, true)): ?>
+              <li class="sidebar-item">
+                <a href="<?= htmlspecialchars($m['url']) ?>" class="sidebar-link">
+                  <i class="fa-solid <?= htmlspecialchars($m['icon']) ?> pe-2"></i>
+                  <?= htmlspecialchars($m['label']) ?>
+                </a>
+              </li>
+            <?php endif ?>
+          <?php endforeach ?>
+
+
+          <?php
+
+          $showAuth = empty($_SESSION['user']) || in_array('auth', $modulosPermitidos, true);
+          if ($showAuth):
+            ?>
+            <li class="sidebar-item">
+              <a href="#" class="sidebar-link collapsed" data-bs-target="#auth" data-bs-toggle="collapse"
+                aria-expanded="false">
+                <i class="fa-regular fa-user pe-2"></i>
+                Auth
+              </a>
+
+              <ul id="auth" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
+                <?php if (empty($_SESSION['user'])): // visitante -> Login + Recuperar ?>
+                  <li class="sidebar-item">
+                    <a href="/login" class="sidebar-link">Login</a>
+                  </li>
+                  <li class="sidebar-item">
+                    <a href="/recoverAccount" class="sidebar-link">Recuperar contraseña</a>
+                  </li>
+                <?php endif; ?>
+
+                <?php if (in_array('auth', $modulosPermitidos, true)): // usuario con permiso 'auth' -> Registrar ?>
+                  <li class="sidebar-item">
+                    <a href="/createAccount" class="sidebar-link">Registrar cuenta</a>
+                  </li>
+                <?php endif; ?>
+
+                <!-- mostrar "Forgot Password" para todos -->
+                <!--
+                <li class="sidebar-item">
+                  <a href="/recoverAccount" class="sidebar-link">Forgot Password</a>
+                </li>
+                -->
+              </ul>
+            </li>
+          <?php endif; ?>
+
+
+          
+
+
           <li class="sidebar-item">
             <a href="/oc" class="sidebar-link">
               <i class="fa-solid fa-list pe-2"></i>
@@ -170,24 +255,66 @@
     <div class="main">
 
       <nav class="navbar navbar-expand px-3 border-bottom">
-        <button class="btn" id="sidebar-toggle" type="button">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="navbar-collapse navbar">
-          <ul class="navbar-nav">
-            <li class="nav-item dropdown">
-              <a href="#" data-bs-toggle="dropdown" class="nav-icon pe-md-0">
-                <img src="/assets/images/profile.jpg" class="avatar img-fluid rounded" alt="">
-              </a>
-              <div class="dropdown-menu dropdown-menu-end">
-                <a href="#" class="dropdown-item">Jhon (Sistemas)</a>
-                <a href="#" class="dropdown-item">Configuración</a>
-                <a href="#" class="dropdown-item">Cambiar contraseña</a>
-                <a href="#" class="dropdown-item">Cerrar sesión</a>
-              </div>
-            </li>
-          </ul>
-        </div>
-      </nav>
 
+        <button class="btn" id="sidebar-toggle" type="button">
+
+          <span class="navbar-toggler-icon"></span>
+
+        </button>
+
+        <div class="navbar-collapse navbar">
+
+          <ul class="navbar-nav">
+
+            <li class="nav-item dropdown">
+
+              <a href="#" data-bs-toggle="dropdown" class="nav-icon pe-md-0">
+
+                <img src="<?= htmlspecialchars($_SESSION['user']['avatar'] ?? '/assets/images/profile.jpg') ?>"
+
+                  class="avatar img-fluid rounded" alt="Avatar" />
+
+              </a>
+
+              <div class="dropdown-menu dropdown-menu-end">
+
+
+
+                <!-- MOSTRAR POR NOMBRE Y APELLIDOS -->
+
+                <?php if (!empty($_SESSION['user'])): ?>
+
+                  <a href="/usuarios/profile/<?= $_SESSION['user']['id'] ?>" class="dropdown-item">
+
+                    <?php
+
+                    $primerNombre = isset($_SESSION['user']['nombres']) ? explode(' ', trim($_SESSION['user']['nombres']))[0] : '';
+
+                    $primerApellido = isset($_SESSION['user']['apellidos']) ? explode(' ', trim($_SESSION['user']['apellidos']))[0] : '';
+
+                    echo htmlspecialchars($primerNombre . ' ' . $primerApellido);
+
+                    ?>
+
+                  </a>
+
+                <?php endif; ?>
+
+
+
+                <a href="#" class="dropdown-item">Configuración</a>
+
+                <a href="#" class="dropdown-item">Cambiar contraseña</a>
+
+                <a href="/logout" class="dropdown-item">Cerrar sesión</a>
+
+              </div>
+
+            </li>
+
+          </ul>
+
+        </div>
+
+      </nav>
       <main class="content px-3 py-2">

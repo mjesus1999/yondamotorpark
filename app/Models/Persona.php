@@ -51,7 +51,6 @@ class Persona
         }
     }
 
-
     public function getAllPersonasCliente(): ?array
     {
         try {
@@ -83,8 +82,6 @@ class Persona
     }
 
 
-
-
     public function create($params): int
     {
         $query = "INSERT INTO personas(apellidos,nombres, tipodoc, nrodoc, genero, fechanac, estadocivil, email, iddistrito, direccion, referencia, telprimario, telalternativo,latitud, longitud)
@@ -100,14 +97,14 @@ class Persona
                 ':genero' => $params['genero'],
                 ':fechanac' => $params['fechanac'],
                 ':estadocivil' => $params['estadocivil'],
-                ':email' => $params['email'], //null
+                ':email' => $params['email'] ?? null, //null
                 ':iddistrito' => $params['iddistrito'],
-                ':direccion' => $params['direccion'], //null
-                ':referencia' => $params['referencia'], //null
-                ':telprimario' => $params['telprimario'], //null
-                ':telalternativo' => $params['telalternativo'], //null
-                ':latitud' => $params['latitud'], //null
-                ':longitud' => $params['longitud'] //null
+                ':direccion' => $params['direccion'] ?? null, //null
+                ':referencia' => $params['referencia'] ?? null, //null
+                ':telprimario' => $params['telprimario'] ?? null, //null
+                ':telalternativo' => $params['telalternativo'] ?? null, //null
+                ':latitud' => $params['latitud'] ?? null, //null
+                ':longitud' => $params['longitud'] ?? null //null
 
             ));
 
@@ -120,8 +117,8 @@ class Persona
 
     public function update($params): int
     {
-            try {
-                $query = "UPDATE personas SET  
+        try {
+            $query = "UPDATE personas SET  
                 nombres = :nombres, 
                 apellidos = :apellidos, 
                 email = :email,
@@ -134,30 +131,41 @@ class Persona
                 modificado = NOW()
               WHERE idpersona  = :idpersona";
 
-                $stmt = $this->db->prepare($query);
-                $stmt->execute([
-                    ':nombres' => $params['nombres'],
-                    ':apellidos' => $params['apellidos'],
-                    ':estadocivil' => $params['estadocivil'],
-                    ':email' => $params['email'],
-                    ':direccion' => $params['direccion'],
-                    ':telprimario' =>  $params['telprimario'],
-                    ':latitud' => $params['latitud'],
-                    ':longitud' => $params['longitud'],
-                    ':iddistrito' => $params['iddistrito'],
-                    ':idpersona' => $params['idpersona']
-                ]);
+            $stmt = $this->db->prepare($query);
+            $stmt->execute([
+                ':nombres' => $params['nombres'],
+                ':apellidos' => $params['apellidos'],
+                ':estadocivil' => $params['estadocivil'],
+                ':email' => $params['email'],
+                ':direccion' => $params['direccion'],
+                ':telprimario' =>  $params['telprimario'],
+                ':latitud' => $params['latitud'],
+                ':longitud' => $params['longitud'],
+                ':iddistrito' => $params['iddistrito'],
+                ':idpersona' => $params['idpersona']
+            ]);
 
-                return (int) $stmt->rowCount();
-            } catch (PDOException $error) {
-                error_log($error->getMessage());
-                return -1;
-            }
+            return (int) $stmt->rowCount();
+        } catch (PDOException $error) {
+            error_log($error->getMessage());
+            return -1;
         }
     }
 
-   
 
-
-
-
+// DEYANIRA
+    public function searchByDNI(string $dni): ?array
+    {
+        $query = "SELECT idpersona, apellidos, nombres FROM personas WHERE nrodoc = :dni LIMIT 1";
+        try {
+            $stmt = $this->db->prepare($query);
+            $stmt->bindValue(':dni', $dni, PDO::PARAM_STR);
+            $stmt->execute();
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $row ?: null;
+        } catch (PDOException $e) {
+            
+            return [];
+        }
+    }
+}

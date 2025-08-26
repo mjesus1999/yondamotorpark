@@ -1,0 +1,42 @@
+<?php
+// app/Helpers/Api.php
+function obtenerTipoCambio(): float
+{
+
+    $url = "https://api.decolecta.com/v1/tipo-cambio/sunat"; // Reemplaza con la URL de la API
+    $headers = [
+        "Authorization: sk_9405.O58LmP8fn72KLFWwC6pm9KVE1NOlnjv6", // Reemplaza con tu token de acceso
+        "Accept: application/json"
+    ];
+
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); // Para recibir la respuesta como string
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+    $response = curl_exec($ch);
+
+    if (curl_errno($ch)) {
+        echo 'Error:' . curl_error($ch);
+    }
+
+    curl_close($ch);
+
+    // Procesa la respuesta (ejemplo: decodificando JSON)
+    $data = json_decode($response, true);
+
+    if ($data) {
+        // Procesa los datos
+        //echo json_encode($data); //PASAR A JSON
+        //var_dump($data);
+        //return $data['buy_price'];
+        return floatval($data['buy_price']) * 1.05; //Incremento 5%
+    } else {
+        //echo "Error al decodificar la respuesta";
+        return 0;
+    }
+}
+
+/* echo obtenerTipoCambio(); */
+
+?>

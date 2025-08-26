@@ -15,6 +15,22 @@ class TipoVehiculo
         $this->db = Database::getInstance();
     }
 
+
+    public function getAll(): array
+    {
+        $stmt = $this->db->prepare("
+            SELECT idtipovehiculo, tipovehiculo
+            FROM tipovehiculos
+            ORDER BY tipovehiculo
+        ");
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+
+
+    // MIO
+
     public function getTipoVehiculoByMarca(int $idmarca): array
     {
         $query = "

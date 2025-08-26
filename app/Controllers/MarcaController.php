@@ -1,6 +1,5 @@
 <?php
 
-
 namespace App\Controllers;
 
 use App\Core\Controller;
@@ -21,23 +20,7 @@ class MarcaController extends Controller
     $this->view('marcas.index');
   }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   // API PARA TRAER LAS MARCAS:
-
 
   public function getMarcasDB():void {
     header('Content-Type: application/json');

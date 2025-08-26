@@ -40,7 +40,7 @@ class Local
         }
     }
 
-    
+
     public function getById($idlocal = 0): ?array
     {
         $query = "SELECT idlocal, responsable, telefono FROM locales WHERE idlocal = ?";
@@ -85,8 +85,6 @@ class Local
     }
 
 
-
-
     public function update($params): int
     {
         try {
@@ -121,6 +119,22 @@ class Local
             error_log($error->getMessage());
             return -1;
         }
+    }
+
+
+
+    // DEYANIRA:
+    public function getByTienda(string $tienda): ?array
+    {
+        $stmt = $this->db->prepare("
+        SELECT idlocal
+        FROM locales
+        WHERE tienda = :tienda
+        LIMIT 1
+    ");
+        $stmt->bindParam(':tienda', $tienda, PDO::PARAM_STR);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
     }
 }
 

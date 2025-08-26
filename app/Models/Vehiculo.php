@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Core\Database;
-use Exception;
 use PDO;
 use PDOException;
 
@@ -15,6 +14,7 @@ class Vehiculo
     {
         $this->db = Database::getInstance();
     }
+
 
     // Se creará los vehículos para una orden de compra - Se mandará
     
@@ -46,4 +46,100 @@ class Vehiculo
             return -1;
         }
     }
+
+
+    /// DEAYANNIRA
+
+    public function getAll($estado = ''): array
+  {
+    $query = "
+      SELECT 
+        v.idvehiculo,
+        mc.marca,
+        tv.tipovehiculo,
+        m.modelo,
+        v.version,
+        v.condicion,
+        v.color,
+        v.disponibilidad,
+        v.placa,
+        v.placarotativa,
+        c.idcombustible,
+        c.combustible,
+        v.moneda,
+        v.precioventa
+      FROM vehiculos v
+      INNER JOIN modelos m ON m.idmodelo = v.idmodelo
+      INNER JOIN marcas mc ON mc.idmarca = m.idmarca
+      INNER JOIN tipovehiculos tv ON tv.idtipovehiculo = m.idtipovehiculo
+      INNER JOIN combustibles c ON c.idcombustible = v.idcombustible
+    ";
+
+    $params = [];
+    if ($estado !== '') {
+      if (is_array($estado)) {
+        // Construir placeholders para IN
+        $placeholders = implode(", ", array_map(fn($i) => ":estado$i", array_keys($estado)));
+        $query .= " WHERE v.disponibilidad IN ($placeholders)";
+        foreach ($estado as $i => $est) {
+          $params[":estado$i"] = $est;
+        }
+      } else {
+        $query .= " WHERE v.disponibilidad = :estado";
+        $params[':estado'] = $estado;
+      }
+    }
+
+    $query .= " ORDER BY v.idvehiculo DESC";
+
+    try {
+      $stmt = $this->db->prepare($query);
+      foreach ($params as $key => $val) {
+        $stmt->bindValue($key, $val);
+      }
+      $stmt->execute();
+      return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+      return [];
+    }
+  }
+
+  // CREAR VEHICUKO DE FORMA NATURAL.
+  public function create(array $data): int
+  {
+    $stmt = $this->db->prepare("CALL spu_vehiculos_registrar(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    $stmt->execute([
+      $data['idmodelo'],
+      $data['version'],
+      $data['condicion'],
+      $data['idcombustible'],
+      $data['color'],
+      $data['chasis'],
+      $data['placa'],
+      $data['placarotativa'],
+      $data['seriemotor'],
+      $data['moneda'],
+      $data['precioventa'],
+      $data['idlogistica'],
+      $data['idlocal']
+    ]);
+
+    $idvehiculo = $stmt->fetchColumn();
+    return (int) $idvehiculo;
+  }
+
+  public function delete(int $id): int
+  {
+    $stmt = $this->db->prepare("DELETE FROM vehiculos WHERE idvehiculo = :id");
+    return $stmt->execute([':id' => $id]);
+  }
+
+  public function getById(int $id): ?array
+  {
+    $stmt = $this->db->prepare('SELECT * FROM vehiculos WHERE idvehiculo = :idvehiculo');
+    $stmt->bindParam(':idvehiculo', $id);
+    $stmt->execute();
+    $vehiculo = $stmt->fetch();
+    return $vehiculo ?: null;
+  }
 }

@@ -17,13 +17,19 @@ class TipoVehiculoController extends Controller
     }
 
 
-
-
-
-
-
-
-
+    // public function getTipoVehiculoByMarca(): void
+    // {
+    //     header('Content-Type: application/json; charset=utf-8');
+    //     $idmarca = (int) ($_GET['idmarca'] ?? 0);
+    //     if ($idmarca <= 0) {
+    //         echo json_encode(['success' => false, 'tipos' => []]);
+    //         exit;
+    //     }
+    //     $tipos = $this->tipoVehiculoModel->getTipoVehiculoByMarca($idmarca);
+    //     echo json_encode(['success' => true, 'tipos' => $tipos], JSON_UNESCAPED_UNICODE);
+    //     exit;
+    // }
+    
 
 
 
