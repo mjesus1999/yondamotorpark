@@ -100,6 +100,19 @@ class PersonaController extends Controller
 
             // construimos explícitamente el array para garantizar el orden de las claves
             if ($newId > 0) {
+                $response = [
+                    'success' => true,
+                    'message' => 'Persona registrada correctamente',
+                    'idpersona' => $newId,
+                    'nrodoc' => $data['nrodoc'],
+                    'apellidos' => $data['apellidos'],
+                    'nombres' => $data['nombres'],
+                ];
+            } else {
+                $response = ['success' => false, 'errors' => ['Error al crear la persona.']];
+            }
+
+            /* if ($newId > 0) {
                 $response = ['success' => true];
                 $response['idpersona'] = $newId;
                 $response['nrodoc'] = $data['nrodoc'];
@@ -108,7 +121,7 @@ class PersonaController extends Controller
             } else {
                 $response = ['success' => false];
                 $response['errors'] = ['Error al crear la persona.'];
-            }
+            } */
 
             echo json_encode($response);
             exit;

@@ -146,7 +146,7 @@ class Vehiculo
     return $vehiculo ?: null;
   }
 
-  /* public function getModeloDetalle(int $idmodelo): ?array
+  public function getModeloDetalle(int $idmodelo): ?array
   {
     $query = "
         SELECT 
@@ -168,7 +168,41 @@ class Vehiculo
     $stmt->execute();
     $detalle = $stmt->fetch(PDO::FETCH_ASSOC);
     return $detalle ?: null;
-  } */
+  }
+
+  public function update(int $idvehiculo, array $data): bool
+  {
+    $sql = "UPDATE vehiculos SET
+              idmodelo = :idmodelo,
+              version = :version,
+              condicion = :condicion,
+              idcombustible = :idcombustible,
+              color = :color,
+              chasis = :chasis,
+              placa = :placa,
+              placarotativa = :placarotativa,
+              seriemotor = :seriemotor,
+              moneda = :moneda,
+              precioventa = :precioventa
+          WHERE idvehiculo = :idvehiculo";
+
+    $stmt = $this->db->prepare($sql);
+    return $stmt->execute([
+      ':idmodelo' => $data['idmodelo'] ?? null,
+      ':version' => $data['version'] ?? null,
+      ':condicion' => $data['condicion'] ?? null,
+      ':idcombustible' => $data['idcombustible'] ?? null,
+      ':color' => $data['color'] ?? null,
+      ':chasis' => $data['chasis'] ?? null,
+      ':placa' => $data['placa'] ?? null,
+      ':placarotativa' => $data['placarotativa'] ?? null,
+      ':seriemotor' => $data['seriemotor'] ?? null,
+      ':moneda' => $data['moneda'] ?? 'USD',
+      ':precioventa' => $data['precioventa'] ?? 0,
+      ':idvehiculo' => $idvehiculo,
+    ]);
+  }
+
 
 
 }

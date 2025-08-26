@@ -13,3 +13,5 @@ $router->add('GET', '/modelos/lista', 'ModeloController', 'getByMarcaYTipo');
 $router->add('POST', '/vehiculos/store', 'VehiculoController', 'store');
 //Eliminar vehiculo
 $router->add('POST', '/vehiculos/delete', 'VehiculoController', 'delete');
+$router->add('POST', '/vehiculos/update', 'VehiculoController', 'update');
+

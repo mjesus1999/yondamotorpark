@@ -26,7 +26,7 @@ class VehiculoController extends Controller
   {
     $this->authRequired();
     // ESTADO DEL VEHICULO
-    $estado = $_GET['estado'] ?? 'libre';
+    $estado = $_GET['estado'] ?? 'proceso';
     $allwed = ['libre', 'proceso', 'separado', 'vendido'];
     if (!in_array($estado, $allwed, true)) {
       $estado = 'libre';
@@ -145,11 +145,79 @@ class VehiculoController extends Controller
   {
     $vehiculo = $this->vehiculoModel->getById($id);
     if ($vehiculo) {
-      $this->view('vehiculos.edit', ['vehiculo' => $vehiculo]);
+      // obtener información del modelo (marca, tipo, modelo, año)
+      $modeloDetalle = $this->vehiculoModel->getModeloDetalle((int) $vehiculo['idmodelo']);
+      $this->view('vehiculos.edit', [
+        'vehiculo' => $vehiculo,
+        'modeloDetalle' => $modeloDetalle
+      ]);
     } else {
       http_response_code(404);
       $this->view('error.404');
     }
   }
+
+  public function update(): void
+  {
+    $this->authRequired();
+    // recibir POST
+    $idvehiculo = (int) ($_POST['idvehiculo'] ?? 0);
+    if ($idvehiculo <= 0) {
+      $_SESSION['error_message'] = 'ID de vehículo inválido';
+      header('Location: /vehiculos');
+      exit;
+    }
+
+    // validar idmodelo
+    $idmodelo = (int) ($_POST['idmodelo'] ?? 0);
+    if ($idmodelo <= 0) {
+      $_SESSION['error_message'] = 'Debe seleccionar modelo y año válidos';
+      header('Location: /vehiculos/edit/' . $idvehiculo);
+      exit;
+    }
+
+    // tomar version (ya sea select o input, según el JS)
+    $version = trim((string) ($_POST['version'] ?? ''));
+
+    $data = [
+      'idmodelo' => $idmodelo,
+      'version' => $version,
+      'condicion' => $_POST['condicion'] ?? null,
+      'idcombustible' => (int) ($_POST['combustible'] ?? 0),
+      'color' => $_POST['color'] ?? null,
+      'chasis' => $_POST['chasis'] ?? null,
+      'placa' => $_POST['placa'] ?? null,
+      'placarotativa' => $_POST['placarotativa'] ?? null,
+      'seriemotor' => $_POST['seriemotor'] ?? null,
+      'moneda' => $_POST['moneda'] ?? 'USD',
+      'precioventa' => $_POST['precio'] ?? 0,
+    ];
+
+    try {
+      $ok = $this->vehiculoModel->update($idvehiculo, $data);
+      if ($ok) {
+        $_SESSION['success_message'] = 'Vehículo actualizado correctamente';
+      } else {
+        $_SESSION['error_message'] = 'No se pudo actualizar el vehículo';
+      }
+    } catch (\Exception $e) {
+      $_SESSION['error_message'] = 'Error al actualizar: ' . $e->getMessage();
+    }
+
+    header('Location: /vehiculos?estado=proceso');
+    exit;
+  }
+
+
+  /* public function edit(int $id): void
+  {
+    $vehiculo = $this->vehiculoModel->getById($id);
+    if ($vehiculo) {
+      $this->view('vehiculos.edit', ['vehiculo' => $vehiculo]);
+    } else {
+      http_response_code(404);
+      $this->view('error.404');
+    }
+  } */
 
 }

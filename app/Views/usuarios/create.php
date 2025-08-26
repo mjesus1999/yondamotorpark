@@ -2,13 +2,15 @@
 
 <div class="container-fluid">
 
-<?php if (!empty($_SESSION['success_message'])): ?>
-  <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
-    <?= htmlspecialchars($_SESSION['success_message']) ?>
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  <div id="flash-messages">
+    <?php if (!empty($_SESSION['success_message'])): ?>
+      <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+        <?= htmlspecialchars($_SESSION['success_message']) ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+      <?php unset($_SESSION['success_message']); ?>
+    <?php endif; ?>
   </div>
-  <?php unset($_SESSION['success_message']); ?>
-<?php endif; ?>
 
   <div class="alert alert-info mt-2" role="alert">
     <div class="row">
@@ -325,18 +327,48 @@
         .then(res => res.json())
         .then(json => {
           if (json.success) {
-            //Rellenar form principal
+            // Rellenar form principal
             document.getElementById('idpersona').value = json.idpersona;
             document.getElementById('dni').value = json.nrodoc;
             document.getElementById('apellidos').value = json.apellidos;
             document.getElementById('nombres').value = json.nombres;
-            //cerrar modal
+
+            // Mostrar mensaje de éxito en el contenedor #flash-messages
+            const flashContainer = document.getElementById('flash-messages');
+            if (flashContainer) {
+              // Crear markup del alert igual al que usas en PHP
+              const alertHtml = `
+        <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+          ${(json.message) ? (json.message) : 'Persona registrada correctamente'}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      `;
+              // insertar al principio
+              flashContainer.insertAdjacentHTML('afterbegin', alertHtml);
+
+              // opcional: cerrar el alert automáticamente después de 5s
+              setTimeout(() => {
+                const firstAlert = flashContainer.querySelector('.alert');
+                if (firstAlert) {
+                  // Usar bootstrap para cerrar animado
+                  try {
+                    const bsAlert = bootstrap.Alert.getOrCreateInstance(firstAlert);
+                    bsAlert.close();
+                  } catch (e) {
+                    firstAlert.remove();
+                  }
+                }
+              }, 5000);
+            }
+
+            // cerrar modal
             const bsModal = bootstrap.Modal.getInstance(modal);
             bsModal.hide();
           } else {
-            alert('Errores:\n' + json.errors.join('\n'));
+            alert('Errores:\n' + (json.errors ? json.errors.join('\n') : 'Error desconocido'));
           }
         })
+
         .catch(err => {
           console.error(err);
           alert('Error al conectar con el servidor.');

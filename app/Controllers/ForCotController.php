@@ -44,6 +44,12 @@ class ForCotController extends Controller
         //inserta y obtiene nuevo ID
         $newId = $this->formatoModel->create($tipocot, $fi, $ff);
 
+        if ($newId > 0) {
+            $_SESSION['success_message'] = "Formato de cotización registrado correctamente.";
+        } else {
+            $_SESSION['error_message'] = "No se pudo registrar el formato de cotización.";
+        }
+
         header('Location: /formatoCotizacion');
         exit;
     }

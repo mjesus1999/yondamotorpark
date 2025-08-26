@@ -29,7 +29,7 @@ class ModeloController extends Controller
         if ($idmarca <= 0 || $idtipo <= 0) {
             echo json_encode(['success' => false, 'modelos' => []]);
             exit;
-        }
+        }  
 
         $data = $this->modeloModel->getModelosByTipoMarca($idmarca, $idtipo);
         echo json_encode(['success' => true, 'modelos' => $data], JSON_UNESCAPED_UNICODE);

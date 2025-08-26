@@ -42,13 +42,13 @@
 					<?php $estadoActual = $estadoActual ?? ''; ?>
 
 					<div class="btn-group m-1" id="botones-filtro">
-						<a href="/vehiculos?estado=libre"
-							class="btn btn-sm <?= $estadoActual === 'libre' ? 'btn-primary' : 'btn-outline-primary' ?>">
-							Libre
-						</a>
 						<a href="/vehiculos?estado=proceso"
 							class="btn btn-sm <?= $estadoActual === 'proceso' ? 'btn-warning text-white' : 'btn-outline-warning' ?>">
 							Proceso
+						</a>
+						<a href="/vehiculos?estado=libre"
+							class="btn btn-sm <?= $estadoActual === 'libre' ? 'btn-primary' : 'btn-outline-primary' ?>">
+							Libre
 						</a>
 						<a href="/vehiculos?estado=separado"
 							class="btn btn-sm <?= $estadoActual === 'separado' ? 'btn-success' : 'btn-outline-success' ?>">

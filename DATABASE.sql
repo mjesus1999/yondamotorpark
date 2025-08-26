@@ -236,7 +236,7 @@ CREATE TABLE vehiculos
     color 				VARCHAR(30) 	NULL,
     chasis 				VARCHAR(30)		NULL,
     placa 				VARCHAR(10)	 	NULL,
-    placarotativa		VARCHAR(10) 	NULL,
+    placarotativa		VARCHAR(10) 	NULL,    
     seriemotor 			VARCHAR(20) 	NULL,
     moneda				ENUM('USD', 'PEN') NULL DEFAULT 'USD', -- VENTA
     precioventa			DECIMAL(9,2) 	NULL,
@@ -255,7 +255,11 @@ CREATE TABLE vehiculos
 )ENGINE = INNODB;
 -- ALTER TABLE vehiculos ADD COLUMN estado ENUM('0', '1') NULL DEFAULT '1' AFTER `origen`;
 -- ALTER TABLE vehiculos ADD COLUMN eliminado DATETIME NULL;
+show tables;
 
+SELECT COUNT(*) 
+FROM information_schema.tables 
+WHERE table_schema = 'motorpark';
 /*
 CREATE TABLE formatocotizacion
 (

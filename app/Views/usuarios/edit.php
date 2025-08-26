@@ -22,7 +22,7 @@
                 </nav>
             </div>
             <div class="col-md-6 text-end">
-                <a href="/usuarios" class="">[ Mostrar lista ]</a>
+                <a href="/usuarios" class="">[ Volver ]</a>
             </div>
         </div>
     </div>
