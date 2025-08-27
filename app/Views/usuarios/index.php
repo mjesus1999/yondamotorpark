@@ -206,9 +206,9 @@
           text: 'Esta acción no se puede deshacer.',
           icon: 'warning',
           showCancelButton: true,
-          confirmButtonText: 'Sí, eliminar',
+          confirmButtonText: 'Sí',
           cancelButtonText: 'Cancelar',
-          reverseButtons: true
+          reverseButtons: false
         });
         if (!isConfirmed) return;
 
