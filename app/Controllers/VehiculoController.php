@@ -8,7 +8,7 @@ use App\Helpers\Validador;
 use App\Models\Vehiculo;
 use App\Models\Usuario;
 use App\Models\Local;
-
+use App\Models\Modelo;
 
 //use App\Models\Product;
 
@@ -17,13 +17,15 @@ class VehiculoController extends Controller
   private Vehiculo $vehiculoModel;
   private Usuario $usuarioModel;
   private Local $localModel;
+  private Modelo $modeloModel;
+
   public function __construct()
   {
     $this->vehiculoModel = new Vehiculo();
     $this->usuarioModel = new Usuario();
     $this->localModel = new Local();
+    $this->modeloModel = new Modelo();
   }
-
 
   public function index(): void
   {
@@ -270,5 +272,26 @@ class VehiculoController extends Controller
     exit;
   }
 
+  public function agregarAnio(): void
+  {
+    header('Content-Type: application/json; charset=utf-8');
+    $body = json_decode(file_get_contents('php://input'), true) ?: [];
+    $id = (int) ($body['idmodelo_base'] ?? 0);
+    $anio = (int) ($body['anio'] ?? 0);
+
+    if ($id <= 0 || $anio <= 0) {
+      http_response_code(400);
+      echo json_encode(['success' => false, 'error' => 'Parámetros inválidos']);
+      return;
+    }
+
+    $nuevoId = $this->modeloModel->addYearToModelo($id, $anio); // <-- sin "new" aquí
+    if ($nuevoId > 0) {
+      echo json_encode(['success' => true, 'idmodelo' => $nuevoId, 'anio' => $anio]);
+    } else {
+      http_response_code(500);
+      echo json_encode(['success' => false, 'error' => 'No se pudo crear el año']);
+    }
+  }
 
 }

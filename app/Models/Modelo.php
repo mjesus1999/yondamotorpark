@@ -22,13 +22,12 @@ class Modelo
    */
   public function getAll(int $idmarca): array
   {
-    try{
+    try {
       $stmt = $this->db->prepare("call spu_modelos_obtener_por_marca(:idmarca)");
       $stmt->bindParam(':idmarca', $idmarca, PDO::PARAM_INT);
       $stmt->execute();
       return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-    catch (Exception $e){
+    } catch (Exception $e) {
       return [];
     }
   }
@@ -51,14 +50,13 @@ class Modelo
       ORDER BY MD.modelo, MD.anio;
     ";
 
-    try{
+    try {
       $stmt = $this->db->prepare($query);
       $stmt->bindParam(':idmarca', $idmarca, PDO::PARAM_INT);
       $stmt->bindParam(':idtipovehiculo', $idtipovehiculo, PDO::PARAM_INT);
       $stmt->execute();
       return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-    catch (Exception $e){
+    } catch (Exception $e) {
       return [];
     }
   }
@@ -75,7 +73,7 @@ class Modelo
       VALUES	(:idmarca, :idtipovehiculo, :modelo, :anio)
     ";
 
-    try{
+    try {
       $stmt = $this->db->prepare($query);
       $stmt->bindParam(':idmarca', $params['idmarca'], PDO::PARAM_INT);
       $stmt->bindParam(':idtipovehiculo', $params['idtipovehiculo'], PDO::PARAM_INT);
@@ -83,8 +81,7 @@ class Modelo
       $stmt->bindParam(':anio', $params['anio'], PDO::PARAM_STR);
       $stmt->execute();
       return (int) $this->db->lastInsertId();
-    }
-    catch(Exception $e){
+    } catch (Exception $e) {
       return -1;
     }
   }
@@ -99,14 +96,38 @@ class Modelo
   {
     $query = "DELETE FROM modelos WHERE idmodelo = :idmodelo";
 
-    try{
+    try {
       $stmt = $this->db->prepare($query);
       $stmt->bindParam(':idmodelo', $idmodelo, PDO::PARAM_INT);
       $stmt->execute();
       return $stmt->rowCount();
-    }
-    catch(Exception $e){
+    } catch (Exception $e) {
       return -1;
     }
   }
+
+  public function addYearToModelo(int $idBase, int $anio): int
+  {
+    $sql = "INSERT INTO modelos (modelo, anio, idmarca, idtipovehiculo)
+      SELECT modelo, :anio, idmarca, idtipovehiculo FROM modelos WHERE idmodelo = :idbase LIMIT 1";
+    $stmt = $this->db->prepare($sql);
+    if ($stmt->execute([':anio' => $anio, ':idbase' => $idBase])) {
+      return (int) $this->db->lastInsertId();
+    }
+    return -1;
+  }
+
+  /* public function getAnosByModelo($idmodelo)
+  {
+    $query = "SELECT DISTINCT anio FROM modelos WHERE idmodelo = :idmodelo ORDER BY anio DESC";
+    try {
+      $stmt = $this->db->prepare($query);
+      $stmt->bindParam(':idmodelo', $idmodelo, PDO::PARAM_INT);
+      $stmt->execute();
+      return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (Exception $e) {
+      return [];
+    }
+  } */
+
 }

@@ -59,7 +59,7 @@
 									</select>
 									<label for="anios">Año <span class="text-danger">*</span></label>
 								</div>
-								<button type="button" class="btn btn-outline-success"
+								<button type="button" class="btn btn-outline-success" id="btn-add-year"
 									title="Incrementa el año del modelo y lo guarda en la base de datos">+</button>
 							</div>
 						</div>
@@ -438,15 +438,47 @@
 				text: 'Esta acción registrará el vehículo en el sistema.',
 				icon: 'question',
 				showCancelButton: true,
-				confirmButtonText: 'Sí, registrar',
+				confirmButtonText: 'Sí',
 				cancelButtonText: 'Cancelar',
-				reverseButtons: true
+				reverseButtons: false
 			});
 
 			if (isConfirmed) {
 				formVeh.submit();
 			}
 		});
+
+		document.getElementById('btn-add-year').addEventListener('click', async () => {
+			const idmodeloBase = document.getElementById('idmodelo').value;
+			const anio = prompt('Nuevo año a agregar:');
+			if (!anio) return;
+
+			try {
+				const res = await fetch('/vehiculos/agregarAnio', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ idmodelo_base: idmodeloBase, anio: parseInt(anio, 10) })
+				});
+				const json = await res.json();
+				if (res.ok && json.success) {
+					alert('Año agregado: ID ' + json.idmodelo + ' — ' + json.anio);
+
+					// Añadir el nuevo año al select de años (sin recargar la página)
+					const aniosSel = document.getElementById("anios");
+					const option = document.createElement("option");
+					option.value = json.anio;
+					option.textContent = json.anio;
+					aniosSel.appendChild(option);  // Añadir el nuevo año al final del select
+					aniosSel.value = json.anio;   // Opcional: seleccionar el nuevo año
+
+				} else {
+					alert('Error: ' + (json.error || 'No se pudo agregar'));
+				}
+			} catch (err) {
+				alert('Error en la petición: ' + err.message);
+			}
+		});
+
 	});
 </script>
 
