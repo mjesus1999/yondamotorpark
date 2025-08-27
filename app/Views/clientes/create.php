@@ -75,7 +75,7 @@ require_once __DIR__ . '/../../Helpers/functions.php'; ?>
             </div>
             <div class="col-md-6 text-end">
                 <a href="/clientes/" class="btn btn-outline-primary btn-sm">
-                    <i class="bi bi-list-ul me-1"></i> Mostrar lista
+                    <i class="bi bi-list-ul me-1"></i> Lista
                 </a>
             </div>
         </div>
@@ -84,7 +84,7 @@ require_once __DIR__ . '/../../Helpers/functions.php'; ?>
     <!-- Tarjeta principal del formulario -->
     <div class="card border-0 shadow-lg mt-3">
         <div class="card-header bg-primary text-white py-3">
-            <h5 class="mb-0"><i class="bi bi-person me-2"></i>Registrar Cliente (Normal)</h5>
+            <h6 class="mb-0"><i class="bi bi-person me-2"></i>Registrar Cliente (Persona)</h6>
         </div>
         <div class="card-body p-4">
             <form action="/storepersonclient/store" id="form-registro-cliente-persona" autocomplete="off" method="POST">
@@ -252,7 +252,7 @@ require_once __DIR__ . '/../../Helpers/functions.php'; ?>
                         </div>
                         <div class="col-md-3 d-flex align-items-center">
                             <button type="button" class="btn btn-success w-60" id="btn-mapa">
-                                <i class="bi bi-map me-1"></i> Ver mapa
+                                <i class="bi bi-map me-1"></i>
                             </button>
                         </div>
                     </div>

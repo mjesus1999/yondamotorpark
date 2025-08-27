@@ -19,6 +19,7 @@ class CompraController extends Controller
     public function index(): void
     {
         $compras = $this->compraModel->getAll();
+        $this->authRequired();
         $this->view('compras.index', ['compras' => $compras]);
     }
 
@@ -41,7 +42,7 @@ class CompraController extends Controller
 
         $registro = [
             'idorden' => $data['idorden'] ?? 0,
-            'idlogistica' => 2,
+            // 'idlogistica' => 2,
             'fechacompra' => $data['fechacompra'] ?? '',
             'tipodoc' => $data['tipodoc'] ?? '',
             'serie' => $data['serie'] ?? '',
@@ -51,7 +52,7 @@ class CompraController extends Controller
 
         $errores = [];
         $errores[] = Validador::campoObligatorio($registro['idorden'], 'Orden de Compra');
-        $errores[] = Validador::campoObligatorio($registro['idlogistica'], 'Logística');
+        // $errores[] = Validador::campoObligatorio($registro['idlogistica'], 'Logística');
         $errores[] = Validador::campoObligatorio($registro['fechacompra'], 'Fecha de Compra');
         $errores[] = Validador::campoObligatorio($registro['tipodoc'], 'Tipo de Documento');
         $errores[] = Validador::campoObligatorio($registro['serie'], 'Serie');

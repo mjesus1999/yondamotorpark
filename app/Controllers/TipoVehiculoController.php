@@ -37,6 +37,7 @@ class TipoVehiculoController extends Controller
 
     public function getTipoVehiculoByMarca($id): void
     {
+        $this->authRequired();
 
         header('Content-Type: application/json');
 

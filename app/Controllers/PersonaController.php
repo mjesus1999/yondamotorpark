@@ -20,6 +20,7 @@ class PersonaController extends Controller
 
     public function indexPersonCliente(): void
     {
+        $this->authRequired();
         $personClientes = $this->personaModel->getAllPersonasCliente();
         $this->view('clientes.index', ['personClientes' => $personClientes]);
     }
@@ -70,7 +71,7 @@ class PersonaController extends Controller
             $registroCliente = [
                 'idpersona'      => $idPersona,
                 'idempresa'      => null,
-                'idcolregistra'  => null,
+                // 'idcolregistra'  => null,
                 'idcolactualiza' => null,
                 'tipocliente'    => 'P',
             ];
@@ -257,7 +258,7 @@ class PersonaController extends Controller
         }
     }
 
-    
+
     /**
      * Buscar Persona por DNI
      * @return void

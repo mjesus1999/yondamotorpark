@@ -18,30 +18,31 @@ class Cliente
 
 
     public function getTipoClienteById(int $id): ?string
-{
-    try {
-        $query = "SELECT tipocliente FROM clientes WHERE idcliente = :idcliente";
-        $stmt = $this->db->prepare($query);
-        $stmt->execute([':idcliente' => $id]);
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $result ? $result['tipocliente'] : null;
-    } catch (PDOException $e) {
-        error_log($e->getMessage());
-        return null;
+    {
+        try {
+            $query = "SELECT tipocliente FROM clientes WHERE idcliente = :idcliente";
+            $stmt = $this->db->prepare($query);
+            $stmt->execute([':idcliente' => $id]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $result ? $result['tipocliente'] : null;
+        } catch (PDOException $e) {
+            error_log($e->getMessage());
+            return null;
+        }
     }
-}
 
 
-    public function create($params = []):int
+    public function create($params = []): int
     {
         $query = "INSERT INTO clientes(idpersona, idempresa, idcolregistra, idcolactualiza, tipocliente)
               VALUES(:idpersona, :idempresa, :idcolregistra, :idcolactualiza, :tipocliente)";
         try {
+            $idUsuario = isset($_SESSION['user']['id']) ? $_SESSION['user']['id'] : null;
             $stmt = $this->db->prepare($query);
             $stmt->execute([
-                ':idpersona' => $params['idpersona'] ,
+                ':idpersona' => $params['idpersona'],
                 ':idempresa' => $params['idempresa'],
-                ':idcolregistra' => $params['idcolregistra'],
+                ':idcolregistra' => $idUsuario,
                 ':idcolactualiza' => $params['idcolactualiza'],
                 ':tipocliente' => $params['tipocliente'],
             ]);
@@ -53,20 +54,17 @@ class Cliente
     }
 
 
-     public function disabled($idcliente = -1):int {
+    public function disabled($idcliente = -1): int
+    {
         try {
             $query = "UPDATE clientes SET estado = 'INACT' WHERE idcliente = :id ";
             $stmt = $this->db->prepare($query);
             $stmt->execute(array(':id' => $idcliente));
-            
+
             return (int) $stmt->rowCount();
-
-
-        } catch(PDOException $error) {
+        } catch (PDOException $error) {
             error_log($error->getMessage());
-            return - 1;
+            return -1;
         }
     }
-
-
 }

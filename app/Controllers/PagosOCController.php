@@ -30,7 +30,7 @@ class PagosOCController extends Controller
 
         $registro = [
             'idorden'      => (int)($data['idorden'] ?? 0),
-            'idlogistica'  => 2,
+            // 'idlogistica'  => 2,
             'amortizacion' => (float)($data['amortizacion'] ?? 0),
             'comprobante'  => '',
             'fecharealpago' => $data['fecharealpago']

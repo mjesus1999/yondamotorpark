@@ -16,6 +16,7 @@ class MarcaController extends Controller
 
   public function index(): void
   {
+    $this->authRequired();
    
     $this->view('marcas.index');
   }

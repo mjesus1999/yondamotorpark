@@ -79,11 +79,12 @@ public function addMultiplePagos(?array $pagoCuota = null, ?array $pagoPenalidad
     {
         $query = "CALL sp_addPagoCronograma(:idcronograma, :idcuentapago, :idcolcaja, :mediopago, :numerotransaccion, :fechapago, :amortizacion, :comprobante, :observacion, :tipo)";
         try {
+            $idUsuario = isset($_SESSION['user']['id']) ? $_SESSION['user']['id'] : null;
             $stmt = $this->db->prepare($query);
             $stmt->execute([
                 ':idcronograma'      => $params['idcronograma'],
                 ':idcuentapago'      => $params['idcuentapago'],
-                ':idcolcaja'         => $params['idcolcaja'],
+                ':idcolcaja'         => $idUsuario,
                 ':mediopago'         => $params['mediopago'],
                 ':numerotransaccion' => $params['numerotransaccion'],
                 ':fechapago'         => $params['fechapago'],

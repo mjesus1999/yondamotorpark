@@ -46,15 +46,15 @@
                     <table class="table table-sm table-hover" id="tabla-cliente-empresa">
                         <thead>
                             <tr>
-                                <th>#</th>
-                                <th>Ubicación</th>
-                                <th>Dirección</th>
-                                <th>Responsable</th>
-                                <th>RUC</th>
-                                <th>Empresa</th>
-                                <th>Correo</th>
-                                <th>Teléfono</th>
-                                <th>Acciones</th>
+                                <th><span class="text-muted badge">#</span></th>
+                                <th> <span class="text-muted badge">Ubicación</span></th>
+                                <th> <span class="text-muted badge">Dirección</span></th>
+                                <th> <span class="text-muted badge">Responsable</span></th>
+                                <th><span class="text-muted badge">RUC</span></th>
+                                <th> <span class="text-muted badge">Empresa</span></th>
+                                <th> <span class="text-muted badge">Correo</span></th>
+                                <th><span class="text-muted badge">Teléfono</span></th>
+                                <th><span class="text-muted badge">Acciones</span></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -66,19 +66,20 @@
                                 <?php $numeroFila = 1; ?>
                                 <?php foreach ($empresasClientes as $empresaCliente): ?>
                                     <tr>
-                                        <td class="align-middle"><?= htmlspecialchars($numeroFila++) ?></td>
-                                        <td class="align-middle"><?= htmlspecialchars($empresaCliente['ubicacion']) ?></td>
-                                        <td class="align-middle">
-                                            <?= $empresaCliente['direccion'] ? htmlspecialchars($empresaCliente['direccion']) : 'No asignado' ?>
+                                        <td><span class="text-muted badge"><?= htmlspecialchars($numeroFila++) ?></span></td>
+                                        <td><span class="text-muted badge"><?= htmlspecialchars($empresaCliente['ubicacion']) ?></span></td>
+                                        <td>
+                                            <span class="text-muted badge"><?= $empresaCliente['direccion'] ? htmlspecialchars($empresaCliente['direccion']) : 'No asignado' ?></span>
+                                            
                                         </td>
-                                        <td class="align-middle"><?= htmlspecialchars($empresaCliente['responsable']) ?></td>
-                                        <td class="align-middle"><?= htmlspecialchars($empresaCliente['ruc']) ?></td>
-                                        <td class="align-middle"><?= htmlspecialchars($empresaCliente['nombrecomercial']) ?></td>
-                                        <td class="align-middle">
-                                            <?= $empresaCliente['email'] ? htmlspecialchars($empresaCliente['email']) : 'No asignado' ?>
+                                        <td> <span class="text-muted badge"><?= htmlspecialchars($empresaCliente['responsable']) ?></span></td>
+                                        <td> <span class="text-muted badge"><?= htmlspecialchars($empresaCliente['ruc']) ?></span></td>
+                                        <td>  <span class="text-muted badge"><?= htmlspecialchars($empresaCliente['nombrecomercial']) ?></span></td>
+                                        <td>
+                                             <span class="text-muted badge"><?= $empresaCliente['email'] ? htmlspecialchars($empresaCliente['email']) : 'No asignado' ?></span>
                                         </td>
-                                        <td class="align-middle"><?= htmlspecialchars($empresaCliente['telprimario']) ?></td>
-                                        <td class="align-middle">
+                                        <td> <span class="text-muted badge"><?= htmlspecialchars($empresaCliente['telprimario']) ?></span></td>
+                                        <td>
                                             <div class="d-flex gap-1">
                                                 <a href="/clientes/empresaCliente/edit/<?= htmlspecialchars($empresaCliente['idempresa']) ?>" class="btn btn-sm btn-outline-primary">
                                                     <i class="fa-solid fa-pen"></i>

@@ -24,10 +24,11 @@ class PagosOC
                       VALUES(:idorden, :idlogistica, :amortizacion, :comprobante, :fecharealpago)';
 
         try {
+            $idUsuario = isset($_SESSION['user']['id']) ? $_SESSION['user']['id'] : null;
             $stmt = $this->db->prepare($query);
             $stmt->execute([
                 ':idorden' => $params['idorden'],
-                ':idlogistica' => $params['idlogistica'],
+                ':idlogistica' => $idUsuario,
                 ':amortizacion' => $params['amortizacion'],
                 ':comprobante' => $params['comprobante'],
                 ':fecharealpago' => $params['fecharealpago']

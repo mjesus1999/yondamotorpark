@@ -21,6 +21,7 @@ class OrdenCompraController extends Controller
     // Me enlistara todas las ordenes de compras, dependiendo de su estado:
     public function index(string $estado = 'emitido'): void
     {
+        $this->authRequired();
         $ordenCompras = $this->ordenCompraModel->getByEstado($estado);
         $this->view('oc.index', ['ordenCompras' => $ordenCompras, 'estado' => $estado]);
     }
@@ -71,7 +72,7 @@ class OrdenCompraController extends Controller
         $data = array_map([Validador::class, 'limpiar'], $_POST);
         $registro = [
             'idtienda' => $data['idtienda'] ?? '',
-            'idlogistica' => 2,  
+            // 'idlogistica' => 2,  
             'moneda' => $data['moneda'] ?? '',
             'serie' => $data['serie'] ?? '',
             'numstock' => $data['numstock'] ?? '',
@@ -80,7 +81,6 @@ class OrdenCompraController extends Controller
 
         $errores = [];
         $errores[] = Validador::campoObligatorio($registro['idtienda'], 'Tienda');
-        $errores[] = Validador::campoObligatorio($registro['idlogistica'], 'Logística');
         $errores[] = Validador::campoObligatorio($registro['moneda'], 'Moneda');
         $errores[] = Validador::campoObligatorio($registro['serie'], 'Serie');
         $errores = array_filter($errores);
