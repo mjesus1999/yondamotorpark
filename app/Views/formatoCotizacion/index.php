@@ -182,7 +182,7 @@
                 const id = btn.dataset.id;
                 Swal.fire({
                     title: '¿Estás seguro?',
-                    text: "¡No podrás revertir esto!",
+                    text: "¡Eliminar!",
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonText: 'Sí',

@@ -8,49 +8,49 @@ use PDOException;
 
 class Vehiculo
 {
-    private PDO $db;
+  private PDO $db;
 
-    public function __construct()
-    {
-        $this->db = Database::getInstance();
+  public function __construct()
+  {
+    $this->db = Database::getInstance();
+  }
+
+
+  // Se creará los vehículos para una orden de compra - Se mandará
+
+  public function createVehiculoOC($params = []): int
+  {
+
+    $query = "CALL sp_vehiculo_OC_registrar(:idmodelo,:idcombustible,:version,:condicion,:color,:chasis,:placa,:placarotativa,:seriemotor)";
+    try {
+      $stmt = $this->db->prepare($query);
+      $stmt->execute(array(
+        ':idmodelo' => $params['idmodelo'],
+        ':idcombustible' => $params['idcombustible'],
+        ':version' => $params['version'],
+        ':condicion' => $params['condicion'],
+        ':color' => $params['color'],
+        ':chasis' => $params['chasis'],
+        ':placa' => $params['placa'],
+        ':placarotativa' => $params['placarotativa'],
+        ':seriemotor' => $params['seriemotor']
+
+      ));
+
+      $idVehiculo = $stmt->fetch(PDO::FETCH_ASSOC);
+      $stmt->closeCursor();
+      return (int) $idVehiculo['last_id'];
+
+    } catch (PDOException $error) {
+      error_log($error->getMessage());
+      return -1;
     }
+  }
 
 
-    // Se creará los vehículos para una orden de compra - Se mandará
-    
-    public function createVehiculoOC($params = []): int
-    {
+  /// DEAYANNIRA
 
-        $query = "CALL sp_vehiculo_OC_registrar(:idmodelo,:idcombustible,:version,:condicion,:color,:chasis,:placa,:placarotativa,:seriemotor)";
-        try {
-            $stmt = $this->db->prepare($query);
-            $stmt->execute(array(
-                ':idmodelo' => $params['idmodelo'],
-                ':idcombustible' => $params['idcombustible'],
-                ':version' => $params['version'],
-                ':condicion' => $params['condicion'],
-                ':color' => $params['color'],
-                ':chasis' => $params['chasis'],
-                ':placa' => $params['placa'],
-                ':placarotativa' => $params['placarotativa'],
-                ':seriemotor' => $params['seriemotor']
-
-            ));
-
-            $idVehiculo = $stmt->fetch(PDO::FETCH_ASSOC);
-            $stmt->closeCursor();
-            return (int)$idVehiculo['last_id'];
-
-        } catch (PDOException $error) {
-            error_log($error->getMessage());
-            return -1;
-        }
-    }
-
-
-    /// DEAYANNIRA
-
-    public function getAll($estado = ''): array
+  public function getAll($estado = ''): array
   {
     $query = "
       SELECT 
@@ -142,4 +142,62 @@ class Vehiculo
     $vehiculo = $stmt->fetch();
     return $vehiculo ?: null;
   }
+
+  public function getModeloDetalle(int $idmodelo): ?array
+  {
+    $query = "
+        SELECT 
+            m.idmodelo,
+            m.modelo,
+            m.anio,
+            m.idmarca,
+            mc.marca,
+            m.idtipovehiculo,
+            tv.tipovehiculo
+        FROM modelos m
+        INNER JOIN marcas mc ON mc.idmarca = m.idmarca
+        INNER JOIN tipovehiculos tv ON tv.idtipovehiculo = m.idtipovehiculo
+        WHERE m.idmodelo = :idmodelo
+    ";
+
+    $stmt = $this->db->prepare($query);
+    $stmt->bindValue(':idmodelo', $idmodelo, PDO::PARAM_INT);
+    $stmt->execute();
+    $detalle = $stmt->fetch(PDO::FETCH_ASSOC);
+    return $detalle ?: null;
+  }
+
+  public function update(int $idvehiculo, array $data): bool
+  {
+    $sql = "UPDATE vehiculos SET
+            idmodelo = :idmodelo,
+            version = :version,
+            condicion = :condicion,
+            idcombustible = :idcombustible,
+            color = :color,
+            chasis = :chasis,
+            placa = :placa,
+            placarotativa = :placarotativa,
+            seriemotor = :seriemotor,
+            moneda = :moneda,
+            precioventa = :precioventa
+          WHERE idvehiculo = :idvehiculo";
+
+    $stmt = $this->db->prepare($sql);
+    return $stmt->execute([
+      ':idmodelo' => $data['idmodelo'] ?? null,
+      ':version' => $data['version'] ?? null,
+      ':condicion' => $data['condicion'] ?? null,
+      ':idcombustible' => $data['idcombustible'] ?? null,
+      ':color' => $data['color'] ?? null,
+      ':chasis' => $data['chasis'] ?? null,
+      ':placa' => $data['placa'] ?? null,
+      ':placarotativa' => $data['placarotativa'] ?? null,
+      ':seriemotor' => $data['seriemotor'] ?? null,
+      ':moneda' => $data['moneda'] ?? 'USD',
+      ':precioventa' => $data['precioventa'] ?? 0,
+      ':idvehiculo' => $idvehiculo,
+    ]);
+  }
+
 }

@@ -18,3 +18,5 @@ $router->add('POST', '/vehiculos/store', 'VehiculoController', 'store');
 //Eliminar vehiculo
 $router->add('POST', '/vehiculos/delete', 'VehiculoController', 'delete');
 
+$router->add('GET', '/vehiculos/edit/{id}','VehiculoController', 'edit');
+$router->add('POST', '/vehiculos/update', 'VehiculoController', 'update');
