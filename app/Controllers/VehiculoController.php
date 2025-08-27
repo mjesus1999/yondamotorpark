@@ -8,7 +8,7 @@ use App\Helpers\Validador;
 use App\Models\Vehiculo;
 use App\Models\Usuario;
 use App\Models\Local;
-
+use App\Models\Modelo;
 
 //use App\Models\Product;
 
@@ -17,19 +17,21 @@ class VehiculoController extends Controller
   private Vehiculo $vehiculoModel;
   private Usuario $usuarioModel;
   private Local $localModel;
+  private Modelo $modeloModel;
+
   public function __construct()
   {
     $this->vehiculoModel = new Vehiculo();
     $this->usuarioModel = new Usuario();
     $this->localModel = new Local();
+    $this->modeloModel = new Modelo();
   }
-
 
   public function index(): void
   {
     $this->authRequired();
     // ESTADO DEL VEHICULO
-    $estado = $_GET['estado'] ?? 'libre';
+    $estado = $_GET['estado'] ?? 'proceso';
     $allwed = ['libre', 'proceso', 'separado', 'vendido'];
     if (!in_array($estado, $allwed, true)) {
       $estado = 'libre';
@@ -111,7 +113,7 @@ class VehiculoController extends Controller
     }
   }
 
-// STORE DEYANIRA:
+  // STORE DEYANIRA:
   public function store(): void
   {
     $this->authRequired();
@@ -202,4 +204,94 @@ class VehiculoController extends Controller
       echo json_encode(['error' => 'Error: ' . $e->getMessage()]);
     }
   }
+
+  public function edit(int $id): void
+  {
+    $vehiculo = $this->vehiculoModel->getById($id);
+    if ($vehiculo) {
+      // obtener información del modelo (marca, tipo, modelo, año)
+      $modeloDetalle = $this->vehiculoModel->getModeloDetalle((int) $vehiculo['idmodelo']);
+      $this->view('vehiculos.edit', [
+        'vehiculo' => $vehiculo,
+        'modeloDetalle' => $modeloDetalle
+      ]);
+    } else {
+      http_response_code(404);
+      $this->view('error.404');
+    }
+  }
+
+  public function update(): void
+  {
+    $this->authRequired();
+    // recibir POST
+    $idvehiculo = (int) ($_POST['idvehiculo'] ?? 0);
+    if ($idvehiculo <= 0) {
+      $_SESSION['error_message'] = 'ID de vehículo inválido';
+      header('Location: /vehiculos');
+      exit;
+    }
+
+    // validar idmodelo
+    $idmodelo = (int) ($_POST['idmodelo'] ?? 0);
+    if ($idmodelo <= 0) {
+      $_SESSION['error_message'] = 'Debe seleccionar modelo y año válidos';
+      header('Location: /vehiculos/edit/' . $idvehiculo);
+      exit;
+    }
+
+    // tomar version (ya sea select o input, según el JS)
+    $version = trim((string) ($_POST['version'] ?? ''));
+
+    $data = [
+      'idmodelo' => $idmodelo,
+      'version' => $version,
+      'condicion' => $_POST['condicion'] ?? null,
+      'idcombustible' => (int) ($_POST['combustible'] ?? 0),
+      'color' => $_POST['color'] ?? null,
+      'chasis' => $_POST['chasis'] ?? null,
+      'placa' => $_POST['placa'] ?? null,
+      'placarotativa' => $_POST['placarotativa'] ?? null,
+      'seriemotor' => $_POST['seriemotor'] ?? null,
+      'moneda' => $_POST['moneda'] ?? 'USD',
+      'precioventa' => $_POST['precio'] ?? 0,
+    ];
+
+    try {
+      $ok = $this->vehiculoModel->update($idvehiculo, $data);
+      if ($ok) {
+        $_SESSION['success_message'] = 'Vehículo actualizado correctamente';
+      } else {
+        $_SESSION['error_message'] = 'No se pudo actualizar el vehículo';
+      }
+    } catch (\Exception $e) {
+      $_SESSION['error_message'] = 'Error al actualizar: ' . $e->getMessage();
+    }
+
+    header('Location: /vehiculos?estado=proceso');
+    exit;
+  }
+
+  public function agregarAnio(): void
+  {
+    header('Content-Type: application/json; charset=utf-8');
+    $body = json_decode(file_get_contents('php://input'), true) ?: [];
+    $id = (int) ($body['idmodelo_base'] ?? 0);
+    $anio = (int) ($body['anio'] ?? 0);
+
+    if ($id <= 0 || $anio <= 0) {
+      http_response_code(400);
+      echo json_encode(['success' => false, 'error' => 'Parámetros inválidos']);
+      return;
+    }
+
+    $nuevoId = $this->modeloModel->addYearToModelo($id, $anio); // <-- sin "new" aquí
+    if ($nuevoId > 0) {
+      echo json_encode(['success' => true, 'idmodelo' => $nuevoId, 'anio' => $anio]);
+    } else {
+      http_response_code(500);
+      echo json_encode(['success' => false, 'error' => 'No se pudo crear el año']);
+    }
+  }
+
 }

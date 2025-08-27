@@ -2,13 +2,21 @@
 
 <div class="container-fluid">
 
-<?php if (!empty($_SESSION['success_message'])): ?>
-  <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
-    <?= htmlspecialchars($_SESSION['success_message']) ?>
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-  </div>
-  <?php unset($_SESSION['success_message']); ?>
-<?php endif; ?>
+  <?php if (!empty($_SESSION['success_message'])): ?>
+    <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+      <?= htmlspecialchars($_SESSION['success_message']) ?>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <?php unset($_SESSION['success_message']); ?>
+  <?php endif; ?>
+
+  <?php if (!empty($_SESSION['error_message'])): ?>
+    <div class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
+      <?= htmlspecialchars($_SESSION['error_message']) ?>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <?php unset($_SESSION['error_message']); ?>
+  <?php endif; ?>
 
   <div class="alert alert-info mt-2" role="alert">
     <div class="row">
@@ -325,18 +333,53 @@
         .then(res => res.json())
         .then(json => {
           if (json.success) {
-            //Rellenar form principal
+            // Rellenar form principal
             document.getElementById('idpersona').value = json.idpersona;
             document.getElementById('dni').value = json.nrodoc;
             document.getElementById('apellidos').value = json.apellidos;
             document.getElementById('nombres').value = json.nombres;
-            //cerrar modal
+
+            // Función simple para escapar texto (evita XSS)
+            function escapeHtml(str) {
+              return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+            }
+
+            // Insertar alerta (mismo markup que el header)
+            const container = document.querySelector('.container-fluid') || document.body;
+            const msg = json.message || 'Persona registrada correctamente';
+            const alertHtml = `
+      <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+        ${escapeHtml(msg)}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    `;
+            container.insertAdjacentHTML('afterbegin', alertHtml);
+
+            // Cerrar modal
             const bsModal = bootstrap.Modal.getInstance(modal);
-            bsModal.hide();
+            if (bsModal) bsModal.hide();
+
+            // Opcional: desplazar hacia la alerta para visibilidad
+            const insertedAlert = container.querySelector('.alert');
+            if (insertedAlert) insertedAlert.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
           } else {
-            alert('Errores:\n' + json.errors.join('\n'));
+            // Mostrar errores (JSON)
+            if (json.errors && Array.isArray(json.errors)) {
+              alert('Errores:\n' + json.errors.join('\n'));
+            } else if (json.message) {
+              alert('Error:\n' + json.message);
+            } else {
+              alert('Error al crear la persona.');
+            }
           }
         })
+
         .catch(err => {
           console.error(err);
           alert('Error al conectar con el servidor.');

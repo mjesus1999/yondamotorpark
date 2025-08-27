@@ -40,21 +40,21 @@ class PersonaController extends Controller
         $data = array_map([Validador::class, 'limpiar'], $_POST);
 
         $registroPersona = [
-            'apellidos'      => $data['apellidos'] ?? '',
-            'nombres'        => $data['nombres'] ?? '',
-            'tipodoc'        => $data['tipodocumento'] ?? '',
-            'nrodoc'         => $data['nrodoc'] ?? '',
-            'genero'         => $data['genero'] ?? '',
-            'fechanac'       => $data['fechanac'] ?? '',
-            'estadocivil'    => $data['estadocivil'] ?? '',
-            'email'          => $data['email'] ?? null,
-            'iddistrito'     => !empty($data['distrito']) ? (int)$data['distrito'] : null,
-            'direccion'      => $data['direccion'] ?? null,
-            'referencia'     => $data['referencia'] ?? null,
-            'telprimario'    => $data['telprimario'] ?? '',
+            'apellidos' => $data['apellidos'] ?? '',
+            'nombres' => $data['nombres'] ?? '',
+            'tipodoc' => $data['tipodocumento'] ?? '',
+            'nrodoc' => $data['nrodoc'] ?? '',
+            'genero' => $data['genero'] ?? '',
+            'fechanac' => $data['fechanac'] ?? '',
+            'estadocivil' => $data['estadocivil'] ?? '',
+            'email' => $data['email'] ?? null,
+            'iddistrito' => !empty($data['distrito']) ? (int) $data['distrito'] : null,
+            'direccion' => $data['direccion'] ?? null,
+            'referencia' => $data['referencia'] ?? null,
+            'telprimario' => $data['telprimario'] ?? '',
             'telalternativo' => $data['telalternativo'] ?? null,
-            'latitud'        => $data['latitud'] ?? null,
-            'longitud'       => $data['longitud'] ?? null,
+            'latitud' => $data['latitud'] ?? null,
+            'longitud' => $data['longitud'] ?? null,
         ];
 
         $errores = Validador::validarPersonaCrear($registroPersona);
@@ -73,7 +73,7 @@ class PersonaController extends Controller
                 'idempresa'      => null,
                 // 'idcolregistra'  => null,
                 'idcolactualiza' => null,
-                'tipocliente'    => 'P',
+                'tipocliente' => 'P',
             ];
 
             $idCliente = $this->clienteModel->create($registroCliente);
@@ -105,21 +105,22 @@ class PersonaController extends Controller
 
     public function update(int $id): void
     {
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') return;
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST')
+            return;
 
         $data = array_map([Validador::class, 'limpiar'], $_POST);
 
         $registro = [
-            'nombres'       => $data['nombres'] ?? '',
-            'apellidos'     => $data['apellidos'] ?? '',
-            'email'         => $data['email'] ?? '',
-            'estadocivil'    => $data['estadocivil'] ?? '',
-            'telprimario'   => $data['telprimario'] ?? '',
-            'latitud'       => $data['latitud'] ?? null,
-            'longitud'      => $data['longitud'] ?? null,
-            'direccion'     => $data['direccion'] ?? null,
-            'iddistrito'    => !empty($data['iddistrito']) ? (int)$data['iddistrito'] : null,
-            'idpersona'     => $id
+            'nombres' => $data['nombres'] ?? '',
+            'apellidos' => $data['apellidos'] ?? '',
+            'email' => $data['email'] ?? '',
+            'estadocivil' => $data['estadocivil'] ?? '',
+            'telprimario' => $data['telprimario'] ?? '',
+            'latitud' => $data['latitud'] ?? null,
+            'longitud' => $data['longitud'] ?? null,
+            'direccion' => $data['direccion'] ?? null,
+            'iddistrito' => !empty($data['iddistrito']) ? (int) $data['iddistrito'] : null,
+            'idpersona' => $id
         ];
 
         $errores = Validador::validarPersonaUpdate($registro);
@@ -230,16 +231,19 @@ class PersonaController extends Controller
         ) {
             header('Content-Type: application/json; charset=utf-8');
 
-            // construimos explícitamente el array para garantizar el orden de las claves
             if ($newId > 0) {
-                $response = ['success' => true];
-                $response['idpersona'] = $newId;
-                $response['nrodoc'] = $data['nrodoc'];
-                $response['apellidos'] = $data['apellidos'];
-                $response['nombres'] = $data['nombres'];
+                $_SESSION['success_message'] = 'Persona registrada correctamente';
+
+                $response = [
+                    'success' => true,
+                    'message' => 'Persona registrada correctamente',
+                    'idpersona' => $newId,
+                    'nrodoc' => $data['nrodoc'],
+                    'apellidos' => $data['apellidos'],
+                    'nombres' => $data['nombres'],
+                ];
             } else {
-                $response = ['success' => false];
-                $response['errors'] = ['Error al crear la persona.'];
+                $response = ['success' => false, 'errors' => ['Error al crear la persona.']];
             }
 
             echo json_encode($response);
@@ -247,7 +251,7 @@ class PersonaController extends Controller
         }
 
         // Respuesta normal en flujo síncrono
-        if ($newId > 0) {
+        /* if ($newId > 0) {
             $_SESSION['success_message'] = 'Persona registrada con ID ' . $newId;
             $this->redirect('/usuarios');
         } else {
@@ -255,7 +259,7 @@ class PersonaController extends Controller
                 'error' => 'Error al crear la persona. Intente de nuevo.',
                 'old' => $data
             ]);
-        }
+        } */
     }
 
 
