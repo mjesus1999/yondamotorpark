@@ -692,9 +692,9 @@
                 text: '¿Desea confirmar el registro de esta cotización?',
                 icon: 'question',
                 showCancelButton: true,
-                confirmButtonText: 'Sí, registrar',
+                confirmButtonText: 'Sí',
                 cancelButtonText: 'Cancelar',
-                reverseButtons: true
+                reverseButtons: false
             });
 
             if (isConfirmed) {

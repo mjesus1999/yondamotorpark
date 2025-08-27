@@ -139,10 +139,11 @@ class OrdenCompra
         $query = 'call spu_oc_registrar(:idtienda,:idlogistica,:moneda,:serie,:numstock,:observaciones)';
 
         try {
+            $idUsuario = isset($_SESSION['user']['id']) ? $_SESSION['user']['id'] : null;
             $stmt = $this->db->prepare($query);
             $stmt->execute(array(
                 ':idtienda' => $params['idtienda'],
-                ':idlogistica' => $params['idlogistica'],
+                ':idlogistica' => $idUsuario,
                 ':moneda' => $params['moneda'],
                 ':serie' => $params['serie'],
                 ':numstock' => $params['numstock'],

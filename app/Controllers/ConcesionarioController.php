@@ -18,6 +18,7 @@ class ConcesionarioController extends Controller
     public function index(): void
     {
         $concesionarios = $this->concesionarioModel->getAll();
+        $this->authRequired();
         $this->view('concesionarios.index', ['concesionarios' => $concesionarios]);
     }
 

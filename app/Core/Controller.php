@@ -5,7 +5,6 @@ namespace App\Core;
 
 class Controller
 {
-
   public function __construct()
   {
     if (session_status() !== PHP_SESSION_ACTIVE) {

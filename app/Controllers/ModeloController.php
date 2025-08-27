@@ -19,9 +19,6 @@ class ModeloController extends Controller
 
 
 
-
-
-
     // API PARA OBTENER LOS MODELOS ÓR TIPO Y MARCA
 
     public function getModeloByTipoMarca(int $idmarca, int $idtipovehiculo): void

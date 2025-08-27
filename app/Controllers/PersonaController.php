@@ -20,6 +20,7 @@ class PersonaController extends Controller
 
     public function indexPersonCliente(): void
     {
+        $this->authRequired();
         $personClientes = $this->personaModel->getAllPersonasCliente();
         $this->view('clientes.index', ['personClientes' => $personClientes]);
     }
@@ -68,9 +69,9 @@ class PersonaController extends Controller
 
         if ($idPersona > 0) {
             $registroCliente = [
-                'idpersona' => $idPersona,
-                'idempresa' => null,
-                'idcolregistra' => null,
+                'idpersona'      => $idPersona,
+                'idempresa'      => null,
+                // 'idcolregistra'  => null,
                 'idcolactualiza' => null,
                 'tipocliente' => 'P',
             ];

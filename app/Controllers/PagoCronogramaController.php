@@ -22,7 +22,7 @@ class PagoCronogramaController extends Controller
 
     public function indexHistorialPagos(int $id): void
     {
-
+        $this->authRequired();
         $tiempoInicio = microtime(true);
 
         $datos = $this->pagoCronogramaModel->getHistorialPagosByContrato($id);
@@ -262,7 +262,7 @@ class PagoCronogramaController extends Controller
                 $pagoCuota = [
                     'idcronograma' => $idCronograma,
                     'idcuentapago' => empty($idCuentaPago) ? null : (int)$idCuentaPago,
-                    'idcolcaja' => 2,
+                    // 'idcolcaja' => 2,
                     'mediopago' => $medioPago,
                     'numerotransaccion' => $numeroTransaccion,
                     'fechapago' => $fechaPago,
@@ -278,7 +278,7 @@ class PagoCronogramaController extends Controller
                 $pagoPenalidad = [
                     'idcronograma' => $idCronograma,
                     'idcuentapago' => empty($idCuentaPagoPenalidad) ? null : (int)$idCuentaPagoPenalidad,
-                    'idcolcaja' => 2,
+                    // 'idcolcaja' => 2,
                     'mediopago' => $medioPagoPenalidad,
                     'numerotransaccion' => $numeroTransaccionPenalidad,
                     'fechapago' => $fechaPago,

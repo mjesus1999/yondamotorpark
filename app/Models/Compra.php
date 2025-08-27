@@ -100,11 +100,11 @@ class Compra
         $query = "CALL  sp_compra_registrar(:idorden,:idlogistica,:fechacompra,:tipodoc,:serie,:numdocumento,:rutadoc)";
 
         try {
-
+             $idUsuario = isset($_SESSION['user']['id']) ? $_SESSION['user']['id'] : null;
             $stmt = $this->db->prepare($query);
             $stmt->execute(array(
                 ':idorden' => $params['idorden'],
-                ':idlogistica' => $params['idlogistica'],
+                ':idlogistica' => $idUsuario,
                 ':fechacompra' => $params['fechacompra'],
                 ':tipodoc' => $params['tipodoc'],
                 ':serie' => $params['serie'],

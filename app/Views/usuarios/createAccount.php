@@ -203,8 +203,8 @@
                         </div>
                     </div>
                     <div class="card-footer text-end">
-                        <button type="submit" class="btn btn-sm yonda text-light rounded">Crear cuenta</button>
                         <button type="reset" class="btn btn-sm btn-outline-secondary rounded">Cancelar</button>
+                        <button type="submit" class="btn btn-sm btn-primary text-light rounded">Crear cuenta</button>
                     </div>
                 </div>
             </form>

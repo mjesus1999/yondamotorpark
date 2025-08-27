@@ -105,7 +105,7 @@
             if (alerts.length > 0) {
                 setTimeout(() => {
                     alerts.forEach(alert => {
-                        alert.style.opacity = '0';
+                        alert.style.opacity = '1';
                         setTimeout(() => alert.remove(), 600); // Después de desvanecer
                     });
                 }, 4000); // 4 segundos

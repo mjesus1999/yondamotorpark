@@ -8,8 +8,7 @@ class HomeController extends Controller
 {
   public function index(): void
   {
-      $this->authRequired(); // si no está logueado, redirige a /login
-        // si está logueado, muestra home
+    $this->authRequired();
         $this->view('home.index');
   }
 }

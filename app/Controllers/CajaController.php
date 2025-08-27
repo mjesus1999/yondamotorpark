@@ -23,6 +23,7 @@ class CajaController extends Controller
         $tiempoInicio = microtime(true);
         $datos = $this->cajaModel->getAllContratosDatos();
 
+        $this->authRequired();
         $this->view('caja.index', ['contratos' => $datos]);
 
         $tiempoFin = microtime(true);

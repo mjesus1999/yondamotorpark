@@ -18,6 +18,7 @@ class LocalController extends Controller
 
     public function index(): void
     {
+        $this->authRequired();
         $locales = $this->localModel->getAll();
         $this->view('locales.index', ['locales' => $locales]);
     }

@@ -1,3 +1,4 @@
+
 USE MOTORPARK2;
 
 -- AGREGANDO INDICES
@@ -14,3 +15,9 @@ SELECT * FROM contratos;
 
 
     SHOW INDEX FROM contratos;
+
+SELECT * FROM ordenescompra;
+SELECT * FROM pagos;
+SELECT * FROM pagosOC;
+SELECT * FROM compras;
+SELECT * FROM clientes;

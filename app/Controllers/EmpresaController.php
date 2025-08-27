@@ -20,6 +20,7 @@ class EmpresaController extends Controller
     public function indexEmpresaClientes(): void
     {
         $empresas = $this->empresaModel->getAllEmpresasCliente();
+        $this->authRequired();
         $this->view('/clientes/empresas.index', ['empresasClientes' => $empresas]);
     }
 
@@ -104,7 +105,7 @@ class EmpresaController extends Controller
             $cliente = [
                 'idpersona' => null,
                 'idempresa' => $idEmpresa,
-                'idcolregistra' => null,
+                // 'idcolregistra' => null,
                 'idcolactualiza' => null,
                 'tipocliente' => 'E'
             ];
