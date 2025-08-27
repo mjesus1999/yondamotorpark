@@ -220,8 +220,6 @@
 			}
 		}
 
-
-
 		//marca -> cargar tipos
 		marcasSel.addEventListener("change", async (event) => {
 			const idm = event.target.value;
@@ -239,8 +237,7 @@
 
 		});
 
-		//tipo -> cargar modelos
-		// Adaptado: usar estructura de tiposSel con lógica de getModeloByTipoMarca
+		//tipo -> cargar modelos (VERSIÓN CORREGIDA)
 		tiposSel.addEventListener("change", async (event) => {
 			const idmarca = parseInt(marcasSel.value);
 			const idTipoVehiculo = parseInt(event.target.value);
@@ -248,6 +245,7 @@
 			modelosSel.innerHTML = `<option value="">Cargando Modelos...</option>`;
 			aniosSel.innerHTML = `<option value="">Seleccione</option>`;
 			modelosCache = [];
+			hiddenModeloId.value = ''; // Limpiar también el hidden
 
 			if (!idmarca || !idTipoVehiculo) {
 				modelosSel.innerHTML = `<option value="">Seleccione marca y tipo primero</option>`;
@@ -263,23 +261,23 @@
 					return;
 				}
 
-				// Map para evitar modelos repetidos
-				const modelosUnicos = new Map();
+				//console.log('Modelos recibidos:', dataModelos); // Debug
 
-				dataModelos.forEach(element => {
-					if (!modelosUnicos.has(element.modelo)) {
-						modelosUnicos.set(element.modelo, element.idmodelo);
-					}
-				});
+				// Guarda TODOS los modelos en cache (incluye todas las combinaciones modelo+año)
+				modelosCache = dataModelos;
+
+				// Extraer solo nombres únicos para mostrar en el select
+				const nombresUnicos = [...new Set(dataModelos.map(element => element.modelo))].sort();
 
 				modelosSel.innerHTML = `<option value="">Seleccione Modelo</option>`;
-				modelosUnicos.forEach((idmodelo, modelo) => {
+
+				nombresUnicos.forEach(nombreModelo => {
 					modelosSel.insertAdjacentHTML("beforeend",
-						`<option value="${idmodelo}">${modelo}</option>`);
+						`<option value="${nombreModelo}">${nombreModelo}</option>`);
 				});
 
-				// Guarda en cache para futuros usos
-				modelosCache = dataModelos;
+				console.log('Cache de modelos:', modelosCache); // Debug
+				console.log('Nombres únicos:', nombresUnicos); // Debug
 
 			} catch (error) {
 				console.error('Error al cargar modelos:', error);
@@ -287,20 +285,20 @@
 			}
 		});
 
-
-
-
-
-		//modelo -> cargar años
+		// EVENTO DE MODELO SELECCIONADO (CORREGIDO)
 		modelosSel.addEventListener("change", () => {
-			const idmodeloSeleccionado = modelosSel.value;
+			const nombreModeloSeleccionado = modelosSel.value; // Ahora es el NOMBRE
 			aniosSel.innerHTML = `<option value="">Seleccione Año</option>`;
 			hiddenModeloId.value = '';
 
-			if (!idmodeloSeleccionado) return;
+			if (!nombreModeloSeleccionado) return;
 
-			// Filtrar modelos por idmodelo (no por nombre)
-			const modelosFiltrados = modelosCache.filter(item => item.idmodelo == idmodeloSeleccionado);
+			console.log('Modelo seleccionado:', nombreModeloSeleccionado); // Debug
+
+			// Filtrar por NOMBRE del modelo (no por idmodelo)
+			const modelosFiltrados = modelosCache.filter(item => item.modelo === nombreModeloSeleccionado);
+
+			console.log('Modelos filtrados:', modelosFiltrados); // Debug
 
 			if (modelosFiltrados.length === 0) {
 				aniosSel.innerHTML = `<option value="">No hay años disponibles</option>`;
@@ -308,73 +306,40 @@
 			}
 
 			// Extraer años únicos y ordenarlos
-			const aniosUnicos = [...new Set(modelosFiltrados.map(item => item.anio))].sort((a, b) => a - b);
+			const aniosUnicos = [...new Set(modelosFiltrados.map(item => parseInt(item.anio)))]
+				.sort((a, b) => b - a); // Orden descendente (más nuevo primero)
 
+			console.log('Años únicos:', aniosUnicos); // Debug
+
+			// Recargar el select de años
 			aniosSel.innerHTML = `<option value="">Seleccione Año</option>`;
 			aniosUnicos.forEach(anio => {
-				aniosSel.insertAdjacentHTML("beforeend",
-					`<option value="${anio}">${anio}</option>`);
+				aniosSel.insertAdjacentHTML("beforeend", `<option value="${anio}">${anio}</option>`);
 			});
-
-			// Puedes guardar el idmodelo seleccionado si lo necesitas más adelante
-			hiddenModeloId.value = idmodeloSeleccionado;
 		});
 
-
-
-		// modelos.addEventListener('change', async (event) => {
-		//     const modeloSeleccionado = event.target.value;
-		//     // Filtrar todos los objetos con ese modelo
-		//     const modelosFiltrados = dataModelos.filter(item => item.idmodelo == modeloSeleccionado);
-
-		//     // Extraer años únicos
-		//     const aniosUnicos = [...new Set(modelosFiltrados.map(item => item.anio))];
-
-		//     // Limpiar el select de años
-		//     anios.innerHTML = '<option>Seleccione</option>';
-
-		//     if (aniosUnicos.length > 0) {
-		//         aniosUnicos.forEach(anio => {
-		//             anios.innerHTML += `<option value="${anio}">${anio}</option>`;
-		//         });
-		//     } else {
-		//         anios.innerHTML += `<option>No hay datos</option>`;
-		//     }
-		// });
-
-
-		//Al cambiar año, buscar el objeto completo y setear su ID
+		// EVENTO DE AÑO SELECCIONADO (CORREGIDO)
 		aniosSel.addEventListener("change", () => {
-			const selModelo = modelosSel.value;
-			const selAnio = aniosSel.value;
-			if (!selModelo || !selAnio) {
-				hiddenModeloId.value = '';
-				return;
-			}
-			const encontrado = modelosCache.find(m =>
-				m.modelo === selModelo && String(m.anio) === selAnio
-			);
-			hiddenModeloId.value = encontrado ?
-				encontrado.idmodelo :
-				'';
-		});
+			const nombreModeloSeleccionado = modelosSel.value; // Es el NOMBRE
+			const anioSeleccionado = parseInt(aniosSel.value);
 
+			console.log('Buscando:', nombreModeloSeleccionado, anioSeleccionado); // Debug
 
-		aniosSel.addEventListener("change", () => {
-			const modeloSeleccionado = modelosSel.value;
-			const anioSeleccionado = aniosSel.value;
-
-			if (!modeloSeleccionado || !anioSeleccionado) {
+			if (!nombreModeloSeleccionado || !anioSeleccionado) {
 				hiddenModeloId.value = '';
 				return;
 			}
 
+			// Buscar el registro exacto por nombre + año
 			const modeloEncontrado = modelosCache.find(m =>
-				m.idmodelo == modeloSeleccionado && m.anio == anioSeleccionado
+				m.modelo === nombreModeloSeleccionado && parseInt(m.anio) === anioSeleccionado
 			);
+
+			console.log('Modelo encontrado:', modeloEncontrado); // Debug
 
 			if (modeloEncontrado) {
 				hiddenModeloId.value = modeloEncontrado.idmodelo;
+				console.log('idmodelo asignado:', modeloEncontrado.idmodelo); // Debug
 			} else {
 				hiddenModeloId.value = '';
 				console.warn("No se encontró modelo con ese año");
@@ -448,33 +413,86 @@
 			}
 		});
 
+		// BOTÓN AGREGAR AÑO (CORREGIDO)
 		document.getElementById('btn-add-year').addEventListener('click', async () => {
-			const idmodeloBase = document.getElementById('idmodelo').value;
+			const nombreModeloActual = modelosSel.value; // Nombre del modelo actual
+
+			// Solo verificar que haya un modelo seleccionado, no un año específico
+			if (!nombreModeloActual) {
+				alert('Debe seleccionar un modelo primero');
+				return;
+			}
+
 			const anio = prompt('Nuevo año a agregar:');
-			if (!anio) return;
+			if (!anio || isNaN(anio)) {
+				alert('Debe ingresar un año válido');
+				return;
+			}
+
+			// Verificar si el año ya existe para este modelo
+			const modelosFiltrados = modelosCache.filter(item => item.modelo === nombreModeloActual);
+			const anioYaExiste = modelosFiltrados.some(item => parseInt(item.anio) === parseInt(anio));
+
+			if (anioYaExiste) {
+				alert('Este año ya existe para el modelo seleccionado');
+				return;
+			}
 
 			try {
+				// Usar cualquier idmodelo del mismo modelo como base (tomar el primero disponible)
+				const modeloBase = modelosFiltrados[0]; // Primer registro del modelo
+				const idmodeloBase = modeloBase.idmodelo;
+
 				const res = await fetch('/vehiculos/agregarAnio', {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({ idmodelo_base: idmodeloBase, anio: parseInt(anio, 10) })
+					body: JSON.stringify({
+						idmodelo_base: parseInt(idmodeloBase),
+						anio: parseInt(anio, 10)
+					})
 				});
+
 				const json = await res.json();
+
 				if (res.ok && json.success) {
 					alert('Año agregado: ID ' + json.idmodelo + ' — ' + json.anio);
 
-					// Añadir el nuevo año al select de años (sin recargar la página)
-					const aniosSel = document.getElementById("anios");
-					const option = document.createElement("option");
-					option.value = json.anio;
-					option.textContent = json.anio;
-					aniosSel.appendChild(option);  // Añadir el nuevo año al final del select
-					aniosSel.value = json.anio;   // Opcional: seleccionar el nuevo año
+					// Agregar el nuevo registro al cache
+					const nuevoRegistro = {
+						idmodelo: json.idmodelo,
+						modelo: modeloBase.modelo,
+						anio: parseInt(json.anio),
+						idmarca: modeloBase.idmarca,
+						idtipovehiculo: modeloBase.idtipovehiculo
+					};
+
+					modelosCache.push(nuevoRegistro);
+					console.log('Nuevo registro agregado al cache:', nuevoRegistro);
+
+					// Recargar los años para el modelo actual
+					const modelosFiltradosActualizados = modelosCache.filter(item =>
+						item.modelo === nombreModeloActual
+					);
+
+					const aniosUnicos = [...new Set(modelosFiltradosActualizados.map(item => parseInt(item.anio)))]
+						.sort((a, b) => b - a);
+
+					// Recargar el select de años
+					aniosSel.innerHTML = `<option value="">Seleccione Año</option>`;
+					aniosUnicos.forEach(anioItem => {
+						aniosSel.insertAdjacentHTML("beforeend",
+							`<option value="${anioItem}">${anioItem}</option>`);
+					});
+
+					// Seleccionar automáticamente el año recién agregado
+					aniosSel.value = json.anio;
+					aniosSel.dispatchEvent(new Event('change'));
 
 				} else {
 					alert('Error: ' + (json.error || 'No se pudo agregar'));
 				}
 			} catch (err) {
+				console.error('Error:', err);
 				alert('Error en la petición: ' + err.message);
 			}
 		});
