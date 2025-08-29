@@ -516,6 +516,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         showPage(1);
     });
 
+    
     // Generar PDF
     elements.btnPdf.addEventListener('click', () => {
         showToast('GENERANDO EL PDF.....', 'INFO', 1500);

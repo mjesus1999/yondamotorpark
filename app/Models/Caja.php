@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Core\Database;
-use FFI\CData;
 use PDO;
 use PDOException;
 
@@ -15,6 +14,8 @@ class Caja
     {
         $this->db = Database::getInstance();
     }
+
+
 
     public function getAllContratosDatos(): ?array
     {
@@ -44,6 +45,42 @@ class Caja
             return $results;
         } catch (PDOException $error) {
             error_log($error->getMessage());
+            return [];
+        }
+    }
+
+    public function getReporteIngresosHoy(): array
+    {
+        $query = "CALL spu_caja_reporte_completo_hoy()";
+        try {
+            $stmt = $this->db->prepare($query);
+            $stmt->execute();
+            $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            return $results;
+        } catch (PDOException $error) {
+            error_log($error->getMessage());
+            return [];
+        }
+    }
+
+    public function getReporteByFecha($fechaInicio, $fechaFin)
+    {
+        $query = "CALL ObtenerReportePagosPorFechas(:fechainicio, :fechafin)";
+
+        try {
+
+            $stmt = $this->db->prepare($query);
+            $stmt->bindParam(':fechainicio', $fechaInicio);
+            $stmt->bindParam(':fechafin', $fechaFin);
+            $stmt->execute();
+            $resultados = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $stmt->closeCursor();
+
+            return $resultados;
+        } catch (PDOException $error) {
+
+            error_log("Error al llamar al procedimiento almacenado: " . $error->getMessage());
             return [];
         }
     }
