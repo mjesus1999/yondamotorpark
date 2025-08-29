@@ -1,8 +1,8 @@
 USE motorpark2;
--- Elimina el procedimiento si ya existe
+
 DROP PROCEDURE IF EXISTS spu_caja_reporte_ingresos_hoy_v$$
 
--- Elimina el procedimiento si ya existe
+
 DROP PROCEDURE IF EXISTS `spu_caja_reporte_completo_hoy`$$
 
 DELIMITER $$
@@ -14,7 +14,7 @@ BEGIN
         p.mediopago AS metodo_pago,
         p.numerotransaccion AS numero_operacion,
         p.amortizacion AS monto,
-        -- Campos específicos para transferencia
+       
         ep.entidad AS entidad_bancaria,
         cp.numcuenta AS numero_cuenta
     FROM
