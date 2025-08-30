@@ -16,7 +16,7 @@ class Credito
         $this->db = Database::getInstance();
     }
 
-    public function getEstadisticasMoresos(): array
+    public function getEstadisticasMorosos(): array
     {
         $query = "CALL sp_get_estadisticas_morosos()";
         try {

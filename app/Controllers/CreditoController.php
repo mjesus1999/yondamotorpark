@@ -22,7 +22,7 @@ class CreditoController extends Controller
         $this->authRequired();
 
         // Obtener estadísticas de morosos
-        $estadisticas = $this->creditoModel->getEstadisticasMoresos();
+        $estadisticas = $this->creditoModel->getEstadisticasMorosos();
 
         // Obtener morosos clasificados por días de atraso
         $morosos = $this->creditoModel->getMorososClasificados();
@@ -167,31 +167,19 @@ class CreditoController extends Controller
         }
     }
 
-public function verHistorial(int $idContrato): void
-{
-    $this->authRequired();
-    $idContrato = (int)$idContrato;
-    $historial = $this->creditoModel->getHistorialSeguimientos($idContrato);
-    $cliente = $this->creditoModel->getClienteByContrato($idContrato);
-    $this->view('creditos.historial', [
-        'historial' => $historial,
-        'cliente' => $cliente
-    ]);
-}
+    public function verHistorial1(int $idContrato): void
+    {
+        $this->authRequired();
+        $idContrato = (int) $idContrato;
 
+        $historial = $this->creditoModel->getHistorialSeguimientos($idContrato);
+        $cliente = $this->creditoModel->getClienteByContrato($idContrato);
 
-    /*     public function verHistorial(int $idContrato): void
-        {
-            $this->authRequired();
-
-            $historial = $this->creditoModel->getHistorialSeguimientos($idContrato);
-            $cliente = $this->creditoModel->getClienteByContrato($idContrato);
-
-            $this->view('creditos.historial', [
-                'historial' => $historial,
-                'cliente' => $cliente
-            ]);
-        } */
+        $this->view('creditos.historial', [
+            'historial' => $historial,
+            'cliente' => $cliente
+        ]);
+    }
 
     private function guardarEvidencia(array $archivo): ?string
     {

@@ -32,6 +32,14 @@ class CajaController extends Controller
         error_log("Tiempo de ejecución de CAJA/Contratos: " . number_format($tiempoEjecucion, 4) . " segundos.");
     }
 
+    // MEOTOD QUE ME MEUSTRA LA VISTA DE REPORTES POR FECHA:
+
+    public function indexReporteByFecha()
+    {
+        $this->view('caja.reporte-by-fechas');
+    }
+
+
     public function cronogramaByContrato(int $id): void
     {
         // Iniciar el cronómetro para medir el rendimiento
@@ -71,25 +79,79 @@ class CajaController extends Controller
         error_log("Tiempo de ejecución de CAJA/CRONOGRAMA: " . number_format($tiempoEjecucion, 4) . " segundos.");
     }
 
-    // public function cronogramaByContrato(int $id): void
-    // {
-    //     $tiempoInicio = microtime(true);
-    //     $cacheFile = "storage/cache/cronograma-contrato{$id}.json";
-    //     $ttl = 86400; //Definir 24 horas en segundos.
-    //     $datos = [];
 
-    //     if (file_exists($cacheFile) && filemtime($cacheFile) + $ttl > time()) {
-    //         $datos = json_decode(file_get_contents($cacheFile),true);
-    //         error_log("Datos de CAJA/CRONOGRAMA cargados desde la caché para ID: {$id}");
-    //     } else {
 
-    //     }
+    public function getReporteIngresosCajaHoy()
+    {
+        header('Content-Type: application/json');
+        $transacciones = $this->cajaModel->getReporteIngresosHoy();
 
-    //     $datos = $this->cajaModel->getCronogramaByIdContrato($id);
-    //     $this->view('caja.cronograma', ['cronograma' => $datos]);
-    //     $tiempoFin = microtime(true);
-    //     $tiempoEjecucion = $tiempoFin - $tiempoInicio;
+        $reporteAgrupado = [];
+        $totalGeneral = 0;
 
-    //     error_log("Tiempo de ejecución de CAJA/CRONOGRAMA: " . number_format($tiempoEjecucion, 4) . " segundos.");
-    // }
+        foreach ($transacciones as $transaccion) {
+            $metodoPago = $transaccion['metodo_pago'];
+            $monto = (float)$transaccion['monto'];
+
+            if (!isset($reporteAgrupado[$metodoPago])) {
+                $reporteAgrupado[$metodoPago] = [
+                    'metodo_pago' => $metodoPago,
+                    'transacciones' => [],
+                    'subtotal' => 0
+                ];
+            }
+
+            $reporteAgrupado[$metodoPago]['transacciones'][] = $transaccion;
+
+            // Sumamos al subtotal del grupo y al total general.
+            $reporteAgrupado[$metodoPago]['subtotal'] += $monto;
+            $totalGeneral += $monto;
+        }
+
+        $respuesta = [
+            'success' => true,
+            'data' => array_values($reporteAgrupado),
+            'total_general' => $totalGeneral
+
+        ];
+
+        echo json_encode($respuesta);
+
+        exit();
+    }
+
+    public function reportePagosByFecha()
+    {
+     
+        header('Content-Type: application/json');
+
+        $fechaInicio = $_GET['fecha_inicio'] ?? null;
+        $fechaFin = $_GET['fecha_fin'] ?? null;
+
+    
+        if (!$fechaInicio || !$fechaFin) {
+            http_response_code(400); 
+            echo json_encode(['error' => 'Fechas de inicio y fin son requeridas.']);
+            exit();
+        }
+
+        
+        $datos = $this->cajaModel->getReporteByFecha($fechaInicio, $fechaFin);
+
+        if ($datos) {
+            echo json_encode([
+                'success' => true,
+                'data' => $datos
+            ]);
+        } else {
+            
+            http_response_code(404); 
+            echo json_encode([
+                'success' => false,
+                'data' => [],
+                'message' => 'No se encontraron datos para el rango de fechas proporcionado.'
+            ]);
+        }
+        exit();
+    }
 }

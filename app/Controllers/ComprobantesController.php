@@ -10,7 +10,7 @@ class ComprobantesController extends Controller
     public function verArchivo(string $tipo, string $nombreArchivo): void
     {
         // Construir la ruta absoluta al archivo.
-    
+
         $rutaArchivo = __DIR__ . "/../../storage/" . basename($tipo) . "/" . basename($nombreArchivo);
 
         //  Verificar que el archivo existe en la ruta especificada.
@@ -25,6 +25,9 @@ class ComprobantesController extends Controller
         header("Content-Type: {$tipoContenido}");
         header("Content-Length: " . filesize($rutaArchivo));
         header("Content-Disposition: inline; filename=\"" . basename($nombreArchivo) . "\"");
+        $this->authRequired();
+
+        error_log("Ruta construida: " . $rutaArchivo);
 
         // Leer el archivo y enviarlo al navegador.
         readfile($rutaArchivo);
