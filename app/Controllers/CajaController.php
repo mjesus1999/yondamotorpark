@@ -122,7 +122,6 @@ class CajaController extends Controller
 
     public function reportePagosByFecha()
     {
-     
         header('Content-Type: application/json');
 
         $fechaInicio = $_GET['fecha_inicio'] ?? null;

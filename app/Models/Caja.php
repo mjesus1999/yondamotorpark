@@ -15,8 +15,6 @@ class Caja
         $this->db = Database::getInstance();
     }
 
-
-
     public function getAllContratosDatos(): ?array
     {
         $query = "CALL sp_getAll_contratos_caja()";

@@ -17,10 +17,21 @@ class MarcaController extends Controller
   public function index(): void
   {
     $this->authRequired();
+    $data = $this->marcaModel->getAll();
    
-    $this->view('marcas.index');
+    $this->view('marcas.index',['marcas' => $data]);
   }
 
+
+
+
+
+
+
+
+
+
+  
   // API PARA TRAER LAS MARCAS:
 
   public function getMarcasDB():void {

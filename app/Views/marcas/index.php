@@ -1,5 +1,11 @@
 <?php include __DIR__ . '/../layout/header.php'; ?>
 
+<?php
+// if(isset($marcas)) {
+//   var_dump($marcas);
+// }
+?>
+
 <div class="container-fluid">
 
   <div class="alert alert-info mt-2" role="alert">
@@ -45,7 +51,36 @@
               </tr>
             </thead>
             <tbody>
-              <!-- datos asíncronos -->
+              <?php if (!empty($marcas)) : ?>
+
+                <?php foreach ($marcas as $marca): ?>
+
+                  <tr>
+                    <td><?= htmlspecialchars($marca['marca']) ?></td>
+                    <td><?= htmlspecialchars($marca['modelos']) ?></td>
+                    <td>
+                      <a href="#" class="btn btn-sm btn-outline-primary" data-idmarca="<?= htmlspecialchars($marca['idmarca'])?>">
+                        <i class="fa-solid fa-pen"></i>
+                      </a>
+                      <form action="/personaCliente/delete/<?= htmlspecialchars($personCliente['idcliente']) ?>" method="POST" class="d-inline"
+                        onsubmit="return confirm('¿Estás seguro de que quieres eliminar este cliente?');">
+                        <button type="submit" class="btn btn-sm btn-outline-danger delete" title="Eliminar">
+                          <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </td>
+
+                  </tr>
+
+
+                <?php endforeach; ?>
+
+              <?php else: ?>
+                <tr>No hay marcas disponibles</tr>
+
+                <!-- datos asíncronos -->
+
+
+              <?php endif; ?>
             </tbody>
           </table>
           <div class="text-end">
@@ -277,9 +312,9 @@
 
         //PENDIENTE
         await fetch(`../../app/controllers/marca.c.php`, {
-          method: 'POST',
-          body: params
-        })
+            method: 'POST',
+            body: params
+          })
           .then(response => response.json())
           .then(data => {
             if (data.id > 0) {
@@ -306,9 +341,9 @@
 
         //PENDIENTE
         await fetch(`../../app/controllers/modelo.c.php`, {
-          method: 'POST',
-          body: params
-        })
+            method: 'POST',
+            body: params
+          })
           .then(response => response.json())
           .then(data => {
             if (data.id > 0) {
@@ -325,7 +360,9 @@
 
     async function obtenerMarcas() {
       //PENDIENTE
-      const request = await fetch('../../app/controllers/marca.c.php?operation=getAll', { method: 'GET' })
+      const request = await fetch('../../app/controllers/marca.c.php?operation=getAll', {
+        method: 'GET'
+      })
       const data = await request.json()
       return data
     }
@@ -355,7 +392,9 @@
 
     async function obtenerModelos(idmarca) {
       //PENDIENTE
-      const request = await fetch(`../../app/controllers/modelo.c.php?operation=getAll&idmarca=${idmarca}`, { method: 'GET' })
+      const request = await fetch(`../../app/controllers/modelo.c.php?operation=getAll&idmarca=${idmarca}`, {
+        method: 'GET'
+      })
       const data = await request.json()
       return data
     }
@@ -398,7 +437,9 @@
 
     async function obtenerTipoVehiculos() {
       //PENDIENTE
-      const request = await fetch(`../../app/controllers/tipovehiculo.c.php?operation=getAll`, { method: 'GET' })
+      const request = await fetch(`../../app/controllers/tipovehiculo.c.php?operation=getAll`, {
+        method: 'GET'
+      })
       const data = await request.json()
       return data
     }
@@ -416,7 +457,9 @@
     }
 
     //Al seleccionar un tipo de vehículo el enfoque va hacia la caja del modelo
-    tipoVehiculo.addEventListener("change", () => { modelo.focus(); })
+    tipoVehiculo.addEventListener("change", () => {
+      modelo.focus();
+    })
 
     //Evento editar - eliminar marca
     tablaMarcas.addEventListener("click", async (event) => {
@@ -436,7 +479,9 @@
 
         if (confirm("¿Eliminamos esta marca?")) {
           //PENDIENTE
-          await fetch(`../../app/controllers/marca.c.php?operation=delete&idmarca=${idEliminar}`, { method: 'GET' })
+          await fetch(`../../app/controllers/marca.c.php?operation=delete&idmarca=${idEliminar}`, {
+              method: 'GET'
+            })
             .then(response => response.json())
             .then(data => {
               if (data.rows > 0) {
@@ -459,7 +504,9 @@
 
         if (confirm("¿Eliminamos este modelo?")) {
           //PENDIENTE
-          await fetch(`../../app/controllers/modelo.c.php?operation=delete&idmarca=${idEliminar}`, { method: 'GET' })
+          await fetch(`../../app/controllers/modelo.c.php?operation=delete&idmarca=${idEliminar}`, {
+              method: 'GET'
+            })
             .then(response => response.json())
             .then(data => {
               if (data.rows > 0) {
@@ -479,7 +526,6 @@
     listarTipoVehiculos()
 
   });
-
 </script>
 
 <?php include __DIR__ . '/../layout/footer.php'; ?>
