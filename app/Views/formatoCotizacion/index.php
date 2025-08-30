@@ -187,32 +187,6 @@
                     showCancelButton: true,
                     confirmButtonText: 'Sí',
                     cancelButtonText: 'Cancelar',
-                    reverseButtons: false
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        // Redirigir o enviar petición AJAX para eliminar
-                        fetch(`/formatoCotizacion/delete/${id}`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ id })
-                        })
-                            .then(res => res.ok ? location.reload() : Promise.reject(res))
-                            .catch(() => Swal.fire('Error', 'No se pudo eliminar.', 'error'));
-                    }
-                });
-            });
-        });
-
-        /* document.querySelectorAll('.btn-eliminar-formato').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const id = btn.dataset.id;
-                Swal.fire({
-                    title: '¿Estás seguro?',
-                    text: "¡Eliminar!",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonText: 'Sí',
-                    cancelButtonText: 'Cancelar',
                     reverseButtons: true
                 }).then((result) => {
                     if (result.isConfirmed) {
@@ -227,7 +201,7 @@
                     }
                 });
             });
-        }); */
+        });
 
         document.querySelectorAll('.btn-ver-requisitos').forEach(btn => {
             btn.addEventListener('click', async () => {

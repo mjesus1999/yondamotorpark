@@ -5,7 +5,6 @@ namespace App\Controllers;
 
 use App\Core\Controller;
 use App\Models\FormatoCotizacion;
-use Exception;
 
 class ForCotController extends Controller
 {
@@ -106,24 +105,8 @@ class ForCotController extends Controller
     public function delete(int $id): void
     {
         $this->authRequired();
-
-        try {
-            $this->formatoModel->delete($id);
-            $_SESSION['success_message'] = 'Formato de cotización eliminado correctamente.';
-            http_response_code(200);
-            echo json_encode(['success' => true]);
-        } catch (Exception $e) {
-            $_SESSION['error_message'] = 'Error al eliminar el formato de cotización.';
-            http_response_code(500);
-            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
-        }
-    }
-
-    /* public function delete(int $id): void
-    {
-        $this->authRequired();
         $this->formatoModel->delete($id);
         http_response_code(200);
-        echo json_encode(['success_message' => true]);
-    } */
+        echo json_encode(['success' => true]);
+    }
 }

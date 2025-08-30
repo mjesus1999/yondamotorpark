@@ -47,21 +47,6 @@ class Caja
         }
     }
 
-    public function getMorososResumen(): array
-    {
-        $sql = "CALL getMorososResumen()";
-
-        try {
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute();
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch (PDOException $e) {
-            error_log('Error en getMorososResumen: ' . $e->getMessage());
-            return [];  // En caso de error, devolvemos un array vacío
-        }
-    }
-
-
     public function getReporteIngresosHoy(): array
     {
         $query = "CALL spu_caja_reporte_completo_hoy()";
@@ -97,5 +82,4 @@ class Caja
             return [];
         }
     }
-
 }
