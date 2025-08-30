@@ -217,7 +217,6 @@ END$$
 DELIMITER ;
 
 DELIMITER $$
-
 CREATE PROCEDURE getMorososResumen()
 BEGIN
     SELECT
@@ -253,7 +252,6 @@ BEGIN
     HAVING deuda_total > 0 OR cuotas_vencidas > 0
     ORDER BY dias_max_vencido DESC, deuda_total DESC;
 END $$
-
 DELIMITER ;
 
 
