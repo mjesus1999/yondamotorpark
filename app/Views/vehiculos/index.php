@@ -87,7 +87,7 @@
 									<td><?= htmlspecialchars($v['modelo']) ?></td>
 									<td><?= htmlspecialchars($v['version']) ?></td>
 									<td><?= htmlspecialchars($v['condicion']) ?></td>
-									<td><?= htmlspecialchars($v['color'] ?? 'N/A') ?></td>
+									<td><?= htmlspecialchars($v['color'] ?? 'N/A') ?: 'N/A' ?></td>
 									<td><?= htmlspecialchars($v['disponibilidad']) ?></td>
 									<td class="text-center">
 										<!-- Editar -->

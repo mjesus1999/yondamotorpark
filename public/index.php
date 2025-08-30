@@ -42,6 +42,8 @@ foreach ($_ENV as $key => $value) {
 
 $timeout = (int) (getenv('SESSION_TIMEOUT') ?: 60);
 ini_set('session.gc_maxlifetime', (string) max(1440, $timeout));
+//$timeoutSeconds = max(60, $timeoutMinutes * 60);
+//ini_set('session.gc_maxlifetime', (string) $timeoutSeconds);
 
 //sesion y cookie params
 session_name('YONDASESSID');
@@ -93,7 +95,7 @@ require APP_ROOT . '/app/Routes/Usuario.router.php';
 require APP_ROOT . '/app/Routes/Auth.router.php';
 require APP_ROOT . '/app/Routes/ForCotizacion.router.php';
 require APP_ROOT . '/app/Routes/Cotizacion.router.php';
-
+require APP_ROOT . '/app/Routes/Credito.router.php';
 
 
 
