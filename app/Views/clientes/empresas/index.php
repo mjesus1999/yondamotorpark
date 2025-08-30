@@ -46,15 +46,15 @@
                     <table class="table table-sm table-hover" id="tabla-cliente-empresa">
                         <thead>
                             <tr>
-                                <th><span class="text-muted badge">#</span></th>
-                                <th> <span class="text-muted badge">Ubicación</span></th>
-                                <th> <span class="text-muted badge">Dirección</span></th>
-                                <th> <span class="text-muted badge">Responsable</span></th>
-                                <th><span class="text-muted badge">RUC</span></th>
-                                <th> <span class="text-muted badge">Empresa</span></th>
-                                <th> <span class="text-muted badge">Correo</span></th>
-                                <th><span class="text-muted badge">Teléfono</span></th>
-                                <th><span class="text-muted badge">Acciones</span></th>
+                                <th><span class="text-body badge">#</span></th>
+                                <th> <span class="text-body badge">Ubicación</span></th>
+                                <th> <span class="text-body badge">Dirección</span></th>
+                                <th> <span class="text-body badge">Responsable</span></th>
+                                <th><span class="text-body badge">RUC</span></th>
+                                <th> <span class="text-body badge">Empresa</span></th>
+                                <th> <span class="text-body badge">Correo</span></th>
+                                <th><span class="text-body badge">Teléfono</span></th>
+                                <th><span class="text-body badge">Acciones</span></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -66,31 +66,36 @@
                                 <?php $numeroFila = 1; ?>
                                 <?php foreach ($empresasClientes as $empresaCliente): ?>
                                     <tr>
-                                        <td><span class="text-muted badge"><?= htmlspecialchars($numeroFila++) ?></span></td>
-                                        <td><span class="text-muted badge"><?= htmlspecialchars($empresaCliente['ubicacion']) ?></span></td>
+                                        <td><span class="text-body badge"><?= htmlspecialchars($numeroFila++) ?></span></td>
+                                        <td><span class="text-body badge"><?= htmlspecialchars($empresaCliente['ubicacion']) ?></span></td>
                                         <td>
-                                            <span class="text-muted badge"><?= $empresaCliente['direccion'] ? htmlspecialchars($empresaCliente['direccion']) : 'No asignado' ?></span>
+                                            <span class="text-body badge"><?= $empresaCliente['direccion'] ? htmlspecialchars($empresaCliente['direccion']) : 'No asignado' ?></span>
                                             
                                         </td>
-                                        <td> <span class="text-muted badge"><?= htmlspecialchars($empresaCliente['responsable']) ?></span></td>
-                                        <td> <span class="text-muted badge"><?= htmlspecialchars($empresaCliente['ruc']) ?></span></td>
-                                        <td>  <span class="text-muted badge"><?= htmlspecialchars($empresaCliente['nombrecomercial']) ?></span></td>
+                                        <td> <span class="text-body badge"><?= htmlspecialchars($empresaCliente['responsable']) ?></span></td>
+                                        <td> <span class="text-body badge"><?= htmlspecialchars($empresaCliente['ruc']) ?></span></td>
+                                        <td>  <span class="text-body badge"><?= htmlspecialchars($empresaCliente['nombrecomercial']) ?></span></td>
                                         <td>
-                                             <span class="text-muted badge"><?= $empresaCliente['email'] ? htmlspecialchars($empresaCliente['email']) : 'No asignado' ?></span>
+                                             <span class="text-body badge"><?= $empresaCliente['email'] ? htmlspecialchars($empresaCliente['email']) : 'No asignado' ?></span>
                                         </td>
-                                        <td> <span class="text-muted badge"><?= htmlspecialchars($empresaCliente['telprimario']) ?></span></td>
+                                        <td> <span class="text-body badge"><?= htmlspecialchars($empresaCliente['telprimario']) ?></span></td>
                                         <td>
-                                            <div class="d-flex gap-1">
-                                                <a href="/clientes/empresaCliente/edit/<?= htmlspecialchars($empresaCliente['idempresa']) ?>" class="btn btn-sm btn-outline-primary">
-                                                    <i class="fa-solid fa-pen"></i>
-                                                </a>
-                                                <form action="/empresaCliente/delete/<?= htmlspecialchars($empresaCliente['idcliente']) ?>" method="POST" class="d-inline"
-                                                    onsubmit="return confirm('¿Estás seguro de que quieres eliminar este cliente?');">
-                                                    <button type="submit" class="btn btn-sm btn-outline-danger delete" title="Eliminar">
-                                                        <i class="fa-solid fa-trash"></i>
-                                                    </button>
-                                                </form>
-                                            </div>
+                                           <div class="d-flex gap-1">
+                                                <div>
+                                                    <a href="/clientes/empresaCliente/edit/<?= htmlspecialchars($empresaCliente['idempresa']) ?>" class="btn btn-sm btn-outline-primary">
+                                                        <i class="fa-solid fa-pen"></i>
+                                                    </a>
+
+                                                </div>
+                                               <form action="/empresaCliente/delete/<?= htmlspecialchars($empresaCliente['idcliente']) ?>" method="POST" class="d-inline"
+                                                   onsubmit="return confirm('¿Estás seguro de que quieres eliminar este cliente?');">
+                                                   <button type="submit" class="btn btn-sm btn-outline-danger delete" title="Eliminar">
+                                                       <i class="fa-solid fa-trash"></i>
+                                                   </button>
+                                               </form>
+
+                                           </div>
+                                          
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
@@ -140,7 +145,7 @@
                             </div>
                         <?php endforeach; ?>
                     <?php else: ?>
-                        <div class="text-center text-muted p-3">No hay clientes empresas registradas.</div>
+                        <div class="text-center text-body p-3">No hay clientes empresas registradas.</div>
                     <?php endif; ?>
                 </div>
 

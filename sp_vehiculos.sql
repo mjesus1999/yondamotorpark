@@ -1,17 +1,6 @@
 
 USE motorpark;
-SELECT * FROM marcas;
-SELECT * FROM combustibles;
-SELECT * FROM ordenescompra;
-SELECT * FROM locales;																			
-SELECT * FROM detordencompra;
 
-SELECT * FROM modelos;
-SELECT * FROM tipovehiculos ;
-
-
-
-DROP PROCEDURE sp_vehiculo_OC_registrar;
 DELIMITER //
 
 CREATE PROCEDURE sp_vehiculo_OC_registrar(
@@ -47,17 +36,6 @@ BEGIN
 END //
 
 CALL sp_vehiculo_OC_registrar(13,1,'FULL','Rojo','','','','');
-ALTER TABLE vehiculos MODIFY COLUMN idlogistica  INT NULL;
-
-
-SELECT * FROM vehiculos;
-SELECT * FROM detordencompra;
-SELECT * FROM ordenescompra;
-SELECT * FROM combustibles;
-
-
-
-
 
 
 

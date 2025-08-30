@@ -48,14 +48,14 @@ include __DIR__ . '/../layout/header.php';
                             <thead>
                                 <tr class="text-primary">
                                     <th>#</th>
-                                    <th><span class="text-muted badge">Ubicación</span></th>
-                                    <th> <span class="text-muted badge">Dirección</span></th>
-                                    <th><span class="text-muted badge">Nombre completo</span> </th>
-                                    <th> <span class="text-muted badge">Documento</span></th>
-                                    <th><span class="text-muted badge">N° documento</span></th>
-                                    <th><span class="text-muted badge">Correo</span></th>
-                                    <th><span class="text-muted badge">Teléfono</span></th>
-                                    <th><span class="text-muted badge">Acciones</span></th>
+                                    <th><span class="text-body badge">Ubicación</span></th>
+                                    <th> <span class="text-body badge">Dirección</span></th>
+                                    <th><span class="text-body badge">Nombre completo</span> </th>
+                                    <th> <span class="text-body badge">Documento</span></th>
+                                    <th><span class="text-body badge">N° documento</span></th>
+                                    <th><span class="text-body badge">Correo</span></th>
+                                    <th><span class="text-body badge">Teléfono</span></th>
+                                    <th><span class="text-body badge">Acciones</span></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -68,18 +68,22 @@ include __DIR__ . '/../layout/header.php';
                                     <?php foreach ($personClientes as $personCliente): ?>
                                         <tr>
                                             <td><?= htmlspecialchars($numeroFila++) ?></td>
-                                            <td><span class="text-muted badge"><?= htmlspecialchars($personCliente['ubicacion']) ?></span></td>
-                                            <td> <span class="badge text-muted"><?= htmlspecialchars($personCliente['direccion'] ?? 'No asignado') ?></span></td>
-                                            <td> <span class="badge text-muted"><?= htmlspecialchars($personCliente['nombrecompleto']) ?></td>
-                                            <td> <span class="badge text-muted"><?= htmlspecialchars($personCliente['tipodoc']) ?></span></td>
-                                            <td><span class="badge text-muted"><?= htmlspecialchars($personCliente['nrodoc']) ?></span> </td>
-                                            <td><span class="badge text-muted"><?= htmlspecialchars($personCliente['email'] ?? 'No asignado') ?></span></td>
-                                            <td><span class="badge text-muted"><?= htmlspecialchars($personCliente['telprimario']) ?></span></td>
+                                            <td><span class="text-body badge"><?= htmlspecialchars($personCliente['ubicacion']) ?></span></td>
+                                            <td> <span class="badge text-body"><?= htmlspecialchars($personCliente['direccion'] ?? 'No asignado') ?></span></td>
+                                            <td> <span class="badge text-body"><?= htmlspecialchars($personCliente['nombrecompleto']) ?></td>
+                                            <td> <span class="badge text-body"><?= htmlspecialchars($personCliente['tipodoc']) ?></span></td>
+                                            <td><span class="badge text-body"><?= htmlspecialchars($personCliente['nrodoc']) ?></span> </td>
+                                            <td><span class="badge text-body"><?= htmlspecialchars($personCliente['email'] ?? 'No asignado') ?></span></td>
+                                            <td><span class="badge text-body"><?= htmlspecialchars($personCliente['telprimario']) ?></span></td>
                                             <td>
                                                 <div class="d-flex gap-1">
-                                                    <a href="/personaCliente/edit/<?= htmlspecialchars($personCliente['idpersona']) ?>" class="btn btn-sm btn-outline-primary">
-                                                        <i class="fa-solid fa-pen"></i>
-                                                    </a>
+                                                        <div class="">
+
+                                                            <a href="/personaCliente/edit/<?= htmlspecialchars($personCliente['idpersona']) ?>" class="btn btn-sm btn-outline-primary">
+                                                                <i class="fa-solid fa-pen"></i>
+                                                            </a>
+
+                                                        </div>
                                                     <form action="/personaCliente/delete/<?= htmlspecialchars($personCliente['idcliente']) ?>" method="POST" class="d-inline"
                                                         onsubmit="return confirm('¿Estás seguro de que quieres eliminar este cliente?');">
                                                         <button type="submit" class="btn btn-sm btn-outline-danger delete" title="Eliminar">
@@ -87,6 +91,7 @@ include __DIR__ . '/../layout/header.php';
                                                         </button>
                                                     </form>
                                                 </div>
+
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>

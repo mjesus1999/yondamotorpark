@@ -71,7 +71,7 @@
                                                     data-bs-toggle="modal" data-bs-target="#modal-locales"
                                                     data-idlocal="<?= htmlspecialchars($local['idlocal']) ?>"
                                                     title="Editar">
-                                                    <i class="fa-solid fa-pen"></i>
+                                                    <i class="fa-solid fa-pen" data-idlocal="<?= htmlspecialchars($local['idlocal']) ?>"></i>
                                                 </a>
                                                 <form action="/locales/delete/<?= htmlspecialchars($local['idlocal']) ?>" method="POST" class="d-inline"
                                                     onsubmit="return confirm('¿Estás seguro de que quieres eliminar este local?');">
@@ -118,12 +118,12 @@
                                                     title="Editar">
                                                     <i class="fa-solid fa-pen" data-idlocal="<?= htmlspecialchars($local['idlocal']) ?>"></i>
                                                 </a>
-                                            <form action="/locales/delete/<?= htmlspecialchars($local['idlocal']) ?>" method="POST" class="d-inline"
-                                                onsubmit="return confirm('¿Estás seguro de que quieres eliminar este local?');">
-                                                <button type="submit" class='btn btn-sm btn-outline-danger delete' title='Eliminar'>
-                                                    <i class="fa-solid fa-trash"></i>
-                                                </button>
-                                            </form>
+                                                <form action="/locales/delete/<?= htmlspecialchars($local['idlocal']) ?>" method="POST" class="d-inline"
+                                                    onsubmit="return confirm('¿Estás seguro de que quieres eliminar este local?');">
+                                                    <button type="submit" class='btn btn-sm btn-outline-danger delete' title='Eliminar'>
+                                                        <i class="fa-solid fa-trash"></i>
+                                                    </button>
+                                                </form>
                                             </div>
                                             </p>
                                         </div>

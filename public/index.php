@@ -93,6 +93,7 @@ require APP_ROOT . '/app/Routes/Usuario.router.php';
 require APP_ROOT . '/app/Routes/Auth.router.php';
 require APP_ROOT . '/app/Routes/ForCotizacion.router.php';
 require APP_ROOT . '/app/Routes/Cotizacion.router.php';
+require APP_ROOT .'/app/Routes/Credito.router.php';
 
 
 

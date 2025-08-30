@@ -1,8 +1,6 @@
 
 USE motorpark;
 
-DROP PROCEDURE  sp_compra_registrar
-
 DELIMITER //
 
 CREATE PROCEDURE sp_compra_registrar(
@@ -27,8 +25,6 @@ BEGIN
 
 END ;
  
- 
- DROP PROCEDURE sp_detalle_oc_por_concesionario
  
 DROP PROCEDURE IF EXISTS sp_detalle_oc_por_concesionario;
 
@@ -74,37 +70,3 @@ DELIMITER ;
 
 
 CALL sp_detalle_oc_por_concesionario(7);
-
-
-
-
-
-
-
-
- SELECT 
-  doc.iddetordencompra,
-  doc.idordencompra,
-  v.idvehiculo,
-  m.modelo,
-  v.color,
-  v.condicion,
-  v.chasis,
-  v.placa,
-  doc.preciocompra,
-  oc.serie,
-  oc.emision,
-  t.idconcesionario,
-  oc.estado,
-  oc.facturado,
-  doc.estado
-FROM ordenescompra oc
-INNER JOIN tiendas t ON t.idtienda = oc.idtienda
-INNER JOIN detordencompra doc ON doc.idordencompra = oc.idordencompra
-INNER JOIN vehiculos v ON v.idvehiculo = doc.idvehiculo
-INNER JOIN modelos m ON m.idmodelo = v.idmodelo
-WHERE t.idconcesionario = 7; 
-
-
-
-SELECT * FROM concesionarios;

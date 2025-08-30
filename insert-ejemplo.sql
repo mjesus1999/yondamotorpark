@@ -1,4 +1,4 @@
-USE motorpark;
+USE motorpark2;
 
 INSERT INTO formatocotizacion (tipocotizacion, fechainicio, fechafin)
 VALUES
@@ -242,7 +242,6 @@ BEGIN
                 ELSE ROUND(v_saldoCapital - v_abonoCapital, 2)
             END
         );
-       
         -- Actualizar saldo capital
         SET v_saldoCapital = v_saldoCapital - v_abonoCapital;
         SET v_numCuota = v_numCuota + 1;

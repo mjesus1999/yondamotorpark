@@ -1,13 +1,6 @@
-SHOW DATABASES;
 
-DROP DATABASE  motorpark2;
--- Procedimiento almacenado modificado
-USE motorpark2;
+USE motorpark;
 
-SELECT * FROM pagosOC;
-SELECT * FROM compras;
-
-DROP PROCEDURE sp_getAll_contratos_caja;
 DELIMITER $$
 CREATE PROCEDURE sp_getAll_contratos_caja()
 BEGIN 
@@ -59,7 +52,6 @@ END $$
 DELIMITER;
 CALL sp_getAll_contratos_caja();
 
-SELECT * FROM cronogramas;
 DROP PROCEDURE IF EXISTS sp_get_cronogramas_by_idcontrato;
 
 DELIMITER $$
@@ -129,81 +121,8 @@ END$$
 
 DELIMITER ;
 
-DELIMITER $$
-
--- CREATE PROCEDURE sp_get_cronogramas_by_idcontrato(IN idcontrato_ INT)
--- BEGIN
-    
---     UPDATE cronogramas cro
---     INNER JOIN contratos cont ON cro.idcontrato = cont.idcontrato
---     INNER JOIN cotizaciones coti ON cont.idcotizacion = coti.idcotizacion
---     SET 
---         cro.estado = 'Vencido',
---         cro.aplicapenalidad = 'S',
---         cro.penalidad = coti.valorcuota * cont.penalidadbase
---     WHERE cro.fechapago < CURDATE()
---       AND cro.estado != 'Pagado'
---       AND cont.idcontrato = idcontrato_;
-
-
---     SELECT 
---         cro.idcronograma,
---         cro.numcuota,
---         cro.fechapago,
---         cro.interes,
---         cro.abonocapital,
---         coti.valorcuota, 
---         cro.penalidad,
---         cro.saldocapital,
---         COALESCE(SUM(pag.amortizacion), 0) AS amortizacion,
---         (coti.valorcuota + cro.penalidad) - COALESCE(SUM(pag.amortizacion), 0) AS saldorestante,
---         coti.valorcuota - COALESCE(SUM(CASE WHEN pag.tipo = 'Cuota' THEN pag.amortizacion ELSE 0 END), 0) AS saldocuota_pendiente,
---         cro.penalidad - COALESCE(SUM(CASE WHEN pag.tipo = 'Penalidad' THEN pag.amortizacion ELSE 0 END), 0) AS penalidad_pendiente,
---         cro.estado,
---         cro.aplicapenalidad
---     FROM 
---         cronogramas cro
---     INNER JOIN 
---         contratos cont ON cro.idcontrato = cont.idcontrato
---     INNER JOIN 
---         cotizaciones coti ON cont.idcotizacion = coti.idcotizacion
---     LEFT JOIN 
---         pagos pag ON pag.idcronograma = cro.idcronograma
---     WHERE 
---         cont.idcontrato = idcontrato_
---     GROUP BY
---         cro.idcronograma,
---         cro.numcuota,
---         cro.fechapago,
---         cro.interes,
---         cro.abonocapital,
---         coti.valorcuota,
---         cro.penalidad,
---         cro.saldocapital,
---         cro.estado,
---         cro.aplicapenalidad
---     ORDER BY 
---         cro.numcuota;
--- END$$
-
--- DELIMITER ;
-
-
 
 CALL sp_get_cronogramas_by_idcontrato (1);
-
-SELECT * FROM cronogramas;
-UPDATE cronogramas SET fechapago = '2025-08-13' WHERE  idcontrato = 2 AND numcuota = 6 ;
-SELECT * FROM contratos;
-
-SELECT * FROM pagos;
-
-SELECT * FROM pagos
-
-
-USE motorpark2;
-
-DROP PROCEDURE sp_addPagoCronograma
 
 DROP PROCEDURE IF EXISTS sp_addPagoCronograma;
 DELIMITER $$
@@ -248,13 +167,7 @@ BEGIN
     SELECT LAST_INSERT_ID() AS last_insert_id;
 END$$
 
-DELIMITER ;
-
-
 DELIMITER;
-
-USE motorpark2;
-DROP PROCEDURE sp_get_pagos_by_contrato
 
 
 DELIMITER $$
@@ -283,27 +196,6 @@ END$$
 
 CALL sp_get_pagos_by_contrato (2);
 
-DELIMITER;
-
-USE motorpark2
-
-SELECT * FROM contratos;
-
-SELECT * FROM pagos;
-
-SELECT * FROM cronogramas;
-
-
-UPDATE cronogramas SET fechapago = '2025-08-14' WHERE idcronograma = 1803;
-UPDATE cronogramas SET fechapago = '2026-03-13', penalidad = 0, aplicapenalidad = 'N', estado = 'Pagado' WHERE idcronograma = 1521;
-UPDATE  cronogramas SET fechapago = '2026-05-13', penalidad = 0, aplicapenalidad ='N', estado = 'Pendiente' WHERE idcronograma = 1521;
-
-
-SELECT * FROM pagos;
-
-SELECT * FROM cronogramas;
-
-SELECT * FROM cuentaspago;
 
 INSERT INTO
     cuentaspago (
@@ -346,20 +238,3 @@ VALUES (
         'hghfd/ghfghdf'
     );
 
-SELECT * FROM pagos;
-
-SELECT *
-FROM cronogramas
-WHERE
-    estado = 'Pendiente'
-    AND fechapago < CURDATE();
-
-UPDATE cronogramas
-SET
-    estado = 'Vencido'
-WHERE
-    estado = 'Pendiente'
-    AND fechapago < CURDATE();
-
-
-DELETE  FROM pagos;

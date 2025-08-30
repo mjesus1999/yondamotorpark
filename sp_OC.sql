@@ -1,7 +1,5 @@
 
-USE motorpark2;
-
-DROP procedure sp_oc_por_estado
+USE motorpark;
 
 
 DELIMITER $$
@@ -47,10 +45,6 @@ END $$
 DELIMITER ;
 
 
-DROP PROCEDURE sp_anular_OC
-
-DROP PROCEDURE sp_anular_OC;
-
 DELIMITER //
 
 CREATE PROCEDURE sp_anular_OC(
@@ -81,12 +75,3 @@ BEGIN
 END //
 
 DELIMITER ;
-
-SHOW FULL COLUMNS FROM ordenescompra;
-
-
-SELECT COUNT(*) 
-FROM information_schema.tables 
-WHERE table_schema = 'motorpark2';
-
-SELECT

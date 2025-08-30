@@ -41,10 +41,10 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"
   integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" crossorigin="anonymous"></script>
 
-<script src="https://cdn.datatables.net/2.2.2/js/dataTables.js"></script>
-<script src="https://cdn.datatables.net/2.2.2/js/dataTables.bootstrap5.js"></script>
-<script src="https://cdn.datatables.net/select/3.0.0/js/dataTables.select.js"></script>
-<script src="https://cdn.datatables.net/select/3.0.0/js/select.bootstrap5.js"></script>
+<script src="https://cdn.datatables.net/2.2.2/js/dataTables.js" defer></script>
+<script src="https://cdn.datatables.net/2.2.2/js/dataTables.bootstrap5.js" defer></script>
+<script src="https://cdn.datatables.net/select/3.0.0/js/dataTables.select.js" defer></script>
+<script src="https://cdn.datatables.net/select/3.0.0/js/select.bootstrap5.js" defer></script>
 <script src="/assets/js/script-dashboard.js"></script>
 
 <!-- Sweet Alert -->

@@ -4,33 +4,35 @@ include __DIR__ . '/../layout/header.php';
 ?>
 <div class="container-fluid">
 
-    <div class="alert alert-info mt-2" role="alert">
-        <div class="row align-items-center">
-            <div class="col-md-6 d-flex align-items-center">
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb mb-0" style="background-color: transparent; padding: 0;">
-                        <li class="breadcrumb-item"><a href="#" class="text-primary"><i class="fas fa-home"></i></a>
-                        </li>
-                        <li class="breadcrumb-item"><a href="#" class="text-primary">Caja</a></li>
-                        <li class="breadcrumb-item active" aria-current="page">Listar</li>
-                    </ol>
-                </nav>
-            </div>
-            <div class="col-md-6 d-flex justify-content-end">
-                <a href="/caja/reporte/by/fecha" class="btn btn-sm btn-outline-primary">
-                    <i class="bi bi-calendar3"></i> Reporte por fecha
-                </a>
-                <button class="btn btn-danger btn-sm ms-2" id="btn-pdf" title="Generar reporte de pagos del día">
-                    <i class="fa-regular fa-file-pdf"></i> Reporte diario
-                </button>
+   <div class="alert alert-info mt-2" role="alert">
+    <div class="row align-items-center">
+        <!-- Barra de navegación responsiva -->
+        <div class="col-12 col-md-6 d-flex align-items-center">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0" style="background-color: transparent; padding: 0;">
+                    <li class="breadcrumb-item"><a href="#" class="text-primary"><i class="fas fa-home"></i></a></li>
+                    <li class="breadcrumb-item"><a href="#" class="text-primary">Caja</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Listar</li>
+                </ol>
+            </nav>
+        </div>
+        <!-- Botones responsivos -->
+        <div class="col-12 col-md-6 d-flex flex-column flex-md-row justify-content-end">
+            <a href="/caja/reporte/by/fecha" class="btn btn-sm btn-outline-primary mb-2 mb-md-0 w-100 w-md-auto">
+                <i class="bi bi-calendar3"></i> Reporte por fecha
+            </a>
+            <button class="btn btn-danger btn-sm ms-2 mb-2 mb-md-0 w-100 w-md-auto" id="btn-pdf" title="Generar reporte de pagos del día">
+                <i class="fa-regular fa-file-pdf"></i> Reporte diario
+            </button>
 
-                <button class="btn btn-success btn-sm ms-2" id="btn-excel" title="Generar reporte de pagos del día en Excel">
-                    <i class="fa-regular fa-file-excel"></i> Reporte diario
-                </button>
-
-            </div>
+            <button class="btn btn-success btn-sm ms-2 mb-2 mb-md-0 w-100 w-md-auto" id="btn-excel" title="Generar reporte de pagos del día en Excel">
+                <i class="fa-regular fa-file-excel"></i> Reporte diario
+            </button>
         </div>
     </div>
+</div>
+
+
 
     <div class="row">
         <div class="col-md-12">
@@ -41,15 +43,15 @@ include __DIR__ . '/../layout/header.php';
                         <table class="table table-sm table-hover table-hover-yonda" id="tabla-contratos">
                             <thead>
                                 <tr>
-                                    <th>#</th>
-                                    <th>Cliente</th>
-                                    <th>Documento</th>
-                                    <th>N° Documento</th>
-                                    <th>Tienda</th>
-                                    <th>Vehículo</th>
-                                    <th>Meses</th>
-                                    <th>Cuota</th>
-                                    <th>Acciones</th>
+                                    <th><span class="text-body fw-bold badge">#</span></th>
+                                    <th><span class="text-body fw-bold badge">Cliente</span></th>
+                                    <th><span class="text-body fw-bold badge">Documento</span></th>
+                                    <th><span class="text-body fw-bold badge">N° Documento</span></th>
+                                    <th> <span class="text-body fw-bold badge">Tienda</span></th>
+                                    <th><span class="text-body fw-bold badge">Vehículo</span></th>
+                                    <th><span class="text-body fw-bold badge">Meses</span></th>
+                                    <th><span class="text-body fw-bold badge">Cuota</span></th>
+                                    <th><span class="text-body fw-bold badge">Acciones</span></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -61,14 +63,14 @@ include __DIR__ . '/../layout/header.php';
                                     <?php $numeroFila = 1; ?>
                                     <?php foreach ($contratos as $contrato) : ?>
                                         <tr>
-                                            <td><?= htmlspecialchars($numeroFila++) ?></td>
-                                            <td><?= htmlspecialchars($contrato['cliente']) ?></td>
-                                            <td class="text-center"><?= htmlspecialchars($contrato['documento']) ?></td>
-                                            <td class="text-center"><?= htmlspecialchars($contrato['ndocumento']) ?></td>
-                                            <td><span class="badge bg-primary fw-bold text-white"><?= htmlspecialchars($contrato['tienda']) ?></span></td>
-                                            <td><span class="badge bg-primary fw-bold text-white"><?= htmlspecialchars($contrato['vehiculo']) ?></span></td>
-                                            <td><?= htmlspecialchars($contrato['meses']) ?></td>
-                                            <td><?= htmlspecialchars($contrato['cuota']) ?></td>
+                                            <td><span class="badge text-body fw-bold"><?= htmlspecialchars($numeroFila++) ?></span></td>
+                                            <td><span class="badge text-body fw-bold"><?= htmlspecialchars($contrato['cliente']) ?></span></td>
+                                            <td><span class="badge text-body fw-bold"><?= htmlspecialchars($contrato['documento']) ?></span></td>
+                                            <td><span class="badge text-body fw-bold"><?= htmlspecialchars($contrato['ndocumento']) ?></span></td>
+                                            <td><span class="badge fw-bold text-body"><?= htmlspecialchars($contrato['tienda']) ?></span></td>
+                                            <td><span class="badge fw-bold text-body"><?= htmlspecialchars($contrato['vehiculo']) ?></span></td>
+                                            <td><span class="badge text-body fw-bold"><?= htmlspecialchars($contrato['meses']) ?></span></td>
+                                            <td><span class="badge text-body fw-bold"><?= htmlspecialchars($contrato['cuota']) ?></span></td>
                                             <td>
                                                 <a href="/caja/cronograma/<?= htmlspecialchars($contrato['idcontrato']) ?>" title="Ver Cronograma">
                                                     <i class="bi-receipt fs-5 text-info"></i>
@@ -140,30 +142,30 @@ include __DIR__ . '/../layout/header.php';
     const btnExcel = document.querySelector('#btn-excel');
     document.addEventListener('DOMContentLoaded', async () => {
 
-        $('#tabla-contratos').DataTable({
-            responsive: true,
-            language: {
-                emptyTable: "No hay datos disponibles en la tabla",
-                info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
-                infoEmpty: "Mostrando 0 a 0 de 0 entradas",
-                infoFiltered: "(filtrado de _MAX_ entradas totales)",
-                lengthMenu: "Mostrar _MENU_ registros",
-                loadingRecords: "Cargando...",
-                processing: "Procesando...",
-                search: "Buscar:",
-                zeroRecords: "No se encontraron registros coincidentes",
-                paginate: {
-                    first: "Primero",
-                    last: "Último",
-                    next: "Siguiente",
-                    previous: "Anterior"
-                },
-                aria: {
-                    sortAscending: ": activar para ordenar la columna ascendente",
-                    sortDescending: ": activar para ordenar la columna descendente"
-                }
-            }
-        });
+         $('#tabla-contratos').DataTable({
+             responsive: true,
+             language: {
+                 emptyTable: "No hay datos disponibles en la tabla",
+                 info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
+                 infoEmpty: "Mostrando 0 a 0 de 0 entradas",
+                 infoFiltered: "(filtrado de _MAX_ entradas totales)",
+                 lengthMenu: "Mostrar _MENU_ registros",
+                 loadingRecords: "Cargando...",
+                 processing: "Procesando...",
+                 search: "Buscar:",
+                 zeroRecords: "No se encontraron registros coincidentes",
+                 paginate: {
+                     first: "Primero",
+                     last: "Último",
+                     next: "Siguiente",
+                     previous: "Anterior"
+                 },
+                 aria: {
+                     sortAscending: ": activar para ordenar la columna ascendente",
+                     sortDescending: ": activar para ordenar la columna descendente"
+                 }
+             }
+         });
 
 
         if (btnPdf) {
@@ -404,7 +406,7 @@ include __DIR__ . '/../layout/header.php';
                 }
             }
 
-            yPos += 15;
+            yPos += 30;
 
             // DETALLES POR MÉTODO DE PAGO
             for (const item of datosTransacciones) {

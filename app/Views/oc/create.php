@@ -6,13 +6,12 @@
         <div class="row">
             <div class="col-md-6 d-flex align-items-center justify-content-start">
                 <!-- <nav aria-label="breadcrumb"> -->
-                <nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='%236c757d'/%3E%3C/svg%3E&#34;);"
-                    aria-label="breadcrumb">
-                    <ol class="breadcrumb mb-0">
-                        <li class="breadcrumb-item"><a href="#">Órdenes de compra</a></li>
-                        <li class="breadcrumb-item active" aria-current="page">Registrar</li>
-                    </ol>
-                </nav>
+
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="#">Órdenes de compra</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Registrar</li>
+                </ol>
+
             </div>
             <div class="col-md-6 d-flex align-items-center justify-content-end">
                 <a href="/oc/" class="btn btn-sm btn-outline-primary">Mostrar lista</a>
@@ -485,7 +484,7 @@
                     event.preventDefault();
 
                     // Validar campos requeridos
-                    if (!marcas.value || !tipos.value || !modelos.value || !anios.value || 
+                    if (!marcas.value || !tipos.value || !modelos.value || !anios.value ||
                         !versionLS.value || !combustible.value || !precio.value) {
                         alert("Por favor complete todos los campos obligatorios");
                         return;
@@ -568,7 +567,7 @@
                     });
 
                     console.log("Vehículos actuales:", dataVehiculos);
-                    
+
                     // Verificar estado de botones después de renderizar
                     verificarEstadoBotones();
                 }
@@ -714,7 +713,7 @@
                                     formVeh.append("idmodelo", vehiculo.idmodelo);
                                     formVeh.append("idcombustible", vehiculo.idcombustible);
                                     formVeh.append("version", vehiculo.version);
-                                    formVeh.append("condicion",vehiculo.condicion);
+                                    formVeh.append("condicion", vehiculo.condicion);
                                     formVeh.append("color", vehiculo.color);
                                     formVeh.append("chasis", vehiculo.chasis);
                                     formVeh.append("placa", vehiculo.placa);
@@ -882,7 +881,7 @@
                 asignarFechaActual();
                 await obtenerConcesionarios();
                 await obtenerMarcas();
-                
+
                 // Inicializar estado de botones
                 verificarEstadoBotones();
 

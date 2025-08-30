@@ -18,7 +18,6 @@
     </div>
 <!-- Lista principal -->
 <div id="lista-oc">
-
     <!-- Vista de ESCRITORIO -->
     <div class="d-none d-md-block">
         <div class="card">

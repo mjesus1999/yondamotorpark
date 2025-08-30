@@ -1,4 +1,4 @@
-SELECT * FROM detordencompra;
+
 USE motorpark;
 
 DELIMITER //
@@ -13,7 +13,7 @@ BEGIN
     RETURN CONCAT(p_anio, '-', LPAD(p_idordencompra, 5, '0'));
 END //
 
-DROP PROCEDURE IF EXISTS sp_detOC_By_IdOC; 
+
 
 DELIMITER //
 CREATE PROCEDURE sp_detOC_By_IdOC(
@@ -98,10 +98,6 @@ END //
 CALL sp_detOC_By_IdOC(13);
 
 
-
-
-
-
 DELIMITER //
 CREATE PROCEDURE sp_det_oc_escorrecto
 (IN idOC INT)
@@ -139,16 +135,8 @@ END //
 CALL sp_det_oc_escorrecto(21);
 
 
-SELECT * FROM ordenescompra;
-
-DELETE FROM ordenescompra 
-WHERE idordencompra NOT IN (6, 7);
-
-
 
 -- SP QUE ACTUALIZA EL CAMPO ESCORRECTO DE LA TABLA OC Y LA FECHARECEPCION EN TABLA COMPRAS.DELIMITER ;
-DROP PROCEDURE  sp_check_recepcion_OC
-
 DELIMITER $$
 
 CREATE PROCEDURE sp_check_recepcion_OC(
@@ -188,6 +176,4 @@ END $$
 
 DELIMITER ;
 
-
-
-	CALL sp_check_recepcion_OC('S',35);
+CALL sp_check_recepcion_OC('S',35);

@@ -283,18 +283,18 @@ CREATE TABLE vehiculos (
     CONSTRAINT fk_idlogistica_veh FOREIGN KEY (idlogistica) REFERENCES colaboradores (idcolaborador)
 ) ENGINE = INNODB;
 
-USE motorpark;
+
 
 -- ALTER TABLE vehiculos ADD COLUMN estado ENUM('0', '1') NULL DEFAULT '1';
 
 --ALTER TABLE vehiculos ADD COLUMN eliminado DATETIME NULL;
 --SHOW COLUMNS FROM vehiculos;
 -- ALTER TABLE vehiculos MODIFY COLUMN idlogistica INT NULL;
-ALTER TABLE vehiculos DROP CONSTRAINT fk_idmodelo_veh;
+-- ALTER TABLE vehiculos DROP CONSTRAINT fk_idmodelo_veh;
 
 -- ALTER TABLE vehiculos DROP CONSTRAINT fk_idmodelo_veh;
-ALTER TABLE vehiculos
-ADD CONSTRAINT fk_idmodelo_veh FOREIGN KEY (idmodelo) REFERENCES modelos (idmodelo);
+-- ALTER TABLE vehiculos
+-- ADD CONSTRAINT fk_idmodelo_veh FOREIGN KEY (idmodelo) REFERENCES modelos (idmodelo);
 
 -- Cuando se compra un vehículo, este además de su valor, supone pagos adicioanles como:
 -- Tarjeta de propiedad y placa, Flete picanto, gastos administrativos
@@ -408,10 +408,10 @@ CREATE TABLE compras (
     CONSTRAINT fk_idlogistica_cmp FOREIGN KEY (idlogistica) REFERENCES colaboradores (idcolaborador)
 ) ENGINE = INNODB;
 
-USE motorpark2;
+-- USE motorpark2;
 
-SELECT * FROM COMPRAS;
-SELECT * FROM pagos;
+-- SELECT * FROM COMPRAS;
+-- SELECT * FROM pagos;
 --SHOW COLUMNS FROM compras
 
 --ALTER TABLE compras DROP COLUMN pathxml
@@ -483,11 +483,11 @@ CREATE TABLE contratos (
 ) ENGINE = InnoDB;
 
 
-ALTER TABLE contratos
-ADD COLUMN penalidadbase DECIMAL(10, 2) NOT NULL DEFAULT 0.1;
+-- ALTER TABLE contratos
+-- ADD COLUMN penalidadbase DECIMAL(10, 2) NOT NULL DEFAULT 0.1;
 
-ALTER TABLE contratos
-MODIFY COLUMN estado ENUM('ACT', 'INACT') DEFAULT 'ACT';
+-- ALTER TABLE contratos
+-- MODIFY COLUMN estado ENUM('ACT', 'INACT') DEFAULT 'ACT';
 
 CREATE TABLE cronogramas (
     idcronograma INT AUTO_INCREMENT PRIMARY KEY,
@@ -507,8 +507,8 @@ CREATE TABLE cronogramas (
     CONSTRAINT fk_idcont_cronogramas FOREIGN KEY (idcontrato) REFERENCES contratos (idcontrato)
 ) ENGINE = InnoDB;
 
-ALTER TABLE cronogramas
-MODIFY COLUMN penalidad DECIMAL(10, 2) NULL DEFAULT 0;
+-- ALTER TABLE cronogramas
+-- MODIFY COLUMN penalidad DECIMAL(10, 2) NULL DEFAULT 0;
 
 ALTER TABLE cronogramas
 MODIFY COLUMN estado ENUM(
@@ -517,12 +517,12 @@ MODIFY COLUMN estado ENUM(
     'Vencido'
 ) DEFAULT 'Pendiente';
 
-ALTER TABLE cronogramas MODIFY COLUMN interes DECIMAL(10, 2) NOT NULL;
+-- ALTER TABLE cronogramas MODIFY COLUMN interes DECIMAL(10, 2) NOT NULL;
 
-ALTER TABLE cronogramas
-MODIFY COLUMN abonocapital DECIMAL(10, 2) NOT NULL;
+-- ALTER TABLE cronogramas
+-- MODIFY COLUMN abonocapital DECIMAL(10, 2) NOT NULL;
 
-USE motorpark;
+-- USE motorpark;
 
 CREATE TABLE pagos (
     idpago INT AUTO_INCREMENT PRIMARY KEY,
@@ -550,24 +550,21 @@ CREATE TABLE pagos (
     CONSTRAINT fk_idcolcaja_pagos FOREIGN KEY (idcolcaja) REFERENCES colaboradores (idcolaborador)
 ) ENGINE = InnoDB;
 
-ALTER TABLE pagos MODIFY COLUMN comprobante VARCHAR(200) NULL;
-ALTER TABLE pagos MODIFY COLUMN numerotransaccion VARCHAR(30) NULL;
-ADD COLUMN tipo ENUM('Cuota', 'Penalidad') NOT NULL DEFAULT 'Cuota';
--- USE motorpark;
-SELECT * FROM pagos;
+-- ALTER TABLE pagos MODIFY COLUMN comprobante VARCHAR(200) NULL;
+-- ALTER TABLE pagos MODIFY COLUMN numerotransaccion VARCHAR(30) NULL;
+-- ADD COLUMN tipo ENUM('Cuota', 'Penalidad') NOT NULL DEFAULT 'Cuota';
+-- -- USE motorpark;
+-- SELECT * FROM pagos;
 
-    use motorpark2;
+--     use motorpark2;
 
-SHOW COLUMNS FROM pagos;
+-- SHOW COLUMNS FROM pagos;
 
-ALTER TABLE pagos MODIFY COLUMN idcuentapago INT NULL;
+-- ALTER TABLE pagos MODIFY COLUMN idcuentapago INT NULL;
 
+-- ALTER TABLE pagos
+-- MODIFY COLUMN saldorestante DECIMAL(10, 2) NULL;
 
-
-ALTER TABLE pagos
-MODIFY COLUMN saldorestante DECIMAL(10, 2) NULL;
-
-ALTER TABLE
 CREATE TABLE cuentaspago (
     idcuentapago INT AUTO_INCREMENT PRIMARY KEY,
     identidadpago INT NOT NULL,
@@ -576,8 +573,8 @@ CREATE TABLE cuentaspago (
     CONSTRAINT fk_identipago_cuentas FOREIGN KEY (identidadpago) REFERENCES entidadespago (identidadpago)
 ) ENGINE = InnoDb;
 
-ALTER TABLE cuentaspago
-CHANGE COLUMN monedad moneda ENUM('Soles', 'Dolares') NOT NULL;
+-- ALTER TABLE cuentaspago
+-- CHANGE COLUMN monedad moneda ENUM('Soles', 'Dolares') NOT NULL;
 
 CREATE TABLE entidadespago (
     identidadpago INT AUTO_INCREMENT PRIMARY KEY,
@@ -611,25 +608,35 @@ CREATE TABLE amortizacionesoc (
 
 
 
+
+
 -- DB DE DEYANIRA:
 
 USE motorpark2;
 CREATE TABLE accesos (
 
   idaccesos 			INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-
   idcargo 				INT NOT NULL,
-
   modulo 				VARCHAR(50) NOT NULL,
-
   permisos 				TINYINT(1) NOT NULL DEFAULT 0,
-
-  creado 				DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
+  creado 			    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   modificado 			DATETIME DEFAULT NULL,
-
   CONSTRAINT fk_accesos_idcargo FOREIGN KEY (idcargo) REFERENCES cargos (idcargo)
 
 )ENGINE = INNODB;
 
-SELECT * FROM accesos;
+CREATE TABLE seguimientos_morosos (
+    idseguimiento INT AUTO_INCREMENT PRIMARY KEY,
+    idcontrato INT NOT NULL,
+    tipo ENUM('documento','evidencia') NOT NULL,
+    observaciones TEXT NOT NULL,
+    evidencia VARCHAR(255) NULL,
+    fecha_seguimiento DATETIME NOT NULL,
+    usuario_registro INT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_seguimiento_contrato (idcontrato),
+    INDEX idx_seguimiento_fecha (fecha_seguimiento),
+    INDEX idx_seguimiento_usuario (usuario_registro),
+    CONSTRAINT fk_seguimiento_contrato FOREIGN KEY (idcontrato) REFERENCES contratos(idcontrato) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT fk_seguimiento_colaborador FOREIGN KEY (usuario_registro) REFERENCES colaboradores(idcolaborador) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE = InnoDB;

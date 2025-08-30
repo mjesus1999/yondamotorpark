@@ -1,12 +1,7 @@
-USE motorpark2;
-
-DROP PROCEDURE IF EXISTS spu_caja_reporte_ingresos_hoy_v$$
-
-
-DROP PROCEDURE IF EXISTS `spu_caja_reporte_completo_hoy`$$
+USE motorpark;
 
 DELIMITER $$
-CREATE PROCEDURE `spu_caja_reporte_completo_hoy`()
+CREATE PROCEDURE spu_caja_reporte_completo_hoy()
 BEGIN
     SELECT
         p.idpago,
@@ -36,33 +31,33 @@ CALL spu_caja_reporte_completo_hoy();
 
 
 -- SP QUE TRAE LOS PAGOS SOLO CON LOS DIAS DE PAGOS
-DROP PROCEDURE ObtenerReportePagosPorFechas;
-DELIMITER $$
+-- DROP PROCEDURE ObtenerReportePagosPorFechas;
+-- DELIMITER $$
 
-CREATE PROCEDURE ObtenerReportePagosPorFechas(
-    IN fecha_inicio DATE,
-    IN fecha_fin DATE
-)
-BEGIN
-    SELECT
-        DATE(fechapago) AS dia,
-        SUM(CASE WHEN mediopago = 'Efectivo' THEN amortizacion ELSE 0 END) AS total_efectivo,
-        SUM(CASE WHEN mediopago = 'Yape' THEN amortizacion ELSE 0 END) AS total_yape,
-        SUM(CASE WHEN mediopago = 'Plin' THEN amortizacion ELSE 0 END) AS total_plin,
-        SUM(CASE WHEN mediopago = 'Transferencia Bancaria' THEN amortizacion ELSE 0 END) AS total_transferencia,
+-- CREATE PROCEDURE ObtenerReportePagosPorFechas(
+--     IN fecha_inicio DATE,
+--     IN fecha_fin DATE
+-- )
+-- BEGIN
+--     SELECT
+--         DATE(fechapago) AS dia,
+--         SUM(CASE WHEN mediopago = 'Efectivo' THEN amortizacion ELSE 0 END) AS total_efectivo,
+--         SUM(CASE WHEN mediopago = 'Yape' THEN amortizacion ELSE 0 END) AS total_yape,
+--         SUM(CASE WHEN mediopago = 'Plin' THEN amortizacion ELSE 0 END) AS total_plin,
+--         SUM(CASE WHEN mediopago = 'Transferencia Bancaria' THEN amortizacion ELSE 0 END) AS total_transferencia,
         
-        SUM(amortizacion) AS total_diario
-    FROM
-        pagos
-    WHERE
-        fechapago BETWEEN fecha_inicio AND fecha_fin
-    GROUP BY
-        dia
-    ORDER BY
-        dia ASC;
-END$$
+--         SUM(amortizacion) AS total_diario
+--     FROM
+--         pagos
+--     WHERE
+--         fechapago BETWEEN fecha_inicio AND fecha_fin
+--     GROUP BY
+--         dia
+--     ORDER BY
+--         dia ASC;
+-- END$$
 
-DELIMITER ;
+-- DELIMITER ;
 
 
 
@@ -108,14 +103,6 @@ ORDER BY
 DROP TEMPORARY TABLE IF EXISTS fechaintervalo;
 
 END$$
-
 DELIMITER ;
 
-
 CALL ObtenerReportePagosPorFechas('2025-08-22', '2025-08-29');
-
-SELECT * FROM pagos;
-
-SELECT * FROM fechaintervalo;
-
-UPDATE pagos SET fechapago = '2025-08-22' WHERE idpago = 272;
