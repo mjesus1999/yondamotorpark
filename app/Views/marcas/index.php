@@ -1,10 +1,26 @@
 <?php include __DIR__ . '/../layout/header.php'; ?>
 
-<?php
-// if(isset($marcas)) {
-//   var_dump($marcas);
-// }
-?>
+<?php if (isset($_SESSION['success'])) : ?>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      showToast('<?= addslashes($_SESSION['success']) ?>', 'SUCCESS', 1000);
+    });
+  </script>
+  <?php unset($_SESSION['success']); ?>
+
+<?php endif; ?>
+
+<?php if (isset($_SESSION['error'])) : ?>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      showToast('<?= addslashes($_SESSION['error']) ?>', 'ERROR', 3000);
+    });
+  </script>
+  <?php unset($_SESSION['error']); ?>
+<?php endif; ?>
+
+
 
 <div class="container-fluid">
 
@@ -59,18 +75,17 @@
                     <td><?= htmlspecialchars($marca['marca']) ?></td>
                     <td><?= htmlspecialchars($marca['modelos']) ?></td>
                     <td>
-                      <a href="#" class="btn btn-sm btn-outline-primary" data-idmarca="<?= htmlspecialchars($marca['idmarca'])?>">
+                      <a href="#" class="btn btn-sm btn-outline-primary" data-idmarca="<?= htmlspecialchars($marca['idmarca']) ?>">
                         <i class="fa-solid fa-pen"></i>
                       </a>
-                      <form action="/personaCliente/delete/<?= htmlspecialchars($personCliente['idcliente']) ?>" method="POST" class="d-inline"
-                        onsubmit="return confirm('¿Estás seguro de que quieres eliminar este cliente?');">
+                      <form action="#" method="POST" class="d-inline"
+                        onsubmit="return confirm('¿Estás seguro de que quieres eliminar esta marca?');">
                         <button type="submit" class="btn btn-sm btn-outline-danger delete" title="Eliminar">
                           <i class="fa-solid fa-trash"></i>
                         </button>
                     </td>
 
                   </tr>
-
 
                 <?php endforeach; ?>
 
@@ -160,25 +175,27 @@
   aria-labelledby="modalMarcas" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
-      <form autocomplete="off" id="formulario-marcas">
+      <form autocomplete="off" id="formulario-marcas" action="/marcas/store" method="POST">
         <div class="modal-header bg-yonda">
           <h1 class="modal-title fs-5" id="exampleModalLabel">Marcas</h1>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
           <div class="form-floating">
-            <input type="text" class="form-control" id="marca" maxlength="30" placeholder="Nueva marca" required>
+            <input type="text" class="form-control" id="marca" name="marca" maxlength="30" placeholder="Nueva marca" required>
             <label for="marca" class="form-label">Nueva marca</label>
           </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
-          <button type="submit" class="btn btn-sm btn-primary">Guardar</button>
+          <button type="submit" class="btn btn-sm btn-primary" onclick=" return confirm('¿Estás seguro de registrar esta marca?')">Guardar</button>
         </div>
       </form>
     </div> <!-- ./model-content -->
   </div>
 </div>
+
+
 
 <div class="modal fade" id="modal-modelos" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false"
   aria-labelledby="modalModelos" aria-hidden="true">
@@ -286,244 +303,244 @@
       formularioModelos.reset()
     })
 
-    /**
-     * Verifica si una marca existe en el arreglo listaMarcas
-     * @param {string} nombreMarca - La cadena que representa el nombre de marca a buscar
-     * @returns {boolean} - true si la marca existe, false caso contrario
-     */
-    function existeMarca(nombreMarca) {
-      const marcaBuscadaMayusc = nombreMarca.toUpperCase()
-      return listaMarcas.some(item => item.marca.toUpperCase() === marcaBuscadaMayusc)
-    }
+    // /**
+    //  * Verifica si una marca existe en el arreglo listaMarcas
+    //  * @param {string} nombreMarca - La cadena que representa el nombre de marca a buscar
+    //  * @returns {boolean} - true si la marca existe, false caso contrario
+    //  */
+    // function existeMarca(nombreMarca) {
+    //   const marcaBuscadaMayusc = nombreMarca.toUpperCase()
+    //   return listaMarcas.some(item => item.marca.toUpperCase() === marcaBuscadaMayusc)
+    // }
 
-    //Controla el evento guardar del formulario marcas
-    formularioMarcas.addEventListener("submit", async (event) => {
-      event.preventDefault()
+    // //Controla el evento guardar del formulario marcas
+    // formularioMarcas.addEventListener("submit", async (event) => {
+    //   event.preventDefault()
 
-      if (existeMarca(marca.value)) {
-        showToast("Esta marca ya está registrada", "WARNING", 2000);
-        return
-      }
+    //   if (existeMarca(marca.value)) {
+    //     showToast("Esta marca ya está registrada", "WARNING", 2000);
+    //     return
+    //   }
 
-      if (confirm("¿Registramos la marca?")) {
-        const params = new FormData()
-        params.append("operation", "create")
-        params.append("marca", marca.value)
+    //   if (confirm("¿Registramos la marca?")) {
+    //     const params = new FormData()
+    //     params.append("operation", "create")
+    //     params.append("marca", marca.value)
 
-        //PENDIENTE
-        await fetch(`../../app/controllers/marca.c.php`, {
-            method: 'POST',
-            body: params
-          })
-          .then(response => response.json())
-          .then(data => {
-            if (data.id > 0) {
-              showToast("Guardado correctamente", "SUCCESS", 2000);
-              listarMarcas()
-            } else {
-              showToast("No se pudo concretar el proceso", "INFO", 2500);
-            }
-            modalMarca.hide()
-          })
-      }
-    })
+    //     //PENDIENTE
+    //     await fetch(`../../app/controllers/marca.c.php`, {
+    //         method: 'POST',
+    //         body: params
+    //       })
+    //       .then(response => response.json())
+    //       .then(data => {
+    //         if (data.id > 0) {
+    //           showToast("Guardado correctamente", "SUCCESS", 2000);
+    //           listarMarcas()
+    //         } else {
+    //           showToast("No se pudo concretar el proceso", "INFO", 2500);
+    //         }
+    //         modalMarca.hide()
+    //       })
+    //   }
+    // })
 
-    formularioModelos.addEventListener("submit", async (event) => {
-      event.preventDefault()
+    // formularioModelos.addEventListener("submit", async (event) => {
+    //   event.preventDefault()
 
-      if (confirm("¿Registramos el nuevo modelo?")) {
-        const params = new FormData()
-        params.append("operation", "create")
-        params.append("idmarca", idmarcaSeleccionada)
-        params.append("idtipovehiculo", tipoVehiculo.value)
-        params.append("modelo", modelo.value)
-        params.append("anio", anio.value)
+    //   if (confirm("¿Registramos el nuevo modelo?")) {
+    //     const params = new FormData()
+    //     params.append("operation", "create")
+    //     params.append("idmarca", idmarcaSeleccionada)
+    //     params.append("idtipovehiculo", tipoVehiculo.value)
+    //     params.append("modelo", modelo.value)
+    //     params.append("anio", anio.value)
 
-        //PENDIENTE
-        await fetch(`../../app/controllers/modelo.c.php`, {
-            method: 'POST',
-            body: params
-          })
-          .then(response => response.json())
-          .then(data => {
-            if (data.id > 0) {
-              showToast("Guardado correctamente", "SUCCESS", 2000)
-              listarMarcas()
-              listarModelos()
-            } else {
-              showToast("No se pudo concretar el proceso", "INFO", 2500)
-            }
-            modalModelo.hide()
-          })
-      }
-    })
+    //     //PENDIENTE
+    //     await fetch(`../../app/controllers/modelo.c.php`, {
+    //         method: 'POST',
+    //         body: params
+    //       })
+    //       .then(response => response.json())
+    //       .then(data => {
+    //         if (data.id > 0) {
+    //           showToast("Guardado correctamente", "SUCCESS", 2000)
+    //           listarMarcas()
+    //           listarModelos()
+    //         } else {
+    //           showToast("No se pudo concretar el proceso", "INFO", 2500)
+    //         }
+    //         modalModelo.hide()
+    //       })
+    //   }
+    // })
 
-    async function obtenerMarcas() {
-      //PENDIENTE
-      const request = await fetch('../../app/controllers/marca.c.php?operation=getAll', {
-        method: 'GET'
-      })
-      const data = await request.json()
-      return data
-    }
+    // async function obtenerMarcas() {
+    //   //PENDIENTE
+    //   const request = await fetch('../../app/controllers/marca.c.php?operation=getAll', {
+    //     method: 'GET'
+    //   })
+    //   const data = await request.json()
+    //   return data
+    // }
 
-    async function listarMarcas() {
-      listaMarcas = await obtenerMarcas()
-      if (listaMarcas.length > 0) {
-        tablaMarcas.innerHTML = ``
-        listaMarcas.forEach(element => {
-          tablaMarcas.innerHTML += `
-              <tr>
-                <td class='align-middle'>
-                  <a href='#' class='title' data-idmarca='${element.idmarca}'>
-                    ${element.marca}
-                  </a>
-                </td>
-                <td>${element.modelos}</td>
-                <td>
-                  <a href='#' title='Editar' data-idmarca='${element.idmarca}' class='btn btn-sm btn-outline-primary edit'><i class="fa-solid fa-pen"></i></a>
-                  <a href='#' title='Eliminar' data-idmarca='${element.idmarca}' class='btn btn-sm btn-outline-danger delete'><i class="fa-solid fa-trash"></i></a>
-                </td>
-              </tr>
-            `
-        });
-      }
-    }
+    // async function listarMarcas() {
+    //   listaMarcas = await obtenerMarcas()
+    //   if (listaMarcas.length > 0) {
+    //     tablaMarcas.innerHTML = ``
+    //     listaMarcas.forEach(element => {
+    //       tablaMarcas.innerHTML += `
+    //           <tr>
+    //             <td class='align-middle'>
+    //               <a href='#' class='title' data-idmarca='${element.idmarca}'>
+    //                 ${element.marca}
+    //               </a>
+    //             </td>
+    //             <td>${element.modelos}</td>
+    //             <td>
+    //               <a href='#' title='Editar' data-idmarca='${element.idmarca}' class='btn btn-sm btn-outline-primary edit'><i class="fa-solid fa-pen"></i></a>
+    //               <a href='#' title='Eliminar' data-idmarca='${element.idmarca}' class='btn btn-sm btn-outline-danger delete'><i class="fa-solid fa-trash"></i></a>
+    //             </td>
+    //           </tr>
+    //         `
+    //     });
+    //   }
+    // }
 
-    async function obtenerModelos(idmarca) {
-      //PENDIENTE
-      const request = await fetch(`../../app/controllers/modelo.c.php?operation=getAll&idmarca=${idmarca}`, {
-        method: 'GET'
-      })
-      const data = await request.json()
-      return data
-    }
+    // async function obtenerModelos(idmarca) {
+    //   //PENDIENTE
+    //   const request = await fetch(`../../app/controllers/modelo.c.php?operation=getAll&idmarca=${idmarca}`, {
+    //     method: 'GET'
+    //   })
+    //   const data = await request.json()
+    //   return data
+    // }
 
-    /**
-     * Renderiza la lista de modelos de una determinada marca en el card del lado derecho
-     */
-    async function listarModelos() {
-      const listaModelos = await obtenerModelos(idmarcaSeleccionada)
+    // /**
+    //  * Renderiza la lista de modelos de una determinada marca en el card del lado derecho
+    //  */
+    // async function listarModelos() {
+    //   const listaModelos = await obtenerModelos(idmarcaSeleccionada)
 
-      if (listaModelos.length == 0) {
-        tablaModelos.innerHTML = `
-          <tr>
-            <td colspan='5' class='text-center'>No hay modelos registrados</td>
-          </tr>
-          `;
-      }
+    //   if (listaModelos.length == 0) {
+    //     tablaModelos.innerHTML = `
+    //       <tr>
+    //         <td colspan='5' class='text-center'>No hay modelos registrados</td>
+    //       </tr>
+    //       `;
+    //   }
 
-      if (listaModelos.length > 0) {
-        tablaModelos.innerHTML = ``;
-        let contador = 1;
-        listaModelos.forEach(element => {
-          tablaModelos.innerHTML += `
-             <tr>
-              <td class='align-middle'>${contador}</td>
-              <td class='align-middle'>${element.tipovehiculo}</td>
-              <td class='align-middle'>${element.modelo}</td>
-              <td class='align-middle'>${element.anio}</td>
-              <td>
-                <a href='#' title='Vista previa' class='btn btn-sm btn-outline-primary view'><i class="fa-solid fa-camera"></i></a>
-                <a href='#' title='Editar' class='btn btn-sm btn-outline-primary edit'><i class="fa-solid fa-pen"></i></a>
-                <a href='#' title='Eliminar' data-idmodelo='${element.idmodelo}' class='btn btn-sm btn-outline-danger delete'><i class="fa-solid fa-trash"></i></a>
-              </td>
-            </tr>
-            `
-          contador++
-        });
-      }
-    }
+    //   if (listaModelos.length > 0) {
+    //     tablaModelos.innerHTML = ``;
+    //     let contador = 1;
+    //     listaModelos.forEach(element => {
+    //       tablaModelos.innerHTML += `
+    //          <tr>
+    //           <td class='align-middle'>${contador}</td>
+    //           <td class='align-middle'>${element.tipovehiculo}</td>
+    //           <td class='align-middle'>${element.modelo}</td>
+    //           <td class='align-middle'>${element.anio}</td>
+    //           <td>
+    //             <a href='#' title='Vista previa' class='btn btn-sm btn-outline-primary view'><i class="fa-solid fa-camera"></i></a>
+    //             <a href='#' title='Editar' class='btn btn-sm btn-outline-primary edit'><i class="fa-solid fa-pen"></i></a>
+    //             <a href='#' title='Eliminar' data-idmodelo='${element.idmodelo}' class='btn btn-sm btn-outline-danger delete'><i class="fa-solid fa-trash"></i></a>
+    //           </td>
+    //         </tr>
+    //         `
+    //       contador++
+    //     });
+    //   }
+    // }
 
-    async function obtenerTipoVehiculos() {
-      //PENDIENTE
-      const request = await fetch(`../../app/controllers/tipovehiculo.c.php?operation=getAll`, {
-        method: 'GET'
-      })
-      const data = await request.json()
-      return data
-    }
+    // async function obtenerTipoVehiculos() {
+    //   //PENDIENTE
+    //   const request = await fetch(`../../app/controllers/tipovehiculo.c.php?operation=getAll`, {
+    //     method: 'GET'
+    //   })
+    //   const data = await request.json()
+    //   return data
+    // }
 
-    async function listarTipoVehiculos() {
-      const listaVehiculos = await obtenerTipoVehiculos();
+    // async function listarTipoVehiculos() {
+    //   const listaVehiculos = await obtenerTipoVehiculos();
 
-      if (listaVehiculos.length > 0) {
-        listaVehiculos.forEach(element => {
-          tipoVehiculo.innerHTML += `
-            <option value='${element.idtipovehiculo}'>${element.tipovehiculo}</option>
-            `
-        });
-      }
-    }
+    //   if (listaVehiculos.length > 0) {
+    //     listaVehiculos.forEach(element => {
+    //       tipoVehiculo.innerHTML += `
+    //         <option value='${element.idtipovehiculo}'>${element.tipovehiculo}</option>
+    //         `
+    //     });
+    //   }
+    // }
 
-    //Al seleccionar un tipo de vehículo el enfoque va hacia la caja del modelo
-    tipoVehiculo.addEventListener("change", () => {
-      modelo.focus();
-    })
+    // //Al seleccionar un tipo de vehículo el enfoque va hacia la caja del modelo
+    // tipoVehiculo.addEventListener("change", () => {
+    //   modelo.focus();
+    // })
 
-    //Evento editar - eliminar marca
-    tablaMarcas.addEventListener("click", async (event) => {
-      const enlaceTitle = event.target.closest('.title')
-      const enlaceDelete = event.target.closest('.delete')
+    // //Evento editar - eliminar marca
+    // tablaMarcas.addEventListener("click", async (event) => {
+    //   const enlaceTitle = event.target.closest('.title')
+    //   const enlaceDelete = event.target.closest('.delete')
 
-      if (enlaceTitle) {
-        //console.log(enlaceTitle.innerHTML, enlaceTitle.getAttribute('data-idmarca'))
-        idmarcaSeleccionada = parseInt(enlaceTitle.getAttribute('data-idmarca'))
-        document.getElementById("modal-modelos-titulo").innerHTML = `${enlaceTitle.innerHTML} - nuevo modelo`
-        document.getElementById("marca-activa").innerHTML = enlaceTitle.innerHTML
-        listarModelos()
-      }
+    //   if (enlaceTitle) {
+    //     //console.log(enlaceTitle.innerHTML, enlaceTitle.getAttribute('data-idmarca'))
+    //     idmarcaSeleccionada = parseInt(enlaceTitle.getAttribute('data-idmarca'))
+    //     document.getElementById("modal-modelos-titulo").innerHTML = `${enlaceTitle.innerHTML} - nuevo modelo`
+    //     document.getElementById("marca-activa").innerHTML = enlaceTitle.innerHTML
+    //     listarModelos()
+    //   }
 
-      if (enlaceDelete) {
-        const idEliminar = parseInt(enlaceDelete.getAttribute("data-idmarca"))
+    //   if (enlaceDelete) {
+    //     const idEliminar = parseInt(enlaceDelete.getAttribute("data-idmarca"))
 
-        if (confirm("¿Eliminamos esta marca?")) {
-          //PENDIENTE
-          await fetch(`../../app/controllers/marca.c.php?operation=delete&idmarca=${idEliminar}`, {
-              method: 'GET'
-            })
-            .then(response => response.json())
-            .then(data => {
-              if (data.rows > 0) {
-                showToast("Eliminado correctamente", "SUCCESS", 2000)
-                listarMarcas()
-              } else {
-                showToast("No se pudo concretar el proceso", "INFO", 2500)
-              }
-            })
-        }
-      }
-    })
+    //     if (confirm("¿Eliminamos esta marca?")) {
+    //       //PENDIENTE
+    //       await fetch(`../../app/controllers/marca.c.php?operation=delete&idmarca=${idEliminar}`, {
+    //           method: 'GET'
+    //         })
+    //         .then(response => response.json())
+    //         .then(data => {
+    //           if (data.rows > 0) {
+    //             showToast("Eliminado correctamente", "SUCCESS", 2000)
+    //             listarMarcas()
+    //           } else {
+    //             showToast("No se pudo concretar el proceso", "INFO", 2500)
+    //           }
+    //         })
+    //     }
+    //   }
+    // })
 
-    //Eventos ver foto - editar - eliminar MODELOS
-    tablaModelos.addEventListener("click", async (event) => {
-      const enlaceDelete = event.target.closest('.delete')
+    // //Eventos ver foto - editar - eliminar MODELOS
+    // tablaModelos.addEventListener("click", async (event) => {
+    //   const enlaceDelete = event.target.closest('.delete')
 
-      if (enlaceDelete) {
-        const idEliminar = parseInt(enlaceDelete.getAttribute("data-idmodelo"))
+    //   if (enlaceDelete) {
+    //     const idEliminar = parseInt(enlaceDelete.getAttribute("data-idmodelo"))
 
-        if (confirm("¿Eliminamos este modelo?")) {
-          //PENDIENTE
-          await fetch(`../../app/controllers/modelo.c.php?operation=delete&idmarca=${idEliminar}`, {
-              method: 'GET'
-            })
-            .then(response => response.json())
-            .then(data => {
-              if (data.rows > 0) {
-                console.log(data) //REVISAR
-                showToast("Eliminado correctamente", "SUCCESS", 2000)
-                listarModelos()
-                listarMarcas()
-              } else {
-                showToast("No se pudo concretar el proceso", "INFO", 2500)
-              }
-            })
-        }
-      }
-    })
+    //     if (confirm("¿Eliminamos este modelo?")) {
+    //       //PENDIENTE
+    //       await fetch(`../../app/controllers/modelo.c.php?operation=delete&idmarca=${idEliminar}`, {
+    //           method: 'GET'
+    //         })
+    //         .then(response => response.json())
+    //         .then(data => {
+    //           if (data.rows > 0) {
+    //             console.log(data) //REVISAR
+    //             showToast("Eliminado correctamente", "SUCCESS", 2000)
+    //             listarModelos()
+    //             listarMarcas()
+    //           } else {
+    //             showToast("No se pudo concretar el proceso", "INFO", 2500)
+    //           }
+    //         })
+    //     }
+    //   }
+    // })
 
-    listarMarcas()
-    listarTipoVehiculos()
+    // listarMarcas()
+    // listarTipoVehiculos()
 
   });
 </script>

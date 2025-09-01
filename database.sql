@@ -612,7 +612,7 @@ CREATE TABLE amortizacionesoc (
 
 -- DB DE DEYANIRA:
 
-USE motorpark2;
+
 CREATE TABLE accesos (
 
   idaccesos 			INT NOT NULL AUTO_INCREMENT PRIMARY KEY,

@@ -64,7 +64,7 @@ class CotizacionController extends Controller
             }
         }
 
-        // Reestructura tu respuesta para que JS pueda hacer destructuring:
+
         echo json_encode([
             'cotizacion' => [
                 'idformato' => $idformato,
@@ -139,13 +139,6 @@ class CotizacionController extends Controller
         exit;
     }
 
-    public function calcularPagoMensual(float $importeTotal, float $inicial, int $meses): void
-    {
-        header('Content-Type: application/json');
-        $pagoMensual = $this->cotizacionModel->calcularPagoMensual($importeTotal, $inicial, $meses);
-        echo json_encode(["pago_mensual" => $pagoMensual]);
-        exit();
-    }
 
     public function store(): void
     {
@@ -202,4 +195,22 @@ class CotizacionController extends Controller
     }
 
 
+    public function calcularPagoMensual(float $importeTotal, float $inicial, int $meses): void
+    {
+        header('Content-Type: application/json');
+        $pagoMensual = $this->cotizacionModel->calcularPagoMensual($importeTotal, $inicial, $meses);
+        echo json_encode(["pago_mensual" => $pagoMensual]);
+        exit();
+    }
+
+
+
+    // Generar cronograma:
+    public function generarCronograma(float $importeTotal, float $inicial, int $meses): void
+    {
+        header('Content-Type: application/json');
+        $cronograma = $this->cotizacionModel->generarCronograma($importeTotal, $inicial, $meses);
+        echo json_encode($cronograma);
+        exit();
+    }
 }

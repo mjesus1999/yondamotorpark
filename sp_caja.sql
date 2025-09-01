@@ -1,6 +1,7 @@
 
 USE motorpark;
 
+SELECT * FROM vehiculos;
 DELIMITER $$
 CREATE PROCEDURE sp_getAll_contratos_caja()
 BEGIN 

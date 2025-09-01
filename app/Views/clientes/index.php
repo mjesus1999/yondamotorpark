@@ -69,11 +69,11 @@ include __DIR__ . '/../layout/header.php';
                                         <tr>
                                             <td><?= htmlspecialchars($numeroFila++) ?></td>
                                             <td><span class="text-body badge"><?= htmlspecialchars($personCliente['ubicacion']) ?></span></td>
-                                            <td> <span class="badge text-body"><?= htmlspecialchars($personCliente['direccion'] ?? 'No asignado') ?></span></td>
+                                            <td> <span class="badge text-body"><?= htmlspecialchars($personCliente['direccion'] ?? 'N/A') ?></span></td>
                                             <td> <span class="badge text-body"><?= htmlspecialchars($personCliente['nombrecompleto']) ?></td>
                                             <td> <span class="badge text-body"><?= htmlspecialchars($personCliente['tipodoc']) ?></span></td>
                                             <td><span class="badge text-body"><?= htmlspecialchars($personCliente['nrodoc']) ?></span> </td>
-                                            <td><span class="badge text-body"><?= htmlspecialchars($personCliente['email'] ?? 'No asignado') ?></span></td>
+                                            <td><span class="badge text-body"><?= htmlspecialchars($personCliente['email'] ?? 'N/A') ?></span></td>
                                             <td><span class="badge text-body"><?= htmlspecialchars($personCliente['telprimario']) ?></span></td>
                                             <td>
                                                 <div class="d-flex gap-1">

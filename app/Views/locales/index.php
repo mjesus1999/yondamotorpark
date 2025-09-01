@@ -62,9 +62,9 @@
                                             <td><?= htmlspecialchars($numeroFila++) ?></td>
                                             <td><?= htmlspecialchars($local['tienda']) ?></td>
                                             <td><?= htmlspecialchars($local['departamento'] . "/" . $local['provincia'] . '/' . $local['distrito']) ?></td>
-                                            <td><?= htmlspecialchars($local['direccion']) ?? 'No asignado' ?></td>
+                                            <td><?= $local['direccion'] === null ? 'N/A' : htmlspecialchars($local['direccion']) ?></td>
                                             <td><?= htmlspecialchars($local['responsable']) ?></td>
-                                            <td><?= $local['correo'] ? htmlspecialchars($local['correo']) : 'No asignado' ?></td>
+                                            <td><?= $local['correo'] ? htmlspecialchars($local['correo']) : 'N/A' ?></td>
                                             <td><?= htmlspecialchars($local['telefono']) ?></td>
                                             <td>
                                                 <a class="btn btn-sm btn-outline-primary btn-edit-local"

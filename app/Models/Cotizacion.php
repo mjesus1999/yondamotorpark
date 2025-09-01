@@ -6,6 +6,8 @@ namespace App\Models;
 use App\Core\Database;
 use PDO;
 use Exception;
+use DateTime;
+use DateInterval;
 
 class Cotizacion
 {
@@ -75,6 +77,8 @@ class Cotizacion
         return $pago;
     }
 
+
+
     public function calcularPagoMensual($importeTotal, $inicial, $meses)
     {
         $tasa = 0.65; //Tasa standard de YONDA 65%
@@ -83,6 +87,56 @@ class Cotizacion
         $cuota = round($this->Pago($tasaMensual, $meses, $montoFinanciar), 2);
         return $cuota;
     }
+
+
+    public function generarCronograma(float $importeTotal, float $inicial, int $meses): array
+    {
+        $tasaAnual = 0.65;
+
+        $tasaMensual = pow((1 + $tasaAnual), (1 / 12)) - 1;
+        // Monto a financiar
+        $montoFinanciar = $importeTotal - $inicial;
+
+        $valorCuota = round($this->Pago($tasaMensual, $meses, $montoFinanciar), 2);
+
+        $cronograma = [];
+
+        $saldoCapital = $montoFinanciar;
+        $fechaPago = new Datetime('now');
+
+        for ($i = 1; $i <= $meses; $i++) {
+            // Calcular interés para el mes
+            $interesExacto = $saldoCapital * $tasaMensual;
+            $interes = round($interesExacto, 2);
+
+            $abonoCapital = $valorCuota - $interes;
+
+            if ($i === $meses) {
+                $abonoCapital = $saldoCapital;
+                $interes = $valorCuota - $abonoCapital;
+            }
+
+            // Actualizar el saldo de capital
+            $saldoCapital -= $abonoCapital;
+            $saldoCapital = round($saldoCapital, 2);
+
+            // Formatear la fecha para cada pago
+            $fechaPago->add(new DateInterval('P1M'));
+
+            $cronograma[] = [
+                'item' => $i,
+                'fecha_pago' => $fechaPago->format('d/m/Y'),
+                'interes' => $interes,
+                'abono_capital' => $abonoCapital,
+                'valor_cuota' => $valorCuota,
+                'saldo_capital' => $saldoCapital,
+            ];
+        }
+
+        return $cronograma; // Retornamos el cronograma como array.
+    }
+
+
 
     // Inserta una nueva cotizacion
     public function create(array $d): void
@@ -128,5 +182,4 @@ class Cotizacion
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     } */
-
 }

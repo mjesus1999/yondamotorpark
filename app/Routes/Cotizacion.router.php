@@ -15,3 +15,5 @@ $router->add('POST', '/cotizaciones', 'CotizacionController', 'store');
 $router->add('GET', '/cotizacion/tipo-cambio', 'CotizacionController', 'tipoCambio');
 
 $router->add('GET', '/api/cotizacion/calcularpagomensual/{importeTotal}/{inicial}/{meses}', 'CotizacionController', 'calcularPagoMensual');
+
+$router->add('GET','/api/cotizacion/generar-cronograma/{importeTotal}/{inicial}/{meses}','CotizacionController','generarCronograma');

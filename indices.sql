@@ -1,5 +1,5 @@
 
-USE MOTORPARK2;
+USE MOTORPARK;
 
 -- AGREGANDO INDICES
 ALTER TABLE pagos ADD INDEX idx_idcronograma (idcronograma);
@@ -21,3 +21,8 @@ SELECT * FROM pagos;
 SELECT * FROM pagosOC;
 SELECT * FROM compras;
 SELECT * FROM clientes;
+
+SELECT * FROM cotizaciones;
+
+SELECT * FROM cronogramas;
+SHOW COLUMNS FROM  cotizaciones;
