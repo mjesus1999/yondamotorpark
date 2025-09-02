@@ -353,8 +353,8 @@ CREATE TABLE pagosOC (
 ) ENGINE = InnoDB;
 
 SELECT * FROM pagosOC;
-SELECT * FROM pagos;
-USE motorpark2;
+USE motorpark;
+
 --ALTER TABLE pagosOC MODIFY COLUMN fecha DATETIME NULL DEFAULT NOW();
 
 --ALTER TABLE pagosOC CHANGE COLUMN amortizacon amortizacion DECIMAL(10, 2) NOT NULL;
@@ -381,16 +381,16 @@ CONSTRAINT fk_idvehiculo_doc FOREIGN KEY (idvehiculo) REFERENCES vehiculos (idve
     CONSTRAINT uk_idvehiculo_doc UNIQUE (idvehiculo) -- Relación uno a uno
 ) ENGINE = INNODB;
 
-ALTER TABLE detordencompra
-ADD COLUMN estado ENUM('0', '1') NOT NULL DEFAULT '1';
+-- ALTER TABLE detordencompra
+-- ADD COLUMN estado ENUM('0', '1') NOT NULL DEFAULT '1';
 
 --ALTER TABLE detordencompra ADD COLUMN creado   DATETIME        NOT NULL DEFAULT NOW();
 
 --ALTER TABLE detordencompra ADD COLUMN modificado  DATETIME        NULL;
 
-show COLUMNS FROM detordencompra;
+-- show COLUMNS FROM detordencompra;
 
-SELECT * FROM detordencompra;
+-- SELECT * FROM detordencompra;
 
 CREATE TABLE compras (
     idcompra INT AUTO_INCREMENT PRIMARY KEY,

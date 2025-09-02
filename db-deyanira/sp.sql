@@ -1,3 +1,4 @@
+
 USE motorpark;
 -- CALL spu_vehiculos_registrar(43, 'Básico', 'seminuevo', 3, 'GRIS', 'CHASISX7777', 'YYY-777', 'ROT-777', 'SER-777', 'PEN', 30500, 2, 3);
 
@@ -58,3 +59,12 @@ BEGIN
 	-- Devolver el ID insertado
 	SELECT LAST_INSERT_ID() AS idvehiculo;
 END $$
+
+use motorpark;
+
+SELECT * FROM vehiculos;
+
+SELECT * FROM modelos WHERE idmodelo = 59;;
+SELECT * FROM marcas;
+SELECT * FROM modelos;
+SELECT * FROM detordencompra;

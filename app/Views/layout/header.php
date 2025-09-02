@@ -107,7 +107,7 @@ $allModules = [
               data-bs-target="#gestionVehiculos" aria-expanded="false">
               <i class="fa-solid fa-car pe-2"></i> Gestión de Vehículos
             </a>
-            <ul id="gestionVehiculos" class="sidebar-dropdown list-unstyled collapse ms-4"
+            <ul id="gestionVehiculos" class="sidebar-dropdown list-unstyled collapse ms-3"
               data-bs-parent="#sidebar">
               <li class="sidebar-item">
                 <a href="/marcas" class="sidebar-link">
@@ -117,6 +117,12 @@ $allModules = [
               <li class="sidebar-item">
                 <a href="/vehiculos" class="sidebar-link">
                   <i class="fa-solid fa-car-side pe-2"></i> Vehículos
+                </a>
+              </li>
+
+              <li class="sidebar-item">
+                <a href="/recepcionVehiculos" class="sidebar-link">
+                   <i class="bi bi-check-all  fs-5"></i> <i class="bi bi-car-front-fill pe-2 "></i>Recepción Vehículos
                 </a>
               </li>
             </ul>

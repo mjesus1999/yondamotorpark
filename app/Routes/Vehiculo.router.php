@@ -12,13 +12,20 @@ $router->add('GET', '/vehiculos/create', 'VehiculoController', 'create');
 
 //Modelos de vehiculo
 $router->add('GET', '/modelos/lista', 'ModeloController', 'getByMarcaYTipo');
+$router->add('GET', '/vehiculos/edit/{id}', 'VehiculoController', 'edit');
+
+// Ruta para ir a la vista de recepción de vehículos
+
+$router->add('GET','/recepcionVehiculos','VehiculoController','indexRecepcionVehiculos');
+    // MODIFICAR LUEGO PARA USA LE ID VEHICULO O ID CONCESIONARIOO.
+$router->add('GET','/recepcionVehiculos/edit/{idcompra}','VehiculoController','recepcionEdit');
+
 
 //registro del vehiculo:
 $router->add('POST', '/vehiculos/store', 'VehiculoController', 'store');
 //Eliminar vehiculo
 $router->add('POST', '/vehiculos/delete', 'VehiculoController', 'delete');
 
-$router->add('GET', '/vehiculos/edit/{id}', 'VehiculoController', 'edit');
 $router->add('POST', '/vehiculos/update', 'VehiculoController', 'update');
 
 // listar tipos por marca (GET)

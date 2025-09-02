@@ -16,6 +16,51 @@ class Vehiculo
   }
 
 
+  public function getAllOCompras(): array
+  {
+    $query = "CALL sp_getAll_OC_Compras()";
+    try {
+
+      $stmt = $this->db->prepare($query);
+      $stmt->execute();
+      $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+      return $result;
+    } catch (PDOException $error) {
+      error_log($error->getMessage());
+      return [];
+    }
+  }
+
+  public function getAllDatosRecepcion(int $idcompra): array
+  {
+
+    $query = "CALL sp_get_OC_details_for_recepcion(?)";
+
+    try {
+      $stmt = $this->db->prepare($query);
+      $stmt->bindParam(1, $idcompra, PDO::PARAM_INT);
+      $stmt->execute();
+
+      $infoCompra = $stmt->fetch(PDO::FETCH_ASSOC);
+      error_log("INFO_COMPRA: " . print_r($infoCompra, true));
+
+      $stmt->nextRowset();
+      $vehiculos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+      error_log("VEHICULOS: " . print_r($vehiculos, true));
+
+      $stmt->closeCursor();
+      return [
+        'info_compra' => $infoCompra,
+        'vehiculos' => $vehiculos
+      ];
+    } catch (PDOException $error) {
+      error_log("PDOException: " . $error->getMessage());
+      return [];
+    }
+  }
+
+
   // Se creará los vehículos para una orden de compra - Se mandará
 
   public function createVehiculoOC($params = []): int
@@ -40,7 +85,6 @@ class Vehiculo
       $idVehiculo = $stmt->fetch(PDO::FETCH_ASSOC);
       $stmt->closeCursor();
       return (int) $idVehiculo['last_id'];
-
     } catch (PDOException $error) {
       error_log($error->getMessage());
       return -1;
@@ -199,5 +243,4 @@ class Vehiculo
       ':idvehiculo' => $idvehiculo,
     ]);
   }
-
 }

@@ -47,6 +47,28 @@ class VehiculoController extends Controller
     );
   }
 
+  /**
+   * Método que muestra la vista para recepcionar los vehículos provenientes de una Orden de Compra (OC).
+   *
+   * @return void No retorna ningún valor; únicamente carga la vista correspondiente.
+   */
+  public function indexRecepcionVehiculos()
+  {
+    $data = $this->vehiculoModel->getAllOCompras();
+    $this->view('vehiculos.recepcion', ['data' => $data]);
+  }
+
+  /**
+   * Método que muestra la vista de editar los datos del vehículo
+   * 
+   * @return void No retorna ningun valor; únicamente carga la vista correspondiente
+   */
+  public function recepcionEdit($idcompra)
+  {
+    $idcompra = (int)$idcompra;
+    $datosRecepcion = $this->vehiculoModel->getAllDatosRecepcion($idcompra);
+    $this->view('vehiculos.recepcionEdit', $datosRecepcion);
+  }
 
   public function create(): void
   {
@@ -293,5 +315,4 @@ class VehiculoController extends Controller
       echo json_encode(['success' => false, 'error' => 'No se pudo crear el año']);
     }
   }
-
 }

@@ -44,6 +44,93 @@ END $$
 
 DELIMITER ;
 
+--SP PARA OBTENER LOS OC QUE SON COMPRAS.
+
+DROP PROCEDURE sp_getAll_OC_Compras;
+
+DELIMITER //
+
+CREATE PROCEDURE sp_getAll_OC_Compras()
+BEGIN
+    SELECT 
+        orden.idordencompra,
+        com.idcompra,
+        orden.serie AS serie_oc,
+        orden.emision AS fecha_emision_oc,
+        com.fechacompra,
+        com.numdocumento AS num_factura,
+        concesionario.nombrecomercial,
+        
+        CONCAT_WS(', ', tienda.direccion, dist.distrito, prov.provincia, dep.departamento) AS direccion_completa_concesionario,
+        (SELECT COUNT(iddetordencompra) FROM detordencompra WHERE idordencompra = orden.idordencompra AND estado = '1') AS cantidadvehiculos
+    FROM compras com
+    INNER JOIN ordenescompra orden ON com.idorden = orden.idordencompra
+    INNER JOIN tiendas tienda ON orden.idtienda = tienda.idtienda
+    INNER JOIN concesionarios concesionario ON tienda.idconcesionario = concesionario.idconcesionario
+    INNER JOIN distritos dist ON tienda.iddistrito = dist.iddistrito
+    INNER JOIN provincias prov ON dist.idprovincia = prov.idprovincia
+    INNER JOIN departamentos dep ON prov.iddepartamento = dep.iddepartamento
+    ORDER BY com.fechacompra DESC; 
+END //
+
+DELIMITER ;
+ CALL sp_getAll_OC_Compras();
+
+ SELECT * FROM compras;
+
+
+
+
+
+DROP PROCEDURE sp_get_OC_details_for_recepcion;
+
+DELIMITER //
+
+CREATE PROCEDURE sp_get_OC_details_for_recepcion(IN p_idcompra INT)
+BEGIN
+    -- Primer conjunto de resultados: Información del Concesionario y Datos de la OC
+    SELECT
+        concesionario.razonsocial AS razonsocial_concesionario,
+        com.fechacompra,
+        IFNULL(SUM(pagos.amortizacion), 0) AS total_amortizado,
+        
+        (SELECT IFNULL(SUM(doc.preciocompra), 0) FROM detordencompra doc WHERE doc.idordencompra = orden.idordencompra AND doc.estado = '1') * 1.18 AS totalcompra,
+       
+        ( (SELECT IFNULL(SUM(doc.preciocompra), 0) FROM detordencompra doc WHERE doc.idordencompra = orden.idordencompra AND doc.estado = '1') * 1.18 ) - IFNULL(SUM(pagos.amortizacion), 0) AS saldopendiente
+    FROM compras com
+    INNER JOIN ordenescompra orden ON com.idorden = orden.idordencompra
+    INNER JOIN tiendas tienda ON orden.idtienda = tienda.idtienda
+    INNER JOIN concesionarios concesionario ON tienda.idconcesionario = concesionario.idconcesionario
+    LEFT JOIN pagosOC pagos ON orden.idordencompra = pagos.idorden
+    WHERE com.idcompra = p_idcompra
+    GROUP BY
+        com.idcompra;
+
+    -- Segundo conjunto de resultados: Listado de Vehículos
+    SELECT
+        veh.idvehiculo,
+        modelo.modelo,
+        veh.version,
+        comb.combustible,
+        modelo.anio,
+        veh.chasis,
+        veh.placa,
+        veh.placarotativa,
+        veh.seriemotor,
+        veh.color
+    FROM detordencompra detoc
+    INNER JOIN compras com ON detoc.idordencompra = com.idorden
+    INNER JOIN vehiculos veh ON detoc.idvehiculo = veh.idvehiculo
+    INNER JOIN modelos modelo ON veh.idmodelo = modelo.idmodelo
+    INNER JOIN combustibles comb ON veh.idcombustible = comb.idcombustible
+    WHERE com.idcompra = p_idcompra AND detoc.estado = '1';
+END //
+
+DELIMITER ;
+CALL sp_get_OC_details_for_recepcion(11)
+
+
+
 
 DELIMITER //
 

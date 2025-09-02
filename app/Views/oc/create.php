@@ -497,6 +497,22 @@
                         return;
                     }
 
+                    // --- CORRECCIÓN AQUÍ ---
+                    // Obtener el idmodelo correcto basándose en el modelo Y el año seleccionados
+                    const modeloSeleccionadoTexto = modelos.options[modelos.selectedIndex].text;
+                    const anioSeleccionado = anios.value;
+
+                    const modeloAnioEncontrado = dataModelos.find(item =>
+                        item.modelo === modeloSeleccionadoTexto && item.anio === anioSeleccionado
+                    );
+
+                    if (!modeloAnioEncontrado) {
+                        alert("No se pudo encontrar el modelo y año seleccionado. Intente de nuevo.");
+                        return;
+                    }
+
+                    const idModeloCorrecto = modeloAnioEncontrado.idmodelo;
+
                     let idVehiculo = dataVehiculos.length;
                     const pregunta = (cantidad.value == 1) ?
                         "¿Agregamos este vehículo?" :
@@ -511,8 +527,8 @@
 
                         const vehiculo = {
                             idVehiculo,
-                            idmodelo: modelos.value,
-                            modelo_texto: modelos.options[modelos.selectedIndex].text,
+                            idmodelo: idModeloCorrecto, // Usamos el ID correcto que acabamos de encontrar
+                            modelo_texto: modeloSeleccionadoTexto,
                             marca: marcas.options[marcas.selectedIndex].text,
                             tipo: tipos.options[tipos.selectedIndex].text,
                             idcombustible: combustible.value,
@@ -527,20 +543,16 @@
                             serie_motor: document.querySelector(`#seri${i}`) ? document.querySelector(`#seri${i}`).value.trim() : ''
                         };
 
-
                         dataVehiculos.push(vehiculo);
                     }
 
                     renderizarTabla();
-
                     console.log("Vehículos agregados:", dataVehiculos);
 
-                    // Puedes cerrar el modal y resetear el formulario
                     formVehiculo.reset();
                     generadorInputsDinamicos(0);
                     modalVehiculo.hide();
                 });
-
 
                 // Función para renderizar la tabla 
 
@@ -827,6 +839,7 @@
 
                     const res = await fetch(`/api/getModeloByTipoMarca/${idmarca}/${idTipoVehiculo}`);
                     dataModelos = await res.json();
+                    console.log('DATA MODELOS:', dataModelos);
 
                     modelos.innerHTML = '<option>Seleccione</option>';
                     anios.innerHTML = '<option>Seleccione</option>';
@@ -850,23 +863,57 @@
                 });
 
 
+                // modelos.addEventListener('change', async (event) => {
+                //     const modeloSeleccionado = event.target.value;
+                //     // Filtrar todos los objetos con ese modelo
+                //     const modelosFiltrados = dataModelos.filter(item => item.idmodelo == modeloSeleccionado);
+
+                //     // Extraer años únicos
+                //     const aniosUnicos = [...new Set(modelosFiltrados.map(item => item.anio))];
+
+                //     // Limpiar el select de años
+                //     anios.innerHTML = '<option>Seleccione</option>';
+
+                //     if (aniosUnicos.length > 0) {
+                //         aniosUnicos.forEach(anio => {
+                //             anios.innerHTML += `<option value="${anio}">${anio}</option>`;
+                //         });
+                //     } else {
+                //         anios.innerHTML += `<option>No hay datos</option>`;
+                //     }
+                // });
+
+
                 modelos.addEventListener('change', async (event) => {
                     const modeloSeleccionado = event.target.value;
-                    // Filtrar todos los objetos con ese modelo
-                    const modelosFiltrados = dataModelos.filter(item => item.idmodelo == modeloSeleccionado);
 
-                    // Extraer años únicos
-                    const aniosUnicos = [...new Set(modelosFiltrados.map(item => item.anio))];
+                    // Primero, encuentra el objeto del modelo que fue seleccionado para obtener su nombre
+                    const objetoModelo = dataModelos.find(item => item.idmodelo == modeloSeleccionado);
 
-                    // Limpiar el select de años
-                    anios.innerHTML = '<option>Seleccione</option>';
+                    // Si se encontró el modelo, filtra el array completo por el nombre del modelo
+                    if (objetoModelo) {
+                        const modelosPorNombre = dataModelos.filter(item => item.modelo === objetoModelo.modelo);
 
-                    if (aniosUnicos.length > 0) {
-                        aniosUnicos.forEach(anio => {
-                            anios.innerHTML += `<option value="${anio}">${anio}</option>`;
-                        });
+                        console.log('MODELOS FILTRADOS POR NOMBRE: ', modelosPorNombre);
+
+                        // Extrae todos los años únicos de los resultados del filtro
+                        const aniosUnicos = [...new Set(modelosPorNombre.map(item => item.anio))];
+                        console.log('AÑOS UNICOS: ', aniosUnicos);
+
+                        // Limpia el select de años
+                        anios.innerHTML = '<option value="">Seleccione Año</option>';
+
+                        // Si hay años únicos, los añade al select
+                        if (aniosUnicos.length > 0) {
+                            aniosUnicos.forEach(anio => {
+                                anios.innerHTML += `<option value="${anio}">${anio}</option>`;
+                            });
+                        } else {
+                            anios.innerHTML += `<option value="">No hay años disponibles</option>`;
+                        }
                     } else {
-                        anios.innerHTML += `<option>No hay datos</option>`;
+                        // Maneja el caso en que no se encuentre el modelo
+                        anios.innerHTML = '<option value="">Seleccione Año</option>';
                     }
                 });
 
