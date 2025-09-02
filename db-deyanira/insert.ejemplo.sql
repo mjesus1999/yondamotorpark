@@ -1,6 +1,109 @@
+use motorpark;
+
+SELECT * FROM personas;
+SELECT * FROM contratoslaborales;
+SELECT * FROM colaboradores;
+SELECT * FROM clientes;
+
+CREATE VIEW vw_colaboradores_con_cargo AS
+SELECT 
+    col.idcolaborador,
+    p.nombres,
+    p.apellidos,
+    CONCAT(p.apellidos, ' ', p.nombres) AS nombrecompleto,
+    col.usernick,
+    c.cargo,
+    cl.fechainicio,
+    cl.fechafin,
+    col.habilitado,
+    col.ultimoacceso
+FROM colaboradores col
+INNER JOIN contratoslaborales cl ON col.idcontratolaboral = cl.idcontratolaboral
+INNER JOIN personas p ON cl.idpersona = p.idpersona
+INNER JOIN cargos c ON cl.idcargo = c.idcargo;
+
+INSERT INTO cargos (idarea, cargo) VALUES (5, 'Asesor de Ventas');
+
+INSERT INTO personas (apellidos, nombres, tipodoc, nrodoc, genero, fechanac, estadocivil, telprimario)
+VALUES 
+('Ríos Castillo', 'Carlos Eduardo', 'DNI', '70000001', 'M', '1990-01-01', 'SOL', '987111111'),
+('López Sánchez', 'Ana María', 'DNI', '70000002', 'F', '1992-02-02', 'SOL', '987222222'),
+('Torres Vega', 'Luis Alberto', 'DNI', '70000003', 'M', '1989-03-03', 'CAS', '987333333');
+
+INSERT INTO contratoslaborales (idpersona, idcargo, fechainicio, tipocontrato)
+VALUES 
+(15, 18, '2025-09-01', 'P'),
+(16, 18, '2025-09-01', 'P'),
+(17, 18, '2025-09-01', 'P');
+
+/*
+INSERT INTO colaboradores (idcontratolaboral, usernick, userpassword)
+VALUES 
+(25, 'carlosr', '$2y$10$ejemploHash1'), -- contraseñas de ejemplo
+(26, 'analopez', '$2y$10$ejemploHash2'),
+(27, 'luistorres', '$2y$10$ejemploHash3');
+*/
+
+INSERT INTO cotizaciones (
+    idformato, idcliente, idasesor, idvehiculo,
+    moneda, precioventa, inicial, numcuotas, valorcuota,
+    comentarios, fechaseguimiento
+)
+VALUES 
+-- Cotización 1 - Carlos Eduardo (colaborador 8) para cliente 1
+(1, 1, 9, 1, 'PEN', 45000.00, 9000.00, 24, 1700.00, 'Primera cotización de Carlos', '2025-09-05'),
+
+-- Cotización 2 - Ana María (colaborador 9) para cliente 2 (empresa)
+(1, 2, 10, 2, 'USD', 32000.00, 8000.00, 12, 2400.00, 'Primera cotización de Ana', '2025-09-06'),
+
+-- Cotización 3 - Luis Alberto (colaborador 10) para cliente 8
+(1, 8, 11, 3, 'PEN', 50000.00, 10000.00, 36, 1300.00, 'Primera cotización de Luis', '2025-09-07');
 
 
 
+
+CREATE OR REPLACE VIEW vwGetAllCotizacion AS
+SELECT
+  c.idcotizacion,
+  c.idformato,
+  c.idasesor,
+  fc.tipocotizacion,
+  COALESCE(
+    CASE WHEN cl.tipocliente = 'P' THEN CONCAT(p.nombres, ' ', p.apellidos) END,
+    e.razonsocial,
+    'Cliente no definido'
+  ) AS nombrecliente,
+  COALESCE(
+    CASE WHEN cl.tipocliente = 'P' THEN p.nrodoc END,
+    e.ruc,
+    ''
+  ) AS documento,
+  COALESCE(
+    CASE WHEN cl.tipocliente = 'P' THEN p.telprimario END,
+    e.telprimario,
+    ''
+  ) AS telefono,
+  ma.marca AS marcaVehiculo,
+  mo.modelo AS modeloVehiculo,
+  mo.anio,
+  v.color,
+  c.creado AS fechaRegistro,
+  c.vigenciadias,
+  DATE_ADD(c.creado, INTERVAL c.vigenciadias DAY) AS fecha_vencimiento
+FROM cotizaciones c
+JOIN clientes cl ON c.idcliente = cl.idcliente
+LEFT JOIN personas p ON cl.idpersona = p.idpersona
+LEFT JOIN empresas e ON cl.idempresa = e.idempresa
+JOIN vehiculos v ON c.idvehiculo = v.idvehiculo
+JOIN modelos mo ON v.idmodelo = mo.idmodelo
+JOIN marcas ma ON mo.idmarca = ma.idmarca
+JOIN formatocotizacion fc ON c.idformato = fc.idformato
+-- Filtramos para devolver solo las cotizaciones cuya fecha de vencimiento aún NO pasó
+WHERE DATE_ADD(c.creado, INTERVAL c.vigenciadias DAY) >= NOW();
+
+
+SELECT * FROM areas;
+SELECT * FROM cargos;
 SELECT * FROM contratoslaborales;
 SELECT * FROM colaboradores;
 SELECT * FROM personas;
@@ -105,9 +208,9 @@ INSERT INTO accesos (idcargo, modulo, permisos) VALUES
 (16, 'marcas', 1),
 (16, 'vehiculos', 1),
 (16, 'formatoCotizacion', 1),
-(16, 'cotizacion', 1);
-
-
+(16, 'cotizacion', 1),
+(16, 'usuarios', 1),
+(16, 'auth', 1);
 
 
 -- VEHICULOS INSERT (disponibilidad)

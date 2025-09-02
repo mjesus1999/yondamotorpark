@@ -189,7 +189,7 @@ class Usuario
     $sql = "SELECT restriccionhoraria FROM colaboradores WHERE idcolaborador = :id LIMIT 1";
     try {
       $stmt = $this->db->prepare($sql);
-      $stmt->bindValue(':id', $idcolaborador, \PDO::PARAM_INT);
+      $stmt->bindValue(':id', $idcolaborador, PDO::PARAM_INT);
       $stmt->execute();
       $val = $stmt->fetchColumn();
       return $val === false ? null : (string) $val;
@@ -206,8 +206,8 @@ class Usuario
     $sql = "UPDATE colaboradores SET restriccionhoraria = :v, modificado = NOW() WHERE idcolaborador = :id";
     try {
       $stmt = $this->db->prepare($sql);
-      $stmt->bindValue(':v', $valor, \PDO::PARAM_STR);
-      $stmt->bindValue(':id', $idcolaborador, \PDO::PARAM_INT);
+      $stmt->bindValue(':v', $valor, PDO::PARAM_STR);
+      $stmt->bindValue(':id', $idcolaborador, PDO::PARAM_INT);
       return $stmt->execute();
     } catch (\Throwable $e) {
       //log $e->getMessage()

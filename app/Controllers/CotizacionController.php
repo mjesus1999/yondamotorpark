@@ -25,16 +25,69 @@ class CotizacionController extends Controller
     {
         $this->authRequired();
 
-        $cotizaciones = $this->cotizacionModel->getAll();
+        // Obtener información del usuario logueado
+        $idasesor = $_SESSION['user']['id'] ?? null;
+        $idcargo = $_SESSION['user']['idcargo'] ?? null;
+
+        if (!$idasesor || !$idcargo) {
+            $_SESSION['error_message'] = "No se pudo identificar al usuario.";
+            header('Location: /login');
+            exit;
+        }
+
+        // Definir cargos que pueden ver todas las cotizaciones (supervisores/jefes)
+        $cargosSupervisores = [
+            1,  // Jefe de sistemas
+            8,  // Jefe de Logística
+            10, // Jefe de Recursos Humanos
+            13, // Jefe de Contabilidad
+            14, // Jefe de Marketing
+            16, // Jefe de Ventas
+            17  // Jefe de Caja
+        ];
+
+        // Verificar si el usuario puede ver todas las cotizaciones o solo las suyas
+        if (in_array($idcargo, $cargosSupervisores)) {
+            // Supervisores/Jefes ven todas las cotizaciones
+            $cotizaciones = $this->cotizacionModel->getAll();
+        } else {
+            // Asesores y otros cargos ven solo sus cotizaciones
+            $cotizaciones = $this->cotizacionModel->getAllByAsesor($idasesor);
+        }
 
         $this->view("cotizacion.index", [
-            'cotizaciones' => $cotizaciones
+            'cotizaciones' => $cotizaciones,
+            'puede_ver_todas' => in_array($idcargo, $cargosSupervisores)
         ]);
     }
 
     public function html2pdfReport($id): void
     {
-        //solo necesitamos el id para pasar los datos 
+        $this->authRequired();
+
+        // Obtener información del usuario logueado
+        $idasesor = $_SESSION['user']['id'] ?? null;
+        $idcargo = $_SESSION['user']['idcargo'] ?? null;
+        $cotizacion = $this->cotizacionModel->getById($id);
+
+        if (!$cotizacion) {
+            http_response_code(404);
+            $_SESSION['error_message'] = "Cotización no encontrada.";
+            header('Location: /cotizacion');
+            exit;
+        }
+
+        // Definir cargos supervisores
+        $cargosSupervisores = [1, 8, 10, 13, 14, 16, 17];
+
+        // Verificar permisos: supervisores pueden ver cualquier cotización, asesores solo las suyas
+        if (!in_array($idcargo, $cargosSupervisores) && $cotizacion['idasesor'] != $idasesor) {
+            http_response_code(403);
+            $_SESSION['error_message'] = "No tienes permisos para acceder a esta cotización.";
+            header('Location: /cotizacion');
+            exit;
+        }
+
         $this->view('pdf/cotizacion/cotizacion-html2pdf', ['id' => $id]);
     }
 
@@ -63,7 +116,6 @@ class CotizacionController extends Controller
                 }
             }
         }
-
 
         echo json_encode([
             'cotizacion' => [
@@ -194,7 +246,6 @@ class CotizacionController extends Controller
         exit;
     }
 
-
     public function calcularPagoMensual(float $importeTotal, float $inicial, int $meses): void
     {
         header('Content-Type: application/json');
@@ -202,8 +253,6 @@ class CotizacionController extends Controller
         echo json_encode(["pago_mensual" => $pagoMensual]);
         exit();
     }
-
-
 
     // Generar cronograma:
     public function generarCronograma(float $importeTotal, float $inicial, int $meses): void

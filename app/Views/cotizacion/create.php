@@ -120,9 +120,6 @@
         padding: 0.8rem;
         border-top: 2px solid #4a698c;
     }
-
-
-
 </style>
 <div class="container-fluid">
 
@@ -174,8 +171,7 @@
                                     <label for="documento">DNI / RUC</label>
                                 </div>
                                 <button type="button" id="btnBuscarCliente" class="btn btn-outline-success"
-                                    title="Buscar cliente en la DB"><i
-                                        class="bi bi-search"></i></button>
+                                    title="Buscar cliente en la DB"><i class="bi bi-search"></i></button>
                             </div>
                         </div>
 
@@ -392,8 +388,8 @@
                         <!-- botón de Cronograma -->
                         <div class="col-md-2">
                             <div class="form-floating h-100">
-                                <button class="btn btn-outline-primary w-100 h-100" data-bs-toggle="modal"
-                                    type="button" id="btn-generar-cronograma">
+                                <button class="btn btn-outline-primary w-100 h-100" data-bs-toggle="modal" type="button"
+                                    id="btn-generar-cronograma">
                                     Cronograma
                                 </button>
                             </div>
@@ -502,7 +498,8 @@
                                     <td><?= htmlspecialchars($v['color'] ?? 'N/A') ?></td>
                                     <td><?= htmlspecialchars($v['disponibilidad']) ?></td>
                                     <td><?= $v['placa'] === null ? 'N/A' : htmlspecialchars($v['placa']) ?></td>
-                                    <td><?= $v['placarotativa'] === null ? 'N/A' : htmlspecialchars($v['placarotativa']) ?></td>
+                                    <td><?= $v['placarotativa'] === null ? 'N/A' : htmlspecialchars($v['placarotativa']) ?>
+                                    </td>
                                     <td class="text-center">
                                         <button type="button" class="btn btn-sm btn-primary seleccionar-vehiculo-btn"
                                             data-idvehiculo="<?= htmlspecialchars($v['idvehiculo']) ?>"
@@ -525,7 +522,9 @@
     </div>
 </div>
 
-<div class="modal fade" id="modalCronograma" tabindex="-1" aria-labelledby="modalCronogramaLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+<!-- MODAL DE CRONOGRAMA -->
+<div class="modal fade" id="modalCronograma" tabindex="-1" aria-labelledby="modalCronogramaLabel" aria-hidden="true"
+    data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
@@ -635,7 +634,7 @@
                 [5, 10, 25, -1],
                 [5, 10, 25, "Todos"]
             ],
-           scrollX: true,
+            scrollX: true,
             language: {
                 url: "https://cdn.datatables.net/plug-ins/2.0.7/i18n/es-ES.json",
                 paginate: {
@@ -659,7 +658,7 @@
                 [5, 10, 25, -1],
                 [5, 10, 25, "Todos"]
             ],
-          scrollX: true,
+            scrollX: true,
             language: {
                 url: "https://cdn.datatables.net/plug-ins/2.0.7/i18n/es-ES.json",
                 paginate: {
@@ -721,7 +720,7 @@
     }
 
     function initEventosVehiculo() {
-        $('#tablaVehiculosModal').on('click', '.seleccionar-vehiculo-btn', async function() {
+        $('#tablaVehiculosModal').on('click', '.seleccionar-vehiculo-btn', async function () {
             const d = $(this).data();
             fillPaso2(d);
             clearConversion();
