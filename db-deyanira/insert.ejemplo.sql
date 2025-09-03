@@ -4,6 +4,7 @@ SELECT * FROM personas;
 SELECT * FROM contratoslaborales;
 SELECT * FROM colaboradores;
 SELECT * FROM clientes;
+SELECT * FROM cotizaciones;
 
 CREATE VIEW vw_colaboradores_con_cargo AS
 SELECT 

@@ -127,7 +127,10 @@ ORDER BY p.apellidos, p.nombres;
 -- VISTAS DE COTIZACION.PHP
 */
 
--- OBTENER TODAS LAS COTIZACIONES REALIZADAS / getAll
+-- OBTENER TODAS LAS COTIZACIONES REALIZADAS / getAll 
+/*
+-- (solo mostrando los que esten en los dias de vigenicas se mostrara)
+*/
 CREATE OR REPLACE VIEW vwGetAllCotizacion AS
 SELECT
   c.idcotizacion,
@@ -174,6 +177,7 @@ JOIN modelos mo ON v.idmodelo = mo.idmodelo
 JOIN marcas ma ON mo.idmarca = ma.idmarca
 JOIN formatocotizacion fc ON c.idformato = fc.idformato
 WHERE DATE_ADD(DATE(c.creado), INTERVAL c.vigenciadias DAY) >= CURDATE();
+
 /*
 CREATE OR REPLACE VIEW vwGetAllCotizacion AS
 SELECT
