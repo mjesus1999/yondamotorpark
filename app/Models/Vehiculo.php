@@ -32,6 +32,7 @@ class Vehiculo
     }
   }
 
+  
   public function getAllDatosRecepcion(int $idcompra): array
   {
 
@@ -43,7 +44,7 @@ class Vehiculo
       $stmt->execute();
 
       $infoCompra = $stmt->fetch(PDO::FETCH_ASSOC);
-      error_log("INFO_COMPRA: " . print_r($infoCompra, true));
+       error_log("INFO_COMPRA: " . print_r($infoCompra, true));
 
       $stmt->nextRowset();
       $vehiculos = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -242,5 +243,42 @@ class Vehiculo
       ':precioventa' => $data['precioventa'] ?? 0,
       ':idvehiculo' => $idvehiculo,
     ]);
+  }
+
+
+  /**
+   * Método que actualizará los datos del vehículo: chasis, placa, color y disponibilidad.
+   *
+   * @param array $params Arreglo asociativo con los datos a actualizar.
+   * @return int Número de filas afectadas (0 si no se actualizó nada).
+   */
+  public function updateVehiculoRecepcionOc(array $params): int
+  {
+    $query = "CALL sp_vehiculo_update_recepcion_OC(:idvehiculo,:idlogistica,:idlocal,:chasis,:placa,:placarotativa,:seriemotor,:color,:disponibilidad)";
+
+    try {
+      $idUsuario = $_SESSION['user']['id'] ?? null;
+
+      $stmt = $this->db->prepare($query);
+      $stmt->execute([
+        ':idvehiculo' => $params['idvehiculo'],
+        ':idlogistica' => $idUsuario,
+        ':idlocal' => $params['idlocal'],
+        ':chasis' => $params['chasis'],
+        ':placa' => $params['placa'],
+        ':placarotativa' => $params['placarotativa'],
+        ':seriemotor' => $params['seriemotor'],
+        ':color' => $params['color'],
+        ':disponibilidad' => $params['disponibilidad']
+      ]);
+
+      $rowAffects = $stmt->fetch(PDO::FETCH_ASSOC);
+      $stmt->closeCursor();
+
+      return isset($rowAffects['filas_afectadas']) ? (int) $rowAffects['filas_afectadas'] : 0;
+    } catch (PDOException $error) {
+      error_log($error->getMessage());
+      return -1;
+    }
   }
 }

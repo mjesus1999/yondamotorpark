@@ -13,5 +13,7 @@ $router->add('POST', '/locales/delete/{id}', 'LocalController', 'delete');
 // API
 $router->add('GET', '/api/locales/{id}', 'LocalController', 'edit');
 
+$router->add('GET','/api/localesActivos','LocalController','apiGetLocales');
+
 
 

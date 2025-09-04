@@ -42,7 +42,6 @@ class CompraController extends Controller
 
         $registro = [
             'idorden' => $data['idorden'] ?? 0,
-            // 'idlogistica' => 2,
             'fechacompra' => $data['fechacompra'] ?? '',
             'tipodoc' => $data['tipodoc'] ?? '',
             'serie' => $data['serie'] ?? '',
@@ -52,7 +51,6 @@ class CompraController extends Controller
 
         $errores = [];
         $errores[] = Validador::campoObligatorio($registro['idorden'], 'Orden de Compra');
-        // $errores[] = Validador::campoObligatorio($registro['idlogistica'], 'Logística');
         $errores[] = Validador::campoObligatorio($registro['fechacompra'], 'Fecha de Compra');
         $errores[] = Validador::campoObligatorio($registro['tipodoc'], 'Tipo de Documento');
         $errores[] = Validador::campoObligatorio($registro['serie'], 'Serie');
@@ -74,7 +72,7 @@ class CompraController extends Controller
         }
 
         try {
-        
+
             $subdirectorio = '';
             switch ($registro['tipodoc']) {
                 case 'F':
@@ -114,14 +112,23 @@ class CompraController extends Controller
 
             $idCompra = $this->compraModel->create($registro);
 
-            echo json_encode([
-                'success' => true,
-                'message' => 'Compra registrada correctamente',
-                'id' => $idCompra
-            ]);
+            if ($idCompra > 0) {
+
+                echo json_encode([
+                    'success' => true,
+                    'message' => 'Compra registrada correctamente',
+                    'id' => $idCompra
+                ]);
+            } else {
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Error al registrar la compra: ',
+                    'id' => 0
+                ]);
+            }
         } catch (\Exception $e) {
             if (isset($rutaCompleta) && file_exists($rutaCompleta)) {
-                @unlink($rutaCompleta);
+                @unlink($rutaCompleta); // Rmover archivo
             }
 
             echo json_encode([

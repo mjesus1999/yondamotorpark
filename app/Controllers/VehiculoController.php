@@ -67,7 +67,9 @@ class VehiculoController extends Controller
   {
     $idcompra = (int)$idcompra;
     $datosRecepcion = $this->vehiculoModel->getAllDatosRecepcion($idcompra);
-    $this->view('vehiculos.recepcionEdit', $datosRecepcion);
+    $infoCompra = $datosRecepcion['info_compra'];
+    $vehiculos = $datosRecepcion['vehiculos'];
+    $this->view('vehiculos.recepcionEdit', ['info_compra' => $infoCompra, 'vehiculos'  => $vehiculos]);
   }
 
   public function create(): void
@@ -313,6 +315,71 @@ class VehiculoController extends Controller
     } else {
       http_response_code(500);
       echo json_encode(['success' => false, 'error' => 'No se pudo crear el año']);
+    }
+  }
+
+
+
+
+ 
+  public function updateVehiculoRecepcionOC()
+  {
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+      http_response_code(405);
+      echo json_encode(['success' => false, 'message' => 'Método no permitido']);
+      exit;
+    }
+
+    header('Content-Type: application/json');
+
+    $data = array_map([Validador::class, 'limpiar'], $_POST);
+
+    $registro = [
+      'idvehiculo' => $data['idvehiculo'],
+      'idlocal' => $data['idlocal'],
+      'chasis' => $data['chasis'],
+      'placa' => $data['placa'],
+      'placarotativa' => $data['placarotativa'],
+      'seriemotor' => $data['seriemotor'],
+      'color' => $data['color'],
+      'disponibilidad' => $data['disponibilidad']
+    ];
+    $errores = [];
+
+    $errores = [];
+    $errores[] = Validador::campoObligatorio($registro['idvehiculo'], 'Vehículo');
+    $errores[] = Validador::campoObligatorio($registro['idlocal'], 'Tienda');
+    $errores[] = Validador::campoObligatorio($registro['chasis'], 'chasis');
+    // $errores[] = Validador::campoObligatorio($registro['placa'], 'Placa');
+    $errores[] = Validador::campoObligatorio($registro['seriemotor'], 'Serie Motor');
+    $errores[] = Validador::campoObligatorio($registro['color'], 'Color');
+    $errores[] = Validador::campoObligatorio($registro['disponibilidad'], 'Disponibilidad');
+    // $errores[] = Validador::campoObligatorio($registro['placarotativa'], 'Placa Rotativa');
+    $errores = array_filter($errores);
+
+    if (!empty($errores)) {
+      echo json_encode([
+        'success' => false,
+        'message' => implode('<br>', $errores),
+      ]);
+      exit;
+    }
+
+    $rowAffects = $this->vehiculoModel->updateVehiculoRecepcionOc($registro);
+
+    if ($rowAffects > 0) {
+      echo json_encode([
+        'success' => true,
+        'message' => 'Se han actualizado los datos correctamente'
+      ]);
+      exit();
+    } else {
+      echo json_encode([
+        'success' => false,
+        'message' => 'No se pudo actualizar los datos',
+        'id' => 0
+      ]);
+      exit;
     }
   }
 }

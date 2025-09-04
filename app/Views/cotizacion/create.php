@@ -525,6 +525,7 @@
     </div>
 </div>
 
+
 <div class="modal fade" id="modalCronograma" tabindex="-1" aria-labelledby="modalCronogramaLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
@@ -534,7 +535,11 @@
             </div>
             <div class="modal-body">
                 <div class="d-flex justify-content-end mb-3">
-                    <button class="btn btn-sm btn-success" id="btn-excel" title="Generar cronograma en Excel">
+                     <button class="btn btn-sm btn-danger m-2" id="btn-pdf" title="Generar cronograma en PDF">
+                       <i class="bi bi-filetype-pdf"></i>
+                        PDF
+                    </button>
+                    <button class="btn btn-sm btn-success m-2" id="btn-excel" title="Generar cronograma en EXCEL">
                         <i class="bi bi-file-earmark-excel"></i>
                         Excel
                     </button>

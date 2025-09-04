@@ -26,3 +26,14 @@ SELECT * FROM cotizaciones;
 
 SELECT * FROM cronogramas;
 SHOW COLUMNS FROM  cotizaciones;
+
+SELECT * FROM locales;
+
+
+SELECT * FROM marcas;
+SELECT * FROM modelos;
+
+
+
+SELECT * FROM distritos;
+SELECT * FROM provincias;

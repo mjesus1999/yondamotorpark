@@ -7,6 +7,7 @@ $router->add('POST', '/vehiculosOC/store', 'VehiculoController', 'storeVehiculoO
 
 
 $router->add('GET', '/vehiculos', 'VehiculoController', 'index');
+
 $router->add('GET', '/vehiculos/create', 'VehiculoController', 'create');
 // $router->add('GET', '/vehiculos/edit/{id}','VehiculoController', 'edit');
 
@@ -16,9 +17,10 @@ $router->add('GET', '/vehiculos/edit/{id}', 'VehiculoController', 'edit');
 
 // Ruta para ir a la vista de recepción de vehículos
 
-$router->add('GET','/recepcionVehiculos','VehiculoController','indexRecepcionVehiculos');
-    // MODIFICAR LUEGO PARA USA LE ID VEHICULO O ID CONCESIONARIOO.
-$router->add('GET','/recepcionVehiculos/edit/{idcompra}','VehiculoController','recepcionEdit');
+$router->add('GET', '/recepcionVehiculos', 'VehiculoController', 'indexRecepcionVehiculos');
+
+
+$router->add('GET', '/recepcionVehiculos/edit/{idcompra}', 'VehiculoController', 'recepcionEdit');
 
 
 //registro del vehiculo:
@@ -33,3 +35,6 @@ $router->add('GET', '/api/getTipoVehiculoByMarca/{id}', 'TipovehiculoController'
 
 // agregar año (POST)
 $router->add('POST', '/vehiculos/agregarAnio', 'VehiculoController', 'agregarAnio');
+
+// Actualizar datos del vehículo recepcionado :
+$router->add('POST', '/update/vehiculoRecepcionado', 'VehiculoController', 'updateVehiculoRecepcionOC');

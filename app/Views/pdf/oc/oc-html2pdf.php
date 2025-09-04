@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Orden de Compra - YONDA PERÚ</title>
     <link rel="stylesheet" href="/assets/css/OC-reporte.css">
+   
 
 </head>
 
@@ -101,19 +102,19 @@
                 <table class="vehicles-table">
                     <thead>
                         <tr>
-                            <th style="width: 15%;">MARCA</th>
-                            <th style="width: 15%;">MODELO</th>
-                            <th style="width: 15%;">VERSIÓN</th>
-                            <th style="width: 12%;">COMBUSTIBLE</th>
+                            <th style="width: 10%;">MARCA</th>
+                            <th style="width: 10%;">MODELO</th>
+                            <th style="width: 10%;">VERSIÓN</th>
                             <th style="width: 8%;">AÑO</th>
-                            <th style="width: 10%;">COLOR</th>
-                            <th style="width: 10%;">CANTIDAD</th>
-                            <th style="width: 15%;">IMPORTE</th>
-
+                            <th style="width: 8%;">COLOR</th>
+                            <th style="width: 12%;">CHASIS</th>
+                            <th style="width: 11%;">PLACA</th>
+                            <th style="width: 11%;">PLACA R.</th>
+                            <th style="width: 12%;">SERIE MOTOR</th>
+                            <th style="width: 12%;">PRECIO INDIVIDUAL</th>
                         </tr>
                     </thead>
                     <tbody id="vehiculos-tbody">
-                        <!-- Los vehículos se cargarán dinámicamente -->
                     </tbody>
                 </table>
             </div>
@@ -175,7 +176,6 @@
 
 
     <script>
-
         // Función para obtener parámetros de la URL
         function getUrlParameter(name) {
             name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
@@ -213,7 +213,7 @@
                 const data = await response.json();
 
                 if (data && data.orden && Array.isArray(data.vehiculos)) {
-                    ocDetalles = data.vehiculos; // solo vehículos para agrupar
+                    ocDetalles = data.vehiculos;
                     cargarDatos(data.orden, data.vehiculos);
                     setTimeout(() => {
                         generarPDFAutomatico();
@@ -234,26 +234,6 @@
             }
         }
 
-        // Función para agrupar vehículos similares
-        function agruparVehiculos(vehiculos) {
-            const grupos = {};
-
-            vehiculos.forEach(vehiculo => {
-                const clave = `${vehiculo.marca}-${vehiculo.modelo}-${vehiculo.version}-${vehiculo.combustible}-${vehiculo.anio_modelo}-${vehiculo.color}`;
-
-                if (!grupos[clave]) {
-                    grupos[clave] = {
-                        vehiculo: vehiculo,
-                        cantidad: 0
-                    };
-                }
-                grupos[clave].cantidad++;
-            });
-
-            return Object.values(grupos);
-        }
-
-
         // Función para cargar los datos
         function cargarDatos(orden, vehiculos) {
             // Datos del encabezado
@@ -272,70 +252,55 @@
             document.getElementById('igv').textContent = `$ ${parseFloat(orden.totales.igv || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
             document.getElementById('total').textContent = `$ ${parseFloat(orden.totales.total || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
 
-            // Guardamos en variable global para poder agrupar y usar en otras funciones
+            // Guardamos en variable global
             ocDetalles = vehiculos;
             ocOrden = orden;
 
-            // Cargar vehículos agrupados
-            cargarVehiculosAgrupados();
+            // Cargar vehículos individualmente
+            cargarVehiculosIndividualmente();
         }
 
-        // Función para cargar vehículos agrupados
-        function cargarVehiculosAgrupados() {
+        // Función para cargar vehículos individualmente, una fila por cada uno
+        function cargarVehiculosIndividualmente() {
             const tbody = document.getElementById('vehiculos-tbody');
             tbody.innerHTML = '';
 
-            const vehiculosAgrupados = agruparVehiculos(ocDetalles);
-
-            if (vehiculosAgrupados.length === 0) {
+            if (ocDetalles.length === 0) {
                 return;
             }
 
-            // Si hay muchos vehículos, usar un enfoque diferente(Se podría poner precio unitario)
-            if (vehiculosAgrupados.length >= 5) {
-                cargarVehiculosConRowSpan(vehiculosAgrupados);
-            } else {
-                cargarVehiculosConRowSpan(vehiculosAgrupados);
-            }
-        }
-
-        // Función para cargar vehículos con rowSpan
-        function cargarVehiculosConRowSpan(vehiculosAgrupados) {
-            const tbody = document.getElementById('vehiculos-tbody');
-            tbody.innerHTML = '';
-
-            vehiculosAgrupados.forEach((grupo, index) => {
+            ocDetalles.forEach(vehiculo => {
                 const row = document.createElement('tr');
 
-                // Datos base
-                row.appendChild(createCell(grupo.vehiculo.marca));
-                row.appendChild(createCell(grupo.vehiculo.modelo));
-                row.appendChild(createCell(grupo.vehiculo.version));
-                row.appendChild(createCell(grupo.vehiculo.combustible));
-                row.appendChild(createCell(grupo.vehiculo.anio_modelo));
-                row.appendChild(createCell(grupo.vehiculo.color));
-                row.appendChild(createCell(grupo.cantidad));
+                // Datos del vehículo
+                row.appendChild(createCell(vehiculo.marca));
+                row.appendChild(createCell(vehiculo.modelo));
+                row.appendChild(createCell(vehiculo.version));
+                row.appendChild(createCell(vehiculo.anio_modelo));
+                row.appendChild(createCell(vehiculo.color));
 
-                // Importe total 
-                if (index === 0) {
-                    const totalCell = document.createElement('td');
-                    totalCell.style.textAlign = 'center';
-                    totalCell.style.fontWeight = 'bold';
-                    totalCell.style.fontSize = '11px';
-                    totalCell.style.verticalAlign = 'middle';
-                    totalCell.rowSpan = vehiculosAgrupados.length;
-                    totalCell.textContent = `$ ${parseFloat(ocOrden.totales.total).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
-                    row.appendChild(totalCell);
-                }
+                // Nuevos campos individuales
+                row.appendChild(createCell(vehiculo.chasis || ''));
+                row.appendChild(createCell(vehiculo.placa || ''));
+                row.appendChild(createCell(vehiculo.placa_rotativa || ''));
+                row.appendChild(createCell(vehiculo.serie_motor || ''));
+
+                // Precio individual del vehículo
+                const precioCell = document.createElement('td');
+                precioCell.textContent = `$ ${parseFloat(vehiculo.precio_unitario || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+                row.appendChild(precioCell);
+
                 tbody.appendChild(row);
             });
         }
+
 
         function createCell(text) {
             const cell = document.createElement('td');
             cell.textContent = text;
             return cell;
         }
+
         function generarPDFAutomatico() {
             const element = document.querySelector('.container');
             const loadingIndicator = document.getElementById('loading-indicator');
@@ -353,7 +318,6 @@
                     quality: 0.98
                 },
                 html2canvas: {
-                    
                     scale: 1.75,
                     useCORS: true,
                     windowWidth: document.documentElement.offsetWidth,
@@ -361,7 +325,7 @@
                 },
                 jsPDF: {
                     unit: 'in',
-                    format: 'letter', 
+                    format: 'letter',
                     orientation: 'portrait'
                 }
             };
@@ -369,7 +333,7 @@
             html2pdf().set(opt).from(element).save().then(() => {
                 console.log('PDF generado y descargado.');
                 setTimeout(() => {
-                    window.close(); 
+                    window.close();
                 }, 500);
             }).catch(error => {
                 console.error('Error al generar PDF:', error);

@@ -36,31 +36,31 @@ class LocalController extends Controller
         }
 
         $data = array_map([Validador::class, 'limpiar'], $_POST);
-        
+
         $registro = [
-            'tienda'      => $data['tienda'] ?? '' ,
-            'iddistrito'  => (int)($data['iddistrito'] ?? 0), 
+            'tienda'      => $data['tienda'] ?? '',
+            'iddistrito'  => (int)($data['iddistrito'] ?? 0),
             'idmotorpark' => (int)($data['idmotorpark'] ?? 0),
             'principal'   =>  $data['principal'] ?? '',
             'responsable' => $data['responsable'] ?? '',
             'correo' =>   !empty($data['correo']) ? $data['correo'] : null,
-            'direccion' => !empty($data['direccion']) ? $data['direccion']:null,  
+            'direccion' => !empty($data['direccion']) ? $data['direccion'] : null,
             'telefono' =>   $data['telefono'] ?? ''
         ];
 
-        
+
         $errores = [];
         $errores[] = Validador::campoObligatorio($registro['tienda'], 'Local');
         $errores[] = Validador::campoObligatorio($registro['iddistrito'], 'Distrito');
         $errores[] = Validador::campoObligatorio($registro['idmotorpark'], 'Tienda');
         $errores[] = Validador::campoObligatorio($registro['principal'], 'Es Principal');
         $errores[] = Validador::campoObligatorio($registro['responsable'], 'Responsable');
-       
+
         $errorTel = Validador::campoObligatorio($registro['telefono'], 'Teléfono');
         if ($errorTel) {
             $errores[] = $errorTel;
         } else {
-            $errores[] = Validador::telefonoValido($registro['telefono'],'Teléfono');
+            $errores[] = Validador::telefonoValido($registro['telefono'], 'Teléfono');
         }
 
         if (!empty($registro['correo'])) {
@@ -80,7 +80,7 @@ class LocalController extends Controller
             $_SESSION['success'] = 'Local agregado correctamente';
             $this->redirect('/locales');
             return $lastInsertId; // Retorna el ID insertado
-            
+
         } else {
             $this->view('locales.create', ['error' => 'Error al crear el local.']);
             return $lastInsertId;
@@ -148,17 +148,45 @@ class LocalController extends Controller
 
     public function delete(int $id): void
     {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') { 
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($this->localModel->disable($id) > 0) {
                 $this->redirect('/locales');
             } else {
-                
+
                 $this->redirect('/products?error=delete_failed');
             }
         } else {
-         
+
             http_response_code(405);
-            $this->view('errors.405'); 
+            $this->view('errors.405');
         }
+    }
+
+
+
+    /**
+     * Devuelve la lista de locales activos en formato JSON.
+     *
+     * Este endpoint actúa como API y retorna todos los locales activos,
+     * incluyendo sus campos principales (ID, nombre y dirección).
+     *
+     * Respuestas:
+     * - 200 OK: Retorna un array de locales en formato JSON.
+     * - 404 Not Found: Si no se encuentran locales, retorna un JSON vacío.
+     *
+     * @return void Imprime un JSON con la lista de locales o un array vacío.
+     */
+    public function apiGetLocales()
+    {
+        header('Content-Type: application/json');
+        $locales = $this->localModel->getAllLocales();
+
+        if ($locales) {
+            echo json_encode($locales);
+        } else {
+            http_response_code(404);
+            echo json_encode([]);
+        }
+        exit();
     }
 }
