@@ -5,6 +5,7 @@ use App\Core\Controller;
 use App\Models\Empresa;
 use App\Models\Cliente;
 use App\Helpers\Validador;
+use Exception;
 
 class EmpresaController extends Controller
 {
@@ -39,18 +40,18 @@ class EmpresaController extends Controller
         $data = array_map([Validador::class, 'limpiar'], $_POST);
 
         $empresa = [
-            'iddistrito'       => (int)($data['iddistrito'] ?? 0),
-            'razonsocial'      => $data['razonsocial'] ?? '',
-            'nombrecomercial'  => $data['nombrecomercial'] ?? '',
-            'ruc'              => $data['ruc'] ?? '',
-            'representante'    => $data['representante'] ?? '',
-            'email'            => !empty($data['email']) ? $data['email'] : null,
-            'direccion'        => $data['direccion'] ?? '',
-            'referencia'       => !empty($data['referencia']) ? $data['referencia'] : null,
-            'latitud'          => !empty($data['latitud']) ? $data['latitud'] : null,
-            'longitud'         => !empty($data['longitud']) ? $data['longitud'] : null,
-            'telprimario'      => $data['telprimario'] ?? '',
-            'telsecundario'    => !empty($data['telsecundario']) ? $data['telsecundario'] : null,
+            'iddistrito' => (int) ($data['iddistrito'] ?? 0),
+            'razonsocial' => $data['razonsocial'] ?? '',
+            'nombrecomercial' => $data['nombrecomercial'] ?? '',
+            'ruc' => $data['ruc'] ?? '',
+            'representante' => $data['representante'] ?? '',
+            'email' => !empty($data['email']) ? $data['email'] : null,
+            'direccion' => $data['direccion'] ?? '',
+            'referencia' => !empty($data['referencia']) ? $data['referencia'] : null,
+            'latitud' => !empty($data['latitud']) ? $data['latitud'] : null,
+            'longitud' => !empty($data['longitud']) ? $data['longitud'] : null,
+            'telprimario' => $data['telprimario'] ?? '',
+            'telsecundario' => !empty($data['telsecundario']) ? $data['telsecundario'] : null,
         ];
 
         $errores = [];
@@ -59,7 +60,7 @@ class EmpresaController extends Controller
         $errores[] = Validador::campoObligatorio($empresa['iddistrito'], 'Distrito');
         $errores[] = Validador::campoObligatorio($empresa['razonsocial'], 'Razón Social');
         $errores[] = Validador::campoObligatorio($empresa['nombrecomercial'], 'Nombre Comercial');
-  
+
         // Validación de RUC 
         $errorRuc = Validador::campoObligatorio($empresa['ruc'], 'RUC');
         if ($errorRuc) {
@@ -83,10 +84,10 @@ class EmpresaController extends Controller
             $errores[] = Validador::emailValido($empresa['email']);
         }
 
-        $errores = array_filter($errores); 
+        $errores = array_filter($errores);
 
         if (!empty($errores)) {
-            $this->view('/clientes/empresas.create',['error' => implode("<br>",$errores),'data' => $empresa]); 
+            $this->view('/clientes/empresas.create', ['error' => implode("<br>", $errores), 'data' => $empresa]);
             return -1;
         }
 
@@ -94,11 +95,11 @@ class EmpresaController extends Controller
             $this->view('/clientes/empresas.create', [
                 'error' => 'El RUC ingresado ya se encuentra registrado',
                 'data' => $empresa
-            ] );
+            ]);
 
             return -1;
         }
-        
+
         $idEmpresa = $this->empresaModel->create($empresa);
 
         if ($idEmpresa > 0) {
@@ -116,7 +117,7 @@ class EmpresaController extends Controller
 
                 $_SESSION['success'] = 'Cliente creado correctamente';
                 $this->redirect('/clientes/empresas');
-                 return $idCliente; // Se pudo agregar
+                return $idCliente; // Se pudo agregar
             } else {
                 $this->view('clientes/empresas.create', ['error' => 'Error al crear el cliente.']);
             }
@@ -139,7 +140,8 @@ class EmpresaController extends Controller
     }
     public function update(int $id): void
     {
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') return;
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST')
+            return;
 
         $data = array_map([Validador::class, 'limpiar'], $_POST);
 
@@ -209,6 +211,73 @@ class EmpresaController extends Controller
             $this->view('clientes/empresas.edit', [
                 'empresaCliente' => $empresaCliente,
                 'error' => 'Error al actualizar el cliente.'
+            ]);
+        }
+    }
+
+    /**
+     * Buscar empresa por RUC usando API externa
+     * @return void
+     */
+    public function searchByRUCApi(): void
+    {
+        header('Content-Type: application/json; charset=utf-8');
+
+        if (!in_array($_SERVER['REQUEST_METHOD'], ['GET', 'POST'])) {
+            echo json_encode(['success' => false, 'message' => 'Método no permitido']);
+            return;
+        }
+
+        $ruc = '';
+        if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+            $ruc = trim($_GET['ruc'] ?? '');
+        } else {
+            $ruc = trim($_POST['ruc'] ?? '');
+        }
+
+        if ($ruc === '') {
+            echo json_encode(['success' => false, 'message' => 'RUC es requerido']);
+            return;
+        }
+
+        // Primero buscar en la base de datos local
+        $empresaLocal = $this->empresaModel->searchByRUC($ruc);
+        if ($empresaLocal) {
+            echo json_encode([
+                'success' => true,
+                'source' => 'local',
+                'message' => 'Empresa encontrada en base de datos local',
+                'idempresa' => $empresaLocal['idempresa'],
+                'razonsocial' => $empresaLocal['razonsocial'],
+                'nombrecomercial' => $empresaLocal['nombrecomercial'],
+                'representante' => $empresaLocal['representante'],
+                'email' => $empresaLocal['email'],
+                'telprimario' => $empresaLocal['telprimario']
+            ]);
+            return;
+        }
+
+        // Si no existe localmente, buscar en API externa
+        try {
+            require_once __DIR__ . '/../Helpers/Api_ruc.php';
+
+            ob_start();
+            searchByRUC($ruc);
+            $apiResponse = ob_get_clean();
+
+            $responseData = json_decode($apiResponse, true);
+
+            if ($responseData && $responseData['success']) {
+                echo $apiResponse;
+            } else {
+                echo $apiResponse;
+            }
+
+        } catch (Exception $e) {
+            error_log('Error en búsqueda por API RUC: ' . $e->getMessage());
+            echo json_encode([
+                'success' => false,
+                'message' => 'Error interno del servidor: ' . $e->getMessage()
             ]);
         }
     }

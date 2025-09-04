@@ -703,11 +703,17 @@
             const data = await res.json();
 
             if (data.notFound) {
-                alert('Cliente no encontrado. Debes registrarlo primero en Clientes.');
-                hid.value = '';
-                document.getElementById('nombres').value = '';
-                document.getElementById('telprimario').value = '';
-                document.getElementById('telalternativo').value = '';
+                const confirmRedirect = confirm('Cliente no encontrado. ¿Desea ir a registrarlo ahora?');
+
+                if (confirmRedirect) {
+                    window.location.href = `/clientes/createpersonclient?dni=${encodeURIComponent(docValue)}`;
+                } else {
+                    // Limpiar campos si no quiere ir a registrar
+                    hid.value = '';
+                    document.getElementById('nombres').value = '';
+                    document.getElementById('telprimario').value = '';
+                    document.getElementById('telalternativo').value = '';
+                }
             } else if (data.error) {
                 alert(data.error);
             } else {
@@ -966,4 +972,30 @@
             showToast('Hubo un error al generar el cronograma de pagos.', 'ERROR', 1200);
         }
     });
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const tipo = document.getElementById("tipoDocumento");
+        const doc = document.getElementById("documento");
+
+        doc.setAttribute("maxlength", "8");
+        doc.placeholder = "DNI (8 dígitos)";
+
+        tipo.addEventListener("change", () => {
+            if (tipo.value === "dni") {
+                doc.setAttribute("maxlength", "8");
+                doc.placeholder = "DNI (8 dígitos)";
+                doc.value = "";
+            } else if (tipo.value === "ruc") {
+                doc.setAttribute("maxlength", "11");
+                doc.placeholder = "RUC (11 dígitos)";
+                doc.value = "";
+            }
+        });
+
+        // Solo números
+        doc.addEventListener("input", () => {
+            doc.value = doc.value.replace(/\D/g, "");
+        });
+    });
+
 </script>

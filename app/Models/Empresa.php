@@ -110,7 +110,7 @@ class Empresa
                 ':referencia' => $params['referencia'], // null
                 ':latitud' => $params['latitud'], // null
                 ':longitud' => $params['longitud'], // null
-                ':telprimario'  => $params['telprimario'],
+                ':telprimario' => $params['telprimario'],
                 ':telsecundario' => $params['telsecundario'] //null
 
             ));
@@ -171,6 +171,36 @@ class Empresa
 
         return $resultado['total'] > 0;
     }
+
+    /**
+     * Buscar empresa por RUC en la base de datos local
+     * @param string $ruc
+     * @return array|null
+     */
+    public function searchByRUC(string $ruc): ?array
+    {
+        $query = "SELECT 
+                    idempresa, 
+                    razonsocial, 
+                    nombrecomercial, 
+                    representante,
+                    email,
+                    telprimario
+                FROM empresas 
+                WHERE ruc = :ruc 
+                LIMIT 1";
+        try {
+            $stmt = $this->db->prepare($query);
+            $stmt->bindValue(':ruc', $ruc, PDO::PARAM_STR);
+            $stmt->execute();
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $row ?: null;
+        } catch (PDOException $e) {
+            //error_log('Error en búsqueda por RUC: ' . $e->getMessage());
+            return null;
+        }
+    }
+
 }
 
 
