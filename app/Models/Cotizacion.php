@@ -44,7 +44,7 @@ class Cotizacion
             $sql = "
           SELECT c.idcliente,
                  p.apellidos, p.nombres,
-                 p.telprimario, p.telalternativo, p.email
+                 p.telprimario, p.telalternativo, p.email, p.direccion
             FROM clientes c
             JOIN personas p ON p.idpersona = c.idpersona
            WHERE p.tipodoc = 'DNI'

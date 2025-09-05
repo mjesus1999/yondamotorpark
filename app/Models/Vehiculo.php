@@ -103,6 +103,7 @@ class Vehiculo
         mc.marca,
         tv.tipovehiculo,
         m.modelo,
+        m.anio,
         v.version,
         v.condicion,
         v.color,

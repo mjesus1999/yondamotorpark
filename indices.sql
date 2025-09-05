@@ -37,3 +37,30 @@ SELECT * FROM modelos;
 
 SELECT * FROM distritos;
 SELECT * FROM provincias;
+
+SELECT *  FROM vehiculos;
+SELECT * FROM modelos;
+
+SELECT 
+    v.idvehiculo,
+    mc.marca,
+    tv.tipovehiculo,
+    m.modelo,
+    m.anio,
+    v.version,
+    v.condicion,
+    v.color,
+    v.disponibilidad,
+    v.placa,
+    v.placarotativa,
+    c.idcombustible,
+    c.combustible,
+    v.moneda,
+    v.precioventa
+FROM vehiculos v
+INNER JOIN modelos m ON m.idmodelo = v.idmodelo
+INNER JOIN marcas mc ON mc.idmarca = m.idmarca
+INNER JOIN tipovehiculos tv ON tv.idtipovehiculo = m.idtipovehiculo
+INNER JOIN combustibles c ON c.idcombustible = v.idcombustible;
+
+

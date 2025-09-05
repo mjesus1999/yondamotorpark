@@ -46,6 +46,10 @@ DELIMITER ;
 USE motorpark;
 DROP PROCEDURE sp_getAll_OC_Compras;
 
+SELECT * FROM contratos;
+SELECT * FROM cronogramas;
+SELECT * FROM cotizaciones;
+SHOW COLUMNS FROM cotizaciones;
 
 DELIMITER //
 
@@ -60,8 +64,22 @@ BEGIN
         com.numdocumento AS num_factura,
         concesionario.nombrecomercial,
         CONCAT_WS(' / ',dep.departamento,prov.provincia,dist.distrito,  tienda.direccion) AS direccion_completa_concesionario,
-        COUNT(CASE WHEN veh.disponibilidad = 'proceso' THEN 1 ELSE NULL END) AS vehiculos_pendientes,
-        COUNT(CASE WHEN veh.disponibilidad = 'proceso' AND veh.chasis IS NOT NULL AND veh.seriemotor IS NOT NULL AND veh.placa IS NOT NULL THEN 1 ELSE NULL END) AS listos_para_liberar
+        COUNT(CASE 
+            WHEN veh.disponibilidad = 'proceso' 
+            AND (veh.chasis IS NULL OR TRIM(veh.chasis) = '' OR veh.seriemotor IS NULL OR TRIM(veh.seriemotor) = '')
+            THEN 1 
+            ELSE NULL 
+        END) AS vehiculos_pendientes,
+        COUNT(
+  CASE
+    WHEN veh.disponibilidad = 'proceso'
+     AND veh.chasis IS NOT NULL AND TRIM(veh.chasis) <> ''
+     AND veh.seriemotor IS NOT NULL AND TRIM(veh.seriemotor) <> ''
+    THEN 1
+    ELSE NULL
+  END
+) AS listos_para_liberar
+
     FROM
         compras AS com
     INNER JOIN
