@@ -1,6 +1,7 @@
 
 USE motorpark;
 
+DROP PROCEDURE  sp_compra_registrar;
 DELIMITER //
 
 CREATE PROCEDURE sp_compra_registrar(
@@ -9,7 +10,7 @@ IN idlogistica_ INT,
 IN fechacompra_ DATE,
 IN tipodoc_  VARCHAR(20),
 IN serie_  VARCHAR(10),
-IN numdocumento_ INT,
+IN numdocumento_ VARCHAR(30),
 IN rutadoc_		VARCHAR(200)
 )
 BEGIN

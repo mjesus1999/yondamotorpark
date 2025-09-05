@@ -54,6 +54,7 @@ class CotizacionController extends Controller
             // Asesores y otros cargos ven solo sus cotizaciones
             $cotizaciones = $this->cotizacionModel->getAllByAsesor($idasesor);
         }
+        error_log('COTIZACIONES: ' . json_encode($cotizaciones));
 
         $this->view("cotizacion.index", [
             'cotizaciones' => $cotizaciones,

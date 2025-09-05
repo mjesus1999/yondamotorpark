@@ -61,12 +61,6 @@
         border-top: none;
     }
 
-    .table-responsive-style {
-        border-radius: 0.5rem;
-        overflow: hidden;
-        border: 1px solid #e0e0e0;
-    }
-
     /* Alineación de columnas en la tabla de vehículos */
     #tablaVehiculosModal thead th:nth-child(1),
     #tablaVehiculosModal tbody td:nth-child(1),
@@ -98,20 +92,6 @@
         background-color: #27ae60;
         border-bottom: 2px solid #229954;
     }
-
-    #btn-excel {
-        background-color: #27ae60;
-        border-color: #27ae60;
-        font-weight: 500;
-        padding: 0.5rem 1rem;
-        border-radius: 0.25rem;
-        transition: background-color 0.3s ease;
-    }
-
-    #btn-excel:hover {
-        background-color: #229954;
-    }
-
     #tablaCronograma tfoot tr td {
         background-color: #e8eaf6;
         color: #2c3e50;
@@ -163,7 +143,7 @@
                             </div>
                         </div>
 
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <div class="input-group">
                                 <div class="form-floating">
                                     <input type="text" class="form-control" id="documento" name="documento"
@@ -175,12 +155,24 @@
                             </div>
                         </div>
 
+
                         <!-- Apellidos y Nombres -->
-                        <div class="col-md-7">
+                        <div class="col-md-4">
                             <div class="form-floating">
                                 <input type="text" class="form-control" placeholder="Apellidos y Nombres / Razón Social"
                                     id="nombres" name="nombres">
                                 <label for="nombres">Apellidos y Nombres / Razón Social</label>
+                            </div>
+                        </div>
+
+
+                        <div class="col-md-4">
+                            <div class="input-group">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="direccion" name="direccion"
+                                        placeholder="Dirección">
+                                    <label for="documento">Dirección</label>
+                                </div>
                             </div>
                         </div>
 
@@ -469,21 +461,22 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
             <div class="modal-body">
-                <div class="table-responsive-style ">
-                    <table class="table table-sm table-hover table-bordered mt-2" id="tablaVehiculosModal">
+                <div class="table-responsive p-2">
+                    <table class="table table-sm table-hover table-bordered mt-2 display nowrap" id="tablaVehiculosModal" style="width:100%">
                         <thead>
                             <tr>
                                 <th>#</th>
                                 <th>Marca</th>
-                                <th>Tipo Vehículo</th>
+                                <th>Tipo</th>
                                 <th>Modelo</th>
                                 <th>Versión</th>
                                 <th>Condición</th>
+                                <th>Año</th>
                                 <th>Color</th>
-                                <th>Disponibilidad</th>
+                                <th>Estado</th>
                                 <th>Placa</th>
-                                <th>Placa Rotativa</th>
-                                <th>Seleccionar</th>
+                                <th>Placa.R</th>
+                                <th style="width: 80px;">Acción</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -495,21 +488,24 @@
                                     <td><?= htmlspecialchars($v['modelo']) ?></td>
                                     <td><?= htmlspecialchars($v['version']) ?></td>
                                     <td><?= htmlspecialchars($v['condicion']) ?></td>
+                                    <td><?=  htmlspecialchars($v['anio'])?></td>
                                     <td><?= htmlspecialchars($v['color'] ?? 'N/A') ?></td>
                                     <td><?= htmlspecialchars($v['disponibilidad']) ?></td>
                                     <td><?= $v['placa'] === null ? 'N/A' : htmlspecialchars($v['placa']) ?></td>
                                     <td><?= $v['placarotativa'] === null ? 'N/A' : htmlspecialchars($v['placarotativa']) ?>
                                     </td>
                                     <td class="text-center">
-                                        <button type="button" class="btn btn-sm btn-primary seleccionar-vehiculo-btn"
+                                        <button type="button" class="btn btn-sm btn-success seleccionar-vehiculo-btn" 
                                             data-idvehiculo="<?= htmlspecialchars($v['idvehiculo']) ?>"
                                             data-precioventa="<?= htmlspecialchars($v['precioventa']) ?>"
                                             data-moneda="<?= htmlspecialchars($v['moneda']) ?>"
-                                            data-descripcion="<?= htmlspecialchars($v['marca'] . ' ' . $v['tipovehiculo'] . ' ' . $v['modelo'] . ' ' . $v['version'] . ' ' . $v['color'] . ' - ' . $v['combustible']) ?>"
+                                            data-descripcion="<?= htmlspecialchars($v['marca'] . ' / ' . $v['tipovehiculo'] . ' / ' . $v['modelo'] . ' / ' . $v['version'] . ' / ' . $v['color']. ' / '.  $v['combustible']. ' / ' .$v['anio']) ?>"
                                             data-placa="<?= htmlspecialchars($v['placa'] ?? 'N/A') ?>"
-                                            data-placarotativa="<?= htmlspecialchars(strip_tags($v['placarotativa'] ?? 'N/A')) ?>">
-                                            Seleccionar
+                                            data-placarotativa="<?= htmlspecialchars(strip_tags($v['placarotativa'] ?? 'N/A')) ?>"
+                                            title="Seleccionar vehículo">
+                                            <i class="fa-solid fa-check"></i>
                                         </button>
+                    
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
@@ -522,6 +518,7 @@
     </div>
 </div>
 
+
 <!-- MODAL DE CRONOGRAMA -->
 <div class="modal fade" id="modalCronograma" tabindex="-1" aria-labelledby="modalCronogramaLabel" aria-hidden="true"
     data-bs-backdrop="static" data-bs-keyboard="false">
@@ -532,13 +529,17 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
             <div class="modal-body">
-                <div class="d-flex justify-content-end mb-3">
-                    <button class="btn btn-sm btn-success" id="btn-excel" title="Generar cronograma en Excel">
+                <div class="d-flex justify-content-end mb-2">
+                    <button class="btn btn-sm btn-outline-danger me-2" id="btn-pdf" title="Generar cronograma en PDF">
+                        <i class="bi bi-filetype-pdf"></i>
+                        PDF
+                    </button>
+                    <button class="btn btn-sm btn-outline-success" id="btn-excel" title="Generar cronograma en EXCEL">
                         <i class="bi bi-file-earmark-excel"></i>
                         Excel
                     </button>
                 </div>
-                <div class="table-responsive-style p-2">
+                <div class="table-responsive p-2">
                     <table class="table table-sm table-bordered table-striped mt-2" id="tablaCronograma">
                         <thead>
                             <tr>
@@ -575,8 +576,17 @@
 
 <?php include __DIR__ . '/../layout/footer.php'; ?>
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js" defer></script>
+<!-- PDFMAKE MAS RECOMENDADO PARA PDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js" defer></script>
+<script src="/assets/js/cotizacion-cronograma-pdf/pdf.js" defer></script>
+
+<!----------------------------------------------->
 <script>
     let tipoCambioCache = null; //Guardaremos el tipo de cambio
+    const tablaCronograma = document.querySelector('#tablaCronograma');
+    const btnExcel = document.querySelector('#btn-excel');
+    const btnPDF = document.querySelector('#btn-pdf');
 
     // Función de utilidad para debouncing
     const debounce = (func, delay) => {
@@ -588,8 +598,7 @@
         };
     };
 
-    const btnExcel = document.querySelector('#btn-excel');
-    const tablaCronograma = document.querySelector('#tablaCronograma');
+
 
     function generarReporteExcel() {
         const dataTable = $('#tablaCronograma').DataTable();
@@ -618,9 +627,6 @@
         verificarUltimoClienteRegistrado();
     });
 
-    // $('#modalVehiculos').on('shown.bs.modal', function() {
-    //     initDataTable();
-    // });
 
     //Verificar y sugerir ultimo cliente registrado
     async function verificarUltimoClienteRegistrado() {
@@ -820,6 +826,7 @@
             const res = await fetch(`/cotizacion/buscarCliente?tipo=${tipoValue}&doc=${encodeURIComponent(docValue)}`);
             const data = await res.json();
 
+            console.log('DATA DE DNI: ', data);
             if (data.notFound) {
                 const confirmRedirect = confirm('Cliente no encontrado. ¿Desea ir a registrarlo ahora?');
 
@@ -833,6 +840,8 @@
                     document.getElementById('nombres').value = '';
                     document.getElementById('telprimario').value = '';
                     document.getElementById('telalternativo').value = '';
+                    document.getElementById('direccion').value = '';
+
                 }
             } else if (data.error) {
                 alert(data.error);
@@ -841,6 +850,7 @@
                 document.getElementById('nombres').value = `${data.apellidos} ${data.nombres}`.trim();
                 document.getElementById('telprimario').value = data.telprimario || '';
                 document.getElementById('telalternativo').value = data.telalternativo || '';
+                document.getElementById('direccion').value = `${data.direccion}` ?? ''; //Traer la dirección del cliente
             }
         });
     }
@@ -888,7 +898,7 @@
     }
 
     function initEventosVehiculo() {
-        $('#tablaVehiculosModal').on('click', '.seleccionar-vehiculo-btn', async function () {
+        $('#tablaVehiculosModal').on('click', '.seleccionar-vehiculo-btn', async function() {
             const d = $(this).data();
             fillPaso2(d);
             clearConversion();
@@ -1153,11 +1163,9 @@
                 doc.value = "";
             }
         });
-
         // Solo números
         doc.addEventListener("input", () => {
             doc.value = doc.value.replace(/\D/g, "");
         });
     });
-
 </script>

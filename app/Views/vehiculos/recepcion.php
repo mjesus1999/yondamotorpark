@@ -13,7 +13,7 @@
                     </ol>
                 </nav>
             </div>
-       
+
         </div>
     </div>
 
@@ -22,9 +22,9 @@
             <div class="card">
                 <div class="card-body">
 
-                   
+
                     <div class="table-responsive">
-                        <table class="table table-sm table-hover" >
+                        <table class="table table-sm table-hover">
                             <thead>
                                 <tr>
                                     <th>#</th>
@@ -33,7 +33,8 @@
                                     <th>Emisión OC</th>
                                     <th>Serie OC</th>
                                     <th>Fecha compra</th>
-                                    <th>Cant.Vehículos</th>
+                                    <th>Cant. Pendientes</th>
+                                    <th>Por / Liberar</th>
                                     <th>Acciones</th>
                                 </tr>
                             </thead>
@@ -51,11 +52,13 @@
                                             <td><?= htmlspecialchars($compras['direccion_completa_concesionario']) ?></td>
                                             <td><?= htmlspecialchars($compras['fecha_emision_oc']) ?></td>
                                             <td><?= htmlspecialchars($compras['serie_oc']) ?></td>
-                                            <td><?=  htmlspecialchars($compras['fechacompra'])  ?></td>
-                                            <td><?= htmlspecialchars($compras['cantidadvehiculos']) ?></td>
+                                            <td><?= htmlspecialchars($compras['fechacompra'])  ?></td>
+                                            <td><span class="badge bg-danger text-white"><?= htmlspecialchars($compras['vehiculos_pendientes']) ?> </span>
+                                                </td>
+                                            <td><span class="badge bg-info text-white"><?= htmlspecialchars($compras['listos_para_liberar']) ?></span></td>
                                             <td>
-                                                <a href="/recepcionVehiculos/edit/<?= htmlspecialchars($compras['idcompra']) ?>">
-                                                        <i class="bi bi-journal-check fs-4" class="text-primary"></i>
+                                                <a href="/recepcionVehiculos/edit/<?= htmlspecialchars($compras['idcompra']) ?>" title="Llevará a la vista de recepcioón de vehículos">
+                                                    <i class="fa-solid fa-book fs-5" style="color: #40cbf5ff;"></i>
                                                 </a>
                                             </td>
                                         </tr>
@@ -65,17 +68,17 @@
                         </table>
                     </div>
 
-               
+
                 </div>
             </div>
         </div>
     </div>
 
- 
 
-   
+
+
 </div>
 
 
-        
+
 <?php include __DIR__ . '/../layout/footer.php'; ?>

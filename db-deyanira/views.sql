@@ -103,6 +103,7 @@ FROM colaboradores col
 JOIN contratoslaborales cl ON cl.idcontratolaboral = col.idcontratolaboral
 JOIN personas p ON p.idpersona = cl.idpersona
 JOIN cargos cg ON cg.idcargo = cl.idcargo;
+
 -- VISTA PRUEBA (VISTA DE MOSTRAR CONTRATOS / SI SE DESHABILITA UN USUARIO PASA A SER UN CONTRATO SIN CUENTA)
 CREATE OR REPLACE VIEW vwContractsWithoutColaborador AS
 SELECT
@@ -152,15 +153,12 @@ SELECT
     e.telprimario,
     ''
   ) AS telefono,
-
   -- columnas históricas (compatibilidad)
   ma.marca AS marcaVehiculo,
   mo.modelo AS modeloVehiculo,
   mo.anio,
-
   -- nueva columna combinada: MARCA/MODELO/ANIO
-  CONCAT_WS('/', ma.marca, mo.modelo, mo.anio) AS vehiculo,
-
+  CONCAT_WS(' / ', ma.marca, mo.modelo, mo.anio) AS vehiculo,
   v.color,
   c.creado AS fechaRegistro,
   c.vigenciadias,
@@ -177,6 +175,12 @@ JOIN modelos mo ON v.idmodelo = mo.idmodelo
 JOIN marcas ma ON mo.idmarca = ma.idmarca
 JOIN formatocotizacion fc ON c.idformato = fc.idformato
 WHERE DATE_ADD(DATE(c.creado), INTERVAL c.vigenciadias DAY) >= CURDATE();
+
+
+
+USE motorpark;
+DROP VIEW vwGetAllCotizacion;
+SELECT * FROM cotizaciones;
 
 /*
 CREATE OR REPLACE VIEW vwGetAllCotizacion AS

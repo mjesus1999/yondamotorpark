@@ -400,7 +400,7 @@ CREATE TABLE compras (
     fecharecepcion DATE NULL,
     tipodoc ENUM('B', 'F') NOT NULL DEFAULT 'F' COMMENT 'Boleta o Factura', -- LA MAYORIA ES FACTURA
     serie VARCHAR(10) NOT NULL,
-    numdocumento INT NOT NULL,
+    numdocumento VARCHAR(30) NOT NULL,
     rutadoc VARCHAR(200) NULL, -- RUTA DEL PDF
     creado DATETIME NOT NULL DEFAULT NOW(),
     modificado DATETIME NULL,
@@ -461,7 +461,7 @@ CREATE TABLE cotizaciones (
     modificado DATETIME NULL,
     CONSTRAINT fk_idformato_cot FOREIGN KEY (idformato) REFERENCES formatocotizacion (idformato),
     CONSTRAINT fk_idcliente_cot FOREIGN KEY (idcliente) REFERENCES clientes (idcliente),
-    CONSTRAINT fk_idvehiculo_cot FOREIGN KEY (idvehiculo) REFERENCES vehiculos (idvehiculo),
+    CONSTRAINT fk_idvehiculo_cot FOREIGN KEY (idvehiculo) REFERENCES + (idvehiculo),
     CONSTRAINT fk_idcolventa_cot FOREIGN KEY (idasesor) REFERENCES colaboradores (idcolaborador)
 ) ENGINE = INNODB;
 
@@ -606,8 +606,8 @@ CREATE TABLE amortizacionesoc (
 ) ENGINE = INNODB;
 
 
-
-
+USE motorpark;
+SELECT * FROM amortizacionesoc
 
 
 -- DB DE DEYANIRA:

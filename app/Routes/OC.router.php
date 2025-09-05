@@ -24,5 +24,6 @@ $router->add('POST','/oc/updateEstado/{estado}/{idOC}','OrdenCompraController','
 //MOSTRAR LOS DETAALLES EN LA VISTA INDEX
 
 $router->add('GET','/api/oc/{id}','OrdenCompraController','searchtDetOCByIdOc');
+
 $router->add('GET','/api/oc/infoAutos/{id}','OrdenCompraController','searchInfoAutos');
 

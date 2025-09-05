@@ -104,13 +104,13 @@
                                     <label for="serie" class="form-label">
                                         <i class="bi bi-hash me-1"></i>Serie
                                     </label>
-                                    <input type="text" id="serie" name="serie" class="form-control" required>
+                                    <input type="text" id="serie" name="serie" class="form-control" required maxlength="10">
                                 </div>
                                 <div class="col-md-6">
                                     <label for="numero" class="form-label">
                                         <i class="bi bi-123 me-1"></i>Número
                                     </label>
-                                    <input type="text" id="numero" name="numero" class="form-control" required>
+                                    <input type="text" id="numero" name="numero" class="form-control" required maxlength="30">
                                 </div>
                                 <div class="col-md-6">
                                     <label for="rutadoc" class="form-label">
@@ -221,22 +221,12 @@
 
                 let html = '';
                 data.forEach((orden, index) => {
-                    const agrupados = {};
-                    orden.detalle.forEach(item => {
-                        const key = `${item.marca}|${item.modelo}|${item.version}|${item.combustible}|${item.anio}|${item.color}|${item.condicion}|${item.moneda}|${item.preciocompra}`;
-                        agrupados[key] = agrupados[key] || {
-                            ...item,
-                            cantidad: 0
-                        };
-                        agrupados[key].cantidad += 1;
-                    });
-
-                    const totalItems = Object.values(agrupados).reduce((sum, item) => sum + item.cantidad, 0);
-                    const subtotal = Object.values(agrupados).reduce((sum, item) => sum + (parseFloat(item.preciocompra) * item.cantidad), 0);
+                    // CÁLCULO DIRECTO DEL TOTAL Y CANTIDAD SIN AGRUPAR
+                    const totalItems = orden.detalle.length;
+                    const subtotal = orden.detalle.reduce((sum, item) => sum + parseFloat(item.preciocompra), 0);
                     const igv = subtotal * 0.18;
                     const total = subtotal + igv;
 
-                    // Verificar si esta orden está seleccionada
                     const isSelected = idOCCompra === orden.idordencompra.toString();
 
                     html += `
@@ -302,18 +292,9 @@
         });
 
         function mostrarDetalleEnModal(orden) {
-            const agrupados = {};
-            orden.detalle.forEach(item => {
-                const key = `${item.marca}|${item.modelo}|${item.version}|${item.combustible}|${item.anio}|${item.color}|${item.condicion}|${item.moneda}|${item.preciocompra}`;
-                agrupados[key] = agrupados[key] || {
-                    ...item,
-                    cantidad: 0
-                };
-                agrupados[key].cantidad += 1;
-            });
-
-            const totalItems = Object.values(agrupados).reduce((sum, item) => sum + item.cantidad, 0);
-            const subtotal = Object.values(agrupados).reduce((sum, item) => sum + (parseFloat(item.preciocompra) * item.cantidad), 0);
+            // CÁLCULOS DIRECTOS SIN AGRUPACIÓN
+            const totalItems = orden.detalle.length;
+            const subtotal = orden.detalle.reduce((sum, item) => sum + parseFloat(item.preciocompra), 0);
             const igv = subtotal * 0.18;
             const total = subtotal + igv;
 
@@ -348,15 +329,13 @@
                                 <th><i class="bi bi-arrow-repeat me-2"></i>Placa rotativa</th>
                                 <th><i class="bi bi-palette me-2"></i>Color</th>
                                 <th class="text-end"><i class="bi bi-currency-dollar me-2"></i>Precio</th>
-                                <th class="text-center"><i class="bi bi-hash me-2"></i>Cantidad</th>
-                                <th class="text-end"><i class="bi bi-calculator me-2"></i>Subtotal</th>
                             </tr>
                         </thead>
                         <tbody>`;
 
-            Object.values(agrupados).forEach(item => {
+            // Bucle sobre cada vehículo individual
+            orden.detalle.forEach(item => {
                 const precio = parseFloat(item.preciocompra);
-                const itemSubtotal = precio * item.cantidad;
                 html += `
                 <tr class="text-center">
                     <td class="fw-semibold">${item.marca}</td>
@@ -370,10 +349,6 @@
                     <td>${item.placarotativa ?? 'N/A'}</td>
                     <td>${item.color ?? 'N/A'}</td>
                     <td class="text-end">${item.moneda} ${precio.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
-                    <td class="text-center">
-                        <span class="badge bg-success text-light">${item.cantidad}</span>
-                    </td>
-                    <td class="text-end fw-bold">${item.moneda} ${itemSubtotal.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
                 </tr>`;
             });
 
@@ -381,15 +356,15 @@
                         </tbody>
                         <tfoot class="table">
                             <tr>
-                                <th colspan="12" class="text-end">Subtotal:</th>
+                                <th colspan="10" class="text-end">Subtotal:</th>
                                 <th class="text-end">${orden.detalle[0].moneda} ${subtotal.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</th>
                             </tr>
                             <tr>
-                                <th colspan="12" class="text-end">IGV (18%):</th>
+                                <th colspan="10" class="text-end">IGV (18%):</th>
                                 <th class="text-end">${orden.detalle[0].moneda} ${igv.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</th>
                             </tr>
                             <tr class="table-success">
-                                <th colspan="12" class="text-end fs-6">TOTAL:</th>
+                                <th colspan="10" class="text-end fs-6">TOTAL:</th>
                                 <th class="text-end fs-6">${orden.detalle[0].moneda} ${total.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</th>
                             </tr>
                         </tfoot>
@@ -401,41 +376,28 @@
             document.getElementById('modalOrdenContent').innerHTML = html;
         }
 
-
-
-        //  Función para los card de resumen que sde encunetran en la parte superior del form
-
+        // Función para los card de resumen
         function seleccionarOrden(idOrden, btnElement = null) {
             idOCCompra = idOrden;
             const orden = data.find(o => o.idordencompra.toString() === idOrden);
 
             // Mostrar resumen
             if (orden) {
-                const agrupados = {};
-                orden.detalle.forEach(item => {
-                    const key = `${item.marca}|${item.modelo}|${item.version}|${item.combustible}|${item.anio}|${item.color}|${item.condicion}|${item.moneda}|${item.preciocompra}`;
-                    agrupados[key] = agrupados[key] || {
-                        ...item,
-                        cantidad: 0
-                    };
-                    agrupados[key].cantidad += 1;
-                });
-
-                const totalItems = Object.values(agrupados).reduce((sum, item) => sum + item.cantidad, 0);
-                const subtotal = Object.values(agrupados).reduce((sum, item) => sum + (parseFloat(item.preciocompra) * item.cantidad), 0);
+                // CÁLCULOS DIRECTOS SIN AGRUPACIÓN
+                const totalItems = orden.detalle.length;
+                const subtotal = orden.detalle.reduce((sum, item) => sum + parseFloat(item.preciocompra), 0);
                 const igv = subtotal * 0.18;
                 const total = subtotal + igv;
 
                 document.getElementById('resumen-orden-numero').textContent = `#${orden.idordencompra}`;
                 document.getElementById('resumen-subtotal').textContent = `${orden.detalle[0].moneda} ${subtotal.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}`;
                 document.getElementById('resumen-igv').textContent = `${orden.detalle[0].moneda} ${igv.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}`;
-                document.getElementById('resumen-total').textContent = `${orden.detalle[0].moneda} ${total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-`;
+                document.getElementById('resumen-total').textContent = `${orden.detalle[0].moneda} ${total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
                 resumenContainer.classList.remove('d-none');
             }
 
-            // Actualizar botones y cards - 
+            // Actualizar botones y cards
             setTimeout(() => {
                 document.querySelectorAll('.card-orden').forEach(card => {
                     const cardId = card.dataset.id;
@@ -489,7 +451,7 @@
                 formData.append('rutadoc', rutadoc.files[0]);
             }
 
-            if (confirm('¿Está seguro de registrar esta compra?')) {
+            if (await ask('¿Estás seguro de regstrar esta compra?', 'Confirmar compra')) {
                 try {
                     const response = await fetch('/compras/store', {
                         method: 'POST',
@@ -513,12 +475,12 @@
                         sinOrdenes.classList.remove('d-none');
                         sinOrdenes.querySelector('p').textContent = 'Seleccione un concesionario para ver las órdenes';
                     } else {
-                        showToast(result.message, 'WARNING', 1200);
+                        showToast(result.message, 'ERROR', 1200);
                     }
 
                 } catch (error) {
                     console.error(error);
-                    showToast(error.message || 'Error al registrar la compra', 'WARNING', 1200);
+                    showToast(error.message || 'Error al registrar la compra', 'ERROR', 1200);
                 }
             }
         });

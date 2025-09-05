@@ -5,8 +5,6 @@ namespace App\Controllers;
 use App\Core\Controller;
 use App\Helpers\Validador;
 use App\Models\Tienda;
-use Dotenv\Parser\Value;
-
 class TiendaController extends Controller
 {
 
@@ -130,7 +128,7 @@ class TiendaController extends Controller
         // Email solo si no está vacío
         if (!empty($registro['email'])) {
             
-            $errores[] = Validador::emailValido($registro['email'],'Correo');
+            $errores[] = Validador::emailValido($registro['email']);
         }
 
         $errores = array_filter($errores);

@@ -1,6 +1,41 @@
 
 USE motorpark;
 
+
+DROP PROCEDURE IF EXISTS sp_vehiculo_update_recepcion_OC;
+DELIMITER //
+CREATE PROCEDURE sp_vehiculo_update_recepcion_OC( 
+  IN idvehiculo_ INT,
+  IN idlogistica_ INT,
+  IN idlocal_ INT,
+  IN chasis_ VARCHAR(30),
+  IN placa_ VARCHAR(10),
+  IN placarotativa_ VARCHAR(10),
+  IN seriemotor_ VARCHAR(20),
+  IN color_ VARCHAR(30),
+  IN disponibilidad_ VARCHAR(25)
+)
+BEGIN
+  UPDATE vehiculos 
+  SET 
+    idlogistica = idlogistica_,
+    idlocal = idlocal_,
+    chasis = chasis_,
+    placa = NULLIF(placa_,''),
+    placarotativa = NULLIF(placarotativa_, ''),
+    seriemotor = seriemotor_,
+    color = color_,
+    disponibilidad = disponibilidad_,
+    modificado = NOW()
+  WHERE idvehiculo = idvehiculo_;
+
+  SELECT ROW_COUNT() AS filas_afectadas;
+END //
+
+DELIMITER ;
+
+SELECT * FROM vehiculos WHERE idvehiculo = 99;
+
 DELIMITER //
 
 CREATE PROCEDURE sp_vehiculo_OC_registrar(

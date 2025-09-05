@@ -55,6 +55,31 @@ class Local
         }
     }
 
+    /**
+     * Obtiene todos los locales activos desde la base de datos.
+     *
+     * Este método invoca el procedimiento almacenado `sp_getAll_locales` para traer la lista de locales
+     * activos, incluyendo únicamente los campos: ID, nombre y dirección.
+     *
+     * @return array<int, array<string,string>> Lista de locales activos en formato:
+     * [
+     *   ['id' => '1', 'local' => 'Motorpark/Ica/Chicnha/Chincha Alta',],
+     * ]
+     * En caso de error, retorna un array vacío.
+     */
+    public function getAllLocales(): array
+    {
+        $query = "CALL sp_getAll_locales()";
+        try {
+            $stmt = $this->db->prepare($query);
+            $stmt->execute();
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            return $result;
+        } catch (PDOException $error) {
+            error_log($error->getMessage());
+            return [];
+        }
+    }
 
 
 
