@@ -80,8 +80,32 @@ class PersonaController extends Controller
             $idCliente = $this->clienteModel->create($registroCliente);
 
             if ($idCliente > 0) {
-                $_SESSION['success'] = '¡Cliente creado exitosamente!';
+                /* $_SESSION['success'] = '¡Cliente creado exitosamente!';
                 $this->redirect('/clientes');
+                return $idCliente; */
+                
+                //Nuevo para llevar el DNI de la ultima persona en cliente
+                $_SESSION['ultimo_cliente_registrado'] = [
+                    'idcliente' => $idCliente,
+                    'nrodoc' => $registroPersona['nrodoc'],
+                    'tipodoc' => $registroPersona['tipodoc'],
+                    'nombres' => $registroPersona['nombres'],
+                    'apellidos' => $registroPersona['apellidos'],
+                    'telprimario' => $registroPersona['telprimario'],
+                    'telalternativo' => $registroPersona['telalternativo'],
+                    'timestamp' => time() // Para verificar si es reciente
+                ];
+
+                $_SESSION['success'] = '¡Cliente creado exitosamente!';
+
+                // Verificar si viene desde cotización
+                $returnTo = $_GET['return_to'] ?? '/clientes';
+                if ($returnTo === 'cotizacion') {
+                    $this->redirect('/cotizacion/create');
+                } else {
+                    $this->redirect('/clientes');
+                }
+
                 return $idCliente;
             } else {
                 $this->view('clientes.create', ['error' => 'Error al crear el cliente.']);

@@ -613,11 +613,129 @@
         initEventosCliente();
         initEventosVehiculo();
         initModalRequisitos();
+
+        //Verificar si hay un cliente recien registrado
+        verificarUltimoClienteRegistrado();
     });
 
     // $('#modalVehiculos').on('shown.bs.modal', function() {
     //     initDataTable();
     // });
+
+    //Verificar y sugerir ultimo cliente registrado
+    async function verificarUltimoClienteRegistrado() {
+        try {
+            const response = await fetch('/api/ultimo-cliente-registrado');
+            const data = await response.json();
+
+            if (data.success && data.cliente) {
+                const cliente = data.cliente;
+                const tiempoTranscurrido = Math.floor((Date.now() / 1000) - cliente.timestamp);
+
+                // Solo mostrar si el registro es reciente (menos de 30 minutos)
+                if (tiempoTranscurrido < 1800) {
+                    mostrarSugerenciaUltimoCliente(cliente);
+                }
+            }
+        } catch (error) {
+            console.log('No hay cliente reciente para sugerir');
+        }
+    }
+
+    //Mostrar modal de sugerencia
+    function mostrarSugerenciaUltimoCliente(cliente) {
+        const modalHtml = `
+            <div class="modal fade" id="modalSugerenciaCliente" tabindex="-1" data-bs-backdrop="static">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content border-primary">
+                        <div class="modal-header bg-primary text-white">
+                            <h5 class="modal-title">
+                                <i class="bi bi-person-plus-fill me-2"></i>
+                                Cliente Recién Registrado
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body p-4">
+                            <div class="alert alert-info d-flex align-items-center mb-3" role="alert">
+                                <i class="bi bi-info-circle-fill me-2"></i>
+                                <div>Detectamos que acabas de registrar un cliente</div>
+                            </div>
+                            
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6 class="card-title text-primary">
+                                        <i class="bi bi-person-badge me-2"></i>
+                                        Datos del Cliente
+                                    </h6>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <strong>Documento:</strong><br>
+                                            <span class="text-muted">${cliente.tipodoc} ${cliente.nrodoc}</span>
+                                        </div>
+                                        <div class="col-6">
+                                            <strong>Teléfono:</strong><br>
+                                            <span class="text-muted">${cliente.telprimario}</span>
+                                        </div>
+                                    </div>
+                                    <div class="mt-2">
+                                        <strong>Nombre completo:</strong><br>
+                                        <span class="text-primary fw-semibold">${cliente.apellidos} ${cliente.nombres}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-3 text-center">
+                                <p class="mb-3">¿Deseas usar este cliente para la cotización?</p>
+                                <div class="d-flex gap-2 justify-content-center">
+                                    <button type="button" class="btn btn-primary" onclick="usarClienteSugerido(${JSON.stringify(cliente).replace(/"/g, '&quot;')})">
+                                        <i class="bi bi-check-circle me-1"></i>Sí
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                                        <i class="bi bi-x-circle me-1"></i>No
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Insertar modal en el DOM
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+        // Mostrar modal después de un breve delay
+        setTimeout(() => {
+            const modal = new bootstrap.Modal(document.getElementById('modalSugerenciaCliente'));
+            modal.show();
+
+            // Limpiar modal cuando se cierre
+            document.getElementById('modalSugerenciaCliente').addEventListener('hidden.bs.modal', function () {
+                this.remove();
+            });
+        }, 500);
+    }
+
+    //Usar cliente sugerido
+    function usarClienteSugerido(cliente) {
+        // Llenar campos del formulario
+        document.getElementById('tipoDocumento').value = cliente.tipodoc.toLowerCase();
+        document.getElementById('documento').value = cliente.nrodoc;
+        document.getElementById('idcliente').value = cliente.idcliente;
+        document.getElementById('nombres').value = `${cliente.apellidos} ${cliente.nombres}`;
+        document.getElementById('telprimario').value = cliente.telprimario;
+        document.getElementById('telalternativo').value = cliente.telalternativo || '';
+
+        // Cerrar modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('modalSugerenciaCliente'));
+        modal.hide();
+
+        // Mostrar mensaje de éxito
+        showToast('Cliente cargado correctamente', 'SUCCESS', 2000);
+
+        // Limpiar sesión del último cliente
+        fetch('/api/limpiar-ultimo-cliente', { method: 'POST' });
+    }
 
     function initDataTable() {
         if ($.fn.DataTable.isDataTable('#tablaVehiculosModal')) {
@@ -706,7 +824,9 @@
                 const confirmRedirect = confirm('Cliente no encontrado. ¿Desea ir a registrarlo ahora?');
 
                 if (confirmRedirect) {
-                    window.location.href = `/clientes/createpersonclient?dni=${encodeURIComponent(docValue)}`;
+                    //window.location.href = `/clientes/createpersonclient?dni=${encodeURIComponent(docValue)}`;
+                    const returnUrl = `/clientes/createpersonclient?return_to=cotizacion&dni=${encodeURIComponent(docValue)}&tipo=${encodeURIComponent(tipoValue)}`;
+                    window.location.href = returnUrl;
                 } else {
                     // Limpiar campos si no quiere ir a registrar
                     hid.value = '';
@@ -723,6 +843,48 @@
                 document.getElementById('telalternativo').value = data.telalternativo || '';
             }
         });
+    }
+
+    //Copiar al portapapeles (funcionalidad extra)
+    function copiarAlPortapapeles(texto) {
+        if (navigator.clipboard && window.isSecureContext) {
+            // Método moderno para navegadores compatibles
+            navigator.clipboard.writeText(texto).then(() => {
+                showToast('Texto copiado al portapapeles', 'SUCCESS', 1500);
+            }).catch(err => {
+                console.error('Error al copiar:', err);
+                copiarConMetodoFallback(texto);
+            });
+        } else {
+            // Método fallback para navegadores más antiguos
+            copiarConMetodoFallback(texto);
+        }
+    }
+
+    //Metodo fallback para copiar
+    function copiarConMetodoFallback(texto) {
+        const textArea = document.createElement('textarea');
+        textArea.value = texto;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        textArea.style.top = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+
+        try {
+            const exitoso = document.execCommand('copy');
+            if (exitoso) {
+                showToast('Texto copiado al portapapeles', 'SUCCESS', 1500);
+            } else {
+                showToast('No se pudo copiar el texto', 'ERROR', 2000);
+            }
+        } catch (err) {
+            console.error('Error al copiar:', err);
+            showToast('Error al copiar texto', 'ERROR', 2000);
+        } finally {
+            document.body.removeChild(textArea);
+        }
     }
 
     function initEventosVehiculo() {

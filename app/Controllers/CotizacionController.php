@@ -187,7 +187,19 @@ class CotizacionController extends Controller
         $data = $this->cotizacionModel->getClienteByDoc($tipo, $doc);
 
         header('Content-Type: application/json; charset=utf-8');
-        echo json_encode($data ?: ['notFound' => true]);
+        /* echo json_encode($data ?: ['notFound' => true]);
+        exit; */
+
+        if ($data) {
+            echo json_encode($data);
+        } else {
+            //Agregar parámetro para identificar origen
+            echo json_encode([
+                'notFound' => true,
+                'documento' => $doc,
+                'tipo' => $tipo
+            ]);
+        }
         exit;
     }
 
@@ -262,4 +274,60 @@ class CotizacionController extends Controller
         echo json_encode($cronograma);
         exit();
     }
+
+
+    //NUEVAS FUNCIONES (BUSCA EL DNI DEL ULTIMO CLIENTE (GET) Y LLEVA A UNA COTIZACION (POST))
+    /**
+     * API para obtener el último cliente registrado
+     */
+    public function ultimoClienteRegistrado(): void
+    {
+        header('Content-Type: application/json; charset=utf-8');
+
+        $ultimoCliente = $_SESSION['ultimo_cliente_registrado'] ?? null;
+
+        if ($ultimoCliente) {
+            // Verificar si el registro es reciente (menos de 30 minutos)
+            $tiempoTranscurrido = time() - $ultimoCliente['timestamp'];
+
+            if ($tiempoTranscurrido < 1800) { // 30 minutos = 1800 segundos
+                echo json_encode([
+                    'success' => true,
+                    'cliente' => $ultimoCliente
+                ]);
+            } else {
+                // Si es muy antiguo, eliminar de sesión
+                unset($_SESSION['ultimo_cliente_registrado']);
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'No hay cliente reciente'
+                ]);
+            }
+        } else {
+            echo json_encode([
+                'success' => false,
+                'message' => 'No hay cliente reciente'
+            ]);
+        }
+        exit;
+    }
+
+    /**
+     * API para limpiar el último cliente registrado de la sesión
+     */
+    public function limpiarUltimoCliente(): void
+    {
+        header('Content-Type: application/json; charset=utf-8');
+
+        if (isset($_SESSION['ultimo_cliente_registrado'])) {
+            unset($_SESSION['ultimo_cliente_registrado']);
+        }
+
+        echo json_encode([
+            'success' => true,
+            'message' => 'Sesión limpiada correctamente'
+        ]);
+        exit;
+    }
+
 }

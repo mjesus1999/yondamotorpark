@@ -6,7 +6,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Cotización <?= $id ?> Dependiente - YONDA PERÚ</title>
-  <link rel="stylesheet" href="/assets/css/cot-reporte.css" />
+  <link rel="stylesheet" href="/assets/css/cotizacion-report.css" />
 </head>
 
 <body>
@@ -27,7 +27,7 @@
 
   <div class="container">
     <div class="header">
-      <img src="/assets/images/logos/cabecera-yonda.png" alt="Cabecera Yonda">
+      <img src="/assets/images/logos/cabecera-yondaa.png" alt="Cabecera Yonda">
     </div>
 
     <div class="row">
@@ -133,7 +133,7 @@
         Ejecutivo de Ventas<br>
         TELÉFONO: (056) 934 008 037
       </div>
-      <img src="/assets/images/logos/footer-yonda.png" alt="Piecera Yonda">
+      <img src="/assets/images/logos/footer-yondaa.png" alt="Piecera Yonda">
     </div>
   </div>
 
@@ -320,7 +320,8 @@
       let topData = null;
       let bottomData = null;
       try { if (imgTopEl) topData = await imageToDataURL(imgTopEl, 0.12); } catch (e) { console.warn('cabecera->dataURL failed', e); topData = null; }
-      try { if (imgBottomEl) bottomData = await imageToDataURL(imgBottomEl, 0.9); } catch (e) { console.warn('footer->dataURL failed', e); bottomData = null; }
+      //try { if (imgBottomEl) bottomData = await imageToDataURL(imgBottomEl, 0.9); } catch (e) { console.warn('footer->dataURL failed', e); bottomData = null; }
+      try { if (imgBottomEl) bottomData = await imageToDataURL(imgBottomEl, 0.12); } catch (e) { console.warn('footer->dataURL failed', e); bottomData = null; }
 
       // guarda display previo para restaurar luego
       const prevHeaderDisplay = headerEl ? headerEl.style.display : null;
@@ -373,7 +374,7 @@
                 }
 
                 // footer-text si existe en DOM (alineado a la derecha)
-                const footerText = footerEl && footerEl.querySelector('.footer-text') ? footerEl.querySelector('.footer-text').innerText.trim() : '';
+                /* const footerText = footerEl && footerEl.querySelector('.footer-text') ? footerEl.querySelector('.footer-text').innerText.trim() : '';
                 if (footerText) {
                   const lines = footerText.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
                   if (lines.length) {
@@ -385,7 +386,7 @@
                     const firstLineY = y2 - 3 - ((lines.length - 1) * lineHeight);
                     pdf.text(lines, textX, firstLineY, { align: 'right' });
                   }
-                }
+                } */
               }
             }
 
