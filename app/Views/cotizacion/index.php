@@ -46,10 +46,9 @@
                                 <th>Cliente</th>
                                 <th>Numero de Doc</th>
                                 <th>Telefono</th>
-                                <th>Marca de vehiculo</th>
-                                <th>Modelo</th>
-                                <th>Año</th>
-                                <th>Modalidad</th>
+                                <th>Vehículo</th>
+                                <th class="text-end">Inicial</th>
+                                <th class="text-end">Modalidad</th>
                                 <th>Opciones</th>
                             </tr>
                         </thead>
@@ -61,15 +60,28 @@
                                     <td><?= htmlspecialchars($c['nombrecliente']) ?></td>
                                     <td><?= htmlspecialchars($c['documento']) ?></td>
                                     <td><?= htmlspecialchars($c['telefono']) ?></td>
-                                    <td><?= htmlspecialchars($c['marcaVehiculo']) ?></td>
-                                    <td><?= htmlspecialchars($c['modeloVehiculo']) ?></td>
-                                    <td><?= htmlspecialchars($c['anio']) ?></td>
-                                    <td><?= htmlspecialchars($c['tipocotizacion']) ?></td>
+
+                                    <!-- Vehículo (MARCA/MODELO/AÑO) -->
+                                    <td><?= htmlspecialchars($c['vehiculo'] ?? (($c['marcaVehiculo'] ?? '') . '/' . ($c['modeloVehiculo'] ?? '') . '/' . ($c['anio'] ?? ''))) ?>
+                                    </td>
+
+                                    <td class="text-end">
+                                        <?php
+                                        if (isset($c['inicial']) && $c['inicial'] !== '') {
+                                            $mon = $c['moneda'] ?? 'PEN';
+                                            $symbol = ($mon === 'USD') ? '$' : 'S/'; // adapta si usas otro símbolo
+                                            // formatea número con separador de miles y 2 decimales
+                                            $formatted = number_format((float) $c['inicial'], 2, '.', ',');
+                                            echo htmlspecialchars($symbol . ' ' . $formatted);
+                                        } else {
+                                            echo '';
+                                        }
+                                        ?>
+                                    </td>
+
+                                    <td class="text-end"><?= htmlspecialchars($c['tipocotizacion'] ?? '') ?></td>
+
                                     <td class="text-center">
-                                        <!-- <a href="/reports/reporte-cotizacion-dependiente.php" target="_blank"
-                                            class="btn btn-sm btn-primary">
-                                            <i class="fa fa-file-pdf"></i> Hacer Reporte
-                                        </a> -->
                                         <a href="/cotizacion/reporte/<?= $c['idcotizacion'] ?>" class="p-1" target="_blank"
                                             title="PDF Cotizacion">
                                             <i class="bi bi-filetype-pdf text-danger fs-5"></i>

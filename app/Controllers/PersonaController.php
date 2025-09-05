@@ -6,6 +6,7 @@ use App\Core\Controller;
 use App\Models\Persona;
 use App\Models\Cliente;
 use App\Helpers\Validador;
+use PDOException;
 
 class PersonaController extends Controller
 {
@@ -69,8 +70,8 @@ class PersonaController extends Controller
 
         if ($idPersona > 0) {
             $registroCliente = [
-                'idpersona'      => $idPersona,
-                'idempresa'      => null,
+                'idpersona' => $idPersona,
+                'idempresa' => null,
                 // 'idcolregistra'  => null,
                 'idcolactualiza' => null,
                 'tipocliente' => 'P',
@@ -262,12 +263,87 @@ class PersonaController extends Controller
         } */
     }
 
+    /**
+     * Buscar persona por DNI usando API externa
+     * @return void
+     */
+    public function searchByDNIApi(): void
+    {
+        header('Content-Type: application/json; charset=utf-8');
+
+        // Verificar que sea una petición GET o POST
+        if (!in_array($_SERVER['REQUEST_METHOD'], ['GET', 'POST'])) {
+            echo json_encode(['success' => false, 'message' => 'Método no permitido']);
+            return;
+        }
+
+        // Obtener el DNI desde GET o POST
+        $dni = '';
+        if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+            $dni = trim($_GET['dni'] ?? '');
+        } else {
+            $dni = trim($_POST['dni'] ?? '');
+        }
+
+        if ($dni === '') {
+            echo json_encode(['success' => false, 'message' => 'DNI es requerido']);
+            return;
+        }
+
+        // Primero buscar en la base de datos local
+        /* $personaLocal = $this->personaModel->searchByDNI($dni);
+        if ($personaLocal) {
+            echo json_encode([
+                'success' => true,
+                'source' => 'local',
+                'message' => 'Persona encontrada en base de datos local',
+                'idpersona' => $personaLocal['idpersona'],
+                'apellidos' => $personaLocal['apellidos'],
+                'nombres' => $personaLocal['nombres']
+            ]);
+            return;
+        } */
+
+        try {
+            require_once __DIR__ . '/../Helpers/Api_dni.php';
+
+            // Capturar la salida de la función
+            ob_start();
+            searchByDNI($dni);
+            $apiResponse = ob_get_clean();
+
+            $responseData = json_decode($apiResponse, true);
+
+            if ($responseData && $responseData['success']) {
+                echo json_encode([
+                    'success' => true,
+                    'source' => 'api',
+                    'message' => 'Persona encontrada en RENIEC',
+                    'apellidos' => trim($responseData['apepaterno'] . ' ' . $responseData['apematerno']),
+                    'nombres' => $responseData['nombres']
+                ]);
+            } else {
+                echo json_encode([
+                    'success' => false,
+                    'message' => $responseData['message'] ?? 'No se encontró la persona'
+                ]);
+            }
+
+        } catch (PDOException $e) {
+            error_log('Error en búsqueda por API DNI: ' . $e->getMessage());
+            echo json_encode([
+                'success' => false,
+                'message' => 'Error interno del servidor'
+            ]);
+        }
+
+    }
 
     /**
      * Buscar Persona por DNI
      * @return void
      */
-    public function searchByDNI(): void
+    /* public function searchByDNI(): void
     {
         header('Content-Type: application/json; charset=utf-8');
         $dni = trim($_GET['dni'] ?? '');
@@ -285,5 +361,6 @@ class PersonaController extends Controller
             $response = ['success' => false, 'message' => 'No encontrado'];
         }
         echo json_encode($response);
-    }
+    } */
+
 }

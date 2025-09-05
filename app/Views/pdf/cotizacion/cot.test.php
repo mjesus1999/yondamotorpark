@@ -298,7 +298,6 @@
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
       };
 
-      // status visual
       let status = document.getElementById('pdf-status');
       if (!status) {
         status = document.createElement('div');
@@ -310,28 +309,24 @@
         status.style.display = 'block';
       }
 
-      // nodos header/footer e imagenes (si existen)
       const headerEl = document.querySelector('.header');
       const footerEl = document.querySelector('.footer');
       const imgTopEl = document.querySelector('.pdf-watermark.top') || (headerEl ? headerEl.querySelector('img') : null);
       const imgBottomEl = document.querySelector('.pdf-watermark.bottom') || (footerEl ? footerEl.querySelector('img') : null);
 
-      // convierte imágenes a dataURL (usa tu imageToDataURL global si la tienes)
       let topData = null;
       let bottomData = null;
       try { if (imgTopEl) topData = await imageToDataURL(imgTopEl, 0.12); } catch (e) { console.warn('cabecera->dataURL failed', e); topData = null; }
       try { if (imgBottomEl) bottomData = await imageToDataURL(imgBottomEl, 0.9); } catch (e) { console.warn('footer->dataURL failed', e); bottomData = null; }
 
-      // guarda display previo para restaurar luego
       const prevHeaderDisplay = headerEl ? headerEl.style.display : null;
       const prevFooterDisplay = footerEl ? footerEl.style.display : null;
 
       try {
-        // ocultar header/footer en DOM para que html2canvas no los capture
+        // hide header/footer in DOM so html2canvas does not capture them (we'll draw them into the pdf)
         if (headerEl) headerEl.style.display = 'none';
         if (footerEl) footerEl.style.display = 'none';
 
-        // generar pdf y obtener objeto jsPDF para post-procesar
         const worker = html2pdf().set(opt).from(element).toPdf();
 
         worker.get('pdf').then((pdf) => {
@@ -340,87 +335,68 @@
             const pageWidth = pdf.internal.pageSize.getWidth();
             const pageHeight = pdf.internal.pageSize.getHeight();
             const margin = Array.isArray(opt.margin) ? opt.margin[0] : 10;
+            const footerText = footerEl && footerEl.querySelector('.footer-text') ? footerEl.querySelector('.footer-text').innerText.trim() : '';
+            const lineHeight = 4; // mm
 
-            if (topData || bottomData) {
+            for (let p = 1; p <= totalPages; p++) {
+              pdf.setPage(p);
+
+              // header image (top)
+              if (topData) {
+                const targetWidth = pageWidth - margin * 2;
+                const iw = (imgTopEl && imgTopEl.naturalWidth) ? imgTopEl.naturalWidth : 100;
+                const ih = (imgTopEl && imgTopEl.naturalHeight) ? imgTopEl.naturalHeight : 30;
+                const h = (ih / iw) * targetWidth;
+                const x = margin;
+                const y = 2; // mm from top
+                pdf.addImage(topData, 'PNG', x, y, targetWidth, h, undefined, 'FAST');
+              }
+
+              // footer image and text
+              let y2;
               const targetWidth = pageWidth - margin * 2;
+              if (bottomData) {
+                const iw2 = (imgBottomEl && imgBottomEl.naturalWidth) ? imgBottomEl.naturalWidth : 100;
+                const ih2 = (imgBottomEl && imgBottomEl.naturalHeight) ? imgBottomEl.naturalHeight : 20;
+                let h2 = (ih2 / iw2) * targetWidth;
+                const maxFooterHeight = 10;
+                if (h2 > maxFooterHeight) h2 = maxFooterHeight;
+                const x2 = margin;
+                y2 = pageHeight - margin - h2 - 1;
+                pdf.addImage(bottomData, 'PNG', x2, y2, targetWidth, h2, undefined, 'FAST');
+              } else {
+                y2 = pageHeight - margin - 6;
+              }
 
-              for (let p = 1; p <= totalPages; p++) {
-                pdf.setPage(p);
-
-                // CABECERA en cada página (si existe)
-                if (topData) {
-                  const iw = (imgTopEl && imgTopEl.naturalWidth) ? imgTopEl.naturalWidth : 100;
-                  const ih = (imgTopEl && imgTopEl.naturalHeight) ? imgTopEl.naturalHeight : 30;
-                  const h = (ih / iw) * targetWidth;
-                  const x = margin;
-                  const y = 2; // mm desde borde superior
-                  pdf.addImage(topData, 'PNG', x, y, targetWidth, h, undefined, 'FAST');
-                }
-
-                // FOOTER imagen y texto
-                let y2;
-                if (bottomData) {
-                  const iw2 = (imgBottomEl && imgBottomEl.naturalWidth) ? imgBottomEl.naturalWidth : 100;
-                  const ih2 = (imgBottomEl && imgBottomEl.naturalHeight) ? imgBottomEl.naturalHeight : 20;
-                  let h2 = (ih2 / iw2) * targetWidth;
-                  const maxFooterHeight = 10;
-                  if (h2 > maxFooterHeight) h2 = maxFooterHeight;
-                  const x2 = margin;
-                  y2 = pageHeight - margin - h2 - 1;
-                  pdf.addImage(bottomData, 'PNG', x2, y2, targetWidth, h2, undefined, 'FAST');
-                } else {
-                  y2 = pageHeight - margin - 6;
-                }
-
-                // footer-text si existe en DOM (alineado a la derecha)
-                const footerText = footerEl && footerEl.querySelector('.footer-text') ? footerEl.querySelector('.footer-text').innerText.trim() : '';
-                if (footerText) {
-                  const lines = footerText.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
-                  if (lines.length) {
-                    pdf.setFont('helvetica');
-                    pdf.setFontSize(10);
-                    pdf.setTextColor(0, 0, 0);
-                    const textX = pageWidth - margin;
-                    const lineHeight = 4; // mm
-                    const firstLineY = y2 - 3 - ((lines.length - 1) * lineHeight);
-                    pdf.text(lines, textX, firstLineY, { align: 'right' });
-                  }
+              // draw footer text aligned right
+              if (footerText) {
+                const lines = footerText.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+                if (lines.length) {
+                  pdf.setFont('helvetica');
+                  pdf.setFontSize(10);
+                  pdf.setTextColor(0, 0, 0);
+                  const textX = pageWidth - margin;
+                  const firstLineY = y2 - 3 - ((lines.length - 1) * lineHeight);
+                  pdf.text(lines, textX, firstLineY, { align: 'right' });
                 }
               }
             }
 
-            // guardar PDF (inicia descarga)
+            // save
             pdf.save(filename);
-
-            // dar tiempo al navegador para iniciar la descarga y luego intentar cerrar la pestaña
-            setTimeout(() => {
-              try { window.close(); } catch (e) { /* algunos navegadores lo bloquearán */ }
-            }, 600);
-
           } catch (err) {
-            console.error('Error postprocesando PDF (añadir marcas):', err);
-            // fallback: guardar lo que html2pdf generó sin postprocesado
-            html2pdf().set(opt).from(element).save().then(() => {
-              try { window.close(); } catch (e) { }
-            }).finally(() => {
-              if (status) status.style.display = 'none';
-            });
+            console.error('Error postprocesando PDF:', err);
+            // fallback: save what html2pdf produced (no postprocessing)
+            html2pdf().set(opt).from(element).save();
           } finally {
-            // restaurar visibilidad del DOM
             if (headerEl) headerEl.style.display = prevHeaderDisplay;
             if (footerEl) footerEl.style.display = prevFooterDisplay;
             if (status) status.style.display = 'none';
           }
         }).catch((err) => {
-          console.error('No se obtuvo objeto jsPDF:', err);
-          // fallback directo: generar y guardar sin post-procesado
-          html2pdf().set(opt).from(element).save().then(() => {
-            try { window.close(); } catch (e) { }
-          }).finally(() => {
-            if (status) status.style.display = 'none';
-            if (headerEl) headerEl.style.display = prevHeaderDisplay;
-            if (footerEl) footerEl.style.display = prevFooterDisplay;
-          });
+          console.error('Error obteniendo jsPDF:', err);
+          // fallback direct
+          html2pdf().set(opt).from(element).save().finally(() => { if (status) status.style.display = 'none'; });
         });
 
       } catch (err) {
@@ -428,10 +404,7 @@
         if (headerEl) headerEl.style.display = prevHeaderDisplay;
         if (footerEl) footerEl.style.display = prevFooterDisplay;
         if (status) status.style.display = 'none';
-        // fallback
-        html2pdf().set(opt).from(element).save().then(() => {
-          try { window.close(); } catch (e) { }
-        });
+        html2pdf().set(opt).from(element).save();
       }
     }
 
@@ -439,6 +412,8 @@
 
     window.addEventListener('DOMContentLoaded', async () => { await fetchAndFill(); });
   </script>
+
+
 
 </body>
 

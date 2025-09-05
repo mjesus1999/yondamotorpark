@@ -1,5 +1,5 @@
 <?php
-
+// app/helpers/Api.php
 
 function obtenerTipoCambio(): float 
 {
@@ -51,5 +51,6 @@ function obtenerTipoCambio(): float
     }
 
     return 0;
-}
+} 
+/* echo obtenerTipoCambio(); */
 ?>

@@ -171,8 +171,7 @@
                                     <label for="documento">DNI / RUC</label>
                                 </div>
                                 <button type="button" id="btnBuscarCliente" class="btn btn-outline-success"
-                                    title="Buscar cliente en la DB"><i
-                                        class="bi bi-search"></i></button>
+                                    title="Buscar cliente en la DB"><i class="bi bi-search"></i></button>
                             </div>
                         </div>
 
@@ -389,8 +388,8 @@
                         <!-- botón de Cronograma -->
                         <div class="col-md-2">
                             <div class="form-floating h-100">
-                                <button class="btn btn-outline-primary w-100 h-100" data-bs-toggle="modal"
-                                    type="button" id="btn-generar-cronograma">
+                                <button class="btn btn-outline-primary w-100 h-100" data-bs-toggle="modal" type="button"
+                                    id="btn-generar-cronograma">
                                     Cronograma
                                 </button>
                             </div>
@@ -499,7 +498,8 @@
                                     <td><?= htmlspecialchars($v['color'] ?? 'N/A') ?></td>
                                     <td><?= htmlspecialchars($v['disponibilidad']) ?></td>
                                     <td><?= $v['placa'] === null ? 'N/A' : htmlspecialchars($v['placa']) ?></td>
-                                    <td><?= $v['placarotativa'] === null ? 'N/A' : htmlspecialchars($v['placarotativa']) ?></td>
+                                    <td><?= $v['placarotativa'] === null ? 'N/A' : htmlspecialchars($v['placarotativa']) ?>
+                                    </td>
                                     <td class="text-center">
                                         <button type="button" class="btn btn-sm btn-primary seleccionar-vehiculo-btn"
                                             data-idvehiculo="<?= htmlspecialchars($v['idvehiculo']) ?>"
@@ -523,7 +523,9 @@
 </div>
 
 
-<div class="modal fade" id="modalCronograma" tabindex="-1" aria-labelledby="modalCronogramaLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+<!-- MODAL DE CRONOGRAMA -->
+<div class="modal fade" id="modalCronograma" tabindex="-1" aria-labelledby="modalCronogramaLabel" aria-hidden="true"
+    data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
@@ -940,11 +942,17 @@
             const data = await res.json();
 
             if (data.notFound) {
-                alert('Cliente no encontrado. Debes registrarlo primero en Clientes.');
-                hid.value = '';
-                document.getElementById('nombres').value = '';
-                document.getElementById('telprimario').value = '';
-                document.getElementById('telalternativo').value = '';
+                const confirmRedirect = confirm('Cliente no encontrado. ¿Desea ir a registrarlo ahora?');
+
+                if (confirmRedirect) {
+                    window.location.href = `/clientes/createpersonclient?dni=${encodeURIComponent(docValue)}`;
+                } else {
+                    // Limpiar campos si no quiere ir a registrar
+                    hid.value = '';
+                    document.getElementById('nombres').value = '';
+                    document.getElementById('telprimario').value = '';
+                    document.getElementById('telalternativo').value = '';
+                }
             } else if (data.error) {
                 alert(data.error);
             } else {
@@ -957,7 +965,7 @@
     }
 
     function initEventosVehiculo() {
-        $('#tablaVehiculosModal').on('click', '.seleccionar-vehiculo-btn', async function() {
+        $('#tablaVehiculosModal').on('click', '.seleccionar-vehiculo-btn', async function () {
             const d = $(this).data();
             fillPaso2(d);
             clearConversion();
@@ -1203,4 +1211,30 @@
             showToast('Hubo un error al generar el cronograma de pagos.', 'ERROR', 1200);
         }
     });
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const tipo = document.getElementById("tipoDocumento");
+        const doc = document.getElementById("documento");
+
+        doc.setAttribute("maxlength", "8");
+        doc.placeholder = "DNI (8 dígitos)";
+
+        tipo.addEventListener("change", () => {
+            if (tipo.value === "dni") {
+                doc.setAttribute("maxlength", "8");
+                doc.placeholder = "DNI (8 dígitos)";
+                doc.value = "";
+            } else if (tipo.value === "ruc") {
+                doc.setAttribute("maxlength", "11");
+                doc.placeholder = "RUC (11 dígitos)";
+                doc.value = "";
+            }
+        });
+
+        // Solo números
+        doc.addEventListener("input", () => {
+            doc.value = doc.value.replace(/\D/g, "");
+        });
+    });
+
 </script>

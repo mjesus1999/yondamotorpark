@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Core\Database;
 use PDO;
 use PDOException;
+use Exception;
 
 class Persona
 {
@@ -138,7 +139,7 @@ class Persona
                 ':estadocivil' => $params['estadocivil'],
                 ':email' => $params['email'],
                 ':direccion' => $params['direccion'],
-                ':telprimario' =>  $params['telprimario'],
+                ':telprimario' => $params['telprimario'],
                 ':latitud' => $params['latitud'],
                 ':longitud' => $params['longitud'],
                 ':iddistrito' => $params['iddistrito'],
@@ -153,8 +154,8 @@ class Persona
     }
 
 
-// DEYANIRA
-    public function searchByDNI(string $dni): ?array
+    // DEYANIRA
+    /* public function searchByDNI(string $dni): ?array
     {
         $query = "SELECT idpersona, apellidos, nombres FROM personas WHERE nrodoc = :dni LIMIT 1";
         try {
@@ -164,8 +165,9 @@ class Persona
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
             return $row ?: null;
         } catch (PDOException $e) {
-            
+
             return [];
         }
-    }
+    } */
+
 }

@@ -28,3 +28,4 @@ $router->add('POST','/clientes/empresas/storeempresaclient','EmpresaController',
 $router->add('GET', '/clientes/empresaCliente/edit/{id}', 'EmpresaController', 'edit'); 
 $router->add('POST', '/clientes/empresaCliente/update/{id}', 'EmpresaController', 'update');
 $router->add('POST','/empresaCliente/delete/{id}','ClienteController','delete');
+$router->add('GET', '/clientes/empresas/searchByRUCApi', 'EmpresaController', 'searchByRUCApi');

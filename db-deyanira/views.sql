@@ -1,3 +1,22 @@
+
+-- VISTA DE EJEMPLO PARA VISUALIZAR CARGOS CON USUARIOS
+CREATE VIEW vw_colaboradores_con_cargo AS
+SELECT 
+    col.idcolaborador,
+    p.nombres,
+    p.apellidos,
+    CONCAT(p.apellidos, ' ', p.nombres) AS nombrecompleto,
+    col.usernick,
+    c.cargo,
+    cl.fechainicio,
+    cl.fechafin,
+    col.habilitado,
+    col.ultimoacceso
+FROM colaboradores col
+INNER JOIN contratoslaborales cl ON col.idcontratolaboral = cl.idcontratolaboral
+INNER JOIN personas p ON cl.idpersona = p.idpersona
+INNER JOIN cargos c ON cl.idcargo = c.idcargo;
+
 /*
 -- VISTAS DE USUARIO.PHP 
 */
@@ -108,7 +127,135 @@ ORDER BY p.apellidos, p.nombres;
 -- VISTAS DE COTIZACION.PHP
 */
 
--- OBTENER TODAS LAS COTIZACIONES REALIZADAS / getAll
+-- OBTENER TODAS LAS COTIZACIONES REALIZADAS / getAll 
+/*
+-- (solo mostrando los que esten en los dias de vigenicas se mostrara)
+*/
+CREATE OR REPLACE VIEW vwGetAllCotizacion AS
+SELECT
+  c.idcotizacion,
+  c.idformato,
+  c.idasesor,
+  fc.tipocotizacion,
+  COALESCE(
+    CASE WHEN cl.tipocliente = 'P' THEN CONCAT(p.nombres, ' ', p.apellidos) END,
+    e.razonsocial,
+    'Cliente no definido'
+  ) AS nombrecliente,
+  COALESCE(
+    CASE WHEN cl.tipocliente = 'P' THEN p.nrodoc END,
+    e.ruc,
+    ''
+  ) AS documento,
+  COALESCE(
+    CASE WHEN cl.tipocliente = 'P' THEN p.telprimario END,
+    e.telprimario,
+    ''
+  ) AS telefono,
+
+  -- columnas históricas (compatibilidad)
+  ma.marca AS marcaVehiculo,
+  mo.modelo AS modeloVehiculo,
+  mo.anio,
+
+  -- nueva columna combinada: MARCA/MODELO/ANIO
+  CONCAT_WS('/', ma.marca, mo.modelo, mo.anio) AS vehiculo,
+
+  v.color,
+  c.creado AS fechaRegistro,
+  c.vigenciadias,
+  c.moneda,         -- <- añadimos moneda
+  c.inicial,        -- <- añadimos inicial
+  c.precioventa,
+  DATE_ADD(c.creado, INTERVAL c.vigenciadias DAY) AS fecha_vencimiento
+FROM cotizaciones c
+JOIN clientes cl ON c.idcliente = cl.idcliente
+LEFT JOIN personas p ON cl.idpersona = p.idpersona
+LEFT JOIN empresas e ON cl.idempresa = e.idempresa
+JOIN vehiculos v ON c.idvehiculo = v.idvehiculo
+JOIN modelos mo ON v.idmodelo = mo.idmodelo
+JOIN marcas ma ON mo.idmarca = ma.idmarca
+JOIN formatocotizacion fc ON c.idformato = fc.idformato
+WHERE DATE_ADD(DATE(c.creado), INTERVAL c.vigenciadias DAY) >= CURDATE();
+
+/*
+CREATE OR REPLACE VIEW vwGetAllCotizacion AS
+SELECT
+  c.idcotizacion,
+  c.idformato,
+  c.idasesor,
+  fc.tipocotizacion,
+  COALESCE(
+    CASE WHEN cl.tipocliente = 'P' THEN CONCAT(p.nombres, ' ', p.apellidos) END,
+    e.razonsocial,
+    'Cliente no definido'
+  ) AS nombrecliente,
+  COALESCE(
+    CASE WHEN cl.tipocliente = 'P' THEN p.nrodoc END,
+    e.ruc,
+    ''
+  ) AS documento,
+  COALESCE(
+    CASE WHEN cl.tipocliente = 'P' THEN p.telprimario END,
+    e.telprimario,
+    ''
+  ) AS telefono,
+  ma.marca AS marcaVehiculo,
+  mo.modelo AS modeloVehiculo,
+  mo.anio,
+  v.color,
+  c.creado AS fechaRegistro,
+  c.vigenciadias,
+  DATE_ADD(c.creado, INTERVAL c.vigenciadias DAY) AS fecha_vencimiento
+FROM cotizaciones c
+JOIN clientes cl ON c.idcliente = cl.idcliente
+LEFT JOIN personas p ON cl.idpersona = p.idpersona
+LEFT JOIN empresas e ON cl.idempresa = e.idempresa
+JOIN vehiculos v ON c.idvehiculo = v.idvehiculo
+JOIN modelos mo ON v.idmodelo = mo.idmodelo
+JOIN marcas ma ON mo.idmarca = ma.idmarca
+JOIN formatocotizacion fc ON c.idformato = fc.idformato
+WHERE DATE_ADD(DATE(c.creado), INTERVAL c.vigenciadias DAY) >= CURDATE();
+*/
+
+/*
+CREATE OR REPLACE VIEW vwGetAllCotizacion AS
+SELECT
+  c.idcotizacion,
+  c.idformato,
+  c.idasesor,  -- ← CAMPO AGREGADO para el filtrado
+  fc.tipocotizacion,
+  COALESCE(
+    CASE WHEN cl.tipocliente = 'P' THEN CONCAT(p.nombres, ' ', p.apellidos) END,
+    e.razonsocial,
+    'Cliente no definido'
+  ) AS nombrecliente,
+  COALESCE(
+    CASE WHEN cl.tipocliente = 'P' THEN p.nrodoc END,
+    e.ruc,
+    ''
+  ) AS documento,
+  COALESCE(
+    CASE WHEN cl.tipocliente = 'P' THEN p.telprimario END,
+    e.telprimario,
+    ''
+  ) AS telefono,
+  ma.marca AS marcaVehiculo,
+  mo.modelo AS modeloVehiculo,
+  mo.anio,
+  v.color,
+  c.creado AS fechaRegistro
+FROM cotizaciones c
+JOIN clientes cl ON c.idcliente = cl.idcliente
+LEFT JOIN personas p ON cl.idpersona = p.idpersona
+LEFT JOIN empresas e ON cl.idempresa = e.idempresa
+JOIN vehiculos v ON c.idvehiculo = v.idvehiculo
+JOIN modelos mo ON v.idmodelo = mo.idmodelo
+JOIN marcas ma ON mo.idmarca = ma.idmarca
+JOIN formatocotizacion fc ON c.idformato = fc.idformato;
+*/
+
+/*
 CREATE OR REPLACE VIEW vwGetAllCotizacion AS
 SELECT
   c.idcotizacion,
@@ -142,7 +289,7 @@ JOIN vehiculos v ON c.idvehiculo = v.idvehiculo
 JOIN modelos mo ON v.idmodelo = mo.idmodelo
 JOIN marcas ma ON mo.idmarca = ma.idmarca
 JOIN formatocotizacion fc ON c.idformato = fc.idformato;
-
+*/
 
 -- OBETENER EL DETALLE DE LA COTIZACION POR ID / getById
 CREATE OR REPLACE VIEW vwGetCotizacionDetail AS
@@ -184,5 +331,6 @@ JOIN clientes cl    ON c.idcliente = cl.idcliente
 LEFT JOIN personas p ON cl.idpersona = p.idpersona
 LEFT JOIN empresas e ON cl.idempresa = e.idempresa
 JOIN vehiculos v    ON c.idvehiculo = v.idvehiculo
+LEFT JOIN colaboradores col ON c.idasesor = col.idcolaborador
 JOIN modelos mo     ON v.idmodelo = mo.idmodelo
 JOIN marcas ma      ON mo.idmarca = ma.idmarca;

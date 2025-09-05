@@ -25,6 +25,17 @@ class Cotizacion
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    /**
+     * Obtiene todas las cotizaciones de un asesor específico
+     */
+    public function getAllByAsesor(int $idasesor): array
+    {
+        $query = "SELECT * FROM vwGetAllCotizacion WHERE idasesor = :idasesor ORDER BY fechaRegistro DESC";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindValue(':idasesor', $idasesor, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 
     public function getClienteByDoc(string $tipo, string $doc): ?array
     {
@@ -76,8 +87,6 @@ class Cotizacion
         $pago = ($montoPrestamo * $tasaInteres) / (1 - pow(1 + $tasaInteres, -$numPagos));
         return $pago;
     }
-
-
 
     public function calcularPagoMensual($importeTotal, $inicial, $meses)
     {
@@ -135,8 +144,6 @@ class Cotizacion
 
         return $cronograma; // Retornamos el cronograma como array.
     }
-
-
 
     // Inserta una nueva cotizacion
     public function create(array $d): void

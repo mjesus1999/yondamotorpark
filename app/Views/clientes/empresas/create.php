@@ -45,12 +45,14 @@ require_once __DIR__ . '/../../../Helpers/functions.php'; ?>
 
 <?php if (isset($error) && !empty($error)): ?>
     <div class="position-fixed top-0 end-0 p-3" style="z-index: 1055">
-        <div class="toast align-items-center text-white bg-danger border-0 show" role="alert" aria-live="assertive" aria-atomic="true" id="errorToast">
+        <div class="toast align-items-center text-white bg-danger border-0 show" role="alert" aria-live="assertive"
+            aria-atomic="true" id="errorToast">
             <div class="d-flex">
                 <div class="toast-body">
                     <?= $error ?>
                 </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                    aria-label="Close"></button>
             </div>
         </div>
     </div>
@@ -65,8 +67,10 @@ require_once __DIR__ . '/../../../Helpers/functions.php'; ?>
             <div class="col-md-6">
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb mb-0">
-                        <li class="breadcrumb-item"><a href="#" class="text-decoration-none"><i class="bi bi-building me-1"></i>Empresas</a></li>
-                        <li class="breadcrumb-item active" aria-current="page"><i class="bi bi-plus-circle me-1"></i>Registrar</li>
+                        <li class="breadcrumb-item"><a href="#" class="text-decoration-none"><i
+                                    class="bi bi-building me-1"></i>Empresas</a></li>
+                        <li class="breadcrumb-item active" aria-current="page"><i
+                                class="bi bi-plus-circle me-1"></i>Registrar</li>
                     </ol>
                 </nav>
             </div>
@@ -84,32 +88,51 @@ require_once __DIR__ . '/../../../Helpers/functions.php'; ?>
             <h6 class="mb-0"><i class="bi bi-building me-2"></i>Registrar Cliente (Empresa)</h6>
         </div>
         <div class="card-body p-4">
-            <form action="/clientes/empresas/storeempresaclient" id="form-registro-cliente-empresa" autocomplete="off" method="POST">
+            <form action="/clientes/empresas/storeempresaclient" id="form-registro-cliente-empresa" autocomplete="off"
+                method="POST">
                 <!-- Sección 1: Información básica -->
                 <div class="mb-4">
-                    <h6 class="text-primary mb-3 border-bottom pb-2"><i class="bi bi-card-text me-2"></i>Información Básica</h6>
+                    <h6 class="text-primary mb-3 border-bottom pb-2"><i class="bi bi-card-text me-2"></i>Información
+                        Básica</h6>
                     <div class="row g-3">
+
                         <div class="col-md-3">
+                            <div class="input-group">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="ruc" name="ruc"
+                                        placeholder="Ingrese el N° de Ruc" maxlength="11" required>
+                                    <label for="ruc"><i class="bi bi-file-text me-1"></i>N° RUC</label>
+                                </div>
+                                <button type="button" id="btnBuscarCliente" class="btn btn-outline-success"
+                                    title="Buscar cliente"><i class="bi bi-search"></i></button>
+                            </div>
+                        </div>
+
+                        <!-- <div class="col-md-3">
                             <div class="form-floating">
                                 <input type="text" name="ruc" id="ruc" class="form-control" placeholder="Ingrese el N° de RUC" maxlength="11" required>
                                 <label for="ruc"><i class="bi bi-file-text me-1"></i>N° RUC</label>
                             </div>
-                        </div>
+                        </div> -->
+
                         <div class="col-md-3">
                             <div class="form-floating">
-                                <input type="text" id="razonsocial" name="razonsocial" class="form-control" placeholder="Ingrese la razón social" required>
+                                <input type="text" id="razonsocial" name="razonsocial" class="form-control"
+                                    placeholder="Ingrese la razón social" required>
                                 <label for="razonsocial"><i class="bi bi-building me-1"></i>Razón social</label>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="form-floating">
-                                <input type="text" name="nombrecomercial" id="nombrecomercial" class="form-control" placeholder="Ingrese el nombre comercial" required>
+                                <input type="text" name="nombrecomercial" id="nombrecomercial" class="form-control"
+                                    placeholder="Ingrese el nombre comercial" required>
                                 <label for="nombrecomercial"><i class="bi bi-shop me-1"></i>Nombre comercial</label>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="form-floating">
-                                <input type="text" name="representante" id="representante" class="form-control" placeholder="Ingrese el nombre del representante" required>
+                                <input type="text" name="representante" id="representante" class="form-control"
+                                    placeholder="Ingrese el nombre del representante" required>
                                 <label for="representante"><i class="bi bi-person-badge me-1"></i>Representante</label>
                             </div>
                         </div>
@@ -153,19 +176,22 @@ require_once __DIR__ . '/../../../Helpers/functions.php'; ?>
                     <div class="row g-3">
                         <div class="col-md-4">
                             <div class="form-floating">
-                                <input type="email" name="email" id="email" class="form-control" placeholder="exmple@gmail.com">
+                                <input type="email" name="email" id="email" class="form-control"
+                                    placeholder="exmple@gmail.com">
                                 <label for="email"><i class="bi bi-envelope me-1"></i>Correo</label>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="form-floating">
-                                <input type="tel" name="telprimario" id="telprimario" class="form-control" placeholder="Número de telefóno" maxlength="9" pattern="[0-9]+" required>
+                                <input type="tel" name="telprimario" id="telprimario" class="form-control"
+                                    placeholder="Número de telefóno" maxlength="9" pattern="[0-9]+" required>
                                 <label for="telprimario"><i class="bi bi-phone me-1"></i>Telefóno</label>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="form-floating">
-                                <input type="tel" name="telsecundario" id="telsecundario" class="form-control" placeholder="Número de telefóno" maxlength="9" pattern="[0-9]+">
+                                <input type="tel" name="telsecundario" id="telsecundario" class="form-control"
+                                    placeholder="Número de telefóno" maxlength="9" pattern="[0-9]+">
                                 <label for="telsecundario"><i class="bi bi-phone me-1"></i>Telefóno 2 (Opcional)</label>
                             </div>
                         </div>
@@ -174,35 +200,41 @@ require_once __DIR__ . '/../../../Helpers/functions.php'; ?>
 
                 <!-- Sección 4: Dirección y coordenadas -->
                 <div class="mb-4">
-                    <h6 class="text-primary mb-3 border-bottom pb-2"><i class="bi bi-pin-map me-2"></i>Dirección y Coordenadas</h6>
+                    <h6 class="text-primary mb-3 border-bottom pb-2"><i class="bi bi-pin-map me-2"></i>Dirección y
+                        Coordenadas</h6>
                     <div class="row g-3">
                         <div class="col-md-3">
                             <div class="form-floating">
-                                <input type="text" name="direccion" id="direccion" class="form-control" placeholder="Ingrese una dirección">
+                                <input type="text" name="direccion" id="direccion" class="form-control"
+                                    placeholder="Ingrese una dirección">
                                 <label for="direccion"><i class="bi bi-signpost me-1"></i>Dirección (Opcional)</label>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="form-floating">
-                                <input type="text" name="referencia" id="referencia" class="form-control" placeholder="Ingrese una referencia">
-                                <label for="referencia"><i class="bi bi-signpost-2 me-1"></i>Referencia (Opcional)</label>
+                                <input type="text" name="referencia" id="referencia" class="form-control"
+                                    placeholder="Ingrese una referencia">
+                                <label for="referencia"><i class="bi bi-signpost-2 me-1"></i>Referencia
+                                    (Opcional)</label>
                             </div>
                         </div>
                         <div class="col-md-2">
                             <div class="form-floating">
-                                <input type="text" name="latitud" id="latitud" class="form-control" placeholder="Ingrese la latitud">
+                                <input type="text" name="latitud" id="latitud" class="form-control"
+                                    placeholder="Ingrese la latitud">
                                 <label for="latitud"><i class="bi bi-globe me-1"></i>Latitud</label>
                             </div>
                         </div>
                         <div class="col-md-2">
                             <div class="form-floating">
-                                <input type="text" name="longitud" id="longitud" class="form-control" placeholder="Ingrese la longitud">
+                                <input type="text" name="longitud" id="longitud" class="form-control"
+                                    placeholder="Ingrese la longitud">
                                 <label for="longitud"><i class="bi bi-globe me-1"></i>Longitud</label>
                             </div>
                         </div>
                         <div class="col-md-1 d-flex align-items-center">
                             <button type="button" class="btn btn-success w-60" id="btn-mapa">
-                                <i class="bi bi-map me-1"></i> 
+                                <i class="bi bi-map me-1"></i>
                             </button>
                         </div>
                     </div>
@@ -233,6 +265,149 @@ require_once __DIR__ . '/../../../Helpers/functions.php'; ?>
 
         if (confirm("¿Desea registrar este nuevo cliente?")) {
             formRegistroClienteEmpresa.submit()
+        }
+    });
+
+    const btnBuscarEmpresa = document.getElementById('btnBuscarCliente'); // Era btnBuscarEmpresa, debe ser btnBuscarCliente
+    const rucInput = document.getElementById('ruc');
+    const razonsocialInput = document.getElementById('razonsocial');
+    const nombrecomercialInput = document.getElementById('nombrecomercial');
+    const representanteInput = document.getElementById('representante');
+    const emailInput = document.getElementById('email');
+    const telprimarioInput = document.getElementById('telprimario');
+    const direccionInput = document.getElementById('direccion');
+
+    // Función para mostrar loading en el botón
+    function setLoadingButtonRUC(loading = true) {
+        if (loading) {
+            btnBuscarEmpresa.disabled = true;
+            btnBuscarEmpresa.innerHTML = '<i class="bi bi-hourglass-split"></i>';
+        } else {
+            btnBuscarEmpresa.disabled = false;
+            btnBuscarEmpresa.innerHTML = '<i class="bi bi-search"></i>';
+        }
+    }
+
+    // Función para limpiar campos de empresa
+    function limpiarCamposEmpresa() {
+        razonsocialInput.value = '';
+        nombrecomercialInput.value = '';
+        representanteInput.value = '';
+        emailInput.value = '';
+        telprimarioInput.value = '';
+        direccionInput.value = '';
+    }
+
+    // Función para llenar campos de empresa
+    function llenarCamposEmpresa(data) {
+        if (data.razonsocial) razonsocialInput.value = data.razonsocial;
+        if (data.nombrecomercial) nombrecomercialInput.value = data.nombrecomercial;
+        if (data.representante) representanteInput.value = data.representante;
+        if (data.email) emailInput.value = data.email;
+        if (data.telefono) telprimarioInput.value = data.telefono;
+        if (data.telprimario) telprimarioInput.value = data.telprimario; // Para datos locales
+        if (data.direccion) direccionInput.value = data.direccion;
+
+        // Enfocar el siguiente campo
+        razonsocialInput.focus();
+    }
+
+    // Función para buscar por RUC
+    async function buscarPorRUC() {
+        const ruc = rucInput.value.trim();
+
+        if (!ruc) {
+            alert('Por favor, ingrese un RUC');
+            rucInput.focus();
+            return;
+        }
+
+        if (ruc.length !== 11) {
+            alert('El RUC debe tener 11 dígitos');
+            rucInput.focus();
+            return;
+        }
+
+        setLoadingButtonRUC(true);
+        limpiarCamposEmpresa();
+
+        try {
+            // CORRECCIÓN: Cambiar la ruta para que coincida con tu estructura
+            const response = await fetch(`/clientes/empresas/searchByRUCApi?ruc=${ruc}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const textResponse = await response.text();
+            let data;
+
+            try {
+                data = JSON.parse(textResponse);
+            } catch (parseError) {
+                console.error('Error parsing JSON:', parseError);
+                throw new Error('Respuesta inválida del servidor');
+            }
+
+            if (data && data.success) {
+                llenarCamposEmpresa(data);
+
+                if (data.source === 'local') {
+                    console.log('Empresa encontrada en base de datos local');
+                    if (data.idempresa) {
+                        setTimeout(() => {
+                            alert('Esta empresa ya está registrada');
+                        }, 2000);
+                    }
+                } else if (data.source === 'api') {
+                    console.log('Datos obtenidos de SUNAT');
+                }
+            } else {
+                const errorMessage = data && data.message ? data.message : 'No se encontró información para este RUC';
+                alert(errorMessage);
+            }
+
+        } catch (error) {
+            console.error('Error en la búsqueda:', error);
+            alert('Error de conexión. Intente nuevamente');
+        } finally {
+            setLoadingButtonRUC(false);
+        }
+    }
+
+    // Event listeners
+    btnBuscarEmpresa.addEventListener('click', buscarPorRUC);
+
+    rucInput.addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            buscarPorRUC();
+        }
+    });
+
+    // Solo permitir números en el campo RUC
+    rucInput.addEventListener('input', function (e) {
+        this.value = this.value.replace(/\D/g, '');
+
+        if (this.value.length > 11) {
+            this.value = this.value.substring(0, 11);
+        }
+    });
+    document.addEventListener('DOMContentLoaded', function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        const rucFromUrl = urlParams.get('ruc');
+
+        if (rucFromUrl) {
+            const rucField = document.getElementById('ruc');
+            if (rucField) {
+                rucField.value = rucFromUrl;
+            }
         }
     });
 </script>
