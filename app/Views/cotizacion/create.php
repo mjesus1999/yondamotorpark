@@ -120,9 +120,6 @@
         padding: 0.8rem;
         border-top: 2px solid #4a698c;
     }
-
-
-
 </style>
 <div class="container-fluid">
 
@@ -535,8 +532,8 @@
             </div>
             <div class="modal-body">
                 <div class="d-flex justify-content-end mb-3">
-                     <button class="btn btn-sm btn-danger m-2" id="btn-pdf" title="Generar cronograma en PDF">
-                       <i class="bi bi-filetype-pdf"></i>
+                    <button class="btn btn-sm btn-danger m-2" id="btn-pdf" title="Generar cronograma en PDF">
+                        <i class="bi bi-filetype-pdf"></i>
                         PDF
                     </button>
                     <button class="btn btn-sm btn-success m-2" id="btn-excel" title="Generar cronograma en EXCEL">
@@ -581,8 +578,15 @@
 
 <?php include __DIR__ . '/../layout/footer.php'; ?>
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js" defer></script>
+                    <!-- PDFMAKE MAS RECOMENDADO PARA PDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js" defer></script>
+                 <!----------------------------------------------->
 <script>
     let tipoCambioCache = null; //Guardaremos el tipo de cambio
+    const tablaCronograma = document.querySelector('#tablaCronograma');
+    const btnExcel = document.querySelector('#btn-excel');
+    const btnPDF = document.querySelector('#btn-pdf');
 
     // Función de utilidad para debouncing
     const debounce = (func, delay) => {
@@ -594,8 +598,235 @@
         };
     };
 
-    const btnExcel = document.querySelector('#btn-excel');
-    const tablaCronograma = document.querySelector('#tablaCronograma');
+
+    btnPDF.addEventListener('click', () => {
+
+        function formatNumber(num) {
+            return Number(num).toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+
+        const nombre = document.getElementById('nombres').value || '';
+        const precioDolar = formatNumber(document.getElementById('valor').value || '0.00');
+        const precioSoles = formatNumber(document.getElementById('inputValorConvertido').value || '0.00');
+        const montoFinanciar = formatNumber(document.getElementById('inputValorFinanciar').value || '0.00');
+        const tasaAnual = document.getElementById('tasaAnual').value || '0.00';
+        const tipoCambio = formatNumber(document.getElementById('tipoCambio').value || '0.00');
+        const inicial = formatNumber(document.getElementById('inicial').value || '0.00');
+        const cuotaMensual = formatNumber(document.getElementById('cuotaMensual').value || '0.00');
+        const numCuotas = document.getElementById('numcuotas').value || '0';
+        const cuotaDiaria = formatNumber((parseFloat(cuotaMensual.replace(/,/g, '') || 0) / 30));
+
+        const tabla = $('#tablaCronograma').DataTable();
+        const data = tabla.rows({
+            search: 'applied'
+        }).data().toArray();
+
+        const headers = [{
+                text: 'ITEM',
+                style: 'tableHeader',
+                alignment: 'center',
+            },
+            {
+                text: 'FECHA DE PAGO',
+                style: 'tableHeader',
+                alignment: 'center',
+            },
+            {
+                text: 'INTERÉS DEL PERIODO',
+                style: 'tableHeader',
+                alignment: 'center',
+            },
+            {
+                text: 'ABONO A CAPITAL',
+                style: 'tableHeader',
+                alignment: 'center',
+            },
+            {
+                text: 'VALOR CUOTA',
+                style: 'tableHeader',
+                alignment: 'center',
+            },
+            {
+                text: 'SALDO CAPITAL',
+                style: 'tableHeader',
+                alignment: 'center',
+            }
+        ];
+
+        const body = [headers];
+
+        data.forEach(row => {
+            const cleanCells = Array.from(row).map(cell => {
+                const match = cell.toString().match(/S\/\s*([\d.,]+)/);
+                if (match) {
+                    // Extraemos número y lo formateamos
+                    let numberValue = match[1].replace(/,/g, '');
+                    return `S/ ${formatNumber(numberValue)}`;
+                }
+                return cell;
+            });
+            body.push(cleanCells);
+        });
+
+        const totalInteres = document.getElementById('totalInteres').innerText;
+        const totalAbono = document.getElementById('totalAbono').innerText;
+        const totalCuota = document.getElementById('totalCuota').innerText;
+
+        body.push([{
+                text: 'TOTAL',
+                colSpan: 2,
+                alignment: 'center',
+                bold: true,
+                fillColor: '#fce300'
+            }, {},
+            {
+                text: totalInteres,
+                bold: true,
+                fillColor: '#fce300',
+            },
+            {
+                text: totalAbono,
+                bold: true,
+                fillColor: '#fce300',
+            },
+            {
+                text: totalCuota,
+                bold: true,
+                fillColor: '#fce300',
+            }, ''
+        ]);
+
+        const documento = {
+            pageSize: 'A4',
+            pageMargins: [30, 30, 30, 30],
+            content: [{
+                    text: nombre.toUpperCase(),
+                    style: 'header',
+                    alignment: 'center',
+                    margin: [0, 0, 0, 10],
+                    decoration:'underline'
+                },
+                {
+                    style: 'tableResumen',
+                    table: {
+                        widths: ['25%', '25%', '25%', '25%'],
+                        body: [
+                            [{
+                                    text: 'PRECIO EN DÓLAR',
+                                    bold: true
+                                }, `$ ${precioDolar}`,
+                                {
+                                    text: 'TIPO DE CAMBIO',
+                                    bold: true
+                                }, `S/ ${tipoCambio}`
+                            ],
+                            [{
+                                    text: 'PRECIO EN SOLES',
+                                    bold: true
+                                }, `S/ ${precioSoles}`,
+                                {
+                                    text: 'INICIAL',
+                                    bold: true,
+                                    fillColor: '#fbe23b'
+                                }, {
+                                    text: `S/ ${inicial}`,
+                                    fillColor: '#fbe23b'
+                                }
+                            ],
+                            [{
+                                    text: 'MONTO A FINANCIAR',
+                                    bold: true
+                                }, `S/ ${montoFinanciar}`,
+                                {
+                                    text: 'CUOTA',
+                                    bold: true,
+                                    fillColor: '#b7e4a4'
+                                }, {
+                                    text: `S/ ${cuotaMensual}`,
+                                    fillColor: '#b7e4a4'
+                                }
+                            ],
+                            [{
+                                    text: 'TASA ANUAL',
+                                    bold: true
+                                }, `${tasaAnual}%`,
+                                {
+                                    text: 'N° DE CUOTAS',
+                                    bold: true
+                                },
+                                numCuotas
+                            ],
+                            [{
+                                    text: 'TASA MENSUAL',
+                                    bold: true
+                                }, `${(parseFloat(tasaAnual) / 12).toFixed(2)}%`,
+                                {
+                                    text: 'CUOTA DIARIA',
+                                    bold: true
+                                }, `S/ ${cuotaDiaria}`
+                            ]
+                        ]
+                    },
+                    layout: {
+                        hLineColor: () => '#ccc',
+                        vLineColor: () => '#ccc'
+                    },
+                    margin: [0, 0, 0, 10]
+                },
+                {
+                    text: 'CRONOGRAMA DE PAGOS',
+                    style: 'subheader',
+                    alignment: 'center',
+                    margin: [0, 10, 0, 5],
+                    decoration:'underline'
+                },
+                {
+                    style: 'tableCronograma',
+                    table: {
+                        headerRows: 1,
+                        widths: [35, '*', '*', '*', '*', '*'],
+                        body: body
+                    },
+                    layout: {
+                        fillColor: function(rowIndex) {
+                            return rowIndex === 0 ? '#e0e0e0' : null;
+                        }
+                    }
+                }
+            ],
+            styles: {
+                header: {
+                    fontSize: 16,
+                    bold: true
+                },
+                subheader: {
+                    fontSize: 14,
+                    bold: true
+                },
+                tableResumen: {
+                    margin: [0, 10, 0, 10],
+                    fontSize: 11
+                },
+                tableCronograma: {
+                    fontSize: 9,
+                    margin: [0, 10, 0, 0]
+                },
+                tableHeader: {
+                    bold: true,
+                    fontSize: 10,
+                    color: 'black'
+                }
+            }
+        };
+
+        pdfMake.createPdf(documento).open();
+        // Para descargar automáticamente: pdfMake.createPdf(documento).download;
+    });
+
+
 
     function generarReporteExcel() {
         const dataTable = $('#tablaCronograma').DataTable();
@@ -640,7 +871,7 @@
                 [5, 10, 25, -1],
                 [5, 10, 25, "Todos"]
             ],
-           scrollX: true,
+            scrollX: true,
             language: {
                 url: "https://cdn.datatables.net/plug-ins/2.0.7/i18n/es-ES.json",
                 paginate: {
@@ -664,7 +895,7 @@
                 [5, 10, 25, -1],
                 [5, 10, 25, "Todos"]
             ],
-          scrollX: true,
+            scrollX: true,
             language: {
                 url: "https://cdn.datatables.net/plug-ins/2.0.7/i18n/es-ES.json",
                 paginate: {
