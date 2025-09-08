@@ -65,6 +65,9 @@ CREATE TABLE personas (
     CONSTRAINT fk_iddistrito_per FOREIGN KEY (iddistrito) REFERENCES distritos (iddistrito)
 ) ENGINE = INNODB;
 
+USE motorpark;
+SELECT * FROM personas;
+SELECT * FROM empresas;
 SHOW COLUMNS FROM personas;
 -- ALTER TABLE personas ADD COLUMN latitud VARCHAR(20) NULL;
 -- ALTER TABLE personas ADD COLUMN longitud VARCHAR(20) NULL;
@@ -77,7 +80,7 @@ CREATE TABLE empresas (
     ruc CHAR(11) NOT NULL UNIQUE,
     representante VARCHAR(50) NOT NULL,
     email VARCHAR(100) NULL UNIQUE,
-    direccion VARCHAR(300) NOT NULL,
+    direccion VARCHAR(300) NULL,
     referencia VARCHAR(280) NULL,
     latitud VARCHAR(20) NULL,
     longitud VARCHAR(20) NULL,
@@ -87,6 +90,8 @@ CREATE TABLE empresas (
     CONSTRAINT fk_iddistrito_empre FOREIGN KEY (iddistrito) REFERENCES distritos (iddistrito)
 ) ENGINE = INNODB;
 
+
+-- ALTER TABLE empresas MODIFY COLUMN direccion VARCHAR(300) NULL;
 -- ALTER TABLE empresas MODIFY COLUMN telprimario VARCHAR(12) NOT NULL UNIQUE;
 -- ALTER TABLE empresas MODIFY COLUMN telsecundario VARCHAR(12) NULL UNIQUE;
 

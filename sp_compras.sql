@@ -26,7 +26,7 @@ BEGIN
 
 END ;
  
- 
+ USE motorpark;
 DROP PROCEDURE IF EXISTS sp_detalle_oc_por_concesionario;
 
 DELIMITER //
@@ -52,7 +52,7 @@ BEGIN
         v.moneda,
         doc.preciocompra,
         oc.serie,
-        oc.emision
+        DATE_FORMAT(oc.emision, '%d-%m-%Y') AS emision
     FROM ordenescompra oc
     INNER JOIN tiendas t ON t.idtienda = oc.idtienda
     INNER JOIN detordencompra doc ON doc.idordencompra = oc.idordencompra
