@@ -916,6 +916,41 @@ require_once __DIR__ . '/../../Helpers/functions.php'; ?>
         }
     });
 
+    //PARAMETRO DE RETORNO PARA LA COTIZACION
+    document.addEventListener('DOMContentLoaded', function () {
+        // Verificar si hay parámetros en la URL para prellenar datos
+        const urlParams = new URLSearchParams(window.location.search);
+        const dniParam = urlParams.get('dni');
+        const tipoParam = urlParams.get('tipo');
+        const returnTo = urlParams.get('return_to');
+
+        // Si viene de cotización, prellenar el documento
+        if (dniParam && tipoParam) {
+            const tipoDocSelect = document.getElementById('tipodocumento');
+            const nrodocInput = document.getElementById('nrodoc');
+
+            if (tipoDocSelect && nrodocInput) {
+                tipoDocSelect.value = tipoParam.toUpperCase();
+                nrodocInput.value = dniParam;
+
+                // Trigger change event para actualizar placeholders si es necesario
+                const changeEvent = new Event('change', { bubbles: true });
+                tipoDocSelect.dispatchEvent(changeEvent);
+
+                // Focus en el campo nombres
+                const nombresInput = document.getElementById('nombres');
+                if (nombresInput) {
+                    setTimeout(() => nombresInput.focus(), 100);
+                }
+            }
+        }
+
+        // Si viene de cotización, mostrar un mensaje informativo
+        if (returnTo === 'cotizacion') {
+            showToast('Complete el registro del cliente para continuar con la cotización', 'INFO', 3000);
+        }
+    });
+
 </script>
 
 <?php include __DIR__ . '/../layout/footer.php'; ?>
