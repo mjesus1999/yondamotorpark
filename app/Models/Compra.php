@@ -23,7 +23,7 @@ class Compra
         $query = " SELECT 
             c.idcompra,
             c.idorden,
-            c.fechacompra,
+            DATE_FORMAT(c.fechacompra, '%d-%m-%Y') AS fechacompra,
             c.fecharecepcion,
             c.tipodoc,
             c.serie,

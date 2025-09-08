@@ -51,11 +51,11 @@ class Validador
         $errores[] = self::campoObligatorio($data['tipodoc'], 'Tipo de documento');
         $errores[] = self::campoObligatorio($data['nrodoc'], 'Número de documento');
         $errores[] = self::campoObligatorio($data['genero'], 'Género');
-        $errores[] = self::campoObligatorio($data['fechanac'], 'Fecha de nacimiento');
-        $errores[] = self::campoObligatorio($data['estadocivil'], 'Estado civil');
+        // $errores[] = self::campoObligatorio($data['fechanac'], 'Fecha de nacimiento');
+        // $errores[] = self::campoObligatorio($data['estadocivil'], 'Estado civil');
         $errores[] = self::campoObligatorio($data['iddistrito'], 'Distrito');
-        $errores[] = self::campoObligatorio($data['fechanac'], 'Fecha de nacimiento');
-        $errores[] = self::validarFechaNacimiento($data['fechanac']);
+        // $errores[] = self::campoObligatorio($data['fechanac'], 'Fecha de nacimiento');
+        // $errores[] = self::validarFechaNacimiento($data['fechanac']);
 
         $errorTel = self::campoObligatorio($data['telprimario'], 'Teléfono');
 
@@ -75,7 +75,7 @@ class Validador
 
         $errores[] = self::campoObligatorio($data['apellidos'] ?? '', 'Apellidos');
         $errores[] = self::campoObligatorio($data['nombres'] ?? '', 'Nombres');
-        $errores[] = self::campoObligatorio($data['estadocivil'] ?? '', 'Estado civil');
+        // $errores[] = self::campoObligatorio($data['estadocivil'] ?? '', 'Estado civil');
 
         $errorTel = self::campoObligatorio($data['telprimario'] ?? '', 'Teléfono');
         $errores[] = $errorTel ?: self::telefonoValido($data['telprimario'], 'Teléfono');
@@ -89,37 +89,38 @@ class Validador
 
 
 
-    public static function validarFechaNacimiento(string $fecha): ?string
-    {
-        try {
-            $nacimiento = new DateTime($fecha);
-            $hoy = new DateTime();
-            $mayorEdad = (clone $hoy)->modify('-18 years');
+    // public static function validarFechaNacimiento(string $fecha): ?string
+    // {
+    //     try {
+    //         $nacimiento = new DateTime($fecha);
+    //         $hoy = new DateTime();
+    //         $mayorEdad = (clone $hoy)->modify('-18 years');
 
-            // Comparamos solo fechas 
-            $fechaNacimientoStr = $nacimiento->format('Y-m-d');
-            $fechaHoyStr = $hoy->format('Y-m-d');
-            $fechaLimiteStr = $mayorEdad->format('Y-m-d');
+    //         // Comparamos solo fechas 
+    //         $fechaNacimientoStr = $nacimiento->format('Y-m-d');
+    //         $fechaHoyStr = $hoy->format('Y-m-d');
+    //         $fechaLimiteStr = $mayorEdad->format('Y-m-d');
 
-            // var_dump("FECHA HOY:" . $fechaHoyStr);
+    //         // var_dump("FECHA HOY:" . $fechaHoyStr);
 
-            if ($fechaNacimientoStr > $fechaHoyStr) {
-                return "La fecha de nacimiento no puede ser en el futuro.";
-            }
+    //         if ($fechaNacimientoStr > $fechaHoyStr) {
+    //             return "La fecha de nacimiento no puede ser en el futuro.";
+    //         }
 
-            if ($fechaNacimientoStr === $fechaHoyStr) {
-                return "La fecha de nacimiento no puede ser la actual.";
-            }
+    //         if ($fechaNacimientoStr === $fechaHoyStr) {
+    //             return "La fecha de nacimiento no puede ser la actual.";
+    //         }
 
-            if ($fechaNacimientoStr > $fechaLimiteStr) {
-                return "Debe tener al menos 18 años.";
-            }
+    //         if ($fechaNacimientoStr > $fechaLimiteStr) {
+    //             return "Debe tener al menos 18 años.";
+    //         }
 
-            return null;
-        } catch (Exception $e) {
-            return "Fecha inválida. Formato esperado: YYYY-MM-DD.";
-        }
-    }
+    //         return null;
+    //     } catch (Exception $e) {
+    //         return "Fecha inválida. Formato esperado: YYYY-MM-DD.";
+    //     }
+    // }
+
 }
 
 

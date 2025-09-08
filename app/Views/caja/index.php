@@ -4,33 +4,33 @@ include __DIR__ . '/../layout/header.php';
 ?>
 <div class="container-fluid">
 
-   <div class="alert alert-info mt-2" role="alert">
-    <div class="row align-items-center">
-        <!-- Barra de navegación responsiva -->
-        <div class="col-12 col-md-6 d-flex align-items-center">
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb mb-0" style="background-color: transparent; padding: 0;">
-                    <li class="breadcrumb-item"><a href="#" class="text-primary"><i class="fas fa-home"></i></a></li>
-                    <li class="breadcrumb-item"><a href="#" class="text-primary">Caja</a></li>
-                    <li class="breadcrumb-item active" aria-current="page">Listar</li>
-                </ol>
-            </nav>
-        </div>
-        <!-- Botones responsivos -->
-        <div class="col-12 col-md-6 d-flex flex-column flex-md-row justify-content-end">
-            <a href="/caja/reporte/by/fecha" class="btn btn-sm btn-outline-primary mb-2 mb-md-0 w-100 w-md-auto">
-                <i class="bi bi-calendar3"></i> Reporte por fecha
-            </a>
-            <button class="btn btn-danger btn-sm ms-2 mb-2 mb-md-0 w-100 w-md-auto" id="btn-pdf" title="Generar reporte de pagos del día">
-                <i class="fa-regular fa-file-pdf"></i> Reporte diario
-            </button>
+    <div class="alert alert-info mt-2" role="alert">
+        <div class="row align-items-center">
+            <!-- Barra de navegación responsiva -->
+            <div class="col-12 col-md-6 d-flex align-items-center">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0" style="background-color: transparent; padding: 0;">
+                        <li class="breadcrumb-item"><a href="#" class="text-primary"><i class="fas fa-home"></i></a></li>
+                        <li class="breadcrumb-item"><a href="#" class="text-primary">Caja</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Listar</li>
+                    </ol>
+                </nav>
+            </div>
+            <!-- Botones responsivos -->
+            <div class="col-12 col-md-6 d-flex flex-column flex-md-row justify-content-end">
+                <a href="/caja/reporte/by/fecha" class="btn btn-sm btn-outline-primary mb-2 mb-md-0 w-100 w-md-auto">
+                    <i class="bi bi-calendar3"></i> Reporte por fecha
+                </a>
+                <button class="btn btn-danger btn-sm ms-2 mb-2 mb-md-0 w-100 w-md-auto" id="btn-pdf" title="Generar reporte de pagos del día">
+                    <i class="fa-regular fa-file-pdf"></i> Reporte diario
+                </button>
 
-            <button class="btn btn-success btn-sm ms-2 mb-2 mb-md-0 w-100 w-md-auto" id="btn-excel" title="Generar reporte de pagos del día en Excel">
-                <i class="fa-regular fa-file-excel"></i> Reporte diario
-            </button>
+                <button class="btn btn-success btn-sm ms-2 mb-2 mb-md-0 w-100 w-md-auto" id="btn-excel" title="Generar reporte de pagos del día en Excel">
+                    <i class="fa-regular fa-file-excel"></i> Reporte diario
+                </button>
+            </div>
         </div>
     </div>
-</div>
 
 
 
@@ -142,30 +142,30 @@ include __DIR__ . '/../layout/header.php';
     const btnExcel = document.querySelector('#btn-excel');
     document.addEventListener('DOMContentLoaded', async () => {
 
-         $('#tabla-contratos').DataTable({
-             responsive: true,
-             language: {
-                 emptyTable: "No hay datos disponibles en la tabla",
-                 info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
-                 infoEmpty: "Mostrando 0 a 0 de 0 entradas",
-                 infoFiltered: "(filtrado de _MAX_ entradas totales)",
-                 lengthMenu: "Mostrar _MENU_ registros",
-                 loadingRecords: "Cargando...",
-                 processing: "Procesando...",
-                 search: "Buscar:",
-                 zeroRecords: "No se encontraron registros coincidentes",
-                 paginate: {
-                     first: "Primero",
-                     last: "Último",
-                     next: "Siguiente",
-                     previous: "Anterior"
-                 },
-                 aria: {
-                     sortAscending: ": activar para ordenar la columna ascendente",
-                     sortDescending: ": activar para ordenar la columna descendente"
-                 }
-             }
-         });
+        $('#tabla-contratos').DataTable({
+            responsive: true,
+            language: {
+                emptyTable: "No hay datos disponibles en la tabla",
+                info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
+                infoEmpty: "Mostrando 0 a 0 de 0 entradas",
+                infoFiltered: "(filtrado de _MAX_ entradas totales)",
+                lengthMenu: "Mostrar _MENU_ registros",
+                loadingRecords: "Cargando...",
+                processing: "Procesando...",
+                search: "Buscar:",
+                zeroRecords: "No se encontraron registros coincidentes",
+                paginate: {
+                    first: "Primero",
+                    last: "Último",
+                    next: "Siguiente",
+                    previous: "Anterior"
+                },
+                aria: {
+                    sortAscending: ": activar para ordenar la columna ascendente",
+                    sortDescending: ": activar para ordenar la columna descendente"
+                }
+            }
+        });
 
 
         if (btnPdf) {
@@ -182,10 +182,6 @@ include __DIR__ . '/../layout/header.php';
 
         // FUNCION PARA CREAR EL EXCEL.
         async function generarReporteExcel() {
-            const textoOriginal = btnExcel.innerHTML;
-            btnExcel.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generando Excel...';
-            btnExcel.disabled = true;
-
             try {
                 const response = await fetch('/api/reporte/hoy');
 
@@ -199,56 +195,58 @@ include __DIR__ . '/../layout/header.php';
                     throw new Error('No se pudieron obtener los datos del reporte');
                 }
 
-
-                const transaccionesFlattened = [];
-                let contador = 1;
-                data.data.forEach(item => {
-                    item.transacciones.forEach(transaccion => {
-                        transaccionesFlattened.push({
-                            '#': contador++,
-                            'Medio de Pago': transaccion.metodo_pago,
-                            'Fecha': new Date(transaccion.fecha).toLocaleDateString('es-PE'),
-                            'N° Operación': transaccion.numero_operacion || 'N/A',
-                            'Entidad Bancaria': transaccion.entidad_bancaria || 'N/A',
-                            'N° Cuenta': transaccion.numero_cuenta || 'N/A',
-                            'Monto (S/)': parseFloat(transaccion.monto).toFixed(2)
+                if (data.data.length > 0) {
+                    const textoOriginal = btnExcel.innerHTML;
+                    btnExcel.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generando Excel...';
+                    btnExcel.disabled = true;
+                    const transaccionesFlattened = [];
+                    let contador = 1;
+                    data.data.forEach(item => {
+                        item.transacciones.forEach(transaccion => {
+                            transaccionesFlattened.push({
+                                '#': contador++,
+                                'Medio de Pago': transaccion.metodo_pago,
+                                'Fecha': new Date(transaccion.fecha).toLocaleDateString('es-PE'),
+                                'N° Operación': transaccion.numero_operacion || 'N/A',
+                                'Entidad Bancaria': transaccion.entidad_bancaria || 'N/A',
+                                'N° Cuenta': transaccion.numero_cuenta || 'N/A',
+                                'Monto (S/)': parseFloat(transaccion.monto).toFixed(2)
+                            });
                         });
                     });
-                });
 
-                // Crear una hoja de cálculo a partir del array de objetos
-                const worksheet = XLSX.utils.json_to_sheet(transaccionesFlattened);
+                    // Crear una hoja de cálculo a partir del array de objetos
+                    const worksheet = XLSX.utils.json_to_sheet(transaccionesFlattened);
 
-                // Crear un nuevo libro de trabajo
-                const workbook = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(workbook, worksheet, 'Reporte de Pagos');
+                    // Crear un nuevo libro de trabajo
+                    const workbook = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(workbook, worksheet, 'Reporte de Pagos');
 
-                // Generar y descargar el archivo
-                const fechaHoy = new Date().toLocaleDateString('es-PE').replace(/\//g, '-');
-                XLSX.writeFile(workbook, `reporte-pagos-diario-${fechaHoy}.xlsx`);
+                    // Generar y descargar el archivo
+                    const fechaHoy = new Date().toLocaleDateString('es-PE').replace(/\//g, '-');
+                    XLSX.writeFile(workbook, `reporte-pagos-diario-${fechaHoy}.xlsx`);
 
-                mostrarNotificacion('Reporte Excel generado y descargado correctamente', 'success');
+                    mostrarNotificacion('Reporte Excel generado y descargado correctamente', 'success');
+                    
+                    setTimeout(() => {
+                        btnExcel.innerHTML = textoOriginal;
+                        btnExcel.disabled = false;
+                    }, 2000);
+                } else {
+                    alert('No hay pagos aún para generar el Excel');
+                }
 
             } catch (error) {
                 console.error('Error al generar el reporte de Excel:', error);
                 mostrarNotificacion('Error al generar el Excel: ' + error.message, 'error');
-            } finally {
-                setTimeout(() => {
-                    btnExcel.innerHTML = textoOriginal;
-                    btnExcel.disabled = false;
-                }, 2000);
             }
         }
 
 
         async function generarReportePDFConJsPDF() {
             const btnPdf = document.getElementById('btn-pdf');
-            const textoOriginal = btnPdf.innerHTML;
-            btnPdf.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generando PDF...';
-            btnPdf.disabled = true;
-
+            
             try {
-
                 const response = await fetch('/api/reporte/hoy');
 
                 if (!response.ok) {
@@ -261,18 +259,24 @@ include __DIR__ . '/../layout/header.php';
                     throw new Error('No se pudieron obtener los datos del reporte');
                 }
 
-                await generarPDFConDatos(data);
-
-                mostrarNotificacion('PDF generado y descargado correctamente', 'success');
+                if (data.data.length > 0) {
+                    const textoOriginal = btnPdf.innerHTML;
+                    btnPdf.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generando PDF...';
+                    btnPdf.disabled = true;
+                    await generarPDFConDatos(data);
+                    mostrarNotificacion('PDF generado y descargado correctamente', 'success');
+                    
+                    setTimeout(() => {
+                        btnPdf.innerHTML = textoOriginal;
+                        btnPdf.disabled = false;
+                    }, 2000);
+                } else {
+                    alert('No hay pagos aún para generar el PDF');
+                }
 
             } catch (error) {
                 console.error('Error al generar PDF:', error);
                 mostrarNotificacion('Error al generar el PDF: ' + error.message, 'error');
-            } finally {
-                setTimeout(() => {
-                    btnPdf.innerHTML = textoOriginal;
-                    btnPdf.disabled = false;
-                }, 2000);
             }
         }
 

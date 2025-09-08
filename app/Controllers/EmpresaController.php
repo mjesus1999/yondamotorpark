@@ -46,7 +46,7 @@ class EmpresaController extends Controller
             'ruc' => $data['ruc'] ?? '',
             'representante' => $data['representante'] ?? '',
             'email' => !empty($data['email']) ? $data['email'] : null,
-            'direccion' => $data['direccion'] ?? '',
+            'direccion' => !empty($data['direccion']) ? $data['direccion'] : null,
             'referencia' => !empty($data['referencia']) ? $data['referencia'] : null,
             'latitud' => !empty($data['latitud']) ? $data['latitud'] : null,
             'longitud' => !empty($data['longitud']) ? $data['longitud'] : null,

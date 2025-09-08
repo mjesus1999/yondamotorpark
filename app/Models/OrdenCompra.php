@@ -75,7 +75,8 @@ class OrdenCompra
             $stmt = $this->db->prepare($query);
             $stmt->execute(array(':idOC' => $idOC));
             $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
+        
+            // error_log(print_r($results, true) . '|');
             return $results;
         } catch (PDOException $error) {
             error_log($error->getMessage());

@@ -69,14 +69,14 @@
                                         <td><span class="text-body badge"><?= htmlspecialchars($numeroFila++) ?></span></td>
                                         <td><span class="text-body badge"><?= htmlspecialchars($empresaCliente['ubicacion']) ?></span></td>
                                         <td>
-                                            <span class="text-body badge"><?= $empresaCliente['direccion'] ? htmlspecialchars($empresaCliente['direccion']) : 'No asignado' ?></span>
+                                            <span class="text-body badge"><?= $empresaCliente['direccion'] ? htmlspecialchars($empresaCliente['direccion']) : 'N/A' ?></span>
                                             
                                         </td>
                                         <td> <span class="text-body badge"><?= htmlspecialchars($empresaCliente['responsable']) ?></span></td>
                                         <td> <span class="text-body badge"><?= htmlspecialchars($empresaCliente['ruc']) ?></span></td>
                                         <td>  <span class="text-body badge"><?= htmlspecialchars($empresaCliente['nombrecomercial']) ?></span></td>
                                         <td>
-                                             <span class="text-body badge"><?= $empresaCliente['email'] ? htmlspecialchars($empresaCliente['email']) : 'No asignado' ?></span>
+                                             <span class="text-body badge"><?= $empresaCliente['email'] ? htmlspecialchars($empresaCliente['email']) : 'N/A' ?></span>
                                         </td>
                                         <td> <span class="text-body badge"><?= htmlspecialchars($empresaCliente['telprimario']) ?></span></td>
                                         <td>
@@ -123,10 +123,10 @@
                                     <div class="card-body">
                                         <p><strong>#:</strong> <?= htmlspecialchars($numeroFila++) ?></p>
                                         <p><strong>Ubicación:</strong> <?= htmlspecialchars($empresaCliente['ubicacion']) ?></p>
-                                        <p><strong>Dirección:</strong> <?= $empresaCliente['direccion'] ? htmlspecialchars($empresaCliente['direccion']) : 'No asignado' ?></p>
+                                        <p><strong>Dirección:</strong> <?= $empresaCliente['direccion'] ? htmlspecialchars($empresaCliente['direccion']) : 'N/A' ?></p>
                                         <p><strong>Responsable:</strong> <?= htmlspecialchars($empresaCliente['responsable']) ?></p>
                                         <p><strong>RUC:</strong> <?= htmlspecialchars($empresaCliente['ruc']) ?></p>
-                                        <p><strong>Correo:</strong> <?= $empresaCliente['email'] ? htmlspecialchars($empresaCliente['email']) : 'No asignado' ?></p>
+                                        <p><strong>Correo:</strong> <?= $empresaCliente['email'] ? htmlspecialchars($empresaCliente['email']) : 'N/A' ?></p>
                                         <p><strong>Teléfono:</strong> <?= htmlspecialchars($empresaCliente['telprimario']) ?></p>
                                         <p><strong>Acciones:</strong></p>
                                         <div class="d-flex align-items-center gap-2">

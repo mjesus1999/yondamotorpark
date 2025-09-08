@@ -47,6 +47,7 @@
 <script src="https://cdn.datatables.net/select/3.0.0/js/select.bootstrap5.js" defer></script>
 <script src="/assets/js/script-dashboard.js"></script>
 
+
 <!-- Sweet Alert -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="/assets/js/swalcustom.js"></script>

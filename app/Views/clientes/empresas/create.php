@@ -41,6 +41,201 @@ require_once __DIR__ . '/../../../Helpers/functions.php'; ?>
     .alert {
         border-radius: 0.5rem;
     }
+
+    /* Estilos para el wizard de pasos */
+    .step-indicator {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+        min-width: 120px;
+    }
+
+    .step-number {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: #e9ecef;
+        color: #6c757d;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 16px;
+        margin-bottom: 8px;
+        transition: all 0.3s ease;
+        border: 2px solid #e9ecef;
+    }
+
+    .step-title {
+        font-size: 12px;
+        font-weight: 500;
+        color: #6c757d;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+
+    .step-indicator.active .step-number {
+        background-color: #0d6efd;
+        color: white;
+        border-color: #0d6efd;
+        transform: scale(1.1);
+    }
+
+    .step-indicator.active .step-title {
+        color: #0d6efd;
+        font-weight: 600;
+    }
+
+    .step-indicator.completed .step-number {
+        background-color: #198754;
+        color: white;
+        border-color: #198754;
+    }
+
+    .step-indicator.completed .step-title {
+        color: #198754;
+    }
+
+    .step-indicator.completed .step-number::before {
+        content: "✓";
+        font-size: 14px;
+    }
+
+    .step-line {
+        width: 60px;
+        height: 2px;
+        background-color: #e9ecef;
+        margin: 0 10px;
+        margin-top: -12px;
+        transition: all 0.3s ease;
+    }
+
+    .step-line.completed {
+        background-color: #198754;
+    }
+
+    /* Estilos para los pasos del formulario */
+    .form-step {
+        display: none;
+        animation: fadeIn 0.4s ease-in-out;
+    }
+
+    .form-step.active {
+        display: block;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateX(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    /* Mejoras visuales para las cards internas */
+    .form-step .card {
+        transition: all 0.3s ease;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .form-step .card:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
+    }
+
+    /* Estilos para searchable select */
+    .searchable-select-container {
+        position: relative;
+    }
+
+    .searchable-select-dropdown {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        border: 1px solid #ced4da;
+        border-top: none;
+        border-radius: 0 0 0.375rem 0.375rem;
+        max-height: 200px;
+        overflow-y: auto;
+        z-index: 1000;
+        display: none;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .searchable-select-dropdown.show {
+        display: block;
+    }
+
+    .searchable-select-dropdown .dropdown-item {
+        padding: 8px 12px;
+        cursor: pointer;
+        border-bottom: 1px solid #f8f9fa;
+        transition: background-color 0.2s;
+    }
+
+    .searchable-select-dropdown .dropdown-item:hover {
+        background-color: #f8f9fa;
+    }
+
+    .searchable-select-dropdown .dropdown-item.selected {
+        background-color: #0d6efd;
+        color: white;
+    }
+
+    .searchable-select-dropdown .dropdown-item.hidden {
+        display: none;
+    }
+
+    .searchable-select-input.has-value {
+        background-color: #f8f9fa;
+    }
+
+    /* Indicadores de validación */
+    .form-control.is-valid,
+    .form-select.is-valid {
+        border-color: #198754;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23198754' d='m2.3 6.73.94-.94 1.86 1.86 3.75-3.75.94.94-4.69 4.69z'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right calc(0.375em + 0.1875rem) center;
+        background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+    }
+
+    .form-control.is-invalid,
+    .form-select.is-invalid {
+        border-color: #dc3545;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath d='m5.8 4.6 2.4 2.4m0-2.4L5.8 7'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right calc(0.375em + 0.1875rem) center;
+        background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+        .step-indicator {
+            min-width: 80px;
+        }
+
+        .step-number {
+            width: 32px;
+            height: 32px;
+            font-size: 14px;
+        }
+
+        .step-title {
+            font-size: 11px;
+        }
+
+        .step-line {
+            width: 40px;
+        }
+    }
 </style>
 
 <?php if (isset($error) && !empty($error)): ?>
@@ -82,188 +277,454 @@ require_once __DIR__ . '/../../../Helpers/functions.php'; ?>
         </div>
     </div>
 
-    <!-- Tarjeta principal del formulario -->
+    <!-- Formulario con diseño de pasos -->
     <div class="card border-0 shadow-lg mt-3">
         <div class="card-header bg-primary text-white py-3">
-            <h6 class="mb-0"><i class="bi bi-building me-2"></i>Registrar Cliente (Empresa)</h6>
+            <div class="d-flex justify-content-between align-items-center">
+                <h6 class="mb-0"><i class="bi bi-building me-2"></i>Registrar Cliente (Empresa)</h6>
+                <div class="progress" style="width: 200px; height: 8px;">
+                    <div class="progress-bar bg-secondary" role="progressbar" id="form-progress" style="width: 33%"></div>
+                </div>
+            </div>
         </div>
+
+        <!-- Indicador de pasos -->
+        <div class="card-body p-0">
+            <div class="d-flex justify-content-center py-3 bg-body border-bottom">
+                <div class="d-flex align-items-center">
+                    <div class="step-indicator active" data-step="1">
+                        <span class="step-number">1</span>
+                        <span class="step-title">Información</span>
+                    </div>
+                    <div class="step-line"></div>
+                    <div class="step-indicator" data-step="2">
+                        <span class="step-number">2</span>
+                        <span class="step-title">Ubicación</span>
+                    </div>
+                    <div class="step-line"></div>
+                    <div class="step-indicator" data-step="3">
+                        <span class="step-number">3</span>
+                        <span class="step-title">Detalles</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="card-body p-4">
-            <form action="/clientes/empresas/storeempresaclient" id="form-registro-cliente-empresa" autocomplete="off"
-                method="POST">
-                <!-- Sección 1: Información básica -->
-                <div class="mb-4">
-                    <h6 class="text-primary mb-3 border-bottom pb-2"><i class="bi bi-card-text me-2"></i>Información
-                        Básica</h6>
-                    <div class="row g-3">
+            <form action="/clientes/empresas/storeempresaclient" id="form-registro-cliente-empresa" autocomplete="off" method="POST">
 
-                        <div class="col-md-3">
-                            <div class="input-group">
-                                <div class="form-floating">
-                                    <input type="text" class="form-control" id="ruc" name="ruc"
-                                        placeholder="Ingrese el N° de Ruc" maxlength="11" required>
-                                    <label for="ruc"><i class="bi bi-file-text me-1"></i>N° RUC</label>
+                <!-- PASO 1: Información Básica -->
+                <div class="form-step active" id="step-1">
+                    <div class="row">
+                        <!-- Columna izquierda: RUC -->
+                        <div class="col-lg-6">
+                            <div class="card h-100 border-0 bg-body">
+                                <div class="card-body">
+                                    <h6 class="text-primary mb-3"><i class="bi bi-file-text me-2"></i>Identificación Tributaria</h6>
+
+                                    <div class="row g-3">
+                                        <div class="col-12">
+                                            <div class="input-group">
+                                                <div class="form-floating flex-grow-1">
+                                                    <input type="text" class="form-control" id="ruc" name="ruc"
+                                                        placeholder="Ingrese el RUC" maxlength="11" required>
+                                                    <label for="ruc">N° RUC <span class="text-danger">*</span></label>
+                                                </div>
+                                                <button type="button" id="btnBuscarCliente" class="btn btn-success px-3"
+                                                    title="Buscar en SUNAT/Base de datos">
+                                                    <i class="bi bi-search"></i>
+                                                </button>
+                                            </div>
+                                            <div class="form-text">
+                                                <i class="bi bi-info-circle me-1"></i>
+                                                Presiona el botón para buscar automáticamente los datos
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <button type="button" id="btnBuscarCliente" class="btn btn-outline-success"
-                                    title="Buscar cliente"><i class="bi bi-search"></i></button>
                             </div>
                         </div>
 
-                        <!-- <div class="col-md-3">
-                            <div class="form-floating">
-                                <input type="text" name="ruc" id="ruc" class="form-control" placeholder="Ingrese el N° de RUC" maxlength="11" required>
-                                <label for="ruc"><i class="bi bi-file-text me-1"></i>N° RUC</label>
-                            </div>
-                        </div> -->
+                        <!-- Columna derecha: Datos de la empresa -->
+                        <div class="col-lg-6">
+                            <div class="card h-100 border-0 bg-body">
+                                <div class="card-body">
+                                    <h6 class="text-primary mb-3"><i class="bi bi-building me-2"></i>Datos de la Empresa</h6>
 
-                        <div class="col-md-3">
-                            <div class="form-floating">
-                                <input type="text" id="razonsocial" name="razonsocial" class="form-control"
-                                    placeholder="Ingrese la razón social" required>
-                                <label for="razonsocial"><i class="bi bi-building me-1"></i>Razón social</label>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="form-floating">
-                                <input type="text" name="nombrecomercial" id="nombrecomercial" class="form-control"
-                                    placeholder="Ingrese el nombre comercial" required>
-                                <label for="nombrecomercial"><i class="bi bi-shop me-1"></i>Nombre comercial</label>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="form-floating">
-                                <input type="text" name="representante" id="representante" class="form-control"
-                                    placeholder="Ingrese el nombre del representante" required>
-                                <label for="representante"><i class="bi bi-person-badge me-1"></i>Representante</label>
+                                    <div class="row g-3">
+                                        <div class="col-12">
+                                            <div class="form-floating">
+                                                <input type="text" id="razonsocial" name="razonsocial" class="form-control"
+                                                    placeholder="Razón social completa" required>
+                                                <label for="razonsocial">Razón Social <span class="text-danger">*</span></label>
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="form-floating">
+                                                <input type="text" name="nombrecomercial" id="nombrecomercial" class="form-control"
+                                                    placeholder="Nombre comercial" required>
+                                                <label for="nombrecomercial">Nombre Comercial <span class="text-danger">*</span></label>
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="form-floating">
+                                                <input type="text" name="representante" id="representante" class="form-control"
+                                                    placeholder="Nombre del representante legal" required>
+                                                <label for="representante">Representante Legal <span class="text-danger">*</span></label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Sección 2: Ubicación -->
-                <div class="mb-4">
-                    <h6 class="text-primary mb-3 border-bottom pb-2"><i class="bi bi-geo-alt me-2"></i>Ubicación</h6>
-                    <div class="row g-3">
-                        <div class="col-md-4">
-                            <div class="form-floating">
-                                <select name="departamento" id="departamento" class="form-select" required>
-                                    <option value="">Seleccione</option>
-                                </select>
-                                <label for="departamento"><i class="bi bi-map me-1"></i>Departamento</label>
+                <!-- PASO 2: Ubicación y Contacto -->
+                <div class="form-step" id="step-2">
+                    <div class="row">
+                        <!-- Columna izquierda: Ubicación -->
+                        <div class="col-lg-6">
+                            <div class="card h-100 border-0 bg-body">
+                                <div class="card-body">
+                                    <h6 class="text-primary mb-3"><i class="bi bi-geo-alt me-2"></i>Ubicación Geográfica</h6>
+
+                                    <div class="row g-3">
+                                        <div class="col-12">
+                                            <div class="searchable-select-container">
+                                                <div class="form-floating">
+                                                    <input type="text" class="form-control searchable-select-input bg-body"
+                                                        id="departamento-input" placeholder="Buscar departamento..."
+                                                        autocomplete="off" required>
+                                                    <input type="hidden" name="departamento" id="departamento" required>
+                                                    <label for="departamento-input">Departamento <span class="text-danger">*</span></label>
+                                                </div>
+                                                <div class="searchable-select-dropdown bg-body" id="departamento-dropdown">
+                                                    <div class="dropdown-item" data-value=""></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="searchable-select-container">
+                                                <div class="form-floating">
+                                                    <input type="text" class="form-control searchable-select-input bg-body"
+                                                        id="provincia-input" placeholder="Buscar provincia..."
+                                                        autocomplete="off" required>
+                                                    <input type="hidden" name="provincia" id="provincia" required>
+                                                    <label for="provincia-input">Provincia <span class="text-danger">*</span></label>
+                                                </div>
+                                                <div class="searchable-select-dropdown" id="provincia-dropdown">
+                                                    <div class="dropdown-item" data-value=""></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="searchable-select-container">
+                                                <div class="form-floating">
+                                                    <input type="text" class="form-control searchable-select-input bg-body"
+                                                        id="distrito-input" placeholder="Buscar distrito..."
+                                                        autocomplete="off" required>
+                                                    <input type="hidden" name="iddistrito" id="distrito" required>
+                                                    <label for="distrito-input">Distrito <span class="text-danger">*</span></label>
+                                                </div>
+                                                <div class="searchable-select-dropdown" id="distrito-dropdown">
+                                                    <div class="dropdown-item" data-value=""></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <div class="col-md-4">
-                            <div class="form-floating">
-                                <select name="provincia" id="provincia" class="form-select" required>
-                                    <option value="">Seleccione</option>
-                                </select>
-                                <label for="provincia"><i class="bi bi-map me-1"></i>Provincia</label>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="form-floating">
-                                <select name="iddistrito" id="distrito" class="form-select" required>
-                                    <option value="">Seleccione</option>
-                                </select>
-                                <label for="distrito"><i class="bi bi-map me-1"></i>Distrito</label>
+
+                        <!-- Columna derecha: Contacto -->
+                        <div class="col-lg-6">
+                            <div class="card h-100 border-0 bg-body">
+                                <div class="card-body">
+                                    <h6 class="text-primary mb-3"><i class="bi bi-telephone me-2"></i>Información de Contacto</h6>
+
+                                    <div class="row g-3">
+                                        <div class="col-12">
+                                            <div class="form-floating">
+                                                <input type="email" name="email" id="email" class="form-control"
+                                                    placeholder="correo@empresa.com">
+                                                <label for="email">Correo Electrónico (Opcional)</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="form-floating">
+                                                <input type="tel" name="telprimario" id="telprimario" class="form-control"
+                                                    maxlength="9" pattern="[0-9]+" placeholder="Teléfono principal" required>
+                                                <label for="telprimario">Teléfono Principal <span class="text-danger">*</span></label>
+                                            </div>
+                                            <div class="form-text">
+                                                <i class="bi bi-info-circle me-1"></i>
+                                                Ingrese solo números (9 dígitos)
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="form-floating">
+                                                <input type="tel" name="telsecundario" id="telsecundario" class="form-control"
+                                                    maxlength="9" pattern="[0-9]+" placeholder="Teléfono alternativo">
+                                                <label for="telsecundario">Teléfono Alternativo (Opcional)</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Sección 3: Contacto -->
-                <div class="mb-4">
-                    <h6 class="text-primary mb-3 border-bottom pb-2"><i class="bi bi-telephone me-2"></i>Contacto</h6>
-                    <div class="row g-3">
-                        <div class="col-md-4">
-                            <div class="form-floating">
-                                <input type="email" name="email" id="email" class="form-control"
-                                    placeholder="exmple@gmail.com">
-                                <label for="email"><i class="bi bi-envelope me-1"></i>Correo</label>
+                <!-- PASO 3: Dirección y Coordenadas -->
+                <div class="form-step" id="step-3">
+                    <div class="row">
+                        <!-- Columna izquierda: Dirección -->
+                        <div class="col-lg-8">
+                            <div class="card h-100 border-0 bg-body">
+                                <div class="card-body">
+                                    <h6 class="text-primary mb-3"><i class="bi bi-house me-2"></i>Dirección Comercial</h6>
+
+                                    <div class="row g-3">
+                                        <div class="col-12">
+                                            <div class="form-floating">
+                                                <input type="text" name="direccion" id="direccion" class="form-control"
+                                                    placeholder="Ej: Av. Los Empresarios 456, Urb. Industrial">
+                                                <label for="direccion">Dirección completa (Opcional)</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="form-floating">
+                                                <input type="text" name="referencia" id="referencia" class="form-control"
+                                                    placeholder="Ej: Frente al centro comercial, edificio azul">
+                                                <label for="referencia">Referencia (Opcional)</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <div class="col-md-4">
-                            <div class="form-floating">
-                                <input type="tel" name="telprimario" id="telprimario" class="form-control"
-                                    placeholder="Número de telefóno" maxlength="9" pattern="[0-9]+" required>
-                                <label for="telprimario"><i class="bi bi-phone me-1"></i>Telefóno</label>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="form-floating">
-                                <input type="tel" name="telsecundario" id="telsecundario" class="form-control"
-                                    placeholder="Número de telefóno" maxlength="9" pattern="[0-9]+">
-                                <label for="telsecundario"><i class="bi bi-phone me-1"></i>Telefóno 2 (Opcional)</label>
+
+                        <!-- Columna derecha: Coordenadas -->
+                        <div class="col-lg-4">
+                            <div class="card h-100 border-0 bg-body">
+                                <div class="card-body">
+                                    <h6 class="text-primary mb-3"><i class="bi bi-geo me-2"></i>Coordenadas GPS</h6>
+
+                                    <div class="row g-3">
+                                        <div class="col-12">
+                                            <div class="form-floating">
+                                                <input type="text" name="latitud" id="latitud" class="form-control"
+                                                    placeholder="Latitud">
+                                                <label for="latitud">Latitud</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="form-floating">
+                                                <input type="text" name="longitud" id="longitud" class="form-control"
+                                                    placeholder="Longitud">
+                                                <label for="longitud">Longitud</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <button type="button" class="btn btn-success w-100" id="btn-mapa">
+                                                <i class="bi bi-map me-2"></i>Seleccionar Mapa
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Sección 4: Dirección y coordenadas -->
-                <div class="mb-4">
-                    <h6 class="text-primary mb-3 border-bottom pb-2"><i class="bi bi-pin-map me-2"></i>Dirección y
-                        Coordenadas</h6>
-                    <div class="row g-3">
-                        <div class="col-md-3">
-                            <div class="form-floating">
-                                <input type="text" name="direccion" id="direccion" class="form-control"
-                                    placeholder="Ingrese una dirección">
-                                <label for="direccion"><i class="bi bi-signpost me-1"></i>Dirección (Opcional)</label>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="form-floating">
-                                <input type="text" name="referencia" id="referencia" class="form-control"
-                                    placeholder="Ingrese una referencia">
-                                <label for="referencia"><i class="bi bi-signpost-2 me-1"></i>Referencia
-                                    (Opcional)</label>
-                            </div>
-                        </div>
-                        <div class="col-md-2">
-                            <div class="form-floating">
-                                <input type="text" name="latitud" id="latitud" class="form-control"
-                                    placeholder="Ingrese la latitud">
-                                <label for="latitud"><i class="bi bi-globe me-1"></i>Latitud</label>
-                            </div>
-                        </div>
-                        <div class="col-md-2">
-                            <div class="form-floating">
-                                <input type="text" name="longitud" id="longitud" class="form-control"
-                                    placeholder="Ingrese la longitud">
-                                <label for="longitud"><i class="bi bi-globe me-1"></i>Longitud</label>
-                            </div>
-                        </div>
-                        <div class="col-md-1 d-flex align-items-center">
-                            <button type="button" class="btn btn-success w-60" id="btn-mapa">
-                                <i class="bi bi-map me-1"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Botones de acción -->
-                <div class="d-flex justify-content-end mt-4 pt-3 border-top gap-2">
-                    <button type="reset" class="btn btn-outline-secondary" id="btn-cancelar">
-                        <i class="bi bi-x-circle me-1"></i> Cancelar
+                <!-- Botones de navegación -->
+                <div class="d-flex justify-content-between mt-4 pt-3 border-top">
+                    <button type="button" class="btn btn-outline-secondary" id="btn-anterior" style="display: none;">
+                        <i class="bi bi-arrow-left me-1"></i> Anterior
                     </button>
-                    <button type="submit" class="btn btn-primary" id="btn-registrar">
-                        <i class="bi bi-save me-1"></i> Guardar
-                    </button>
+
+                    <div class="ms-auto d-flex gap-2">
+                        <button type="reset" class="btn btn-outline-secondary" id="btn-cancelar">
+                            Cancelar
+                        </button>
+                        <button type="button" class="btn btn-primary" id="btn-siguiente">
+                            Siguiente <i class="bi bi-arrow-right ms-1"></i>
+                        </button>
+                        <button type="submit" class="btn btn-outline-primary" id="btn-registrar" style="display: none;">
+                            Guardar
+                        </button>
+                    </div>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-
-
+<?php include __DIR__ . '/../../layout/footer.php'; ?>
 <script src="/assets/js/ubigeo.js" defer></script>
 <script>
-    const formRegistroClienteEmpresa = document.querySelector('#form-registro-cliente-empresa');
+    // Variables globales para el wizard
+    let currentStep = 1;
+    const totalSteps = 3;
 
-    formRegistroClienteEmpresa.addEventListener('submit', (event) => {
+    // Referencias a elementos del DOM
+    const formRegistroClienteEmpresa = document.getElementById('form-registro-cliente-empresa');
+    const btnSiguiente = document.getElementById('btn-siguiente');
+    const btnAnterior = document.getElementById('btn-anterior');
+    const btnRegistrar = document.getElementById('btn-registrar');
+    const progressBar = document.getElementById('form-progress');
+
+    // Función para actualizar el progreso visual
+    function updateProgress() {
+        const progress = (currentStep / totalSteps) * 100;
+        progressBar.style.width = progress + '%';
+    }
+
+    // Función para actualizar los indicadores de pasos
+    function updateStepIndicators() {
+        const stepIndicators = document.querySelectorAll('.step-indicator');
+        const stepLines = document.querySelectorAll('.step-line');
+
+        stepIndicators.forEach((indicator, index) => {
+            const stepNumber = index + 1;
+            indicator.classList.remove('active', 'completed');
+
+            if (stepNumber < currentStep) {
+                indicator.classList.add('completed');
+            } else if (stepNumber === currentStep) {
+                indicator.classList.add('active');
+            }
+        });
+
+        stepLines.forEach((line, index) => {
+            line.classList.remove('completed');
+            if (index + 1 < currentStep) {
+                line.classList.add('completed');
+            }
+        });
+    }
+
+    // Función para mostrar el paso actual
+    function showStep(step) {
+        // Ocultar todos los pasos
+        document.querySelectorAll('.form-step').forEach(stepElement => {
+            stepElement.classList.remove('active');
+        });
+
+        // Mostrar el paso actual
+        const currentStepElement = document.getElementById(`step-${step}`);
+        if (currentStepElement) {
+            currentStepElement.classList.add('active');
+        }
+
+        // Actualizar botones
+        updateButtons();
+        updateProgress();
+        updateStepIndicators();
+    }
+
+    // Función para actualizar la visibilidad de los botones
+    function updateButtons() {
+        // Botón anterior
+        if (currentStep === 1) {
+            btnAnterior.style.display = 'none';
+        } else {
+            btnAnterior.style.display = 'inline-block';
+        }
+
+        // Botón siguiente y registrar
+        if (currentStep === totalSteps) {
+            btnSiguiente.style.display = 'none';
+            btnRegistrar.style.display = 'inline-block';
+        } else {
+            btnSiguiente.style.display = 'inline-block';
+            btnRegistrar.style.display = 'none';
+        }
+    }
+
+    // Función para validar el paso actual
+    function validateCurrentStep() {
+        const currentStepElement = document.getElementById(`step-${currentStep}`);
+        const requiredFields = currentStepElement.querySelectorAll('[required]');
+        let isValid = true;
+
+        requiredFields.forEach(field => {
+            // Limpiar clases previas
+            field.classList.remove('is-valid', 'is-invalid');
+
+            if (!field.value.trim()) {
+                field.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                field.classList.add('is-valid');
+            }
+        });
+
+        // Validaciones específicas por paso
+        if (currentStep === 1) {
+            // Validar RUC
+            const ruc = document.getElementById('ruc').value;
+            if (ruc && ruc.length !== 11) {
+                document.getElementById('ruc').classList.add('is-invalid');
+                isValid = false;
+            }
+        }
+
+        if (currentStep === 2) {
+            // Validar teléfono
+            const telefono = document.getElementById('telprimario').value;
+            if (telefono && telefono.length !== 9) {
+                document.getElementById('telprimario').classList.add('is-invalid');
+                isValid = false;
+            }
+        }
+
+        return isValid;
+    }
+
+    // Event listeners para navegación
+    btnSiguiente.addEventListener('click', () => {
+        if (validateCurrentStep()) {
+            if (currentStep < totalSteps) {
+                currentStep++;
+                showStep(currentStep);
+            }
+        } else {
+            // Mostrar mensaje de error
+            showToast('Por favor, complete todos los campos obligatorios correctamente.', 'ERROR', 1300);
+        }
+    });
+
+    btnAnterior.addEventListener('click', () => {
+        if (currentStep > 1) {
+            currentStep--;
+            showStep(currentStep);
+        }
+    });
+
+    // Validación en tiempo real
+    document.addEventListener('input', (e) => {
+        if (e.target.matches('input[required], select[required]')) {
+            const field = e.target;
+            field.classList.remove('is-valid', 'is-invalid');
+
+            if (field.value.trim()) {
+                field.classList.add('is-valid');
+            }
+        }
+    });
+
+    // Inicializar el wizard
+    document.addEventListener('DOMContentLoaded', () => {
+        showStep(1);
+    });
+
+    // Manejo del envío del formulario
+    formRegistroClienteEmpresa.addEventListener('submit', async (event) => {
         event.preventDefault();
 
-        if (confirm("¿Desea registrar este nuevo cliente?")) {
+        if (await ask("¿Registrar cliente?","Confirmar cliente")) {
             formRegistroClienteEmpresa.submit()
         }
     });
@@ -384,7 +845,7 @@ require_once __DIR__ . '/../../../Helpers/functions.php'; ?>
     // Event listeners
     btnBuscarEmpresa.addEventListener('click', buscarPorRUC);
 
-    rucInput.addEventListener('keypress', function (e) {
+    rucInput.addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
             e.preventDefault();
             buscarPorRUC();
@@ -392,14 +853,14 @@ require_once __DIR__ . '/../../../Helpers/functions.php'; ?>
     });
 
     // Solo permitir números en el campo RUC
-    rucInput.addEventListener('input', function (e) {
+    rucInput.addEventListener('input', function(e) {
         this.value = this.value.replace(/\D/g, '');
 
         if (this.value.length > 11) {
             this.value = this.value.substring(0, 11);
         }
     });
-    document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function() {
         const urlParams = new URLSearchParams(window.location.search);
         const rucFromUrl = urlParams.get('ruc');
 
@@ -411,5 +872,3 @@ require_once __DIR__ . '/../../../Helpers/functions.php'; ?>
         }
     });
 </script>
-
-<?php include __DIR__ . '/../../layout/footer.php'; ?>

@@ -38,10 +38,8 @@
 
     .modal-body {
         padding: 1.5rem;
-        /* background-color: #f4f7f9; */
         color: #333;
     }
-
 
     .table {
         font-size: 0.85rem;
