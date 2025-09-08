@@ -47,18 +47,32 @@ class CotizacionController extends Controller
         ];
 
         // Verificar si el usuario puede ver todas las cotizaciones o solo las suyas
-        if (in_array($idcargo, $cargosSupervisores)) {
-            // Supervisores/Jefes ven todas las cotizaciones
+        $puedeVerTodas = in_array($idcargo, $cargosSupervisores);
+
+        if ($puedeVerTodas) {
+            // Supervisores/Jefes ven todas las cotizaciones con información del asesor
             $cotizaciones = $this->cotizacionModel->getAll();
+
+            // Log para debugging (opcional)
+            error_log('USUARIO SUPERVISOR - Puede ver todas las cotizaciones');
+            error_log('COTIZACIONES CARGADAS: ' . count($cotizaciones));
         } else {
             // Asesores y otros cargos ven solo sus cotizaciones
             $cotizaciones = $this->cotizacionModel->getAllByAsesor($idasesor);
+
+            // Log para debugging (opcional)
+            error_log('USUARIO ASESOR - Solo ve sus cotizaciones');
+            error_log('COTIZACIONES DEL ASESOR ' . $idasesor . ': ' . count($cotizaciones));
         }
-        error_log('COTIZACIONES: ' . json_encode($cotizaciones));
 
         $this->view("cotizacion.index", [
             'cotizaciones' => $cotizaciones,
-            'puede_ver_todas' => in_array($idcargo, $cargosSupervisores)
+            'puede_ver_todas' => $puedeVerTodas,
+            'usuario_actual' => [
+                'id' => $idasesor,
+                'cargo' => $idcargo,
+                'es_supervisor' => $puedeVerTodas
+            ]
         ]);
     }
 
@@ -92,6 +106,7 @@ class CotizacionController extends Controller
         $this->view('pdf/cotizacion/cotizacion-html2pdf', ['id' => $id]);
     }
 
+    // En CotizacionController.php - Método apiShow actualizado
     public function apiShow(int $idcotizacion): void
     {
         header('Content-Type: application/json; charset=utf-8');
@@ -102,48 +117,42 @@ class CotizacionController extends Controller
             echo json_encode(['error' => 'Cotización no encontrada']);
             exit;
         }
-        // obtener requisitos del formato (si existe idformato)
+
         $idformato = isset($cot['idformato']) ? (int) $cot['idformato'] : null;
-        $requisitos = [];
-        $tipocotizacion = null;
-        if ($idformato) {
-            $requisitos = $this->formatoModel->getDetalleRequisitos($idformato);
-            // opcional: obtener el nombre del formato (tipocotizacion)
-            $formatos = $this->formatoModel->getAll(); // getAll devuelve idformato y tipocotizacion
-            foreach ($formatos as $f) {
-                if ((int) $f['idformato'] === $idformato) {
-                    $tipocotizacion = $f['tipocotizacion'];
-                    break;
-                }
-            }
-        }
+        $requisitos = $idformato ? $this->formatoModel->getDetalleRequisitos($idformato) : [];
+        $financiamientos = $this->cotizacionModel->getFinanciamientos($idcotizacion);
 
         echo json_encode([
             'cotizacion' => [
                 'idformato' => $idformato,
-                'tipocotizacion' => $tipocotizacion,
-                'fecha' => $cot['fechaRegistro'],
+                'tipocotizacion' => $cot['tipocotizacion'] ?? null,
+                'fecha' => $cot['fechaRegistro'] ?? null,
                 'cliente' => [
-                    'nombre' => $cot['cliente_nombre'],
-                    'dni' => $cot['cliente_documento'],
-                    'celular' => $cot['cliente_telefono'],
+                    'nombre' => $cot['cliente_nombre'] ?? null,
+                    'dni' => $cot['cliente_documento'] ?? null,
+                    'celular' => $cot['cliente_telefono'] ?? null,
                 ],
                 'vehiculo' => [
-                    'marca' => $cot['vehiculo_marca'],
-                    'modelo' => $cot['vehiculo_modelo'],
-                    'anio' => $cot['vehiculo_anio'],
-                    'color' => $cot['vehiculo_color'],
+                    'marca' => $cot['vehiculo_marca'] ?? null,
+                    'modelo' => $cot['vehiculo_modelo'] ?? null,
+                    'anio' => $cot['vehiculo_anio'] ?? null,
+                    'color' => $cot['vehiculo_color'] ?? null,
                 ],
                 'precios' => [
-                    'precio_usd' => number_format($cot['precioventa'], 2, '.', ''),
-                    'inicial_soles' => number_format($cot['inicial'], 2, '.', ''),
-                    'meses_24' => $cot['numcuotas'] == 24 ? $cot['valorcuota'] : null,
-                    'meses_36' => $cot['numcuotas'] == 36 ? $cot['valorcuota'] : null,
-                    'meses_48' => $cot['numcuotas'] == 48 ? $cot['valorcuota'] : null,
-                    'meses_60' => $cot['numcuotas'] == 60 ? $cot['valorcuota'] : null,
+                    'precio_usd' => number_format($cot['precioventa'] ?? 0, 2, '.', ''),
+                    'inicial_soles' => number_format($cot['inicial'] ?? 0, 2, '.', ''),
                 ],
-                // incluimos requisitos aquí para que el front no haga otra petición
-                'requisitos' => $requisitos
+                // NUEVA SECCIÓN: INFORMACIÓN DEL ASESOR
+                'asesor' => [
+                    'nombre' => $cot['asesor_nombre'] ?? 'CHARLY YACTAYO ORTIZ',
+                    'nombre_completo' => $cot['asesor_nombre_completo'] ?? 'CHARLY YACTAYO ORTIZ',
+                    'cargo' => $cot['asesor_cargo'] ?? 'Ejecutivo de Ventas',
+                    'telefono' => $cot['asesor_telefono'] ?? '934 008 037',
+                    'telefono_alt' => $cot['asesor_telefono_alt'] ?? null,
+                    'usuario' => $cot['asesor_usuario'] ?? null
+                ],
+                'requisitos' => $requisitos,
+                'opciones_financiamiento' => $financiamientos
             ]
         ]);
         exit;
@@ -204,17 +213,27 @@ class CotizacionController extends Controller
         exit;
     }
 
-
     public function store(): void
     {
         $this->authRequired();
-        header('Content-Type: application/json; charset=utf-8');
 
         $idasesor = $_SESSION['user']['id'] ?? null;
         if (!$idasesor) {
             $_SESSION['error'] = "No se encontro al usuario.";
             header('Location: /cotizacion/create');
             exit;
+        }
+
+        // Decodificar las opciones de financiamiento para obtener la inicial
+        $opcionesJson = $_POST['opciones_financiamiento'] ?? '[]';
+        $opciones = json_decode($opcionesJson, true);
+        if (!is_array($opciones))
+            $opciones = [];
+
+        // Obtener la inicial de la primera opción (ya que todas deben tener la misma inicial)
+        $inicialPrincipal = 0;
+        if (!empty($opciones)) {
+            $inicialPrincipal = $opciones[0]['inicial'] ?? 0;
         }
 
         $input = [
@@ -224,22 +243,35 @@ class CotizacionController extends Controller
             'moneda' => $_POST['moneda'] ?? 'PEN',
             'precioventa' => $_POST['precioventa'] ?? 0,
             'vigenciadias' => $_POST['vigenciadias'] ?? 7,
-            'inicial' => $_POST['inicial'] ?? 0,
+            'inicial' => $inicialPrincipal, // USAR LA INICIAL DE LAS OPCIONES
             'numcuotas' => $_POST['numcuotas'] ?? 0,
             'valorcuota' => $_POST['valorcuota'] ?? 0,
             'idasesor' => $idasesor,
         ];
 
-        // Validar datos obligatorios
         if (!$input['idcliente'] || !$input['idvehiculo'] || !$input['idformato']) {
             $_SESSION['error'] = "Faltan datos obligatorios.";
             header('Location: /cotizacion/create');
             exit;
         }
 
-        // Inserta la cotización
         try {
-            $this->cotizacionModel->create($input);
+            // insertar cotización y obtener id
+            $idcot = $this->cotizacionModel->create($input);
+
+            // insertar cada opción
+            foreach ($opciones as $opt) {
+                $numcuotas = (int) ($opt['numcuotas'] ?? 0);
+                $valorcuota = (float) ($opt['valorcuota'] ?? 0);
+                $inicial = (float) ($opt['inicial'] ?? $input['inicial']);
+                $moneda = $input['moneda'];
+                $precioventa = (float) ($opt['precioventa'] ?? $input['precioventa']);
+
+                if ($numcuotas > 0 && $valorcuota >= 0) {
+                    $this->cotizacionModel->createFinanciamiento($idcot, $numcuotas, $inicial, $valorcuota, $moneda, $precioventa);
+                }
+            }
+
             $_SESSION['success_message'] = "Cotización registrada correctamente.";
             header('Location: /cotizacion');
             exit;
@@ -249,6 +281,7 @@ class CotizacionController extends Controller
             exit;
         }
     }
+
 
     public function tipoCambio(): void
     {

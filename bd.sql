@@ -514,3 +514,15 @@ CREATE TABLE seguimientos_morosos (
     CONSTRAINT fk_seguimiento_contrato FOREIGN KEY (idcontrato) REFERENCES contratos(idcontrato) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT fk_seguimiento_colaborador FOREIGN KEY (usuario_registro) REFERENCES colaboradores(idcolaborador) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE = InnoDB;
+
+CREATE TABLE cotizacion_financiamiento (
+    idfinanciamiento INT AUTO_INCREMENT PRIMARY KEY,
+    idcotizacion INT NOT NULL,
+    numcuotas SMALLINT NOT NULL,
+    inicial DECIMAL(9,2) NOT NULL DEFAULT 0,
+    valorcuota DECIMAL(9,2) NOT NULL,
+    moneda ENUM('PEN','USD') NOT NULL DEFAULT 'PEN',
+    precioventa DECIMAL(12,2) NOT NULL DEFAULT 0,
+    creado DATETIME NOT NULL DEFAULT NOW(),
+    CONSTRAINT fk_cotfin_cot FOREIGN KEY (idcotizacion) REFERENCES cotizaciones (idcotizacion) ON DELETE CASCADE
+) ENGINE=INNODB;

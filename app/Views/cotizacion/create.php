@@ -7,7 +7,6 @@
         overflow: hidden;
     }
 
-
     .modal-header {
         background-color: #fd9628ff;
         color: #fff;
@@ -42,7 +41,6 @@
         color: #333;
     }
 
-
     .table {
         font-size: 0.85rem;
         --bs-table-hover-bg: #eef2f5;
@@ -69,7 +67,6 @@
         text-align: center;
     }
 
-
     .seleccionar-vehiculo-btn {
         border-radius: 0.25rem;
         font-size: 0.75rem;
@@ -87,11 +84,11 @@
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
-
     #modalCronograma .modal-header {
         background-color: #27ae60;
         border-bottom: 2px solid #229954;
     }
+
     #tablaCronograma tfoot tr td {
         background-color: #e8eaf6;
         color: #2c3e50;
@@ -322,75 +319,89 @@
                 <input type="hidden" id="vehiculoMoneda" value="">
             </div>
 
-
-            <!-- Condiciones de Cotización -->
-            <div class="card mb-4">
-                <div class="card-header bg-info">
-                    <strong>Paso 3:</strong> <span class="fst-italic">
-                        Financiamiento
-                    </span>
-                </div>
-                <div class="card-body">
-                    <div class="row g-2">
-                        <!-- Cuota Inicial -->
-                        <div class="col-md-2">
-                            <div class="form-floating">
-                                <input type="number" placeholder="Inicial" class="form-control" id="inicial"
-                                    name="inicial" step="0.01" min="0" required>
-                                <label for="inicial">Inicial</label>
-                            </div>
-                        </div>
-
-                        <!-- Valor a Financiar -->
-                        <div class="col-md-2">
-                            <div class="form-floating">
-                                <input type="text" class="form-control" id="valorFinanciar" readonly>
-                                <label for="valorFinanciar">Valor a Financiar</label>
-                            </div>
-                        </div>
-                        <input type="hidden" name="valorfinanciar" id="inputValorFinanciar">
-
-                        <!-- Meses -->
-                        <div class="col-md-2">
-                            <div class="form-floating">
-                                <input type="number" placeholder="Meses" class="form-control" id="numcuotas"
-                                    name="numcuotas" step="3" min="0" required>
-                                <label for="numcuotas">Meses</label>
-                            </div>
-                        </div>
-
-                        <!-- Tasa -->
-                        <div class="col-md-2">
-                            <div class="form-floating">
-                                <input type="number" class="form-control" id="tasaAnual" step="0.01" name="tasa" min="0"
-                                    value="65">
-                                <label for="tasaAnual">Tasa anual (%)</label>
-                            </div>
-                        </div>
-
-                        <!-- Valor mensual -->
-                        <div class="col-md-2">
-                            <div class="form-floating">
-                                <input type="text" class="form-control" id="cuotaMensual" readonly>
-                                <label for="cuotaMensual">Valor Mensual</label>
-                            </div>
-                        </div>
-                        <input type="hidden" name="valorcuota" id="inputCuotaMensual">
-
-                        <!-- botón de Cronograma -->
-                        <div class="col-md-2">
-                            <div class="form-floating h-100">
-                                <button class="btn btn-outline-primary w-100 h-100" data-bs-toggle="modal" type="button"
-                                    id="btn-generar-cronograma">
-                                    Cronograma
-                                </button>
-                            </div>
-                        </div>
-
+            <!-- Paso 3: Financiamiento -->
+            <div class="card mb-4" id="card-paso3-financiamiento">
+                <div class="card-header bg-info d-flex justify-content-between align-items-center">
+                    <div><strong>Paso 3:</strong> <span class="fst-italic">Financiamiento</span></div>
+                    <div>
+                        <button type="button" id="btnAgregarFin" class="btn btn-sm btn-outline-light">
+                            <i class="bi bi-plus-lg"></i> Agregar
+                        </button>
                     </div>
+                </div>
 
+                <div class="card-body">
+                    <div id="cardsFinanciamiento" class="mb-3"></div>
+                    <input type="hidden" id="opciones_financiamiento" name="opciones_financiamiento" value="[]">
+                    <p class="text-muted small mt-2">Cada tarjeta representa una opción de financiamiento distinta (24,
+                        36, 48, 60 meses, etc.). Puedes agregar, editar o eliminar antes de registrar la cotización.</p>
                 </div>
             </div>
+            <!-- Template para cada tarjeta de financiamiento -->
+            <template id="templateCardFin">
+                <div class="card card-fin mb-3 border-primary">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <div class="fw-semibold fin-title">Financiamiento</div>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-sm btn-outline-secondary fin-remove-btn"
+                                title="Eliminar opción">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-2 align-items-center">
+                            <div class="col-md-2">
+                                <div class="form-floating">
+                                    <input type="number" class="form-control fin-inicial" placeholder="Inicial"
+                                        step="0.01" min="0">
+                                    <label>Inicial</label>
+                                </div>
+                            </div>
+
+                            <div class="col-md-2">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control fin-valorFinanciar"
+                                        placeholder="Valor a Financiar" readonly>
+                                    <label>Valor a Financiar</label>
+                                </div>
+                            </div>
+
+                            <div class="col-md-2">
+                                <div class="form-floating">
+                                    <input type="number" class="form-control fin-numcuotas" placeholder="Meses" step="1"
+                                        min="0">
+                                    <label>Meses</label>
+                                </div>
+                            </div>
+
+                            <div class="col-md-2">
+                                <div class="form-floating">
+                                    <input type="number" class="form-control fin-tasaAnual" placeholder="Tasa anual"
+                                        step="0.01" min="0" value="65">
+                                    <label>Tasa anual (%)</label>
+                                </div>
+                            </div>
+
+                            <div class="col-md-2">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control fin-cuotaMensual" placeholder="Valor Mensual"
+                                        readonly>
+                                    <label>Valor Mensual</label>
+                                </div>
+                            </div>
+
+                            <!-- Mantener tamaño original del botón Cronograma -->
+                            <div class="col-md-2">
+                                <div class="form-floating h-100">
+                                    <button class="btn btn-outline-primary w-100 h-100 fin-btn-cronograma"
+                                        type="button">Cronograma</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </template>
 
             <!-- Botones de Acción -->
             <div class="card">
@@ -462,7 +473,8 @@
             </div>
             <div class="modal-body">
                 <div class="table-responsive p-2">
-                    <table class="table table-sm table-hover table-bordered mt-2 display nowrap" id="tablaVehiculosModal" style="width:100%">
+                    <table class="table table-sm table-hover table-bordered mt-2 display nowrap"
+                        id="tablaVehiculosModal" style="width:100%">
                         <thead>
                             <tr>
                                 <th>#</th>
@@ -488,24 +500,24 @@
                                     <td><?= htmlspecialchars($v['modelo']) ?></td>
                                     <td><?= htmlspecialchars($v['version']) ?></td>
                                     <td><?= htmlspecialchars($v['condicion']) ?></td>
-                                    <td><?=  htmlspecialchars($v['anio'])?></td>
+                                    <td><?= htmlspecialchars($v['anio']) ?></td>
                                     <td><?= htmlspecialchars($v['color'] ?? 'N/A') ?></td>
                                     <td><?= htmlspecialchars($v['disponibilidad']) ?></td>
                                     <td><?= $v['placa'] === null ? 'N/A' : htmlspecialchars($v['placa']) ?></td>
                                     <td><?= $v['placarotativa'] === null ? 'N/A' : htmlspecialchars($v['placarotativa']) ?>
                                     </td>
                                     <td class="text-center">
-                                        <button type="button" class="btn btn-sm btn-success seleccionar-vehiculo-btn" 
+                                        <button type="button" class="btn btn-sm btn-success seleccionar-vehiculo-btn"
                                             data-idvehiculo="<?= htmlspecialchars($v['idvehiculo']) ?>"
                                             data-precioventa="<?= htmlspecialchars($v['precioventa']) ?>"
                                             data-moneda="<?= htmlspecialchars($v['moneda']) ?>"
-                                            data-descripcion="<?= htmlspecialchars($v['marca'] . ' / ' . $v['tipovehiculo'] . ' / ' . $v['modelo'] . ' / ' . $v['version'] . ' / ' . $v['color']. ' / '.  $v['combustible']. ' / ' .$v['anio']) ?>"
+                                            data-descripcion="<?= htmlspecialchars($v['marca'] . ' / ' . $v['tipovehiculo'] . ' / ' . $v['modelo'] . ' / ' . $v['version'] . ' / ' . $v['color'] . ' / ' . $v['combustible'] . ' / ' . $v['anio']) ?>"
                                             data-placa="<?= htmlspecialchars($v['placa'] ?? 'N/A') ?>"
                                             data-placarotativa="<?= htmlspecialchars(strip_tags($v['placarotativa'] ?? 'N/A')) ?>"
                                             title="Seleccionar vehículo">
                                             <i class="fa-solid fa-check"></i>
                                         </button>
-                    
+
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
@@ -517,7 +529,6 @@
         </div>
     </div>
 </div>
-
 
 <!-- MODAL DE CRONOGRAMA -->
 <div class="modal fade" id="modalCronograma" tabindex="-1" aria-labelledby="modalCronogramaLabel" aria-hidden="true"
@@ -583,52 +594,329 @@
 
 <!----------------------------------------------->
 <script>
-    let tipoCambioCache = null; //Guardaremos el tipo de cambio
+    let tipoCambioCache = null;
     const tablaCronograma = document.querySelector('#tablaCronograma');
     const btnExcel = document.querySelector('#btn-excel');
     const btnPDF = document.querySelector('#btn-pdf');
 
-    // Función de utilidad para debouncing
-    const debounce = (func, delay) => {
+    function debounce(func, delay = 300) {
         let timeout;
-        return (...args) => {
-            const context = this;
+        return function (...args) {
+            const ctx = this;
             clearTimeout(timeout);
-            timeout = setTimeout(() => func.apply(context, args), delay);
+            timeout = setTimeout(() => func.apply(ctx, args), delay);
         };
-    };
-
-
-
-    function generarReporteExcel() {
-        const dataTable = $('#tablaCronograma').DataTable();
-        dataTable.page.len(-1).draw();
-        let ws = XLSX.utils.table_to_sheet(document.getElementById('tablaCronograma'));
-        let wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Cronograma");
-        XLSX.writeFile(wb, `Cronograma-${$('#nombres').val()}.xlsx`);
-        dataTable.page.len(10).draw();
     }
 
-    btnExcel.addEventListener('click', generarReporteExcel);
+    async function calcularCuotaAPI(importeTotal, inicial, meses) {
+        try {
+            const res = await fetch(`/api/cotizacion/calcularpagomensual/${encodeURIComponent(importeTotal)}/${encodeURIComponent(inicial)}/${encodeURIComponent(meses)}`);
+            if (!res.ok) throw new Error('Error calculando cuota');
+            const j = await res.json();
+            return parseFloat(j.pago_mensual || 0);
+        } catch (err) {
+            console.error('calcularCuotaAPI error', err);
+            return 0;
+        }
+    }
+
+    async function generarYMostrarCronograma(importeTotal, inicial, meses) {
+        try {
+            const res = await fetch(`/api/cotizacion/generar-cronograma/${encodeURIComponent(importeTotal)}/${encodeURIComponent(inicial)}/${encodeURIComponent(meses)}`);
+            if (!res.ok) throw new Error('Error generando cronograma');
+            const cronograma = await res.json();
+
+            const tablaCronograma = document.getElementById('tablaCronograma');
+            if (!tablaCronograma) {
+                throw new Error('Tabla de cronograma no encontrada');
+            }
+
+            if ($.fn.DataTable.isDataTable('#tablaCronograma')) {
+                $('#tablaCronograma').DataTable().clear().destroy();
+            }
+
+            const tbody = document.getElementById('cuerpoTablaCronograma');
+            if (tbody) {
+                tbody.innerHTML = '';
+
+                let totalInteres = 0, totalAbono = 0, totalCuota = 0;
+
+                cronograma.forEach(pago => {
+                    const row = tbody.insertRow();
+                    row.insertCell(0).innerText = pago.item;
+                    row.insertCell(1).innerText = pago.fecha_pago;
+                    row.insertCell(2).innerText = `S/ ${Number(pago.interes).toFixed(2)}`;
+                    row.insertCell(3).innerText = `S/ ${Number(pago.abono_capital).toFixed(2)}`;
+                    row.insertCell(4).innerText = `S/ ${Number(pago.valor_cuota).toFixed(2)}`;
+                    row.insertCell(5).innerText = `S/ ${Number(pago.saldo_capital).toFixed(2)}`;
+
+                    totalInteres += Number(pago.interes);
+                    totalAbono += Number(pago.abono_capital);
+                    totalCuota += Number(pago.valor_cuota);
+                });
+
+                const totalInteresEl = document.getElementById('totalInteres');
+                const totalAbonoEl = document.getElementById('totalAbono');
+                const totalCuotaEl = document.getElementById('totalCuota');
+
+                if (totalInteresEl) totalInteresEl.innerText = `S/ ${totalInteres.toFixed(2)}`;
+                if (totalAbonoEl) totalAbonoEl.innerText = `S/ ${totalAbono.toFixed(2)}`;
+                if (totalCuotaEl) totalCuotaEl.innerText = `S/ ${totalCuota.toFixed(2)}`;
+            }
+
+            const modalCronograma = new bootstrap.Modal(document.getElementById('modalCronograma'));
+            modalCronograma.show();
+
+            setTimeout(() => {
+                initTableModalVehiculo();
+            }, 300);
+
+        } catch (err) {
+            console.error('Error cronograma:', err);
+            if (typeof showToast === 'function') {
+                showToast('Error al generar cronograma', 'ERROR', 1500);
+            } else {
+                alert('Error al generar cronograma');
+            }
+        }
+    }
+
+    let finCounter = 0;
+    const cardsContainer = document.getElementById('cardsFinanciamiento');
+    const templateCard = document.getElementById('templateCardFin');
+
+    function crearTarjetaFin(data = {}) {
+        if (!cardsContainer || !templateCard) {
+            console.error('Missing required elements for financing cards');
+            return null;
+        }
+
+        finCounter++;
+        const clone = templateCard.content.cloneNode(true);
+        const card = clone.querySelector('.card-fin');
+        card.dataset.finId = 'fin_' + finCounter;
+
+        const inicialEl = card.querySelector('.fin-inicial');
+        const valorFinEl = card.querySelector('.fin-valorFinanciar');
+        const numEl = card.querySelector('.fin-numcuotas');
+        const tasaEl = card.querySelector('.fin-tasaAnual');
+        const cuotaEl = card.querySelector('.fin-cuotaMensual');
+        const btnCrono = card.querySelector('.fin-btn-cronograma');
+        const btnRemove = card.querySelector('.fin-remove-btn');
+        const titleEl = card.querySelector('.fin-title');
+
+        function obtenerInicialReferencia() {
+            const primeraCard = cardsContainer.querySelector('.card-fin .fin-inicial');
+            if (primeraCard && primeraCard.value) {
+                return primeraCard.value;
+            }
+            return '';
+        }
+
+        const inicialReferencia = obtenerInicialReferencia();
+        if (inicialEl) inicialEl.value = (typeof data.inicial !== 'undefined') ? data.inicial : inicialReferencia;
+        if (numEl) numEl.value = (typeof data.numcuotas !== 'undefined') ? data.numcuotas : '';
+        if (tasaEl) tasaEl.value = (typeof data.tasa !== 'undefined') ? data.tasa : 65;
+        if (cuotaEl) cuotaEl.value = data.valorcuota ? Number(data.valorcuota).toFixed(2) : '';
+
+        function actualizarValorFinanciar() {
+            const precioFinal = parseFloat(document.getElementById('inputValorConvertido')?.value || document.getElementById('valor')?.value || 0) || 0;
+            const inicial = parseFloat(inicialEl?.value || 0);
+            const vf = Math.max(0, precioFinal - inicial);
+            if (valorFinEl) valorFinEl.value = vf.toFixed(2);
+        }
+
+        const calcularYSetCuota = debounce(async function () {
+            const precioFinal = parseFloat(document.getElementById('inputValorConvertido')?.value || document.getElementById('valor')?.value || 0) || 0;
+            const inicial = parseFloat(inicialEl?.value || 0);
+            const meses = parseInt(numEl?.value || 0, 10) || 0;
+
+            actualizarValorFinanciar();
+
+            if (!meses || precioFinal <= 0) {
+                if (cuotaEl) cuotaEl.value = '';
+                actualizarHiddenOpciones();
+                return;
+            }
+            const cuota = await calcularCuotaAPI(precioFinal, inicial, meses);
+            if (cuotaEl) cuotaEl.value = cuota ? Number(cuota).toFixed(2) : '';
+            actualizarHiddenOpciones();
+        }, 250);
+
+        if (inicialEl) {
+            inicialEl.addEventListener('input', function () {
+                const nuevaInicial = this.value;
+
+                cardsContainer.querySelectorAll('.card-fin .fin-inicial').forEach(otroInput => {
+                    if (otroInput !== this) {
+                        otroInput.value = nuevaInicial;
+                        const otherCard = otroInput.closest('.card-fin');
+                        const otroNumEl = otherCard?.querySelector('.fin-numcuotas');
+                        if (otroNumEl && otroNumEl.value) {
+                            const ev = new Event('input');
+                            otroNumEl.dispatchEvent(ev);
+                        }
+                    }
+                });
+
+                calcularYSetCuota();
+            });
+        }
+
+        if (numEl) numEl.addEventListener('input', calcularYSetCuota);
+        if (tasaEl) tasaEl.addEventListener('input', calcularYSetCuota);
+
+        if (btnCrono) {
+            btnCrono.addEventListener('click', (e) => {
+                e.preventDefault();
+                const precioFinal = parseFloat(document.getElementById('inputValorConvertido')?.value || document.getElementById('valor')?.value || 0) || 0;
+                const inicial = parseFloat(inicialEl?.value || 0);
+                const meses = parseInt(numEl?.value || 0, 10) || 0;
+                if (meses <= 0 || (precioFinal - inicial) <= 0) {
+                    if (typeof showToast === 'function') {
+                        showToast('Ingresa valores válidos para cronograma', 'ERROR', 1200);
+                    } else {
+                        alert('Ingresa valores válidos para cronograma');
+                    }
+                    return;
+                }
+                generarYMostrarCronograma(precioFinal, inicial, meses);
+            });
+        }
+
+        if (btnRemove) {
+            btnRemove.addEventListener('click', () => {
+                card.remove();
+                actualizarHiddenOpciones();
+            });
+        }
+
+        const updateTitle = () => {
+            const meses = numEl?.value ? `${numEl.value} meses` : 'Financiamiento';
+            if (titleEl) titleEl.textContent = meses;
+        };
+        if (numEl) numEl.addEventListener('input', updateTitle);
+
+        cardsContainer.appendChild(card);
+        calcularYSetCuota();
+        updateTitle();
+        return card;
+    }
+
+    function actualizarHiddenOpciones() {
+        const cards = cardsContainer?.querySelectorAll('.card-fin') || [];
+        const opciones = [];
+        cards.forEach(card => {
+            const inicial = parseFloat(card.querySelector('.fin-inicial')?.value || 0);
+            const numcuotas = parseInt(card.querySelector('.fin-numcuotas')?.value || 0, 10) || 0;
+            const valorcuota = parseFloat((card.querySelector('.fin-cuotaMensual')?.value || '').replace(/,/g, '')) || 0;
+            const precioventa = parseFloat(document.getElementById('inputValorConvertido')?.value || document.getElementById('valor')?.value || 0) || 0;
+            if (numcuotas > 0 && (valorcuota > 0 || inicial >= 0)) {
+                opciones.push({
+                    numcuotas,
+                    inicial: Number(inicial.toFixed(2)),
+                    valorcuota: Number(valorcuota.toFixed(2)),
+                    precioventa: Number(precioventa.toFixed(2))
+                });
+            }
+        });
+        const hiddenInput = document.getElementById('opciones_financiamiento');
+        if (hiddenInput) hiddenInput.value = JSON.stringify(opciones);
+    }
+
+    function initFinancingEvents() {
+        const btnAgregar = document.getElementById('btnAgregarFin');
+        if (btnAgregar) {
+            btnAgregar.addEventListener('click', (e) => {
+                e.preventDefault();
+                crearTarjetaFin();
+            });
+        }
+
+        crearTarjetaFin({
+            inicial: 0,
+            numcuotas: 0,
+            tasa: 65,
+            valorcuota: ''
+        });
+
+        const globalTriggers = ['inputValorConvertido', 'valor'];
+        globalTriggers.forEach(id => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.addEventListener('input', debounce(() => {
+                if (cardsContainer) {
+                    cardsContainer.querySelectorAll('.card-fin').forEach(card => {
+                        const ev = new Event('input');
+                        const numInput = card.querySelector('.fin-numcuotas');
+                        if (numInput) numInput.dispatchEvent(ev);
+                    });
+                }
+            }, 300));
+        });
+    }
+
+    function initFormSubmitHandler() {
+        const formCot = document.getElementById('formCotizacion');
+        if (formCot) {
+            formCot.addEventListener('submit', function (e) {
+                actualizarHiddenOpciones();
+            });
+        }
+    }
+
+    function generarReporteExcel() {
+        const tableElement = document.getElementById('tablaCronograma');
+        if (!tableElement) {
+            console.warn('Table tablaCronograma not found for Excel export');
+            return;
+        }
+
+        try {
+            if ($.fn.DataTable.isDataTable('#tablaCronograma')) {
+                const dataTable = $('#tablaCronograma').DataTable();
+                dataTable.page.len(-1).draw();
+
+                setTimeout(() => {
+                    const ws = XLSX.utils.table_to_sheet(tableElement);
+                    const wb = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(wb, ws, "Cronograma");
+
+                    const nombresEl = document.getElementById('nombres');
+                    const fileName = nombresEl ? `Cronograma-${nombresEl.value}.xlsx` : 'Cronograma.xlsx';
+                    XLSX.writeFile(wb, fileName);
+
+                    dataTable.page.len(10).draw();
+                }, 100);
+            } else {
+                const ws = XLSX.utils.table_to_sheet(tableElement);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Cronograma");
+
+                const nombresEl = document.getElementById('nombres');
+                const fileName = nombresEl ? `Cronograma-${nombresEl.value}.xlsx` : 'Cronograma.xlsx';
+                XLSX.writeFile(wb, fileName);
+            }
+        } catch (error) {
+            console.error('Error generating Excel report:', error);
+            if (typeof showToast === 'function') {
+                showToast('Error al generar reporte Excel', 'ERROR', 2000);
+            } else {
+                alert('Error al generar reporte Excel');
+            }
+        }
+    }
+
+    function bindExcelButton() {
+        if (btnExcel) {
+            btnExcel.addEventListener('click', generarReporteExcel);
+        }
+    }
 
     function formatDate(date, pad) {
         return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
     }
 
-    document.addEventListener("DOMContentLoaded", () => {
-        initDataTable();
-        initFechas();
-        initEventosCliente();
-        initEventosVehiculo();
-        initModalRequisitos();
-
-        //Verificar si hay un cliente recien registrado
-        verificarUltimoClienteRegistrado();
-    });
-
-
-    //Verificar y sugerir ultimo cliente registrado
     async function verificarUltimoClienteRegistrado() {
         try {
             const response = await fetch('/api/ultimo-cliente-registrado');
@@ -637,8 +925,6 @@
             if (data.success && data.cliente) {
                 const cliente = data.cliente;
                 const tiempoTranscurrido = Math.floor((Date.now() / 1000) - cliente.timestamp);
-
-                // Solo mostrar si el registro es reciente (menos de 30 minutos)
                 if (tiempoTranscurrido < 1800) {
                     mostrarSugerenciaUltimoCliente(cliente);
                 }
@@ -648,7 +934,6 @@
         }
     }
 
-    //Mostrar modal de sugerencia
     function mostrarSugerenciaUltimoCliente(cliente) {
         const modalHtml = `
             <div class="modal fade" id="modalSugerenciaCliente" tabindex="-1" data-bs-backdrop="static">
@@ -706,111 +991,151 @@
                 </div>
             </div>
         `;
-
-        // Insertar modal en el DOM
         document.body.insertAdjacentHTML('beforeend', modalHtml);
-
-        // Mostrar modal después de un breve delay
         setTimeout(() => {
             const modal = new bootstrap.Modal(document.getElementById('modalSugerenciaCliente'));
             modal.show();
-
-            // Limpiar modal cuando se cierre
             document.getElementById('modalSugerenciaCliente').addEventListener('hidden.bs.modal', function () {
                 this.remove();
             });
         }, 500);
     }
 
-    //Usar cliente sugerido
     function usarClienteSugerido(cliente) {
-        // Llenar campos del formulario
-        document.getElementById('tipoDocumento').value = cliente.tipodoc.toLowerCase();
-        document.getElementById('documento').value = cliente.nrodoc;
-        document.getElementById('idcliente').value = cliente.idcliente;
-        document.getElementById('nombres').value = `${cliente.apellidos} ${cliente.nombres}`;
-        document.getElementById('telprimario').value = cliente.telprimario;
-        document.getElementById('telalternativo').value = cliente.telalternativo || '';
+        const tipoDoc = document.getElementById('tipoDocumento');
+        const doc = document.getElementById('documento');
+        const idCliente = document.getElementById('idcliente');
+        const nombres = document.getElementById('nombres');
+        const telPrimario = document.getElementById('telprimario');
+        const telAlternativo = document.getElementById('telalternativo');
 
-        // Cerrar modal
+        if (tipoDoc) tipoDoc.value = cliente.tipodoc.toLowerCase();
+        if (doc) doc.value = cliente.nrodoc;
+        if (idCliente) idCliente.value = cliente.idcliente;
+        if (nombres) nombres.value = `${cliente.apellidos} ${cliente.nombres}`;
+        if (telPrimario) telPrimario.value = cliente.telprimario;
+        if (telAlternativo) telAlternativo.value = cliente.telalternativo || '';
+
         const modal = bootstrap.Modal.getInstance(document.getElementById('modalSugerenciaCliente'));
-        modal.hide();
+        if (modal) modal.hide();
 
-        // Mostrar mensaje de éxito
-        showToast('Cliente cargado correctamente', 'SUCCESS', 2000);
+        if (typeof showToast === 'function') {
+            showToast('Cliente cargado correctamente', 'SUCCESS', 2000);
+        }
 
-        // Limpiar sesión del último cliente
         fetch('/api/limpiar-ultimo-cliente', { method: 'POST' });
     }
 
     function initDataTable() {
-        if ($.fn.DataTable.isDataTable('#tablaVehiculosModal')) {
-            $('#tablaVehiculosModal').DataTable().destroy();
+        if (typeof $ === 'undefined' || typeof $.fn.DataTable === 'undefined') {
+            console.warn('jQuery or DataTables not loaded yet');
+            return;
         }
 
-        $('#tablaVehiculosModal').DataTable({
-            order: [
-                [0, 'desc']
-            ],
-            pagingType: 'full_numbers',
-            pageLength: 10,
-            lengthMenu: [
-                [5, 10, 25, -1],
-                [5, 10, 25, "Todos"]
-            ],
-            scrollX: true,
-            language: {
-                url: "https://cdn.datatables.net/plug-ins/2.0.7/i18n/es-ES.json",
-                paginate: {
-                    first: '«',
-                    previous: '‹',
-                    next: '›',
-                    last: '»'
-                }
+        const table = document.getElementById('tablaVehiculosModal');
+        if (!table) {
+            console.warn('Table tablaVehiculosModal not found');
+            return;
+        }
+
+        try {
+            if ($.fn.DataTable.isDataTable('#tablaVehiculosModal')) {
+                $('#tablaVehiculosModal').DataTable().clear().destroy();
             }
-        });
+
+            setTimeout(() => {
+                const tableElement = document.getElementById('tablaVehiculosModal');
+                if (tableElement && tableElement.parentNode) {
+                    $('#tablaVehiculosModal').DataTable({
+                        order: [[0, 'desc']],
+                        pagingType: 'full_numbers',
+                        pageLength: 10,
+                        lengthMenu: [[5, 10, 25, -1], [5, 10, 25, "Todos"]],
+                        scrollX: true,
+                        destroy: true,
+                        language: {
+                            url: "https://cdn.datatables.net/plug-ins/2.0.7/i18n/es-ES.json",
+                            paginate: {
+                                first: '«',
+                                previous: '‹',
+                                next: '›',
+                                last: '»'
+                            }
+                        }
+                    });
+                }
+            }, 100);
+        } catch (error) {
+            console.error('Error initializing vehicle table:', error);
+        }
     }
 
     function initTableModalVehiculo() {
-        $('#tablaCronograma').DataTable({
-            order: [
-                [0, 'asc']
-            ],
-            pagingType: 'full_numbers',
-            pageLength: 10,
-            lengthMenu: [
-                [5, 10, 25, -1],
-                [5, 10, 25, "Todos"]
-            ],
-            scrollX: true,
-            language: {
-                url: "https://cdn.datatables.net/plug-ins/2.0.7/i18n/es-ES.json",
-                paginate: {
-                    first: '«',
-                    previous: '‹',
-                    next: '›',
-                    last: '»'
-                }
+        if (typeof $ === 'undefined' || typeof $.fn.DataTable === 'undefined') {
+            console.warn('jQuery or DataTables not loaded yet');
+            return;
+        }
+
+        const table = document.getElementById('tablaCronograma');
+        if (!table) {
+            console.warn('Table tablaCronograma not found');
+            return;
+        }
+
+        try {
+            if ($.fn.DataTable.isDataTable('#tablaCronograma')) {
+                $('#tablaCronograma').DataTable().clear().destroy();
             }
-        });
+
+            setTimeout(() => {
+                const tableElement = document.getElementById('tablaCronograma');
+                if (tableElement && tableElement.parentNode) {
+                    $('#tablaCronograma').DataTable({
+                        order: [[0, 'asc']],
+                        pagingType: 'full_numbers',
+                        pageLength: 10,
+                        lengthMenu: [[5, 10, 25, -1], [5, 10, 25, "Todos"]],
+                        scrollX: true,
+                        destroy: true,
+                        language: {
+                            url: "https://cdn.datatables.net/plug-ins/2.0.7/i18n/es-ES.json",
+                            paginate: {
+                                first: '«',
+                                previous: '‹',
+                                next: '›',
+                                last: '»'
+                            }
+                        }
+                    });
+                }
+            }, 100);
+        } catch (error) {
+            console.error('Error initializing cronograma table:', error);
+        }
     }
 
     function initFechas() {
+        const fechaEmision = document.getElementById('fechaEmision');
+        const fechaCaducidad = document.getElementById('fechaCaducidad');
+        const inputVigenciaDias = document.getElementById('inputVigenciaDias');
+
+        if (!fechaEmision || !fechaCaducidad) return;
+
         const hoy = new Date();
         const pad = n => String(n).padStart(2, '0');
-        document.getElementById('fechaEmision').value = formatDate(hoy, pad);
+        fechaEmision.value = formatDate(hoy, pad);
         const fin = new Date();
         fin.setDate(hoy.getDate() + 7);
-        document.getElementById('fechaCaducidad').value = formatDate(fin, pad);
-        document.getElementById('inputVigenciaDias').value = 7;
-    }
+        fechaCaducidad.value = formatDate(fin, pad);
+        if (inputVigenciaDias) inputVigenciaDias.value = 7;
 
-    document.getElementById('fechaCaducidad').addEventListener('change', () => {
-        const em = new Date(document.getElementById('fechaEmision').value);
-        const ca = new Date(document.getElementById('fechaCaducidad').value);
-        const diff = Math.round((ca - em) / (1000 * 60 * 60 * 24));
-        document.getElementById('inputVigenciaDias').value = diff;
-    });
+        fechaCaducidad.addEventListener('change', () => {
+            const em = new Date(fechaEmision.value);
+            const ca = new Date(fechaCaducidad.value);
+            const diff = Math.round((ca - em) / (1000 * 60 * 60 * 24));
+            if (inputVigenciaDias) inputVigenciaDias.value = diff;
+        });
+    }
 
     async function initEventosCliente() {
         const btn = document.getElementById('btnBuscarCliente');
@@ -818,60 +1143,62 @@
         const docIn = document.getElementById('documento');
         const hid = document.getElementById('idcliente');
 
+        if (!btn || !tipo || !docIn || !hid) return;
+
         btn.addEventListener('click', async () => {
             const tipoValue = tipo.value;
             const docValue = docIn.value.trim();
             if (!docValue) return alert('Ingresa un número de documento válido.');
-
             const res = await fetch(`/cotizacion/buscarCliente?tipo=${tipoValue}&doc=${encodeURIComponent(docValue)}`);
             const data = await res.json();
-
             console.log('DATA DE DNI: ', data);
             if (data.notFound) {
                 const confirmRedirect = confirm('Cliente no encontrado. ¿Desea ir a registrarlo ahora?');
-
                 if (confirmRedirect) {
-                    //window.location.href = `/clientes/createpersonclient?dni=${encodeURIComponent(docValue)}`;
                     const returnUrl = `/clientes/createpersonclient?return_to=cotizacion&dni=${encodeURIComponent(docValue)}&tipo=${encodeURIComponent(tipoValue)}`;
                     window.location.href = returnUrl;
                 } else {
-                    // Limpiar campos si no quiere ir a registrar
                     hid.value = '';
-                    document.getElementById('nombres').value = '';
-                    document.getElementById('telprimario').value = '';
-                    document.getElementById('telalternativo').value = '';
-                    document.getElementById('direccion').value = '';
-
+                    const nombres = document.getElementById('nombres');
+                    const telPrimario = document.getElementById('telprimario');
+                    const telAlternativo = document.getElementById('telalternativo');
+                    const direccion = document.getElementById('direccion');
+                    if (nombres) nombres.value = '';
+                    if (telPrimario) telPrimario.value = '';
+                    if (telAlternativo) telAlternativo.value = '';
+                    if (direccion) direccion.value = '';
                 }
             } else if (data.error) {
                 alert(data.error);
             } else {
                 hid.value = data.idcliente;
-                document.getElementById('nombres').value = `${data.apellidos} ${data.nombres}`.trim();
-                document.getElementById('telprimario').value = data.telprimario || '';
-                document.getElementById('telalternativo').value = data.telalternativo || '';
-                document.getElementById('direccion').value = `${data.direccion}` ?? ''; //Traer la dirección del cliente
+                const nombres = document.getElementById('nombres');
+                const telPrimario = document.getElementById('telprimario');
+                const telAlternativo = document.getElementById('telalternativo');
+                const direccion = document.getElementById('direccion');
+                if (nombres) nombres.value = `${data.apellidos} ${data.nombres}`.trim();
+                if (telPrimario) telPrimario.value = data.telprimario || '';
+                if (telAlternativo) telAlternativo.value = data.telalternativo || '';
+                if (direccion) direccion.value = `${data.direccion}` ?? '';
             }
         });
     }
 
-    //Copiar al portapapeles (funcionalidad extra)
     function copiarAlPortapapeles(texto) {
         if (navigator.clipboard && window.isSecureContext) {
-            // Método moderno para navegadores compatibles
             navigator.clipboard.writeText(texto).then(() => {
-                showToast('Texto copiado al portapapeles', 'SUCCESS', 1500);
+                if (typeof showToast === 'function') {
+                    showToast('Texto copiado al portapapeles', 'SUCCESS', 1500);
+                }
             }).catch(err => {
                 console.error('Error al copiar:', err);
                 copiarConMetodoFallback(texto);
             });
         } else {
-            // Método fallback para navegadores más antiguos
             copiarConMetodoFallback(texto);
         }
     }
 
-    //Metodo fallback para copiar
     function copiarConMetodoFallback(texto) {
         const textArea = document.createElement('textarea');
         textArea.value = texto;
@@ -881,30 +1208,38 @@
         document.body.appendChild(textArea);
         textArea.focus();
         textArea.select();
-
         try {
             const exitoso = document.execCommand('copy');
-            if (exitoso) {
+            if (exitoso && typeof showToast === 'function') {
                 showToast('Texto copiado al portapapeles', 'SUCCESS', 1500);
-            } else {
+            } else if (!exitoso && typeof showToast === 'function') {
                 showToast('No se pudo copiar el texto', 'ERROR', 2000);
             }
         } catch (err) {
             console.error('Error al copiar:', err);
-            showToast('Error al copiar texto', 'ERROR', 2000);
+            if (typeof showToast === 'function') {
+                showToast('Error al copiar texto', 'ERROR', 2000);
+            }
         } finally {
             document.body.removeChild(textArea);
         }
     }
 
     function initEventosVehiculo() {
-        $('#tablaVehiculosModal').on('click', '.seleccionar-vehiculo-btn', async function() {
+        const tabla = document.getElementById('tablaVehiculosModal');
+        if (!tabla) return;
+
+        $('#tablaVehiculosModal').on('click', '.seleccionar-vehiculo-btn', async function () {
             const d = $(this).data();
             fillPaso2(d);
             clearConversion();
             await actualizarMontos();
             await actualizarFinanciamiento();
-            bootstrap.Modal.getInstance($('#modalVehiculos')[0]).hide();
+            const modal = document.getElementById('modalVehiculos');
+            if (modal) {
+                const modalInstance = bootstrap.Modal.getInstance(modal);
+                if (modalInstance) modalInstance.hide();
+            }
         });
 
         actualizarMontos();
@@ -920,42 +1255,53 @@
     }) {
         const valorPlaca = (placa || '').trim() || 'N/A';
         const valorPlacaRotativa = (placarotativa || '').replace(/<[^>]+>/g, '').trim() || 'N/A';
-
         const precio = parseFloat(precioventa);
         const valorPrecio = isNaN(precio) ? '0.00' : precio.toFixed(2);
 
-        $('#idvehiculo').val(idvehiculo);
-        $('#descripcion').val(descripcion);
-        $('#placa').val(valorPlaca.toUpperCase());
-        $('#placarotativa').val(valorPlacaRotativa.toUpperCase());
-        $('#valor').val(valorPrecio);
-        $('#monedaprecio').val(moneda === 'USD' ? 'Dólares' : 'Soles');
-        $('#vehiculoMoneda').val(moneda);
+        const idVehiculoEl = document.getElementById('idvehiculo');
+        const descripcionEl = document.getElementById('descripcion');
+        const placaEl = document.getElementById('placa');
+        const placaRotativaEl = document.getElementById('placarotativa');
+        const valorEl = document.getElementById('valor');
+        const monedaPrecioEl = document.getElementById('monedaprecio');
+        const vehiculoMonedaEl = document.getElementById('vehiculoMoneda');
+        const monedaSelectEl = document.getElementById('monedaSelect');
 
-        const $monedaSelect = $('#monedaSelect');
-        if (moneda === 'PEN') {
-            $monedaSelect.val('PEN').prop('disabled', true);
-        } else {
-            $monedaSelect.prop('disabled', false);
+        if (idVehiculoEl) idVehiculoEl.value = idvehiculo;
+        if (descripcionEl) descripcionEl.value = descripcion;
+        if (placaEl) placaEl.value = valorPlaca.toUpperCase();
+        if (placaRotativaEl) placaRotativaEl.value = valorPlacaRotativa.toUpperCase();
+        if (valorEl) valorEl.value = valorPrecio;
+        if (monedaPrecioEl) monedaPrecioEl.value = moneda === 'USD' ? 'Dólares' : 'Soles';
+        if (vehiculoMonedaEl) vehiculoMonedaEl.value = moneda;
+
+        if (monedaSelectEl) {
+            if (moneda === 'PEN') {
+                monedaSelectEl.value = 'PEN';
+                monedaSelectEl.disabled = true;
+            } else {
+                monedaSelectEl.disabled = false;
+            }
         }
     }
 
     function clearConversion() {
-        $('#tipoCambio, #valormoneda').val('');
+        const tipoCambioEl = document.getElementById('tipoCambio');
+        const valorMonedaEl = document.getElementById('valormoneda');
+        if (tipoCambioEl) tipoCambioEl.value = '';
+        if (valorMonedaEl) valorMonedaEl.value = '';
     }
 
     async function fetchTipoCambio(force = false) {
         if (!force && tipoCambioCache !== null) {
-            return tipoCambioCache; // Usa caché si ya se tiene
+            return tipoCambioCache;
         }
 
         try {
             const res = await fetch('/cotizacion/tipo-cambio');
             if (!res.ok) throw new Error(res.statusText);
-            const {
-                tipo_cambio
-            } = await res.json();
-            tipoCambioCache = parseFloat(tipo_cambio) || 1; // Guarda en caché
+            const { tipo_cambio } = await res.json();
+            tipoCambioCache = parseFloat(tipo_cambio) || 1;
             return tipoCambioCache;
         } catch (err) {
             console.error('Error al obtener tipo de cambio:', err);
@@ -963,29 +1309,41 @@
         }
     }
 
-
     async function actualizarMontos() {
-        const precioOriginal = parseFloat($('#valor').val()) || 0;
-        const vehMoneda = $('#vehiculoMoneda').val();
-        const cotMoneda = $('#monedaSelect').val();
+        const valorEl = document.getElementById('valor');
+        const vehiculoMonedaEl = document.getElementById('vehiculoMoneda');
+        const monedaSelectEl = document.getElementById('monedaSelect');
+        const idVehiculoEl = document.getElementById('idvehiculo');
+        const tipoCambioEl = document.getElementById('tipoCambio');
+        const valorMonedaEl = document.getElementById('valormoneda');
+        const inputPrecioventaEl = document.getElementById('inputPrecioventa');
+        const inputMonedaEl = document.getElementById('inputMoneda');
+        const inputTipoCambioEl = document.getElementById('inputTipoCambio');
+        const inputValorConvertidoEl = document.getElementById('inputValorConvertido');
+
+        if (!valorEl || !vehiculoMonedaEl || !monedaSelectEl || !idVehiculoEl) return;
+
+        const precioOriginal = parseFloat(valorEl.value) || 0;
+        const vehMoneda = vehiculoMonedaEl.value;
+        const cotMoneda = monedaSelectEl.value;
         let tipoCam = 1;
 
-        const idvehiculo = $('#idvehiculo').val();
+        const idvehiculo = idVehiculoEl.value;
         if (!idvehiculo) {
-            $('#tipoCambio').val('');
-            $('#valormoneda').val('');
-            $('#inputPrecioventa').val('');
-            $('#inputMoneda').val('');
-            $('#inputTipoCambio').val('');
-            $('#inputValorConvertido').val('');
+            if (tipoCambioEl) tipoCambioEl.value = '';
+            if (valorMonedaEl) valorMonedaEl.value = '';
+            if (inputPrecioventaEl) inputPrecioventaEl.value = '';
+            if (inputMonedaEl) inputMonedaEl.value = '';
+            if (inputTipoCambioEl) inputTipoCambioEl.value = '';
+            if (inputValorConvertidoEl) inputValorConvertidoEl.value = '';
             return;
         }
 
         if (vehMoneda !== cotMoneda) {
-            tipoCam = await fetchTipoCambio(); // Solo si necesario
-            $('#tipoCambio').val(tipoCam.toFixed(4));
+            tipoCam = await fetchTipoCambio();
+            if (tipoCambioEl) tipoCambioEl.value = tipoCam.toFixed(4);
         } else {
-            $('#tipoCambio').val('');
+            if (tipoCambioEl) tipoCambioEl.value = '';
         }
 
         let precioFinal = precioOriginal;
@@ -998,77 +1356,69 @@
         }
 
         precioFinal = Number(precioFinal.toFixed(2));
-        $('#valormoneda').val(precioFinal);
-        $('#inputPrecioventa').val(precioFinal);
-        $('#inputMoneda').val(cotMoneda);
-        $('#inputTipoCambio').val(tipoCam);
-        $('#inputValorConvertido').val(precioFinal);
+        if (valorMonedaEl) valorMonedaEl.value = precioFinal;
+        if (inputPrecioventaEl) inputPrecioventaEl.value = precioFinal;
+        if (inputMonedaEl) inputMonedaEl.value = cotMoneda;
+        if (inputTipoCambioEl) inputTipoCambioEl.value = tipoCam;
+        if (inputValorConvertidoEl) inputValorConvertidoEl.value = precioFinal;
     }
-
 
     async function actualizarFinanciamiento() {
-        const inicial = parseFloat($('#inicial').val()) || 0;
-        const precioFinal = parseFloat($('#inputValorConvertido').val()) || 0;
-        const valorF = Math.max(0, precioFinal - inicial);
-        $('#valorFinanciar').val(valorF.toFixed(2));
-        $('#inputValorFinanciar').val(valorF.toFixed(2));
-
-        const n = parseInt($('#numcuotas').val(), 10) || 0;
-
-        if (n > 0) {
-            try {
-                const res = await fetch(`/api/cotizacion/calcularpagomensual/${precioFinal}/${inicial}/${n}`);
-                if (!res.ok) throw new Error(res.statusText);
-                const {
-                    pago_mensual
-                } = await res.json();
-
-                $('#cuotaMensual').val(pago_mensual.toFixed(2));
-                $('#inputCuotaMensual').val(pago_mensual.toFixed(2));
-            } catch (err) {
-                console.error('Error calculando financiamiento:', err);
-                $('#cuotaMensual').val('');
-                $('#inputCuotaMensual').val('');
-            }
-        } else {
-            $('#cuotaMensual').val('');
-            $('#inputCuotaMensual').val('');
-        }
+        // This function is intentionally simplified since the new card-based system handles this
+        // Individual cards will recalculate themselves when needed
     }
 
-    // APLICAMOS DEBOUNCE AQUÍ
     const debouncedActualizarMontosFinanciamiento = debounce(async () => {
         await actualizarMontos();
         await actualizarFinanciamiento();
     }, 280);
 
-    $('#inicial, #numcuotas, #tasaAnual, #tipoCambio, #monedaSelect')
-        .on('input change', debouncedActualizarMontosFinanciamiento);
-
-    $('#tasaAnual').val(65);
-
-    $(document).ready(async () => {
-        await actualizarMontos();
-        await actualizarFinanciamiento();
-    });
-
-    function initModalRequisitos() {
-        $('#modalRequisitos').on('show.bs.modal', async () => {
-            const id = $('#modalidad').val();
-            const ul = $('#listaRequisitos').empty();
-            if (!id) return ul.append('<li class="list-group-item text-muted">Selecciona primero una modalidad.</li>');
-            try {
-                const resp = await fetch(`/cotizaciones/requisitos/${id}`);
-                const arr = await resp.json();
-                if (!arr.length) ul.append('<li class="list-group-item text-muted">No hay requisitos definidos.</li>');
-                else arr.forEach(i => ul.append(`<li class="list-group-item">${i.requisito}</li>`));
-            } catch {
-                ul.append('<li class="list-group-item text-danger">Error cargando requisitos.</li>');
+    function bindMonedaEvents() {
+        const elementos = ['tipoCambio', 'monedaSelect'];
+        elementos.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('input', debouncedActualizarMontosFinanciamiento);
+                el.addEventListener('change', debouncedActualizarMontosFinanciamiento);
             }
         });
     }
 
-    (function attachCotizacionConfirm() {
+    function initModalRequisitos() {
+        const modalRequisitos = document.getElementById('modalRequisitos');
+        if (!modalRequisitos) return;
+
+        modalRequisitos.addEventListener('show.bs.modal', async () => {
+            const modalidadEl = document.getElementById('modalidad');
+            const listaRequisitosEl = document.getElementById('listaRequisitos');
+
+            if (!modalidadEl || !listaRequisitosEl) return;
+
+            const id = modalidadEl.value;
+            listaRequisitosEl.innerHTML = '';
+
+            if (!id) {
+                listaRequisitosEl.innerHTML = '<li class="list-group-item text-muted">Selecciona primero una modalidad.</li>';
+                return;
+            }
+
+            try {
+                const resp = await fetch(`/cotizaciones/requisitos/${id}`);
+                const arr = await resp.json();
+                if (!arr.length) {
+                    listaRequisitosEl.innerHTML = '<li class="list-group-item text-muted">No hay requisitos definidos.</li>';
+                } else {
+                    arr.forEach(i => {
+                        listaRequisitosEl.innerHTML += `<li class="list-group-item">${i.requisito}</li>`;
+                    });
+                }
+            } catch {
+                listaRequisitosEl.innerHTML = '<li class="list-group-item text-danger">Error cargando requisitos.</li>';
+            }
+        });
+    }
+
+    function attachCotizacionConfirm() {
         const formCot = document.getElementById('formCotizacion');
         if (!formCot) return;
 
@@ -1076,7 +1426,13 @@
             e.preventDefault();
             const submitButton = formCot.querySelector('button[type="submit"]');
 
-            const confirmado = await ask('¿Desea confirmar el registro de esta cotización?', '¿Registrar cotización?');
+            let confirmado;
+            if (typeof ask === 'function') {
+                confirmado = await ask('¿Desea confirmar el registro de esta cotización?', '¿Registrar cotización?');
+            } else {
+                confirmado = confirm('¿Desea confirmar el registro de esta cotización?');
+            }
+
             if (!confirmado) return;
 
             if (submitButton) {
@@ -1085,69 +1441,13 @@
             }
             formCot.submit();
         });
-    })();
+    }
 
-
-    document.getElementById('btn-generar-cronograma').addEventListener('click', async (e) => {
-        e.preventDefault();
-
-        const importeTotal = parseFloat($('#inputValorConvertido').val()) || 0;
-        const inicial = parseFloat($('#inicial').val()) || 0;
-        const meses = parseInt($('#numcuotas').val(), 10) || 0;
-
-        if (meses <= 0 || (importeTotal - inicial) <= 0) {
-            alert('Ingresa valores válidos para calcular el cronograma.');
-            return;
-        }
-
-        try {
-            const res = await fetch(`/api/cotizacion/generar-cronograma/${importeTotal}/${inicial}/${meses}`);
-            if (!res.ok) throw new Error(res.statusText);
-            const cronograma = await res.json();
-
-            if ($.fn.DataTable.isDataTable('#tablaCronograma')) {
-                $('#tablaCronograma').DataTable().destroy();
-            }
-
-            const tbody = document.getElementById('cuerpoTablaCronograma');
-            tbody.innerHTML = '';
-
-            let totalInteres = 0;
-            let totalAbono = 0;
-            let totalCuota = 0;
-
-            cronograma.forEach(pago => {
-                const row = tbody.insertRow();
-                row.insertCell(0).innerText = pago.item;
-                row.insertCell(1).innerText = pago.fecha_pago;
-                row.insertCell(2).innerText = `S/ ${pago.interes.toFixed(2)}`;
-                row.insertCell(3).innerText = `S/ ${pago.abono_capital.toFixed(2)}`;
-                row.insertCell(4).innerText = `S/ ${pago.valor_cuota.toFixed(2)}`;
-                row.insertCell(5).innerText = `S/ ${pago.saldo_capital.toFixed(2)}`;
-
-                totalInteres += pago.interes;
-                totalAbono += pago.abono_capital;
-                totalCuota += pago.valor_cuota;
-            });
-
-            document.getElementById('totalInteres').innerText = `S/ ${totalInteres.toFixed(2)}`;
-            document.getElementById('totalAbono').innerText = `S/ ${totalAbono.toFixed(2)}`;
-            document.getElementById('totalCuota').innerText = `S/ ${totalCuota.toFixed(2)}`;
-
-            initTableModalVehiculo();
-
-            const modalCronograma = new bootstrap.Modal(document.getElementById('modalCronograma'));
-            modalCronograma.show();
-
-        } catch (err) {
-
-            showToast('Hubo un error al generar el cronograma de pagos.', 'ERROR', 1200);
-        }
-    });
-
-    document.addEventListener("DOMContentLoaded", () => {
+    function initDocumentValidation() {
         const tipo = document.getElementById("tipoDocumento");
         const doc = document.getElementById("documento");
+
+        if (!tipo || !doc) return;
 
         doc.setAttribute("maxlength", "8");
         doc.placeholder = "DNI (8 dígitos)";
@@ -1163,9 +1463,38 @@
                 doc.value = "";
             }
         });
-        // Solo números
+
         doc.addEventListener("input", () => {
             doc.value = doc.value.replace(/\D/g, "");
         });
+    }
+
+    // Initialize everything when DOM is ready
+    document.addEventListener("DOMContentLoaded", () => {
+        console.log('DOM Content Loaded - Initializing...');
+
+        // Initialize basic functions first
+        initFechas();
+        initEventosCliente();
+        initModalRequisitos();
+        initFinancingEvents();
+        initFormSubmitHandler();
+        bindExcelButton();
+        bindMonedaEvents();
+        attachCotizacionConfirm();
+        initDocumentValidation();
+        verificarUltimoClienteRegistrado();
+
+        // Initialize DataTables after a delay to ensure all scripts are loaded
+        setTimeout(() => {
+            initDataTable();
+            initEventosVehiculo();
+        }, 500);
+
+        // Initialize monetary calculations
+        setTimeout(async () => {
+            await actualizarMontos();
+            await actualizarFinanciamiento();
+        }, 600);
     });
 </script>

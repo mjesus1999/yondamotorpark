@@ -146,7 +146,7 @@ class Cotizacion
     }
 
     // Inserta una nueva cotizacion
-    public function create(array $d): void
+    /* public function create(array $d): void
     {
         $sql = "
       INSERT INTO cotizaciones
@@ -168,6 +168,57 @@ class Cotizacion
             ':valorcuota' => $d['valorcuota'],
             ':idasesor' => $d['idasesor']
         ]);
+    } */
+
+    public function create(array $d): int
+    {
+        $sql = "INSERT INTO cotizaciones
+      (idformato, idcliente, idvehiculo, moneda, precioventa,
+       vigenciadias, inicial, numcuotas, valorcuota, idasesor)
+      VALUES
+      (:idformato, :idcliente, :idvehiculo, :moneda, :precioventa,
+       :vigenciadias, :inicial, :numcuotas, :valorcuota, :idasesor)";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([
+            ':idformato' => $d['idformato'],
+            ':idcliente' => $d['idcliente'],
+            ':idvehiculo' => $d['idvehiculo'],
+            ':moneda' => $d['moneda'],
+            ':precioventa' => $d['precioventa'],
+            ':vigenciadias' => $d['vigenciadias'],
+            ':inicial' => $d['inicial'],
+            ':numcuotas' => $d['numcuotas'],
+            ':valorcuota' => $d['valorcuota'],
+            ':idasesor' => $d['idasesor']
+        ]);
+        return (int) $this->db->lastInsertId();
+    }
+    public function createFinanciamiento(int $idcotizacion, int $numcuotas, float $inicial, float $valorcuota, string $moneda, float $precioventa): int
+    {
+        $sql = "INSERT INTO cotizacion_financiamiento
+            (idcotizacion, numcuotas, inicial, valorcuota, moneda, precioventa)
+            VALUES (:idcotizacion, :numcuotas, :inicial, :valorcuota, :moneda, :precioventa)";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([
+            ':idcotizacion' => $idcotizacion,
+            ':numcuotas' => $numcuotas,
+            ':inicial' => $inicial,
+            ':valorcuota' => $valorcuota,
+            ':moneda' => $moneda,
+            ':precioventa' => $precioventa
+        ]);
+        return (int) $this->db->lastInsertId();
+    }
+
+    public function getFinanciamientos(int $idcotizacion): array
+    {
+        $sql = "SELECT idfinanciamiento, idcotizacion, numcuotas, inicial, valorcuota, moneda, precioventa, creado
+            FROM cotizacion_financiamiento
+            WHERE idcotizacion = :idcotizacion
+            ORDER BY numcuotas ASC";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([':idcotizacion' => $idcotizacion]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function getById(int $idcotizacion): ?array
@@ -177,16 +228,14 @@ class Cotizacion
             $stmt = $this->db->prepare($query);
             $stmt->bindValue(':id', $idcotizacion, PDO::PARAM_INT);
             $stmt->execute();
-            return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+            $row = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+            if ($row) {
+                $row['opciones_financiamiento'] = $this->getFinanciamientos($idcotizacion);
+            }
+            return $row;
         } catch (Exception $e) {
-            // log $e->getMessage()
             return null;
         }
     }
-    /* public function getRequisitos(): array
-    {
-        $stmt = $this->pdo->prepare("SELECT idrequisito, requisito FROM requisitos ORDER BY idrequisito");
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    } */
+
 }

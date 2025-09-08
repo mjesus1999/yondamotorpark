@@ -6,7 +6,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Cotización <?= $id ?> Dependiente - YONDA PERÚ</title>
-  <link rel="stylesheet" href="/assets/css/cotizacion-report.css" />
+  <link rel="stylesheet" href="/assets/css/cotizacion-reportP.css" />
 </head>
 
 <body>
@@ -107,17 +107,6 @@
         </p>
         <!-- <p><strong>Modalidad: </strong><span id="format-name"></span></p> -->
         <ol id="instructions-list">
-          <!-- <li>FOTOCOPIA DNI DEL TITULAR Y CÓNYUGE</li>
-          <li>COPIA DEL ÚLTIMO RECIBO PAGADO DE SERVICIOS (LUZ O AGUA)</li>
-          <li>COPIA SIMPLE DE VIVIENDA (TÍTULO DE PROPIEDAD / CERTIFICADO DE POSESIÓN, COPIA LITERAL)</li>
-          <li>BOLETAS DE PAGO</li>
-          <li>DNI AVAL (DNI CÓNYUGE DE SER NECESARIO)</li>
-          <li>EVALUACIÓN DE GASTOS FAMILIARES</li>
-          <li>30% DE INICIAL COMO MÍNIMO (aumenta según precio de la unidad)</li>
-          <li>VERIFICACIÓN DOMICILIARIA Y LABORAL</li>
-          <li>PAGO ÚNICO POR GASTOS ADMINISTRATIVOS S/ 1,500.00</li>
-          <li>SEGURO VEHICULAR (bajo evaluación)</li>
-          <li>GPS SATELITAL</li> -->
         </ol>
         <p><span class="selected">ENTREGA DE LA UNIDAD EN UN MÁXIMO DE 25 DÍAS HÁBILES</span></p>
         <p class="closing">
@@ -128,10 +117,10 @@
       </div>
     </div>
     <div class="footer">
-      <div class="footer-text">
-        CHARLY YACTAYO ORTIZ<br>
-        Ejecutivo de Ventas<br>
-        TELÉFONO: (056) 934 008 037
+      <div class="footer-text" id="asesor-info">
+        <span id="asesor-nombre"><!-- CHARLY YACTAYO ORTIZ --></span><br>
+        <span id="asesor-cargo"><!-- Ejecutivo de Ventas --></span><br>
+        TELÉFONO: <span id="asesor-telefono"><!-- (056) 934 008 037 --></span>
       </div>
       <img src="/assets/images/logos/footer-yondaa.png" alt="Piecera Yonda">
     </div>
@@ -145,6 +134,11 @@
     function getIdFromPath() {
       const parts = window.location.pathname.split('/');
       return parts[parts.length - 1];
+    }
+    // ¿Entró en modo vista previa? (URL ?preview=1 o abierta desde la lista en nueva pestaña)
+    function isPreviewMode() {
+      const q = new URLSearchParams(window.location.search);
+      return q.get('preview') === '1' || q.get('mode') === 'preview' || !!window.opener;
     }
 
     function formatDateSpanish(dateInput, ciudad = 'Chincha') {
@@ -171,6 +165,7 @@
       return `${ciudad}, ${day} de ${month} de ${year}`;
     }
 
+    // Modificación en la función fetchAndFill del JavaScript
     async function fetchAndFill() {
       try {
         const loadingIndicator = document.getElementById('loading-indicator');
@@ -185,17 +180,22 @@
         const payload = await res.json();
         const cotizacion = payload.cotizacion ?? payload;
 
+        // Llenar fecha
         const fechaStr = formatDateSpanish(cotizacion.fecha, 'Chincha');
         document.getElementById('fecha').textContent = fechaStr.replace(/ /g, '\u00A0');
 
+        // Llenar datos del cliente
         document.getElementById('cliente-nombre').textContent = (cotizacion.cliente && cotizacion.cliente.nombre) ? cotizacion.cliente.nombre : '';
         document.getElementById('cliente-dni').textContent = (cotizacion.cliente && cotizacion.cliente.dni) ? cotizacion.cliente.dni : '';
         document.getElementById('cliente-celular').textContent = (cotizacion.cliente && cotizacion.cliente.celular) ? cotizacion.cliente.celular : '';
+
+        // Llenar datos del vehículo
         document.getElementById('vehiculo-marca').textContent = (cotizacion.vehiculo && cotizacion.vehiculo.marca) ? cotizacion.vehiculo.marca : '';
         document.getElementById('vehiculo-modelo').textContent = (cotizacion.vehiculo && cotizacion.vehiculo.modelo) ? cotizacion.vehiculo.modelo : '';
         document.getElementById('vehiculo-anio').textContent = (cotizacion.vehiculo && cotizacion.vehiculo.anio) ? cotizacion.vehiculo.anio : '';
         document.getElementById('vehiculo-color').textContent = (cotizacion.vehiculo && cotizacion.vehiculo.color) ? cotizacion.vehiculo.color : '';
 
+        // Llenar precios
         document.getElementById('precio-usd').textContent = cotizacion.precios ? `$ ${cotizacion.precios.precio_usd}` : '';
         document.getElementById('inicial-soles').textContent = cotizacion.precios ? `S/ ${cotizacion.precios.inicial_soles}` : '';
         document.getElementById('cuota-24').textContent = (cotizacion.precios && cotizacion.precios.meses_24) ? cotizacion.precios.meses_24 : '-';
@@ -203,9 +203,48 @@
         document.getElementById('cuota-48').textContent = (cotizacion.precios && cotizacion.precios.meses_48) ? cotizacion.precios.meses_48 : '-';
         document.getElementById('cuota-60').textContent = (cotizacion.precios && cotizacion.precios.meses_60) ? cotizacion.precios.meses_60 : '-';
 
+        // NUEVA SECCIÓN: Llenar datos del asesor
+        if (cotizacion.asesor) {
+          const asesorNombre = document.getElementById('asesor-nombre');
+          const asesorCargo = document.getElementById('asesor-cargo');
+          const asesorTelefono = document.getElementById('asesor-telefono');
+
+          if (asesorNombre) {
+            asesorNombre.textContent = cotizacion.asesor.nombre_completo || cotizacion.asesor.nombre || 'CHARLY YACTAYO ORTIZ';
+          }
+
+          if (asesorCargo) {
+            // Mapear cargos específicos a "Ejecutivo de Ventas"
+            let cargoMostrar = cotizacion.asesor.cargo || 'Ejecutivo de Ventas';
+
+            // Si el cargo contiene "vent" o "asesor", mostrar "Ejecutivo de Ventas"
+            if (cargoMostrar.toLowerCase().includes('vent') || cargoMostrar.toLowerCase().includes('asesor')) {
+              cargoMostrar = 'Ejecutivo de Ventas';
+            }
+
+            asesorCargo.textContent = cargoMostrar;
+          }
+
+          if (asesorTelefono) {
+            // Formatear teléfono con código de área si es necesario
+            let telefono = cotizacion.asesor.telefono || '934 008 037';
+
+            // Si el teléfono no tiene el código de área, agregarlo
+            if (telefono && !telefono.includes('056') && telefono.length === 9) {
+              telefono = `(056) ${telefono}`;
+            } else if (telefono && telefono.length === 9) {
+              telefono = `(056) ${telefono}`;
+            }
+
+            asesorTelefono.textContent = telefono;
+          }
+        }
+
+        // Llenar requisitos (código existente)
         const instructionsOl = document.getElementById('instructions-list');
         if (instructionsOl) instructionsOl.innerHTML = '';
         const requisitos = cotizacion.requisitos ?? [];
+
         if (requisitos.length > 0) {
           requisitos.forEach(r => {
             const li = document.createElement('li');
@@ -213,6 +252,7 @@
             instructionsOl.appendChild(li);
           });
         } else {
+          // Requisitos por defecto si no hay específicos
           const defaults = [
             'FOTOCOPIA DNI DEL TITULAR Y CÓNYUGE',
             'COPIA DEL ÚLTIMO RECIBO PAGADO DE SERVICIOS (LUZ O AGUA)',
@@ -233,10 +273,74 @@
           });
         }
 
+        // Llenar tabla de precios con opciones de financiamiento (código existente)
+        (function populatePricingTable() {
+          const inicialCell = document.getElementById('inicial-soles');
+          const precioCell = document.getElementById('precio-usd');
+          const idMap = {
+            24: 'cuota-24',
+            36: 'cuota-36',
+            48: 'cuota-48',
+            60: 'cuota-60'
+          };
+
+          const precios = cotizacion.precios || {};
+          const inicialSoles = precios.inicial_soles ? String(precios.inicial_soles) : '0.00';
+          const precioUsd = precios.precio_usd ? String(precios.precio_usd) : '0.00';
+
+          if (precioCell) precioCell.textContent = `$ ${parseFloat(precioUsd).toFixed(2)}`;
+          if (inicialCell) inicialCell.textContent = `S/ ${parseFloat(inicialSoles).toFixed(2)}`;
+
+          Object.values(idMap).forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = '-';
+          });
+
+          const pricingTable = document.querySelector('.pricing');
+          if (!pricingTable) return;
+          pricingTable.querySelectorAll('.extra-opt').forEach(node => node.remove());
+
+          const opciones = cotizacion.opciones_financiamiento || [];
+          const extras = [];
+
+          opciones.forEach(opt => {
+            const meses = Number(opt.numcuotas || opt.numCuotas || 0);
+            const cuota = (opt.valorcuota !== undefined && opt.valorcuota !== null)
+              ? Number(opt.valorcuota)
+              : null;
+
+            if (idMap[meses]) {
+              const target = document.getElementById(idMap[meses]);
+              if (target) {
+                target.textContent = cuota !== null ? `S/ ${cuota.toFixed(2)}` : '-';
+              }
+            } else {
+              extras.push({
+                meses,
+                cuota: cuota !== null ? `S/ ${cuota.toFixed(2)}` : '-'
+              });
+            }
+          });
+
+          if (extras.length) {
+            extras.forEach(ex => {
+              const tr = document.createElement('tr');
+              tr.classList.add('extra-opt');
+              tr.innerHTML = `
+            <td>${ex.meses} meses</td>
+            <td>${ex.cuota}</td>
+            <td>S/ ${parseFloat(inicialSoles).toFixed(2)}</td>
+            <td>$ ${parseFloat(precioUsd).toFixed(2)}</td>
+          `;
+              pricingTable.appendChild(tr);
+            });
+          }
+        })();
+
         if (loadingIndicator) loadingIndicator.style.display = 'none';
         if (container) container.style.visibility = 'visible';
 
-        // tiny delay to ensure DOM painted well
+        // Generar PDF después de llenar datos
         setTimeout(() => generarPDFCotizacion(), 10);
 
       } catch (error) {
@@ -278,6 +382,7 @@
       if (loadingIndicator) loadingIndicator.style.display = 'none';
 
       const filename = `cotizacion-${getIdFromPath() || 'yonda'}.pdf`;
+      const preview = isPreviewMode(); // <-- agregado
 
       const opt = {
         margin: [10, 10, 10, 10],
@@ -320,7 +425,6 @@
       let topData = null;
       let bottomData = null;
       try { if (imgTopEl) topData = await imageToDataURL(imgTopEl, 0.12); } catch (e) { console.warn('cabecera->dataURL failed', e); topData = null; }
-      //try { if (imgBottomEl) bottomData = await imageToDataURL(imgBottomEl, 0.9); } catch (e) { console.warn('footer->dataURL failed', e); bottomData = null; }
       try { if (imgBottomEl) bottomData = await imageToDataURL(imgBottomEl, 0.12); } catch (e) { console.warn('footer->dataURL failed', e); bottomData = null; }
 
       // guarda display previo para restaurar luego
@@ -374,7 +478,7 @@
                 }
 
                 // footer-text si existe en DOM (alineado a la derecha)
-                /* const footerText = footerEl && footerEl.querySelector('.footer-text') ? footerEl.querySelector('.footer-text').innerText.trim() : '';
+                const footerText = footerEl && footerEl.querySelector('.footer-text') ? footerEl.querySelector('.footer-text').innerText.trim() : '';
                 if (footerText) {
                   const lines = footerText.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
                   if (lines.length) {
@@ -386,26 +490,49 @@
                     const firstLineY = y2 - 3 - ((lines.length - 1) * lineHeight);
                     pdf.text(lines, textX, firstLineY, { align: 'right' });
                   }
-                } */
+                }
               }
             }
 
-            // guardar PDF (inicia descarga)
-            pdf.save(filename);
+            // 🔸 PREVIEW vs DESCARGA (sin romper tu flujo)
+            if (preview) {
+              const blob = pdf.output('blob'); // 'application/pdf'
+              const url = URL.createObjectURL(blob);
+              const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+              const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 
-            // dar tiempo al navegador para iniciar la descarga y luego intentar cerrar la pestaña
-            setTimeout(() => {
-              try { window.close(); } catch (e) { /* algunos navegadores lo bloquearán */ }
-            }, 600);
+              if (isIOS || isSafari) {
+                window.open(url, '_blank', 'noopener,noreferrer');
+              } else {
+                window.location.href = url; // mismo tab con visor nativo
+              }
+              // limpiar blob al salir
+              window.addEventListener('pagehide', () => URL.revokeObjectURL(url), { once: true });
+
+            } else {
+              // guardar PDF (inicia descarga)
+              pdf.save(filename);
+              // dar tiempo al navegador para iniciar la descarga y luego intentar cerrar la pestaña
+              setTimeout(() => { try { window.close(); } catch (e) { } }, 600);
+            }
 
           } catch (err) {
             console.error('Error postprocesando PDF (añadir marcas):', err);
-            // fallback: guardar lo que html2pdf generó sin postprocesado
-            html2pdf().set(opt).from(element).save().then(() => {
-              try { window.close(); } catch (e) { }
-            }).finally(() => {
-              if (status) status.style.display = 'none';
-            });
+            // fallback: con/ sin preview
+            if (preview) {
+              html2pdf().set(opt).from(element).toPdf().outputPdf('blob').then((blob) => {
+                const url = URL.createObjectURL(blob);
+                const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+                const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+                if (isIOS || isSafari) window.open(url, '_blank', 'noopener,noreferrer');
+                else window.location.href = url;
+                window.addEventListener('pagehide', () => URL.revokeObjectURL(url), { once: true });
+              }).finally(() => { if (status) status.style.display = 'none'; });
+            } else {
+              html2pdf().set(opt).from(element).save().then(() => {
+                try { window.close(); } catch (e) { }
+              }).finally(() => { if (status) status.style.display = 'none'; });
+            }
           } finally {
             // restaurar visibilidad del DOM
             if (headerEl) headerEl.style.display = prevHeaderDisplay;
@@ -414,14 +541,29 @@
           }
         }).catch((err) => {
           console.error('No se obtuvo objeto jsPDF:', err);
-          // fallback directo: generar y guardar sin post-procesado
-          html2pdf().set(opt).from(element).save().then(() => {
-            try { window.close(); } catch (e) { }
-          }).finally(() => {
-            if (status) status.style.display = 'none';
-            if (headerEl) headerEl.style.display = prevHeaderDisplay;
-            if (footerEl) footerEl.style.display = prevFooterDisplay;
-          });
+          // fallback directo: preview vs descarga
+          if (preview) {
+            html2pdf().set(opt).from(element).toPdf().outputPdf('blob').then((blob) => {
+              const url = URL.createObjectURL(blob);
+              const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+              const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+              if (isIOS || isSafari) window.open(url, '_blank', 'noopener,noreferrer');
+              else window.location.href = url;
+              window.addEventListener('pagehide', () => URL.revokeObjectURL(url), { once: true });
+            }).finally(() => {
+              if (status) status.style.display = 'none';
+              if (headerEl) headerEl.style.display = prevHeaderDisplay;
+              if (footerEl) footerEl.style.display = prevFooterDisplay;
+            });
+          } else {
+            html2pdf().set(opt).from(element).save().then(() => {
+              try { window.close(); } catch (e) { }
+            }).finally(() => {
+              if (status) status.style.display = 'none';
+              if (headerEl) headerEl.style.display = prevHeaderDisplay;
+              if (footerEl) footerEl.style.display = prevFooterDisplay;
+            });
+          }
         });
 
       } catch (err) {
@@ -430,9 +572,20 @@
         if (footerEl) footerEl.style.display = prevFooterDisplay;
         if (status) status.style.display = 'none';
         // fallback
-        html2pdf().set(opt).from(element).save().then(() => {
-          try { window.close(); } catch (e) { }
-        });
+        if (preview) {
+          html2pdf().set(opt).from(element).toPdf().outputPdf('blob').then((blob) => {
+            const url = URL.createObjectURL(blob);
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+            const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+            if (isIOS || isSafari) window.open(url, '_blank', 'noopener,noreferrer');
+            else window.location.href = url;
+            window.addEventListener('pagehide', () => URL.revokeObjectURL(url), { once: true });
+          });
+        } else {
+          html2pdf().set(opt).from(element).save().then(() => {
+            try { window.close(); } catch (e) { }
+          });
+        }
       }
     }
 
