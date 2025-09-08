@@ -32,7 +32,7 @@ $allModules = [
     background-color: #007bff;
     color: white;
     font-weight: bold;
-  
+
   }
 
   .sidebar-item .collapse.show {
@@ -57,8 +57,9 @@ $allModules = [
     crossorigin="anonymous" referrerpolicy="no-referrer" />
   <link rel="stylesheet" href="/assets/css/style-dashboard.css">
   <link rel="stylesheet" href="/assets/css/motorpark-style.css">
-  <link rel="stylesheet" href="https://cdn.datatables.net/2.2.2/css/dataTables.bootstrap5.min.css"> 
+  <link rel="stylesheet" href="https://cdn.datatables.net/2.2.2/css/dataTables.bootstrap5.min.css">
 
+ 
 </head>
 
 <body>
@@ -122,7 +123,7 @@ $allModules = [
 
               <li class="sidebar-item">
                 <a href="/recepcionVehiculos" class="sidebar-link">
-                   <i class="bi bi-check-all  fs-5"></i> <i class="bi bi-car-front-fill pe-2 "></i>Recepción Vehículos
+                  <i class="bi bi-check-all  fs-5"></i> <i class="bi bi-car-front-fill pe-2 "></i>Recepción Vehículos
                 </a>
               </li>
             </ul>
@@ -252,7 +253,7 @@ $allModules = [
       </nav>
       <main class="content px-3 py-2">
 
-        
+
         <script>
           document.addEventListener('DOMContentLoaded', function() {
             const currentPath = window.location.pathname;

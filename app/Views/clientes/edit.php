@@ -109,14 +109,14 @@
                                 <div class="form-floating">
                                     <input type="text" class="form-control" id="apellidos" name="apellidos"
                                         placeholder="Apellidos" required value="<?= htmlspecialchars($personaCliente['apellidos']) ?>">
-                                    <label for="apellidos"><i class="bi bi-person me-1"></i>Apellidos</label>
+                                    <label for="apellidos"><i class="bi bi-person me-1"></i>Apellidos <span class="text-danger">*</span></label>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-floating">
                                     <input type="text" class="form-control" id="nombres" name="nombres"
                                         placeholder="Nombres" required value="<?= htmlspecialchars($personaCliente['nombres']) ?>">
-                                    <label for="nombres"><i class="bi bi-person me-1"></i>Nombres</label>
+                                    <label for="nombres"><i class="bi bi-person me-1"></i>Nombres <span class="text-danger">*</span></label>
                                 </div>
                             </div>
                         </div>
@@ -126,10 +126,24 @@
                     <div class="mb-4">
                         <h6 class="text-primary mb-3 border-bottom pb-2"><i class="bi bi-info-circle me-2"></i>Datos Personales</h6>
                         <div class="row g-3">
-                            <div class="col-md-6">
-                                <div class="form-floating">
-                                    <select name="estadocivil" id="estadocivil" class="form-select" required>
-                                        <?php
+
+                        <div class="col-md-4">
+                            <div class="form-floating">
+                                <input type="date" class="form-control" id="fechanac" name="fechanac"
+                                    placeholder="Fecha de nacimiento" value="<?= htmlspecialchars($personaCliente['fechanac'] ?? 'No asignado') ?>">
+                                <label for="fechanac"><i class="bi bi-calendar me-1"></i>Fecha de nacimiento</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating">
+                                <select name="estadocivil" id="estadocivil" class="form-select">
+                                    <?php
+                                        // Opción por defecto si no hay estado civil asignado
+                                        $estadoCivilActual = $personaCliente['estadocivil'] ?? '';
+                                        if (empty($estadoCivilActual)) {
+                                            echo "<option value=\"\" selected>Seleccione</option>";
+                                        }
+                                        
                                         $estados = [
                                             'SOL' => 'Solter@',
                                             'CAS' => 'Casad@',
@@ -138,7 +152,7 @@
                                             'CNV' => 'Conviviente'
                                         ];
                                         foreach ($estados as $value => $label) {
-                                            $selected = ($value == $personaCliente['estadocivil']) ? 'selected' : '';
+                                            $selected = ($value == $estadoCivilActual) ? 'selected' : '';
                                             echo "<option value=\"{$value}\" {$selected}>{$label}</option>";
                                         }
                                         ?>
@@ -146,10 +160,10 @@
                                     <label for="estadocivil"><i class="bi bi-heart me-1"></i>Estado civil</label>
                                 </div>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <div class="form-floating">
                                     <input type="email" class="form-control" id="email" name="email"
-                                        placeholder="Correo" value="<?= htmlspecialchars($personaCliente['email'] ?? 'No asignado') ?>">
+                                        placeholder="Correo" value="<?= htmlspecialchars($personaCliente['email'] ?? '') ?>">
                                     <label for="email"><i class="bi bi-envelope me-1"></i>Correo</label>
                                 </div>
                             </div>
@@ -165,7 +179,7 @@
                                     <select name="departamento" id="departamento" class="form-select" required>
                                         <option value="">Seleccione</option>
                                     </select>
-                                    <label for="departamento"><i class="bi bi-map me-1"></i>Departamento</label>
+                                    <label for="departamento"><i class="bi bi-map me-1"></i>Departamento <span class="text-danger">*</span></label>
                                 </div>
                             </div>
                             <div class="col-md-4">
@@ -173,7 +187,7 @@
                                     <select name="provincia" id="provincia" class="form-select" required>
                                         <option value="">Seleccione</option>
                                     </select>
-                                    <label for="provincia"><i class="bi bi-map me-1"></i>Provincia</label>
+                                    <label for="provincia"><i class="bi bi-map me-1"></i>Provincia <span class="text-danger">*</span></label>
                                 </div>
                             </div>
                             <div class="col-md-4">
@@ -181,7 +195,7 @@
                                     <select name="iddistrito" id="distrito" class="form-select" required>
                                         <option value="">Seleccione</option>
                                     </select>
-                                    <label for="distrito"><i class="bi bi-map me-1"></i>Distrito</label>
+                                    <label for="distrito"><i class="bi bi-map me-1"></i>Distrito <span class="text-danger">*</span></label>
                                 </div>
                             </div>
                             <div class="col-md-6">
@@ -196,7 +210,7 @@
                                     <input type="text" class="form-control" id="telprimario" name="telprimario"
                                         placeholder="Teléfono" maxlength="9" pattern="[0-9]+" required
                                         value="<?= htmlspecialchars($personaCliente['telprimario'] ?? '') ?>">
-                                    <label for="telprimario"><i class="bi bi-phone me-1"></i>Teléfono</label>
+                                    <label for="telprimario"><i class="bi bi-phone me-1"></i>Teléfono <span class="text-danger">*</span></label>
                                 </div>
                             </div>
                         </div>
@@ -231,10 +245,10 @@
                     <!-- Botones de acción -->
                     <div class="d-flex justify-content-end mt-4 pt-3 border-top gap-2">
                         <a href="/clientes" class="btn btn-outline-secondary">
-                            <i class="bi bi-arrow-left me-1"></i> Cancelar
+                             Cancelar
                         </a>
                         <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-check-circle me-1"></i> Actualizar
+                             Actualizar
                         </button>
                     </div>
                 </form>
@@ -359,9 +373,9 @@
         document.getElementById('estadocivil').value = initialEstadoCivil;
 
 
-        formularioClientePersonas.addEventListener('submit', (event) => {
+        formularioClientePersonas.addEventListener('submit', async (event) => {
             event.preventDefault();
-            if (confirm("¿Desea actualizar este cliente?")) {
+            if (await ask("¿Desea actualizar este cliente?", "Actualizar cliente")) {
 
                 event.target.submit();
 

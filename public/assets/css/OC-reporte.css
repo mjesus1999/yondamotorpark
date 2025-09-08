@@ -11,7 +11,6 @@
         line-height: 1.3;
         color: #333;
         background: white;
-        padding: 5px;
         min-height: 100vh;
         overflow-x: hidden;
     }
@@ -24,7 +23,6 @@
         position: relative;
     }
 
-    /* Header */
     .header {
         display: flex;
         justify-content: space-between;
@@ -67,7 +65,8 @@
         font-size: 13px;
     }
 
-    /* Secciones */
+ 
+    
     .section {
         margin-bottom: 15px;
         border: 1px solid #ddd;
@@ -88,7 +87,7 @@
         padding: 10px;
     }
 
-    /* Tablas */
+  
     .info-table {
         width: 100%;
         border-collapse: collapse;
@@ -111,7 +110,7 @@
         width: 25%;
     }
 
-    /* Tabla de vehículos */
+    
     .vehicles-table {
         width: 100%;
         border-collapse: collapse;
@@ -146,7 +145,6 @@
         text-align: left;
     }
 
-    /* Resumen financiero */
     .summary-section {
         display: flex;
         justify-content: flex-end;
@@ -193,7 +191,7 @@
         font-size: 11px;
     }
 
-    /* Observaciones */
+    
     .observations-section {
         margin: 15px 0;
         padding: 10px;
@@ -218,7 +216,7 @@
         font-size: 9px;
     }
 
-    /* Aprobaciones */
+
     .approval-section {
         margin-top: 10px;
     }
@@ -245,7 +243,7 @@
         min-height: 40px;
     }
 
-    /* Botón PDF */
+    
     .btn-generate-pdf {
         position: fixed;
         top: 20px;

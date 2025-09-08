@@ -98,25 +98,25 @@ END //
 CALL sp_detOC_By_IdOC(13);
 
 
+DROP PROCEDURE IF EXISTS sp_det_oc_escorrecto;
 DELIMITER //
 CREATE PROCEDURE sp_det_oc_escorrecto
 (IN idOC INT)
 BEGIN
 
 SELECT 
-    CONCAT(
-        mvh.marca, ' / ', 
-        modvh.modelo, ' / ', 
-        tpvh.tipovehiculo, ' / ', 
-		vh.version, ' / ', 
-		cvh.combustible,' / ',
-        IFNULL(vh.color,'COLOR NO ESPECIFICADO'), ' / ', 
-        modvh.anio, ' / ', 
-        CONCAT(UCASE(LEFT(vh.condicion, 1)), LOWER(SUBSTRING(vh.condicion, 2)))
-
-        
-    ) AS auto,
-    COUNT(*) AS cantidad
+    mvh.marca,
+    modvh.modelo,
+    tpvh.tipovehiculo,
+    vh.version,
+    cvh.combustible,
+    IFNULL(vh.color,'COLOR NO ESPECIFICADO') AS color,
+    vh.chasis,
+    vh.placa,
+    vh.placarotativa,
+    vh.seriemotor,
+    modvh.anio,
+    CONCAT(UCASE(LEFT(vh.condicion, 1)), LOWER(SUBSTRING(vh.condicion, 2))) AS condicion
 FROM detordencompra detoc
 INNER JOIN ordenescompra oc ON detoc.idordencompra = oc.idordencompra
 INNER JOIN vehiculos vh ON detoc.idvehiculo = vh.idvehiculo
@@ -125,14 +125,16 @@ INNER JOIN modelos modvh ON vh.idmodelo = modvh.idmodelo
 INNER JOIN marcas mvh ON modvh.idmarca = mvh.idmarca
 INNER JOIN tipovehiculos tpvh ON modvh.idtipovehiculo = tpvh.idtipovehiculo
 WHERE oc.idordencompra = idOC
-GROUP BY 
-    mvh.marca, modvh.modelo, tpvh.tipovehiculo, vh.color, 
-    modvh.anio, vh.version, vh.condicion, cvh.combustible
-ORDER BY cantidad DESC;
+ORDER BY detoc.iddetordencompra;
 
 END //
+USE motorpark;
+CALL sp_det_oc_escorrecto(54);
+    SELECT * FROM vehiculos;
+SELECT * FROM detordencompra WHERE idordencompra = 42;
 
-CALL sp_det_oc_escorrecto(21);
+
+SELECT * FROM compras;
 
 
 

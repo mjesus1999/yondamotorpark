@@ -37,7 +37,6 @@
 
     .modal-body {
         padding: 1.5rem;
-        /* background-color: #f4f7f9; */
         color: #333;
     }
 

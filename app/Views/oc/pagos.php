@@ -122,24 +122,32 @@
                                 <th class="text-center">Versión</th>
                                 <th class="text-center">Combustible</th>
                                 <th class="text-center">Color</th>
+                                <th class="text-center">Chasis</th>
+                                <th class="text-center">Placa</th>
+                                <th class="text-center">Placa Rotativa</th>
+                                <th class="text-center">Serie Motor</th>
                                 <th class="text-center">Año</th>
                                 <th class="text-center">Estado</th>
-                                <th class="text-center">Cantidad</th>
+
                             </tr>
                         </thead>
                         <tbody>
-                            <?php foreach ($autos as $auto):
-                                $datos = explode(' / ', $auto['auto']);
-                            ?>
+                            <?php foreach ($autos as $auto): ?>
+
+
                                 <tr>
-                                    <td class="fw-bold text-center"><?= htmlspecialchars($datos[0] ?? '') ?> <?= htmlspecialchars($datos[1] ?? '') ?></td>
-                                    <td class="text-center"><?= htmlspecialchars($datos[2] ?? '') ?></td>
-                                    <td class="text-center"><?= htmlspecialchars($datos[3] ?? '') ?></td>
-                                    <td class="text-center"><?= htmlspecialchars($datos[4] ?? '') ?></td>
-                                    <td class="text-center"><?= htmlspecialchars($datos[5] ?? '') ?></td>
-                                    <td class="text-center"><?= htmlspecialchars($datos[6] ?? '') ?></td>
-                                    <td class="text-center"><span class="badge bg-<?= ($datos[7] ?? '') == 'Nuevo' ? 'success' : 'warning' ?>"><?= htmlspecialchars($datos[7] ?? '') ?></span></td>
-                                    <td class="text-center fw-bold"><?= htmlspecialchars($auto['cantidad']) ?></td>
+                                    <td class="fw-bold text-center"><?= htmlspecialchars($auto['marca'] ?? '') ?> / <?= htmlspecialchars($auto['modelo'] ?? '') ?></td>
+                                    <td class="text-center"><?= htmlspecialchars($auto['tipovehiculo'] ?? '') ?></td>
+                                    <td class="text-center"><?= htmlspecialchars($auto['version'] ?? '') ?></td>
+                                    <td class="text-center"><?= htmlspecialchars($auto['combustible'] ?? '') ?></td>
+                                    <td class="text-center"><?= htmlspecialchars($auto['color'] ?? '') ?></td>
+                                    <td class="text-center"><?= htmlspecialchars($auto['chasis'] ?? '') ?></td>
+                                    <td class="text-center"><?= htmlspecialchars($auto['placa'] ?? '') ?></td>
+                                    <td class="text-center"><?= htmlspecialchars($auto['placarotativa'] ?? '') ?></td>
+                                    <td class="text-center"><?= htmlspecialchars($auto['seriemotor'] ?? '') ?></td>
+                                    <td class="text-center"><?= htmlspecialchars($auto['anio'] ?? '') ?></td>
+                                    <td class="text-center"><span class="badge bg-<?= ($auto['condicion'] ?? '') == 'Nuevo' ? 'success' : 'warning' ?>"><?= htmlspecialchars($auto['condicion'] ?? '') ?></span></td>
+
                                 </tr>
                             <?php endforeach; ?>
                         </tbody>
@@ -212,7 +220,7 @@
                                                 <?php if (!empty($pago['comprobante'])): ?>
                                                     <?php $esPdf = strtolower(pathinfo($pago['comprobante'], PATHINFO_EXTENSION)) === 'pdf'; ?>
                                                     <?php
-                                                    
+
                                                     $urlSegura = "/archivos/" . htmlspecialchars($pago['comprobante']);
                                                     ?>
                                                     <?php if ($esPdf): ?>
@@ -292,7 +300,7 @@
                         <input type="hidden" name="idorden" value="<?= htmlspecialchars($concesionario['idordencompra'] ?? 0) ?>">
 
                         <div class="form-floating form-floating-pago mb-4">
-                            <input type="number" min="500" step="500" name="amortizacion" id="amortizacion"
+                            <input type="number" min="1" step="1" name="amortizacion" id="amortizacion"
                                 class="form-control" placeholder="0.00" required>
                             <label for="amortizacion"><i class="fas fa-dollar-sign me-1"></i> Monto a pagar</label>
                         </div>
@@ -350,7 +358,10 @@
     </div>
 
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script> -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js" defer></script>
+    <script src="/assets/js/pagosOc-pdf/pdf.js" defer></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -430,197 +441,6 @@
             });
 
 
-            const btnGenerarPdf = document.getElementById('btn-generar-pdf');
-            if (btnGenerarPdf) {
-                btnGenerarPdf.addEventListener('click', () => {
-                    const element = document.createElement('div');
-                    element.style.padding = '20px';
-                    element.style.fontFamily = 'Arial, sans-serif';
-                    element.style.color = '#333';
-
-                    // 1. Encabezado del reporte
-                    const header = document.createElement('div');
-                    header.style.borderBottom = '2px solid #3a7bd5';
-                    header.style.marginBottom = '20px';
-                    header.style.paddingBottom = '10px';
-
-                    const title = document.createElement('h2');
-                    title.textContent = `Reporte de Pagos - OC #${document.querySelector('[name="idorden"]')?.value || 'N/A'}`;
-                    title.style.textAlign = 'center';
-                    title.style.color = '#3a7bd5';
-                    title.style.marginBottom = '5px';
-                    title.style.fontWeight = 'bold';
-
-                    const subtitle = document.createElement('h3');
-                    subtitle.textContent = 'DETALLE DE VEHÍCULOS';
-                    subtitle.style.textAlign = 'center';
-                    subtitle.style.color = '#555';
-                    subtitle.style.marginTop = '0';
-                    subtitle.style.fontSize = '18px';
-
-                    header.appendChild(title);
-                    header.appendChild(subtitle);
-                    element.appendChild(header);
-
-                    // 2. Tabla de vehículos con mejor formato
-                    const autosTable = document.querySelector('.table');
-                    if (autosTable) {
-                        const clonedAutosTable = autosTable.cloneNode(true);
-
-                        // Aplicar estilos para PDF
-                        clonedAutosTable.style.width = '100%';
-                        clonedAutosTable.style.borderCollapse = 'collapse';
-                        clonedAutosTable.style.marginBottom = '25px';
-                        clonedAutosTable.style.fontSize = '12px';
-
-                        // Estilos para celdas
-                        clonedAutosTable.querySelectorAll('th, td').forEach(cell => {
-                            cell.style.border = '1px solid #ddd';
-                            cell.style.padding = '4px';
-                            cell.style.textAlign = 'center';
-                        });
-
-                        // Estilos para encabezados
-                        clonedAutosTable.querySelectorAll('th').forEach(th => {
-                            th.style.backgroundColor = '#3a7bd5';
-                            th.style.color = 'white';
-                            th.style.fontWeight = 'bold';
-                        });
-
-                        // Resaltar filas alternas
-                        clonedAutosTable.querySelectorAll('tbody tr:nth-child(even)').forEach(row => {
-                            row.style.backgroundColor = '#f9f9f9';
-                        });
-
-                        // Manejar "COLOR NO ESPECIFICADO"
-                        clonedAutosTable.querySelectorAll('td').forEach(td => {
-                            if (td.textContent.trim() === 'COLOR NO ESPECIFICADO') {
-                                td.textContent = 'N/A';
-                                td.style.color = '#999';
-                            }
-                        });
-
-                        element.appendChild(clonedAutosTable);
-                    }
-
-                    // 3. Sección de pagos
-                    const pagosSection = document.createElement('div');
-                    pagosSection.style.marginTop = '30px';
-                    pagosSection.style.borderTop = '2px solid #3a7bd5';
-                    pagosSection.style.paddingTop = '15px';
-
-                    const pagosTitle = document.createElement('h3');
-                    pagosTitle.textContent = 'DETALLES DE PAGOS';
-                    pagosTitle.style.color = '#3a7bd5';
-                    pagosTitle.style.marginBottom = '15px';
-                    pagosSection.appendChild(pagosTitle);
-
-                    const pagosTable = document.querySelector('.table-pagos');
-                    if (pagosTable) {
-                        const clonedPagosTable = pagosTable.cloneNode(true);
-
-                        // Ajustes para el PDF
-                        clonedPagosTable.style.width = '100%';
-                        clonedPagosTable.style.borderCollapse = 'collapse';
-                        clonedPagosTable.style.marginBottom = '20px';
-                        clonedPagosTable.style.fontSize = '12px';
-
-                        clonedPagosTable.querySelectorAll('th, td').forEach(cell => {
-                            cell.style.border = '1px solid #ddd';
-                            cell.style.padding = '6px';
-                            cell.style.textAlign = 'center';
-                        });
-
-                        clonedPagosTable.querySelectorAll('th').forEach(th => {
-                            th.style.backgroundColor = '#3a7bd5';
-                            th.style.color = 'white';
-                            th.style.fontWeight = 'bold';
-                        });
-
-                        // Ocultar columna de comprobante y registrado por para PDF
-                        clonedPagosTable.querySelectorAll('th:nth-child(5), td:nth-child(5), th:nth-child(6), td:nth-child(6)').forEach(el => {
-                            el.style.display = 'none';
-                        });
-
-                        pagosSection.appendChild(clonedPagosTable);
-                    }
-
-                    element.appendChild(pagosSection);
-
-                    // 4. Totales con mejor formato
-                    const totalesDiv = document.createElement('div');
-                    totalesDiv.style.marginTop = '30px';
-                    totalesDiv.style.textAlign = 'right';
-                    totalesDiv.style.fontWeight = 'bold';
-                    totalesDiv.style.borderTop = '2px solid #3a7bd5';
-                    totalesDiv.style.paddingTop = '15px';
-
-                    // Obtener total pagado del badge
-                    const totalPagadoBadge = document.querySelector('.card-header-pagos .badge');
-                    let totalPagadoText = '0.00';
-                    if (totalPagadoBadge) {
-                        const badgeText = totalPagadoBadge.textContent || '';
-                        const match = badgeText.match(/\$([\d,]+\.\d{2})/);
-                        if (match) {
-                            totalPagadoText = match[1];
-                        }
-                    }
-
-                    const saldoRestante = <?= json_encode($saldoRestante ?? 0) ?>;
-
-                    const totalPagado = document.createElement('p');
-                    totalPagado.textContent = `TOTAL PAGADO: $<?= isset($totalAmortizado) ? number_format($totalAmortizado, 2) : (isset($pagos) ? number_format(array_sum(array_column($pagos, 'amortizacion')), 2) : '0.00') ?>`;
-                    totalPagado.style.color = '#28a745';
-                    totalPagado.style.fontSize = '16px';
-                    totalPagado.style.marginBottom = '10px';
-
-                    const saldoRestanteP = document.createElement('p');
-                    saldoRestanteP.textContent = `SALDO RESTANTE: $${saldoRestante.toFixed(2)}`;
-                    saldoRestanteP.style.color = '#dc3545';
-                    saldoRestanteP.style.fontSize = '16px';
-                    saldoRestanteP.style.marginBottom = '10px';
-
-                    const fechaPago = document.createElement('p');
-                    fechaPago.textContent = `FECHA DE GENERACIÓN: ${new Date().toLocaleDateString()}`;
-                    fechaPago.style.color = '#6c757d';
-                    fechaPago.style.fontSize = '14px';
-
-                    totalesDiv.appendChild(totalPagado);
-                    totalesDiv.appendChild(saldoRestanteP);
-                    totalesDiv.appendChild(fechaPago);
-                    element.appendChild(totalesDiv);
-
-                    // Opciones de html2pdf
-                    const opt = {
-                        margin: [10, 10, 10, 10],
-                        filename: `Reporte_Pagos_OC_${document.querySelector('[name="idorden"]')?.value || ''}_${new Date().toISOString().slice(0, 10)}.pdf`,
-                        image: {
-                            type: 'jpeg',
-                            quality: 0.98
-                        },
-                        html2canvas: {
-                            scale: 2,
-                            letterRendering: true,
-                            useCORS: true,
-                            logging: false
-                        },
-                        jsPDF: {
-                            unit: 'mm',
-                            format: 'a4',
-                            orientation: 'portrait',
-                            compress: true
-                        },
-                        pagebreak: {
-                            mode: ['avoid-all', 'css', 'legacy']
-                        }
-                    };
-
-                    // Generar PDF
-                    setTimeout(() => {
-                        html2pdf().set(opt).from(element).save();
-                    }, 200);
-                });
-            }
         });
     </script>
 

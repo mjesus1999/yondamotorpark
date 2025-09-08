@@ -1,9 +1,16 @@
 
 btnPDF.addEventListener('click', () => {
 
-
     function formatNumber(num) {
-        return Number(num).toLocaleString('en-US', {
+        // Limpiar el valor de entrada
+        let cleanNum = String(num).replace(/[^\d.-]/g, '');
+
+        // Si está vacío o es inválido, retornar 0.00
+        if (!cleanNum || cleanNum === '' || isNaN(cleanNum)) {
+            return '0.00';
+        }
+
+        return Number(cleanNum).toLocaleString('en-US', {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         });
@@ -60,38 +67,57 @@ btnPDF.addEventListener('click', () => {
         body.push(cleanCells);
     });
 
-    const totalInteres = document.getElementById('totalInteres').innerText;
-    const totalAbono = document.getElementById('totalAbono').innerText;
-    const totalCuota = document.getElementById('totalCuota').innerText;
+    const totalInteres = document.getElementById('totalInteres').innerText.replace(/,/g, '');
+    const totalAbono = document.getElementById('totalAbono').innerText.replace(/,/g, '');
+    const totalCuota = document.getElementById('totalCuota').innerText.replace(/,/g, '');
 
     body.push([
         { text: 'TOTAL', colSpan: 2, alignment: 'center', bold: true, fillColor: '#fce300' }, {},
-        { text: totalInteres, bold: true, fillColor: '#fce300' },
-        { text: totalAbono, bold: true, fillColor: '#fce300' },
-        { text: totalCuota, bold: true, fillColor: '#fce300' }, ''
+        { text: `S/ ${formatNumber(totalInteres)}`, bold: true, fillColor: '#fce300', alignment: 'right' },
+        { text: `S/ ${formatNumber(totalAbono)}`, bold: true, fillColor: '#fce300', alignment: 'right' },
+        { text: `S/ ${formatNumber(totalCuota)}`, bold: true, fillColor: '#fce300', alignment: 'right' }, ''
     ]);
     const documento = {
         pageSize: 'A4',
         pageOrientation: 'portrait',
-        pageMargins: [15, 15, 15, 15],
+        pageMargins: [40, 25, 25, 25],
         defaultStyle: {
-            fontSize: 7,
+            fontSize: 7.2,
         },
         content: [
             {
-                image: logo,
-                width: 80,
-                alignment: 'left',
-                margin: [0, 0, 0, 15]
+                columns: [
+                    {
+                        image: logo,
+                        width: 80,
+                        alignment: 'left'
+                    },
+                    {
+                        stack: [
+                            { text: 'YONDA & GRUPO HUARACA E.I.R.L', fontSize: 12, bold: true, color: '#2c3e50'},
+                            { text: 'RUC: 20609396866', fontSize: 10, margin: [0, 2, 0, 0],bold:true },
+            
+                        ],
+                        alignment: 'right',
+                        margin: [10, 0, 0, 0]
+                    }
+                ],
+                margin: [0, 0, 0, 10]
+            },
+            {
+                text: 'CRONOGRAMA',
+                style: 'subheader',
+                alignment: 'center',
+                margin: [0, 0, 0, 10], // izquierda/arriba/derecha/abajo
+                decoration: 'underline',
+                fontSize: 14,
+                bold: true
             },
             {
                 style: 'tableEmpresaCliente',
                 table: {
                     widths: ['30%', '70%'],
                     body: [
-                        [{ text: 'DATOS DE LA EMPRESA', colSpan: 2, bold: true, fillColor: '#d1ecf1', alignment: 'center' }, {}],
-                        [{ text: 'Nombre', bold: true }, 'YONDA & GRUPO HUARACA E.I.R.L'],
-                        [{ text: 'RUC', bold: true }, '20609396866'],
                         [{ text: 'DATOS DEL CLIENTE', colSpan: 2, bold: true, fillColor: '#f1f8ff', alignment: 'center' }, {}],
                         [{ text: 'Nombre Completo', bold: true }, nombre],
                         [{ text: 'DNI', bold: true }, dni],
@@ -107,22 +133,15 @@ btnPDF.addEventListener('click', () => {
                     widths: ['25%', '25%', '25%', '25%'],
                     body: [
                         [{ text: 'DESCRIPCIÓN', bold: true, colSpan: 4, alignment: 'center', fillColor: '#d4edda' }, {}, {}, {}],
-                       [{ text: 'Vehículo', bold: true, fillColor: '#d1ecf1' }, { text: descripcionVehiculo, bold:true,colSpan: 3, fillColor: '#d1ecf1' }, {}, {}],
-                        [{ text: 'PRECIO EN DÓLAR', bold: true }, `$ ${precioDolar}`, { text: 'TIPO DE CAMBIO', bold: true }, `S/ ${tipoCambio}`],
-                        [{ text: 'PRECIO EN SOLES', bold: true }, `S/ ${precioSoles}`, { text: 'INICIAL', bold: true, fillColor: '#fbe23b' }, { text: `S/ ${inicial}`, fillColor: '#fbe23b' }],
-                        [{ text: 'MONTO A FINANCIAR', bold: true }, `S/ ${montoFinanciar}`, { text: 'CUOTA', bold: true, fillColor: '#b7e4a4' }, { text: `S/ ${cuotaMensual}`, fillColor: '#b7e4a4' }],
-                        [{ text: 'TASA ANUAL', bold: true }, `${tasaAnual}%`, { text: 'N° DE CUOTAS', bold: true }, numCuotas],
-                        [{ text: 'TASA MENSUAL', bold: true }, `${(parseFloat(tasaAnual) / 12).toFixed(2)}%`, { text: 'CUOTA DIARIA', bold: true }, `S/ ${cuotaDiaria}`]
+                        [{ text: 'Vehículo', bold: true, fillColor: '#d1ecf1' }, { text: descripcionVehiculo, bold: true, colSpan: 3, fillColor: '#d1ecf1' }, {}, {}],
+                        [{ text: 'PRECIO EN DÓLAR', bold: true }, { text: `$ ${precioDolar}`, alignment: 'right' }, { text: 'TIPO DE CAMBIO', bold: true }, { text: `S/ ${tipoCambio}`, alignment: 'right' }],
+                        [{ text: 'PRECIO EN SOLES', bold: true }, { text: `S/ ${precioSoles}`, alignment: 'right' }, { text: 'INICIAL', bold: true, fillColor: '#fbe23b' }, { text: `S/ ${inicial}`, fillColor: '#fbe23b', alignment: 'right' }],
+                        [{ text: 'MONTO A FINANCIAR', bold: true }, { text: `S/ ${montoFinanciar}`, alignment: 'right' }, { text: 'CUOTA', bold: true, fillColor: '#b7e4a4' }, { text: `S/ ${cuotaMensual}`, fillColor: '#b7e4a4', alignment: 'right' }],
+                        [{ text: 'TASA ANUAL', bold: true }, { text: `${tasaAnual}%`, alignment: 'right' }, { text: 'N° DE CUOTAS', bold: true }, { text: numCuotas, alignment: 'right' }],
+                        [{ text: 'TASA MENSUAL', bold: true }, { text: `${(parseFloat(tasaAnual) / 12).toFixed(2)}%`, alignment: 'right' }, { text: 'CUOTA DIARIA', bold: true }, { text: `S/ ${cuotaDiaria}`, alignment: 'right' }]
                     ]
                 },
                 margin: [0, 0, 0, 5]
-            },
-            {
-                text: 'CRONOGRAMA',
-                style: 'subheader',
-                alignment: 'center',
-                margin: [0, 5, 0, 2],
-                decoration: 'underline'
             },
             {
                 style: 'tableCronograma',
@@ -135,6 +154,7 @@ btnPDF.addEventListener('click', () => {
                     fillColor: function (rowIndex) {
                         return rowIndex === 0 ? '#e0e0e0' : null;
                     }
+                    
                 }
             }
         ],

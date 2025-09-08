@@ -1,7 +1,5 @@
 <?php include __DIR__ . '/../../layout/header.php'; ?>
 
-
-
 <?php if (isset($error)): ?>
     <div class="alert alert-danger" role="alert">
         <?= htmlspecialchars($error) ?>
@@ -87,14 +85,14 @@
                                 <div class="form-floating">
                                     <input type="text" class="form-control" id="razonsocial" name="razonsocial" 
                                         placeholder="Razón Social" required value="<?= htmlspecialchars($empresaCliente['razonsocial']) ?>">
-                                    <label for="razonsocial"><i class="bi bi-building me-1"></i>Razón Social</label>
+                                    <label for="razonsocial"><i class="bi bi-building me-1"></i>Razón Social <span class="text-danger fw-bold">*</span></label>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-floating">
                                     <input type="text" class="form-control" id="nombrecomercial" name="nombrecomercial"
                                         placeholder="Nombre Comercial" required value="<?= htmlspecialchars($empresaCliente['nombrecomercial']) ?>">
-                                    <label for="nombrecomercial"><i class="bi bi-shop me-1"></i>Nombre Comercial</label>
+                                    <label for="nombrecomercial"><i class="bi bi-shop me-1"></i>Nombre Comercial <span class="text-danger fw-bold">*</span></label>
                                 </div>
                             </div>
                         </div>
@@ -108,14 +106,14 @@
                                 <div class="form-floating">
                                     <input type="text" class="form-control" id="ruc" name="ruc" 
                                         placeholder="RUC" maxlength="11" required value="<?= htmlspecialchars($empresaCliente['ruc']) ?>">
-                                    <label for="ruc"><i class="bi bi-file-text me-1"></i>RUC</label>
+                                    <label for="ruc"><i class="bi bi-file-text me-1"></i>RUC <span class="text-danger fw-bold">*</span></label>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-floating">
                                     <input type="text" class="form-control" id="representante" name="representante" 
                                         required placeholder="Representante Legal" value="<?= htmlspecialchars($empresaCliente['representante']) ?>">
-                                    <label for="representante"><i class="bi bi-person-vcard me-1"></i>Representante</label>
+                                    <label for="representante"><i class="bi bi-person-vcard me-1"></i>Representante <span class="text-danger fw-bold">*</span></label>
                                 </div>
                             </div>
                         </div>
@@ -137,7 +135,7 @@
                                     <input type="text" class="form-control" id="telprimario" maxlength="9" 
                                         name="telprimario" required placeholder="Teléfono principal" 
                                         value="<?= htmlspecialchars($empresaCliente['telprimario']) ?>">
-                                    <label for="telprimario"><i class="bi bi-phone me-1"></i>Teléfono</label>
+                                    <label for="telprimario"><i class="bi bi-phone me-1"></i>Teléfono <span class="text-danger fw-bold">*</span></label>
                                 </div>
                             </div>
                         </div>
@@ -146,10 +144,10 @@
                     <!-- Botones de acción -->
                     <div class="d-flex justify-content-end mt-4 pt-3 border-top gap-2">
                         <a href="/clientes/empresas" class="btn btn-outline-secondary">
-                            <i class="bi bi-arrow-left me-1"></i> Cancelar
+                             Cancelar
                         </a>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-check-circle me-1"></i> Actualizar
+                        <button type="submit" class="btn btn-outline-primary">
+                            Actualizar
                         </button>
                     </div>
                 </form>
@@ -172,9 +170,9 @@
 
         const formularioClienteEmpresa = document.querySelector('#formulario-cliente-empresa');
 
-        formularioClienteEmpresa.addEventListener('submit', (event) => {
+        formularioClienteEmpresa.addEventListener('submit', async (event) => {
             event.preventDefault();
-            if (confirm("¿Desea actualizar este cliente?")) {
+            if (await ask("¿Desea actualizar este cliente?", "Actualizar cliente")) {
 
                 event.target.submit();
 

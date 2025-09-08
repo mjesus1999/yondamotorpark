@@ -5,7 +5,6 @@ namespace App\Models;
 use App\Core\Database;
 use PDO;
 use PDOException;
-use Exception;
 
 class Persona
 {
@@ -28,6 +27,7 @@ class Persona
                     p.email,
                     p.direccion,
                     p.telprimario,
+                    p.fechanac,
                     p.latitud,
                     p.longitud,
                     d.iddistrito,
@@ -71,7 +71,8 @@ class Persona
                         LEFT JOIN distritos di ON p.iddistrito = di.iddistrito
                         LEFT JOIN provincias pr ON di.idprovincia = pr.idprovincia
                         LEFT JOIN departamentos de ON pr.iddepartamento = de.iddepartamento
-                        WHERE c.tipocliente = 'P' AND c.estado = 'ACT'";
+                        WHERE c.tipocliente = 'P' AND c.estado = 'ACT'
+                        ORDER BY p.creado DESC;";
             $stmt = $this->db->prepare($query);
             $stmt->execute();
             $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -85,8 +86,8 @@ class Persona
 
     public function create($params): int
     {
-        $query = "INSERT INTO personas(apellidos,nombres, tipodoc, nrodoc, genero, fechanac, estadocivil, email, iddistrito, direccion, referencia, telprimario, telalternativo,latitud, longitud)
-                  VALUES(:apellidos,:nombres,:tipodoc,:nrodoc,:genero,:fechanac,:estadocivil,:email,:iddistrito,:direccion,:referencia,:telprimario,:telalternativo,:latitud,:longitud)";
+        $query = "INSERT INTO personas(apellidos,nombres, tipodoc, nrodoc, genero,iddistrito, direccion, referencia, telprimario, telalternativo,latitud, longitud)
+                  VALUES(:apellidos,:nombres,:tipodoc,:nrodoc,:genero,:iddistrito,:direccion,:referencia,:telprimario,:telalternativo,:latitud,:longitud)";
 
         try {
             $stmt = $this->db->prepare($query);
@@ -96,9 +97,9 @@ class Persona
                 ':tipodoc' => $params['tipodoc'],
                 ':nrodoc' => $params['nrodoc'],
                 ':genero' => $params['genero'],
-                ':fechanac' => $params['fechanac'],
-                ':estadocivil' => $params['estadocivil'],
-                ':email' => $params['email'] ?? null, //null
+                // ':fechanac' => $params['fechanac'],
+                // ':estadocivil' => $params['estadocivil'],
+                // ':email' => $params['email'] ?? null, //null
                 ':iddistrito' => $params['iddistrito'],
                 ':direccion' => $params['direccion'] ?? null, //null
                 ':referencia' => $params['referencia'] ?? null, //null
@@ -129,6 +130,7 @@ class Persona
                 latitud   = :latitud,
                 longitud = :longitud,
                 iddistrito = :iddistrito,
+                fechanac = :fechanac,
                 modificado = NOW()
               WHERE idpersona  = :idpersona";
 
@@ -143,6 +145,7 @@ class Persona
                 ':latitud' => $params['latitud'],
                 ':longitud' => $params['longitud'],
                 ':iddistrito' => $params['iddistrito'],
+                ':fechanac' => $params['fechanac'],
                 ':idpersona' => $params['idpersona']
             ]);
 
@@ -169,5 +172,4 @@ class Persona
             return [];
         }
     } */
-
 }

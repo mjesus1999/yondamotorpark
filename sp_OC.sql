@@ -42,6 +42,11 @@ END $$
 
 DELIMITER ;
 
+CALL sp_oc_por_estado('proceso');
+
+-- UPDATE concesionarios SET razonsocial = 'HYUNDAI PERU' WHERE idconcesionario = 7;
+
+SELECT * FROM concesionarios;
 --SP PARA OBTENER LOS OC QUE SON COMPRAS.
 USE motorpark;
 DROP PROCEDURE sp_getAll_OC_Compras;

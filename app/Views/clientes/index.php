@@ -53,7 +53,7 @@ include __DIR__ . '/../layout/header.php';
                                     <th><span class="text-body badge">Nombre completo</span> </th>
                                     <th> <span class="text-body badge">Documento</span></th>
                                     <th><span class="text-body badge">N° documento</span></th>
-                                    <th><span class="text-body badge">Correo</span></th>
+                                    <!-- <th><span class="text-body badge">Correo</span></th> -->
                                     <th><span class="text-body badge">Teléfono</span></th>
                                     <th><span class="text-body badge">Acciones</span></th>
                                 </tr>
@@ -73,7 +73,7 @@ include __DIR__ . '/../layout/header.php';
                                             <td> <span class="badge text-body"><?= htmlspecialchars($personCliente['nombrecompleto']) ?></td>
                                             <td> <span class="badge text-body"><?= htmlspecialchars($personCliente['tipodoc']) ?></span></td>
                                             <td><span class="badge text-body"><?= htmlspecialchars($personCliente['nrodoc']) ?></span> </td>
-                                            <td><span class="badge text-body"><?= htmlspecialchars($personCliente['email'] ?? 'N/A') ?></span></td>
+                                            <!-- <td><span class="badge text-body"><?= htmlspecialchars($personCliente['email'] ?? 'N/A') ?></span></td> -->
                                             <td><span class="badge text-body"><?= htmlspecialchars($personCliente['telprimario']) ?></span></td>
                                             <td>
                                                 <div class="d-flex gap-1">

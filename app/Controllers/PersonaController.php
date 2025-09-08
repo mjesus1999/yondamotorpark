@@ -46,16 +46,16 @@ class PersonaController extends Controller
             'tipodoc' => $data['tipodocumento'] ?? '',
             'nrodoc' => $data['nrodoc'] ?? '',
             'genero' => $data['genero'] ?? '',
-            'fechanac' => $data['fechanac'] ?? '',
-            'estadocivil' => $data['estadocivil'] ?? '',
-            'email' => $data['email'] ?? null,
+            // 'fechanac' => $data['fechanac'] ?? '',
+            // 'estadocivil' => $data['estadocivil'] ?? '',
+            // 'email' => $data['email'] ?? null,
             'iddistrito' => !empty($data['distrito']) ? (int) $data['distrito'] : null,
-            'direccion' => $data['direccion'] ?? null,
-            'referencia' => $data['referencia'] ?? null,
-            'telprimario' => $data['telprimario'] ?? '',
-            'telalternativo' => $data['telalternativo'] ?? null,
-            'latitud' => $data['latitud'] ?? null,
-            'longitud' => $data['longitud'] ?? null,
+            'direccion' => $data['direccion']  == '' ? null : $data['direccion'],
+            'referencia' => $data['referencia']  == '' ? null : $data['referencia'],
+            'telprimario' => $data['telprimario']  == '' ? null : $data['telprimario'],
+            'telalternativo' => $data['telalternativo']  == '' ? null : $data['telalternativo'],
+            'latitud' => $data['latitud']  == '' ? null : $data['latitud'],
+            'longitud' => $data['longitud']  == '' ? null : $data['longitud'],
         ];
 
         $errores = Validador::validarPersonaCrear($registroPersona);
@@ -138,13 +138,14 @@ class PersonaController extends Controller
         $registro = [
             'nombres' => $data['nombres'] ?? '',
             'apellidos' => $data['apellidos'] ?? '',
-            'email' => $data['email'] ?? '',
-            'estadocivil' => $data['estadocivil'] ?? '',
-            'telprimario' => $data['telprimario'] ?? '',
-            'latitud' => $data['latitud'] ?? null,
-            'longitud' => $data['longitud'] ?? null,
-            'direccion' => $data['direccion'] ?? null,
+            'email' => !empty($data['email']) ? $data['email'] : null,
+            'estadocivil' => !empty($data['estadocivil']) ? $data['estadocivil'] : null,
+            'telprimario' => !empty($data['telprimario']) ? $data['telprimario'] : null,
+            'latitud' => !empty($data['latitud']) ? $data['latitud'] : null,
+            'longitud' => !empty($data['longitud']) ? $data['longitud'] : null,
+            'direccion' => !empty($data['direccion']) ? $data['direccion'] : null,
             'iddistrito' => !empty($data['iddistrito']) ? (int) $data['iddistrito'] : null,
+            'fechanac' => !empty($data['fechanac']) ? $data['fechanac'] : null,
             'idpersona' => $id
         ];
 

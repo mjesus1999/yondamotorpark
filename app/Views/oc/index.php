@@ -299,6 +299,7 @@
 
             let idOC = null; // Para identifcar el idoc a actualizar desde el modal para verificar si los autos llegarón de acuerdo a la OC
 
+
             formularioOc.addEventListener("submit", async (e) => {
                 e.preventDefault();
 
@@ -396,6 +397,7 @@
             });
 
 
+
             // Para el modal de check
 
             document.querySelectorAll("a[data-idocmodal]").forEach(icono => {
@@ -413,14 +415,20 @@
                             tablaAutosModalBody.innerHTML = `<tr><td colspan="4" class="text-center">No hay autos para esta orden</td></tr>`;
                         } else {
                             tablaAutosModalBody.innerHTML = "";
-                            autos.sort((a, b) => a.auto.localeCompare(b.auto));
+
+                            // Crear descripción concatenada para ordenar
+                            autos.forEach(item => {
+                                item.descripcion = `${item.marca} ${item.modelo} ${item.tipovehiculo} ${item.version} ${item.combustible} ${item.color} ${item.anio}`;
+                            });
+
+                            autos.sort((a, b) => a.descripcion.localeCompare(b.descripcion));
 
                             autos.forEach((item, index) => {
                                 const row = document.createElement("tr");
                                 row.innerHTML = `
                             <td>${index + 1}</td>
-                            <td>${item.auto}</td>
-                            <td>${item.cantidad}</td>
+                            <td>${item.marca} / ${item.modelo} / ${item.tipovehiculo} / ${item.version} / ${item.combustible} / ${item.color} / ${item.anio}</td>
+                            <td>1</td>
                         `;
                                 tablaAutosModalBody.appendChild(row);
                             });
@@ -544,8 +552,6 @@
                 botonVolver.addEventListener('click', () => {
 
                     limpiarVistaDetalle();
-
-
                     $("#detalle-oc").slideUp(speedAnimation);
                     $("#lista-oc").slideDown(speedAnimation);
                 });
