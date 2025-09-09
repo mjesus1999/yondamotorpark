@@ -325,8 +325,6 @@ class CotizacionController extends Controller
         exit();
     }
 
-
-
     // Generar cronograma:
     public function generarCronograma(float $importeTotal, float $inicial, int $meses): void
     {
