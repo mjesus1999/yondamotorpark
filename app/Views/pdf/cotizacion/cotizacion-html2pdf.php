@@ -1,217 +1,78 @@
+<!-- app/views/pdf/cotizacion/cotizacion-html2pdf.php (corregido) -->
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Cotización <?= $id ?> Dependiente - YONDA PERÚ</title>
-  
-  <style>
-    @page {
-      size: A4 portrait;
-      margin: 10mm;
-    }
+  <link rel="stylesheet" href="/assets/css/cotizacion-reportP.css" />
 
-    * {
-      margin: 0;
-      padding: 0;
+  <!-- Overrides específicos solicitados -->
+  <style>
+    /* Asegurar que los textos small-text y closing estén justificados y ocupen ancho hasta los márgenes del footer */
+    .content {
+      width: 100%;
       box-sizing: border-box;
     }
 
-    body {
-      font-family: Arial, sans-serif;
-      font-size: 11pt;
-      line-height: 1.3;
-      color: #333;
-      background: white;
-      margin: 0;
-      padding: 0;
+    .small-text,
+    .closing {
+      text-align: justify;
+      display: block;
+      margin-right: 0;
     }
 
-    .container {
-      max-width: 7.5in;
-      margin: 0 auto;
-      padding: 15mm;
-      background: white;
-      position: relative;
+    /* Reducir tamaño de la tabla DETALLE cliente (título/tamaño solicitado) */
+    .detalle {
+      font-size: 10pt;
+      /* bajado desde 12pt */
     }
 
-    /* Header simplificado - sin posición fija */
-    .header {
-      text-align: center;
-      margin-bottom: 15px;
-      opacity: 0.3;
-    }
-
-    .header img {
-      width: 50%;
-      max-height: 35px;
-      object-fit: contain;
-    }
-
-    .fecha {
-      text-align: right;
-      font-size: 11pt;
-      margin: 10px 0;
-      white-space: nowrap;
-    }
-
-    .title {
-      text-align: center;
-      margin: 15px 0;
-      font-size: 16pt;
+    /* Evitar capitalizar cada palabra vía CSS: lo haremos mediante JS para solo capitalizar la primera palabra */
+    .instructions ol li {
+      text-transform: none;
       font-weight: bold;
+      line-height: 1.15;
     }
 
+    /* Sufijo al título (estética) */
     #cot-id-suffix {
       font-weight: normal;
       font-size: 0.85em;
       margin-left: 8px;
+      vertical-align: middle;
     }
 
-    .content {
-      width: 100%;
-      margin: 0;
-      padding: 0;
+    .title {
+      font-size: 15pt;
     }
 
-    .content p {
-      margin: 6px 0;
-      line-height: 1.3;
-      font-size: 11pt;
-    }
-
-    .tight {
-      margin: 2px 0;
-    }
-
-    .justified-text {
-      text-align: justify;
-    }
-
-    /* Tabla de detalles optimizada */
-    .detalle {
-      width: 75%;
-      border-collapse: collapse;
-      font-weight: bold;
-      font-size: 10pt;
-      margin: 10px 0;
-    }
-
-    .detalle td.label {
-      width: 180px;
-      text-align: left;
-      padding: 2px 0;
-    }
-
-    .detalle td.value {
-      text-align: left;
-      padding: 2px 0;
-    }
-
-    /* Tabla de precios optimizada */
-    .pricing {
-      width: 100%;
-      border-collapse: collapse;
-      font-weight: bold;
-      font-size: 11pt;
-      margin: 15px 0;
-    }
-
-    .pricing,
-    .pricing td {
-      border: 1px solid #000;
-    }
-
-    .pricing td {
-      padding: 6px 8px;
-      text-align: center;
-    }
-
-    /* Instrucciones */
-    .instructions {
-      font-size: 11pt;
-      margin: 10px 0;
-    }
-
-    .instructions p {
-      margin: 4px 0;
-    }
-
-    .instructions ol li {
-      margin-bottom: 3px;
-      font-weight: bold;
-      line-height: 1.3;
-    }
-
-    .selected {
-      background-color: #fff3cd;
-      padding: 4px 8px;
-      text-align: center;
-      border-radius: 4px;
-      font-weight: bold;
-      margin: 10px 0;
-      display: block;
-    }
-
-    .closing {
-      text-align: justify;
-      margin-top: 10px;
-    }
-
-    /* Footer simplificado - sin posición fija */
-    .footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-      margin-top: 30px;
-      opacity: 0.3;
-      page-break-inside: avoid;
-    }
-
-    .footer-text {
-      font-size: 10pt;
-      line-height: 1.2;
-      text-align: left;
-    }
-
-    .footer img {
-      width: auto;
-      max-width: 200px;
-      height: 20mm;
-      object-fit: contain;
-    }
-
-    /* Indicador de carga */
-    #loading-indicator {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: white;
-      padding: 20px;
-      border: 2px solid #d32f2f;
-      border-radius: 10px;
-      z-index: 2000;
-      text-align: center;
-    }
-
+    /* Aseguramos que en impresión se mantengan los overrides */
     @media print {
-      #loading-indicator {
-        display: none !important;
+
+      .small-text,
+      .closing {
+        text-align: justify !important;
       }
-      
-      .container {
-        max-width: none;
-        padding: 10mm;
+
+      .detalle {
+        font-size: 10pt !important;
       }
     }
   </style>
 </head>
 
 <body>
-  <button class="btn-generate-pdf" onclick="generatePDF()" style="display: none;">Generar PDF</button>
+  <!-- Botón oculto para generar PDF manualmente -->
+  <button class="btn-generate-pdf" onclick="generatePDF()" style="display: none;">
+    Generar PDF
+  </button>
 
-  <div id="loading-indicator">
+  <!-- Indicador de carga -->
+  <div id="loading-indicator" style="position: fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+          background:white; padding:20px; border:2px solid #d32f2f;
+          border-radius:10px; z-index:2000; text-align:center;">
     <div style="color:#d32f2f; font-weight:bold; margin-bottom:10px;">
       Generando PDF...
     </div>
@@ -223,21 +84,23 @@
       <img src="/assets/images/logos/cabecera-yondaa.png" alt="Cabecera Yonda">
     </div>
 
-    <div class="fecha" id="fecha"></div>
+    <div class="row">
+      <div class="left"></div>
+      <div class="right fecha" id="fecha"></div>
+    </div>
 
-    <h2 class="title">
-      <strong id="main-title">COTIZACIÓN VEHICULAR</strong> 
-      <span id="cot-id-suffix"></span>
-    </h2>
+    <!-- TÍTULO: se agrega sufijo con el ID formateado -->
+    <h2 class="title"><strong id="main-title">COTIZACIÓN VEHICULAR</strong> <span id="cot-id-suffix"></span></h2>
 
     <div class="content">
-      <p class="tight">Presente, atte. Yonda & Grupo Huaraca E.I.R.L.</p>
-      <p class="tight">RUC: 20609396866</p>
-      <p class="justified-text">
+      <p class="tight small-text">Presente, atte. Yonda & Grupo Huaraca E.I.R.L.</p>
+      <p class="tight small-text">RUC: 20609396866</p>
+      <p class="small-text justified-text">
         De nuestra consideración, nos es grato dirigirnos a usted para brindarle una
         cotización vehicular de acuerdo al siguiente detalle:
       </p>
 
+      <!-- DETALLE CLIENTE -->
       <table class="detalle">
         <tr>
           <td class="label">NOMBRE DEL CLIENTE</td>
@@ -269,6 +132,7 @@
         </tr>
       </table>
 
+      <!-- CUADRO DE PRECIOS -->
       <table class="pricing">
         <tr>
           <td>PRECIO</td>
@@ -290,11 +154,13 @@
         </tr>
       </table>
 
+      <!-- INSTRUCCIONES -->
       <div class="instructions">
         <p>
           Con la finalidad de iniciar el proceso de desembolso de su crédito agradeceremos entregar a nuestro
           ejecutivo de ventas la siguiente documentación:
         </p>
+        <!-- <p><strong>Modalidad: </strong><span id="format-name"></span></p> -->
         <ol id="instructions-list">
         </ol>
         <p><span class="selected">ENTREGA DE LA UNIDAD EN UN MÁXIMO DE 25 DÍAS HÁBILES</span></p>
@@ -305,17 +171,17 @@
         <p class="closing"><strong>Atte.</strong></p>
       </div>
     </div>
-    
     <div class="footer">
       <div class="footer-text" id="asesor-info">
-        <span id="asesor-nombre"></span><br>
-        <span id="asesor-cargo"></span><br>
-        TELÉFONO: <span id="asesor-telefono"></span>
+        <span id="asesor-nombre"><!-- CHARLY YACTAYO ORTIZ --></span><br>
+        <span id="asesor-cargo"><!-- Ejecutivo de Ventas --></span><br>
+        TELÉFONO: <span id="asesor-telefono"><!-- (056) 934 008 037 --></span>
       </div>
       <img src="/assets/images/logos/footer-yondaa.png" alt="Piecera Yonda">
     </div>
   </div>
 
+  <!-- html2pdf.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script>
     const cotId = <?= json_encode($id, JSON_NUMERIC_CHECK) ?>;
@@ -349,10 +215,20 @@
       return `${ciudad}, ${day} de ${month} de ${year}`;
     }
 
+    /**
+     * formatea un ítem de instrucciones:
+     * - pasa todo a minúsculas
+     * - aplica un mapa de correcciones (tildes, siglas, palabras comunes)
+     * - deja sólo la primera letra de la oración en mayúscula
+     *
+     * Ejemplo:
+     *  "DECLARACION JURADA DE INGRESOS" => "Declaración jurada de ingresos"
+     */
     function formatInstruction(text) {
       if (!text && text !== 0) return '';
       let s = String(text).trim().toLowerCase();
 
+      // Mapa simple de correcciones; agrega otras palabras si las necesitas
       const corrections = {
         'declaracion': 'declaración',
         'jurada': 'jurada',
@@ -403,6 +279,7 @@
         's/1,500.00': 'S/ 1,500.00'
       };
 
+      // Construir patrón para reemplazar palabras completas que estén en el mapa
       const keys = Object.keys(corrections).map(k => k.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\$&'));
       if (keys.length) {
         const pattern = new RegExp('\\b(' + keys.join('|') + ')\\b', 'g');
@@ -411,6 +288,7 @@
         });
       }
 
+      // Después de aplicar correcciones, aseguramos sólo la primera letra en mayúscula
       const firstWordMatch = s.match(/^\s*([^\s]+)/);
       if (firstWordMatch) {
         const first = firstWordMatch[1];
@@ -426,6 +304,7 @@
       return s.charAt(0).toUpperCase() + s.slice(1);
     }
 
+    // Modificación en la función fetchAndFill del JavaScript
     async function fetchAndFill() {
       try {
         const loadingIndicator = document.getElementById('loading-indicator');
@@ -444,7 +323,7 @@
         const fechaStr = formatDateSpanish(cotizacion.fecha, 'Chincha');
         document.getElementById('fecha').textContent = fechaStr.replace(/ /g, '\u00A0');
 
-        // Ajustar TÍTULO para incluir id formateado
+        // Ajustar TÍTULO para incluir id formateado (ej: 000001)
         try {
           const idNum = cotizacion.id || cotId || getIdFromPath() || '';
           const padded = String(idNum).padStart(6, '0');
@@ -473,7 +352,7 @@
         document.getElementById('cuota-48').textContent = (cotizacion.precios && cotizacion.precios.meses_48) ? cotizacion.precios.meses_48 : '-';
         document.getElementById('cuota-60').textContent = (cotizacion.precios && cotizacion.precios.meses_60) ? cotizacion.precios.meses_60 : '-';
 
-        // Llenar datos del asesor
+        // NUEVA SECCIÓN: Llenar datos del asesor
         if (cotizacion.asesor) {
           const asesorNombre = document.getElementById('asesor-nombre');
           const asesorCargo = document.getElementById('asesor-cargo');
@@ -484,25 +363,33 @@
           }
 
           if (asesorCargo) {
+            // Mapear cargos específicos a "Ejecutivo de Ventas"
             let cargoMostrar = cotizacion.asesor.cargo || 'Ejecutivo de Ventas';
+
+            // Si el cargo contiene "vent" o "asesor", mostrar "Ejecutivo de Ventas"
             if (cargoMostrar.toLowerCase().includes('vent') || cargoMostrar.toLowerCase().includes('asesor')) {
               cargoMostrar = 'Ejecutivo de Ventas';
             }
+
             asesorCargo.textContent = cargoMostrar;
           }
 
           if (asesorTelefono) {
+            // Formatear teléfono con código de área si es necesario
             let telefono = cotizacion.asesor.telefono || '934 008 037';
+
+            // Si el teléfono no tiene el código de área, agregarlo
             if (telefono && !telefono.includes('056') && telefono.length === 9) {
               telefono = `(056) ${telefono}`;
             } else if (telefono && telefono.length === 9) {
               telefono = `(056) ${telefono}`;
             }
+
             asesorTelefono.textContent = telefono;
           }
         }
 
-        // Llenar requisitos
+        // Llenar requisitos (código existente) - con capitalización y tildes mediante formatInstruction()
         const instructionsOl = document.getElementById('instructions-list');
         if (instructionsOl) instructionsOl.innerHTML = '';
         const requisitos = cotizacion.requisitos ?? [];
@@ -510,10 +397,12 @@
         if (requisitos.length > 0) {
           requisitos.forEach(r => {
             const li = document.createElement('li');
+            // Aplicar formato: primera palabra mayúscula + correcciones (tildes, siglas)
             li.textContent = formatInstruction(r.requisito || r.texto || r);
             instructionsOl.appendChild(li);
           });
         } else {
+          // Requisitos por defecto si no hay específicos
           const defaults = [
             'FOTOCOPIA DNI DEL TITULAR Y CÓNYUGE',
             'COPIA DEL ÚLTIMO RECIBO PAGADO DE SERVICIOS (LUZ O AGUA)',
@@ -534,74 +423,75 @@
           });
         }
 
-        // Llenar tabla de precios con opciones de financiamiento
-        const inicialCell = document.getElementById('inicial-soles');
-        const precioCell = document.getElementById('precio-usd');
-        const idMap = {
-          24: 'cuota-24',
-          36: 'cuota-36',
-          48: 'cuota-48',
-          60: 'cuota-60'
-        };
+        // Llenar tabla de precios con opciones de financiamiento (código existente)
+        (function populatePricingTable() {
+          const inicialCell = document.getElementById('inicial-soles');
+          const precioCell = document.getElementById('precio-usd');
+          const idMap = {
+            24: 'cuota-24',
+            36: 'cuota-36',
+            48: 'cuota-48',
+            60: 'cuota-60'
+          };
 
-        const precios = cotizacion.precios || {};
-        const inicialSoles = precios.inicial_soles ? String(precios.inicial_soles) : '0.00';
-        const precioUsd = precios.precio_usd ? String(precios.precio_usd) : '0.00';
+          const precios = cotizacion.precios || {};
+          const inicialSoles = precios.inicial_soles ? String(precios.inicial_soles) : '0.00';
+          const precioUsd = precios.precio_usd ? String(precios.precio_usd) : '0.00';
 
-        if (precioCell) precioCell.textContent = `$ ${parseFloat(precioUsd).toFixed(2)}`;
-        if (inicialCell) inicialCell.textContent = `S/ ${parseFloat(inicialSoles).toFixed(2)}`;
+          if (precioCell) precioCell.textContent = `$ ${parseFloat(precioUsd).toFixed(2)}`;
+          if (inicialCell) inicialCell.textContent = `S/ ${parseFloat(inicialSoles).toFixed(2)}`;
 
-        Object.values(idMap).forEach(id => {
-          const el = document.getElementById(id);
-          if (el) el.textContent = '-';
-        });
+          Object.values(idMap).forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = '-';
+          });
 
-        const pricingTable = document.querySelector('.pricing');
-        if (pricingTable) {
+          const pricingTable = document.querySelector('.pricing');
+          if (!pricingTable) return;
           pricingTable.querySelectorAll('.extra-opt').forEach(node => node.remove());
-        }
 
-        const opciones = cotizacion.opciones_financiamiento || [];
-        const extras = [];
+          const opciones = cotizacion.opciones_financiamiento || [];
+          const extras = [];
 
-        opciones.forEach(opt => {
-          const meses = Number(opt.numcuotas || opt.numCuotas || 0);
-          const cuota = (opt.valorcuota !== undefined && opt.valorcuota !== null)
-            ? Number(opt.valorcuota)
-            : null;
+          opciones.forEach(opt => {
+            const meses = Number(opt.numcuotas || opt.numCuotas || 0);
+            const cuota = (opt.valorcuota !== undefined && opt.valorcuota !== null)
+              ? Number(opt.valorcuota)
+              : null;
 
-          if (idMap[meses]) {
-            const target = document.getElementById(idMap[meses]);
-            if (target) {
-              target.textContent = cuota !== null ? `S/ ${cuota.toFixed(2)}` : '-';
+            if (idMap[meses]) {
+              const target = document.getElementById(idMap[meses]);
+              if (target) {
+                target.textContent = cuota !== null ? `S/ ${cuota.toFixed(2)}` : '-';
+              }
+            } else {
+              extras.push({
+                meses,
+                cuota: cuota !== null ? `S/ ${cuota.toFixed(2)}` : '-'
+              });
             }
-          } else {
-            extras.push({
-              meses,
-              cuota: cuota !== null ? `S/ ${cuota.toFixed(2)}` : '-'
+          });
+
+          if (extras.length) {
+            extras.forEach(ex => {
+              const tr = document.createElement('tr');
+              tr.classList.add('extra-opt');
+              tr.innerHTML = `
+            <td>${ex.meses} meses</td>
+            <td>${ex.cuota}</td>
+            <td>S/ ${parseFloat(inicialSoles).toFixed(2)}</td>
+            <td>$ ${parseFloat(precioUsd).toFixed(2)}</td>
+          `;
+              pricingTable.appendChild(tr);
             });
           }
-        });
-
-        if (extras.length && pricingTable) {
-          extras.forEach(ex => {
-            const tr = document.createElement('tr');
-            tr.classList.add('extra-opt');
-            tr.innerHTML = `
-              <td>${ex.meses} meses</td>
-              <td>${ex.cuota}</td>
-              <td>S/ ${parseFloat(inicialSoles).toFixed(2)}</td>
-              <td>$ ${parseFloat(precioUsd).toFixed(2)}</td>
-            `;
-            pricingTable.appendChild(tr);
-          });
-        }
+        })();
 
         if (loadingIndicator) loadingIndicator.style.display = 'none';
         if (container) container.style.visibility = 'visible';
 
         // Generar PDF después de llenar datos
-        setTimeout(() => generarPDFOptimizado(), 500);
+        setTimeout(() => generarPDFCotizacion(), 10);
 
       } catch (error) {
         console.error('Error al cargar datos:', error);
@@ -612,57 +502,353 @@
       }
     }
 
-    // Función de generación de PDF optimizada (similar al de OC)
-    async function generarPDFOptimizado() {
+    // convert <img> element to dataURL (uses canvas; requires same-origin or CORS headers)
+    function imageToDataURL(imgEl, alpha = 1) {
+      return new Promise((resolve, reject) => {
+        if (!imgEl) return resolve(null);
+        function convert() {
+          try {
+            const canvas = document.createElement('canvas');
+            const w = imgEl.naturalWidth || imgEl.width || 100;
+            const h = imgEl.naturalHeight || imgEl.height || 40;
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            if (alpha < 1) ctx.globalAlpha = alpha;
+            ctx.drawImage(imgEl, 0, 0, w, h);
+            resolve(canvas.toDataURL('image/png'));
+          } catch (err) {
+            reject(err);
+          }
+        }
+        if (imgEl.complete && imgEl.naturalWidth) convert();
+        else { imgEl.onload = convert; imgEl.onerror = (e) => reject(e); }
+      });
+    }
+
+    async function generarPDFCotizacion() {
       const element = document.querySelector('.container');
       const loadingIndicator = document.getElementById('loading-indicator');
-      
       if (loadingIndicator) loadingIndicator.style.display = 'none';
 
       const filename = `cotizacion-${getIdFromPath() || 'yonda'}.pdf`;
 
-      // Configuración optimizada similar al de OC
       const opt = {
-        margin: [0.1, 0.1, 0.1, 0.1],
+        margin: [10, 10, 10, 10],
         filename,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: {
-          scale: 1.75, // Reducido desde 2.0 
+          scale: 2.0,
           useCORS: true,
           allowTaint: false,
           logging: false,
+          imageTimeout: 15000,
           windowWidth: document.documentElement.offsetWidth,
-          windowHeight: document.documentElement.offsetHeight
+          windowHeight: document.documentElement.offsetHeight,
+          scrollX: 0,
+          scrollY: 0,
+          backgroundColor: '#ffffff'
         },
-        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
       };
 
+      // Status visual
+      let status = document.getElementById('pdf-status');
+      if (!status) {
+        status = document.createElement('div');
+        status.id = 'pdf-status';
+        status.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.8);color:#fff;padding:14px;border-radius:8px;z-index:9999;font-family:Arial,sans-serif;';
+        status.innerHTML = '📄 Generando PDF...';
+        document.body.appendChild(status);
+      } else {
+        status.style.display = 'block';
+      }
+
+      const headerEl = document.querySelector('.header');
+      const footerEl = document.querySelector('.footer');
+      const imgTopEl = document.querySelector('.pdf-watermark.top') || (headerEl ? headerEl.querySelector('img') : null);
+      const imgBottomEl = document.querySelector('.pdf-watermark.bottom') || (footerEl ? footerEl.querySelector('img') : null);
+
+      // Convierte imágenes a dataURL
+      let topData = null;
+      let bottomData = null;
+      try { if (imgTopEl) topData = await imageToDataURL(imgTopEl, 0.12); } catch (e) { console.warn('cabecera->dataURL failed', e); topData = null; }
+      try { if (imgBottomEl) bottomData = await imageToDataURL(imgBottomEl, 0.12); } catch (e) { console.warn('footer->dataURL failed', e); bottomData = null; }
+
+      const prevHeaderDisplay = headerEl ? headerEl.style.display : null;
+      const prevFooterDisplay = footerEl ? footerEl.style.display : null;
+
       try {
-        html2pdf().set(opt).from(element).save().then(() => {
-          console.log('PDF generado y descargado.');
-          setTimeout(() => {
-            window.close();
-          }, 500);
-        }).catch(error => {
-          console.error('Error al generar PDF:', error);
-          alert('Error al generar el PDF. La ventana se cerrará.');
-          setTimeout(() => {
-            window.close();
-          }, 1000);
+        // Ocultar header/footer para html2canvas
+        if (headerEl) headerEl.style.display = 'none';
+        if (footerEl) footerEl.style.display = 'none';
+
+        // Generar PDF
+        const worker = html2pdf().set(opt).from(element).toPdf();
+
+        worker.get('pdf').then((pdf) => {
+          try {
+            const totalPages = pdf.internal.getNumberOfPages();
+            const pageWidth = pdf.internal.pageSize.getWidth();
+            const pageHeight = pdf.internal.pageSize.getHeight();
+            const margin = Array.isArray(opt.margin) ? opt.margin[0] : 10;
+
+            if (topData || bottomData) {
+              const targetWidth = pageWidth - margin * 2;
+
+              for (let p = 1; p <= totalPages; p++) {
+                pdf.setPage(p);
+
+                // CABECERA
+                if (topData) {
+                  const iw = (imgTopEl && imgTopEl.naturalWidth) ? imgTopEl.naturalWidth : 100;
+                  const ih = (imgTopEl && imgTopEl.naturalHeight) ? imgTopEl.naturalHeight : 30;
+                  const h = (ih / iw) * targetWidth;
+                  const x = margin;
+                  const y = 2;
+                  pdf.addImage(topData, 'PNG', x, y, targetWidth, h, undefined, 'FAST');
+                }
+
+                // FOOTER
+                let y2;
+                if (bottomData) {
+                  const iw2 = (imgBottomEl && imgBottomEl.naturalWidth) ? imgBottomEl.naturalWidth : 100;
+                  const ih2 = (imgBottomEl && imgBottomEl.naturalHeight) ? imgBottomEl.naturalHeight : 20;
+                  let h2 = (ih2 / iw2) * targetWidth;
+                  const maxFooterHeight = 10;
+                  if (h2 > maxFooterHeight) h2 = maxFooterHeight;
+                  const x2 = margin;
+                  y2 = pageHeight - margin - h2 - 1;
+                  pdf.addImage(bottomData, 'PNG', x2, y2, targetWidth, h2, undefined, 'FAST');
+                } else {
+                  y2 = pageHeight - margin - 6;
+                }
+
+                // Texto del footer
+                const footerText = footerEl && footerEl.querySelector('.footer-text') ? footerEl.querySelector('.footer-text').innerText.trim() : '';
+                if (footerText) {
+                  const lines = footerText.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+                  if (lines.length) {
+                    pdf.setFont('helvetica');
+                    pdf.setFontSize(10);
+                    pdf.setTextColor(0, 0, 0);
+                    const textX = pageWidth - margin;
+                    const lineHeight = 4;
+                    const firstLineY = y2 - 3 - ((lines.length - 1) * lineHeight);
+                    pdf.text(lines, textX, firstLineY, { align: 'right' });
+                  }
+                }
+              }
+            }
+
+            // Ocultar status de generación
+            if (status) status.style.display = 'none';
+
+            // MOSTRAR MODAL DE DESCARGA
+            showDownloadModal(pdf, filename);
+
+          } catch (err) {
+            console.error('Error postprocesando PDF:', err);
+            if (status) status.style.display = 'none';
+            // Fallback directo
+            showDownloadModal(pdf, filename);
+          } finally {
+            // Restaurar elementos DOM
+            if (headerEl) headerEl.style.display = prevHeaderDisplay;
+            if (footerEl) footerEl.style.display = prevFooterDisplay;
+          }
+        }).catch((err) => {
+          console.error('No se obtuvo objeto jsPDF:', err);
+          if (status) status.style.display = 'none';
+          // Fallback básico
+          html2pdf().set(opt).from(element).toPdf().get('pdf').then((pdf) => {
+            showDownloadModal(pdf, filename);
+          });
         });
-      } catch (error) {
-        console.error('Error al generar PDF:', error);
-        alert('Error al generar el PDF. Intente nuevamente.');
+
+      } catch (err) {
+        console.error('Error generando PDF:', err);
+        if (headerEl) headerEl.style.display = prevHeaderDisplay;
+        if (footerEl) footerEl.style.display = prevFooterDisplay;
+        if (status) status.style.display = 'none';
+        alert('Error generando PDF. Intente nuevamente.');
       }
     }
 
+    function showDownloadModal(pdf, filename) {
+      // Crear modal
+      const modalOverlay = document.createElement('div');
+      modalOverlay.id = 'download-modal-overlay';
+      modalOverlay.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: Arial, sans-serif;
+  `;
+
+      const modal = document.createElement('div');
+      modal.style.cssText = `
+    background: white;
+    padding: 20px;
+    border: 1px solid #ccc;
+    text-align: center;
+    max-width: 300px;
+    width: 90%;
+  `;
+
+      modal.innerHTML = `
+    <p style="margin: 0 0 20px 0; font-size: 14px;">
+      PDF generado. ¿Desea descargarlo?
+    </p>
+    <div>
+      <button id="btn-download-pdf" style="
+        background: white;
+        color: black;
+        border: 1px solid #ccc;
+        padding: 8px 16px;
+        cursor: pointer;
+        font-size: 14px;
+        margin-right: 10px;
+      ">
+        Descargar
+      </button>
+      <button id="btn-cancel-download" style="
+        background: white;
+        color: black;
+        border: 1px solid #ccc;
+        padding: 8px 16px;
+        cursor: pointer;
+        font-size: 14px;
+      ">
+        Cancelar
+      </button>
+    </div>
+  `;
+
+      modalOverlay.appendChild(modal);
+      document.body.appendChild(modalOverlay);
+
+      const btnDownload = modal.querySelector('#btn-download-pdf');
+      const btnCancel = modal.querySelector('#btn-cancel-download');
+
+      // EVENTOS DE LOS BOTONES
+      btnDownload.addEventListener('click', () => {
+        try {
+          console.log('Iniciando descarga...');
+
+          // Método 1: Descarga directa con save()
+          try {
+            pdf.save(filename);
+            console.log('Descarga iniciada con save()');
+          } catch (saveError) {
+            console.log('save() falló, usando método alternativo...');
+
+            // Método 2: Crear enlace de descarga
+            const blob = pdf.output('blob');
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+
+            link.href = url;
+            link.download = filename;
+            link.style.position = 'fixed';
+            link.style.left = '-9999px';
+
+            document.body.appendChild(link);
+            link.click();
+
+            setTimeout(() => {
+              document.body.removeChild(link);
+              URL.revokeObjectURL(url);
+            }, 100);
+
+            console.log('Descarga iniciada con enlace');
+          }
+
+          // Cerrar modal
+          closeModal();
+
+          // Cerrar ventana después de un delay
+          setTimeout(() => {
+            try {
+              window.close();
+            } catch (e) {
+              console.log('No se pudo cerrar la ventana automáticamente');
+            }
+          }, 1000);
+
+        } catch (error) {
+          console.error('Error en descarga:', error);
+          alert('Error al descargar el PDF. Intente nuevamente.');
+        }
+      });
+
+      btnCancel.addEventListener('click', () => {
+        closeModal();
+        // Cerrar ventana al cancelar
+        setTimeout(() => {
+          try {
+            window.close();
+          } catch (e) {
+            console.log('No se pudo cerrar la ventana automáticamente');
+          }
+        }, 100);
+      });
+
+      // Cerrar modal al hacer clic fuera
+      modalOverlay.addEventListener('click', (e) => {
+        if (e.target === modalOverlay) {
+          closeModal();
+          setTimeout(() => {
+            try { window.close(); } catch (e) { }
+          }, 100);
+        }
+      });
+
+      // Función para cerrar modal
+      function closeModal() {
+        if (modalOverlay && modalOverlay.parentNode) {
+          modalOverlay.parentNode.removeChild(modalOverlay);
+        }
+      }
+
+      // Cerrar con ESC
+      document.addEventListener('keydown', function escHandler(e) {
+        if (e.key === 'Escape') {
+          closeModal();
+          document.removeEventListener('keydown', escHandler);
+          setTimeout(() => {
+            try { window.close(); } catch (e) { }
+          }, 100);
+        }
+      });
+
+      // Auto-focus en el botón de descarga
+      setTimeout(() => {
+        btnDownload.focus();
+      }, 100);
+    }
+
+    // REMOVER TODA LÓGICA DE PREVIEW
+    function isPreviewMode() {
+      return false; // Siempre devolver false para deshabilitar preview
+    }
+
     function generatePDF() {
-      generarPDFOptimizado();
+      generarPDFCotizacion();
     }
 
     window.addEventListener('DOMContentLoaded', async () => {
       await fetchAndFill();
     });
   </script>
+
 </body>
+
 </html>
