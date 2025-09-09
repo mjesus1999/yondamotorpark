@@ -1,9 +1,4 @@
 
-
-.cronograma-table {
-  font-family: "Arial", Tahoma, Geneva, Verdana, sans-serif;
-}
-
 .cronograma-table thead th {
   background-color:  rgb(255, 95, 0);;
   color: white;
@@ -12,16 +7,32 @@
   font-size: 0.85rem;
   letter-spacing: 0.5px;
 }
-
-.cronograma-table tbody tr {
-  transition: all 0.2s ease;
+.card-header-cronograma {
+  background-color:  rgb(255, 95, 0);
+  color: white;
+  border-radius: 10px 10px 0 0 !important;
+  padding: 1rem 1.5rem;
 }
+
 
 .cronograma-table tbody tr:hover:not([data-disabled="true"]) {
   background-color: rgba(44, 62, 80, 0.05);
 }
+.hidden {
+  display: none;
+}
 
-/* Estados de las cuotas */
+.cronograma-table tbody tr[data-disabled="true"] td {
+  color: #727373;
+}
+ tr[data-disabled="true"] {
+  opacity: 0.75;
+  pointer-events: none;
+}
+
+
+
+
 .estado-pendiente {
   background-color: #fff3cd;
   color: #856404;
@@ -38,7 +49,7 @@
   padding: 0.25rem 0.5rem;
   border-radius: 0.25rem;
   display: inline-block;
-}
+} 
 
 .estado-vencido {
   background-color: #e60c1e;
@@ -49,47 +60,24 @@
   display: inline-block;
 }
 
-/* Nuevo estado: Sin pago */
-.estado-sin-pago {
-  background-color: #e9ecef;
-  color: #6c757d;
-  font-weight: 500;
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.25rem;
-  display: inline-block;
-}
-
-/* Filas deshabilitadas específicas */
- tr[data-disabled="true"] {
-  opacity: 0.75;
-  pointer-events: none;
-}
-
 tr[data-disabled="true"]:hover {
   background-color: inherit !important;
-} 
+}
 
-/* Texto especial para cuotas sin pago */
+
 .text-sin-pago {
   color: #dc3545 !important;
   font-size: 0.75rem;
   font-weight: 600;
 }
 
-/* Badge de cuota */
+
 .badge-cuota {
   font-size: 0.75rem;
   padding: 0.35em 0.65em;
   font-weight: 600;
 }
 
-/* Botón de pagar */
-.btn-pagar {
-  background: linear-gradient(135deg, #27ae60, #2ecc71);
-  border: none;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
-}
 
 .btn-pagar:hover {
   transform: translateY(-2px);
@@ -97,40 +85,21 @@ tr[data-disabled="true"]:hover {
   background: linear-gradient(135deg, #229954, #27ae60);
 }
 
-/* Card del cronograma */
+
 .card-cronograma {
   border-radius: 10px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   border: none;
 }
 
-.card-header-cronograma {
-  background-color:  rgb(255, 95, 0);
-  color: white;
-  border-radius: 10px 10px 0 0 !important;
-  padding: 1rem 1.5rem;
-}
-
-.table-responsive {
-  border-radius: 0 0 10px 10px;
-}
-
-/* Utilidades */
-.hidden {
-  display: none;
-}
-
-/* Texto especial para cuotas sin pago */
 .text-sin-pago {
   color: #1a1dfd !important;
   font-size: 0.75rem;
   font-weight: 600;
 }
 
-/* Mejoras adicionales para accesibilidad */
-.cronograma-table tbody tr[data-disabled="true"] td {
-  color: #727373;
-}
+
+
 
 
 .cronograma-table tbody tr.fila-sin-pago td {
@@ -147,7 +116,7 @@ tr[data-disabled="true"]:hover {
 
 
 
-/* Responsive improvements */
+
 @media (max-width: 768px) {
   .cronograma-table {
     font-size: 0.85rem;
@@ -162,4 +131,4 @@ tr[data-disabled="true"]:hover {
     padding: 0.25rem 0.5rem;
     font-size: 0.8rem;
   }
-}
+} 

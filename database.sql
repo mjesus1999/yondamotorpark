@@ -339,6 +339,9 @@ CREATE TABLE ordenescompra (
     CONSTRAINT fk_idlogistica_ocp FOREIGN KEY (idlogistica) REFERENCES colaboradores (idcolaborador)
 ) ENGINE = INNODB;
 
+USE motorpark;
+SELECT * FROM ordenescompra;
+
 --ALTER TABLE ordenescompra ADD COLUMN  facturado ENUM('S','N') NOT NULL DEFAULT 'N' ;
 -- ALTER TABLE ordenescompra ADD COLUMN creado DATETIME NOT NULL DEFAULT NOW();
 -- ALTER TABLE ordenescompra ADD COLUMN fechanulado DATETIME NULL;

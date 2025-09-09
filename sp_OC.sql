@@ -42,6 +42,10 @@ END $$
 
 DELIMITER ;
 
+
+
+
+
 CALL sp_oc_por_estado('proceso');
 
 -- UPDATE concesionarios SET razonsocial = 'HYUNDAI PERU' WHERE idconcesionario = 7;
