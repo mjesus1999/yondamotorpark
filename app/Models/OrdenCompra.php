@@ -83,6 +83,7 @@ class OrdenCompra
             return [];
         }
     }
+    
 
     //  METODO PARA ACTUAlIZAR EL CAMPO ESCORRECTO EN LA TABLA DET_ORDEN_COMPRA DE LA DB
 

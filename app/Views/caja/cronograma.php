@@ -1,3 +1,4 @@
+
 <?php include __DIR__ . '/../layout/header.php'; ?>
 <link rel="stylesheet" href="/assets/css/cronograma-contrato.css">
 
@@ -33,7 +34,7 @@
                 <div class="card-header card-header-cronograma">
                     <div class="d-flex justify-content-between align-items-center">
                         <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i> Cronograma de Pagos</h5>
-                        <div class="input-group input-group-sm" style="width: 250px;">
+                        <div class="input-group input-group-sm" style="width: 250px">
                             <span class="input-group-text bg-white"><i class="fas fa-search text-muted"></i></span>
                             <input type="text" class="form-control" placeholder="Buscar cuota..." id="inputBuscar">
                         </div>
@@ -162,7 +163,7 @@
                                                     } elseif ($clase_estado === 'estado-vencido') {
                                                         echo 'Vencido';
                                                     } elseif ($es_sin_pago) {
-                                                        echo 'Pendiente - sin pago';
+                                                        echo 'Pend. Sin pago';
                                                     } else {
                                                         echo 'Pendiente';
                                                     }
@@ -183,7 +184,7 @@
                                                         </span>
                                                     </div>
                                                 <?php else: ?>
-                                                    <button class="btn btn-pagar btn-sm text-white" id="btn-pagar"
+                                                    <button class="btn btn-pagar btn-sm text-white bg-success" id="btn-pagar"
                                                         data-bs-toggle="modal"
                                                         data-bs-target="#modalPago"
                                                         data-cuota="<?= $fila['numcuota'] ?>"
@@ -418,7 +419,9 @@
 </div>
 
 <!-- USADO PARA GENERAR EL PDF -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js" defer></script>
+
+
 <script src="/assets/js/cronograma-pagos/cronograma.js" type="module" defer></script>
 <?php include __DIR__ . '/../layout/footer.php'; ?>
