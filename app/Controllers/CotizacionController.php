@@ -224,16 +224,29 @@ class CotizacionController extends Controller
             exit;
         }
 
-        // Decodificar las opciones de financiamiento para obtener la inicial
+        // Opciones de financiamiento del front (tarjetas)
         $opcionesJson = $_POST['opciones_financiamiento'] ?? '[]';
         $opciones = json_decode($opcionesJson, true);
         if (!is_array($opciones))
             $opciones = [];
 
-        // Obtener la inicial de la primera opción (ya que todas deben tener la misma inicial)
+        // 1) Inicial principal (todas comparten inicial)
         $inicialPrincipal = 0;
         if (!empty($opciones)) {
-            $inicialPrincipal = $opciones[0]['inicial'] ?? 0;
+            $inicialPrincipal = (float) ($opciones[0]['inicial'] ?? 0);
+        }
+
+        // 2) Opción principal para llenar "resumen" en cotizaciones:
+        //    Tomamos la de MENOR número de cuotas (puedes cambiar el criterio si quieres)
+        $numcuotasResumen = 0;
+        $valorcuotaResumen = 0.00;
+        if (!empty($opciones)) {
+            usort($opciones, function ($a, $b) {
+                return (int) ($a['numcuotas'] ?? 0) <=> (int) ($b['numcuotas'] ?? 0);
+            });
+            $opcionPrincipal = $opciones[0];
+            $numcuotasResumen = (int) ($opcionPrincipal['numcuotas'] ?? 0);
+            $valorcuotaResumen = (float) ($opcionPrincipal['valorcuota'] ?? 0);
         }
 
         $input = [
@@ -243,9 +256,12 @@ class CotizacionController extends Controller
             'moneda' => $_POST['moneda'] ?? 'PEN',
             'precioventa' => $_POST['precioventa'] ?? 0,
             'vigenciadias' => $_POST['vigenciadias'] ?? 7,
-            'inicial' => $inicialPrincipal, // USAR LA INICIAL DE LAS OPCIONES
-            'numcuotas' => $_POST['numcuotas'] ?? 0,
-            'valorcuota' => $_POST['valorcuota'] ?? 0,
+
+            // Lo correcto: desde el JSON
+            'inicial' => $inicialPrincipal,
+            'numcuotas' => $numcuotasResumen,
+            'valorcuota' => $valorcuotaResumen,
+
             'idasesor' => $idasesor,
         ];
 
@@ -256,10 +272,10 @@ class CotizacionController extends Controller
         }
 
         try {
-            // insertar cotización y obtener id
+            // Insert cotizacion y obtener id
             $idcot = $this->cotizacionModel->create($input);
 
-            // insertar cada opción
+            // Insertar cada opción en cotizacion_financiamiento
             foreach ($opciones as $opt) {
                 $numcuotas = (int) ($opt['numcuotas'] ?? 0);
                 $valorcuota = (float) ($opt['valorcuota'] ?? 0);
@@ -268,7 +284,14 @@ class CotizacionController extends Controller
                 $precioventa = (float) ($opt['precioventa'] ?? $input['precioventa']);
 
                 if ($numcuotas > 0 && $valorcuota >= 0) {
-                    $this->cotizacionModel->createFinanciamiento($idcot, $numcuotas, $inicial, $valorcuota, $moneda, $precioventa);
+                    $this->cotizacionModel->createFinanciamiento(
+                        $idcot,
+                        $numcuotas,
+                        $inicial,
+                        $valorcuota,
+                        $moneda,
+                        $precioventa
+                    );
                 }
             }
 
@@ -282,7 +305,6 @@ class CotizacionController extends Controller
         }
     }
 
-
     public function tipoCambio(): void
     {
         header('Content-Type: application/json; charset=utf-8');
@@ -295,20 +317,27 @@ class CotizacionController extends Controller
     public function calcularPagoMensual(float $importeTotal, float $inicial, int $meses): void
     {
         header('Content-Type: application/json');
-        $pagoMensual = $this->cotizacionModel->calcularPagoMensual($importeTotal, $inicial, $meses);
+        $tasaPercent = isset($_GET['tasa']) ? floatval($_GET['tasa']) : 65.0; // en %
+        $tasaAnual = max(0.0, $tasaPercent) / 100.0; // a decimal
+
+        $pagoMensual = $this->cotizacionModel->calcularPagoMensual($importeTotal, $inicial, $meses, $tasaAnual);
         echo json_encode(["pago_mensual" => $pagoMensual]);
         exit();
     }
+
+
 
     // Generar cronograma:
     public function generarCronograma(float $importeTotal, float $inicial, int $meses): void
     {
         header('Content-Type: application/json');
-        $cronograma = $this->cotizacionModel->generarCronograma($importeTotal, $inicial, $meses);
+        $tasaPercent = isset($_GET['tasa']) ? floatval($_GET['tasa']) : 65.0; // en %
+        $tasaAnual = max(0.0, $tasaPercent) / 100.0;
+
+        $cronograma = $this->cotizacionModel->generarCronograma($importeTotal, $inicial, $meses, $tasaAnual);
         echo json_encode($cronograma);
         exit();
     }
-
 
     //NUEVAS FUNCIONES (BUSCA EL DNI DEL ULTIMO CLIENTE (GET) Y LLEVA A UNA COTIZACION (POST))
     /**
@@ -362,6 +391,62 @@ class CotizacionController extends Controller
             'message' => 'Sesión limpiada correctamente'
         ]);
         exit;
+    }
+
+    //HISTORIAL PARA VER LAS COTIZACIONES VENCIDAS : 09/09/25
+    public function historial(): void
+    {
+        $this->authRequired();
+
+        // Obtener información del usuario logueado
+        $idasesor = $_SESSION['user']['id'] ?? null;
+        $idcargo = $_SESSION['user']['idcargo'] ?? null;
+
+        if (!$idasesor || !$idcargo) {
+            $_SESSION['error_message'] = "No se pudo identificar al usuario.";
+            header('Location: /login');
+            exit;
+        }
+
+        // Definir cargos que pueden ver todas las cotizaciones (supervisores/jefes)
+        $cargosSupervisores = [
+            1,  // Jefe de sistemas
+            8,  // Jefe de Logística
+            10, // Jefe de Recursos Humanos
+            13, // Jefe de Contabilidad
+            14, // Jefe de Marketing
+            16, // Jefe de Ventas
+            17  // Jefe de Caja
+        ];
+
+        // Verificar si el usuario puede ver todas las cotizaciones o solo las suyas
+        $puedeVerTodas = in_array($idcargo, $cargosSupervisores);
+
+        if ($puedeVerTodas) {
+            // Supervisores/Jefes ven todas las cotizaciones vencidas con información del asesor
+            $cotizaciones = $this->cotizacionModel->getAllVencidas();
+
+            // Log para debugging (opcional)
+            error_log('USUARIO SUPERVISOR - Historial: Puede ver todas las cotizaciones vencidas');
+            error_log('COTIZACIONES VENCIDAS CARGADAS: ' . count($cotizaciones));
+        } else {
+            // Asesores y otros cargos ven solo sus cotizaciones vencidas
+            $cotizaciones = $this->cotizacionModel->getAllVencidasByAsesor($idasesor);
+
+            // Log para debugging (opcional)
+            error_log('USUARIO ASESOR - Historial: Solo ve sus cotizaciones vencidas');
+            error_log('COTIZACIONES VENCIDAS DEL ASESOR ' . $idasesor . ': ' . count($cotizaciones));
+        }
+
+        $this->view("cotizacion.historial", [
+            'cotizaciones' => $cotizaciones,
+            'puede_ver_todas' => $puedeVerTodas,
+            'usuario_actual' => [
+                'id' => $idasesor,
+                'cargo' => $idcargo,
+                'es_supervisor' => $puedeVerTodas
+            ]
+        ]);
     }
 
 }

@@ -253,3 +253,59 @@ LEFT JOIN cargos cg ON cl_ase.idcargo = cg.idcargo
 -- Datos del vehículo
 JOIN modelos mo     ON v.idmodelo = mo.idmodelo
 JOIN marcas ma      ON mo.idmarca = ma.idmarca;
+
+
+-- VISTA PARA OBTENER COTIZACIONES VENCIDAS / getAllVencidas
+CREATE OR REPLACE VIEW vwGetAllCotizacionVencidas AS
+SELECT
+  c.idcotizacion,
+  c.idformato,
+  c.idasesor,
+  fc.tipocotizacion,
+  COALESCE(
+    CASE WHEN cl.tipocliente = 'P' THEN CONCAT(p.nombres, ' ', p.apellidos) END,
+    e.razonsocial,
+    'Cliente no definido'
+  ) AS nombrecliente,
+  COALESCE(
+    CASE WHEN cl.tipocliente = 'P' THEN p.nrodoc END,
+    e.ruc,
+    ''
+  ) AS documento,
+  COALESCE(
+    CASE WHEN cl.tipocliente = 'P' THEN p.telprimario END,
+    e.telprimario,
+    ''
+  ) AS telefono,
+  -- columnas históricas (compatibilidad)
+  ma.marca AS marcaVehiculo,
+  mo.modelo AS modeloVehiculo,
+  mo.anio,
+  -- nueva columna combinada: MARCA/MODELO/ANIO
+  CONCAT_WS(' / ', ma.marca, mo.modelo, mo.anio) AS vehiculo,
+  v.color,
+  c.creado AS fechaRegistro,
+  c.vigenciadias,
+  c.moneda,
+  c.inicial,
+  c.precioventa,
+  DATE_ADD(c.creado, INTERVAL c.vigenciadias DAY) AS fecha_vencimiento,
+  -- INFORMACIÓN DEL ASESOR QUE REGISTRÓ LA COTIZACIÓN
+  CONCAT(pase.apellidos, ' ', pase.nombres) AS asesor_nombre,
+  col.usernick AS asesor_usuario,
+  cg.cargo AS asesor_cargo
+FROM cotizaciones c
+JOIN clientes cl ON c.idcliente = cl.idcliente
+LEFT JOIN personas p ON cl.idpersona = p.idpersona
+LEFT JOIN empresas e ON cl.idempresa = e.idempresa
+JOIN vehiculos v ON c.idvehiculo = v.idvehiculo
+JOIN modelos mo ON v.idmodelo = mo.idmodelo
+JOIN marcas ma ON mo.idmarca = ma.idmarca
+JOIN formatocotizacion fc ON c.idformato = fc.idformato
+-- JOIN para obtener información del asesor
+LEFT JOIN colaboradores col ON c.idasesor = col.idcolaborador
+LEFT JOIN contratoslaborales cl_ase ON col.idcontratolaboral = cl_ase.idcontratolaboral
+LEFT JOIN personas pase ON cl_ase.idpersona = pase.idpersona
+LEFT JOIN cargos cg ON cl_ase.idcargo = cg.idcargo
+WHERE DATE_ADD(DATE(c.creado), INTERVAL c.vigenciadias DAY) < CURDATE()
+ORDER BY c.creado DESC;

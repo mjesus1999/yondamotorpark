@@ -18,65 +18,45 @@
         <?php unset($_SESSION['error_message']); ?>
     <?php endif; ?>
 
-    <div class="alert alert-info mt-2" role="alert">
+    <div class="alert alert-warning mt-2" role="alert">
         <div class="row">
             <div class="col-md-6 d-flex align-items-center justify-content-start">
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb mb-0">
-                        <li class="breadcrumb-item"><a href="#">Cotizacion</a></li>
-                        <li class="breadcrumb-item active" aria-current="page">Cotizar</li>
+                        <li class="breadcrumb-item"><a href="/cotizacion">Cotización</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Historial</li>
                     </ol>
                 </nav>
             </div>
             <div class="col-md-6 text-end">
-                <a href="/cotizacion/historial" class="btn btn-outline-secondary btn-sm me-2">
-                    <i class="bi bi-clock-history"></i> Historial
+                <a href="/cotizacion" class="btn btn-outline-primary btn-sm me-2">
+                    <i class="bi bi-arrow-left"></i> Volver a Cotizaciones Activas
                 </a>
-                <a href="/cotizacion/create" class="btn btn-primary btn-sm">
-                    <!-- <i class="bi bi-plus"></i> -->Registrar
-                </a>
+                <!-- <a href="/cotizacion/create" class="btn btn-primary btn-sm">
+                    <i class="bi bi-plus"></i> Registrar
+                </a> -->
             </div>
         </div>
     </div>
 
-    <!-- <div class="alert alert-info mt-2" role="alert">
-        <div class="row">
-            <div class="col-md-6 d-flex aling-items-center justify-content-start">
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb mb-0">
-                        <li class="breadcrumb-item"><a href="#">Cotizacion</a></li>
-                        <li class="breadcrumb-item active" aria-current="page">Cotizar</li>
-                    </ol>
-                </nav>
-            </div>
-            <div class="col-md-6 text-end">
-                <a href="/cotizacion/historial" class="btn btn-outline-secondary btn-sm me-2">
-                    <i class="bi bi-clock-history"></i> Historial
-                </a>
-                <a href="/cotizacion/create" class="btn btn-primary btn-sm">
-                    <i class="bi bi-plus"></i> Registrar
-                </a>
-            </div>
-        </div>
-    </div> -->
-
-    <!-- Información de cotizaciones activas -->
-    <!-- <div class="alert alert-success" role="alert">
+    <!-- Información del historial -->
+    <div class="alert alert-info" role="alert">
         <div class="d-flex align-items-center">
-            <i class="bi bi-check-circle me-2"></i>
-            <span><strong>Cotizaciones Activas:</strong> Mostrando cotizaciones vigentes (dentro del período de validez).</span>
+            <i class="bi bi-info-circle me-2"></i>
+            <span><strong>Historial de Cotizaciones:</strong> Mostrando cotizaciones vencidas (que han superado su
+                período de vigencia).</span>
             <?php if (count($cotizaciones) > 0): ?>
-                <span class="ms-2 badge bg-success"><?= count($cotizaciones) ?> cotizaciones activas</span>
+                <span class="ms-2 badge bg-secondary"><?= count($cotizaciones) ?> cotizaciones encontradas</span>
             <?php endif; ?>
         </div>
-    </div> -->
+    </div>
 
     <div class="row">
         <div class="col-md-12">
             <div class="card">
                 <div class="card-body">
                     <?php if (count($cotizaciones) > 0): ?>
-                        <table class="table table-sm table-hover table-hover-yonda" id="tabla-cotizacion">
+                        <table class="table table-sm table-hover table-hover-yonda" id="tabla-cotizacion-historial">
                             <thead>
                                 <tr>
                                     <th>#</th>
@@ -86,6 +66,7 @@
                                     <th>Inicial</th>
                                     <th class="text-start">N° de Doc</th>
                                     <th class="text-start">Teléfono</th>
+                                    <th class="text-center">Fecha Vencimiento</th>
                                     <?php if ($puede_ver_todas): ?>
                                         <th>Registrado por</th>
                                     <?php endif; ?>
@@ -95,7 +76,7 @@
 
                             <tbody>
                                 <?php foreach ($cotizaciones as $index => $c): ?>
-                                    <tr>
+                                    <tr class="table-light">
                                         <td><?= $index + 1 ?></td>
                                         <td><?= htmlspecialchars($c['nombrecliente']) ?></td>
 
@@ -123,6 +104,21 @@
 
                                         <td class="text-start"><?= htmlspecialchars($c['documento']) ?></td>
                                         <td class="text-start"><?= htmlspecialchars($c['telefono']) ?></td>
+
+                                        <!-- Fecha de vencimiento con indicador visual -->
+                                        <td class="text-center">
+                                            <span class="badge bg-danger">
+                                                <?php
+                                                $fechaVenc = $c['fecha_vencimiento'] ?? '';
+                                                if ($fechaVenc) {
+                                                    $fecha = DateTime::createFromFormat('Y-m-d', $fechaVenc);
+                                                    echo $fecha ? $fecha->format('d/m/Y') : $fechaVenc;
+                                                } else {
+                                                    echo 'N/A';
+                                                }
+                                                ?>
+                                            </span>
+                                        </td>
 
                                         <?php if ($puede_ver_todas): ?>
                                             <td>
@@ -156,18 +152,13 @@
                         </table>
                     <?php else: ?>
                         <div class="text-center py-5">
-                            <i class="bi bi-file-earmark-text display-1 text-muted"></i>
-                            <h4 class="text-muted mt-3">No hay cotizaciones activas</h4>
-                            <p class="text-muted">No se encontraron cotizaciones vigentes. Las cotizaciones vencidas se
-                                pueden ver en el historial.</p>
-                            <div class="mt-3">
-                                <a href="/cotizacion/create" class="btn btn-primary me-2">
-                                    <i class="bi bi-plus"></i> Nueva Cotización
-                                </a>
-                                <a href="/cotizacion/historial" class="btn btn-outline-secondary">
-                                    <i class="bi bi-clock-history"></i> Ver Historial
-                                </a>
-                            </div>
+                            <i class="bi bi-archive display-1 text-muted"></i>
+                            <h4 class="text-muted mt-3">No hay cotizaciones vencidas</h4>
+                            <p class="text-muted">No se encontraron cotizaciones que hayan superado su período de vigencia.
+                            </p>
+                            <a href="/cotizacion" class="btn btn-primary">
+                                <i class="bi bi-arrow-left"></i> Volver a Cotizaciones Activas
+                            </a>
                         </div>
                     <?php endif; ?>
                 </div>
@@ -176,7 +167,7 @@
     </div>
 </div>
 
-<!-- Modal para confirmar descarga -->
+<!-- Modal para confirmar descarga (igual que en index) -->
 <div class="modal fade" id="downloadModal" tabindex="-1" aria-labelledby="downloadModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -192,6 +183,10 @@
                         Abrir en nueva pestaña
                     </label>
                 </div>
+                <div class="alert alert-warning mt-2">
+                    <i class="bi bi-exclamation-triangle me-1"></i>
+                    <small>Esta cotización está vencida (fuera de vigencia)</small>
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
@@ -203,10 +198,10 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // Inicializar DataTable
-        initDataTableCotizacion();
+        // Inicializar DataTable para historial
+        initDataTableCotizacionHistorial();
 
-        // Modal functionality
+        // Modal functionality (igual que en index.php)
         const downloadModal = new bootstrap.Modal(document.getElementById('downloadModal'));
         let currentUrl = '';
         let currentClientName = '';
@@ -252,27 +247,27 @@
         });
     });
 
-    function initDataTableCotizacion() {
+    function initDataTableCotizacionHistorial() {
         if (typeof $ === 'undefined' || typeof $.fn.DataTable === 'undefined') {
             console.warn('jQuery or DataTables not loaded yet');
             return;
         }
 
-        const table = document.getElementById('tabla-cotizacion');
+        const table = document.getElementById('tabla-cotizacion-historial');
         if (!table) {
-            console.warn('Table tabla-cotizacion not found');
+            console.warn('Table tabla-cotizacion-historial not found');
             return;
         }
 
         try {
-            if ($.fn.DataTable.isDataTable('#tabla-cotizacion')) {
-                $('#tabla-cotizacion').DataTable().clear().destroy();
+            if ($.fn.DataTable.isDataTable('#tabla-cotizacion-historial')) {
+                $('#tabla-cotizacion-historial').DataTable().clear().destroy();
             }
 
             setTimeout(() => {
-                const tableElement = document.getElementById('tabla-cotizacion');
+                const tableElement = document.getElementById('tabla-cotizacion-historial');
                 if (tableElement && tableElement.parentNode) {
-                    $('#tabla-cotizacion').DataTable({
+                    $('#tabla-cotizacion-historial').DataTable({
                         order: [[0, 'desc']], // Ordenar por # descendente
                         pagingType: 'full_numbers',
                         pageLength: 10,
@@ -296,24 +291,24 @@
                                 searchable: false // No incluir en búsqueda
                             },
                             {
-                                targets: 0, // # 
+                                targets: 0, // #
                                 width: "3%"
                             },
                             {
                                 targets: 1, // Cliente
-                                width: "20%"
-                            },
-                            {
-                                targets: 2, // Vehículo
                                 width: "18%"
                             },
                             {
+                                targets: 2, // Vehículo
+                                width: "16%"
+                            },
+                            {
                                 targets: 3, // Modalidad
-                                width: "12%"
+                                width: "10%"
                             },
                             {
                                 targets: 4, // Inicial
-                                width: "10%"
+                                width: "8%"
                             },
                             {
                                 targets: 5, // N° Doc
@@ -322,19 +317,23 @@
                             {
                                 targets: 6, // Teléfono
                                 width: "8%"
+                            },
+                            {
+                                targets: 7, // Fecha Vencimiento
+                                width: "10%"
                             }
                             <?php if ($puede_ver_todas): ?>
                                 , {
-                                    targets: 7, // Registrado por
-                                    width: "15%"
+                                    targets: 8, // Registrado por
+                                    width: "14%"
                                 },
                                 {
-                                    targets: 8, // Opciones
+                                    targets: 9, // Opciones
                                     width: "5%"
                                 }
                             <?php else: ?>
                                 , {
-                                    targets: 7, // Opciones
+                                    targets: 8, // Opciones
                                     width: "5%"
                                 }
                             <?php endif; ?>
@@ -343,7 +342,7 @@
                 }
             }, 100);
         } catch (error) {
-            console.error('Error initializing cotizacion table:', error);
+            console.error('Error initializing cotizacion historial table:', error);
         }
     }
 </script>

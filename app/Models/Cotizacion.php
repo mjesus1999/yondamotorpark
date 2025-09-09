@@ -18,19 +18,21 @@ class Cotizacion
         $this->db = Database::getInstance();
     }
 
+    //ORDER BY fechaRegistro DESC LIMIT 10000
     public function getAll(): array
     {
-        $query = "SELECT * FROM vwGetAllCotizacion ORDER BY fechaRegistro DESC LIMIT 10";
+        $query = "SELECT * FROM vwGetAllCotizacion";
         $stmt = $this->db->query($query);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     /**
      * Obtiene todas las cotizaciones de un asesor específico
+     * ORDER BY fechaRegistro DESC
      */
     public function getAllByAsesor(int $idasesor): array
     {
-        $query = "SELECT * FROM vwGetAllCotizacion WHERE idasesor = :idasesor ORDER BY fechaRegistro DESC";
+        $query = "SELECT * FROM vwGetAllCotizacion WHERE idasesor = :idasesor";
         $stmt = $this->db->prepare($query);
         $stmt->bindValue(':idasesor', $idasesor, PDO::PARAM_INT);
         $stmt->execute();
@@ -42,15 +44,15 @@ class Cotizacion
         // Solo personas por DNI
         if (strtoupper($tipo) === 'DNI') {
             $sql = "
-          SELECT c.idcliente,
-                 p.apellidos, p.nombres,
-                 p.telprimario, p.telalternativo, p.email, p.direccion
-            FROM clientes c
-            JOIN personas p ON p.idpersona = c.idpersona
-           WHERE p.tipodoc = 'DNI'
-             AND p.nrodoc  = :doc
-           LIMIT 1
-        ";
+            SELECT c.idcliente,
+                    p.apellidos, p.nombres,
+                    p.telprimario, p.telalternativo, p.email, p.direccion
+                FROM clientes c
+                JOIN personas p ON p.idpersona = c.idpersona
+            WHERE p.tipodoc = 'DNI'
+                AND p.nrodoc  = :doc
+            LIMIT 1
+            ";
             $stmt = $this->db->prepare($sql);
             $stmt->execute([':doc' => $doc]);
             return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
@@ -59,15 +61,15 @@ class Cotizacion
         // Solo empresas por RUC
         if (strtoupper($tipo) === 'RUC') {
             $sql = "
-          SELECT c.idcliente,
-                 e.razonsocial AS apellidos,
-                 e.nombrecomercial AS nombres,
-                 e.telprimario, e.telalternativo, e.email
-            FROM clientes c
-            JOIN empresas e ON e.idempresa = c.idempresa
-           WHERE e.ruc = :doc
-           LIMIT 1
-        ";
+            SELECT c.idcliente,
+                    e.razonsocial AS apellidos,
+                    e.nombrecomercial AS nombres,
+                    e.telprimario, e.telalternativo, e.email
+                FROM clientes c
+                JOIN empresas e ON e.idempresa = c.idempresa
+            WHERE e.ruc = :doc
+            LIMIT 1
+            ";
             $stmt = $this->db->prepare($sql);
             $stmt->execute([':doc' => $doc]);
             return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
@@ -88,36 +90,28 @@ class Cotizacion
         return $pago;
     }
 
-    public function calcularPagoMensual($importeTotal, $inicial, $meses)
+    public function calcularPagoMensual($importeTotal, $inicial, $meses, $tasaAnual = 0.65)
     {
-        $tasa = 0.65; //Tasa standard de YONDA 65%
-        $tasaMensual = pow((1 + $tasa), (1 / 12)) - 1;
+        $tasaMensual = pow((1 + $tasaAnual), (1 / 12)) - 1;
         $montoFinanciar = $importeTotal - $inicial;
         $cuota = round($this->Pago($tasaMensual, $meses, $montoFinanciar), 2);
         return $cuota;
     }
 
 
-    public function generarCronograma(float $importeTotal, float $inicial, int $meses): array
+    public function generarCronograma(float $importeTotal, float $inicial, int $meses, float $tasaAnual = 0.65): array
     {
-        $tasaAnual = 0.65;
-
         $tasaMensual = pow((1 + $tasaAnual), (1 / 12)) - 1;
-        // Monto a financiar
         $montoFinanciar = $importeTotal - $inicial;
-
         $valorCuota = round($this->Pago($tasaMensual, $meses, $montoFinanciar), 2);
 
         $cronograma = [];
-
         $saldoCapital = $montoFinanciar;
         $fechaPago = new Datetime('now');
 
         for ($i = 1; $i <= $meses; $i++) {
-            // Calcular interés para el mes
             $interesExacto = $saldoCapital * $tasaMensual;
             $interes = round($interesExacto, 2);
-
             $abonoCapital = $valorCuota - $interes;
 
             if ($i === $meses) {
@@ -125,11 +119,9 @@ class Cotizacion
                 $interes = $valorCuota - $abonoCapital;
             }
 
-            // Actualizar el saldo de capital
             $saldoCapital -= $abonoCapital;
             $saldoCapital = round($saldoCapital, 2);
 
-            // Formatear la fecha para cada pago
             $fechaPago->add(new DateInterval('P1M'));
 
             $cronograma[] = [
@@ -142,33 +134,8 @@ class Cotizacion
             ];
         }
 
-        return $cronograma; // Retornamos el cronograma como array.
+        return $cronograma;
     }
-
-    // Inserta una nueva cotizacion
-    /* public function create(array $d): void
-    {
-        $sql = "
-      INSERT INTO cotizaciones
-        (idformato, idcliente, idvehiculo, moneda, precioventa,
-         vigenciadias, inicial, numcuotas, valorcuota, idasesor)
-      VALUES
-        (:idformato, :idcliente, :idvehiculo, :moneda, :precioventa,
-         :vigenciadias, :inicial, :numcuotas, :valorcuota, :idasesor)";
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute([
-            ':idformato' => $d['idformato'],
-            ':idcliente' => $d['idcliente'],
-            ':idvehiculo' => $d['idvehiculo'],
-            ':moneda' => $d['moneda'],
-            ':precioventa' => $d['precioventa'],
-            ':vigenciadias' => $d['vigenciadias'],
-            ':inicial' => $d['inicial'],
-            ':numcuotas' => $d['numcuotas'],
-            ':valorcuota' => $d['valorcuota'],
-            ':idasesor' => $d['idasesor']
-        ]);
-    } */
 
     public function create(array $d): int
     {
@@ -236,6 +203,28 @@ class Cotizacion
         } catch (Exception $e) {
             return null;
         }
+    }
+
+    /**
+     * Obtiene todas las cotizaciones vencidas
+     */
+    public function getAllVencidas(): array
+    {
+        $query = "SELECT * FROM vwGetAllCotizacionVencidas";
+        $stmt = $this->db->query($query);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Obtiene todas las cotizaciones vencidas de un asesor específico
+     */
+    public function getAllVencidasByAsesor(int $idasesor): array
+    {
+        $query = "SELECT * FROM vwGetAllCotizacionVencidas WHERE idasesor = :idasesor ORDER BY fechaRegistro DESC";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindValue(':idasesor', $idasesor, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
 }

@@ -110,7 +110,7 @@
                 </nav>
             </div>
             <div class="col-md-6 text-end">
-                <a href="/cotizacion" class="">[ Mostrar Lista ]</a>
+                <a href="/cotizacion" class="btn-sm btn btn-primary">Mostrar Lista</a>
             </div>
         </div>
     </div>
@@ -336,11 +336,12 @@
                         36, 48, 60 meses, etc.). Puedes agregar, editar o eliminar antes de registrar la cotización.</p>
                 </div>
             </div>
+
             <!-- Template para cada tarjeta de financiamiento -->
             <template id="templateCardFin">
                 <div class="card card-fin mb-3 border-primary">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        <div class="fw-semibold fin-title">Financiamiento</div>
+                        <div class="fw-semibold fin-title">Meses</div>
                         <div class="d-flex gap-2">
                             <button type="button" class="btn btn-sm btn-outline-secondary fin-remove-btn"
                                 title="Eliminar opción">
@@ -350,6 +351,7 @@
                     </div>
                     <div class="card-body">
                         <div class="row g-2 align-items-center">
+
                             <div class="col-md-2">
                                 <div class="form-floating">
                                     <input type="number" class="form-control fin-inicial" placeholder="Inicial"
@@ -368,8 +370,8 @@
 
                             <div class="col-md-2">
                                 <div class="form-floating">
-                                    <input type="number" class="form-control fin-numcuotas" placeholder="Meses" step="1"
-                                        min="0">
+                                    <input type="number" class="form-control fin-numcuotas" placeholder="Meses"
+                                        step="3">
                                     <label>Meses</label>
                                 </div>
                             </div>
@@ -464,7 +466,7 @@
 <!-- MODAL SELECCIONAR VEHÍCULO -->
 <div class="modal fade" id="modalVehiculos" tabindex="-1" aria-labelledby="modalVehiculosLabel" aria-hidden="true"
     data-bs-backdrop="static" data-bs-keyboard="false">
-    <div class="modal-dialog modal-xl">
+    <div class="modal-dialog modal-xl   ">
         <div class="modal-content">
             <div class="modal-header text-white">
                 <h5 class="modal-title" id="modalVehiculosLabel">Seleccionar Vehículo</h5>
@@ -510,12 +512,14 @@
                                             data-idvehiculo="<?= htmlspecialchars($v['idvehiculo']) ?>"
                                             data-precioventa="<?= htmlspecialchars($v['precioventa']) ?>"
                                             data-moneda="<?= htmlspecialchars($v['moneda']) ?>"
+                                            data-tipovehiculo="<?= htmlspecialchars($v['tipovehiculo']) ?>"
                                             data-descripcion="<?= htmlspecialchars($v['marca'] . ' / ' . $v['tipovehiculo'] . ' / ' . $v['modelo'] . ' / ' . $v['version'] . ' / ' . $v['color'] . ' / ' . $v['combustible'] . ' / ' . $v['anio']) ?>"
                                             data-placa="<?= htmlspecialchars($v['placa'] ?? 'N/A') ?>"
                                             data-placarotativa="<?= htmlspecialchars(strip_tags($v['placarotativa'] ?? 'N/A')) ?>"
                                             title="Seleccionar vehículo">
                                             <i class="fa-solid fa-check"></i>
                                         </button>
+
 
                                     </td>
                                 </tr>
@@ -607,9 +611,11 @@
         };
     }
 
-    async function calcularCuotaAPI(importeTotal, inicial, meses) {
+    async function calcularCuotaAPI(importeTotal, inicial, meses, tasaPercent) {
         try {
-            const res = await fetch(`/api/cotizacion/calcularpagomensual/${encodeURIComponent(importeTotal)}/${encodeURIComponent(inicial)}/${encodeURIComponent(meses)}`);
+            const res = await fetch(
+                `/api/cotizacion/calcularpagomensual/${encodeURIComponent(importeTotal)}/${encodeURIComponent(inicial)}/${encodeURIComponent(meses)}?tasa=${encodeURIComponent(tasaPercent)}`
+            );
             if (!res.ok) throw new Error('Error calculando cuota');
             const j = await res.json();
             return parseFloat(j.pago_mensual || 0);
@@ -618,10 +624,9 @@
             return 0;
         }
     }
-
-    async function generarYMostrarCronograma(importeTotal, inicial, meses) {
+    async function generarYMostrarCronograma(importeTotal, inicial, meses, tasaPercent) {
         try {
-            const res = await fetch(`/api/cotizacion/generar-cronograma/${encodeURIComponent(importeTotal)}/${encodeURIComponent(inicial)}/${encodeURIComponent(meses)}`);
+            const res = await fetch(`/api/cotizacion/generar-cronograma/${encodeURIComponent(importeTotal)}/${encodeURIComponent(inicial)}/${encodeURIComponent(meses)}?tasa=${encodeURIComponent(tasaPercent)}`);
             if (!res.ok) throw new Error('Error generando cronograma');
             const cronograma = await res.json();
 
@@ -684,6 +689,35 @@
     const cardsContainer = document.getElementById('cardsFinanciamiento');
     const templateCard = document.getElementById('templateCardFin');
 
+
+    // Función para limpiar el valor "0" cuando el usuario empieza a escribir
+    function setupZeroValueClearing(inputElement) {
+        if (!inputElement) return;
+
+        // Manejador para cuando el usuario hace foco en el campo
+        inputElement.addEventListener('focus', function () {
+            if (this.value === '0') {
+                this.value = '';
+            }
+        });
+
+        // Manejador para cuando el usuario empieza a escribir
+        inputElement.addEventListener('input', function () {
+            // Si el valor actual es "0" y el usuario escribió algo más, limpiarlo
+            if (this.value.startsWith('0') && this.value.length > 1 && this.value !== '0.') {
+                // Mantener solo lo que escribió después del 0
+                this.value = this.value.substring(1);
+            }
+        });
+
+        // Manejador para cuando pierde el foco - opcional: restaurar 0 si está vacío
+        inputElement.addEventListener('blur', function () {
+            if (this.value === '' || this.value === null) {
+                this.value = '0';
+            }
+        });
+    }
+
     function crearTarjetaFin(data = {}) {
         if (!cardsContainer || !templateCard) {
             console.error('Missing required elements for financing cards');
@@ -706,15 +740,25 @@
 
         function obtenerInicialReferencia() {
             const primeraCard = cardsContainer.querySelector('.card-fin .fin-inicial');
-            if (primeraCard && primeraCard.value) {
+            if (primeraCard && primeraCard.value && primeraCard.value !== '0') {
                 return primeraCard.value;
             }
-            return '';
+            return '0';
         }
 
         const inicialReferencia = obtenerInicialReferencia();
-        if (inicialEl) inicialEl.value = (typeof data.inicial !== 'undefined') ? data.inicial : inicialReferencia;
-        if (numEl) numEl.value = (typeof data.numcuotas !== 'undefined') ? data.numcuotas : '';
+        if (inicialEl) {
+            inicialEl.value = (typeof data.inicial !== 'undefined') ? data.inicial : inicialReferencia;
+            // Aplicar la funcionalidad de limpiar el 0
+            setupZeroValueClearing(inicialEl);
+        }
+
+        if (numEl) {
+            numEl.value = (typeof data.numcuotas !== 'undefined') ? data.numcuotas : '0';
+            // Aplicar la funcionalidad de limpiar el 0
+            setupZeroValueClearing(numEl);
+        }
+
         if (tasaEl) tasaEl.value = (typeof data.tasa !== 'undefined') ? data.tasa : 65;
         if (cuotaEl) cuotaEl.value = data.valorcuota ? Number(data.valorcuota).toFixed(2) : '';
 
@@ -729,6 +773,7 @@
             const precioFinal = parseFloat(document.getElementById('inputValorConvertido')?.value || document.getElementById('valor')?.value || 0) || 0;
             const inicial = parseFloat(inicialEl?.value || 0);
             const meses = parseInt(numEl?.value || 0, 10) || 0;
+            const tasaPercent = parseFloat(tasaEl?.value || 65);
 
             actualizarValorFinanciar();
 
@@ -737,7 +782,9 @@
                 actualizarHiddenOpciones();
                 return;
             }
-            const cuota = await calcularCuotaAPI(precioFinal, inicial, meses);
+            //const cuota = await calcularCuotaAPI(precioFinal, inicial, meses);
+            const cuota = await calcularCuotaAPI(precioFinal, inicial, meses, tasaPercent);
+
             if (cuotaEl) cuotaEl.value = cuota ? Number(cuota).toFixed(2) : '';
             actualizarHiddenOpciones();
         }, 250);
@@ -751,7 +798,7 @@
                         otroInput.value = nuevaInicial;
                         const otherCard = otroInput.closest('.card-fin');
                         const otroNumEl = otherCard?.querySelector('.fin-numcuotas');
-                        if (otroNumEl && otroNumEl.value) {
+                        if (otroNumEl && otroNumEl.value && otroNumEl.value !== '0') {
                             const ev = new Event('input');
                             otroNumEl.dispatchEvent(ev);
                         }
@@ -771,6 +818,8 @@
                 const precioFinal = parseFloat(document.getElementById('inputValorConvertido')?.value || document.getElementById('valor')?.value || 0) || 0;
                 const inicial = parseFloat(inicialEl?.value || 0);
                 const meses = parseInt(numEl?.value || 0, 10) || 0;
+                const tasaPercent = parseFloat(tasaEl?.value || 65);
+
                 if (meses <= 0 || (precioFinal - inicial) <= 0) {
                     if (typeof showToast === 'function') {
                         showToast('Ingresa valores válidos para cronograma', 'ERROR', 1200);
@@ -779,7 +828,7 @@
                     }
                     return;
                 }
-                generarYMostrarCronograma(precioFinal, inicial, meses);
+                generarYMostrarCronograma(precioFinal, inicial, meses, tasaPercent);
             });
         }
 
@@ -791,7 +840,7 @@
         }
 
         const updateTitle = () => {
-            const meses = numEl?.value ? `${numEl.value} meses` : 'Financiamiento';
+            const meses = numEl?.value && numEl.value !== '0' ? `${numEl.value} meses` : 'Meses';
             if (titleEl) titleEl.textContent = meses;
         };
         if (numEl) numEl.addEventListener('input', updateTitle);
@@ -1224,6 +1273,42 @@
         }
     }
 
+    function aplicarPoliticaFinanciamientoPorTipo(tipovehiculo) {
+        const esMoto = ['Mototaxi', 'Motolineal'].includes(String(tipovehiculo || '').trim());
+
+        const btnAgregar = document.getElementById('btnAgregarFin');
+        if (btnAgregar) btnAgregar.disabled = esMoto;
+
+        // tasa por defecto segun tipo
+        const tasaPorDefecto = esMoto ? 80 : 65;
+
+        // Si es moto, restringe a una sola tarjeta
+        if (esMoto) {
+            // Elimina todas menos la primera
+            const cards = cardsContainer?.querySelectorAll('.card-fin') || [];
+            cards.forEach((card, idx) => {
+                if (idx > 0) card.remove();
+            });
+            // Si no hay tarjetas, crea una
+            if (!cardsContainer.querySelector('.card-fin')) {
+                crearTarjetaFin();
+            }
+        } else {
+            // En vehículos normales permitimos múltiples y dejamos el botón activo
+            if (btnAgregar) btnAgregar.disabled = false;
+        }
+
+        // Setea la tasa en las tarjetas existentes y recalcula
+        (cardsContainer?.querySelectorAll('.card-fin') || []).forEach(card => {
+            const tasaEl = card.querySelector('.fin-tasaAnual');
+            if (tasaEl) {
+                tasaEl.value = tasaPorDefecto;
+                const ev = new Event('input');
+                tasaEl.dispatchEvent(ev);
+            }
+        });
+    }
+
     function initEventosVehiculo() {
         const tabla = document.getElementById('tablaVehiculosModal');
         if (!tabla) return;
@@ -1231,8 +1316,15 @@
         $('#tablaVehiculosModal').on('click', '.seleccionar-vehiculo-btn', async function () {
             const d = $(this).data();
             fillPaso2(d);
+            // Guarda el tipo en hidden si lo agregaste
+            const tipoHidden = document.getElementById('tipoVehiculoSeleccionado');
+            if (tipoHidden) tipoHidden.value = d.tipovehiculo || '';
+
             clearConversion();
             await actualizarMontos();
+
+            aplicarPoliticaFinanciamientoPorTipo(d.tipovehiculo); // NUEVO
+
             await actualizarFinanciamiento();
             const modal = document.getElementById('modalVehiculos');
             if (modal) {
@@ -1362,9 +1454,39 @@
         if (inputValorConvertidoEl) inputValorConvertidoEl.value = precioFinal;
     }
 
-    async function actualizarFinanciamiento() {
+    /* async function actualizarFinanciamiento() {
         // This function is intentionally simplified since the new card-based system handles this
         // Individual cards will recalculate themselves when needed
+    } */
+
+    async function actualizarFinanciamiento() {
+        const inicial = parseFloat($('#inicial').val()) || 0;
+        const precioFinal = parseFloat($('#inputValorConvertido').val()) || 0;
+        const valorF = Math.max(0, precioFinal - inicial);
+        $('#valorFinanciar').val(valorF.toFixed(2));
+        $('#inputValorFinanciar').val(valorF.toFixed(2));
+
+        const n = parseInt($('#numcuotas').val(), 10) || 0;
+
+        if (n > 0) {
+            try {
+                const res = await fetch(`/api/cotizacion/calcularpagomensual/${precioFinal}/${inicial}/${n}`);
+                if (!res.ok) throw new Error(res.statusText);
+                const {
+                    pago_mensual
+                } = await res.json();
+
+                $('#cuotaMensual').val(pago_mensual.toFixed(2));
+                $('#inputCuotaMensual').val(pago_mensual.toFixed(2));
+            } catch (err) {
+                console.error('Error calculando financiamiento:', err);
+                $('#cuotaMensual').val('');
+                $('#inputCuotaMensual').val('');
+            }
+        } else {
+            $('#cuotaMensual').val('');
+            $('#inputCuotaMensual').val('');
+        }
     }
 
     const debouncedActualizarMontosFinanciamiento = debounce(async () => {
@@ -1496,4 +1618,5 @@
             await actualizarFinanciamiento();
         }, 600);
     });
+
 </script>

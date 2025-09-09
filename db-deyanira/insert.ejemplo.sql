@@ -1,5 +1,28 @@
 use motorpark;
 
+/*
+*	AGREGARE INSERTS PARA VEHICULO (MOTOLINEALES) : 09/09/25
+*/
+-- (idtipovehiculo = 9) :  HONDA (idmarca = 11)
+INSERT INTO modelos (idtipovehiculo, idmarca, modelo, anio, imagenreferencial)
+VALUES
+(9, 11, 'CB125F', '2025', NULL),
+(9, 11, 'XR150L', '2025', NULL),
+(9, 11, 'CBR250R', '2025', NULL);
+
+/*
+* PARA MOTOTAXIS / SE AGREGARA BAJAJ EJEMPLO : 09/09/25
+*/
+INSERT INTO marcas (marca) VALUES ('BAJAJ');
+
+-- Ahora agregamos modelos de mototaxi
+INSERT INTO modelos (idtipovehiculo, idmarca, modelo, anio, imagenreferencial)
+VALUES
+(11, (SELECT idmarca FROM marcas WHERE marca = 'BAJAJ'), 'RE 205', '2025', NULL),
+(11, (SELECT idmarca FROM marcas WHERE marca = 'BAJAJ'), 'Maxima CNG', '2025', NULL);
+
+
+
 SELECT * FROM personas;
 SELECT * FROM contratoslaborales;
 SELECT * FROM colaboradores;
