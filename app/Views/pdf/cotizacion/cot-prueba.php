@@ -1,4 +1,4 @@
-<!-- app/views/pdf/cotizacion/cotizacion-html2pdf.php (corregido) -->
+<!-- app/views/pdf/cotizacion/cotizacion-html2pdf.php (corregido: header/footer ya no aparecen como marca de agua) -->
 <!DOCTYPE html>
 <html lang="es">
 
@@ -6,11 +6,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Cotización <?= $id ?> Dependiente - YONDA PERÚ</title>
-  <link rel="stylesheet" href="/assets/css/cotizacion-reportP.css" />
+  <link rel="stylesheet" href="/assets/css/cot-style-report.css" />
 
-  <!-- Overrides específicos solicitados -->
   <style>
-    /* Asegurar que los textos small-text y closing estén justificados y ocupen ancho hasta los márgenes del footer */
     .content {
       width: 100%;
       box-sizing: border-box;
@@ -23,20 +21,16 @@
       margin-right: 0;
     }
 
-    /* Reducir tamaño de la tabla DETALLE cliente (título/tamaño solicitado) */
     .detalle {
       font-size: 10pt;
-      /* bajado desde 12pt */
     }
 
-    /* Evitar capitalizar cada palabra vía CSS: lo haremos mediante JS para solo capitalizar la primera palabra */
     .instructions ol li {
       text-transform: none;
       font-weight: bold;
       line-height: 1.15;
     }
 
-    /* Sufijo al título (estética) */
     #cot-id-suffix {
       font-weight: normal;
       font-size: 0.85em;
@@ -48,7 +42,6 @@
       font-size: 15pt;
     }
 
-    /* Aseguramos que en impresión se mantengan los overrides */
     @media print {
 
       .small-text,
@@ -160,7 +153,6 @@
           Con la finalidad de iniciar el proceso de desembolso de su crédito agradeceremos entregar a nuestro
           ejecutivo de ventas la siguiente documentación:
         </p>
-        <!-- <p><strong>Modalidad: </strong><span id="format-name"></span></p> -->
         <ol id="instructions-list">
         </ol>
         <p><span class="selected">ENTREGA DE LA UNIDAD EN UN MÁXIMO DE 25 DÍAS HÁBILES</span></p>
@@ -215,95 +207,6 @@
       return `${ciudad}, ${day} de ${month} de ${year}`;
     }
 
-    /**
-     * formatea un ítem de instrucciones:
-     * - pasa todo a minúsculas
-     * - aplica un mapa de correcciones (tildes, siglas, palabras comunes)
-     * - deja sólo la primera letra de la oración en mayúscula
-     *
-     * Ejemplo:
-     *  "DECLARACION JURADA DE INGRESOS" => "Declaración jurada de ingresos"
-     */
-    function formatInstruction(text) {
-      if (!text && text !== 0) return '';
-      let s = String(text).trim().toLowerCase();
-
-      // Mapa simple de correcciones; agrega otras palabras si las necesitas
-      const corrections = {
-        'declaracion': 'declaración',
-        'jurada': 'jurada',
-        'ingresos': 'ingresos',
-        'fotocopia': 'fotocopia',
-        'dni': 'DNI',
-        'titular': 'titular',
-        'conyuge': 'cónyuge',
-        'cónyuge': 'cónyuge',
-        'copia': 'copia',
-        'ultimo': 'último',
-        'recibo': 'recibo',
-        'pagado': 'pagado',
-        'servicios': 'servicios',
-        'luz': 'luz',
-        'agua': 'agua',
-        'simple': 'simple',
-        'vivienda': 'vivienda',
-        'titulo': 'título',
-        'título': 'título',
-        'propiedad': 'propiedad',
-        'certificado': 'certificado',
-        'posesion': 'posesión',
-        'posesión': 'posesión',
-        'literal': 'literal',
-        'boletas': 'boletas',
-        'aval': 'aval',
-        'evaluacion': 'evaluación',
-        'evaluación': 'evaluación',
-        'gastos': 'gastos',
-        'familiares': 'familiares',
-        'inicial': 'inicial',
-        'minimo': 'mínimo',
-        'mínimo': 'mínimo',
-        'verificacion': 'verificación',
-        'verificación': 'verificación',
-        'domiciliaria': 'domiciliaria',
-        'laboral': 'laboral',
-        'pago': 'pago',
-        'unico': 'único',
-        'único': 'único',
-        'administrativos': 'administrativos',
-        'seguro': 'seguro',
-        'vehicular': 'vehicular',
-        'gps': 'GPS',
-        'satelital': 'satelital',
-        's/': 'S/',
-        's/1,500.00': 'S/ 1,500.00'
-      };
-
-      // Construir patrón para reemplazar palabras completas que estén en el mapa
-      const keys = Object.keys(corrections).map(k => k.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\$&'));
-      if (keys.length) {
-        const pattern = new RegExp('\\b(' + keys.join('|') + ')\\b', 'g');
-        s = s.replace(pattern, function (m) {
-          return corrections[m] || m;
-        });
-      }
-
-      // Después de aplicar correcciones, aseguramos sólo la primera letra en mayúscula
-      const firstWordMatch = s.match(/^\s*([^\s]+)/);
-      if (firstWordMatch) {
-        const first = firstWordMatch[1];
-        const rest = s.slice(firstWordMatch[0].length - first.length);
-        if (first === first.toUpperCase() && first.length <= 4) {
-          return first + rest;
-        } else {
-          const capitalizedFirst = first.charAt(0).toUpperCase() + first.slice(1);
-          return capitalizedFirst + rest;
-        }
-      }
-
-      return s.charAt(0).toUpperCase() + s.slice(1);
-    }
-
     // Modificación en la función fetchAndFill del JavaScript
     async function fetchAndFill() {
       try {
@@ -319,7 +222,6 @@
         const payload = await res.json();
         const cotizacion = payload.cotizacion ?? payload;
 
-        // Llenar fecha
         const fechaStr = formatDateSpanish(cotizacion.fecha, 'Chincha');
         document.getElementById('fecha').textContent = fechaStr.replace(/ /g, '\u00A0');
 
@@ -352,7 +254,7 @@
         document.getElementById('cuota-48').textContent = (cotizacion.precios && cotizacion.precios.meses_48) ? cotizacion.precios.meses_48 : '-';
         document.getElementById('cuota-60').textContent = (cotizacion.precios && cotizacion.precios.meses_60) ? cotizacion.precios.meses_60 : '-';
 
-        // NUEVA SECCIÓN: Llenar datos del asesor
+        //Llenar datos del asesor
         if (cotizacion.asesor) {
           const asesorNombre = document.getElementById('asesor-nombre');
           const asesorCargo = document.getElementById('asesor-cargo');
@@ -397,8 +299,8 @@
         if (requisitos.length > 0) {
           requisitos.forEach(r => {
             const li = document.createElement('li');
-            // Aplicar formato: primera palabra mayúscula + correcciones (tildes, siglas)
-            li.textContent = formatInstruction(r.requisito || r.texto || r);
+            // Aplicar formato: ahora preservamos case original y aplicamos correcciones
+            li.textContent = (r.requisito || r.texto || r);
             instructionsOl.appendChild(li);
           });
         } else {
@@ -502,7 +404,7 @@
       }
     }
 
-    // convert <img> element to dataURL (uses canvas; requires same-origin or CORS headers)
+    // convert <img> element to dataURL (mantener por si se necesita, pero ya no la usamos con alpha baja)
     function imageToDataURL(imgEl, alpha = 1) {
       return new Promise((resolve, reject) => {
         if (!imgEl) return resolve(null);
@@ -564,112 +466,45 @@
         status.style.display = 'block';
       }
 
-      const headerEl = document.querySelector('.header');
-      const footerEl = document.querySelector('.footer');
-      const imgTopEl = document.querySelector('.pdf-watermark.top') || (headerEl ? headerEl.querySelector('img') : null);
-      const imgBottomEl = document.querySelector('.pdf-watermark.bottom') || (footerEl ? footerEl.querySelector('img') : null);
-
-      // Convierte imágenes a dataURL
-      let topData = null;
-      let bottomData = null;
-      try { if (imgTopEl) topData = await imageToDataURL(imgTopEl, 0.12); } catch (e) { console.warn('cabecera->dataURL failed', e); topData = null; }
-      try { if (imgBottomEl) bottomData = await imageToDataURL(imgBottomEl, 0.12); } catch (e) { console.warn('footer->dataURL failed', e); bottomData = null; }
-
-      const prevHeaderDisplay = headerEl ? headerEl.style.display : null;
-      const prevFooterDisplay = footerEl ? footerEl.style.display : null;
-
       try {
-        // Ocultar header/footer para html2canvas
-        if (headerEl) headerEl.style.display = 'none';
-        if (footerEl) footerEl.style.display = 'none';
+        // Importante: NO ocultamos header/footer ni añadimos versiones con alpha baja.
+        // Antes se ocultaban y luego se añadían manualmente con pdf.addImage(...) (eso generaba la "marca de agua").
+        // Dejamos que html2pdf capture el DOM tal cual está en pantalla (header/footer visibles y opacos).
 
-        // Generar PDF
+        // Generar PDF y obtener objeto jsPDF
         const worker = html2pdf().set(opt).from(element).toPdf();
 
         worker.get('pdf').then((pdf) => {
           try {
-            const totalPages = pdf.internal.getNumberOfPages();
-            const pageWidth = pdf.internal.pageSize.getWidth();
-            const pageHeight = pdf.internal.pageSize.getHeight();
-            const margin = Array.isArray(opt.margin) ? opt.margin[0] : 10;
-
-            if (topData || bottomData) {
-              const targetWidth = pageWidth - margin * 2;
-
-              for (let p = 1; p <= totalPages; p++) {
-                pdf.setPage(p);
-
-                // CABECERA
-                if (topData) {
-                  const iw = (imgTopEl && imgTopEl.naturalWidth) ? imgTopEl.naturalWidth : 100;
-                  const ih = (imgTopEl && imgTopEl.naturalHeight) ? imgTopEl.naturalHeight : 30;
-                  const h = (ih / iw) * targetWidth;
-                  const x = margin;
-                  const y = 2;
-                  pdf.addImage(topData, 'PNG', x, y, targetWidth, h, undefined, 'FAST');
-                }
-
-                // FOOTER
-                let y2;
-                if (bottomData) {
-                  const iw2 = (imgBottomEl && imgBottomEl.naturalWidth) ? imgBottomEl.naturalWidth : 100;
-                  const ih2 = (imgBottomEl && imgBottomEl.naturalHeight) ? imgBottomEl.naturalHeight : 20;
-                  let h2 = (ih2 / iw2) * targetWidth;
-                  const maxFooterHeight = 10;
-                  if (h2 > maxFooterHeight) h2 = maxFooterHeight;
-                  const x2 = margin;
-                  y2 = pageHeight - margin - h2 - 1;
-                  pdf.addImage(bottomData, 'PNG', x2, y2, targetWidth, h2, undefined, 'FAST');
-                } else {
-                  y2 = pageHeight - margin - 6;
-                }
-
-                // Texto del footer
-                const footerText = footerEl && footerEl.querySelector('.footer-text') ? footerEl.querySelector('.footer-text').innerText.trim() : '';
-                if (footerText) {
-                  const lines = footerText.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
-                  if (lines.length) {
-                    pdf.setFont('helvetica');
-                    pdf.setFontSize(10);
-                    pdf.setTextColor(0, 0, 0);
-                    const textX = pageWidth - margin;
-                    const lineHeight = 4;
-                    const firstLineY = y2 - 3 - ((lines.length - 1) * lineHeight);
-                    pdf.text(lines, textX, firstLineY, { align: 'right' });
-                  }
-                }
-              }
-            }
-
+            // Simple: ya no añadimos imágenes manualmente al PDF.
             // Ocultar status de generación
             if (status) status.style.display = 'none';
-
             // MOSTRAR MODAL DE DESCARGA
             showDownloadModal(pdf, filename);
-
           } catch (err) {
             console.error('Error postprocesando PDF:', err);
             if (status) status.style.display = 'none';
-            // Fallback directo
             showDownloadModal(pdf, filename);
-          } finally {
-            // Restaurar elementos DOM
-            if (headerEl) headerEl.style.display = prevHeaderDisplay;
-            if (footerEl) footerEl.style.display = prevFooterDisplay;
           }
         }).catch((err) => {
           console.error('No se obtuvo objeto jsPDF:', err);
           if (status) status.style.display = 'none';
-          // Fallback básico
-          html2pdf().set(opt).from(element).toPdf().get('pdf').then((pdf) => {
-            showDownloadModal(pdf, filename);
-          });
+          // Fallback directo: intentar otra vez (sin postproceso)
+          try {
+            html2pdf().set(opt).from(element).save(filename);
+            // cerrar status y ventana
+            if (status) status.style.display = 'none';
+            setTimeout(() => {
+              try { window.close(); } catch (e) { }
+            }, 800);
+          } catch (e) {
+            console.error('Fallback falló:', e);
+            alert('Error al generar el PDF. Intente nuevamente.');
+          }
         });
 
       } catch (err) {
         console.error('Error generando PDF:', err);
-        if (headerEl) headerEl.style.display = prevHeaderDisplay;
-        if (footerEl) footerEl.style.display = prevFooterDisplay;
         if (status) status.style.display = 'none';
         alert('Error generando PDF. Intente nuevamente.');
       }
@@ -680,57 +515,57 @@
       const modalOverlay = document.createElement('div');
       modalOverlay.id = 'download-modal-overlay';
       modalOverlay.style.cssText = `
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 10000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: Arial, sans-serif;
-  `;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 10000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: Arial, sans-serif;
+      `;
 
       const modal = document.createElement('div');
       modal.style.cssText = `
-    background: white;
-    padding: 20px;
-    border: 1px solid #ccc;
-    text-align: center;
-    max-width: 300px;
-    width: 90%;
-  `;
+        background: white;
+        padding: 20px;
+        border: 1px solid #ccc;
+        text-align: center;
+        max-width: 300px;
+        width: 90%;
+      `;
 
       modal.innerHTML = `
-    <p style="margin: 0 0 20px 0; font-size: 14px;">
-      PDF generado. ¿Desea descargarlo?
-    </p>
-    <div>
-      <button id="btn-download-pdf" style="
-        background: white;
-        color: black;
-        border: 1px solid #ccc;
-        padding: 8px 16px;
-        cursor: pointer;
-        font-size: 14px;
-        margin-right: 10px;
-      ">
-        Descargar
-      </button>
-      <button id="btn-cancel-download" style="
-        background: white;
-        color: black;
-        border: 1px solid #ccc;
-        padding: 8px 16px;
-        cursor: pointer;
-        font-size: 14px;
-      ">
-        Cancelar
-      </button>
-    </div>
-  `;
+        <p style="margin: 0 0 20px 0; font-size: 14px;">
+          PDF generado. ¿Desea descargarlo?
+        </p>
+        <div>
+          <button id="btn-download-pdf" style="
+            background: white;
+            color: black;
+            border: 1px solid #ccc;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+          ">
+            Descargar
+          </button>
+          <button id="btn-cancel-download" style="
+            background: white;
+            color: black;
+            border: 1px solid #ccc;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 14px;
+          ">
+            Cancelar
+          </button>
+        </div>
+      `;
 
       modalOverlay.appendChild(modal);
       document.body.appendChild(modalOverlay);
@@ -741,16 +576,11 @@
       // EVENTOS DE LOS BOTONES
       btnDownload.addEventListener('click', () => {
         try {
-          console.log('Iniciando descarga...');
-
-          // Método 1: Descarga directa con save()
+          // Método preferido: save()
           try {
             pdf.save(filename);
-            console.log('Descarga iniciada con save()');
           } catch (saveError) {
-            console.log('save() falló, usando método alternativo...');
-
-            // Método 2: Crear enlace de descarga
+            // Fallback: crear blob y enlace
             const blob = pdf.output('blob');
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
@@ -767,8 +597,6 @@
               document.body.removeChild(link);
               URL.revokeObjectURL(url);
             }, 100);
-
-            console.log('Descarga iniciada con enlace');
           }
 
           // Cerrar modal
@@ -843,6 +671,12 @@
     function generatePDF() {
       generarPDFCotizacion();
     }
+
+    // Helper para formateo de texto de requisitos (si lo necesitas)
+    /* function formatInstruction(text) {
+      // Aquí podrías aplicar tildes / capitalización fina si quieres
+      return text;
+    } */
 
     window.addEventListener('DOMContentLoaded', async () => {
       await fetchAndFill();

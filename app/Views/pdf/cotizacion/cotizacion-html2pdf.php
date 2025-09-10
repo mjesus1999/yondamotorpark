@@ -1,4 +1,4 @@
-<!-- app/views/pdf/cotizacion/cotizacion-html2pdf.php (corregido) -->
+<!-- app/views/pdf/cotizacion/cotizacion-html2pdf.php (corregido — sin formatInstruction) -->
 <!DOCTYPE html>
 <html lang="es">
 
@@ -27,13 +27,6 @@
     .detalle {
       font-size: 10pt;
       /* bajado desde 12pt */
-    }
-
-    /* Evitar capitalizar cada palabra vía CSS: lo haremos mediante JS para solo capitalizar la primera palabra */
-    .instructions ol li {
-      text-transform: none;
-      font-weight: bold;
-      line-height: 1.15;
     }
 
     /* Sufijo al título (estética) */
@@ -215,96 +208,7 @@
       return `${ciudad}, ${day} de ${month} de ${year}`;
     }
 
-    /**
-     * formatea un ítem de instrucciones:
-     * - pasa todo a minúsculas
-     * - aplica un mapa de correcciones (tildes, siglas, palabras comunes)
-     * - deja sólo la primera letra de la oración en mayúscula
-     *
-     * Ejemplo:
-     *  "DECLARACION JURADA DE INGRESOS" => "Declaración jurada de ingresos"
-     */
-    function formatInstruction(text) {
-      if (!text && text !== 0) return '';
-      let s = String(text).trim().toLowerCase();
-
-      // Mapa simple de correcciones; agrega otras palabras si las necesitas
-      const corrections = {
-        'declaracion': 'declaración',
-        'jurada': 'jurada',
-        'ingresos': 'ingresos',
-        'fotocopia': 'fotocopia',
-        'dni': 'DNI',
-        'titular': 'titular',
-        'conyuge': 'cónyuge',
-        'cónyuge': 'cónyuge',
-        'copia': 'copia',
-        'ultimo': 'último',
-        'recibo': 'recibo',
-        'pagado': 'pagado',
-        'servicios': 'servicios',
-        'luz': 'luz',
-        'agua': 'agua',
-        'simple': 'simple',
-        'vivienda': 'vivienda',
-        'titulo': 'título',
-        'título': 'título',
-        'propiedad': 'propiedad',
-        'certificado': 'certificado',
-        'posesion': 'posesión',
-        'posesión': 'posesión',
-        'literal': 'literal',
-        'boletas': 'boletas',
-        'aval': 'aval',
-        'evaluacion': 'evaluación',
-        'evaluación': 'evaluación',
-        'gastos': 'gastos',
-        'familiares': 'familiares',
-        'inicial': 'inicial',
-        'minimo': 'mínimo',
-        'mínimo': 'mínimo',
-        'verificacion': 'verificación',
-        'verificación': 'verificación',
-        'domiciliaria': 'domiciliaria',
-        'laboral': 'laboral',
-        'pago': 'pago',
-        'unico': 'único',
-        'único': 'único',
-        'administrativos': 'administrativos',
-        'seguro': 'seguro',
-        'vehicular': 'vehicular',
-        'gps': 'GPS',
-        'satelital': 'satelital',
-        's/': 'S/',
-        's/1,500.00': 'S/ 1,500.00'
-      };
-
-      // Construir patrón para reemplazar palabras completas que estén en el mapa
-      const keys = Object.keys(corrections).map(k => k.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\$&'));
-      if (keys.length) {
-        const pattern = new RegExp('\\b(' + keys.join('|') + ')\\b', 'g');
-        s = s.replace(pattern, function (m) {
-          return corrections[m] || m;
-        });
-      }
-
-      // Después de aplicar correcciones, aseguramos sólo la primera letra en mayúscula
-      const firstWordMatch = s.match(/^\s*([^\s]+)/);
-      if (firstWordMatch) {
-        const first = firstWordMatch[1];
-        const rest = s.slice(firstWordMatch[0].length - first.length);
-        if (first === first.toUpperCase() && first.length <= 4) {
-          return first + rest;
-        } else {
-          const capitalizedFirst = first.charAt(0).toUpperCase() + first.slice(1);
-          return capitalizedFirst + rest;
-        }
-      }
-
-      return s.charAt(0).toUpperCase() + s.slice(1);
-    }
-
-    // Modificación en la función fetchAndFill del JavaScript
+    // Modificación en la función fetchAndFill del JavaScript (sin formatInstruction)
     async function fetchAndFill() {
       try {
         const loadingIndicator = document.getElementById('loading-indicator');
@@ -389,7 +293,7 @@
           }
         }
 
-        // Llenar requisitos (código existente) - con capitalización y tildes mediante formatInstruction()
+        // Llenar requisitos SIN formato adicional (se muestra tal cual vienen)
         const instructionsOl = document.getElementById('instructions-list');
         if (instructionsOl) instructionsOl.innerHTML = '';
         const requisitos = cotizacion.requisitos ?? [];
@@ -397,12 +301,12 @@
         if (requisitos.length > 0) {
           requisitos.forEach(r => {
             const li = document.createElement('li');
-            // Aplicar formato: primera palabra mayúscula + correcciones (tildes, siglas)
-            li.textContent = formatInstruction(r.requisito || r.texto || r);
+            // Mostrar el texto tal cual viene desde la API
+            li.textContent = (r.requisito || r.texto || r);
             instructionsOl.appendChild(li);
           });
         } else {
-          // Requisitos por defecto si no hay específicos
+          // Requisitos por defecto si no hay específicos (se mantienen tal cual)
           const defaults = [
             'FOTOCOPIA DNI DEL TITULAR Y CÓNYUGE',
             'COPIA DEL ÚLTIMO RECIBO PAGADO DE SERVICIOS (LUZ O AGUA)',
@@ -418,7 +322,7 @@
           ];
           defaults.forEach(text => {
             const li = document.createElement('li');
-            li.textContent = formatInstruction(text);
+            li.textContent = text;
             instructionsOl.appendChild(li);
           });
         }
@@ -572,8 +476,8 @@
       // Convierte imágenes a dataURL
       let topData = null;
       let bottomData = null;
-      try { if (imgTopEl) topData = await imageToDataURL(imgTopEl, 0.12); } catch (e) { console.warn('cabecera->dataURL failed', e); topData = null; }
-      try { if (imgBottomEl) bottomData = await imageToDataURL(imgBottomEl, 0.12); } catch (e) { console.warn('footer->dataURL failed', e); bottomData = null; }
+      try { if (imgTopEl) topData = await imageToDataURL(imgTopEl, 1); } catch (e) { console.warn('cabecera->dataURL failed', e); topData = null; }
+      try { if (imgBottomEl) bottomData = await imageToDataURL(imgBottomEl, 1); } catch (e) { console.warn('footer->dataURL failed', e); bottomData = null; }
 
       const prevHeaderDisplay = headerEl ? headerEl.style.display : null;
       const prevFooterDisplay = footerEl ? footerEl.style.display : null;

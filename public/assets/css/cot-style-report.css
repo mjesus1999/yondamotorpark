@@ -1,4 +1,3 @@
-/* public/assets/css/cotizacion-reportP.css */
 @page {
   size: A4 portrait;
   margin: 10mm;
@@ -33,9 +32,12 @@ html {
   padding: 0 10mm;
   box-sizing: border-box;
   /* ocupa toda la altura disponible */
-  min-height: 100%;
+  min-height: 90%;
   position: relative;
   font-family: Arial, sans-serif;
+  /* espacio adicional para evitar solapamiento con header/footer */
+  padding-top: 10mm;
+  padding-bottom: 28mm;
 }
 
 #loading-indicator {
@@ -86,33 +88,30 @@ html {
   }
 }
 
-/* CABECERA COMO MARCA DE AGUA - MÁS OSCURA */
-/* Mostrar las imágenes con opacidad normal (no marca de agua) */
+/* --- CABECERA: ahora opaca y sin filtros, conservando posición --- */
 .header {
   position: fixed;
   top: 6mm;
   left: 10mm;
   right: 10mm;
-  z-index: 2; /* subir para que se impriman nítidas sobre el contenido */
+  z-index: 999; /* subimos z-index para que no quede "detrás" */
   text-align: center;
   margin-bottom: 0;
-  opacity: 1; /* antes 0.5 */
-  pointer-events: auto; /* si quieres permitir selección/copia; si no, déjalo */
+  opacity: 1; /* opaco en vez de translúcido */
+  pointer-events: auto;
 }
 
 .header img {
-  width: 55%;
+  width: 40%;
   max-height: 40px;
   object-fit: contain;
-  filter: none !important; /* quitar filtros de brillo/grayscale */
-  -webkit-filter: none !important;
-  opacity: 1 !important;
+  filter: none !important; /* quitar filtros que alteraban brillo */
 }
+
 /* Para la generación/imprenta evita filtros pesados */
 .header img,
 .footer {
   filter: none !important;
-  -webkit-filter: none !important;
 }
 
 .fecha {
@@ -251,15 +250,18 @@ html {
   line-height: 1.15;
 }
 
-/* Lista de instrucciones: no aplicar capitalización automática (mostramos tal cual) */
+/* Lista de instrucciones con primera letra mayúscula */
 .instructions ol li {
   margin-bottom: 4px;
   font-weight: bold;
   line-height: 1.15;
-  text-transform: none; /* Mostrar exactamente como viene del servidor */
+  text-transform: capitalize; /* Primera letra mayúscula */
 }
 
-/* Excepciones para mantener mayúsculas completas: eliminadas (se respeta el texto original) */
+/* Excepciones para mantener mayúsculas completas */
+.instructions ol li:first-letter {
+  text-transform: uppercase;
+}
 
 .instructions .closing {
   margin-top: 16px;
@@ -278,40 +280,54 @@ html {
   margin: 10px 0; /* Espaciado vertical */
 }
 
-/* FOOTER COMO MARCA DE AGUA - MÁS OSCURO */
+/* --- FOOTER: opaco y sin filtro --- */
 .footer {
   position: fixed;
-  bottom: 4mm;
+  bottom: 4mm; /* Ajusta el valor si es necesario */
   left: 10mm;
   right: 10mm;
-  z-index: 2;
   text-align: right;
   margin-bottom: 0;
-  opacity: 1; /* antes 0.5 */
+  opacity: 1;
   pointer-events: auto;
+  height: auto; /* Esto asegura que el footer no tenga altura fija y se ajuste */
   display: flex;
-  align-items: flex-end;
+  align-items: flex-start; /* Alinea el contenido en la parte superior */
   justify-content: space-between;
-  filter: none !important;
-  -webkit-filter: none !important;
 }
 
-.footer .footer-text {
+.footer-text {
   font-size: 11pt;
   font-family: Arial, sans-serif;
   line-height: 1.15;
-  margin: 0;
-  padding: 0;
   text-align: left;
-  align-self: flex-end;
-  white-space: nowrap;
-  font-weight: normal;
-  color: rgba(0, 0, 0, 0.5); /* Incrementado de 0.28 a 0.5 para más oscuro */
+  color: rgba(0, 0, 0, 1); /* Asegura que el texto sea completamente visible */
+  white-space: nowrap; /* Evita que el texto se divida */
+  padding-top: 5mm; /* Ajusta el margen superior si es necesario */
 }
 
+/* --- Imagen del footer --- */
 .footer img {
-  opacity: 1 !important;
-  filter: none !important;
+  display: block;
+  width: auto;
+  max-width: 20%;
+  height: 10mm;
+  object-fit: contain;
+  align-self: flex-end;
+  margin: 0;
+}
+
+.footer::after {
+  content: "";
+  flex: 1;
+  min-width: 20px;
+}
+
+/* Aseguramos que el footer y texto no se solapen con el contenido principal */
+.container {
+  padding: 6mm;
+  max-width: 100%;
+  padding-bottom: 28mm; /* Se ajusta para dejar espacio suficiente para el footer */
 }
 
 /* Asegurar que el texto y la imagen estén alineados en la parte inferior */
