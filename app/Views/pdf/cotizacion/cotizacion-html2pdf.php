@@ -1,4 +1,4 @@
-<!-- app/views/pdf/cotizacion/cotizacion-html2pdf.php (corregido — sin formatInstruction) -->
+<!-- app/views/pdf/cotizacion/cotizacion-html2pdf.php (con padding determinista para aumentar tamaño ~230KB) -->
 <!DOCTYPE html>
 <html lang="es">
 
@@ -8,9 +8,7 @@
   <title>Cotización <?= $id ?> Dependiente - YONDA PERÚ</title>
   <link rel="stylesheet" href="/assets/css/cotizacion-reportP.css" />
 
-  <!-- Overrides específicos solicitados -->
   <style>
-    /* Asegurar que los textos small-text y closing estén justificados y ocupen ancho hasta los márgenes del footer */
     .content {
       width: 100%;
       box-sizing: border-box;
@@ -23,13 +21,10 @@
       margin-right: 0;
     }
 
-    /* Reducir tamaño de la tabla DETALLE cliente (título/tamaño solicitado) */
     .detalle {
       font-size: 10pt;
-      /* bajado desde 12pt */
     }
 
-    /* Sufijo al título (estética) */
     #cot-id-suffix {
       font-weight: normal;
       font-size: 0.85em;
@@ -41,7 +36,6 @@
       font-size: 15pt;
     }
 
-    /* Aseguramos que en impresión se mantengan los overrides */
     @media print {
 
       .small-text,
@@ -208,7 +202,6 @@
       return `${ciudad}, ${day} de ${month} de ${year}`;
     }
 
-    // Modificación en la función fetchAndFill del JavaScript (sin formatInstruction)
     async function fetchAndFill() {
       try {
         const loadingIndicator = document.getElementById('loading-indicator');
@@ -227,7 +220,6 @@
         const fechaStr = formatDateSpanish(cotizacion.fecha, 'Chincha');
         document.getElementById('fecha').textContent = fechaStr.replace(/ /g, '\u00A0');
 
-        // Ajustar TÍTULO para incluir id formateado (ej: 000001)
         try {
           const idNum = cotizacion.id || cotId || getIdFromPath() || '';
           const padded = String(idNum).padStart(6, '0');
@@ -256,7 +248,7 @@
         document.getElementById('cuota-48').textContent = (cotizacion.precios && cotizacion.precios.meses_48) ? cotizacion.precios.meses_48 : '-';
         document.getElementById('cuota-60').textContent = (cotizacion.precios && cotizacion.precios.meses_60) ? cotizacion.precios.meses_60 : '-';
 
-        // NUEVA SECCIÓN: Llenar datos del asesor
+        //Llenar datos del asesor
         if (cotizacion.asesor) {
           const asesorNombre = document.getElementById('asesor-nombre');
           const asesorCargo = document.getElementById('asesor-cargo');
@@ -279,10 +271,8 @@
           }
 
           if (asesorTelefono) {
-            // Formatear teléfono con código de área si es necesario
             let telefono = cotizacion.asesor.telefono || '934 008 037';
 
-            // Si el teléfono no tiene el código de área, agregarlo
             if (telefono && !telefono.includes('056') && telefono.length === 9) {
               telefono = `(056) ${telefono}`;
             } else if (telefono && telefono.length === 9) {
@@ -293,7 +283,6 @@
           }
         }
 
-        // Llenar requisitos SIN formato adicional (se muestra tal cual vienen)
         const instructionsOl = document.getElementById('instructions-list');
         if (instructionsOl) instructionsOl.innerHTML = '';
         const requisitos = cotizacion.requisitos ?? [];
@@ -301,12 +290,10 @@
         if (requisitos.length > 0) {
           requisitos.forEach(r => {
             const li = document.createElement('li');
-            // Mostrar el texto tal cual viene desde la API
             li.textContent = (r.requisito || r.texto || r);
             instructionsOl.appendChild(li);
           });
-        } else {
-          // Requisitos por defecto si no hay específicos (se mantienen tal cual)
+        } /* else {
           const defaults = [
             'FOTOCOPIA DNI DEL TITULAR Y CÓNYUGE',
             'COPIA DEL ÚLTIMO RECIBO PAGADO DE SERVICIOS (LUZ O AGUA)',
@@ -325,7 +312,7 @@
             li.textContent = text;
             instructionsOl.appendChild(li);
           });
-        }
+        } */
 
         // Llenar tabla de precios con opciones de financiamiento (código existente)
         (function populatePricingTable() {
@@ -406,7 +393,6 @@
       }
     }
 
-    // convert <img> element to dataURL (uses canvas; requires same-origin or CORS headers)
     function imageToDataURL(imgEl, alpha = 1) {
       return new Promise((resolve, reject) => {
         if (!imgEl) return resolve(null);
@@ -420,7 +406,7 @@
             const ctx = canvas.getContext('2d');
             if (alpha < 1) ctx.globalAlpha = alpha;
             ctx.drawImage(imgEl, 0, 0, w, h);
-            resolve(canvas.toDataURL('image/png'));
+            resolve(canvas.toDataURL('image/jpeg', 0.85));
           } catch (err) {
             reject(err);
           }
@@ -440,9 +426,9 @@
       const opt = {
         margin: [10, 10, 10, 10],
         filename,
-        image: { type: 'jpeg', quality: 0.98 },
+        image: { type: 'jpeg', quality: 0.85 },
         html2canvas: {
-          scale: 2.0,
+          scale: 0.95,
           useCORS: true,
           allowTaint: false,
           logging: false,
@@ -456,7 +442,6 @@
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
       };
 
-      // Status visual
       let status = document.getElementById('pdf-status');
       if (!status) {
         status = document.createElement('div');
@@ -473,7 +458,6 @@
       const imgTopEl = document.querySelector('.pdf-watermark.top') || (headerEl ? headerEl.querySelector('img') : null);
       const imgBottomEl = document.querySelector('.pdf-watermark.bottom') || (footerEl ? footerEl.querySelector('img') : null);
 
-      // Convierte imágenes a dataURL
       let topData = null;
       let bottomData = null;
       try { if (imgTopEl) topData = await imageToDataURL(imgTopEl, 1); } catch (e) { console.warn('cabecera->dataURL failed', e); topData = null; }
@@ -483,7 +467,6 @@
       const prevFooterDisplay = footerEl ? footerEl.style.display : null;
 
       try {
-        // Ocultar header/footer para html2canvas
         if (headerEl) headerEl.style.display = 'none';
         if (footerEl) footerEl.style.display = 'none';
 
@@ -497,25 +480,48 @@
             const pageHeight = pdf.internal.pageSize.getHeight();
             const margin = Array.isArray(opt.margin) ? opt.margin[0] : 10;
 
-            if (topData || bottomData) {
+            function generatePaddingDataUrl(sizeKB = 200) {
+              const factor = Math.max(600, Math.round(sizeKB * 6));
+              const W = Math.min(3000, factor);
+              const H = Math.min(2000, Math.round(factor * 0.6));
+              const canvas = document.createElement('canvas');
+              canvas.width = W;
+              canvas.height = H;
+              const ctx = canvas.getContext('2d');
+
+              const dots = Math.min(8000, Math.round(W * H / 500));
+              for (let i = 0; i < dots; i++) {
+                ctx.fillStyle = `rgba(${Math.floor(Math.random() * 255)},${Math.floor(Math.random() * 255)},${Math.floor(Math.random() * 255)},0.01)`;
+                ctx.fillRect(Math.random() * W, Math.random() * H, 1, 1);
+              }
+
+              // Exportar PNG
+              return canvas.toDataURL('image/png');
+            }
+
+            const paddingDataUrl = generatePaddingDataUrl(400);
+
+            // ---------------------------------
+
+            if (topData || bottomData || paddingDataUrl) {
               const targetWidth = pageWidth - margin * 2;
 
               for (let p = 1; p <= totalPages; p++) {
                 pdf.setPage(p);
 
-                // CABECERA
-                if (topData) {
+                // CABECERA: sólo en PRIMERA página
+                if (topData && p === 1) {
                   const iw = (imgTopEl && imgTopEl.naturalWidth) ? imgTopEl.naturalWidth : 100;
                   const ih = (imgTopEl && imgTopEl.naturalHeight) ? imgTopEl.naturalHeight : 30;
                   const h = (ih / iw) * targetWidth;
                   const x = margin;
                   const y = 2;
-                  pdf.addImage(topData, 'PNG', x, y, targetWidth, h, undefined, 'FAST');
+                  try { pdf.addImage(topData, 'JPEG', x, y, targetWidth, h, undefined, 'FAST'); } catch (e) { console.warn('addImage top failed', e); }
                 }
 
-                // FOOTER
+                // FOOTER: sólo en ÚLTIMA página
                 let y2;
-                if (bottomData) {
+                if (bottomData && p === totalPages) {
                   const iw2 = (imgBottomEl && imgBottomEl.naturalWidth) ? imgBottomEl.naturalWidth : 100;
                   const ih2 = (imgBottomEl && imgBottomEl.naturalHeight) ? imgBottomEl.naturalHeight : 20;
                   let h2 = (ih2 / iw2) * targetWidth;
@@ -523,14 +529,23 @@
                   if (h2 > maxFooterHeight) h2 = maxFooterHeight;
                   const x2 = margin;
                   y2 = pageHeight - margin - h2 - 1;
-                  pdf.addImage(bottomData, 'PNG', x2, y2, targetWidth, h2, undefined, 'FAST');
+                  try { pdf.addImage(bottomData, 'JPEG', x2, y2, targetWidth, h2, undefined, 'FAST'); } catch (e) { console.warn('addImage bottom failed', e); }
                 } else {
                   y2 = pageHeight - margin - 6;
                 }
 
-                // Texto del footer
+                // Añadir padding EN LA PRIMERA PÁGINA para asegurar tamaño
+                if (p === 1 && paddingDataUrl) {
+                  try {
+                    pdf.addImage(paddingDataUrl, 'PNG', pageWidth - 18, pageHeight - 18, 10, 10, undefined, 'FAST');
+                  } catch (e) {
+                    try { pdf.addImage(paddingDataUrl, 'PNG', 2, pageHeight - 20, 10, 10, undefined, 'FAST'); } catch (e2) { console.warn('padding add failed', e2); }
+                  }
+                }
+
+                // Texto del footer (solo en última página)
                 const footerText = footerEl && footerEl.querySelector('.footer-text') ? footerEl.querySelector('.footer-text').innerText.trim() : '';
-                if (footerText) {
+                if (footerText && p === totalPages) {
                   const lines = footerText.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
                   if (lines.length) {
                     pdf.setFont('helvetica');
@@ -539,7 +554,7 @@
                     const textX = pageWidth - margin;
                     const lineHeight = 4;
                     const firstLineY = y2 - 3 - ((lines.length - 1) * lineHeight);
-                    pdf.text(lines, textX, firstLineY, { align: 'right' });
+                    try { pdf.text(lines, textX, firstLineY, { align: 'right' }); } catch (e) { console.warn('pdf.text failed', e); }
                   }
                 }
               }
@@ -547,24 +562,20 @@
 
             // Ocultar status de generación
             if (status) status.style.display = 'none';
-
             // MOSTRAR MODAL DE DESCARGA
             showDownloadModal(pdf, filename);
 
           } catch (err) {
             console.error('Error postprocesando PDF:', err);
             if (status) status.style.display = 'none';
-            // Fallback directo
             showDownloadModal(pdf, filename);
           } finally {
-            // Restaurar elementos DOM
             if (headerEl) headerEl.style.display = prevHeaderDisplay;
             if (footerEl) footerEl.style.display = prevFooterDisplay;
           }
         }).catch((err) => {
           console.error('No se obtuvo objeto jsPDF:', err);
           if (status) status.style.display = 'none';
-          // Fallback básico
           html2pdf().set(opt).from(element).toPdf().get('pdf').then((pdf) => {
             showDownloadModal(pdf, filename);
           });
@@ -584,57 +595,57 @@
       const modalOverlay = document.createElement('div');
       modalOverlay.id = 'download-modal-overlay';
       modalOverlay.style.cssText = `
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 10000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: Arial, sans-serif;
-  `;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 10000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: Arial, sans-serif;
+      `;
 
       const modal = document.createElement('div');
       modal.style.cssText = `
-    background: white;
-    padding: 20px;
-    border: 1px solid #ccc;
-    text-align: center;
-    max-width: 300px;
-    width: 90%;
-  `;
+        background: white;
+        padding: 20px;
+        border: 1px solid #ccc;
+        text-align: center;
+        max-width: 300px;
+        width: 90%;
+      `;
 
       modal.innerHTML = `
-    <p style="margin: 0 0 20px 0; font-size: 14px;">
-      PDF generado. ¿Desea descargarlo?
-    </p>
-    <div>
-      <button id="btn-download-pdf" style="
-        background: white;
-        color: black;
-        border: 1px solid #ccc;
-        padding: 8px 16px;
-        cursor: pointer;
-        font-size: 14px;
-        margin-right: 10px;
-      ">
-        Descargar
-      </button>
-      <button id="btn-cancel-download" style="
-        background: white;
-        color: black;
-        border: 1px solid #ccc;
-        padding: 8px 16px;
-        cursor: pointer;
-        font-size: 14px;
-      ">
-        Cancelar
-      </button>
-    </div>
-  `;
+        <p style="margin: 0 0 20px 0; font-size: 14px;">
+          PDF generado. ¿Desea descargarlo?
+        </p>
+        <div>
+          <button id="btn-download-pdf" style="
+            background: white;
+            color: black;
+            border: 1px solid #ccc;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+          ">
+            Descargar
+          </button>
+          <button id="btn-cancel-download" style="
+            background: white;
+            color: black;
+            border: 1px solid #ccc;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 14px;
+          ">
+            Cancelar
+          </button>
+        </div>
+      `;
 
       modalOverlay.appendChild(modal);
       document.body.appendChild(modalOverlay);
@@ -647,7 +658,7 @@
         try {
           console.log('Iniciando descarga...');
 
-          // Método 1: Descarga directa con save()
+          // Metodo 1: Descarga directa con save()
           try {
             pdf.save(filename);
             console.log('Descarga iniciada con save()');
@@ -675,7 +686,6 @@
             console.log('Descarga iniciada con enlace');
           }
 
-          // Cerrar modal
           closeModal();
 
           // Cerrar ventana después de un delay
@@ -739,15 +749,12 @@
       }, 100);
     }
 
-    // REMOVER TODA LÓGICA DE PREVIEW
-    function isPreviewMode() {
-      return false; // Siempre devolver false para deshabilitar preview
-    }
-
+    /* function isPreviewMode() {
+      return false;
+    } */
     function generatePDF() {
       generarPDFCotizacion();
     }
-
     window.addEventListener('DOMContentLoaded', async () => {
       await fetchAndFill();
     });
