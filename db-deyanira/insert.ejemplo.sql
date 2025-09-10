@@ -1,6 +1,127 @@
 use motorpark;
 
 /*
+* ACTUALIZAR LOS REQUISITOS:
+*/
+-- REQUISITOS
+INSERT INTO requisitos (requisito) 
+VALUES
+  ('FOTOCOPIA DNI DEL TITULAR Y CONYUGUE'),
+  ('COPIA DEL ÚLTIMO RECIBO PAGADO DE SERVICIOS (LUZ O AGUA)'),
+  ('COPIA SIMPLE DE VIVIENDA (TÍTULO DE PROPIEDAD / CERTIFICADO DE POSESIÓN, COPIA LITERAL)'),
+  ('DECLARACION JURADA DE INGRESOS'),
+  ('LICENCIA DE CONDUCIR'),
+  ('RECORD DE PAPELETAS'),
+  ('DNI AVAL (DNI CONYUGE DE SER NECESARIO)'),
+  ('EVALUACION DE GASTOS FAMILIARES'),
+  ('30% DE INICIAL COMO MINIMO (aumenta según precio de la unidad)'),
+  ('VERIFICACION DOMICILIARIA Y LABORAL'),
+  ('PAGO UNICO POR GASTOS ADMINISTRATIVOS S/1,500.00'),
+  ('SEGURO VEHICULAR (bajo evaluación)'),
+  ('GPS SATELITAL'),
+  ('RECIBO DE SERVICIOS'),
+  ('BOLETAS DE PAGO');
+
+SELECT * FROM requisitos;
+SELECT idrequisito,
+       requisito AS original,
+       CONCAT(
+         UPPER(LEFT(TRIM(requisito), 1)),
+         LOWER(SUBSTRING(TRIM(requisito), 2))
+       ) AS nuevo_formato
+FROM requisitos
+WHERE requisito IS NOT NULL AND requisito <> '';
+
+START TRANSACTION;
+
+UPDATE requisitos
+SET requisito = CONCAT(
+  UPPER(LEFT(TRIM(requisito), 1)),
+  LOWER(SUBSTRING(TRIM(requisito), 2))
+)
+WHERE requisito IS NOT NULL AND requisito <> '';
+
+COMMIT;
+
+-- copia de seguridad rápida (por si acaso)
+CREATE TABLE IF NOT EXISTS requisitos_backup AS SELECT * FROM requisitos;
+
+-- (opcional) permitir UPDATEs sin WHERE con clave
+SET SQL_SAFE_UPDATES = 0;
+
+START TRANSACTION;
+
+UPDATE requisitos
+SET requisito = 'Fotocopia DNI del titular y cónyuge'
+WHERE idrequisito = 1;
+
+UPDATE requisitos
+SET requisito = 'Copia del último recibo pagado de servicios (luz o agua)'
+WHERE idrequisito = 2;
+
+UPDATE requisitos
+SET requisito = 'Copia simple de vivienda (título de propiedad / certificado de posesión, copia literal)'
+WHERE idrequisito = 3;
+
+UPDATE requisitos
+SET requisito = 'Declaración jurada de ingresos'
+WHERE idrequisito = 4;
+
+UPDATE requisitos
+SET requisito = 'Licencia de conducir'
+WHERE idrequisito = 5;
+
+UPDATE requisitos
+SET requisito = 'Récord de papeletas'
+WHERE idrequisito = 6;
+
+UPDATE requisitos
+SET requisito = 'DNI aval (DNI cónyuge de ser necesario)'
+WHERE idrequisito = 7;
+
+UPDATE requisitos
+SET requisito = 'Evaluación de gastos familiares'
+WHERE idrequisito = 8;
+
+UPDATE requisitos
+SET requisito = '30% de inicial como mínimo (aumenta según precio de la unidad)'
+WHERE idrequisito = 9;
+
+UPDATE requisitos
+SET requisito = 'Verificación domiciliaria y laboral'
+WHERE idrequisito = 10;
+
+UPDATE requisitos
+SET requisito = 'Pago único por gastos administrativos S/ 1,500.00'
+WHERE idrequisito = 11;
+
+UPDATE requisitos
+SET requisito = 'Seguro vehicular (bajo evaluación)'
+WHERE idrequisito = 12;
+
+UPDATE requisitos
+SET requisito = 'GPS satelital'
+WHERE idrequisito = 13;
+
+UPDATE requisitos
+SET requisito = 'Recibo de servicios'
+WHERE idrequisito = 14;
+
+UPDATE requisitos
+SET requisito = 'Boletas de pago'
+WHERE idrequisito = 15;
+
+-- revisar resultados
+SELECT idrequisito, requisito FROM requisitos ORDER BY idrequisito;
+
+COMMIT;
+
+-- reactivar safe-updates si quieres
+SET SQL_SAFE_UPDATES = 1;
+
+
+
+/*
 *	AGREGARE INSERTS PARA VEHICULO (MOTOLINEALES) : 09/09/25
 */
 -- (idtipovehiculo = 9) :  HONDA (idmarca = 11)

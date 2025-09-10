@@ -96,6 +96,51 @@
         padding: 0.8rem;
         border-top: 2px solid #4a698c;
     }
+
+    .bg-info {
+        background-color: #81dfe6ff !important;
+        color: #0a5461ff !important;
+    }
+
+    .seleccionar-vehiculo-radio {
+        -webkit-appearance: radio;
+        appearance: radio;
+        width: 1rem;
+        height: 1rem;
+        transform: none;
+        margin-top: 0;
+        vertical-align: middle;
+        accent-color: var(--bs-primary);
+    }
+
+    /* Ajustes del contenedor para que el texto quede alineado al lado */
+    .form-check.d-inline-flex {
+        gap: 0.45rem;
+        align-items: center;
+    }
+
+    .form-check-label {
+        cursor: pointer;
+        user-select: none;
+        margin-bottom: 0;
+    }
+
+    /* Opción cuando algún padre reduce mucho el font-size: forzar tamaño normal */
+    .seleccionar-vehiculo-radio.force-normal {
+        width: 1rem !important;
+        height: 1rem !important;
+    }
+
+    .seleccionar-vehiculo-radio:checked {
+        border-color: var(--bs-primary);
+        background-color: var(--bs-primary) !important;
+    }
+
+    #modalVehiculos .form-check-input,
+    #modalVehiculos .seleccionar-vehiculo-radio {
+        filter: none !important;
+        opacity: 1 !important;
+    }
 </style>
 <div class="container-fluid">
 
@@ -465,8 +510,8 @@
 
 <!-- MODAL SELECCIONAR VEHÍCULO -->
 <div class="modal fade" id="modalVehiculos" tabindex="-1" aria-labelledby="modalVehiculosLabel" aria-hidden="true"
-    data-bs-backdrop="static" data-bs-keyboard="false">
-    <div class="modal-dialog modal-xl   ">
+    data-bs-backdrop="static" data-bs-keyboard="true">
+    <div class="modal-dialog modal-fullscreen">
         <div class="modal-content">
             <div class="modal-header text-white">
                 <h5 class="modal-title" id="modalVehiculosLabel">Seleccionar Vehículo</h5>
@@ -507,24 +552,29 @@
                                     <td><?= $v['placa'] === null ? 'N/A' : htmlspecialchars($v['placa']) ?></td>
                                     <td><?= $v['placarotativa'] === null ? 'N/A' : htmlspecialchars($v['placarotativa']) ?>
                                     </td>
-                                    <td class="text-center">
-                                        <button type="button" class="btn btn-sm btn-success seleccionar-vehiculo-btn"
-                                            data-idvehiculo="<?= htmlspecialchars($v['idvehiculo']) ?>"
-                                            data-precioventa="<?= htmlspecialchars($v['precioventa']) ?>"
-                                            data-moneda="<?= htmlspecialchars($v['moneda']) ?>"
-                                            data-tipovehiculo="<?= htmlspecialchars($v['tipovehiculo']) ?>"
-                                            data-descripcion="<?= htmlspecialchars($v['marca'] . ' / ' . $v['tipovehiculo'] . ' / ' . $v['modelo'] . ' / ' . $v['version'] . ' / ' . $v['color'] . ' / ' . $v['combustible'] . ' / ' . $v['anio']) ?>"
-                                            data-placa="<?= htmlspecialchars($v['placa'] ?? 'N/A') ?>"
-                                            data-placarotativa="<?= htmlspecialchars(strip_tags($v['placarotativa'] ?? 'N/A')) ?>"
-                                            title="Seleccionar vehículo">
-                                            <i class="fa-solid fa-check"></i>
-                                        </button>
-
-
+                                    <td class="text-center align-middle">
+                                        <div class="form-check d-inline-flex align-items-center">
+                                            <input class="form-check-input seleccionar-vehiculo-radio" type="radio"
+                                                name="vehiculoSeleccionado"
+                                                id="vehiculoRadio<?= htmlspecialchars($v['idvehiculo']) ?>"
+                                                data-idvehiculo="<?= htmlspecialchars($v['idvehiculo']) ?>"
+                                                data-precioventa="<?= htmlspecialchars($v['precioventa']) ?>"
+                                                data-moneda="<?= htmlspecialchars($v['moneda']) ?>"
+                                                data-tipovehiculo="<?= htmlspecialchars($v['tipovehiculo']) ?>"
+                                                data-descripcion="<?= htmlspecialchars($v['marca'] . ' / ' . $v['tipovehiculo'] . ' / ' . $v['modelo'] . ' / ' . $v['version'] . ' / ' . ($v['color'] ?? 'N/A') . ' / ' . ($v['combustible'] ?? 'N/A') . ' / ' . $v['anio']) ?>"
+                                                data-placa="<?= htmlspecialchars($v['placa'] ?? 'N/A') ?>"
+                                                data-placarotativa="<?= htmlspecialchars(strip_tags($v['placarotativa'] ?? 'N/A')) ?>"
+                                                title="Seleccionar vehículo">
+                                            <label class="form-check-label ms-2"
+                                                for="vehiculoRadio<?= htmlspecialchars($v['idvehiculo']) ?>">
+                                                Seleccionar
+                                            </label>
+                                        </div>
                                     </td>
+
+
                                 </tr>
                             <?php endforeach; ?>
-                            <!-- data-moneda="<?= htmlspecialchars($v['moneda']) ?>" -->
                         </tbody>
                     </table>
                 </div>
@@ -1097,8 +1147,8 @@
                     $('#tablaVehiculosModal').DataTable({
                         order: [[0, 'desc']],
                         pagingType: 'full_numbers',
-                        pageLength: 10,
-                        lengthMenu: [[5, 10, 25, -1], [5, 10, 25, "Todos"]],
+                        pageLength: 15,
+                        lengthMenu: [[10, 15, 30, -1], [10, 15, 30, "Todos"]],
                         scrollX: true,
                         destroy: true,
                         language: {
@@ -1313,23 +1363,29 @@
         const tabla = document.getElementById('tablaVehiculosModal');
         if (!tabla) return;
 
-        $('#tablaVehiculosModal').on('click', '.seleccionar-vehiculo-btn', async function () {
-            const d = $(this).data();
+        $('#tablaVehiculosModal').on('change', '.seleccionar-vehiculo-radio', async function () {
+            const $input = $(this);
+            const d = $input.data();
+
+            // Rellenar paso 2 con los datos
             fillPaso2(d);
+
             // Guarda el tipo en hidden si lo agregaste
             const tipoHidden = document.getElementById('tipoVehiculoSeleccionado');
             if (tipoHidden) tipoHidden.value = d.tipovehiculo || '';
 
+            // Limpia y actualiza montos / financiamiento
             clearConversion();
             await actualizarMontos();
 
-            aplicarPoliticaFinanciamientoPorTipo(d.tipovehiculo); // NUEVO
-
+            aplicarPoliticaFinanciamientoPorTipo(d.tipovehiculo);
             await actualizarFinanciamiento();
-            const modal = document.getElementById('modalVehiculos');
-            if (modal) {
-                const modalInstance = bootstrap.Modal.getInstance(modal);
-                if (modalInstance) modalInstance.hide();
+
+            // Cerrar modal (Bootstrap 5)
+            const modalEl = document.getElementById('modalVehiculos');
+            if (modalEl) {
+                const modalInstance = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+                modalInstance.hide();
             }
         });
 
