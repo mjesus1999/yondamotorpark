@@ -748,7 +748,6 @@
         btnDownload.focus();
       }, 100);
     }
-
     /* function isPreviewMode() {
       return false;
     } */
