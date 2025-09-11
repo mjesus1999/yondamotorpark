@@ -518,9 +518,9 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
             <div class="modal-body">
-                <div class="table-responsive p-2">
-                    <table class="table table-sm table-hover table-bordered mt-2 display nowrap"
-                        id="tablaVehiculosModal" style="width:100%">
+                <div class="table-responsive">
+                    <table class="table table-hover table-bordered mt-2 display nowrap" id="tablaVehiculosModal"
+                        style="width:100%">
                         <thead>
                             <tr>
                                 <th>#</th>
@@ -529,7 +529,7 @@
                                 <th>Modelo</th>
                                 <th>Versión</th>
                                 <th>Condición</th>
-                                <th>Año</th>
+                                <th class="text-center">Año</th>
                                 <th>Color</th>
                                 <th>Estado</th>
                                 <th>Placa</th>
@@ -545,12 +545,12 @@
                                     <td><?= htmlspecialchars($v['tipovehiculo']) ?></td>
                                     <td><?= htmlspecialchars($v['modelo']) ?></td>
                                     <td><?= htmlspecialchars($v['version']) ?></td>
-                                    <td><?= htmlspecialchars($v['condicion']) ?></td>
-                                    <td><?= htmlspecialchars($v['anio']) ?></td>
-                                    <td><?= htmlspecialchars($v['color'] ?? 'N/A') ?></td>
-                                    <td><?= htmlspecialchars($v['disponibilidad']) ?></td>
-                                    <td><?= $v['placa'] === null ? 'N/A' : htmlspecialchars($v['placa']) ?></td>
-                                    <td><?= $v['placarotativa'] === null ? 'N/A' : htmlspecialchars($v['placarotativa']) ?>
+                                    <td><?= htmlspecialchars(ucfirst($v['condicion'])) ?></td>
+                                    <td class="text-center"><?= htmlspecialchars($v['anio']) ?></td>
+                                    <td><?= !empty($v['color']) ? htmlspecialchars($v['color']) : 'N/A' ?></td>
+                                    <td><?= htmlspecialchars(ucfirst($v['disponibilidad'])) ?></td>
+                                    <td><?= !empty($v['placa']) ? htmlspecialchars($v['placa']) : 'N/A' ?></td>
+                                    <td><?= !empty($v['placarotativa']) ? htmlspecialchars($v['placarotativa']) : 'N/A' ?>
                                     </td>
                                     <td class="text-center align-middle">
                                         <div class="form-check d-inline-flex align-items-center">
@@ -562,8 +562,8 @@
                                                 data-moneda="<?= htmlspecialchars($v['moneda']) ?>"
                                                 data-tipovehiculo="<?= htmlspecialchars($v['tipovehiculo']) ?>"
                                                 data-descripcion="<?= htmlspecialchars($v['marca'] . ' / ' . $v['tipovehiculo'] . ' / ' . $v['modelo'] . ' / ' . $v['version'] . ' / ' . ($v['color'] ?? 'N/A') . ' / ' . ($v['combustible'] ?? 'N/A') . ' / ' . $v['anio']) ?>"
-                                                data-placa="<?= htmlspecialchars($v['placa'] ?? 'N/A') ?>"
-                                                data-placarotativa="<?= htmlspecialchars(strip_tags($v['placarotativa'] ?? 'N/A')) ?>"
+                                                data-placa="<?= !empty($v['placa']) ? htmlspecialchars($v['placa']) : 'N/A' ?>"
+                                                data-placarotativa="<?= !empty($v['placarotativa']) ? htmlspecialchars(strip_tags($v['placarotativa'])) : 'N/A' ?>"
                                                 title="Seleccionar vehículo">
                                             <label class="form-check-label ms-2"
                                                 for="vehiculoRadio<?= htmlspecialchars($v['idvehiculo']) ?>">
@@ -572,12 +572,16 @@
                                         </div>
                                     </td>
 
-
                                 </tr>
                             <?php endforeach; ?>
                         </tbody>
                     </table>
                 </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-sm btn-primary"
+                    id="btnSeleccionarVehiculoConfirm">Seleccionar</button>
             </div>
         </div>
     </div>
@@ -1674,5 +1678,47 @@
             await actualizarFinanciamiento();
         }, 600);
     });
+
+    //para subir el modal-body mas arriba
+    (function () {
+        const modalEl = document.getElementById('modalVehiculos');
+        if (!modalEl) return;
+
+        modalEl.addEventListener('shown.bs.modal', function () {
+            const mb = modalEl.querySelector('.modal-body');
+            if (!mb) return;
+
+            // guarda valor original para poder restaurarlo luego
+            if (typeof mb.dataset.originalPaddingTop === 'undefined') {
+                mb.dataset.originalPaddingTop = mb.style.paddingTop || '';
+            }
+            mb.style.paddingTop = '4px';
+
+            const tr = mb.querySelector('.table-responsive');
+            if (tr) {
+                if (typeof tr.dataset.originalMarginTop === 'undefined') {
+                    tr.dataset.originalMarginTop = tr.style.marginTop || '';
+                }
+                tr.style.marginTop = '0';
+            }
+            mb.scrollTop = 0;
+        });
+
+        modalEl.addEventListener('hidden.bs.modal', function () {
+            const mb = modalEl.querySelector('.modal-body');
+            if (!mb) return;
+
+            // restaura valores originales
+            if (typeof mb.dataset.originalPaddingTop !== 'undefined') {
+                mb.style.paddingTop = mb.dataset.originalPaddingTop;
+                delete mb.dataset.originalPaddingTop;
+            }
+            const tr = mb.querySelector('.table-responsive');
+            if (tr && typeof tr.dataset.originalMarginTop !== 'undefined') {
+                tr.style.marginTop = tr.dataset.originalMarginTop;
+                delete tr.dataset.originalMarginTop;
+            }
+        });
+    })();
 
 </script>

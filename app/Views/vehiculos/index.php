@@ -120,9 +120,9 @@
                                     <td><?= htmlspecialchars($v['tipovehiculo']) ?></td>
                                     <td><?= htmlspecialchars($v['modelo']) ?></td>
                                     <td><?= htmlspecialchars($v['version']) ?></td>
-                                    <td><?= htmlspecialchars($v['condicion']) ?></td>
-                                    <td><?= htmlspecialchars($v['color'] ?? 'N/A') ?></td>
-                                    <td><?= htmlspecialchars($v['disponibilidad']) ?></td>
+                                    <td><?= htmlspecialchars(ucfirst($v['condicion'])) ?></td>
+                                    <td><?= !empty($v['color']) ? htmlspecialchars($v['color']) : 'N/A' ?></td>
+                                    <td><?= htmlspecialchars(ucfirst($v['disponibilidad'])) ?></td>
                                     <td class="text-center">
                                         <!-- Editar -->
                                         <a href="/vehiculos/edit/<?= $v['idvehiculo'] ?>"
@@ -148,7 +148,7 @@
 </div>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
+    document.addEventListener("DOMContentLoaded", function () {
         const table = $('#tabla-vehiculos').DataTable({
             order: [
                 [0, 'desc']
@@ -169,7 +169,7 @@
                     last: '»'
                 }
             },
-            initComplete: function() {
+            initComplete: function () {
                 const params = new URLSearchParams(window.location.search);
                 const nuevoId = params.get('vehiculo_nuevo');
 
@@ -187,7 +187,7 @@
             console.log('Buscando vehículo ID:', targetId);
 
             //  Buscar usando jQuery directamente en el DOM
-            const $filaEncontrada = $('#tabla-vehiculos tbody tr').filter(function() {
+            const $filaEncontrada = $('#tabla-vehiculos tbody tr').filter(function () {
                 const idEnFila = $(this).find('td:first').text().trim();
                 return idEnFila === targetId.toString();
             });
@@ -211,7 +211,7 @@
                 api.page(pagina).draw('page');
 
                 // Buscar en la página actual
-                $('#tabla-vehiculos tbody tr').each(function() {
+                $('#tabla-vehiculos tbody tr').each(function () {
                     const idEnFila = $(this).find('td:first').text().trim();
                     if (idEnFila === targetId.toString()) {
                         filaEncontrada = this;
@@ -272,9 +272,8 @@
             }, 1000);
         }
 
-
         // Eventos de eliminación - usando delegación de eventos
-        $(document).on('click', '.btn-borrar', async function() {
+        $(document).on('click', '.btn-borrar', async function () {
             const id = $(this).data('id');
             if (!id) return;
 

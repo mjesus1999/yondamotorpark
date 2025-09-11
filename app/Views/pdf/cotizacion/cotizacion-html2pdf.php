@@ -6,7 +6,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Cotización <?= $id ?> Dependiente - YONDA PERÚ</title>
-  <link rel="stylesheet" href="/assets/css/cotizacion-reportP.css" />
+  <link rel="stylesheet" href="/assets/css/cotizacion-reportPs.css" />
 
   <style>
     .content {
@@ -199,8 +199,9 @@
       const day = dt.getDate();
       const month = months[dt.getMonth()] || '';
       const year = dt.getFullYear();
-      return `${ciudad}, ${day} de ${month} de ${year}`;
+      return `${ciudad}, ${day} de ${month.toLowerCase()} de ${year}`;
     }
+
 
     async function fetchAndFill() {
       try {
@@ -423,18 +424,28 @@
 
       const filename = `cotizacion-${getIdFromPath() || 'yonda'}.pdf`;
 
+      // --- Medidas del elemento para evitar desplazamientos ---
+      const rect = element.getBoundingClientRect();
+      const elWidth = Math.ceil(rect.width);
+      const elHeight = Math.ceil(rect.height);
+
+      // Escala razonable (usar devicePixelRatio pero limitarlo)
+      const scale = Math.min(2.0, Math.max(1.25, (window.devicePixelRatio || 1) * 1.25));
+
+      // Opciones para html2pdf / html2canvas
       const opt = {
         margin: [10, 10, 10, 10],
         filename,
-        image: { type: 'jpeg', quality: 0.85 },
+        image: { type: 'jpeg', quality: 0.95 },
         html2canvas: {
-          scale: 0.95,
+          scale: scale,
           useCORS: true,
           allowTaint: false,
           logging: false,
-          imageTimeout: 15000,
-          windowWidth: document.documentElement.offsetWidth,
-          windowHeight: document.documentElement.offsetHeight,
+          imageTimeout: 30000,
+          // IMPORTANTE: pasar dimensiones razonables (no las multiplicamos por scale)
+          windowWidth: Math.max(document.documentElement.clientWidth, elWidth),
+          windowHeight: Math.max(document.documentElement.clientHeight, elHeight),
           scrollX: 0,
           scrollY: 0,
           backgroundColor: '#ffffff'
@@ -442,6 +453,7 @@
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
       };
 
+      // Status visual
       let status = document.getElementById('pdf-status');
       if (!status) {
         status = document.createElement('div');
@@ -453,6 +465,7 @@
         status.style.display = 'block';
       }
 
+      // Preparar imágenes de cabecera/footer (si existen) como dataURL
       const headerEl = document.querySelector('.header');
       const footerEl = document.querySelector('.footer');
       const imgTopEl = document.querySelector('.pdf-watermark.top') || (headerEl ? headerEl.querySelector('img') : null);
@@ -463,14 +476,16 @@
       try { if (imgTopEl) topData = await imageToDataURL(imgTopEl, 1); } catch (e) { console.warn('cabecera->dataURL failed', e); topData = null; }
       try { if (imgBottomEl) bottomData = await imageToDataURL(imgBottomEl, 1); } catch (e) { console.warn('footer->dataURL failed', e); bottomData = null; }
 
+      // Guardar display previos para restaurar después
       const prevHeaderDisplay = headerEl ? headerEl.style.display : null;
       const prevFooterDisplay = footerEl ? footerEl.style.display : null;
 
       try {
+        // Ocultar header/footer en la captura principal para evitar duplicados
         if (headerEl) headerEl.style.display = 'none';
         if (footerEl) footerEl.style.display = 'none';
 
-        // Generar PDF
+        // Generar PDF (html2pdf)
         const worker = html2pdf().set(opt).from(element).toPdf();
 
         worker.get('pdf').then((pdf) => {
@@ -480,6 +495,7 @@
             const pageHeight = pdf.internal.pageSize.getHeight();
             const margin = Array.isArray(opt.margin) ? opt.margin[0] : 10;
 
+            // Generador de padding (para forzar tamaño del PDF si es necesario)
             function generatePaddingDataUrl(sizeKB = 200) {
               const factor = Math.max(600, Math.round(sizeKB * 6));
               const W = Math.min(3000, factor);
@@ -494,15 +510,12 @@
                 ctx.fillStyle = `rgba(${Math.floor(Math.random() * 255)},${Math.floor(Math.random() * 255)},${Math.floor(Math.random() * 255)},0.01)`;
                 ctx.fillRect(Math.random() * W, Math.random() * H, 1, 1);
               }
-
-              // Exportar PNG
               return canvas.toDataURL('image/png');
             }
 
-            const paddingDataUrl = generatePaddingDataUrl(400);
+            const paddingDataUrl = generatePaddingDataUrl(200);
 
-            // ---------------------------------
-
+            // Si tenemos imágenes de header/footer o padding, las añadimos por página
             if (topData || bottomData || paddingDataUrl) {
               const targetWidth = pageWidth - margin * 2;
 
@@ -543,7 +556,7 @@
                   }
                 }
 
-                // Texto del footer (solo en última página)
+                // Texto del footer (solo en última página) - dibujado como texto y no como imagen
                 const footerText = footerEl && footerEl.querySelector('.footer-text') ? footerEl.querySelector('.footer-text').innerText.trim() : '';
                 if (footerText && p === totalPages) {
                   const lines = footerText.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
@@ -560,9 +573,10 @@
               }
             }
 
-            // Ocultar status de generación
+            // Ocultar status
             if (status) status.style.display = 'none';
-            // MOSTRAR MODAL DE DESCARGA
+
+            // Mostrar modal de descarga
             showDownloadModal(pdf, filename);
 
           } catch (err) {
@@ -570,12 +584,14 @@
             if (status) status.style.display = 'none';
             showDownloadModal(pdf, filename);
           } finally {
+            // Restaurar display de header/footer
             if (headerEl) headerEl.style.display = prevHeaderDisplay;
             if (footerEl) footerEl.style.display = prevFooterDisplay;
           }
         }).catch((err) => {
           console.error('No se obtuvo objeto jsPDF:', err);
           if (status) status.style.display = 'none';
+          // Intento fallback: generar y mostrar modal con el pdf resultante
           html2pdf().set(opt).from(element).toPdf().get('pdf').then((pdf) => {
             showDownloadModal(pdf, filename);
           });
@@ -589,6 +605,7 @@
         alert('Error generando PDF. Intente nuevamente.');
       }
     }
+
 
     function showDownloadModal(pdf, filename) {
       // Crear modal

@@ -1,0 +1,442 @@
+/* public/assets/css/cotizacion-reportP.css
+   Versión ajustada: vista previa ordenada + comportamiento PDF intacto
+*/
+
+/* --- Página / impresión base --- */
+@page {
+  size: A4 portrait;
+  margin: 10mm;
+}
+
+/* --- Reset / base --- */
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  position: relative;
+  font-family: Arial, sans-serif;
+  background: white;
+}
+
+/* --- Body: vista previa (NO inflar con un padding-bottom gigante) --- */
+body {
+  font-size: 11pt;
+  line-height: 1.15;
+  color: #222;
+  margin: 0;
+  padding: 0;
+  padding-bottom: 0; /* importante: evita estirar la vista previa */
+  min-height: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* --- Contenedor principal (comportamiento tipo OC) --- */
+.container {
+  display: flex;
+  flex-direction: column;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 10mm; /* espacio interior consistente en pantalla */
+  min-height: 100%;
+  position: relative;
+  z-index: 1;
+  background: white;
+  font-family: Arial, sans-serif;
+}
+
+/* --- Indicador de carga (mantener pero ocultable) --- */
+#loading-indicator {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  padding: 30px;
+  border: 2px solid #d32f2f;
+  border-radius: 15px;
+  z-index: 2000;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  font-family: Arial, sans-serif;
+}
+
+#loading-indicator div:first-child {
+  color: #d32f2f;
+  font-weight: bold;
+  margin-bottom: 15px;
+  font-size: 18px;
+}
+
+#loading-indicator div:last-child {
+  font-size: 14px;
+  color: #666;
+}
+
+#loading-indicator::before {
+  content: "";
+  display: block;
+  width: 40px;
+  height: 40px;
+  margin: 0 auto 15px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #d32f2f;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---------------- HEADER (vista previa: relativo; print: fixed) ---------------- */
+/* Layout tipo OC: logo izquierda, info derecha */
+.header {
+  position: relative; /* importante para vista previa: no fixed */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  text-align: left;
+  margin-bottom: 6mm;
+  z-index: 2;
+  pointer-events: auto;
+  opacity: 1;
+}
+
+/* Si tu header usa solo una imagen, asegúrate que no sea demasiado alta */
+.header img {
+  width: auto;
+  max-height: 48px;
+  object-fit: contain;
+  filter: none !important;
+  -webkit-filter: none !important;
+  opacity: 1 !important;
+}
+
+/* Pequeña zona a la derecha (fecha / datos) */
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 4mm;
+}
+
+/* Fecha: evitar quiebre de líneas */
+.fecha {
+  white-space: nowrap;
+  font-size: 11pt;
+  margin: 0;
+  padding-top: 1px;
+  line-height: 1.15;
+}
+
+/* TÍTULO */
+.title {
+  text-align: center;
+  margin: 10px 0 8px 0;
+  font-size: 18pt;
+  font-weight: bold;
+  line-height: 1.15;
+}
+
+/* Contenido principal: ancho controlado y z-index por encima de "marcas" */
+.content {
+  max-width: 900px;
+  margin-left: 0;
+  margin-right: 0;
+  flex: 0 0 auto;
+  position: relative;
+  z-index: 2;
+  font-family: Arial, sans-serif;
+}
+
+/* Párrafos y textos */
+.content p {
+  margin: 8px 0;
+  line-height: 1.15;
+  font-size: 11pt;
+}
+
+.tight {
+  margin: 2px 0;
+  line-height: 1.15;
+}
+
+/* Párrafo justificado (mejor lectura) */
+.justified-text {
+  text-align: justify;
+  text-justify: inter-word;
+  text-align-last: left;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  -moz-hyphens: auto;
+}
+
+/* ---------------- TABLA DETALLE ---------------- */
+/* Usar table-layout: fixed para alineación consistente en pantalla */
+.detalle {
+  border-collapse: collapse;
+  font-weight: bold;
+  font-size: 12pt;
+  text-transform: uppercase;
+  width: 100%;
+  max-width: 520px; /* limita ancho para alinearse visualmente con el footer */
+  table-layout: fixed;
+  margin-top: 8px;
+}
+
+.detalle td {
+  padding: 4px 6px;
+  vertical-align: top;
+}
+
+.detalle td.label {
+  width: 40%;
+  padding-right: 6px;
+  text-align: left;
+  font-weight: bold;
+}
+
+.detalle td.value {
+  width: 60%;
+  text-align: left;
+  font-weight: bold;
+}
+
+/* Texto pequeño y cierre */
+.small-text {
+  font-size: 11pt;
+  line-height: 1.15;
+}
+
+.closing {
+  text-align: justify;
+  margin-top: 10px;
+}
+
+/* ---------------- PRICING ---------------- */
+.pricing {
+  margin-top: 12px;
+  border-collapse: collapse;
+  font-weight: bold;
+  width: 100%;
+  font-size: 12pt;
+  text-transform: uppercase;
+  line-height: 1.15;
+  border: 1px solid #000;
+}
+
+.pricing td {
+  padding: 6px 10px;
+  border: 1px solid #000;
+  font-weight: bold;
+}
+
+/* estilo de filas extra añadidas dinámicamente */
+.pricing .extra-opt td {
+  font-weight: normal;
+  font-size: 11pt;
+}
+
+/* ---------------- INSTRUCCIONES ---------------- */
+.instructions {
+  font-size: 11pt;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  line-height: 1.15;
+}
+
+.instructions p {
+  margin: 4px 0;
+  line-height: 1.15;
+}
+
+.instructions ol {
+  padding-left: 18px;
+  margin: 6px 0;
+}
+
+.instructions ol li {
+  margin-bottom: 6px;
+  font-weight: bold;
+  line-height: 1.15;
+  text-transform: none; /* respetar texto del servidor */
+}
+
+/* nota destacada */
+.selected {
+  background-color: #fff3cd;
+  padding: 6px 10px;
+  display: block;
+  text-align: center;
+  border-radius: 4px;
+  font-weight: bold;
+  margin: 10px 0;
+}
+
+/* ---------------- FOOTER (vista previa relativo; print fijo) ---------------- */
+.footer {
+  position: relative; /* importante en pantalla para que no se superponga */
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 16px;
+  z-index: 2;
+  pointer-events: auto;
+  opacity: 1;
+}
+
+.footer .footer-text {
+  font-size: 11pt;
+  line-height: 1.15;
+  text-align: left;
+  font-weight: normal;
+  color: rgba(0, 0, 0, 0.65);
+  white-space: nowrap;
+}
+
+/* imagen del footer */
+.footer img {
+  max-height: 48px;
+  object-fit: contain;
+  opacity: 1 !important;
+  filter: none !important;
+}
+
+/* ---------------- UTILIDADES / RESPONSIVE ---------------- */
+@media (max-width: 480px) {
+  .fecha {
+    white-space: normal;
+    font-size: 10pt;
+  }
+  .container {
+    padding: 8mm;
+  }
+  .detalle td.label {
+    width: 45%;
+  }
+  .detalle td.value {
+    width: 55%;
+  }
+}
+
+/* ---------------- REGLAS EXCLUSIVAS PARA IMPRESIÓN/PDF ---------------- */
+@media print {
+  /* ocultar indicator */
+  #loading-indicator {
+    display: none !important;
+  }
+
+  /* Forzar header/footer fixed en PDF para mantener el diseño actual */
+  .header,
+  .footer {
+    position: fixed !important;
+    left: 10mm;
+    right: 10mm;
+    z-index: 2;
+  }
+
+  .header {
+    top: 6mm !important;
+    text-align: center;
+  }
+
+  .footer {
+    bottom: 4mm !important;
+    text-align: right;
+  }
+
+  /* espaciar contenido para no tapar cabecera/pie */
+  .container {
+    padding-top: 18mm; /* espacio para cabecera fija en el A4 */
+    padding-bottom: 18mm; /* espacio para footer fijo en el A4 */
+    max-width: 100%;
+  }
+
+  /* Forzar tipografías y quitar backgrounds innecesarios */
+  body {
+    background: white !important;
+    font-family: Arial, sans-serif !important;
+  }
+  * {
+    font-family: Arial, sans-serif !important;
+    color: #000 !important;
+  }
+
+  /* Evitar problemas de elements "fixed" duplicados por html2pdf */
+  *[style*="position: fixed"],
+  *[style*="position:fixed"] {
+    position: relative !important;
+  }
+
+  /* Asegurar que header/footer vuelvan a ser fixed después del reset */
+  .header,
+  .footer {
+    position: fixed !important;
+  }
+}
+
+/* ---------------- pequeños "cosméticos" finales ---------------- */
+/* reducir espacios excesivos en tablas cuando se renderiza por html2canvas */
+table {
+  border-spacing: 0;
+}
+
+/* asegurar que las cajas no crezcan demasiado en la vista */
+img {
+  max-width: 100%;
+  height: auto;
+  display: inline-block;
+}
+
+/* botón oculto pero con estilo por si se muestra en pantalla */
+.btn-generate-pdf {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background-color: #d32f2f;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  z-index: 1000;
+}
+
+/* asegurar que en print el botón no moleste */
+@media print {
+  .btn-generate-pdf {
+    display: none !important;
+  }
+}
+
+/* Hacer la lista de instrucciones un poco más indentada */
+.instructions ol,
+#instructions-list {
+  padding-left: 28px; /* aumenta el indent (ajusta el valor si quieres más/menos) */
+  margin-left: 6px; /* empuja todo el bloque ligeramente hacia la derecha */
+  list-style-position: outside;
+}
+
+/* En impresión mantener la misma indentación */
+@media print {
+  .instructions ol,
+  #instructions-list {
+    padding-left: 28px;
+    margin-left: 6px;
+  }
+}
