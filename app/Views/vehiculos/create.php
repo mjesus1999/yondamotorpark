@@ -136,7 +136,7 @@
 						<div class="col-md-2 mb-2">
 							<div class="form-floating">
 								<input type="text" id="precio" name="precio" class="form-control text-end"
-									 title="Solo se permiten números" placeholder="Precio" required>
+									title="Solo se permiten números" placeholder="Precio" required>
 								<label for="precio">Precio <span class="text-danger">*</span></label>
 							</div>
 						</div>

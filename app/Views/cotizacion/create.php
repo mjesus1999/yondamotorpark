@@ -141,6 +141,61 @@
         filter: none !important;
         opacity: 1 !important;
     }
+
+    /* Compactar filas SOLO en el modal Vehículos */
+    #modalVehiculos .modal-body {
+        padding: 0.6rem;
+        /* menos padding alrededor del contenido */
+    }
+
+    /* quitar padding extra del wrapper responsive dentro del modal (si aplica) */
+    #modalVehiculos .table-responsive {
+        padding: 0;
+        margin: 0;
+    }
+
+    /* Forzar tamaño de fuente algo menor en la tabla de vehículos */
+    #tablaVehiculosModal {
+        font-size: 0.90rem;
+        /* ajustar según prefieras */
+    }
+
+    /* Reducir paddings de celdas para hacer filas más delgadas */
+    #tablaVehiculosModal thead th,
+    #tablaVehiculosModal tbody td {
+        padding: 0.30rem 0.45rem;
+        /* vertical horizontal */
+        line-height: 1;
+        /* evita alturas extra por line-height */
+        white-space: nowrap;
+        /* evita wraps que aumenten la altura */
+        vertical-align: middle;
+    }
+
+    /* Si DataTables usa scrollBody, forzar a que no añada padding extra */
+    .dataTables_scrollBody table#tablaVehiculosModal tbody td {
+        padding: 0.28rem 0.45rem !important;
+    }
+
+    /* Ajustes para los radios / labels en la columna de acción */
+    #modalVehiculos .form-check.d-inline-flex {
+        gap: 0.35rem;
+        align-items: center;
+    }
+
+    #modalVehiculos .form-check-input,
+    #modalVehiculos .seleccionar-vehiculo-radio {
+        width: 0.95rem;
+        height: 0.95rem;
+        margin-top: 0;
+    }
+
+    /* Etiqueta junto al radio un poco más pequeña */
+    #modalVehiculos .form-check-label {
+        font-size: 0.82rem;
+        margin-bottom: 0;
+        line-height: 1;
+    }
 </style>
 <div class="container-fluid">
 
@@ -180,16 +235,16 @@
                                     <option value="dni">DNI</option>
                                     <option value="ruc">RUC</option>
                                 </select>
-                                <label for="tipoDocumento">Tipo Documento</label>
+                                <label for="tipoDocumento">Tipo Documento <span class="text-danger">*</span></label>
                             </div>
                         </div>
 
                         <div class="col-md-2">
                             <div class="input-group">
                                 <div class="form-floating">
-                                    <input type="text" class="form-control" id="documento" name="documento"
-                                        placeholder="DNI / RUC">
-                                    <label for="documento">DNI / RUC</label>
+                                    <input type="text" autocomplete="off" class="form-control" id="documento"
+                                        name="documento" placeholder="DNI / RUC">
+                                    <label for="documento">DNI / RUC <span class="text-danger">*</span></label>
                                 </div>
                                 <button type="button" id="btnBuscarCliente" class="btn btn-outline-success"
                                     title="Buscar cliente en la DB"><i class="bi bi-search"></i></button>
@@ -200,9 +255,10 @@
                         <!-- Apellidos y Nombres -->
                         <div class="col-md-4">
                             <div class="form-floating">
-                                <input type="text" class="form-control" placeholder="Apellidos y Nombres / Razón Social"
-                                    id="nombres" name="nombres">
-                                <label for="nombres">Apellidos y Nombres / Razón Social</label>
+                                <input type="text" autocomplete="off" class="form-control"
+                                    placeholder="Apellidos y Nombres / Razón Social" id="nombres" name="nombres">
+                                <label for="nombres">Apellidos y Nombres / Razón Social <span
+                                        class="text-danger">*</span></label>
                             </div>
                         </div>
 
@@ -224,8 +280,8 @@
                         <div class="col-md-2">
                             <div class="form-floating">
                                 <input type="text" class="form-control" placeholder="Teléfono" id="telprimario"
-                                    name="telprimario" maxlength="9" required>
-                                <label for="telprimario">Teléfono</label>
+                                    name="telprimario" autocomplete="off" maxlength="9" required>
+                                <label for="telprimario">Teléfono <span class="text-danger">*</span></label>
                             </div>
                         </div>
                         <!-- Telefono alternativo -->
@@ -281,9 +337,10 @@
                                     Lista Vehículos
                                 </button>
                                 <div class="form-floating">
-                                    <input type="text" class="form-control" placeholder="Descripcion del vehiculo"
-                                        id="descripcion" name="descripcion">
-                                    <label for="descripcion">Descripcion del vehiculo</label>
+                                    <input type="text" autocomplete="off" class="form-control"
+                                        placeholder="Descripcion del vehiculo" id="descripcion" name="descripcion">
+                                    <label for="descripcion">Descripcion del vehiculo <span
+                                            class="text-danger">*</span></label>
                                 </div>
 
                             </div>
@@ -291,15 +348,16 @@
                         <!-- PLACA -->
                         <div class="col-md-2">
                             <div class="form-floating">
-                                <input type="text" placeholder="Placa" class="form-control" id="placa" name="placa">
+                                <input type="text" autocomplete="off" placeholder="Placa" class="form-control"
+                                    id="placa" name="placa">
                                 <label for="placa">Placa</label>
                             </div>
                         </div>
                         <!-- PLACA ROTATIVA -->
                         <div class="col-md-2">
                             <div class="form-floating">
-                                <input type="text" placeholder="Placa Rotativa" class="form-control" id="placarotativa"
-                                    name="placarotativa">
+                                <input type="text" autocomplete="off" placeholder="Placa Rotativa" class="form-control"
+                                    id="placarotativa" name="placarotativa">
                                 <label for="placarotativa">Placa Rotativa</label>
                             </div>
                         </div>
@@ -311,7 +369,7 @@
                         <div class="col-md-2">
                             <div class="form-floating">
                                 <input type="text" class="form-control" id="monedaprecio" readonly>
-                                <label for="monedaprecio">Moneda Vta.</label>
+                                <label for="monedaprecio">Moneda Vta. <span class="text-danger">*</span></label>
                             </div>
                         </div>
                         <input type="hidden" name="moneda" id="inputMoneda">
@@ -321,7 +379,7 @@
                             <div class="form-floating">
                                 <input type="text" placeholder="Valor" class="form-control" id="valor" name="valor"
                                     readonly>
-                                <label for="valor">Valor</label>
+                                <label for="valor">Valor <span class="text-danger">*</span></label>
                             </div>
                         </div>
                         <input type="hidden" name="precioventa" id="inputPrecioventa">
@@ -333,7 +391,7 @@
                                     <option value="PEN" selected>Soles</option>
                                     <option value="USD">Dólares</option>
                                 </select>
-                                <label for="monedaSelect">Moneda</label>
+                                <label for="monedaSelect">Moneda <span class="text-danger">*</span></label>
                             </div>
                         </div>
 
@@ -341,8 +399,8 @@
                         <div class="col-md-2">
                             <div class="form-floating">
                                 <input type="number" step="0.0001" class="form-control" id="tipoCambio"
-                                    name="tipoCambio" placeholder="Ej: 3.80">
-                                <label for="tipoCambio">Tipo de Cambio</label>
+                                    name="tipoCambio" placeholder="Ej: 3.80" readonly>
+                                <label for="tipoCambio">Tipo de Cambio <span class="text-danger">*</span></label>
                             </div>
                         </div>
                         <input type="hidden" name="tipoCambio" id="inputTipoCambio">
@@ -352,7 +410,7 @@
                             <div class="form-floating">
                                 <input type="text" placeholder="Valor de Moneda" class="form-control" id="valormoneda"
                                     name="valormoneda" readonly>
-                                <label for="valormoneda">Valor de Moneda</label>
+                                <label for="valormoneda">Valor de Moneda <span class="text-danger">*</span></label>
                             </div>
                         </div>
                         <input type="hidden" name="valorconvertido" id="inputValorConvertido">
@@ -378,7 +436,7 @@
                     <div id="cardsFinanciamiento" class="mb-3"></div>
                     <input type="hidden" id="opciones_financiamiento" name="opciones_financiamiento" value="[]">
                     <p class="text-muted small mt-2">Cada tarjeta representa una opción de financiamiento distinta (24,
-                        36, 48, 60 meses, etc.). Puedes agregar, editar o eliminar antes de registrar la cotización.</p>
+                        36, 48, 60 meses, etc.). </p>
                 </div>
             </div>
 
@@ -401,7 +459,7 @@
                                 <div class="form-floating">
                                     <input type="number" class="form-control fin-inicial" placeholder="Inicial"
                                         step="0.01" min="0">
-                                    <label>Inicial</label>
+                                    <label>Inicial <span class="text-danger">*</span></label>
                                 </div>
                             </div>
 
@@ -409,7 +467,7 @@
                                 <div class="form-floating">
                                     <input type="text" class="form-control fin-valorFinanciar"
                                         placeholder="Valor a Financiar" readonly>
-                                    <label>Valor a Financiar</label>
+                                    <label>Valor a Financiar <span class="text-danger">*</span></label>
                                 </div>
                             </div>
 
@@ -417,7 +475,7 @@
                                 <div class="form-floating">
                                     <input type="number" class="form-control fin-numcuotas" placeholder="Meses"
                                         step="3">
-                                    <label>Meses</label>
+                                    <label>Meses <span class="text-danger">*</span></label>
                                 </div>
                             </div>
 
@@ -433,7 +491,7 @@
                                 <div class="form-floating">
                                     <input type="text" class="form-control fin-cuotaMensual" placeholder="Valor Mensual"
                                         readonly>
-                                    <label>Valor Mensual</label>
+                                    <label>Valor Mensual <span class="text-danger">*</span></label>
                                 </div>
                             </div>
 
@@ -519,8 +577,8 @@
             </div>
             <div class="modal-body">
                 <div class="table-responsive">
-                    <table class="table table-hover table-bordered mt-2 display nowrap" id="tablaVehiculosModal"
-                        style="width:100%">
+                    <table class="table table-sm table-hover table-bordered mt-2 display nowrap"
+                        id="tablaVehiculosModal" style="width:100%">
                         <thead>
                             <tr>
                                 <th>#</th>
@@ -580,8 +638,6 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Cerrar</button>
-                <button type="button" class="btn btn-sm btn-primary"
-                    id="btnSeleccionarVehiculoConfirm">Seleccionar</button>
             </div>
         </div>
     </div>
@@ -589,6 +645,60 @@
 
 <!-- MODAL DE CRONOGRAMA -->
 <div class="modal fade" id="modalCronograma" tabindex="-1" aria-labelledby="modalCronogramaLabel" aria-hidden="true"
+    data-bs-backdrop="static" data-bs-keyboard="true">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalCronogramaLabel">Cronograma de Pagos</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <div class="d-flex justify-content-end mb-2">
+                    <button class="btn btn-sm btn-outline-danger me-2" id="btn-pdf" title="Generar cronograma en PDF">
+                        <i class="bi bi-filetype-pdf"></i>
+                        PDF
+                    </button>
+                    <button class="btn btn-sm btn-outline-success" id="btn-excel" title="Generar cronograma en EXCEL">
+                        <i class="bi bi-file-earmark-excel"></i>
+                        Excel
+                    </button>
+                </div>
+                <div class="table-responsive p-2">
+                    <table class="table table-sm table-bordered table-striped mt-2" id="tablaCronograma">
+                        <thead>
+                            <tr>
+                                <th>ITEM</th>
+                                <th>FECHA DE PAGO</th>
+                                <th>INTERÉS DEL PERIODO</th>
+                                <th>ABONO A CAPITAL</th>
+                                <th>VALOR CUOTA</th>
+                                <th>SALDO CAPITAL</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cuerpoTablaCronograma">
+                        </tbody>
+                        <tfoot>
+                            <tr id="filaTotales">
+                                <td colspan="2" class="text-end fw-bold">TOTALES</td>
+                                <td class="fw-bold" id="totalInteres"></td>
+                                <td class="fw-bold" id="totalAbono"></td>
+                                <td class="fw-bold" id="totalCuota"></td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- <div class="modal fade" id="modalCronograma" tabindex="-1" aria-labelledby="modalCronogramaLabel" aria-hidden="true"
     data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
@@ -640,7 +750,7 @@
             </div>
         </div>
     </div>
-</div>
+</div> -->
 
 <?php include __DIR__ . '/../layout/footer.php'; ?>
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js" defer></script>
@@ -1195,8 +1305,8 @@
                     $('#tablaCronograma').DataTable({
                         order: [[0, 'asc']],
                         pagingType: 'full_numbers',
-                        pageLength: 10,
-                        lengthMenu: [[5, 10, 25, -1], [5, 10, 25, "Todos"]],
+                        pageLength: 15,
+                        lengthMenu: [[10, 15, 25, -1], [10, 15, 25, "Todos"]],
                         scrollX: true,
                         destroy: true,
                         language: {
