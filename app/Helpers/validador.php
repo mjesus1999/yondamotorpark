@@ -12,10 +12,13 @@ class Validador
         return htmlspecialchars(trim($valor));
     }
 
-    public static function campoObligatorio(string $valor, string $nombre): ?string
+    public static function campoObligatorio(?string $valor, string $nombre): ?string
     {
-        return empty($valor) ? "El campo '$nombre' es obligatorio." : null;
+        return (is_null($valor) || trim($valor) === '')
+            ? "El campo '$nombre' es obligatorio."
+            : null;
     }
+
 
     public static function emailValido(?string $email): ?string
     {

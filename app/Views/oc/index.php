@@ -20,34 +20,43 @@
 
 
     <div class="card">
+      <div class="card-header">
+    <?php $estadoActual = $estado ?? ''; ?>
+    <div class="d-flex justify-content-between align-items-center flex-wrap">
+        <div class="btn-group m-1 mb-2" id="botones-filtro">
+            <a href="/oc/listar/emitido"
+               class="btn btn-sm <?= $estadoActual === 'emitido' ? 'btn-primary' : 'btn-outline-primary' ?>">
+                Emitido
+            </a>
 
-        <div class="card-header">
-            <?php $estadoActual = $estado ?? ''; ?>
-            <div class="btn-group m-1" id="botones-filtro">
-                <a href="/oc/listar/emitido"
-                    class="btn btn-sm  <?= $estadoActual === 'emitido' ? 'btn-primary' : 'btn-outline-primary' ?>">
-                    Emitido
-                </a>
+            <a href="/oc/listar/proceso"
+               class="btn btn-sm <?= $estadoActual === 'proceso' ? 'btn-warning' : 'btn-outline-warning' ?>">
+                Proceso
+            </a>
 
-                <a href="/oc/listar/proceso"
-                    class="btn btn-sm <?= $estadoActual === 'proceso' ? 'btn-warning' : 'btn-outline-warning' ?>">
-                    Proceso
-                </a>
+            <a href="/oc/listar/pagado"
+               class="btn btn-sm <?= $estadoActual === 'pagado' ? 'btn-success' : 'btn-outline-success' ?>">
+                Pagado
+            </a>
 
-
-                <a href="/oc/listar/pagado"
-                    class="btn btn-sm <?= $estadoActual === 'pagado' ? 'btn-success' : 'btn-outline-success' ?>">
-                    Pagado
-                </a>
-
-                <a href="/oc/listar/anulado"
-                    class="btn btn-sm <?= $estadoActual === 'anulado' ? 'btn-danger' : 'btn-outline-danger' ?>">
-                    Anulado
-                </a>
-            </div>
-
+            <a href="/oc/listar/anulado"
+               class="btn btn-sm <?= $estadoActual === 'anulado' ? 'btn-danger' : 'btn-outline-danger' ?>">
+                Anulado
+            </a>
         </div>
 
+        <div class="btn-group m-1 ms-auto">
+            <?php if ($estadoActual === 'proceso'): ?>
+                <button title="Exportar a PDF" class="btn btn-sm btn-outline-danger" id="btn-exportar-pdf">
+                    <i class="bi bi-filetype-pdf"></i> PDF
+                </button>
+                <button title="Exportar a EXCEL" class="btn btn-sm btn-outline-success" id="btn-exportar-excel">
+                    <i class="bi bi-file-earmark-excel"></i> Excel
+                </button>
+            <?php endif; ?>
+        </div>
+    </div>
+</div>
         <div class="card-body" id="lista-oc">
 
             <!-- Vista de ESCRITORIO-->
@@ -56,8 +65,9 @@
                     <thead>
                         <tr>
                             <th>#</th>
-                            <th>Número</th>
+                            <th>Serie</th>
                             <th>Concesionario</th>
+                            <th>Ubicación</th>
                             <th>Fecha</th>
                             <th>Moneda</th>
 
@@ -79,15 +89,16 @@
                     <tbody>
                         <?php if (empty($ordenCompras)): ?>
                             <tr>
-                                <td colspan="8" class="text-center">No hay ordénes de compras registradas.</td>
+                                <td colspan="12" class="text-center">No hay ordénes de compras registradas.</td>
                             </tr>
                         <?php else: ?>
                             <?php $numeroFila = 1; ?>
                             <?php foreach ($ordenCompras as $ordenCompra): ?>
                                 <tr>
                                     <td><?= $numeroFila++ ?></td>
-                                    <td><?= htmlspecialchars($ordenCompra['serie']) ?></td>
+                                    <td><?= htmlspecialchars($ordenCompra['numeroOCIdentificador']) ?></td>
                                     <td><?= htmlspecialchars($ordenCompra['razonsocial']) ?></td>
+                                    <td><?= htmlspecialchars($ordenCompra['ubicacion']) ?></td>
                                     <td><?= htmlspecialchars($ordenCompra['emision']) ?></td>
                                     <td><?= htmlspecialchars($ordenCompra['moneda']) ?></td>
 
@@ -115,12 +126,13 @@
                     <?php foreach ($ordenCompras as $ordenCompra): ?>
                         <div class="card mb-2 shadow-sm">
                             <div class="card-header d-flex justify-content-between align-items-center" data-bs-toggle="collapse" href="#collapse-oc-<?= $ordenCompra['idordencompra'] ?>" style="cursor: pointer;">
-                                <span><i class="bi bi-receipt me-2 text-primary fw-bold"></i><?= htmlspecialchars($ordenCompra['serie']) ?> - <?= htmlspecialchars($ordenCompra['razonsocial']) ?></span>
+                                <span><i class="bi bi-receipt me-2 text-primary fw-bold"></i><?= htmlspecialchars($ordenCompra['numeroOCIdentificador']) ?> - <?= htmlspecialchars($ordenCompra['razonsocial']) ?></span>
                                 <i class="bi bi-chevron-down"></i>
                             </div>
                             <div id="collapse-oc-<?= $ordenCompra['idordencompra'] ?>" class="collapse">
                                 <div class="card-body">
                                     <p><strong>#:</strong> <?= $numeroFila++ ?></p>
+                                     <p><strong>Ubicación:</strong></strong> <?= htmlspecialchars($ordenCompra['ubicacion']) ?></p>
                                     <p><strong>Fecha:</strong> <?= htmlspecialchars($ordenCompra['emision']) ?></p>
                                     <p><strong>Moneda:</strong> <?= htmlspecialchars($ordenCompra['moneda']) ?></p>
 
@@ -207,7 +219,7 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <!-- Aquí se llenarán los autos dinámicamente -->
+
                                     </tbody>
                                 </table>
 
@@ -262,6 +274,13 @@
 
     </div> <!-- ./card -->
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js" defer></script>
+    <script src="/assets/js/logoBase64.js"></script>
+    <script src="/assets/js/oc-proceso-reporte/pdf.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js" defer></script>
+
+
     <script>
         document.addEventListener("DOMContentLoaded", () => {
 
@@ -299,41 +318,249 @@
 
             let idOC = null; // Para identifcar el idoc a actualizar desde el modal para verificar si los autos llegarón de acuerdo a la OC
 
+            const btnExportarExcel = document.getElementById("btn-exportar-excel");
+            btnExportarExcel.addEventListener('click', async () => {
+                try {
+                    // Obtener los datos de la API
+                    const response = await fetch('/api/ocproceso/reporte');
+                    if (!response.ok) {
+                        throw new Error('Error al obtener los datos del reporte');
+                    }
+                    const data = await response.json();
 
-            formularioOc.addEventListener("submit", async (e) => {
-                e.preventDefault();
+                    const {
+                        totalOCProceso,
+                        totalVehiculos,
+                        Deudaglobal,
+                        totalPagosGlobal,
+                        saldoPendienteGlobal,
+                        porcentajeAvanceGlobal
+                    } = data.resumenEjecutivo;
 
-                const valorSeleccionado = document.querySelector('input[name="escorrecto"]:checked').value;
+                    const detallesOrdenes = data.detallesOrdenes;
 
-                if (confirm('¿Actualizar el detalle?')) {
-                    formData = new FormData();
-                    formData.append('escorrecto', valorSeleccionado);
+                    // Crear el libro y la hoja de trabajo de Excel
+                    const workbook = new ExcelJS.Workbook();
+                    const worksheet = workbook.addWorksheet('Resumen Ejecutivo');
 
-                    try {
-                        const res = await fetch(`/oc/update/${idOC}`, {
-                            method: 'POST',
-                            body: formData
-                        })
+                    // Agregar el título principal
+                    worksheet.mergeCells('A1:H1');
+                    const titleCell = worksheet.getCell('A1');
+                    titleCell.value = 'Resumen Ejecutivo de Órdenes en Proceso';
+                    titleCell.font = {
+                        size: 16,
+                        bold: true
+                    };
+                    titleCell.alignment = {
+                        horizontal: 'center'
+                    };
 
-                        const data = await res.json();
+                    // Construir la tabla de Totales Globales
+                    worksheet.getCell('A3').value = 'Totales Globales';
+                    worksheet.getCell('A3').font = {
+                        bold: true,
+                        size: 12,
+                        underline: true
+                    };
 
-                        if (data.success) {
-                            modalOc.hide();
-                            showToast(data.message, 'SUCCESS', 1000);
-                            // setTimeout(() => location.reload(), 1000);
+                    const headerTotales = ['Métricas', 'Valor', 'Descripción'];
+                    const headerTotalesRow = worksheet.addRow(headerTotales);
 
-                        } else {
-                            modalOc.hide();
-                            showToast(data.message, 'WARNING', 1000);
-                        }
+                    // Aplicar estilos a la fila de encabezado de totales
+                    headerTotalesRow.font = {
+                        bold: true
+                    };
+                    headerTotalesRow.eachCell(cell => {
+                        cell.fill = {
+                            type: 'pattern',
+                            pattern: 'solid',
+                            fgColor: {
+                                argb: 'FFD3D3D3'
+                            }
+                        };
+                        cell.border = {
+                            top: {
+                                style: 'thin'
+                            },
+                            left: {
+                                style: 'thin'
+                            },
+                            bottom: {
+                                style: 'thin'
+                            },
+                            right: {
+                                style: 'thin'
+                            }
+                        };
+                    });
 
-                    } catch (error) {
-                        console.error(error);
+                    // Formatear los datos de totales y agregar a la hoja
+                    const resumenData = [
+                        ['Total de OCs', parseInt(totalOCProceso), 'Órdenes de compra en proceso'],
+                        ['Total de Vehículos', parseInt(totalVehiculos), 'Vehículos entre todas las OCs'],
+                        ['Deuda Global', parseFloat(Deudaglobal), 'Monto total adeudado entre todas las OCs'],
+                        ['Total Pagos Global', parseFloat(totalPagosGlobal), 'Suma de todos los pagos realizados'],
+                        ['Saldo Pendiente Global', parseFloat(saldoPendienteGlobal), 'Suma de los saldos por pagar'],
+                        ['Porcentaje de Avance Global', parseFloat(porcentajeAvanceGlobal) / 100, 'Avance promedio entre todas las OCs']
+                    ];
+
+                    const firstTotalesRow = 5;
+                    resumenData.forEach((row, index) => {
+                        const newRow = worksheet.getRow(firstTotalesRow + index);
+                        newRow.values = row;
+                        newRow.eachCell(cell => {
+                            cell.border = {
+                                top: {
+                                    style: 'thin'
+                                },
+                                left: {
+                                    style: 'thin'
+                                },
+                                bottom: {
+                                    style: 'thin'
+                                },
+                                right: {
+                                    style: 'thin'
+                                }
+                            };
+                        });
+                    });
+
+                    
+                    worksheet.getCell('B7').numFmt = '_($* #,##0.00_);_($* (#,##0.00);_($* "-"??_);_(@_)';
+                    worksheet.getCell('B8').numFmt = '_($* #,##0.00_);_($* (#,##0.00);_($* "-"??_);_(@_)';
+                    worksheet.getCell('B9').numFmt = '_($* #,##0.00_);_($* (#,##0.00);_($* "-"??_);_(@_)';
+
+                    
+                    worksheet.getCell('B10').numFmt = '0.00%';
+
+                    // Construir la tabla de Detalle Completo de Órdenes
+                    const startRowDetalle = worksheet.rowCount + 2;
+                    worksheet.getCell(`A${startRowDetalle}`).value = 'Detalle Completo de Órdenes';
+                    worksheet.getCell(`A${startRowDetalle}`).font = {
+                        bold: true,
+                        size: 12,
+                        underline: true
+                    };
+
+                    const headersDetalle = [
+                        'OC Identificador',
+                        'Concesionario',
+                        'Ubicación',
+                        'Total OC',
+                        'Pagado',
+                        'Saldo',
+                        '% Avance',
+                        'Cant. Vehículos'
+                    ];
+
+                    const headerDetalleRow = worksheet.addRow(headersDetalle);
+                    headerDetalleRow.font = {
+                        bold: true
+                    };
+                    headerDetalleRow.eachCell(cell => {
+                        cell.fill = {
+                            type: 'pattern',
+                            pattern: 'solid',
+                            fgColor: {
+                                argb: 'FFD3D3D3'
+                            }
+                        };
+                        cell.border = {
+                            top: {
+                                style: 'thin'
+                            },
+                            left: {
+                                style: 'thin'
+                            },
+                            bottom: {
+                                style: 'thin'
+                            },
+                            right: {
+                                style: 'thin'
+                            }
+                        };
+                    });
+
+                    // Llenar la tabla de detalles con los datos
+                    detallesOrdenes.forEach(oc => {
+                        const row = worksheet.addRow([
+                            oc.OCIdentificador,
+                            oc.Concesionario,
+                            oc.ubicacionConcesionario,
+                            parseFloat(oc.totalOC),
+                            parseFloat(oc.pagado),
+                            parseFloat(oc.saldo),
+                            parseFloat(oc.avancePorcentaje) / 100,
+                            oc.totalVehiculos
+                        ]);
+
+                        // Aplicar bordes a las celdas de datos
+                        row.eachCell(cell => {
+                            cell.border = {
+                                top: {
+                                    style: 'thin'
+                                },
+                                left: {
+                                    style: 'thin'
+                                },
+                                bottom: {
+                                    style: 'thin'
+                                },
+                                right: {
+                                    style: 'thin'
+                                }
+                            };
+                        });
+                    });
+
+
+                    // Aplicar formato de moneda y porcentaje a las columnas de la segunda tabla
+                    worksheet.getColumn('D').numFmt = '_($* #,##0.00_);_($* (#,##0.00);_($* "-"??_);_(@_)';
+                    worksheet.getColumn('E').numFmt = '_($* #,##0.00_);_($* (#,##0.00);_($* "-"??_);_(@_)';
+                    worksheet.getColumn('F').numFmt = '_($* #,##0.00_);_($* (#,##0.00);_($* "-"??_);_(@_)';
+                    worksheet.getColumn('G').numFmt = '0.00%';
+
+                    // Ajustar el ancho de las columnas
+                    worksheet.columns.forEach(column => {
+                        let maxLength = 0;
+                        column.eachCell({
+                            includeEmpty: true
+                        }, cell => {
+                            const columnLength = cell.value ? cell.value.toString().length : 10;
+                            if (columnLength > maxLength) {
+                                maxLength = columnLength;
+                            }
+                        });
+                        column.width = Math.min(30, maxLength < 10 ? 10 : maxLength + 2);
+                    });
+
+
+                    const observacionesCol = worksheet.getColumn('C');
+                    if (observacionesCol) {
+                        observacionesCol.width = 40;
                     }
 
-                }
+                    // Generar el archivo y descargarlo
+                    const buffer = await workbook.xlsx.writeBuffer();
+                    const blob = new Blob([buffer], {
+                        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                    });
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'Resumen_Ejecutivo.xlsx';
+                    a.click();
+                    window.URL.revokeObjectURL(url);
 
+                } catch (error) {
+                    console.error('Error al exportar a Excel:', error);
+                    alert('Hubo un error al exportar el reporte. Por favor, inténtelo de nuevo.');
+                }
             });
+
+
+
 
 
             document.querySelectorAll(".btn-abrir-modal-estado").forEach(btn => {
@@ -355,6 +582,8 @@
                     modalProceso.show();
                 });
             });
+
+
 
             // Enviar el formulario
             formProceso.addEventListener("submit", async (e) => {
@@ -507,6 +736,7 @@
                             detailConcesionarioRazonSocial.textContent = orden.concesionario.razon_social || 'N/A';
 
                             const numeroOc = orden.numero_oc_formateado || 'N/A';
+                            // console.log(numeroOc);
                             const fechaEmision = orden.fecha_emision_oc || 'N/A';
                             const moneda = orden.moneda_oc || 'N/A';
                             const total = orden.totales.total ? parseFloat(orden.totales.total).toFixed(2) : '0.00';

@@ -27,3 +27,6 @@ $router->add('GET','/api/oc/{id}','OrdenCompraController','searchtDetOCByIdOc');
 
 $router->add('GET','/api/oc/infoAutos/{id}','OrdenCompraController','searchInfoAutos');
 
+$router->add('GET','/api/ocproceso/reporte','OrdenCompraController','getReporteOCProceso');
+
+

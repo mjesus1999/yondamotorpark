@@ -1,10 +1,14 @@
 document.getElementById('btn-generar-pdf').addEventListener('click', () => {
+    const dataPDF = document.querySelectorAll("#tabla-pagos-datos tbody tr");
+    if (dataPDF.length === 0 || (dataPDF.length === 1 && dataPDF[0].querySelectorAll("td").length === 1)) {
+        alert("No hay datos en la tabla para exportar el PDF.");
+        return;
+    }
 
-    // Función de formato de números, idéntica a la del primer ejemplo
     function formatNumber(num) {
         let cleanNum = String(num).replace(/[^\d.-]/g, '');
         if (!cleanNum || cleanNum === '' || isNaN(cleanNum)) {
-            return '0.00';
+            return '';
         }
         return Number(cleanNum).toLocaleString('en-US', {
             minimumFractionDigits: 2,
@@ -12,230 +16,219 @@ document.getElementById('btn-generar-pdf').addEventListener('click', () => {
         });
     }
 
- 
-    const logo = "data:image/png;base64,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";
+    const logo = window.logoBase64;
     const date = new Date().toLocaleDateString();
+    const numeroIdentificadorOC = document.getElementById('numeroIdentificadorOC') ? document.getElementById('numeroIdentificadorOC').textContent.trim() : 'N/A';
+    const concesionario = document.getElementById('concesionario') ? document.getElementById('concesionario').textContent.trim() : 'N/A';
 
-    const headersVehiculos = [{
-        text: 'Marca / Modelo',
-        style: 'tableHeader',
-        alignment: 'center'
-    }, {
-        text: 'Tipo',
-        style: 'tableHeader',
-        alignment: 'center'
-    }, {
-        text: 'Versión',
-        style: 'tableHeader',
-        alignment: 'center'
-    }, {
-        text: 'Combustible',
-        style: 'tableHeader',
-        alignment: 'center'
-    }, {
-        text: 'Color',
-        style: 'tableHeader',
-        alignment: 'center'
-    }, {
-        text: 'Chasis',
-        style: 'tableHeader',
-        alignment: 'center'
-    }, {
-        text: 'Placa',
-        style: 'tableHeader',
-        alignment: 'center'
-    }, {
-        text: 'Placa Rotativa',
-        style: 'tableHeader',
-        alignment: 'center'
-    }, {
-        text: 'Serie Motor',
-        style: 'tableHeader',
-        alignment: 'center'
-    }, {
-        text: 'Año',
-        style: 'tableHeader',
-        alignment: 'center'
-    }, {
-        text: 'Estado',
-        style: 'tableHeader',
-        alignment: 'center'
-    }];
+    // ----------------------------
+    // Tabla Vehículos
+    // ----------------------------
+    const headersVehiculos = [
+        { text: 'Marca / Modelo', style: 'tableHeader'},
+        { text: 'Características', style: 'tableHeader', alignment: 'left' },
+        { text: 'Chasis', style: 'tableHeader' },
+        { text: 'Placa', style: 'tableHeader' },
+        { text: 'P. Rotativa', style: 'tableHeader' },
+        { text: 'S. Motor', style: 'tableHeader' },
+        { text: 'Año', style: 'tableHeader' },
+        { text: 'Estado', style: 'tableHeader' }
+    ];
     const bodyVehiculos = [headersVehiculos];
 
-    document.querySelectorAll('.table.table-bordered.table-hover tbody tr').forEach(row => {
+    document.querySelectorAll('#tabla-vehiculos tbody tr').forEach(row => {
         const cols = row.querySelectorAll('td');
-        const rowData = Array.from(cols).map(td => ({
-            text: td.textContent.trim(),
-            alignment: 'center'
-        }));
+
+        const marcaModelo = cols[0].textContent.trim();
+        const caracteristicas = [
+            cols[1].textContent.trim(),
+            cols[2].textContent.trim(),
+            cols[3].textContent.trim(),
+            cols[4].textContent.trim()
+        ].filter(v => v !== '').join('/');
+
+        const chasis = cols[5].textContent.trim();
+        const placa = cols[6].textContent.trim();
+        const placaRotativa = cols[7].textContent.trim();
+        const serieMotor = cols[8].textContent.trim();
+        const anio = cols[9].textContent.trim();
+        const estado = cols[10].textContent.trim();
+
+        const rowData = [
+            { text: marcaModelo },
+            { text: caracteristicas, alignment: 'left' },
+            { text: chasis },
+            { text: placa },
+            { text: placaRotativa },
+            { text: serieMotor },
+            { text: anio },
+            { text: estado }
+        ];
         bodyVehiculos.push(rowData);
     });
 
-    const headersPagos = [{
-        text: '#',
-        style: 'tableHeader',
-        alignment: 'center'
-    }, {
-        text: 'Monto Pagado',
-        style: 'tableHeader',
-        alignment: 'center'
-    }, {
-        text: 'Saldo Restante',
-        style: 'tableHeader',
-        alignment: 'center'
-    }, {
-        text: 'Fecha Real Pago',
-        style: 'tableHeader',
-        alignment: 'center'
-    }];
+    // ----------------------------
+    // Tabla Pagos + Observaciones
+    // ----------------------------
+    const headersPagos = [
+        { text: '#', style: 'tableHeader' },
+        { text: 'Fecha Pago', style: 'tableHeader' },
+        { text: 'Entidad', style: 'tableHeader' },
+        { text: 'N° Transacción', style: 'tableHeader' },
+        { text: 'Moneda', style: 'tableHeader' },
+        { text: 'Monto Pagado', style: 'tableHeader' },
+        { text: 'Restante', style: 'tableHeader' },
+        { text: 'T.Cambio', style: 'tableHeader' },
+        { text: 'Valor Dólares', style: 'tableHeader' },
+    ];
 
     const bodyPagos = [headersPagos];
-    document.querySelectorAll('.table-pagos tbody tr').forEach(row => {
-        const cols = row.querySelectorAll('td:not(:nth-child(5)):not(:nth-child(6))');
-        if (cols.length > 0) {
-            const rowData = Array.from(cols).map((td, index) => {
-                const textContent = td.textContent.trim();
-                if (index === 1 || index === 2) { 
-                    const cleanValue = textContent.replace(/[^\d.-]/g, '');
-                    const formattedValue = formatNumber(cleanValue);
-                    return {
-                        text: `$${formattedValue}`, 
-                        alignment: 'center'
-                    };
+    const bodyObservaciones = [];
+
+    document.querySelectorAll('#tabla-pagos-datos tbody tr').forEach(row => {
+        const cols = row.querySelectorAll('td');
+        const rowData = new Array(9).fill({ text: '' });
+
+        for (let i = 0; i < Math.min(cols.length, 9); i++) {
+            const td = cols[i];
+            let textContent = td.textContent.trim();
+            if ([5, 6, 7, 8].includes(i)) {
+                let simbolo = '';
+                if (textContent.startsWith('$')) simbolo = '$';
+                else if (textContent.startsWith('S/')) simbolo = 'S/';
+                const cleanValue = textContent.replace(/[^\d.-]/g, '');
+                const formattedValue = formatNumber(cleanValue);
+                rowData[i] = {
+                    text: simbolo ? `${simbolo}  ${formattedValue}` : formattedValue,
+                    alignment: 'right'
                 }
-                return {
-                    text: textContent,
-                    alignment: 'center'
-                };
-            });
-            bodyPagos.push(rowData);
+
+            } else {
+                rowData[i] = { text: textContent };
+            }
+        }
+        bodyPagos.push(rowData);
+
+        // Observaciones
+        const obsIndex = 9;
+        const obsTd = cols[obsIndex];
+        const btnDetalle = obsTd.querySelector('button.ver-detalle-observacion');
+        if (btnDetalle && btnDetalle.getAttribute('data-observacion')) {
+            const numeroPago = cols[0].textContent.trim();
+            const observacion = btnDetalle.getAttribute('data-observacion');
+            bodyObservaciones.push([
+                { text: numeroPago },
+                { text: observacion, alignment: 'left' }
+            ]);
         }
     });
 
-  
+    // Totales
     let totalAmortizado = 0;
+    const totalAmortizadoEl = document.getElementById('total-pagado');
+    if (totalAmortizadoEl) {
+        const match = totalAmortizadoEl.textContent.match(/Total Pagado:\s*\$([\d,\.]+)/);
+        if (match && match[1]) {
+            totalAmortizado = parseFloat(match[1].replace(/,/g, ''));
+        }
+    }
+
     let saldoRestante = 0;
-    document.querySelectorAll('.table-pagos tbody tr').forEach(row => {
-        const montoStr = row.cells[1].textContent.replace(/[^\d.]/g, '');
-        const saldoStr = row.cells[2].textContent.replace(/[^\d.]/g, '');
-        totalAmortizado += parseFloat(montoStr) || 0;
-        saldoRestante = parseFloat(saldoStr) || 0;
-    });
+    const filasPagos = document.querySelectorAll('.table-pagos tbody tr');
+    if (filasPagos.length > 0) {
+        const lastRow = filasPagos[filasPagos.length - 1];
+        if (lastRow && lastRow.cells && lastRow.cells.length >= 7) {
+            const saldoStr = lastRow.cells[6].textContent.replace(/[^\d.]/g, '');
+            saldoRestante = parseFloat(saldoStr) || 0;
+        }
+    }
+
+    let totalDeuda = totalAmortizado + saldoRestante;
+    let avancePorcentaje = totalDeuda > 0 ? (totalAmortizado / totalDeuda) * 100 : 0;
+
+    const totalRow = [
+        {
+            text: `TOTAL DEUDA: $${formatNumber(totalDeuda)} | AVANCE: ${avancePorcentaje.toFixed(2)}% | TOTAL PAGADO: $${formatNumber(totalAmortizado)} | SALDO: $${formatNumber(saldoRestante)} | FECHA: ${date}`,
+            colSpan: 9,
+            alignment: 'center',
+            bold: true,
+            fillColor: '#fff59d',
+            margin: [0, 5, 0, 5]
+        }, {}, {}, {}, {}, {}, {}, {}, {}
+    ];
+    bodyPagos.push(totalRow);
 
     const documento = {
         pageSize: 'A4',
-        pageOrientation: 'landscape',
+        pageOrientation: 'portrait',
         pageMargins: [40, 25, 25, 25],
-        defaultStyle: {
-            fontSize: 7.2,
-        },
-        content: [{
-            columns: [{
-                image: logo,
-                width: 80,
-                alignment: 'left'
-            }, {
-                stack: [{
-                    text: 'YONDA & GRUPO HUARACA E.I.R.L',
-                    fontSize: 12,
-                    bold: true,
-                    color: '#2c3e50'
-                }, {
-                    text: 'RUC: 20609396866',
-                    fontSize: 10,
-                    margin: [0, 2, 0, 0],
-                    bold: true
-                }],
-                alignment: 'right',
-                margin: [10, 0, 0, 0]
-            }],
-            margin: [0, 0, 0, 20]
-        }, {
-            text: 'INVENTARIO DE VEHÍCULOS',
-            style: 'subheader',
-            alignment: 'center',
-            margin: [0, 0, 0, 10],
-            decoration: 'underline',
-            fontSize: 14,
-            bold: true
-        }, {
-            style: 'tableVehiculos',
-            table: {
-                headerRows: 1,
-                widths: ['*', '*', '*', '*', '*', '*', '*','*','*','*','*'],
-                body: bodyVehiculos
+        defaultStyle: { fontSize: 7.2, alignment: 'center' },
+
+        content: [
+
+            {
+                columns: [
+                    { image: logo, width: 80, alignment: 'left', margin: [0, 0, 0, 0] },
+                    {
+                        stack: [
+                            { text: 'YONDA & GRUPO HUARACA E.I.R.L', fontSize: 12, bold: true, color: '#2c3e50', alignment: 'right' },
+                            { text: 'RUC: 20609396866', fontSize: 10, bold: true, alignment: 'right' },
+
+                        ],
+                        margin: [10, 0, 0, 0]
+                    }
+                ],
+                margin: [0, 0, 0, 20]
             },
-            layout: {
-                fillColor: (rowIndex) => (rowIndex === 0 ? '#e0e0e0' : null),
-            }
-        }, {
-            text: 'PAGOS REALIZADOS',
-            style: 'subheader',
-            alignment: 'center',
-            margin: [0, 20, 0, 10],
-            decoration: 'underline',
-            fontSize: 14,
-            bold: true
-        }, {
-            style: 'tablePagos',
-            table: {
-                headerRows: 1,
-                widths: ['auto', '*', '*', '*'],
-                body: bodyPagos
+            {
+                columns: [
+                    { text: `OC-IDENTIFICADOR: #${numeroIdentificadorOC}`, style: 'subheader', bold: true, fontSize: 8, alignment: 'left' },
+                    { text: `CONCESIONARIO: ${concesionario}`, style: 'subheader', bold: true, fontSize: 8, alignment: 'right' }
+                ],
+                margin: [0, 10, 0, 20]
             },
-            layout: {
-                fillColor: (rowIndex) => (rowIndex === 0 ? '#e0e0e0' : null),
-            }
-        }, {
-            columns: [{
-                text: `TOTAL PAGADO: $${formatNumber(totalAmortizado)}`, 
-                style: 'totalPagado'
-            }, {
-                text: `SALDO RESTANTE: $${formatNumber(saldoRestante)}`, 
-                style: 'saldo'
-            }, {
-                text: `FECHA DE GENERACIÓN: ${date}`,
-                style: 'fecha'
-            }]
-        }],
+            {
+                style: 'tableVehiculos',
+                table: {
+                    headerRows: 1,
+                    widths: ['auto', '*', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto'],
+                    body: bodyVehiculos
+                },
+                layout: 'lightHorizontalLines'
+            },
+            { text: 'PAGOS REALIZADOS', style: 'subheader', alignment: 'center', margin: [0, 20, 0, 10], decoration: 'underline', bold: true, fontSize: 10 },
+            {
+                style: 'tablePagos',
+                table: {
+                    headerRows: 1,
+                    widths: ['auto', 'auto', '*', '*', 'auto', 'auto', 'auto', 'auto', 'auto'],
+                    body: bodyPagos
+                },
+                layout: 'lightHorizontalLines'
+            },
+            // Lógica condicional para mostrar u ocultar la sección de observaciones
+            ...(bodyObservaciones.length > 0 ? [
+                { text: 'OBSERVACIONES DETALLADAS', style: 'subheader', alignment: 'center', margin: [0, 20, 0, 10], decoration: 'underline', bold: true, fontSize: 10 },
+                {
+                    style: 'tableObservaciones',
+                    table: {
+                        headerRows: 1,
+                        widths: ['auto', '*'],
+                        body: [
+                            [{ text: '# Pago', style: 'tableHeader' }, { text: 'Observación', style: 'tableHeader' }],
+                            ...bodyObservaciones
+                        ]
+                    },
+                    layout: 'lightHorizontalLines'
+                }
+            ] : []),
+        ],
         styles: {
-            subheader: {
-                bold: true,
-                fontSize: 10
-            },
-            tableVehiculos: {
-                margin: [0, 5, 0, 5]
-            },
-            tablePagos: {
-                margin: [0, 5, 0, 0]
-            },
-            tableHeader: {
-                bold: true,
-                fontSize: 8,
-                color: '#333333'
-            },
-            totalPagado: {
-                color: '#000',
-                fontSize: 9,
-                bold: true,
-                alignment: 'left',
-                margin: [0, 20, 0, 2]
-            },
-            saldo: {
-                color: '#000',
-                fontSize: 9,
-                bold: true,
-                alignment: 'center',
-                margin: [0, 20, 0, 5]
-            },
-            fecha: {
-                color: '#000',
-                fontSize: 9,
-                bold: true,
-                alignment: 'right',
-                margin: [0, 20, 0, 5]
-            }
+            subheader: { bold: true },
+            tableVehiculos: { margin: [0, 5, 0, 5] },
+            tablePagos: { margin: [0, 5, 0, 5] },
+            tableObservaciones: { margin: [0, 5, 0, 5] },
+            tableHeader: { bold: true, color: '#333333', alignment: 'center' }
         }
     };
 

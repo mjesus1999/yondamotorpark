@@ -1,36 +1,54 @@
 
-USE motorpark;
+USE motorpark2;
 
+DROP TRIGGER IF EXISTS tr_set_saldo_pagoOC;
 DELIMITER //
 CREATE TRIGGER tr_set_saldo_pagoOC
 BEFORE INSERT ON pagosOC
 FOR EACH ROW
 BEGIN
     DECLARE totalOC DECIMAL(10,2);
-    DECLARE totalPagado DECIMAL(10,2);
+    DECLARE totalPagosUSD DECIMAL(10,4); -- Usar más decimales internamente para mayor precisión
 
-    -- Total de la OC con IGV
-    SELECT IFNULL(SUM(preciocompra * 1.18),0) INTO totalOC
+    -- Obtener el total de la OC con IGV
+    SELECT ROUND(IFNULL(SUM(preciocompra * 1.18),0),2) INTO totalOC
     FROM detordencompra
     WHERE idordencompra = NEW.idorden;
 
-    -- Total pagado hasta ahora
-    SELECT IFNULL(SUM(amortizacion),0) INTO totalPagado
+    -- Calcular el total de todos los pagos (existentes + el nuevo pago) en USD
+    -- Se hace un solo cálculo para evitar errores de redondeo acumulados
+    SELECT IFNULL(SUM(
+        CASE
+            WHEN moneda = 'PEN' AND tipocambio > 0 THEN amortizacion / tipocambio
+            ELSE amortizacion
+        END
+    ), 0) INTO totalPagosUSD
     FROM pagosOC
     WHERE idorden = NEW.idorden;
+    
+    SET totalPagosUSD = totalPagosUSD + (
+        CASE
+            WHEN NEW.moneda = 'PEN' AND NEW.tipocambio > 0 THEN NEW.amortizacion / NEW.tipocambio
+            ELSE NEW.amortizacion
+        END
+    );
 
     -- Validar que el nuevo pago no exceda el saldo
-    IF (totalPagado + NEW.amortizacion) > totalOC THEN
+    -- La validación se hace con el valor sin redondear para mayor precisión
+    IF totalPagosUSD > totalOC + 0.001 THEN -- Se agrega un pequeño margen para evitar problemas de flotantes
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'El monto de amortizacion excede el saldo de la orden';
     END IF;
 
-    -- Calcular saldo restante (mínimo 0)
-    SET NEW.saldo = GREATEST(0, totalOC - (totalPagado + NEW.amortizacion));
+    -- Calcular saldo restante con redondeo al final
+    SET NEW.saldo = ROUND(GREATEST(0, totalOC - totalPagosUSD), 2);
 END;
 //
 DELIMITER ;
 
+SELECT * FROM pagosOc;
+
+SHOW COLUMNS FROM pagosOC;
 
 
 -- TRIGGER PARA CUABDO EL SALDO SEA 0, OC PASA A PAGADO 
@@ -43,11 +61,16 @@ BEGIN
     DECLARE totalOC DECIMAL(10,2);
     DECLARE totalPagado DECIMAL(10,2);
 
-    SELECT IFNULL(SUM(preciocompra * 1.18),0) INTO totalOC
+    SELECT IFNULL(SUM(preciocompra * 1.18),0) INTO totalOC -- SUMA TODOS LOS PRECIOSCOMPRA DE ESA OC
     FROM detordencompra
     WHERE idordencompra = NEW.idorden;
 
-    SELECT IFNULL(SUM(amortizacion),0) INTO totalPagado
+    SELECT IFNULL(SUM(
+        CASE
+            WHEN moneda = 'PEN' AND tipocambio > 0 THEN amortizacion / tipocambio
+            ELSE amortizacion
+        END
+    ),0) INTO totalPagado
     FROM pagosOC
     WHERE idorden = NEW.idorden;
 
