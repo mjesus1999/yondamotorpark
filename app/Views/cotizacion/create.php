@@ -375,7 +375,7 @@
                         <input type="hidden" name="moneda" id="inputMoneda">
 
                         <!-- Valor -->
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <div class="form-floating">
                                 <input type="text" placeholder="Valor" class="form-control" id="valor" name="valor"
                                     readonly>
@@ -406,7 +406,7 @@
                         <input type="hidden" name="tipoCambio" id="inputTipoCambio">
 
                         <!-- Valor en soles -->
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <div class="form-floating">
                                 <input type="text" placeholder="Valor de Moneda" class="form-control" id="valormoneda"
                                     name="valormoneda" readonly>
@@ -414,6 +414,15 @@
                             </div>
                         </div>
                         <input type="hidden" name="valorconvertido" id="inputValorConvertido">
+
+                        <div class="col-md-2">
+                            <div class="form-floating">
+                                <input type="text" placeholder="Gastos Administrativos" class="form-control" id="gastosAdministrativos" 
+                                    name="gastos_administrativos" readonly>
+                                <label for="gastosAdministrativos">Gastos Administrativos <span class="text-danger">*</span></label>
+                            </div>
+                        </div>
+                        <input type="hidden" name="gastos_administrativos" id="inputGastosAdministrativos">
 
                     </div>
 
@@ -496,6 +505,7 @@
                             </div>
 
                             <!-- Mantener tamaño original del botón Cronograma -->
+
                             <div class="col-md-2">
                                 <div class="form-floating h-100">
                                     <button class="btn btn-outline-primary w-100 h-100 fin-btn-cronograma"
@@ -1261,8 +1271,8 @@
                     $('#tablaVehiculosModal').DataTable({
                         order: [[0, 'desc']],
                         pagingType: 'full_numbers',
-                        pageLength: 15,
-                        lengthMenu: [[10, 15, 30, -1], [10, 15, 30, "Todos"]],
+                        pageLength: 20,
+                        lengthMenu: [[15, 20, 35, -1], [15, 20, 35, "Todos"]],
                         scrollX: true,
                         destroy: true,
                         language: {

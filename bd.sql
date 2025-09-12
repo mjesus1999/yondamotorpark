@@ -388,6 +388,9 @@ CREATE TABLE cotizaciones (
 ) ENGINE = INNODB;
 -- ALTER TABLE cotizaciones ADD COLUMN comentarios TEXT AFTER estadocotizacion;
 -- ALTER TABLE cotizaciones ADD COLUMN fechaseguimiento DATETIME NULL AFTER comentarios;
+-- Agregar campo de gastos administrativos a la tabla cotizaciones
+-- ALTER TABLE cotizaciones ADD COLUMN gastosadministrativos DECIMAL(9, 2) NOT NULL DEFAULT 0.00 COMMENT 'Gastos administrativos según tipo de vehículo' AFTER valorcuota;
+-- ALTER TABLE cotizaciones ADD COLUMN fechareactivacion DATETIME NULL AFTER modificado;
 
 CREATE TABLE contratos (
     idcontrato INT AUTO_INCREMENT PRIMARY KEY,

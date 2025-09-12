@@ -158,7 +158,7 @@ class Persona
 
 
     // DEYANIRA
-    /* public function searchByDNI(string $dni): ?array
+    public function searchByDNI(string $dni): ?array
     {
         $query = "SELECT idpersona, apellidos, nombres FROM personas WHERE nrodoc = :dni LIMIT 1";
         try {
@@ -171,5 +171,5 @@ class Persona
 
             return [];
         }
-    } */
+    }
 }

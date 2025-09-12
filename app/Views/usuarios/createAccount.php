@@ -26,14 +26,16 @@
     <div class="alert alert-info mt-2" role="alert">
         <div class="row">
             <div class="col-md-6 d-flex">
-                <nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='%236c757d'/%3E%3C/svg%3E&#34;);"
-                    aria-label="breadcrumb">
-                    <ol class="breadcrumb mb-0">
-                        <li class="breadcrumb-item"><a href="#">Registrar</a></li>
-                        <li class="breadcrumb-item active" aria-current="page">Cuentas</li>
-                    </ol>
-                </nav>
+
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="#">Registrar</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Cuentas</li>
+                </ol>
+
             </div>
+            <!-- <div class="col-md-6 text-end">
+                <a href="/usuarios" class="">[ Mostrar lista ]</a>
+            </div> -->
         </div>
     </div>
 
@@ -120,7 +122,8 @@
                                 <div class="form-floating">
                                     <input id="nombreSel" class="form-control" placeholder="Nombres y Apellidos"
                                         readonly>
-                                    <label for="form-label">Nombres y Apellidos</label>
+                                    <label for="form-label">Nombres y Apellidos <span
+                                            class="text-danger">*</span></label>
                                 </div>
                             </div>
 
@@ -128,7 +131,7 @@
                             <div class="col-md-4 mb-2">
                                 <div class="form-floating">
                                     <input id="areaSel" class="form-control" placeholder="Área Asignada" readonly>
-                                    <label for="form-label">Área Asignada</label>
+                                    <label for="form-label">Área Asignada <span class="text-danger">*</span></label>
                                 </div>
                             </div>
 
@@ -136,7 +139,7 @@
                             <div class="col-md-3 mb-2">
                                 <div class="form-floating">
                                     <input id="cargoSel" class="form-control" placeholder="Cargo Asignado" readonly>
-                                    <label for="form-label">Cargo</label>
+                                    <label for="form-label">Cargo <span class="text-danger">*</span></label>
                                 </div>
                             </div>
 
@@ -152,7 +155,8 @@
                                 <div class="form-floating">
                                     <input name="usernick" id="usernick" class="form-control"
                                         placeholder="Nombre de Usuario" value="<?= $old['usernick'] ?? '' ?>" required>
-                                    <label for="form-label">Nombres de Usuario</label>
+                                    <label for="form-label">Nombres de Usuario <span
+                                            class="text-danger">*</span></label>
                                     <div class="form-text small text-muted">Sugerencia: pulsa el nombre en la lista para
                                         autocompletar.</div>
                                 </div>
@@ -163,7 +167,7 @@
                                 <div class="form-floating">
                                     <input name="password1" type="password" class="form-control" minlength="8"
                                         placeholder="Contraseña" required>
-                                    <label for="form-label">Contraseña</label>
+                                    <label for="form-label">Contraseña <span class="text-danger">*</span></label>
                                 </div>
                             </div>
 
@@ -172,7 +176,8 @@
                                 <div class="form-floating">
                                     <input name="password2" type="password" class="form-control" minlength="8"
                                         placeholder="Confirmar Contraseña" required>
-                                    <label for="form-label">Comfirmar contraseña</label>
+                                    <label for="form-label">Comfirmar contraseña <span
+                                            class="text-danger">*</span></label>
                                 </div>
                             </div>
 
@@ -184,7 +189,7 @@
                             <div class="col-md-12 mb-2">
                                 <label class="form-label">Restricción horaria - Lunes a Sábado
                                     <strong><?= htmlspecialchars($start) ?></strong> -
-                                    <strong><?= htmlspecialchars($end) ?></strong>
+                                    <strong><?= htmlspecialchars($end) ?></strong> <span class="text-danger">*</span>
                                 </label>
                                 <div class="form-check">
                                     <input class="form-check-input" type="radio" name="restriccionhoraria" id="rest_si"

@@ -368,7 +368,7 @@ class PersonaController extends Controller
      * Buscar Persona por DNI
      * @return void
      */
-    /* public function searchByDNI(): void
+    public function searchByDNI(): void
     {
         header('Content-Type: application/json; charset=utf-8');
         $dni = trim($_GET['dni'] ?? '');
@@ -386,6 +386,6 @@ class PersonaController extends Controller
             $response = ['success' => false, 'message' => 'No encontrado'];
         }
         echo json_encode($response);
-    } */
+    }
 
 }

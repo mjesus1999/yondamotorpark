@@ -21,12 +21,12 @@
   <div class="alert alert-info mt-2" role="alert">
     <div class="row">
       <div class="col-md-6 d-flex">
-      
-          <ol class="breadcrumb mb-0">
-            <li class="breadcrumb-item"><a href="#">Usuario</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Registrar</li>
-          </ol>
-       
+
+        <ol class="breadcrumb mb-0">
+          <li class="breadcrumb-item"><a href="#">Usuario</a></li>
+          <li class="breadcrumb-item active" aria-current="page">Registrar</li>
+        </ol>
+
       </div>
       <div class="col-md-6 text-end">
         <a href="/usuarios" class="">[ Mostrar lista ]</a>
@@ -54,7 +54,7 @@
                 <!-- form-floating con flex-grow para que ocupe todo el espacio -->
                 <div class="form-floating flex-grow-1">
                   <input type="text" id="dni" name="nrodoc" class="form-control text-center" autofocus>
-                  <label for="dni">DNI</label>
+                  <label for="dni">DNI <span class="text-danger">*</span></label>
                 </div>
                 <button type="button" class="btn btn-primary" title="Administrar" data-bs-toggle="modal"
                   data-bs-target="#modalRegistrarPersona">
@@ -67,13 +67,13 @@
             <div class="col-md-5">
               <div class="form-floating">
                 <input type="text" id="apellidos" name="apellidos" class="form-control">
-                <label for="form-label">Apellidos</label>
+                <label for="form-label">Apellidos <span class="text-danger">*</span></label>
               </div>
             </div>
             <div class="col-md-5">
               <div class="form-floating">
                 <input type="text" id="nombres" name="nombres" class="form-control">
-                <label for="form-label">Nombres</label>
+                <label for="form-label">Nombres <span class="text-danger">*</span></label>
               </div>
             </div>
           </div>
@@ -99,7 +99,7 @@
                     <option value="<?= $a['idarea'] ?>"><?= htmlspecialchars($a['area']) ?></option>
                   <?php endforeach; ?>
                 </select>
-                <label for="area">Áreas</label>
+                <label for="area">Áreas <span class="text-danger">*</span></label>
               </div>
             </div>
             <!-- Campo de cargos -->
@@ -108,14 +108,14 @@
                 <select name="idcargo" id="cargo" class="form-select" required disabled>
                   <option value="">Seleccione un área primero</option>
                 </select>
-                <label for="cargo">Cargo</label>
+                <label for="cargo">Cargo <span class="text-danger">*</span></label>
               </div>
             </div>
             <!-- Fecha inicio -->
             <div class="col-md-2 mb-2">
               <div class="form-floating">
                 <input type="date" class="form-control" id="fecha-inicio" name="fecha_inicio">
-                <label for="fecha-inicio">Fecha Inicio</label>
+                <label for="fecha-inicio">Fecha Inicio <span class="text-danger">*</span></label>
               </div>
             </div>
             <!-- Fecha fin -->
@@ -153,7 +153,7 @@
             <div class="col-md-4">
               <div class="form-floating">
                 <input type="text" class="form-control" id="usernick" name="usuario" required>
-                <label for="form-label">Nombre de usuario</label>
+                <label for="form-label">Nombre de usuario <span class="text-danger">*</span></label>
               </div>
             </div>
             <div class="col-md-4">
@@ -161,13 +161,13 @@
                 <input type="password" class="form-control" id="password1" name="password1"
                   pattern="^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&]).{8,}$"
                   title="Mínimo 8 caracteres: al menos letra, número y símbolo" required>
-                <label for="form-label">Contraseña 1</label>
+                <label for="form-label">Contraseña <span class="text-danger">*</span></label>
               </div>
             </div>
             <div class="col-md-4">
               <div class="form-floating">
                 <input type="password" class="form-control" id="password2" name="password2" required>
-                <label for="form-label">Contraseña 2</label>
+                <label for="form-label">Confirmar Contraseña <span class="text-danger">*</span></label>
               </div>
             </div>
           </div>
@@ -206,21 +206,21 @@
                 <option value="CEX">CEX</option>
                 <option value="PAS">PAS</option>
               </select>
-              <label for="modal-tipodoc">Tipo Doc</label>
+              <label for="modal-tipodoc">Tipo Doc <span class="text-danger">*</span></label>
             </div>
             <div class="col-md-2 form-floating">
               <input type="text" class="form-control" id="modal-nrodoc" name="nrodoc" required>
-              <label for="modal-nrodoc">N° Documento</label>
+              <label for="modal-nrodoc">N° Documento <span class="text-danger">*</span></label>
             </div>
 
             <!-- Apellidos / Nombres -->
             <div class="col-md-4 form-floating">
               <input type="text" class="form-control" id="modal-apellidos" name="apellidos" required>
-              <label for="modal-apellidos">Apellidos</label>
+              <label for="modal-apellidos">Apellidos <span class="text-danger">*</span></label>
             </div>
             <div class="col-md-4 form-floating">
               <input type="text" class="form-control" id="modal-nombres" name="nombres" required>
-              <label for="modal-nombres">Nombres</label>
+              <label for="modal-nombres">Nombres <span class="text-danger">*</span></label>
             </div>
 
             <!-- Género / Fecha Nac. / Estado Civil -->
@@ -229,11 +229,11 @@
                 <option value="M">Masculino</option>
                 <option value="F">Femenino</option>
               </select>
-              <label for="modal-genero">Género</label>
+              <label for="modal-genero">Género <span class="text-danger">*</span></label>
             </div>
             <div class="col-md-4 form-floating">
               <input type="date" class="form-control" id="modal-fechanac" name="fechanac">
-              <label for="modal-fechanac">F. Nacimiento</label>
+              <label for="modal-fechanac">F. Nacimiento <span class="text-danger">*</span></label>
             </div>
             <div class="col-md-6 form-floating">
               <select class="form-select" id="modal-estadocivil" name="estadocivil">
@@ -272,7 +272,7 @@
             <!-- Teléfonos -->
             <div class="col-md-6 form-floating">
               <input type="text" class="form-control" id="modal-telprimario" name="telprimario" maxlength="9" required>
-              <label for="modal-telprimario">Teléfono Primario</label>
+              <label for="modal-telprimario">Teléfono Primario <span class="text-danger">*</span></label>
             </div>
             <div class="col-md-6 form-floating">
               <input type="text" class="form-control" id="modal-telalternativo" name="telalternativo" maxlength="9">
@@ -351,11 +351,11 @@
             const container = document.querySelector('.container-fluid') || document.body;
             const msg = json.message || 'Persona registrada correctamente';
             const alertHtml = `
-      <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
-        ${escapeHtml(msg)}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-      </div>
-    `;
+              <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+                ${escapeHtml(msg)}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+            `;
             container.insertAdjacentHTML('afterbegin', alertHtml);
 
             // Cerrar modal
@@ -432,24 +432,97 @@
         .then(res => res.json())
         .then(json => {
           if (json.success) {
-            //si el DNI existe
+            // Si el DNI existe, rellenar los campos
             idPersonaIn.value = json.idpersona;
             apellidosIn.value = json.apellidos;
             nombresIn.value = json.nombres;
+
+            // Toast de éxito (opcional)
+            showToast('Persona encontrada', 'success');
           } else {
-            //si el DNI no existe
+            // Si el DNI no existe
             idPersonaIn.value = '';
             apellidosIn.value = '';
             nombresIn.value = '';
 
-            //muetra el DNI en el modal
+            // Mostrar toast indicando que no existe y debe registrarlo
+            showToast('DNI no encontrado. Debe registrar los datos de la persona.', 'warning');
+
+            // Prellenar el DNI en el modal
             modalDniInput.value = dni;
 
+            // Abrir el modal
             bootstrap.Modal.getOrCreateInstance(personaModalEl).show();
           }
         })
-        .catch(err => console.error('Error buscando DNI:', err));
+        .catch(err => {
+          console.error('Error buscando DNI:', err);
+          showToast('Error al buscar el DNI. Intente nuevamente.', 'error');
+        });
     });
+
+    // Función para mostrar toast
+    function showToast(message, type = 'info') {
+      // Crear el elemento toast si no existe
+      let toastContainer = document.getElementById('toast-container');
+      if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.id = 'toast-container';
+        toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+        toastContainer.style.zIndex = '9999';
+        document.body.appendChild(toastContainer);
+      }
+
+      // Determinar la clase CSS según el tipo
+      let toastClass = 'bg-primary';
+      let iconClass = 'fa-info-circle';
+
+      switch (type) {
+        case 'success':
+          toastClass = 'bg-success';
+          iconClass = 'fa-check-circle';
+          break;
+        case 'warning':
+          toastClass = 'bg-warning';
+          iconClass = 'fa-exclamation-triangle';
+          break;
+        case 'error':
+          toastClass = 'bg-danger';
+          iconClass = 'fa-times-circle';
+          break;
+      }
+
+      // Crear el HTML del toast
+      const toastId = 'toast-' + Date.now();
+      const toastHtml = `
+        <div class="toast align-items-center ${toastClass} text-white border-0" role="alert" aria-live="assertive" aria-atomic="true" id="${toastId}">
+          <div class="d-flex">
+            <div class="toast-body d-flex align-items-center">
+              <i class="fas ${iconClass} me-2"></i>
+              ${message}
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+        </div>
+      `;
+
+      // Insertar el toast en el container
+      toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+
+      // Inicializar y mostrar el toast
+      const toastElement = document.getElementById(toastId);
+      const bsToast = new bootstrap.Toast(toastElement, {
+        autohide: true,
+        delay: 5000 // 5 segundos
+      });
+
+      bsToast.show();
+
+      // Remover el elemento del DOM cuando se oculte
+      toastElement.addEventListener('hidden.bs.toast', () => {
+        toastElement.remove();
+      });
+    }
 
     const sinFinCheckbox = document.getElementById('sin-fecha-fin');
     const fechaFinInput = document.getElementById('fecha-fin');
