@@ -201,7 +201,7 @@ document.getElementById('btn-generar-pdf').addEventListener('click', () => {
                 style: 'tablePagos',
                 table: {
                     headerRows: 1,
-                    widths: ['auto', 'auto', '*', '*', 'auto', 'auto', 'auto', 'auto', 'auto'],
+                    widths: ['auto', 'auto', '*', '*', 'auto', 'auto', 'auto', '*', 'auto'],
                     body: bodyPagos
                 },
                 layout: 'lightHorizontalLines'

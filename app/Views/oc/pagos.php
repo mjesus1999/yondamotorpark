@@ -80,6 +80,7 @@
         opacity: 0.5;
     }
 </style>
+
 <div class="container-fluid mt-4">
 
     <?php if (!empty($autos)): ?>
@@ -109,17 +110,17 @@
                             <tbody>
                                 <?php foreach ($autos as $auto): ?>
                                     <tr>
-                                        <td class="fw-bold text-center"><?= htmlspecialchars($auto['marca'] ?? '') ?> / <?= htmlspecialchars($auto['modelo'] ?? '') ?></td>
-                                        <td class="text-center"><?= htmlspecialchars($auto['tipovehiculo'] ?? '') ?></td>
-                                        <td class="text-center"><?= htmlspecialchars($auto['version'] ?? '') ?></td>
-                                        <td class="text-center"><?= htmlspecialchars($auto['combustible'] ?? '') ?></td>
-                                        <td class="text-center"><?= htmlspecialchars($auto['color'] ?? '') ?></td>
-                                        <td class="text-center"><?= htmlspecialchars($auto['chasis'] ?? '') ?></td>
-                                        <td class="text-center"><?= htmlspecialchars($auto['placa'] ?? '') ?></td>
-                                        <td class="text-center"><?= htmlspecialchars($auto['placarotativa'] ?? '') ?></td>
-                                        <td class="text-center"><?= htmlspecialchars($auto['seriemotor'] ?? '') ?></td>
-                                        <td class="text-center"><?= htmlspecialchars($auto['anio'] ?? '') ?></td>
-                                        <td class="text-center"><span class="badge bg-<?= ($auto['condicion'] ?? '') == 'Nuevo' ? 'success' : 'warning' ?>"><?= htmlspecialchars($auto['condicion'] ?? '') ?></span></td>
+                                        <td class="fw-bold text-center" style="font-size: 12px;"><?= htmlspecialchars($auto['marca'] ?? '') ?> / <?= htmlspecialchars($auto['modelo'] ?? '') ?></td>
+                                        <td class="text-center" style="font-size: 12px;"><?= htmlspecialchars($auto['tipovehiculo'] ?? '') ?></td>
+                                        <td class="text-center" style="font-size: 12px;"><?= htmlspecialchars($auto['version'] ?? '') ?></td>
+                                        <td class="text-center" style="font-size: 12px;"><?= htmlspecialchars($auto['combustible'] ?? '') ?></td>
+                                        <td class="text-center" style="font-size: 12px;"><?= htmlspecialchars($auto['color'] ?? '') ?></td>
+                                        <td class="text-center" style="font-size: 12px;"><?= htmlspecialchars($auto['chasis'] ?? '') ?></td>
+                                        <td class="text-center" style="font-size: 12px;"><?= htmlspecialchars($auto['placa'] ?? '') ?></td>
+                                        <td class="text-center" style="font-size: 12px;"><?= htmlspecialchars($auto['placarotativa'] ?? '') ?></td>
+                                        <td class="text-center" style="font-size: 12px;"><?= htmlspecialchars($auto['seriemotor'] ?? '') ?></td>
+                                        <td class="text-center" style="font-size: 12px;"><?= htmlspecialchars($auto['anio'] ?? '') ?></td>
+                                        <td class="text-center" style="font-size: 12px;"><span class="badge bg-<?= ($auto['condicion'] ?? '') == 'Nuevo' ? 'success' : 'warning' ?>"><?= htmlspecialchars($auto['condicion'] ?? '') ?></span></td>
                                     </tr>
                                 <?php endforeach; ?>
                             </tbody>
@@ -189,19 +190,19 @@
 
                             <div class="d-flex flex-wrap gap-2 mt-2">
                                 <?php if (isset($concesionario['concesionario'])): ?>
-                                    <span class="badge bg-white text-primary">
+                                    <span class="badge bg-white text-primary" id="concesionario">
                                         Concesionario: <?= htmlspecialchars($concesionario['concesionario']) ?> - <?= $concesionario['ubicacion'] ?>
                                     </span>
                                 <?php endif; ?>
                                 <?php if (isset($concesionario['idordencompra'])): ?>
                                     <span class="badge bg-white text-primary">OC #<?= htmlspecialchars($concesionario['idordencompra']) ?></span>
-                                    <span class="badge bg-white text-primary"><?= htmlspecialchars($concesionario['numeroOCIdentificador']) ?></span>
+                                    <span class="badge bg-white text-primary" id="numeroIdentificadorOC"><?= htmlspecialchars($concesionario['numeroOCIdentificador']) ?></span>
                                 <?php endif; ?>
                             </div>
                         </div>
 
                         <div class="d-flex align-items-center flex-wrap gap-2 justify-content-start justify-content-md-end">
-                            <span class="badge bg-white text-primary p-2">
+                            <span class="badge bg-white text-primary p-2" id="total-pagado">
                                 <i class="fas fa-dollar-sign me-1"></i>
                                 Total Pagado: $<?= isset($totalAmortizado) ? number_format($totalAmortizado, 2) : '0.00' ?>
                             </span>

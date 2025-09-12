@@ -27,18 +27,6 @@ CREATE TABLE pagosOC (
 ) ENGINE = InnoDB;
 
 -- ALTER TABLE pagosOC CHANGE COLUMN valorSoles valorUSD DECIMAL(10,2) NULL AFTER tipocambio;
-
-
-
-
-SELECT * FROM pagosOC;
-
-
-
-
-
--- // SP PARA LAS OC QEU ESTAN EN PROCESO. REPORTE GENREAL DE LAS OC k
-
 -- UPDATE pagosOC SET identidadpago = 1;
 -- ALTER TABLE pagosOC ADD COLUMN identidadpago INT NOT NULL AFTER idlogistica;
 -- 
@@ -49,58 +37,11 @@ SELECT * FROM pagosOC;
 -- ALTER TABLE pagosOC ADD COLUMN observaciones VARCHAR(400) NULL AFTER comprobante;
 
 
--- DELIMITER $$
 
--- CREATE PROCEDURE sp_oc_por_estado_reporte(IN p_estado VARCHAR(50))
--- BEGIN
---     SELECT 
---         oc.idordencompra,
---         oc.serie,
---         DATE_FORMAT(oc.emision, '%d-%m-%Y') AS emision, 
---         oc.moneda,
---         con.razonsocial,
---         (
---             SELECT IFNULL(SUM(preciocompra * 1.18),0) 
---             FROM detordencompra 
---             WHERE idordencompra = oc.idordencompra
---         ) AS totalOC,
---         (
---             SELECT IFNULL(SUM(amortizacion),0) 
---             FROM pagosOC 
---             WHERE idorden = oc.idordencompra
---         ) AS totalPagado,
---         (
---             (SELECT IFNULL(SUM(amortizacion),0) 
---              FROM pagosOC 
---              WHERE idorden = oc.idordencompra) /
---             NULLIF((SELECT IFNULL(SUM(preciocompra * 1.18),0) 
---              FROM detordencompra 
---              WHERE idordencompra = oc.idordencompra),0) * 100
---         ) AS avancePorcentaje,
---         (
---             SELECT COUNT(*) 
---             FROM detordencompra 
---             WHERE idordencompra = oc.idordencompra
---         ) AS totalVehiculos,
---         (
---             (SELECT IFNULL(SUM(preciocompra * 1.18),0) 
---              FROM detordencompra 
---              WHERE idordencompra = oc.idordencompra)
---             -
---             (SELECT IFNULL(SUM(amortizacion),0) 
---              FROM pagosOC 
---              WHERE idorden = oc.idordencompra)
---         ) AS saldoRestante
---     FROM ordenescompra oc
---     JOIN tiendas t ON oc.idtienda = t.idtienda
---     JOIN concesionarios con ON t.idconcesionario = con.idconcesionario
---     WHERE oc.estado = CONVERT(p_estado USING utf8mb4) COLLATE utf8mb4_general_ci
---     ORDER BY oc.idordencompra DESC;
--- END $$
 
--- DELIMITER ;
+
 CALL sp_oc_por_estado_reporte('proceso');
-select * from pagosoc;
+
 
 
 USE motorpark2;
@@ -173,7 +114,7 @@ BEGIN
         ROUND(saldo_pendiente, 2) AS 'saldoPendienteGlobal',
         ROUND(avance_general, 2) AS 'porcentajeAvanceGlobal';
 
-    -- 2. Consulta para el Detalle de Órdenes de Compra y Vehículos (Segundo conjunto de resultados)
+    -- Consulta para el Detalle de Órdenes de Compra y Vehículos (Segundo conjunto de resultados)
     SELECT
         CONCAT(oc.serie, '-', LPAD(oc.idordencompra, 5, '0')) AS 'OCIdentificador',
         con.nombrecomercial AS 'Concesionario',
@@ -222,6 +163,7 @@ BEGIN
             FROM detordencompra d 
             WHERE d.idordencompra = oc.idordencompra
         ) AS 'totalVehiculos',
+        oc.emision,
         GROUP_CONCAT(CONCAT(mar.marca, ' ', modl.modelo, ' / ', v.chasis) SEPARATOR ', ') AS 'Detalle de Vehículos'
     FROM
         ordenescompra oc
@@ -250,7 +192,7 @@ BEGIN
     ORDER BY
         oc.idordencompra DESC;
 
-END //
+END 
 
 DELIMITER ;
 CALL sp_reporte_general_oc_proceso();

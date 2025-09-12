@@ -145,41 +145,7 @@ END //
 
 DELIMITER ;
 
--- DELIMITER //
 
--- CREATE PROCEDURE sp_getAll_OC_Compras()
--- BEGIN
---     SELECT 
---         orden.idordencompra,
---         com.idcompra,
---         orden.serie AS serie_oc,
---         orden.emision AS fecha_emision_oc,
---         com.fechacompra,
---         com.numdocumento AS num_factura,
---         concesionario.nombrecomercial,
-        
---         CONCAT_WS(', ', tienda.direccion, dist.distrito, prov.provincia, dep.departamento) AS direccion_completa_concesionario,
---         (SELECT COUNT(iddetordencompra) FROM detordencompra WHERE idordencompra = orden.idordencompra AND estado = '1') AS cantidadvehiculos
---     FROM compras com
---     INNER JOIN ordenescompra orden ON com.idorden = orden.idordencompra
---     INNER JOIN tiendas tienda ON orden.idtienda = tienda.idtienda
---     INNER JOIN concesionarios concesionario ON tienda.idconcesionario = concesionario.idconcesionario
---     INNER JOIN distritos dist ON tienda.iddistrito = dist.iddistrito
---     INNER JOIN provincias prov ON dist.idprovincia = prov.idprovincia
---     INNER JOIN departamentos dep ON prov.iddepartamento = dep.iddepartamento
---     ORDER BY com.fechacompra DESC; 
--- END //
-
--- DELIMITER ;
---  CALL sp_getAll_OC_Compras();
-
-
-
- SELECT * FROM compras;
-
-
-
-USE motorpark2;
 
 DROP PROCEDURE IF EXISTS sp_get_OC_details_for_recepcion;
 

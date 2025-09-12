@@ -30,6 +30,7 @@ function generarReporteResumenEjecutivo(data, logo) {
     // --- TABLA DE DETALLE POR ORDEN DE COMPRA ---
     const headersDetalle = [
         { text: 'OC Identificador', style: 'tableHeader', alignment: 'center' },
+        {text:'Emisión',style:'tableHeader',alignment:'center'},
         { text: 'Concesionario', style: 'tableHeader', alignment: 'center' },
         { text: 'Ubicación', style: 'tableHeader', alignment: 'center' },
         { text: 'Total OC', style: 'tableHeader', alignment: 'center' },
@@ -45,9 +46,10 @@ function generarReporteResumenEjecutivo(data, logo) {
         detallesOrdenes.forEach(oc => {
             bodyDetalle.push([
                 { text: oc.OCIdentificador },
+                { text: `${new Date(oc.emision).toLocaleDateString('es-ES')}`, alignment: 'center' },
                 { text: oc.Concesionario },
                 { text: oc.ubicacionConcesionario },
-                { text: `$${formatNumber(oc.totalOC)}`, alignment: 'right' }, 
+                { text: `$${formatNumber(oc.totalOC)}`, alignment: 'right'}, 
                 { text: `$${formatNumber(oc.pagado)}`, alignment: 'right' }, 
                 { text: `$${formatNumber(oc.saldo)}`, alignment: 'right' }, 
                 { text: `${formatNumber(oc.avancePorcentaje)}%`, alignment: 'center' },
@@ -64,7 +66,7 @@ function generarReporteResumenEjecutivo(data, logo) {
         pageSize: 'A4',
         pageOrientation: 'portait',
         pageMargins: [40, 25, 25, 25],
-        defaultStyle: { fontSize: 7.5 },
+        defaultStyle: { fontSize: 7.2 },
         content: [
             {
                 columns: [
@@ -128,7 +130,7 @@ function generarReporteResumenEjecutivo(data, logo) {
             {
                 table: {
                     // Anchos de columna optimizados para ser compactos
-                    widths: ['auto', 'auto', '*', 'auto', 'auto', 'auto', 'auto', 'auto'],
+                    widths: ['*','*', 'auto', '*', 'auto', 'auto', 'auto', 'auto', 'auto'],
                     body: bodyDetalle
                 },
                 layout: 'lightHorizontalLines'

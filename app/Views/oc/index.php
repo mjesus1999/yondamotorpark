@@ -1,5 +1,6 @@
 <?php include __DIR__ . '/../layout/header.php'; ?>
 
+
 <div class="container-fluid">
 
     <div class="alert alert-info mt-2" role="alert">
@@ -53,6 +54,10 @@
                 <button title="Exportar a EXCEL" class="btn btn-sm btn-outline-success" id="btn-exportar-excel">
                     <i class="bi bi-file-earmark-excel"></i> Excel
                 </button>
+                <a href="/oc/reporte-concesionario" class="btn btn-sm btn-outline-secondary" id="btn-reporte-concesionario">
+                    <i class="bi bi-bar-chart"></i> Reporte por Concesionario
+
+                </a>
             <?php endif; ?>
         </div>
     </div>

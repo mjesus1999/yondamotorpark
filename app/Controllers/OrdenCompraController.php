@@ -53,12 +53,20 @@ class OrdenCompraController extends Controller
         ]);
     }
 
+    // METODO QUE ME LLEVARA A LS VISTA DE RPEORTES POR CONCESIONARIO
+
+    public function indexReporteByConcesionario(): void
+    {
+        $this->authRequired();
+        $this->view('oc.reporteBy-concesionario');
+    }
+
     public function html2pdfReport($id): void
     {
-        // Solo necesitamos pasar el ID, los datos se cargarán via JavaScript
-        // El PDF se generará automáticamente sin mostrar la vista
         $this->view('pdf/oc/oc-html2pdf', ['id' => $id]);
     }
+
+
 
     // Me llevará a la vista de crear
     public function create(): void
