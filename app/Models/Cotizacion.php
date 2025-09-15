@@ -229,5 +229,24 @@ class Cotizacion
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    
+    /**
+     * Funcion de reactivar una cotizacion con nueva fecha
+     */
+    public function reactivar(int $idcotizacion, int $vigenciadias = 7): bool
+    {
+        $query = "UPDATE cotizaciones
+            SET vigenciadias = :vig,
+                modificado = NOW(),
+                fechareactivacion = NOW(),
+                estadocotizacion = 'P'
+            WHERE idcotizacion = :id";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute([
+            ':vig' => $vigenciadias,
+            ':id' => $idcotizacion
+        ]);
+        return $stmt->rowCount() > 0;
+    }
+
+
 }

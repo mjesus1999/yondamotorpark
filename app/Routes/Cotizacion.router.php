@@ -26,4 +26,4 @@ $router->add('GET', '/api/cotizacion/generar-cronograma/{importeTotal}/{inicial}
 $router->add('GET', '/cotizacion/historial', 'CotizacionController', 'historial');
 
 //FECHA DE REACTIVACION
-/* $router->add('POST', '/cotizacion/reactivar/(\d+)', 'CotizacionController', 'reactivar'); */
+$router->add('POST', '/cotizacion/reactivar/(\d+)', 'CotizacionController', 'reactivar');

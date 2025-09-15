@@ -7,6 +7,7 @@ use App\Core\Controller;
 use App\Models\Cotizacion;
 use App\Models\Vehiculo;
 use App\Models\FormatoCotizacion;
+use Exception;
 
 class CotizacionController extends Controller
 {
@@ -490,6 +491,57 @@ class CotizacionController extends Controller
             ]
         ]);
     }
-    
+
+    public function reactivar(int $idcotizacion): void
+    {
+        header('Content-Type: application/json; charset=utf-8');
+        $this->authRequired();
+
+        $idasesor = $_SESSION['user']['id'] ?? null;
+        $idcargo = $_SESSION['user']['cargo'] ?? null;
+
+        $cot = $this->cotizacionModel->getById($idcotizacion);
+        if (!$cot) {
+            http_response_code(404);
+            echo json_encode(['success' => false, 'message' => 'Cotizacion no encrontada.']);
+            exit;
+        }
+
+        $cargosSuperiores = [1, 8, 10, 13, 14, 16, 17];
+
+        if (!in_array($idcargo, $cargosSuperiores) && (int) ($cot['idasesor'] ?? 0) !== (int) $idasesor) {
+            http_response_code(403);
+            echo json_encode(['success' => false, 'message' => 'No tienes permiso para reactivar esta cotizacion.']);
+            exit;
+        }
+
+        $vig = 7;
+        try {
+            $ok = $this->cotizacionModel->reactivar($idcotizacion, $vig);
+
+            // RECUPERAR CON GETBYID
+            $updated = $this->cotizacionModel->getById($idcotizacion);
+
+            $financiamientos = $this->cotizacionModel->getFinanciamientos($idcotizacion) ?: [];
+
+            $fecha_reactivacion = $updated['fechareactivacion'] ?? null;
+            $fecha_vencimiento = $fecha_reactivacion ? (new \DateTime($fecha_reactivacion))->modify("+{$vig} days")->format('d/m/Y') : date('d/m/Y', strtotime("+{$vig} days"));
+
+            json_encode([
+                'success' => true,
+                'message' => $ok ? 'Cotizacion reactivada correctamente.' : 'No se realizaron cambios',
+                'fechareactivacion' => $fecha_reactivacion,
+                'fecha_vencimiento' => $fecha_vencimiento,
+                'cotizacion' => $updated,
+                'financiamiento' => $financiamientos
+            ]);
+            exit;
+
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => 'Error al reactivar: ' . $e->getMessage()]);
+        }
+
+    }
 
 }

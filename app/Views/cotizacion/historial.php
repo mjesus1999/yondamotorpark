@@ -145,6 +145,8 @@
                                                 title="Reactivar cotización">
                                                 <i class="bi bi-arrow-clockwise fs-5"></i>
                                             </button> -->
+
+                                            <!-- BOTON DE REACTIVAR LA FECHA DE COTIZACION -->
                                             <a href="#" class="p-1 btn-reactivate" role="button"
                                                 data-id="<?= $c['idcotizacion'] ?>"
                                                 data-cliente="<?= htmlspecialchars($c['nombrecliente']) ?>"
@@ -152,6 +154,7 @@
                                                 <i class="bi bi-arrow-clockwise fs-5 text-success"></i>
                                             </a>
 
+                                            <!-- BOTON DE REPORTE COTIZACION -->
                                             <a href="/cotizacion/reporte/<?= $c['idcotizacion'] ?>" class="p-1 btn-download-pdf"
                                                 data-id="<?= $c['idcotizacion'] ?>"
                                                 data-cliente="<?= htmlspecialchars($c['nombrecliente']) ?>"
