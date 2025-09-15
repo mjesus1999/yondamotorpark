@@ -83,7 +83,9 @@ class CotizacionController extends Controller
         // Obtener información del usuario logueado
         $idasesor = $_SESSION['user']['id'] ?? null;
         $idcargo = $_SESSION['user']['idcargo'] ?? null;
-        $cotizacion = $this->cotizacionModel->getById($id);
+
+        // Obtener cotización completa (incluye opciones_financiamiento dentro del modelo)
+        $cotizacion = $this->cotizacionModel->getById((int) $id);
 
         if (!$cotizacion) {
             http_response_code(404);
@@ -103,8 +105,17 @@ class CotizacionController extends Controller
             exit;
         }
 
-        $this->view('pdf/cotizacion/cotizacion-html2pdf', ['id' => $id]);
+        // Asegurarnos de traer las opciones de financiamiento directamente desde el modelo
+        $financiamientos = $this->cotizacionModel->getFinanciamientos((int) $id);
+        $cotizacion['opciones_financiamiento'] = $financiamientos;
+
+        // Pasamos tanto el id como la estructura completa al view
+        $this->view('pdf/cotizacion/cotizacion-html2pdf', [
+            'id' => (int) $id,
+            'cotizacion' => $cotizacion
+        ]);
     }
+
 
     // En CotizacionController.php - Método apiShow actualizado
     public function apiShow(int $idcotizacion): void
@@ -122,8 +133,40 @@ class CotizacionController extends Controller
         $requisitos = $idformato ? $this->formatoModel->getDetalleRequisitos($idformato) : [];
         $financiamientos = $this->cotizacionModel->getFinanciamientos($idcotizacion);
 
+        // PROCESAR REQUISITOS DINÁMICOS
+        $gastosAdmin = (float) ($cot['gastosadministrativos'] ?? 1500.00);
+        $requisitosProcesados = [];
+
+        foreach ($requisitos as $requisito) {
+            $textoRequisito = $requisito['requisito'] ?? '';
+            $textoOriginal = mb_strtolower($textoRequisito, 'UTF-8');
+
+            // Detectar si es el requisito de gastos administrativos con múltiples variantes
+            if (
+                strpos($textoOriginal, 'gastos administrativos') !== false ||
+                strpos($textoOriginal, 'pago único') !== false ||
+                strpos($textoOriginal, 'pago unico') !== false ||
+                (strpos($textoOriginal, 'gastos') !== false && strpos($textoOriginal, 'administrativos') !== false)
+            ) {
+
+                // Crear el texto dinámico con el monto real
+                $montoProcesado = ($gastosAdmin > 0) ? $gastosAdmin : 1500.00;
+                $requisitosProcesados[] = [
+                    'idrequisito' => $requisito['idrequisito'] ?? null,
+                    'requisito' => "Pago único por gastos administrativos S/ " . number_format($montoProcesado, 2, '.', ',')
+                ];
+            } else {
+                // Mantener el requisito original
+                $requisitosProcesados[] = $requisito;
+            }
+        }
+
+        $vehColorRaw = trim((string) ($cot['vehiculo_color'] ?? ''));
+        $vehColor = $vehColorRaw === '' ? 'POR DEFINIR' : $vehColorRaw;
+
         echo json_encode([
             'cotizacion' => [
+                'id' => $idcotizacion, // Agregar el ID para el PDF
                 'idformato' => $idformato,
                 'tipocotizacion' => $cot['tipocotizacion'] ?? null,
                 'fecha' => $cot['fechaRegistro'] ?? null,
@@ -136,13 +179,13 @@ class CotizacionController extends Controller
                     'marca' => $cot['vehiculo_marca'] ?? null,
                     'modelo' => $cot['vehiculo_modelo'] ?? null,
                     'anio' => $cot['vehiculo_anio'] ?? null,
-                    'color' => $cot['vehiculo_color'] ?? null,
+                    'color' => $vehColor,
+                    /* 'color' => $cot['vehiculo_color'] ?? null, */
                 ],
                 'precios' => [
                     'precio_usd' => number_format($cot['precioventa'] ?? 0, 2, '.', ''),
                     'inicial_soles' => number_format($cot['inicial'] ?? 0, 2, '.', ''),
                 ],
-                // NUEVA SECCIÓN: INFORMACIÓN DEL ASESOR
                 'asesor' => [
                     'nombre' => $cot['asesor_nombre'] ?? 'CHARLY YACTAYO ORTIZ',
                     'nombre_completo' => $cot['asesor_nombre_completo'] ?? 'CHARLY YACTAYO ORTIZ',
@@ -151,8 +194,9 @@ class CotizacionController extends Controller
                     'telefono_alt' => $cot['asesor_telefono_alt'] ?? null,
                     'usuario' => $cot['asesor_usuario'] ?? null
                 ],
-                'requisitos' => $requisitos,
-                'opciones_financiamiento' => $financiamientos
+                'requisitos' => $requisitosProcesados,
+                'opciones_financiamiento' => $financiamientos,
+                'gastosadministrativos' => $gastosAdmin
             ]
         ]);
         exit;
@@ -224,20 +268,19 @@ class CotizacionController extends Controller
             exit;
         }
 
-        // Opciones de financiamiento del front (tarjetas)
+        // Opciones de financiamiento
         $opcionesJson = $_POST['opciones_financiamiento'] ?? '[]';
         $opciones = json_decode($opcionesJson, true);
         if (!is_array($opciones))
             $opciones = [];
 
-        // 1) Inicial principal (todas comparten inicial)
+        // 1) Inicial principal
         $inicialPrincipal = 0;
         if (!empty($opciones)) {
             $inicialPrincipal = (float) ($opciones[0]['inicial'] ?? 0);
         }
 
         // 2) Opción principal para llenar "resumen" en cotizaciones:
-        //    Tomamos la de MENOR número de cuotas (puedes cambiar el criterio si quieres)
         $numcuotasResumen = 0;
         $valorcuotaResumen = 0.00;
         if (!empty($opciones)) {
@@ -256,11 +299,12 @@ class CotizacionController extends Controller
             'moneda' => $_POST['moneda'] ?? 'PEN',
             'precioventa' => $_POST['precioventa'] ?? 0,
             'vigenciadias' => $_POST['vigenciadias'] ?? 7,
-
-            // Lo correcto: desde el JSON
             'inicial' => $inicialPrincipal,
             'numcuotas' => $numcuotasResumen,
             'valorcuota' => $valorcuotaResumen,
+
+            // CAMPO GASTOS ADMINISTRATIVOS
+            'gastosadministrativos' => (float) ($_POST['gastosadministrativos'] ?? 0.00),
 
             'idasesor' => $idasesor,
         ];
@@ -446,5 +490,6 @@ class CotizacionController extends Controller
             ]
         ]);
     }
+    
 
 }

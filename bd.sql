@@ -376,11 +376,13 @@ CREATE TABLE cotizaciones (
     inicial DECIMAL(9, 2) NOT NULL,
     numcuotas SMALLINT NOT NULL,
     valorcuota DECIMAL(9, 2) NOT NULL, -- Se usara en la tabla de cronogramas
+    gastosadministrativos DECIMAL(9,2) NOT NULL DEFAULT 0.00 COMMENT 'Gastos administrativos de la cotización',
     estadocotizacion ENUM('P', 'E', 'A', 'C', 'R') NOT NULL DEFAULT 'P' COMMENT 'Pendiente | Evaluación | Aprobada | Cancelada (cliente) | Rechazada (Analista crédito)',
     comentarios TEXT,
     fechaseguimiento DATETIME NULL,
     creado DATETIME NOT NULL DEFAULT NOW(),
     modificado DATETIME NULL,
+    fechareactivacion DATETIME NULL,
     CONSTRAINT fk_idformato_cot FOREIGN KEY (idformato) REFERENCES formatocotizacion (idformato),
     CONSTRAINT fk_idcliente_cot FOREIGN KEY (idcliente) REFERENCES clientes (idcliente),
     CONSTRAINT fk_idvehiculo_cot FOREIGN KEY (idvehiculo) REFERENCES vehiculos (idvehiculo),
@@ -388,7 +390,16 @@ CREATE TABLE cotizaciones (
 ) ENGINE = INNODB;
 -- ALTER TABLE cotizaciones ADD COLUMN comentarios TEXT AFTER estadocotizacion;
 -- ALTER TABLE cotizaciones ADD COLUMN fechaseguimiento DATETIME NULL AFTER comentarios;
--- Agregar campo de gastos administrativos a la tabla cotizaciones
+
+-- Agregar el campo gastos_administrativos a la tabla cotizaciones
+-- ALTER TABLE cotizaciones ADD COLUMN gastosadministrativos DECIMAL(9,2) NOT NULL DEFAULT 0.00 COMMENT 'Gastos administrativos de la cotización' AFTER valorcuota;
+-- ALTER TABLE cotizaciones ADD COLUMN fechareactivacion DATETIME NULL AFTER modificado;
+
+
+-- no = ALTER TABLE cotizaciones ADD COLUMN fechareactivacion DATETIME NULL COMMENT 'Fecha de reactivación de la cotización vencida' AFTER fechaseguimiento;
+
+
+-- Agregar campo de gastos administrativos a la tabla cotizaciones - POR AHORA NO
 -- ALTER TABLE cotizaciones ADD COLUMN gastosadministrativos DECIMAL(9, 2) NOT NULL DEFAULT 0.00 COMMENT 'Gastos administrativos según tipo de vehículo' AFTER valorcuota;
 -- ALTER TABLE cotizaciones ADD COLUMN fechareactivacion DATETIME NULL AFTER modificado;
 
@@ -529,3 +540,4 @@ CREATE TABLE cotizacion_financiamiento (
     creado DATETIME NOT NULL DEFAULT NOW(),
     CONSTRAINT fk_cotfin_cot FOREIGN KEY (idcotizacion) REFERENCES cotizaciones (idcotizacion) ON DELETE CASCADE
 ) ENGINE=INNODB;
+-- ALTER TABLE cotizacion_financiamiento ADD COLUMN activo TINYINT(1) NOT NULL DEFAULT 1;

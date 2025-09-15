@@ -139,12 +139,26 @@
                                         <?php endif; ?>
 
                                         <td class="text-end">
+                                            <!-- <button type="button" class="btn btn-sm btn-outline-success P-1 btn-reactivate"
+                                                data-id="<?= $c['idcotizacion'] ?>"
+                                                data-cliente="<?= htmlspecialchars($c['nombrecliente']) ?>"
+                                                title="Reactivar cotización">
+                                                <i class="bi bi-arrow-clockwise fs-5"></i>
+                                            </button> -->
+                                            <a href="#" class="p-1 btn-reactivate" role="button"
+                                                data-id="<?= $c['idcotizacion'] ?>"
+                                                data-cliente="<?= htmlspecialchars($c['nombrecliente']) ?>"
+                                                title="Reactivar cotización">
+                                                <i class="bi bi-arrow-clockwise fs-5 text-success"></i>
+                                            </a>
+
                                             <a href="/cotizacion/reporte/<?= $c['idcotizacion'] ?>" class="p-1 btn-download-pdf"
                                                 data-id="<?= $c['idcotizacion'] ?>"
                                                 data-cliente="<?= htmlspecialchars($c['nombrecliente']) ?>"
                                                 title="PDF Cotización">
                                                 <i class="bi bi-filetype-pdf text-danger fs-5"></i>
                                             </a>
+
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
@@ -166,6 +180,26 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="reactivateModal" tabindex="-1" aria-labelledby="reactivateModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Reactivar Cotización</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Deseas reactivar la cotización de <strong id="reactivate-cliente-name"></strong>?</p>
+                <p class="small text-muted">Se otorgarán <strong>7 días</strong> más de vigencia.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary btn-sm" id="confirmReactivate">Reactivar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <!-- Modal para confirmar descarga (igual que en index) -->
 <div class="modal fade" id="downloadModal" tabindex="-1" aria-labelledby="downloadModalLabel" aria-hidden="true">
@@ -245,6 +279,95 @@
 
             downloadModal.hide();
         });
+
+        // Reactivar modal
+        const reactivateModalEl = document.getElementById('reactivateModal');
+        const reactivateModal = reactivateModalEl ? new bootstrap.Modal(reactivateModalEl) : null;
+        let reactivateTargetId = null;
+
+        document.querySelectorAll('.btn-reactivate').forEach(btn => {
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                reactivateTargetId = this.getAttribute('data-id');
+                const clienteName = this.getAttribute('data-cliente') || '';
+                const elNombre = document.getElementById('reactivate-cliente-name');
+                if (elNombre) elNombre.textContent = clienteName;
+                if (reactivateModal) reactivateModal.show();
+            });
+        });
+
+        document.getElementById('confirmReactivate')?.addEventListener('click', async function () {
+            if (!reactivateTargetId) return;
+            const btn = this;
+            btn.disabled = true;
+            const originalText = btn.textContent;
+            btn.textContent = 'Procesando...';
+
+            try {
+                const resp = await fetch(`/cotizacion/reactivar/${encodeURIComponent(reactivateTargetId)}`, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        // 'X-CSRF-Token': token  <-- si usas CSRF, envíalo aquí
+                    }
+                });
+
+                const j = await resp.json();
+
+                if (resp.ok && j.success) {
+                    if (typeof showToast === 'function') {
+                        showToast(j.message || 'Reactivada correctamente', 'SUCCESS', 2000);
+                    }
+
+                    // Actualizar fila visualmente
+                    const btnEl = document.querySelector(`.btn-reactivate[data-id="${reactivateTargetId}"]`);
+                    if (btnEl) {
+                        const tr = btnEl.closest('tr');
+                        if (tr) {
+                            // badge (fecha vencimiento)
+                            const badge = tr.querySelector('.badge');
+                            if (badge && j.fecha_vencimiento) {
+                                badge.textContent = j.fecha_vencimiento;
+                                badge.classList.remove('bg-danger');
+                                badge.classList.add('bg-success');
+                            }
+
+                            // agregar texto de reactivación (si no existe, crearlo)
+                            let small = tr.querySelector('small.text-muted.reactivate-info');
+                            if (!small) {
+                                small = document.createElement('small');
+                                small.className = 'text-muted reactivate-info d-block';
+                                if (tr.querySelector('td:nth-child(8)')) {
+                                    // intentar colocarlo en la celda 8 (ajusta si tu estructura cambia)
+                                    tr.querySelector('td:nth-child(8)').appendChild(small);
+                                } else {
+                                    tr.lastElementChild.appendChild(small);
+                                }
+                            }
+                            if (j.fechareactivacion) {
+                                const d = new Date(j.fechareactivacion);
+                                small.textContent = 'Reactivado: ' + d.toLocaleString();
+                            } else if (j.fecha_vencimiento) {
+                                small.textContent = 'Vigencia hasta: ' + j.fecha_vencimiento;
+                            }
+                        }
+                    }
+
+                    if (reactivateModal) reactivateModal.hide();
+                } else {
+                    const msg = j.message || 'Error al reactivar';
+                    if (typeof showToast === 'function') showToast(msg, 'ERROR', 2500); else alert(msg);
+                }
+            } catch (err) {
+                console.error('Error reactivar:', err);
+                if (typeof showToast === 'function') showToast('Error de conexión al reactivar', 'ERROR', 2500); else alert('Error de conexión');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = originalText;
+                reactivateTargetId = null;
+            }
+        });
+
     });
 
     function initDataTableCotizacionHistorial() {
@@ -316,11 +439,11 @@
                             },
                             {
                                 targets: 6, // Teléfono
-                                width: "8%"
+                                width: "6%"
                             },
                             {
                                 targets: 7, // Fecha Vencimiento
-                                width: "10%"
+                                width: "8%"
                             }
                             <?php if ($puede_ver_todas): ?>
                                 , {
@@ -329,7 +452,7 @@
                                 },
                                 {
                                     targets: 9, // Opciones
-                                    width: "5%"
+                                    width: "6%"
                                 }
                             <?php else: ?>
                                 , {

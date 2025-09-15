@@ -107,7 +107,7 @@ JOIN personas p ON p.idpersona = cl.idpersona
 JOIN cargos cg ON cg.idcargo = cl.idcargo;
 
 -- VISTA PRUEBA (VISTA DE MOSTRAR CONTRATOS / SI SE DESHABILITA UN USUARIO PASA A SER UN CONTRATO SIN CUENTA)
-CREATE OR REPLACE VIEW vwContractsWithoutColaborador AS
+CREATE VIEW vwContractsWithoutColaborador AS
 SELECT
   cl.idcontratolaboral,
   cl.idpersona,
@@ -135,7 +135,58 @@ ORDER BY p.apellidos, p.nombres;
 /*
 -- (solo mostrando los que esten en los dias de vigenicas se mostrara)
 */
+CREATE OR REPLACE VIEW vwGetAllCotizacion AS
+SELECT
+  c.idcotizacion,
+  c.idformato,
+  c.idasesor,
+  fc.tipocotizacion,
+  COALESCE(
+    CASE WHEN cl.tipocliente = 'P' THEN CONCAT(p.apellidos, ', ', p.nombres) END,
+    e.razonsocial,
+    'Cliente no definido'
+  ) AS nombrecliente,
+  COALESCE(
+    CASE WHEN cl.tipocliente = 'P' THEN p.nrodoc END,
+    e.ruc,
+    ''
+  ) AS documento,
+  COALESCE(
+    CASE WHEN cl.tipocliente = 'P' THEN p.telprimario END,
+    e.telprimario,
+    ''
+  ) AS telefono,
+  ma.marca AS marcaVehiculo,
+  mo.modelo AS modeloVehiculo,
+  mo.anio,
+  CONCAT_WS(' / ', ma.marca, mo.modelo, mo.anio) AS vehiculo,
+  v.color,
+  c.creado AS fechaRegistro,
+  c.vigenciadias,
+  c.moneda,
+  c.inicial,
+  c.precioventa,
+  -- calcular vencimiento desde fechareactivacion si existe, si no desde creado
+  DATE_ADD(IFNULL(c.fechareactivacion, c.creado), INTERVAL c.vigenciadias DAY) AS fecha_vencimiento,
+  c.fechareactivacion,
+  CONCAT(pase.apellidos, ' ', pase.nombres) AS asesor_nombre,
+  col.usernick AS asesor_usuario,
+  cg.cargo AS asesor_cargo
+FROM cotizaciones c
+JOIN clientes cl ON c.idcliente = cl.idcliente
+LEFT JOIN personas p ON cl.idpersona = p.idpersona
+LEFT JOIN empresas e ON cl.idempresa = e.idempresa
+JOIN vehiculos v ON c.idvehiculo = v.idvehiculo
+JOIN modelos mo ON v.idmodelo = mo.idmodelo
+JOIN marcas ma ON mo.idmarca = ma.idmarca
+JOIN formatocotizacion fc ON c.idformato = fc.idformato
+LEFT JOIN colaboradores col ON c.idasesor = col.idcolaborador
+LEFT JOIN contratoslaborales cl_ase ON col.idcontratolaboral = cl_ase.idcontratolaboral
+LEFT JOIN personas pase ON cl_ase.idpersona = pase.idpersona
+LEFT JOIN cargos cg ON cl_ase.idcargo = cg.idcargo
+WHERE DATE_ADD(IFNULL(c.fechareactivacion, c.creado), INTERVAL c.vigenciadias DAY) >= CURDATE();
 
+/*
 CREATE OR REPLACE VIEW vwGetAllCotizacion AS
 SELECT
   c.idcotizacion,
@@ -188,6 +239,7 @@ LEFT JOIN contratoslaborales cl_ase ON col.idcontratolaboral = cl_ase.idcontrato
 LEFT JOIN personas pase ON cl_ase.idpersona = pase.idpersona
 LEFT JOIN cargos cg ON cl_ase.idcargo = cg.idcargo
 WHERE DATE_ADD(DATE(c.creado), INTERVAL c.vigenciadias DAY) >= CURDATE();
+*/
 
 /*
 USE motorpark;
@@ -210,9 +262,10 @@ SELECT
   c.valorcuota,
   c.idasesor,
   c.creado AS fechaRegistro,
+  c.gastosadministrativos,
   -- Datos del cliente (normalizado: persona o empresa)
   CASE
-    WHEN cl.tipocliente = 'P' THEN CONCAT(p.nombres, ' ', p.apellidos)
+    WHEN cl.tipocliente = 'P' THEN CONCAT(p.apellidos, ', ', p.nombres)
     ELSE e.razonsocial
   END AS cliente_nombre,
 
@@ -263,6 +316,57 @@ SELECT
   c.idasesor,
   fc.tipocotizacion,
   COALESCE(
+    CASE WHEN cl.tipocliente = 'P' THEN CONCAT(p.apellidos, ', ', p.nombres) END,
+    e.razonsocial,
+    'Cliente no definido'
+  ) AS nombrecliente,
+  COALESCE(
+    CASE WHEN cl.tipocliente = 'P' THEN p.nrodoc END,
+    e.ruc,
+    ''
+  ) AS documento,
+  COALESCE(
+    CASE WHEN cl.tipocliente = 'P' THEN p.telprimario END,
+    e.telprimario,
+    ''
+  ) AS telefono,
+  ma.marca AS marcaVehiculo,
+  mo.modelo AS modeloVehiculo,
+  mo.anio,
+  CONCAT_WS(' / ', ma.marca, mo.modelo, mo.anio) AS vehiculo,
+  v.color,
+  c.creado AS fechaRegistro,
+  c.vigenciadias,
+  c.moneda,
+  c.inicial,
+  c.precioventa,
+  DATE_ADD(IFNULL(c.fechareactivacion, c.creado), INTERVAL c.vigenciadias DAY) AS fecha_vencimiento,
+  c.fechareactivacion,
+  CONCAT(pase.apellidos, ' ', pase.nombres) AS asesor_nombre,
+  col.usernick AS asesor_usuario,
+  cg.cargo AS asesor_cargo
+FROM cotizaciones c
+JOIN clientes cl ON c.idcliente = cl.idcliente
+LEFT JOIN personas p ON cl.idpersona = p.idpersona
+LEFT JOIN empresas e ON cl.idempresa = e.idempresa
+JOIN vehiculos v ON c.idvehiculo = v.idvehiculo
+JOIN modelos mo ON v.idmodelo = mo.idmodelo
+JOIN marcas ma ON mo.idmarca = ma.idmarca
+JOIN formatocotizacion fc ON c.idformato = fc.idformato
+LEFT JOIN colaboradores col ON c.idasesor = col.idcolaborador
+LEFT JOIN contratoslaborales cl_ase ON col.idcontratolaboral = cl_ase.idcontratolaboral
+LEFT JOIN personas pase ON cl_ase.idpersona = pase.idpersona
+LEFT JOIN cargos cg ON cl_ase.idcargo = cg.idcargo
+WHERE DATE_ADD(IFNULL(c.fechareactivacion, c.creado), INTERVAL c.vigenciadias DAY) < CURDATE();
+
+/*
+CREATE OR REPLACE VIEW vwGetAllCotizacionVencidas AS
+SELECT
+  c.idcotizacion,
+  c.idformato,
+  c.idasesor,
+  fc.tipocotizacion,
+  COALESCE(
     CASE WHEN cl.tipocliente = 'P' THEN CONCAT(p.nombres, ' ', p.apellidos) END,
     e.razonsocial,
     'Cliente no definido'
@@ -290,6 +394,7 @@ SELECT
   c.inicial,
   c.precioventa,
   DATE_ADD(c.creado, INTERVAL c.vigenciadias DAY) AS fecha_vencimiento,
+  c.fechareactivacion,
   -- INFORMACIÓN DEL ASESOR QUE REGISTRÓ LA COTIZACIÓN
   CONCAT(pase.apellidos, ' ', pase.nombres) AS asesor_nombre,
   col.usernick AS asesor_usuario,
@@ -307,5 +412,7 @@ LEFT JOIN colaboradores col ON c.idasesor = col.idcolaborador
 LEFT JOIN contratoslaborales cl_ase ON col.idcontratolaboral = cl_ase.idcontratolaboral
 LEFT JOIN personas pase ON cl_ase.idpersona = pase.idpersona
 LEFT JOIN cargos cg ON cl_ase.idcargo = cg.idcargo
-WHERE DATE_ADD(DATE(c.creado), INTERVAL c.vigenciadias DAY) < CURDATE()
-ORDER BY c.creado DESC;
+WHERE DATE_ADD(DATE(c.creado), INTERVAL c.vigenciadias DAY) < CURDATE();
+*/
+
+-- ORDER BY c.creado DESC

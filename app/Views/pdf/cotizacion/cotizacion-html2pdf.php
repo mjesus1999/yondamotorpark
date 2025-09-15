@@ -223,7 +223,7 @@
 
         try {
           const idNum = cotizacion.id || cotId || getIdFromPath() || '';
-          const padded = String(idNum).padStart(6, '0');
+          const padded = String(idNum).padStart(7, '0');
           const suffixEl = document.getElementById('cot-id-suffix');
           if (suffixEl) suffixEl.textContent = `- ${padded}`;
         } catch (e) {

@@ -415,14 +415,15 @@
                         </div>
                         <input type="hidden" name="valorconvertido" id="inputValorConvertido">
 
+                        <!-- Gastos Administrativos -->
                         <div class="col-md-2">
                             <div class="form-floating">
-                                <input type="text" placeholder="Gastos Administrativos" class="form-control" id="gastosAdministrativos" 
-                                    name="gastos_administrativos" readonly>
-                                <label for="gastosAdministrativos">Gastos Administrativos <span class="text-danger">*</span></label>
+                                <input type="number" step="0.01" min="0" placeholder="0.00" class="form-control"
+                                    id="gastosAdministrativos" name="gastosadministrativos" value="0.00">
+                                <label for="gastosAdministrativos">Gastos Administrativos</label>
                             </div>
                         </div>
-                        <input type="hidden" name="gastos_administrativos" id="inputGastosAdministrativos">
+                        <input type="hidden" name="gastos_administrativos_hidden" id="inputGastosAdministrativos">
 
                     </div>
 
@@ -868,26 +869,42 @@
     function setupZeroValueClearing(inputElement) {
         if (!inputElement) return;
 
-        // Manejador para cuando el usuario hace foco en el campo
+        // Al hacer foco: si el valor es "todo ceros" (0, 0.0, 0.00, 000) lo limpiamos
         inputElement.addEventListener('focus', function () {
-            if (this.value === '0') {
+            if (/^0+(\.0+)?$/.test(this.value)) {
                 this.value = '';
             }
         });
 
-        // Manejador para cuando el usuario empieza a escribir
+        // Al escribir: permitimos sólo números y punto; quitamos ceros a la izquierda innecesarios
         inputElement.addEventListener('input', function () {
-            // Si el valor actual es "0" y el usuario escribió algo más, limpiarlo
-            if (this.value.startsWith('0') && this.value.length > 1 && this.value !== '0.') {
-                // Mantener solo lo que escribió después del 0
-                this.value = this.value.substring(1);
+            // permitir sólo dígitos y punto
+            this.value = this.value.replace(/[^0-9.]/g, '');
+
+            // si empieza por varios ceros sin punto, eliminamos los ceros iniciales
+            if (/^0[0-9]/.test(this.value)) {
+                this.value = this.value.replace(/^0+/, '');
+            }
+
+            // si hay más de un punto, dejamos sólo el primero
+            const parts = this.value.split('.');
+            if (parts.length > 2) {
+                this.value = parts.shift() + '.' + parts.join('');
             }
         });
 
-        // Manejador para cuando pierde el foco - opcional: restaurar 0 si está vacío
+        // Al perder foco: normalizamos a 2 decimales y restauramos 0.00 si quedó vacío
         inputElement.addEventListener('blur', function () {
             if (this.value === '' || this.value === null) {
-                this.value = '0';
+                this.value = '0.00';
+            } else {
+                // parsear y formatear a 2 decimales
+                const v = parseFloat(this.value.replace(/,/g, ''));
+                if (isNaN(v) || v < 0) {
+                    this.value = '0.00';
+                } else {
+                    this.value = v.toFixed(2);
+                }
             }
         });
     }
@@ -1546,6 +1563,8 @@
         if (monedaPrecioEl) monedaPrecioEl.value = moneda === 'USD' ? 'Dólares' : 'Soles';
         if (vehiculoMonedaEl) vehiculoMonedaEl.value = moneda;
 
+        // NO modificamos gastos administrativos aquí, se mantiene como el usuario lo escribió
+
         if (monedaSelectEl) {
             if (moneda === 'PEN') {
                 monedaSelectEl.value = 'PEN';
@@ -1770,6 +1789,45 @@
         });
     }
 
+    // Función para sincronizar el campo de gastos administrativos
+    function actualizarGastosAdministrativos() {
+        const gastosAdminEl = document.getElementById('gastosAdministrativos');
+        const inputGastosAdminEl = document.getElementById('inputGastosAdministrativos');
+
+        if (gastosAdminEl && inputGastosAdminEl) {
+            const valor = parseFloat(gastosAdminEl.value || 0);
+            inputGastosAdminEl.value = valor.toFixed(2);
+        }
+    }
+
+    // Event listeners para gastos administrativos
+    function bindGastosAdministrativosEvents() {
+        const gastosAdminEl = document.getElementById('gastosAdministrativos');
+
+        if (gastosAdminEl) {
+            // Aplicar comportamiento "limpia el 0.00 al escribir"
+            setupZeroValueClearing(gastosAdminEl);
+
+            // Sincronizar al escribir (debounced para no hacer muchas operaciones)
+            gastosAdminEl.addEventListener('input', debounce(() => {
+                actualizarGastosAdministrativos();
+            }, 300));
+
+            // Al perder foco ya formatea y también actualiza hidden
+            gastosAdminEl.addEventListener('blur', () => {
+                actualizarGastosAdministrativos();
+            });
+
+            // Validar teclado: permitir números y punto
+            gastosAdminEl.addEventListener('keypress', (e) => {
+                const char = String.fromCharCode(e.which || e.keyCode);
+                if (!/[0-9\.]/.test(char) && e.which !== 8 && e.which !== 46) {
+                    e.preventDefault();
+                }
+            });
+        }
+    }
+
     // Initialize everything when DOM is ready
     document.addEventListener("DOMContentLoaded", () => {
         console.log('DOM Content Loaded - Initializing...');
@@ -1785,6 +1843,11 @@
         attachCotizacionConfirm();
         initDocumentValidation();
         verificarUltimoClienteRegistrado();
+        // Inicializar eventos de gastos administrativos
+        bindGastosAdministrativosEvents();
+
+        // Inicializar valor por defecto
+        actualizarGastosAdministrativos();
 
         // Initialize DataTables after a delay to ensure all scripts are loaded
         setTimeout(() => {

@@ -16,13 +16,19 @@ VALUES
   ('EVALUACION DE GASTOS FAMILIARES'),
   ('30% DE INICIAL COMO MINIMO (aumenta según precio de la unidad)'),
   ('VERIFICACION DOMICILIARIA Y LABORAL'),
-  ('PAGO UNICO POR GASTOS ADMINISTRATIVOS S/1,500.00'),
+  -- ('PAGO UNICO POR GASTOS ADMINISTRATIVOS S/1,500.00'),
+  ('Pago único por gastos administrativos'),
   ('SEGURO VEHICULAR (bajo evaluación)'),
   ('GPS SATELITAL'),
   ('RECIBO DE SERVICIOS'),
   ('BOLETAS DE PAGO');
 
 SELECT * FROM requisitos;
+SELECT idrequisito, requisito FROM requisitos WHERE idrequisito = 11;
+UPDATE requisitos
+SET requisito = 'Pago único por gastos administrativos'
+WHERE idrequisito = 11;
+
 SELECT idrequisito,
        requisito AS original,
        CONCAT(
@@ -149,6 +155,15 @@ SELECT * FROM contratoslaborales;
 SELECT * FROM colaboradores;
 SELECT * FROM clientes;
 SELECT * FROM cotizaciones;
+SELECT * FROM cotizacion_financiamiento WHERE idcotizacion = 1;
+
+
+
+SELECT idfinanciamiento, idcotizacion, numcuotas, inicial, valorcuota, moneda, precioventa, creado
+FROM cotizacion_financiamiento
+WHERE idcotizacion = 2
+ORDER BY numcuotas;
+
 
 CREATE VIEW vw_colaboradores_con_cargo AS
 SELECT 
