@@ -1,6 +1,18 @@
 <?php include __DIR__ . '/../layout/header.php'; ?>
 
 <style>
+    .accordion-button[aria-expanded="true"] {
+        background-color: #0d6efd !important;
+        color: white !important;
+        box-shadow: 0 2px 4px rgba(13, 110, 253, 0.3) !important;
+        border-color: #0d6efd !important;
+    }
+
+    .accordion-button[aria-expanded="true"]:hover {
+        background-color: #0b5ed7 !important;
+        border-color: #0b5ed7 !important;
+    }
+
     #totalpagado {
         background-color: chartreuse;
         box-shadow: 5px 5px #8dbfa8ff;
@@ -74,10 +86,63 @@
             transform: translateX(0);
         }
     }
+
+    @media (max-width: 767px) {
+
+        .table-responsive table,
+        .table-responsive thead,
+        .table-responsive tbody,
+        .table-responsive th,
+        .table-responsive td,
+        .table-responsive tr {
+            display: block;
+        }
+
+        .table-responsive thead tr {
+            position: absolute;
+            top: -9999px;
+            left: -9999px;
+        }
+
+        .table-responsive td {
+            border: none;
+            position: relative;
+            padding-left: 50%;
+            text-align: right;
+        }
+
+        .table-responsive td:before {
+            content: attr(data-label);
+            position: absolute;
+            left: 6px;
+            font-weight: bold;
+            text-align: left;
+            white-space: nowrap;
+        }
+    }
 </style>
 
 
 <div class="container-fluid mt-5">
+
+
+
+    <div class="alert alert-info mt-2" role="alert">
+        <div class="row">
+            <div class="col-md-6 d-flex align-items-center justify-content-start">
+
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="#">OC en Proceso</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Reporte por Concesionario</li>
+                </ol>
+
+            </div>
+            <div class="col-md-6 d-flex align-items-center justify-content-end">
+                <a href="/oc/listar/proceso" class="btn btn-sm btn-outline-primary">Mostrar lista</a>
+            </div>
+        </div>
+    </div>
+
     <div class="card shadow-sm">
         <div class="card-header bg-primary text-white text-center">
             <h5 class="mb-0">Reporte Financiero por Concesionario</h5>
@@ -196,58 +261,75 @@
         }
     }
 
-    function fillPagosTable(pagos, targetId) {
-        const tableBody = document.getElementById(targetId);
-        tableBody.innerHTML = '';
-        if (pagos.length === 0) {
-            tableBody.innerHTML = `<tr><td colspan="8" class="text-center text-muted">No se han registrado pagos para esta OC.</td></tr>`;
-            return;
-        }
-        pagos.forEach(pago => {
-            const row = `
-                <tr>
-                    <td>${pago.idordencompra}</td>
-                    <td>${pago.fechapago}</td>
-                    <td>${pago.entidad}</td>
-                    <td>${pago.numtransaccion}</td>
-                    <td>${pago.moneda}</td>
-                    <td>${pago.moneda === 'USD' ? '$' : 'S/'}${formatNumber(pago.montopagado)}</td>
-                    <td>${pago.tipocambio && !isNaN(pago.tipocambio) ? Number(pago.tipocambio).toFixed(2) : '-'}</td>
-                    <td>${pago.valordolares ? '$' + formatNumber(pago.valordolares) : '-'}</td>
-                </tr>
-            `;
-            tableBody.innerHTML += row;
+    /// Función para manejar el comportamiento personalizado del acordeón
+    function initializeAccordionFunctionality() {
+        const accordionOCs = document.getElementById('accordionOCs');
+
+        // Agregar event listener para manejar clicks en los headers del acordeón
+        accordionOCs.addEventListener('click', function(e) {
+            // Buscar el botón del acordeón más cercano
+            const button = e.target.closest('.accordion-button');
+            if (!button) return;
+
+            e.preventDefault(); // Prevenir el comportamiento por defecto
+
+            const targetId = button.getAttribute('data-bs-target');
+            const targetCollapse = document.querySelector(targetId);
+
+            if (!targetCollapse) return;
+
+            const isCurrentlyOpen = targetCollapse.classList.contains('show');
+            const bsCollapse = bootstrap.Collapse.getInstance(targetCollapse);
+
+            // Cerrar todos los acordeones abiertos y actualizar sus atributos
+            const allCollapses = accordionOCs.querySelectorAll('.accordion-collapse');
+            allCollapses.forEach(collapse => {
+                if (collapse !== targetCollapse) {
+                    const instance = bootstrap.Collapse.getInstance(collapse);
+                    if (instance && collapse.classList.contains('show')) {
+                        instance.hide();
+                    }
+                    // Encontrar el botón correspondiente y actualizar sus atributos
+                    const collapseButton = accordionOCs.querySelector(`[data-bs-target="#${collapse.id}"]`);
+                    if (collapseButton) {
+                        collapseButton.setAttribute('aria-expanded', 'false');
+                        collapseButton.classList.add('collapsed');
+                    }
+                }
+            });
+
+            // Alternar el acordeón clickeado y actualizar el aria-expanded
+            if (isCurrentlyOpen) {
+                if (bsCollapse) {
+                    bsCollapse.hide();
+                } else {
+                    new bootstrap.Collapse(targetCollapse, {
+                        toggle: false
+                    }).hide();
+                }
+                // Actualizar atributos cuando se cierra
+                button.setAttribute('aria-expanded', 'false');
+                button.classList.add('collapsed');
+            } else {
+                if (bsCollapse) {
+                    bsCollapse.show();
+                } else {
+                    new bootstrap.Collapse(targetCollapse, {
+                        toggle: false
+                    }).show();
+                }
+                // Actualizar atributos cuando se abre
+                button.setAttribute('aria-expanded', 'true');
+                button.classList.remove('collapsed');
+            }
         });
     }
 
-    function fillVehiculosTable(vehiculos, targetId) {
-        const tableBody = document.getElementById(targetId);
-        tableBody.innerHTML = '';
-        if (vehiculos.length === 0) {
-            tableBody.innerHTML = `<tr><td colspan="9" class="text-center text-muted">No hay vehículos asociados a esta OC.</td></tr>`;
-            return;
-        }
-        vehiculos.forEach(vehiculo => {
-            const row = `
-                <tr>
-                    <td>${vehiculo.marcaymodelo}</td>
-                    <td>${vehiculo.caracteristicas}</td>
-                    <td>${vehiculo.chasis ?? '-'}</td>
-                    <td>${vehiculo.placa ?? '-'}</td>
-                    <td>${vehiculo.placarotativa ?? '-'}</td>
-                    <td>${vehiculo.seriemotor ?? '-'}</td>
-                    <td>${vehiculo.Anio}</td>
-                    <td>${vehiculo.condicion}</td>
-                    <td>$${formatNumber(vehiculo.preciocompra)}</td>
-                </tr>
-            `;
-            tableBody.innerHTML += row;
-        });
-    }
 
     document.addEventListener('DOMContentLoaded', () => {
         cargarConcesionarios();
     });
+
     document.getElementById('form-reporte').addEventListener('submit', async (e) => {
         e.preventDefault();
 
@@ -345,11 +427,11 @@
                 accordionItem.className = 'accordion-item';
                 accordionItem.innerHTML = `
                 <h2 class="accordion-header" id="headingOC${index}">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOC${index}" aria-expanded="false" aria-controls="collapseOC${index}">
+                    <button class="accordion-button collapsed" type="button" data-bs-target="#collapseOC${index}" aria-expanded="false" aria-controls="collapseOC${index}">
                         <strong>OC: ${oc.id}</strong> - Emisión: ${oc.fechaemision} | Total: $${formatNumber(totalOC)} | Pagado: $${formatNumber(pagado)} | Saldo: <span class="text-danger">$${formatNumber(saldo)}</span>
                     </button>
                 </h2>
-                <div id="collapseOC${index}" class="accordion-collapse collapse" aria-labelledby="headingOC${index}" data-bs-parent="#accordionOCs">
+                <div id="collapseOC${index}" class="accordion-collapse collapse" aria-labelledby="headingOC${index}">
                     <div class="accordion-body">
                         <h6 class="mb-2 fw-bold text-primary">Pagos Realizados</h6>
                         <div class="table-responsive">
@@ -396,6 +478,9 @@
                 fillVehiculosTable(oc.vehiculos, `vehiculos-oc-${index}`);
             });
 
+
+            initializeAccordionFunctionality();
+
             reporteContenido.style.display = 'block';
             btnPDF.disabled = false;
             btnExcel.disabled = false;
@@ -415,9 +500,52 @@
 
 
 
+    function fillPagosTable(pagos, targetId) {
+        const tableBody = document.getElementById(targetId);
+        tableBody.innerHTML = '';
+        if (pagos.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="8" class="text-center text-muted">No se han registrado pagos para esta OC.</td></tr>`;
+            return;
+        }
+        pagos.forEach(pago => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+            <td data-label="ID OC">${pago.idordencompra}</td>
+            <td data-label="Fecha Pago">${pago.fechapago}</td>
+            <td data-label="Entidad">${pago.entidad}</td>
+            <td data-label="N° Transacción">${pago.numtransaccion}</td>
+            <td data-label="Moneda">${pago.moneda}</td>
+            <td data-label="Monto Pagado">${pago.moneda === 'USD' ? '$' : 'S/'}${formatNumber(pago.montopagado)}</td>
+            <td data-label="T. Cambio">${pago.tipocambio && !isNaN(pago.tipocambio) ? Number(pago.tipocambio).toFixed(2) : '-'}</td>
+            <td data-label="Valor Dólares">${pago.valordolares ? '$' + formatNumber(pago.valordolares) : '-'}</td>
+        `;
+            tableBody.appendChild(row);
+        });
+    }
 
-
-
+    function fillVehiculosTable(vehiculos, targetId) {
+        const tableBody = document.getElementById(targetId);
+        tableBody.innerHTML = '';
+        if (vehiculos.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="9" class="text-center text-muted">No hay vehículos asociados a esta OC.</td></tr>`;
+            return;
+        }
+        vehiculos.forEach(vehiculo => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+            <td data-label="Marca / Modelo">${vehiculo.marcaymodelo}</td>
+            <td data-label="Características">${vehiculo.caracteristicas}</td>
+            <td data-label="Chasis">${vehiculo.chasis ?? '-'}</td>
+            <td data-label="Placa">${vehiculo.placa ?? '-'}</td>
+            <td data-label="P Rotativa">${vehiculo.placarotativa ?? '-'}</td>
+            <td data-label="S. Motor">${vehiculo.seriemotor ?? '-'}</td>
+            <td data-label="Año">${vehiculo.Anio}</td>
+            <td data-label="Condición">${vehiculo.condicion}</td>
+            <td data-label="Precio">$${formatNumber(vehiculo.preciocompra)}</td>
+        `;
+            tableBody.appendChild(row);
+        });
+    }
 
 
 
@@ -869,237 +997,297 @@
     }
 
     // EVENTO PARA GENERAR EL ARCHIVO EXCEL:
-   document.getElementById("btn-generar-excel").addEventListener("click", async () => {
+    document.getElementById("btn-generar-excel").addEventListener("click", async () => {
 
-    if (!reporteData) {
-        alert("Por favor, genera el reporte primero para tener los datos disponibles.");
-        return;
-    }
-
-    const inputConcesionario = document.getElementById('input-concesionario').value.trim();
-    const concesionario = concesionariosData.find(c => c.nombrecomercial === inputConcesionario);
-
-    if (!concesionario) {
-        alert("No se pudo obtener la información del concesionario.");
-        return;
-    }
-
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet(`${concesionario.nombrecomercial}`);
-
-    // 2. Definir estilos reutilizables.
-    const titleStyle = {
-        font: {
-            bold: true,
-            size: 16
-        },
-        alignment: {
-            horizontal: 'center'
+        if (!reporteData) {
+            alert("Por favor, genera el reporte primero para tener los datos disponibles.");
+            return;
         }
-    };
-    const subtitleStyle = {
-        font: {
-            bold: true,
-            size: 14
-        },
-        alignment: {
-            horizontal: 'center'
+
+        const inputConcesionario = document.getElementById('input-concesionario').value.trim();
+        const concesionario = concesionariosData.find(c => c.nombrecomercial === inputConcesionario);
+
+        if (!concesionario) {
+            alert("No se pudo obtener la información del concesionario.");
+            return;
         }
-    };
-    const ocTitleStyle = {
-        font: {
-            bold: true,
-            size: 14
-        },
-        alignment: {
-            horizontal: 'center'
-        },
-        fill: {
-            type: 'pattern',
-            pattern: 'solid',
-            fgColor: {
-                argb: 'FFFFFF00'
+
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet(`${concesionario.nombrecomercial}`);
+
+        // 2. Definir estilos reutilizables.
+        const titleStyle = {
+            font: {
+                bold: true,
+                size: 16
+            },
+            alignment: {
+                horizontal: 'center'
             }
-        }
-    };
-    const headerStyle = {
-        font: {
-            bold: true,
-            size: 11
-        },
-        fill: {
-            type: 'pattern',
-            pattern: 'solid',
-            fgColor: {
-                argb: 'FFE0E0E0'
+        };
+        const subtitleStyle = {
+            font: {
+                bold: true,
+                size: 14
+            },
+            alignment: {
+                horizontal: 'center'
             }
-        },
-        alignment: {
-            vertical: 'middle',
-            horizontal: 'center'
-        },
-        border: {
-            top: {
-                style: 'thin'
+        };
+        const ocTitleStyle = {
+            font: {
+                bold: true,
+                size: 14
             },
-            left: {
-                style: 'thin'
+            alignment: {
+                horizontal: 'center'
             },
-            bottom: {
-                style: 'thin'
-            },
-            right: {
-                style: 'thin'
+            fill: {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: {
+                    argb: 'FFFFFF00'
+                }
             }
-        }
-    };
-    const summaryHeaderStyle = {
-        font: {
-            bold: true,
-            size: 12,
-            color: {
-                argb: 'FFFFFFFF'
+        };
+        const headerStyle = {
+            font: {
+                bold: true,
+                size: 11
+            },
+            fill: {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: {
+                    argb: 'FFE0E0E0'
+                }
+            },
+            alignment: {
+                vertical: 'middle',
+                horizontal: 'center'
+            },
+            border: {
+                top: {
+                    style: 'thin'
+                },
+                left: {
+                    style: 'thin'
+                },
+                bottom: {
+                    style: 'thin'
+                },
+                right: {
+                    style: 'thin'
+                }
             }
-        },
-        fill: {
-            type: 'pattern',
-            pattern: 'solid',
-            fgColor: {
-                argb: 'FF495057'
+        };
+        const summaryHeaderStyle = {
+            font: {
+                bold: true,
+                size: 12,
+                color: {
+                    argb: 'FFFFFFFF'
+                }
+            },
+            fill: {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: {
+                    argb: 'FF495057'
+                }
+            },
+            alignment: {
+                horizontal: 'center'
+            },
+            border: {
+                top: {
+                    style: 'thin'
+                },
+                left: {
+                    style: 'thin'
+                },
+                bottom: {
+                    style: 'thin'
+                },
+                right: {
+                    style: 'thin'
+                }
             }
-        },
-        alignment: {
-            horizontal: 'center'
-        },
-        border: {
-            top: {
-                style: 'thin'
+        };
+        const summaryValueStyle = {
+            font: {
+                bold: true,
+                size: 12
             },
-            left: {
-                style: 'thin'
+            alignment: {
+                horizontal: 'center'
             },
-            bottom: {
-                style: 'thin'
-            },
-            right: {
-                style: 'thin'
+            border: {
+                top: {
+                    style: 'thin'
+                },
+                left: {
+                    style: 'thin'
+                },
+                bottom: {
+                    style: 'thin'
+                },
+                right: {
+                    style: 'thin'
+                }
             }
-        }
-    };
-    const summaryValueStyle = {
-        font: {
-            bold: true,
-            size: 12
-        },
-        alignment: {
-            horizontal: 'center'
-        },
-        border: {
-            top: {
-                style: 'thin'
-            },
-            left: {
-                style: 'thin'
-            },
-            bottom: {
-                style: 'thin'
-            },
-            right: {
-                style: 'thin'
-            }
-        }
-    };
+        };
 
-    // 3. Agregar el título y la información general.
-    worksheet.addRow(['REPORTE FINANCIERO DE CONCESIONARIO']).getCell(1).style = titleStyle;
-    worksheet.mergeCells('A1:J1');
-    worksheet.addRow([]);
-    worksheet.addRow([`Concesionario:`, `${concesionario.nombrecomercial ?? '---'}`]);
-    worksheet.addRow([`Fecha del Reporte:`, `${new Date().toLocaleDateString('es-PE')}`]);
-    worksheet.addRow([]);
-
-    // 4. Agregar el resumen ejecutivo.
-    const resumen = reporteData.resumenEjecutivo;
-    console.log('TOTAL OCS: ', resumen.totalOCs);
-    worksheet.addRow(['RESUMEN EJECUTIVO']).getCell(1).style = subtitleStyle;
-    worksheet.mergeCells('A' + worksheet.rowCount + ':D' + worksheet.rowCount);
-    worksheet.addRow([]);
-
-    const summaryHeaders = ['Total OCs', 'Deuda Total', 'Total Pagado', 'Saldo Pendiente'];
-    const summaryValues = [
-        parseInt(resumen.totalOCs, 10),
-        parseFloat(resumen.deudatotal),
-        parseFloat(resumen.totalpagado),
-        parseFloat(resumen.saldopendiente)
-    ];
-
-    const summaryHeaderRow = worksheet.addRow(summaryHeaders);
-    summaryHeaderRow.eachCell(cell => cell.style = summaryHeaderStyle);
-
-    const summaryValueRow = worksheet.addRow(summaryValues);
-
-    summaryValueRow.getCell(1).numFmt = '0';
-    summaryValueRow.getCell(2).numFmt = '_("$"* #,##0.00_);_("$"* (#,##0.00);_("$"* "-"??_);_(@_)';
-    summaryValueRow.getCell(3).numFmt = '_("$"* #,##0.00_);_("$"* (#,##0.00);_("$"* "-"??_);_(@_)';
-    summaryValueRow.getCell(4).numFmt = '_("$"* #,##0.00_);_("$"* (#,##0.00);_("$"* "-"??_);_(@_)';
-
-    // 5. Agrupar datos por Orden de Compra para el detalle.
-    const ordenesCompra = {};
-
-    
-    reporteData.detalleVehiculos.forEach(vehiculo => {
-        const id = vehiculo.idordencompra;
-        if (!ordenesCompra[id]) {
-            ordenesCompra[id] = {
-                id: vehiculo.OCIdentificador,
-                fechaemision: vehiculo.fechaemision,
-                totalOC: Number(vehiculo.totalOC),
-                pagos: [],
-                vehiculos: []
-            };
-        }
-        ordenesCompra[id].vehiculos.push(vehiculo);
-    });
-
-    // agregamos los pagos a las OCs ya creadas.
-    reporteData.detallePagos.forEach(pago => {
-        const id = pago.idordencompra;
-        if (ordenesCompra[id]) {
-            ordenesCompra[id].pagos.push(pago);
-        }
-    });
-
-    // 6. Recorrer cada OC y agregar las tablas de pagos y vehículos.
-    for (const oc of Object.values(ordenesCompra)) {
+        // 3. Agregar el título y la información general.
+        worksheet.addRow(['REPORTE FINANCIERO DE CONCESIONARIO']).getCell(1).style = titleStyle;
+        worksheet.mergeCells('A1:J1');
         worksheet.addRow([]);
+        worksheet.addRow([`Concesionario:`, `${concesionario.nombrecomercial ?? '---'}`]);
+        worksheet.addRow([`Fecha del Reporte:`, `${new Date().toLocaleDateString('es-PE')}`]);
         worksheet.addRow([]);
 
-        // Título de la OC, con total, pagado y saldo.
-        const totalPagado = oc.pagos.reduce((sum, pago) => sum + (pago.valordolares ? parseFloat(pago.valordolares) : 0), 0);
-        const saldoPendiente = oc.totalOC - totalPagado;
-        const ocTitleCell = worksheet.addRow([`DETALLE ORDEN DE COMPRA: ${oc.id} (Emitida: ${oc.fechaemision || '---'}) - Total: $${oc.totalOC.toFixed(2)} | Pagado: $${totalPagado.toFixed(2)} | Saldo: $${saldoPendiente.toFixed(2)}`]).getCell(1);
-        
-        
-        ocTitleCell.style = ocTitleStyle;
-        worksheet.mergeCells(`A${ocTitleCell.row}:I${ocTitleCell.row}`);
-
+        // 4. Agregar el resumen ejecutivo.
+        const resumen = reporteData.resumenEjecutivo;
+        console.log('TOTAL OCS: ', resumen.totalOCs);
+        worksheet.addRow(['RESUMEN EJECUTIVO']).getCell(1).style = subtitleStyle;
+        worksheet.mergeCells('A' + worksheet.rowCount + ':D' + worksheet.rowCount);
         worksheet.addRow([]);
 
-        // Tabla de Pagos
-        if (oc.pagos.length > 0) {
-            const headersPagos = ["Fecha Pago", "Entidad", "N° Transacción", "Moneda", "Monto Pagado", "T. Cambio", "Valor Dólares"];
-            const headerRowPagos = worksheet.addRow(headersPagos);
-            headerRowPagos.eachCell(cell => cell.style = headerStyle);
+        const summaryHeaders = ['Total OCs', 'Deuda Total', 'Total Pagado', 'Saldo Pendiente'];
+        const summaryValues = [
+            parseInt(resumen.totalOCs, 10),
+            parseFloat(resumen.deudatotal),
+            parseFloat(resumen.totalpagado),
+            parseFloat(resumen.saldopendiente)
+        ];
 
-            oc.pagos.forEach(pago => {
+        const summaryHeaderRow = worksheet.addRow(summaryHeaders);
+        summaryHeaderRow.eachCell(cell => cell.style = summaryHeaderStyle);
+
+        const summaryValueRow = worksheet.addRow(summaryValues);
+
+        summaryValueRow.getCell(1).numFmt = '0';
+        summaryValueRow.getCell(2).numFmt = '_("$"* #,##0.00_);_("$"* (#,##0.00);_("$"* "-"??_);_(@_)';
+        summaryValueRow.getCell(3).numFmt = '_("$"* #,##0.00_);_("$"* (#,##0.00);_("$"* "-"??_);_(@_)';
+        summaryValueRow.getCell(4).numFmt = '_("$"* #,##0.00_);_("$"* (#,##0.00);_("$"* "-"??_);_(@_)';
+
+        // 5. Agrupar datos por Orden de Compra para el detalle.
+        const ordenesCompra = {};
+
+
+        reporteData.detalleVehiculos.forEach(vehiculo => {
+            const id = vehiculo.idordencompra;
+            if (!ordenesCompra[id]) {
+                ordenesCompra[id] = {
+                    id: vehiculo.OCIdentificador,
+                    fechaemision: vehiculo.fechaemision,
+                    totalOC: Number(vehiculo.totalOC),
+                    pagos: [],
+                    vehiculos: []
+                };
+            }
+            ordenesCompra[id].vehiculos.push(vehiculo);
+        });
+
+        // agregamos los pagos a las OCs ya creadas.
+        reporteData.detallePagos.forEach(pago => {
+            const id = pago.idordencompra;
+            if (ordenesCompra[id]) {
+                ordenesCompra[id].pagos.push(pago);
+            }
+        });
+
+        // 6. Recorrer cada OC y agregar las tablas de pagos y vehículos.
+        for (const oc of Object.values(ordenesCompra)) {
+            worksheet.addRow([]);
+            worksheet.addRow([]);
+
+            // Título de la OC, con total, pagado y saldo.
+            const totalPagado = oc.pagos.reduce((sum, pago) => sum + (pago.valordolares ? parseFloat(pago.valordolares) : 0), 0);
+            const saldoPendiente = oc.totalOC - totalPagado;
+            const ocTitleCell = worksheet.addRow([`DETALLE ORDEN DE COMPRA: ${oc.id} (Emitida: ${oc.fechaemision || '---'}) - Total: $${oc.totalOC.toFixed(2)} | Pagado: $${totalPagado.toFixed(2)} | Saldo: $${saldoPendiente.toFixed(2)}`]).getCell(1);
+
+
+            ocTitleCell.style = ocTitleStyle;
+            worksheet.mergeCells(`A${ocTitleCell.row}:I${ocTitleCell.row}`);
+
+            worksheet.addRow([]);
+
+            // Tabla de Pagos
+            if (oc.pagos.length > 0) {
+                const headersPagos = ["Fecha Pago", "Entidad", "N° Transacción", "Moneda", "Monto Pagado", "T. Cambio", "Valor Dólares"];
+                const headerRowPagos = worksheet.addRow(headersPagos);
+                headerRowPagos.eachCell(cell => cell.style = headerStyle);
+
+                oc.pagos.forEach(pago => {
+                    const row = worksheet.addRow([
+                        pago.fechapago || '-',
+                        pago.entidad || '-',
+                        pago.numtransaccion || '-',
+                        pago.moneda || '-',
+                        pago.montopagado ? parseFloat(pago.montopagado) : 0,
+                        pago.tipocambio && !isNaN(pago.tipocambio) ? parseFloat(pago.tipocambio) : '-',
+                        pago.valordolares ? parseFloat(pago.valordolares) : 0
+                    ]);
+                    row.eachCell((cell, colNumber) => {
+                        cell.border = {
+                            top: {
+                                style: 'thin'
+                            },
+                            left: {
+                                style: 'thin'
+                            },
+                            bottom: {
+                                style: 'thin'
+                            },
+                            right: {
+                                style: 'thin'
+                            }
+                        };
+                        if (colNumber === 5) {
+                            cell.numFmt = pago.moneda === 'PEN' ? '_("S/"* #,##0.00_);_("S/"* (#,##0.00);_("S/"* "-"??_);_(@_)' : '_("$"* #,##0.00_);_("$"* (#,##0.00);_("$"* "-"??_);_(@_)';
+                            cell.alignment = {
+                                horizontal: 'right'
+                            };
+                        }
+                        if (colNumber === 7) {
+                            cell.numFmt = '_("$"* #,##0.00_);_("$"* (#,##0.00);_("$"* "-"??_);_(@_)';
+                            cell.alignment = {
+                                horizontal: 'right'
+                            };
+                        }
+                    });
+                });
+            } else {
+                worksheet.addRow(['No se han registrado pagos para esta OC.']).eachCell(cell => {
+                    cell.font = {
+                        italic: true
+                    };
+                    cell.alignment = {
+                        horizontal: 'center'
+                    };
+                });
+            }
+
+            worksheet.addRow([]);
+
+            // Tabla de Vehículos
+            const headersVehiculos = ["Marca / Modelo", "Características", "Chasis", "Placa", "P. Rotativa", "S. Motor", "Año", "Estado", "Precio"];
+            const headerRowVehiculos = worksheet.addRow(headersVehiculos);
+            headerRowVehiculos.eachCell(cell => cell.style = headerStyle);
+
+            oc.vehiculos.forEach(vehiculo => {
+                const caracteristicas = vehiculo.caracteristicas.split(',');
                 const row = worksheet.addRow([
-                    pago.fechapago || '-',
-                    pago.entidad || '-',
-                    pago.numtransaccion || '-',
-                    pago.moneda || '-',
-                    pago.montopagado ? parseFloat(pago.montopagado) : 0,
-                    pago.tipocambio && !isNaN(pago.tipocambio) ? parseFloat(pago.tipocambio) : '-',
-                    pago.valordolares ? parseFloat(pago.valordolares) : 0
+                    vehiculo.marcaymodelo,
+                    caracteristicas[0]?.trim() || '-',
+                    vehiculo.chasis || '-',
+                    vehiculo.placa || '-',
+                    vehiculo.placarotativa || '-',
+                    vehiculo.seriemotor || '-',
+                    vehiculo.Anio || '-',
+                    vehiculo.condicion || '-',
+                    vehiculo.preciocompra ? parseFloat(vehiculo.preciocompra) : 0
                 ]);
                 row.eachCell((cell, colNumber) => {
                     cell.border = {
@@ -1116,13 +1304,7 @@
                             style: 'thin'
                         }
                     };
-                    if (colNumber === 5) {
-                        cell.numFmt = pago.moneda === 'PEN' ? '_("S/"* #,##0.00_);_("S/"* (#,##0.00);_("S/"* "-"??_);_(@_)' : '_("$"* #,##0.00_);_("$"* (#,##0.00);_("$"* "-"??_);_(@_)';
-                        cell.alignment = {
-                            horizontal: 'right'
-                        };
-                    }
-                    if (colNumber === 7) {
+                    if (colNumber === 9) {
                         cell.numFmt = '_("$"* #,##0.00_);_("$"* (#,##0.00);_("$"* "-"??_);_(@_)';
                         cell.alignment = {
                             horizontal: 'right'
@@ -1130,88 +1312,34 @@
                     }
                 });
             });
-        } else {
-            worksheet.addRow(['No se han registrado pagos para esta OC.']).eachCell(cell => {
-                cell.font = {
-                    italic: true
-                };
-                cell.alignment = {
-                    horizontal: 'center'
-                };
-            });
         }
 
-        worksheet.addRow([]);
-
-        // Tabla de Vehículos
-        const headersVehiculos = ["Marca / Modelo", "Características", "Chasis", "Placa", "P. Rotativa", "S. Motor", "Año", "Estado", "Precio"];
-        const headerRowVehiculos = worksheet.addRow(headersVehiculos);
-        headerRowVehiculos.eachCell(cell => cell.style = headerStyle);
-
-        oc.vehiculos.forEach(vehiculo => {
-            const caracteristicas = vehiculo.caracteristicas.split(',');
-            const row = worksheet.addRow([
-                vehiculo.marcaymodelo,
-                caracteristicas[0]?.trim() || '-',
-                vehiculo.chasis || '-',
-                vehiculo.placa || '-',
-                vehiculo.placarotativa || '-',
-                vehiculo.seriemotor || '-',
-                vehiculo.Anio || '-',
-                vehiculo.condicion || '-',
-                vehiculo.preciocompra ? parseFloat(vehiculo.preciocompra) : 0
-            ]);
-            row.eachCell((cell, colNumber) => {
-                cell.border = {
-                    top: {
-                        style: 'thin'
-                    },
-                    left: {
-                        style: 'thin'
-                    },
-                    bottom: {
-                        style: 'thin'
-                    },
-                    right: {
-                        style: 'thin'
-                    }
-                };
-                if (colNumber === 9) {
-                    cell.numFmt = '_("$"* #,##0.00_);_("$"* (#,##0.00);_("$"* "-"??_);_(@_)';
-                    cell.alignment = {
-                        horizontal: 'right'
-                    };
+        // 7. Ajustar anchos de columna de forma más controlada.
+        worksheet.columns.forEach((column, index) => {
+            let maxLength = 0;
+            column.eachCell({
+                includeEmpty: true
+            }, cell => {
+                const columnLength = cell.value ? cell.value.toString().length : 10;
+                if (columnLength > maxLength) {
+                    maxLength = columnLength;
                 }
             });
+            column.width = Math.min(maxLength + 2, 23);
         });
-    }
 
-    // 7. Ajustar anchos de columna de forma más controlada.
-    worksheet.columns.forEach((column, index) => {
-        let maxLength = 0;
-        column.eachCell({
-            includeEmpty: true
-        }, cell => {
-            const columnLength = cell.value ? cell.value.toString().length : 10;
-            if (columnLength > maxLength) {
-                maxLength = columnLength;
-            }
+        // 8. Escribir el archivo y descargarlo.
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         });
-        column.width = Math.min(maxLength + 2, 23);
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Reporte-Financiero-${concesionario.nombrecomercial ?? '---'}(${new Date().toLocaleDateString('es-PE')}).xlsx`;
+        a.click();
+        window.URL.revokeObjectURL(url);
     });
-
-    // 8. Escribir el archivo y descargarlo.
-    const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], {
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-    });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `Reporte-Financiero-${concesionario.nombrecomercial ?? '---'}(${new Date().toLocaleDateString('es-PE')}).xlsx`;
-    a.click();
-    window.URL.revokeObjectURL(url);
-});
 
 
 
