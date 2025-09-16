@@ -35,16 +35,22 @@ class OrdenCompra
     {
         $query = "SELECT 
                 oc.idordencompra,
-                c.nombrecomercial AS concesionario
+                c.nombrecomercial AS concesionario,
+                fn_format_oc_display_id(oc.idordencompra, oc.serie) AS numeroOCIdentificador,
+                CONCAT(dep.departamento, ' / ', p.provincia, ' / ', d.distrito) AS ubicacion
             FROM ordenescompra oc
             INNER JOIN tiendas t ON oc.idtienda = t.idtienda
             INNER JOIN concesionarios c ON t.idconcesionario = c.idconcesionario
+            INNER JOIN distritos d ON t.iddistrito = d.iddistrito
+            INNER JOIN provincias p ON d.idprovincia = p.idprovincia
+            INNER JOIN departamentos dep ON p.iddepartamento = dep.iddepartamento
             WHERE oc.idordencompra = :idorden";
 
         try {
             $stmt = $this->db->prepare($query);
             $stmt->execute([':idorden' => $idorden]);
             $data = $stmt->fetch(PDO::FETCH_ASSOC);
+            // error_log(print_r($data, true) . '|');
             return $data ?: null;
         } catch (PDOException $error) {
             error_log('Error en obtenerPorId OrdenCompra: ' . $error->getMessage());
@@ -75,7 +81,7 @@ class OrdenCompra
             $stmt = $this->db->prepare($query);
             $stmt->execute(array(':idOC' => $idOC));
             $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        
+
             // error_log(print_r($results, true) . '|');
             return $results;
         } catch (PDOException $error) {
@@ -83,7 +89,7 @@ class OrdenCompra
             return [];
         }
     }
-    
+
 
     //  METODO PARA ACTUAlIZAR EL CAMPO ESCORRECTO EN LA TABLA DET_ORDEN_COMPRA DE LA DB
 
@@ -115,7 +121,7 @@ class OrdenCompra
                     ':observaciones' => $params['observaciones'],
                     ':idordencompra' => $params['idordencompra']
                 ]);
-                return $stmt->rowCount(); 
+                return $stmt->rowCount();
             } else {
                 $query = 'UPDATE ordenescompra 
                       SET estado = :estado, observaciones = :observaciones 
@@ -160,8 +166,34 @@ class OrdenCompra
             return -1;
         }
     }
+
+
+    public function getReporteOCProceso(): ?array
+    {
+        $query = "CALL sp_reporte_general_oc_proceso()";
+        try {
+            $stmt = $this->db->prepare($query);
+            $stmt->execute();
+
+            $resumenEjecutivo = $stmt->fetch(PDO::FETCH_ASSOC);
+            $stmt->nextRowset();
+            $detalleOrdenes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            error_log(print_r($resumenEjecutivo, true));
+            error_log(print_r($detalleOrdenes, true));
+            return [
+                'resumenEjecutivo' => $resumenEjecutivo,
+                'detalleOrdenes' => $detalleOrdenes
+            ];
+        } catch (PDOException $e) {
+            error_log($e->getMessage());
+            return null;
+        }
+    }
 }
 
-// $orden = new OrdenCompra();
+//  $orden = new OrdenCompra();
+
+//  $orden->getReporteOCProceso();
 
 // var_dump($orden->getAll());

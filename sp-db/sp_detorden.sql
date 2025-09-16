@@ -130,12 +130,7 @@ ORDER BY detoc.iddetordencompra;
 END //
 USE motorpark;
 CALL sp_det_oc_escorrecto(54);
-    SELECT * FROM vehiculos;
-SELECT * FROM detordencompra WHERE idordencompra = 42;
-
-
-SELECT * FROM compras;
-
+   
 
 
 -- SP QUE ACTUALIZA EL CAMPO ESCORRECTO DE LA TABLA OC Y LA FECHARECEPCION EN TABLA COMPRAS.DELIMITER ;
@@ -177,5 +172,6 @@ BEGIN
 END $$
 
 DELIMITER ;
+
 
 CALL sp_check_recepcion_OC('S',35);

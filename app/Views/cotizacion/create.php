@@ -468,7 +468,7 @@
                             <div class="col-md-2">
                                 <div class="form-floating">
                                     <input type="number" class="form-control fin-inicial" placeholder="Inicial"
-                                        step="0.01" min="0">
+                                        step="0.01" min="0" id="inicial">
                                     <label>Inicial <span class="text-danger">*</span></label>
                                 </div>
                             </div>
@@ -476,7 +476,7 @@
                             <div class="col-md-2">
                                 <div class="form-floating">
                                     <input type="text" class="form-control fin-valorFinanciar"
-                                        placeholder="Valor a Financiar" readonly>
+                                        placeholder="Valor a Financiar" readonly id="inputValorFinanciar">
                                     <label>Valor a Financiar <span class="text-danger">*</span></label>
                                 </div>
                             </div>
@@ -484,7 +484,7 @@
                             <div class="col-md-2">
                                 <div class="form-floating">
                                     <input type="number" class="form-control fin-numcuotas" placeholder="Meses"
-                                        step="3">
+                                        step="3" id="numcuotas">
                                     <label>Meses <span class="text-danger">*</span></label>
                                 </div>
                             </div>
@@ -492,7 +492,7 @@
                             <div class="col-md-2">
                                 <div class="form-floating">
                                     <input type="number" class="form-control fin-tasaAnual" placeholder="Tasa anual"
-                                        step="0.01" min="0" value="65">
+                                        step="0.01" min="0" value="65" id="tasaAnual">
                                     <label>Tasa anual (%)</label>
                                 </div>
                             </div>
@@ -500,7 +500,7 @@
                             <div class="col-md-2">
                                 <div class="form-floating">
                                     <input type="text" class="form-control fin-cuotaMensual" placeholder="Valor Mensual"
-                                        readonly>
+                                        readonly id="cuotaMensual">
                                     <label>Valor Mensual <span class="text-danger">*</span></label>
                                 </div>
                             </div>
@@ -769,6 +769,7 @@
 <!-- PDFMAKE MAS RECOMENDADO PARA PDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js" defer></script>
+<script src="/assets/js/logoBase64.js"></script>
 <script src="/assets/js/cotizacion-cronograma-pdf/pdf.js" defer></script>
 
 <!----------------------------------------------->

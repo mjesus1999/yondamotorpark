@@ -148,6 +148,7 @@ require_once __DIR__ . '/../../Helpers/functions.php'; ?>
             opacity: 0;
             transform: translateX(20px);
         }
+
         to {
             opacity: 1;
             transform: translateX(0);
@@ -157,11 +158,11 @@ require_once __DIR__ . '/../../Helpers/functions.php'; ?>
     /* Mejoras visuales para las cards internas */
     .form-step .card {
         transition: all 0.3s ease;
-        border: 1px solid rgba(0,0,0,0.05);
+        border: 1px solid rgba(0, 0, 0, 0.05);
     }
 
     .form-step .card:hover {
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         transform: translateY(-2px);
     }
 
@@ -183,7 +184,7 @@ require_once __DIR__ . '/../../Helpers/functions.php'; ?>
         overflow-y: auto;
         z-index: 1000;
         display: none;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     }
 
     .searchable-select-dropdown.show {
@@ -238,17 +239,17 @@ require_once __DIR__ . '/../../Helpers/functions.php'; ?>
         .step-indicator {
             min-width: 80px;
         }
-        
+
         .step-number {
             width: 32px;
             height: 32px;
             font-size: 14px;
         }
-        
+
         .step-title {
             font-size: 11px;
         }
-        
+
         .step-line {
             width: 40px;
         }
@@ -288,7 +289,7 @@ require_once __DIR__ . '/../../Helpers/functions.php'; ?>
                 </div>
             </div>
         </div>
-        
+
         <!-- Indicador de pasos -->
         <div class="card-body p-0">
             <div class="d-flex justify-content-center py-3 bg-body border-bottom">
@@ -323,7 +324,7 @@ require_once __DIR__ . '/../../Helpers/functions.php'; ?>
                             <div class="card h-100 border-0 bg-body">
                                 <div class="card-body">
                                     <h6 class="text-primary mb-3"><i class="bi bi-card-text me-2"></i>Documento de Identidad</h6>
-                                    
+
                                     <div class="row g-3">
                                         <div class="col-12">
                                             <div class="form-floating">
@@ -362,7 +363,7 @@ require_once __DIR__ . '/../../Helpers/functions.php'; ?>
                             <div class="card h-100 border-0 bg-body">
                                 <div class="card-body">
                                     <h6 class="text-primary mb-3"><i class="bi bi-person me-2"></i>Datos Personales</h6>
-                                    
+
                                     <div class="row g-3">
                                         <div class="col-12">
                                             <div class="form-floating">
@@ -403,47 +404,32 @@ require_once __DIR__ . '/../../Helpers/functions.php'; ?>
                             <div class="card h-100 border-0 bg-body">
                                 <div class="card-body">
                                     <h6 class="text-primary mb-3"><i class="bi bi-geo-alt me-2"></i>Ubicación Geográfica</h6>
-                                    
-                                    <div class="row g-3">
-                                        <div class="col-12">
-                                            <div class="searchable-select-container">
+
+                                    <div class="mb-4">
+
+                                        <div class="row g-3">
+                                            <div class="col-12">
                                                 <div class="form-floating">
-                                                    <input type="text" class="form-control searchable-select-input bg-body" 
-                                                           id="departamento-input" placeholder="Buscar departamento..." 
-                                                           autocomplete="off" required>
-                                                    <input type="hidden" name="departamento" id="departamento" required>
-                                                    <label for="departamento-input">Departamento <span class="text-danger">*</span></label>
-                                                </div>
-                                                <div class="searchable-select-dropdown bg-body" id="departamento-dropdown">
-                                                    <div class="dropdown-item" data-value=""></div>
+                                                    <select name="departamento" id="departamento" class="form-select" required>
+                                                        <option value="">Seleccione</option>
+                                                    </select>
+                                                    <label for="departamento"><i class="bi bi-map me-1"></i>Departamento</label>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div class="col-12">
-                                            <div class="searchable-select-container">
+                                            <div class="col-12">
                                                 <div class="form-floating">
-                                                    <input type="text" class="form-control searchable-select-input bg-body" 
-                                                           id="provincia-input" placeholder="Buscar provincia..." 
-                                                           autocomplete="off" required>
-                                                    <input type="hidden" name="provincia" id="provincia" required>
-                                                    <label for="provincia-input">Provincia <span class="text-danger">*</span></label>
-                                                </div>
-                                                <div class="searchable-select-dropdown bg-body" id="provincia-dropdown">
-                                                    <div class="dropdown-item" data-value=""></div>
+                                                    <select name="provincia" id="provincia" class="form-select" required>
+                                                        <option value="">Seleccione</option>
+                                                    </select>
+                                                    <label for="provincia"><i class="bi bi-map me-1"></i>Provincia</label>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div class="col-12">
-                                            <div class="searchable-select-container">
+                                            <div class="col-12">
                                                 <div class="form-floating">
-                                                    <input type="text" class="form-control searchable-select-input bg-body" 
-                                                           id="distrito-input" placeholder="Buscar distrito..." 
-                                                           autocomplete="off" required>
-                                                    <input type="hidden" name="distrito" id="distrito" required>
-                                                    <label for="distrito-input">Distrito <span class="text-danger">*</span></label>
-                                                </div>
-                                                <div class="searchable-select-dropdown bg-body" id="distrito-dropdown">
-                                                    <div class="dropdown-item" data-value=""></div>
+                                                    <select name="distrito" id="distrito" class="form-select" required>
+                                                        <option value="">Seleccione</option>
+                                                    </select>
+                                                    <label for="distrito"><i class="bi bi-map me-1"></i>Distrito</label>
                                                 </div>
                                             </div>
                                         </div>
@@ -457,11 +443,11 @@ require_once __DIR__ . '/../../Helpers/functions.php'; ?>
                             <div class="card h-100 border-0 bg-body">
                                 <div class="card-body">
                                     <h6 class="text-primary mb-3"><i class="bi bi-telephone me-2"></i>Información de Contacto</h6>
-                                    
+
                                     <div class="row g-3">
                                         <div class="col-12">
                                             <div class="form-floating">
-                                                <input type="tel" name="telprimario" id="telprimario" class="form-control" 
+                                                <input type="tel" name="telprimario" id="telprimario" class="form-control"
                                                     maxlength="9" pattern="[0-9]+" placeholder="Teléfono principal" required>
                                                 <label for="telprimario">Teléfono principal <span class="text-danger">*</span></label>
                                             </div>
@@ -492,7 +478,7 @@ require_once __DIR__ . '/../../Helpers/functions.php'; ?>
                             <div class="card h-100 border-0 bg-body">
                                 <div class="card-body">
                                     <h6 class="text-primary mb-3"><i class="bi bi-house me-2"></i>Dirección de Residencia</h6>
-                                    
+
                                     <div class="row g-3">
                                         <div class="col-12">
                                             <div class="form-floating">
@@ -518,7 +504,7 @@ require_once __DIR__ . '/../../Helpers/functions.php'; ?>
                             <div class="card h-100 border-0 bg-body">
                                 <div class="card-body">
                                     <h6 class="text-primary mb-3"><i class="bi bi-geo me-2"></i>Coordenadas GPS</h6>
-                                    
+
                                     <div class="row g-3">
                                         <div class="col-12">
                                             <div class="form-floating">
@@ -529,7 +515,7 @@ require_once __DIR__ . '/../../Helpers/functions.php'; ?>
                                         </div>
                                         <div class="col-12">
                                             <div class="form-floating">
-                                                <input type="text" name="longitud" id="longitud" class="form-control" 
+                                                <input type="text" name="longitud" id="longitud" class="form-control"
                                                     maxlength="40" placeholder="Longitud">
                                                 <label for="longitud">Longitud</label>
                                             </div>
@@ -551,7 +537,7 @@ require_once __DIR__ . '/../../Helpers/functions.php'; ?>
                     <button type="button" class="btn btn-outline-secondary" id="btn-anterior" style="display: none;">
                         <i class="bi bi-arrow-left me-1"></i> Anterior
                     </button>
-                    
+
                     <div class="ms-auto d-flex gap-2">
                         <button type="reset" class="btn btn-outline-secondary" id="btn-cancelar">
                             Cancelar
@@ -574,7 +560,7 @@ require_once __DIR__ . '/../../Helpers/functions.php'; ?>
     // Variables globales para el wizard
     let currentStep = 1;
     const totalSteps = 3;
-    
+
     // Referencias a elementos del DOM
     const formRegistroClientePersona = document.getElementById('form-registro-cliente-persona');
     const btnSiguiente = document.getElementById('btn-siguiente');
@@ -592,11 +578,11 @@ require_once __DIR__ . '/../../Helpers/functions.php'; ?>
     function updateStepIndicators() {
         const stepIndicators = document.querySelectorAll('.step-indicator');
         const stepLines = document.querySelectorAll('.step-line');
-        
+
         stepIndicators.forEach((indicator, index) => {
             const stepNumber = index + 1;
             indicator.classList.remove('active', 'completed');
-            
+
             if (stepNumber < currentStep) {
                 indicator.classList.add('completed');
             } else if (stepNumber === currentStep) {
@@ -618,13 +604,13 @@ require_once __DIR__ . '/../../Helpers/functions.php'; ?>
         document.querySelectorAll('.form-step').forEach(stepElement => {
             stepElement.classList.remove('active');
         });
-        
+
         // Mostrar el paso actual
         const currentStepElement = document.getElementById(`step-${step}`);
         if (currentStepElement) {
             currentStepElement.classList.add('active');
         }
-        
+
         // Actualizar botones
         updateButtons();
         updateProgress();
@@ -639,7 +625,7 @@ require_once __DIR__ . '/../../Helpers/functions.php'; ?>
         } else {
             btnAnterior.style.display = 'inline-block';
         }
-        
+
         // Botón siguiente y registrar
         if (currentStep === totalSteps) {
             btnSiguiente.style.display = 'none';
@@ -655,11 +641,11 @@ require_once __DIR__ . '/../../Helpers/functions.php'; ?>
         const currentStepElement = document.getElementById(`step-${currentStep}`);
         const requiredFields = currentStepElement.querySelectorAll('[required]');
         let isValid = true;
-        
+
         requiredFields.forEach(field => {
             // Limpiar clases previas
             field.classList.remove('is-valid', 'is-invalid');
-            
+
             if (!field.value.trim()) {
                 field.classList.add('is-invalid');
                 isValid = false;
@@ -667,19 +653,19 @@ require_once __DIR__ . '/../../Helpers/functions.php'; ?>
                 field.classList.add('is-valid');
             }
         });
-        
+
         // Validaciones específicas por paso
         if (currentStep === 1) {
             // Validar documento
             const tipoDoc = document.getElementById('tipodocumento').value;
             const nroDoc = document.getElementById('ndocumento').value;
-            
+
             if (tipoDoc === 'DNI' && nroDoc.length !== 8) {
                 document.getElementById('ndocumento').classList.add('is-invalid');
                 isValid = false;
             }
         }
-        
+
         if (currentStep === 2) {
             // Validar teléfono
             const telefono = document.getElementById('telprimario').value;
@@ -688,7 +674,7 @@ require_once __DIR__ . '/../../Helpers/functions.php'; ?>
                 isValid = false;
             }
         }
-        
+
         return isValid;
     }
 
@@ -708,7 +694,7 @@ require_once __DIR__ . '/../../Helpers/functions.php'; ?>
                 timer: 3000,
                 timerProgressBar: true
             });
-            
+
             Toast.fire({
                 icon: 'warning',
                 title: 'Por favor, complete todos los campos obligatorios'
@@ -728,7 +714,7 @@ require_once __DIR__ . '/../../Helpers/functions.php'; ?>
         if (e.target.matches('input[required], select[required]')) { // matchea los campos que tengan el atributo required
             const field = e.target;
             field.classList.remove('is-valid', 'is-invalid');
-            
+
             if (field.value.trim()) {
                 field.classList.add('is-valid');
             }
@@ -741,7 +727,7 @@ require_once __DIR__ . '/../../Helpers/functions.php'; ?>
     });
 
     // Manejo del envío del formulario
-    formRegistroClientePersona.addEventListener('submit', async(event) => {
+    formRegistroClientePersona.addEventListener('submit', async (event) => {
         event.preventDefault();
 
         // Validar todos los pasos
@@ -758,7 +744,7 @@ require_once __DIR__ . '/../../Helpers/functions.php'; ?>
         }
 
         if (allValid) {
-            if (await ask("¿Registrar cliente?",'Confirmar cliente')) {
+            if (await ask("¿Registrar cliente?", 'Confirmar cliente')) {
                 formRegistroClientePersona.submit();
             }
         } else {
@@ -769,7 +755,7 @@ require_once __DIR__ . '/../../Helpers/functions.php'; ?>
                 timer: 4000,
                 timerProgressBar: true
             });
-            
+
             Toast.fire({
                 icon: 'error',
                 title: 'Hay errores en el formulario. Por favor, revise todos los campos.'
@@ -887,14 +873,14 @@ require_once __DIR__ . '/../../Helpers/functions.php'; ?>
 
     btnBuscarCliente.addEventListener('click', buscarPorDNI);
 
-    ndocumento.addEventListener('keypress', function (e) {
+    ndocumento.addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
             e.preventDefault();
             buscarPorDNI();
         }
     });
 
-    ndocumento.addEventListener('input', function (e) {
+    ndocumento.addEventListener('input', function(e) {
         this.value = this.value.replace(/\D/g, '');
 
         if (this.value.length > 8) {
@@ -903,7 +889,7 @@ require_once __DIR__ . '/../../Helpers/functions.php'; ?>
     });
 
     // Capturar DNI de la URL y prellenar el campo
-    document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function() {
         const urlParams = new URLSearchParams(window.location.search);
         const dniFromUrl = urlParams.get('dni');
 
@@ -911,13 +897,13 @@ require_once __DIR__ . '/../../Helpers/functions.php'; ?>
             const ndocumentoField = document.getElementById('ndocumento');
             if (ndocumentoField) {
                 ndocumentoField.value = dniFromUrl;
-               
+
             }
         }
     });
 
     //PARAMETRO DE RETORNO PARA LA COTIZACION
-    document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function() {
         // Verificar si hay parámetros en la URL para prellenar datos
         const urlParams = new URLSearchParams(window.location.search);
         const dniParam = urlParams.get('dni');
@@ -934,7 +920,9 @@ require_once __DIR__ . '/../../Helpers/functions.php'; ?>
                 nrodocInput.value = dniParam;
 
                 // Trigger change event para actualizar placeholders si es necesario
-                const changeEvent = new Event('change', { bubbles: true });
+                const changeEvent = new Event('change', {
+                    bubbles: true
+                });
                 tipoDocSelect.dispatchEvent(changeEvent);
 
                 // Focus en el campo nombres
@@ -950,7 +938,6 @@ require_once __DIR__ . '/../../Helpers/functions.php'; ?>
             showToast('Complete el registro del cliente para continuar con la cotización', 'INFO', 3000);
         }
     });
-
 </script>
 
 <?php include __DIR__ . '/../layout/footer.php'; ?>

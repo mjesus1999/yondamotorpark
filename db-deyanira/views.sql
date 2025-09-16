@@ -1,3 +1,4 @@
+USE motorpark;
 
 -- VISTA DE EJEMPLO PARA VISUALIZAR CARGOS CON USUARIOS
 CREATE VIEW vw_colaboradores_con_cargo AS
@@ -126,6 +127,11 @@ LEFT JOIN colaboradores col
   AND col.habilitado = 'S'
 WHERE col.idcolaborador IS NULL
 ORDER BY p.apellidos, p.nombres;
+
+
+
+
+
 
 /*
 -- VISTAS DE COTIZACION.PHP

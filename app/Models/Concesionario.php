@@ -112,5 +112,66 @@ class Concesionario
             return -1;
         }
     }
+
+
+    public function getConcesionariosWhitOCProceso(): array
+    {
+        try {
+            $query = 'SELECT DISTINCT c.idconcesionario, c.ruc, c.razonsocial, c.nombrecomercial 
+                      FROM tiendas ti
+                      JOIN ordenescompra oc ON ti.idtienda = oc.idtienda
+                      JOIN concesionarios c ON ti.idconcesionario = c.idconcesionario
+                      WHERE oc.estado = "proceso"
+                      ORDER BY c.razonsocial ASC;';
+            $stmt = $this->db->prepare($query);
+            $stmt->execute();
+            $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            return $results;
+        } catch (PDOException $error) {
+            error_log($error->getMessage());
+            return [];
+        }
+    }
+
+
+    public function getReporteConcesionarioDetallado(int $id): ?array
+    {
+        // Asegúrate de que el nombre de tu procedimiento sea correcto y que espera un parámetro.
+        $query = "CALL sp_reporte_concesionario_detallado(?)";
+
+        try {
+            $stmt = $this->db->prepare($query);
+            $stmt->bindParam(1, $id, PDO::PARAM_INT);
+            $stmt->execute();
+
+            // 1. Obtener el Resumen Ejecutivo (primer conjunto de resultados)
+            $resumenEjecutivo = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            // 2. Avanzar al siguiente conjunto para obtener el Detalle de Pagos
+            $stmt->nextRowset();
+            $detallePagos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            // 3. Avanzar al siguiente conjunto para obtener el Detalle de Vehículos
+            $stmt->nextRowset();
+            $detalleVehiculos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            // Opcional: Para depuración, puedes seguir usando error_log
+            // error_log(print_r($resumenEjecutivo, true));
+            // error_log(print_r($detallePagos, true));
+            // error_log(print_r($detalleVehiculos, true));
+
+            // Cierra el cursor para liberar la conexión a la base de datos
+            $stmt->closeCursor();
+
+            // Retornar los tres conjuntos de resultados en un solo array
+            return [
+                'resumenEjecutivo' => $resumenEjecutivo,
+                'detallePagos' => $detallePagos,
+                'detalleVehiculos' => $detalleVehiculos
+            ];
+        } catch (PDOException $e) {
+            error_log("Error en el procedimiento almacenado: " . $e->getMessage());
+            return null;
+        }
+    }
 }
-        
