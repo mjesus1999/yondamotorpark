@@ -2,13 +2,15 @@
 USE motorpark2;
 
 DROP TRIGGER IF EXISTS tr_set_saldo_pagoOC;
+
 DELIMITER //
 CREATE TRIGGER tr_set_saldo_pagoOC
 BEFORE INSERT ON pagosOC
 FOR EACH ROW
 BEGIN
     DECLARE totalOC DECIMAL(10,2);
-    DECLARE totalPagosUSD DECIMAL(10,4); -- Usar más decimales internamente para mayor precisión
+    DECLARE totalPagosUSD DECIMAL(10,4); 
+    DECLARE totalPagosRedondeado DECIMAL(10,2); -- Nuevo: Variable para el valor redondeado
 
     -- Obtener el total de la OC con IGV
     SELECT ROUND(IFNULL(SUM(preciocompra * 1.18),0),2) INTO totalOC
@@ -16,7 +18,6 @@ BEGIN
     WHERE idordencompra = NEW.idorden;
 
     -- Calcular el total de todos los pagos (existentes + el nuevo pago) en USD
-    -- Se hace un solo cálculo para evitar errores de redondeo acumulados
     SELECT IFNULL(SUM(
         CASE
             WHEN moneda = 'PEN' AND tipocambio > 0 THEN amortizacion / tipocambio
@@ -25,26 +26,30 @@ BEGIN
     ), 0) INTO totalPagosUSD
     FROM pagosOC
     WHERE idorden = NEW.idorden;
-    
+
     SET totalPagosUSD = totalPagosUSD + (
         CASE
             WHEN NEW.moneda = 'PEN' AND NEW.tipocambio > 0 THEN NEW.amortizacion / NEW.tipocambio
             ELSE NEW.amortizacion
         END
     );
+    
+    -- Redondear la suma total de pagos antes de la validación
+    SET totalPagosRedondeado = ROUND(totalPagosUSD, 2);
 
-    -- Validar que el nuevo pago no exceda el saldo
-    -- La validación se hace con el valor sin redondear para mayor precisión
-    IF totalPagosUSD > totalOC + 0.001 THEN -- Se agrega un pequeño margen para evitar problemas de flotantes
+    -- Validar que el nuevo pago no exceda el saldo usando el valor redondeado
+    IF totalPagosRedondeado > totalOC THEN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'El monto de amortizacion excede el saldo de la orden';
     END IF;
 
     -- Calcular saldo restante con redondeo al final
-    SET NEW.saldo = ROUND(GREATEST(0, totalOC - totalPagosUSD), 2);
+    SET NEW.saldo = ROUND(GREATEST(0, totalOC - totalPagosRedondeado), 2);
 END;
 //
 DELIMITER ;
+
+
 
 SELECT * FROM pagosOc;
 
@@ -99,5 +104,8 @@ END //
 USE motorpark2;
 
 SHOW TRIGGERS;
+
+
+SELECT * FROM pagosOC;
 
 

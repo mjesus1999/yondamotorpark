@@ -42,7 +42,7 @@ class OrdenCompraController extends Controller
         $totalAmortizado = $result['totalAmortizado'];
         $infoAutos = $this->ordenCompraModel->getInfoAutosOC($idorden);
         $entidadesPago = $this->entidadesPagoModel->getAllEntidadesPago();
-        // error_log('AUTO: ' . print_r($infoAutos, true));
+        error_log('SALDO RESTANTE: ' . print_r($saldoRestante, true));
         $this->view('oc.pagos', [
             'pagos' => $pagos,
             'totalAmortizado' => $totalAmortizado,

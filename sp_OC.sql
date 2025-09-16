@@ -70,65 +70,94 @@ DELIMITER ;
 
 
 CALL sp_oc_por_estado('proceso');
-SELECT  * FROM pagosOC;
 
--- UPDATE concesionarios SET razonsocial = 'HYUNDAI PERU' WHERE idconcesionario = 7;
 
-SELECT * FROM concesionarios;
---SP PARA OBTENER LOS OC QUE SON COMPRAS.
-USE motorpark2;
 
-SELECT * FROM pagosOC;
+DROP PROCEDURE sp_getAll_OC_Compras;
+
 DELIMITER //
-
 CREATE PROCEDURE sp_getAll_OC_Compras()
 BEGIN
     SELECT
         orden.idordencompra,
+        
         com.idcompra,
+        
         orden.serie AS serie_oc,
-        orden.emision AS fecha_emision_oc,
+        
+        orden.emisiON AS fecha_emision_oc,
+        
         com.fechacompra,
+        
         com.numdocumento AS num_factura,
+        
         concesionario.nombrecomercial,
-        CONCAT_WS(' / ',dep.departamento,prov.provincia,dist.distrito,  tienda.direccion) AS direccion_completa_concesionario,
-        COUNT(CASE 
-            WHEN veh.disponibilidad = 'proceso' 
-            AND (veh.chasis IS NULL OR TRIM(veh.chasis) = '' OR veh.seriemotor IS NULL OR TRIM(veh.seriemotor) = '')
-            THEN 1 
-            ELSE NULL 
+        
+        CONCAT_WS(' / ',
+        dep.departamento,
+        prov.provincia,
+        dist.distrito,
+         tienda.direccion) AS direccion_completa_concesionario,
+        
+        COUNT(
+    CASE 
+           
+    WHEN veh.disponibilidad = 'proceso' 
+           
+        AND (veh.chasis IS NULL
+        OR TRIM(veh.chasis) = ''
+        OR veh.seriemotOR IS NULL
+        OR TRIM(veh.seriemotor) = '')
+            THEN
+    1 
+           
+    ELSE NULL 
         END) AS vehiculos_pendientes,
         COUNT(
   CASE
+   
     WHEN veh.disponibilidad = 'proceso'
-     AND veh.chasis IS NOT NULL AND TRIM(veh.chasis) <> ''
-     AND veh.seriemotor IS NOT NULL AND TRIM(veh.seriemotor) <> ''
-    THEN 1
+     AND veh.chasis IS NOT NULL
+        AND TRIM(veh.chasis) <> ''
+     AND veh.seriemotOR IS NOT NULL
+        AND TRIM(veh.seriemotor) <> ''
+    THEN
+    1
+   
     ELSE NULL
   END
 ) AS listos_para_liberar
 
     FROM
-        compras AS com
+        comprAS AS com
     INNER JOIN
-        ordenescompra AS orden ON com.idorden = orden.idordencompra
+        ordenescompra AS orden
+    ON com.idorden = orden.idordencompra
     INNER JOIN
-        tiendas AS tienda ON orden.idtienda = tienda.idtienda
+        tiendAS AS tienda
+    ON orden.idtienda = tienda.idtienda
     INNER JOIN
-        concesionarios AS concesionario ON tienda.idconcesionario = concesionario.idconcesionario
+        concesionarios AS concesionario
+    ON tienda.idconcesionario = concesionario.idconcesionario
     INNER JOIN
-        distritos AS dist ON tienda.iddistrito = dist.iddistrito
+        distritos AS dist
+    ON tienda.iddistrito = dist.iddistrito
     INNER JOIN
-        provincias AS prov ON dist.idprovincia = prov.idprovincia
+        provinciAS AS prov
+    ON dist.idprovincia = prov.idprovincia
     INNER JOIN
-        departamentos AS dep ON prov.iddepartamento = dep.iddepartamento
+        departamentos AS dep
+    ON prov.iddepartamento = dep.iddepartamento
     INNER JOIN
-        detordencompra AS detoc ON orden.idordencompra = detoc.idordencompra
+        detordencompra AS detoc
+    ON orden.idordencompra = detoc.idordencompra
     INNER JOIN
-        vehiculos AS veh ON detoc.idvehiculo = veh.idvehiculo
+        vehiculos AS veh
+    ON detoc.idvehiculo = veh.idvehiculo
     WHERE
         detoc.estado = '1'
-    GROUP BY
+   
+    GROUP BY 
         orden.idordencompra,
         com.idcompra,
         orden.serie,
@@ -139,12 +168,12 @@ BEGIN
         direccion_completa_concesionario
     HAVING
         vehiculos_pendientes > 0
-    ORDER BY
+        OR listos_para_liberar > 0
+   
+ORDER BY 
         com.fechacompra DESC;
 END //
-
 DELIMITER ;
-
 
 
 DROP PROCEDURE IF EXISTS sp_get_OC_details_for_recepcion;
@@ -278,12 +307,300 @@ END //
 DELIMITER ;
 
 
-SELECT * FROM vehiculos;
 
-SELECT * FROM vehiculos WHERE idvehiculo = 63;
+DELIMITER //
+CREATE PROCEDURE sp_reporte_general_oc_proceso()
+BEGIN
+    -- Declaración de variables para el Resumen Ejecutivo
+    DECLARE total_oc_proceso INT;
+    DECLARE total_vehiculos_pendientes INT;
+    DECLARE deuda_global DECIMAL(15, 2);
+    DECLARE pagos_recibidos DECIMAL(15, 2);
+    DECLARE saldo_pendiente DECIMAL(15, 2);
+    DECLARE avance_general DECIMAL(5, 2);
 
-USE motorpark2;
+    --  Consulta para el Resumen Ejecutivo (Primer conjunto de resultados)
+    -- Contar Órdenes de Compra en estado 'proceso'
+    SELECT COUNT(*)
+    INTO total_oc_proceso
+    FROM ordenescompra
+    WHERE estado = 'proceso';
 
-UPDATE pagosOC SET observaciones = 'El pago se realizó en dólares, requiriendo la conversión del monto desde soles al tipo de cambio vigente. ' WHERE idpagooc = 48;
-SELECT * FROM pagosOc;
-SHOW COLUMNS FROM pagosOC;
+    -- Sumar los precios de compra de todos los vehículos de las OCs en proceso, aplicando el IGV (1.18)
+    SELECT COALESCE(SUM(totalOC), 0)
+    INTO deuda_global
+    FROM (
+        SELECT SUM(doc.preciocompra * 1.18) AS totalOC
+        FROM detordencompra doc
+        INNER JOIN ordenescompra oc ON doc.idordencompra = oc.idordencompra
+        WHERE oc.estado = 'proceso'
+        GROUP BY oc.idordencompra
+    ) AS subquery;
+
+    -- Sumar la amortización (pagos) de todas las OCs en proceso, convirtiendo PEN a USD
+    SELECT COALESCE(SUM(totalPagado), 0)
+    INTO pagos_recibidos
+    FROM (
+        SELECT SUM(
+            CASE
+                WHEN poc.moneda = 'PEN' AND poc.tipocambio > 0 THEN poc.amortizacion / poc.tipocambio
+                ELSE poc.amortizacion
+            END
+        ) AS totalPagado
+        FROM pagosOC poc
+        INNER JOIN ordenescompra oc ON poc.idorden = oc.idordencompra
+        WHERE oc.estado = 'proceso'
+        GROUP BY oc.idordencompra
+    ) AS subquery;
+
+    -- Contar el total de vehículos en OCs en proceso
+    SELECT COALESCE(COUNT(doc.idvehiculo), 0)
+    INTO total_vehiculos_pendientes
+    FROM detordencompra doc
+    INNER JOIN ordenescompra oc ON doc.idordencompra = oc.idordencompra
+    WHERE oc.estado = 'proceso';
+    
+    -- Calcular el saldo pendiente y el avance general
+    SET saldo_pendiente = deuda_global - pagos_recibidos;
+    SET avance_general = IF(deuda_global > 0, (pagos_recibidos / deuda_global) * 100, 0);
+    
+    -- Primer conjunto de resultados: Resumen Ejecutivo
+    SELECT
+        total_oc_proceso AS 'totalOCProceso',
+        total_vehiculos_pendientes AS 'totalVehiculos',
+        ROUND(deuda_global, 2) AS 'Deudaglobal',
+        ROUND(pagos_recibidos, 2) AS 'totalPagosGlobal',
+        ROUND(saldo_pendiente, 2) AS 'saldoPendienteGlobal',
+        ROUND(avance_general, 2) AS 'porcentajeAvanceGlobal';
+
+    -- Consulta para el Detalle de Órdenes de Compra y Vehículos (Segundo conjunto de resultados)
+    SELECT
+        CONCAT(oc.serie, '-', LPAD(oc.idordencompra, 5, '0')) AS 'OCIdentificador',
+        con.nombrecomercial AS 'Concesionario',
+        CONCAT_WS(', ', dep.departamento, p.provincia, d.distrito) AS 'ubicacionConcesionario',
+        ROUND((
+            SELECT IFNULL(SUM(preciocompra * 1.18), 0)
+            FROM detordencompra
+            WHERE idordencompra = oc.idordencompra
+        ), 2) AS 'totalOC',
+        ROUND((
+            SELECT IFNULL(SUM(
+                CASE 
+                    WHEN moneda = 'PEN' AND tipocambio > 0 THEN amortizacion / tipocambio
+                    ELSE amortizacion
+                END
+            ), 0)
+            FROM pagosOC
+            WHERE idorden = oc.idordencompra
+        ), 2) AS 'pagado',
+        ROUND((
+            (SELECT IFNULL(SUM(preciocompra * 1.18), 0) FROM detordencompra WHERE idordencompra = oc.idordencompra) -
+            (SELECT IFNULL(SUM(
+                CASE 
+                    WHEN moneda = 'PEN' AND tipocambio > 0 THEN amortizacion / tipocambio
+                    ELSE amortizacion
+                END
+            ), 0) FROM pagosOC WHERE idorden = oc.idordencompra)
+        ), 2) AS 'saldo',
+        IF(
+            (SELECT IFNULL(SUM(preciocompra * 1.18), 0) FROM detordencompra WHERE idordencompra = oc.idordencompra) > 0,
+            ROUND(
+                (
+                    (SELECT IFNULL(SUM(
+                        CASE 
+                            WHEN moneda = 'PEN' AND tipocambio > 0 THEN amortizacion / tipocambio
+                            ELSE amortizacion
+                        END
+                    ), 0) FROM pagosOC WHERE idorden = oc.idordencompra)
+                    /
+                    (SELECT IFNULL(SUM(preciocompra * 1.18), 0) FROM detordencompra WHERE idordencompra = oc.idordencompra)
+                ) * 100, 2),
+            0
+        ) AS 'avancePorcentaje',
+        (
+            SELECT COUNT(d.idvehiculo) 
+            FROM detordencompra d 
+            WHERE d.idordencompra = oc.idordencompra
+        ) AS 'totalVehiculos',
+        oc.emision,
+        GROUP_CONCAT(CONCAT(mar.marca, ' ', modl.modelo, ' / ', v.chasis) SEPARATOR ', ') AS 'Detalle de Vehículos'
+    FROM
+        ordenescompra oc
+    LEFT JOIN
+        detordencompra doc ON oc.idordencompra = doc.idordencompra
+    LEFT JOIN
+        tiendas t ON oc.idtienda = t.idtienda
+    LEFT JOIN
+        concesionarios con ON t.idconcesionario = con.idconcesionario
+    LEFT JOIN
+        vehiculos v ON doc.idvehiculo = v.idvehiculo
+    LEFT JOIN
+        modelos modl ON v.idmodelo = modl.idmodelo
+    LEFT JOIN
+        marcas mar ON modl.idmarca = mar.idmarca
+    LEFT JOIN
+        distritos d ON t.iddistrito = d.iddistrito
+    LEFT JOIN
+        provincias p ON d.idprovincia = p.idprovincia
+    LEFT JOIN
+        departamentos dep ON p.iddepartamento = dep.iddepartamento
+    WHERE
+        oc.estado = 'proceso'
+    GROUP BY
+        oc.idordencompra, ubicacionConcesionario
+    ORDER BY
+        oc.idordencompra DESC;
+
+END 
+
+DELIMITER ;
+CALL sp_reporte_general_oc_proceso();
+
+
+
+DROP PROCEDURE IF EXISTS sp_reporte_concesionario_detallado;
+
+DELIMITER //
+CREATE PROCEDURE sp_reporte_concesionario_detallado(
+  IN concesionario_id INT
+)
+BEGIN
+  -- Declaración de variables para el Resumen Ejecutivo
+  DECLARE total_oc_proceso INT;
+  DECLARE total_vehiculos_pendientes INT;
+  DECLARE deuda_global DECIMAL(15, 2);
+  DECLARE pagos_recibidos DECIMAL(15, 2);
+  DECLARE saldo_pendiente DECIMAL(15, 2);
+  DECLARE avance_general DECIMAL(5, 2);
+
+  -- 1. Resumen Ejecutivo (Primer conjunto de resultados)
+  -- Contar OCs en proceso para el concesionario
+  SELECT COUNT(DISTINCT oc.idordencompra)
+  INTO total_oc_proceso
+  FROM ordenescompra oc
+  INNER JOIN tiendas t ON oc.idtienda = t.idtienda
+  INNER JOIN concesionarios con ON t.idconcesionario = con.idconcesionario
+  WHERE oc.estado = 'proceso'
+  AND con.idconcesionario = concesionario_id;
+
+  -- Calcular la deuda global (suma de los totales de cada OC)
+  SELECT COALESCE(SUM(totalOC_sub), 0)
+  INTO deuda_global
+  FROM (
+    SELECT oc.idordencompra, SUM(doc.preciocompra * 1.18) AS totalOC_sub
+    FROM ordenescompra oc
+    INNER JOIN tiendas t ON oc.idtienda = t.idtienda
+    INNER JOIN concesionarios con ON t.idconcesionario = con.idconcesionario
+    INNER JOIN detordencompra doc ON oc.idordencompra = doc.idordencompra
+    WHERE oc.estado = 'proceso'
+    AND con.idconcesionario = concesionario_id
+    GROUP BY oc.idordencompra
+  ) AS sub_query;
+
+  -- Calcular los pagos recibidos (suma de los pagos de cada OC, convertidos a USD)
+  SELECT COALESCE(SUM(pagos_sub), 0)
+  INTO pagos_recibidos
+  FROM (
+    SELECT oc.idordencompra, SUM(
+      CASE
+        WHEN poc.moneda = 'PEN' AND poc.tipocambio > 0 THEN poc.amortizacion / poc.tipocambio
+        ELSE poc.amortizacion
+      END
+    ) AS pagos_sub
+    FROM ordenescompra oc
+    INNER JOIN tiendas t ON oc.idtienda = t.idtienda
+    INNER JOIN concesionarios con ON t.idconcesionario = con.idconcesionario
+    INNER JOIN pagosOC poc ON oc.idordencompra = poc.idorden
+    WHERE oc.estado = 'proceso'
+    AND con.idconcesionario = concesionario_id
+    GROUP BY oc.idordencompra
+  ) AS sub_query;
+
+  -- Contar el total de vehículos
+  SELECT COALESCE(COUNT(doc.idvehiculo), 0)
+  INTO total_vehiculos_pendientes
+  FROM detordencompra doc
+  INNER JOIN ordenescompra oc ON doc.idordencompra = oc.idordencompra
+  INNER JOIN tiendas t ON oc.idtienda = t.idtienda
+  INNER JOIN concesionarios con ON t.idconcesionario = con.idconcesionario
+  WHERE oc.estado = 'proceso'
+  AND con.idconcesionario = concesionario_id;
+  
+  -- Calcular el saldo y el avance
+  SET saldo_pendiente = deuda_global - pagos_recibidos;
+  SET avance_general = IF(deuda_global > 0, (pagos_recibidos / deuda_global) * 100, 0);
+  
+  -- Mostrar el resumen ejecutivo
+  SELECT
+    total_oc_proceso AS 'totalOCs',
+    total_vehiculos_pendientes AS 'totalvehiculos',
+    ROUND(deuda_global, 2) AS 'deudatotal',
+    ROUND(pagos_recibidos, 2) AS 'totalpagado',
+    ROUND(saldo_pendiente, 2) AS 'saldopendiente',
+    ROUND(avance_general, 2) AS 'avance';
+
+  -- 2. Detalle de Pagos (Segundo conjunto de resultados)
+  SELECT
+    oc.idordencompra,
+    CONCAT(oc.serie, '-', LPAD(oc.idordencompra, 5, '0')) AS 'OCIdentificador',
+    poc.fecharealpago AS 'fechapago',
+    edp.entidad AS 'entidad',
+    poc.numtransaccion AS 'numtransaccion',
+    poc.moneda AS 'moneda',
+    poc.amortizacion AS 'montopagado',
+    poc.tipocambio AS 'tipocambio',
+    CASE 
+      WHEN poc.moneda = 'PEN' AND poc.tipocambio > 0 THEN ROUND(poc.amortizacion / poc.tipocambio, 2)
+      ELSE poc.amortizacion 
+    END AS 'valordolares'
+  FROM
+    pagosOC poc
+  INNER JOIN ordenescompra oc ON poc.idorden = oc.idordencompra
+  INNER JOIN tiendas t ON oc.idtienda = t.idtienda
+  INNER JOIN concesionarios con ON t.idconcesionario = con.idconcesionario
+  INNER JOIN entidadespago edp ON poc.identidadpago = edp.identidadpago
+  WHERE
+    oc.estado = 'proceso'
+    AND con.idconcesionario = concesionario_id
+  ORDER BY
+    oc.idordencompra DESC, poc.fecharealpago ASC;
+    
+  -- 3. Detalle de Vehículos (Tercer conjunto de resultados)
+  SELECT
+    oc.idordencompra,
+    CONCAT(oc.serie, '-', LPAD(oc.idordencompra, 5, '0')) AS 'OCIdentificador',
+    DATE_FORMAT(oc.emision, '%d-%m-%Y') AS 'fechaemision',
+    CONCAT(mar.marca, ' / ', modl.modelo) AS 'marcaymodelo',
+    CONCAT(
+      tp.tipovehiculo, ' / ',
+      v.version, ' / ',
+      com.combustible, ' / ',
+      v.color
+    ) AS 'caracteristicas',
+    v.chasis AS 'chasis',
+    v.placa AS 'placa',
+    v.placarotativa AS 'placarotativa',
+    v.seriemotor AS 'seriemotor',
+    modl.anio AS 'Anio',
+    v.condicion AS 'condicion',
+    doc.preciocompra AS 'preciocompra',
+    (SELECT SUM(sub_doc.preciocompra * 1.18) FROM detordencompra sub_doc WHERE sub_doc.idordencompra = oc.idordencompra) AS 'totalOC'
+  FROM
+    ordenescompra oc
+    JOIN tiendas t ON oc.idtienda = t.idtienda
+    JOIN concesionarios con ON t.idconcesionario = con.idconcesionario
+    JOIN detordencompra doc ON oc.idordencompra = doc.idordencompra
+    JOIN vehiculos v ON doc.idvehiculo = v.idvehiculo
+    JOIN modelos modl ON v.idmodelo = modl.idmodelo
+    JOIN marcas mar ON modl.idmarca = mar.idmarca
+    JOIN tipovehiculos tp ON modl.idtipovehiculo = tp.idtipovehiculo
+    JOIN combustibles com ON v.idcombustible = com.idcombustible
+  WHERE
+    oc.estado = 'proceso'
+    AND con.idconcesionario = concesionario_id
+  ORDER BY
+    oc.idordencompra DESC;
+
+END //
+DELIMITER ;
+CALL sp_reporte_concesionario_detallado(25);

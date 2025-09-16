@@ -241,4 +241,42 @@ class ConcesionarioController extends Controller
         }
         exit();
     }
+
+    public function getConcesionariosWhitOCProceso(): void
+    {
+        header('Content-Type: application/json');
+        $concesionarios = $this->concesionarioModel->getConcesionariosWhitOCProceso();
+        error_log('Concesionarios con OC en proceso: ' . print_r($concesionarios, true));
+
+        if ($concesionarios) {
+            echo json_encode($concesionarios);
+        } else {
+            http_response_code(404);
+            echo json_encode([]);
+        }
+        exit();
+    }
+
+    public function getReporteByConcesionario(INT $id): void
+    {
+        header('Content-Type: application/json');
+
+        $datos = $this->concesionarioModel->getReporteConcesionarioDetallado($id);
+
+        if ($datos !== null) {
+            $respuesta = [
+                'resumenEjecutivo' => $datos['resumenEjecutivo'],
+                'detallePagos' => $datos['detallePagos'],
+                'detalleVehiculos' => $datos['detalleVehiculos']
+            ];
+
+            // Codifica el array completo en JSON
+            echo json_encode($respuesta);
+
+            // error_log(print_r($respuesta, true));
+        } else {
+            http_response_code(404);
+            echo json_encode([]);
+        }
+    }
 }

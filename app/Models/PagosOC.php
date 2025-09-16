@@ -118,6 +118,7 @@ class PagosOC
             return [];
         }
     }
+
     /**
      * Obtiene el saldo restante de una orden de compra, considerando la conversión de PEN a USD.
      *
@@ -126,55 +127,44 @@ class PagosOC
      */
     public function obtenerSaldoRestante(int $idorden): float
     {
-                    $query = '
-                    SELECT 
-                        oc.idordencompra AS idorden,
-                        IFNULL(SUM(d.preciocompra * 1.18), 0) AS totalOC,
-                        (
-                            SELECT IFNULL(SUM(
-                                CASE 
-                                    WHEN p.moneda = "PEN" AND p.tipocambio > 0 THEN p.amortizacion / p.tipocambio
-                                    ELSE p.amortizacion
-                                END
-                            ), 0) 
-                            FROM pagosOC p
-                            WHERE p.idorden = oc.idordencompra
-                        ) AS totalPagado,
-                        (
-                            IFNULL(SUM(d.preciocompra * 1.18), 0)
-                            -
-                            (
-                                SELECT IFNULL(SUM(
-                                    CASE 
-                                        WHEN p.moneda = "PEN" AND p.tipocambio > 0 THEN p.amortizacion / p.tipocambio
-                                        ELSE p.amortizacion
-                                    END
-                                ), 0) 
-                                FROM pagosOC p
-                                WHERE p.idorden = oc.idordencompra
-                            )
-                        ) AS saldoRestante
-                    FROM ordenescompra oc
-                    LEFT JOIN detordencompra d ON d.idordencompra = oc.idordencompra
-                    WHERE oc.idordencompra = :idorden
-                    GROUP BY oc.idordencompra;
-                ';
+        // Obtener el saldo del último pago si existe
+        $query_saldo_existente = '
+                SELECT saldo
+                FROM pagosOC
+                WHERE idorden = :idorden
+                ORDER BY fecharealpago DESC, idpagooc DESC
+                LIMIT 1;
+            ';
 
         try {
-            $stmt = $this->db->prepare($query);
-            $stmt->execute([':idorden' => $idorden]);
-            $row = $stmt->fetch(PDO::FETCH_ASSOC);
-            error_log('Saldo restante para orden ' . $idorden . ': ' . ($row ? $row['saldoRestante'] : '0.0'));
-            return $row ? (float) $row['saldoRestante'] : 0.0;
+            $stmt_saldo = $this->db->prepare($query_saldo_existente);
+            $stmt_saldo->execute([':idorden' => $idorden]);
+            $saldo_de_pago = $stmt_saldo->fetch(PDO::FETCH_ASSOC);
+
+            // Si se encontró un pago, devolver el saldo de ese pago.
+            if ($saldo_de_pago) {
+                return (float) $saldo_de_pago['saldo'];
+            }
         } catch (PDOException $error) {
-            error_log('Error en obtenerSaldoRestante: ' . $error->getMessage());
+            error_log('Error en obtenerSaldoRestante (saldo existente): ' . $error->getMessage());
+        }
+
+        //  Si no hay pagos, calcular el saldo total de la OC
+        $query_total_oc = '
+        SELECT ROUND(IFNULL(SUM(preciocompra * 1.18), 0), 2) AS totalOC
+        FROM detordencompra
+        WHERE idordencompra = :idorden;
+    ';
+
+        try {
+            $stmt_total = $this->db->prepare($query_total_oc);
+            $stmt_total->execute([':idorden' => $idorden]);
+            $total_oc = $stmt_total->fetch(PDO::FETCH_ASSOC);
+
+            return $total_oc ? (float) $total_oc['totalOC'] : 0.0;
+        } catch (PDOException $error) {
+            error_log('Error en obtenerSaldoRestante (total OC): ' . $error->getMessage());
             return 0.0;
         }
     }
-
 }
-
-
-// $orden = new OrdenCompra();
-
-// var_dump($orden->getAll());
