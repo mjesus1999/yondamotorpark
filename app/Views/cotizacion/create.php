@@ -1176,65 +1176,65 @@
 
     function mostrarSugerenciaUltimoCliente(cliente) {
         const modalHtml = `
-    <div class="modal fade" id="modalSugerenciaCliente" tabindex="-1" data-bs-backdrop="static">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-primary">
-          <div class="modal-header bg-primary text-white">
-            <h5 class="modal-title">
-              <i class="bi bi-person-plus-fill me-2"></i> Cliente Recién Registrado
-            </h5>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-          </div>
-          <div class="modal-body p-4">
-            <div class="alert alert-info d-flex align-items-center mb-3" role="alert">
-              <i class="bi bi-info-circle-fill me-2"></i>
-              <div>Detectamos que acabas de registrar un cliente</div>
-            </div>
+            <div class="modal fade" id="modalSugerenciaCliente" tabindex="-1" data-bs-backdrop="static">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content border-primary">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title">
+                        <i class="bi bi-person-plus-fill me-2"></i> Cliente Recién Registrado
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <div class="alert alert-info d-flex align-items-center mb-3" role="alert">
+                        <i class="bi bi-info-circle-fill me-2"></i>
+                        <div>Detectamos que acabas de registrar un cliente</div>
+                        </div>
 
-            <div class="card bg-light mb-3">
-              <div class="card-body">
-                <h6 class="card-title text-primary">
-                  <i class="bi bi-person-badge me-2"></i> Datos del Cliente
-                </h6>
-                <div class="row">
-                  <div class="col-6">
-                    <strong>Documento:</strong><br>
-                    <span class="text-muted">${cliente.tipodoc ?? ''} ${cliente.nrodoc ?? ''}</span>
-                  </div>
-                  <div class="col-6">
-                    <strong>Teléfono:</strong><br>
-                    <span class="text-muted">${cliente.telprimario ?? ''}</span>
-                  </div>
+                        <div class="card bg-light mb-3">
+                        <div class="card-body">
+                            <h6 class="card-title text-primary">
+                            <i class="bi bi-person-badge me-2"></i> Datos del Cliente
+                            </h6>
+                            <div class="row">
+                            <div class="col-6">
+                                <strong>Documento:</strong><br>
+                                <span class="text-muted">${cliente.tipodoc ?? ''} ${cliente.nrodoc ?? ''}</span>
+                            </div>
+                            <div class="col-6">
+                                <strong>Teléfono:</strong><br>
+                                <span class="text-muted">${cliente.telprimario ?? ''}</span>
+                            </div>
+                            </div>
+                            <div class="mt-2">
+                            <strong>Nombre completo / Razón social:</strong><br>
+                            <span class="text-primary fw-semibold">${(cliente.apellidos ?? '')} ${(cliente.nombres ?? '')}</span>
+                            </div>
+                            ${cliente.direccion ? `
+                            <div class="mt-2">
+                            <strong>Dirección:</strong><br>
+                            <span class="text-muted">${cliente.direccion}</span>
+                            </div>` : ''}
+                        </div>
+                        </div>
+
+                        <div class="mt-3 text-center">
+                        <p class="mb-3">¿Deseas usar este cliente para la cotización?</p>
+                        <div class="d-flex gap-2 justify-content-center">
+                            <button type="button" class="btn btn-primary" id="btnUsarCliente">
+                            <i class="bi bi-check-circle me-1"></i> Sí
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                            <i class="bi bi-x-circle me-1"></i> No
+                            </button>
+                        </div>
+                        </div>
+
+                    </div>
+                    </div>
                 </div>
-                <div class="mt-2">
-                  <strong>Nombre completo / Razón social:</strong><br>
-                  <span class="text-primary fw-semibold">${(cliente.apellidos ?? '')} ${(cliente.nombres ?? '')}</span>
-                </div>
-                ${cliente.direccion ? `
-                <div class="mt-2">
-                  <strong>Dirección:</strong><br>
-                  <span class="text-muted">${cliente.direccion}</span>
-                </div>` : ''}
-              </div>
             </div>
-
-            <div class="mt-3 text-center">
-              <p class="mb-3">¿Deseas usar este cliente para la cotización?</p>
-              <div class="d-flex gap-2 justify-content-center">
-                <button type="button" class="btn btn-primary" id="btnUsarCliente">
-                  <i class="bi bi-check-circle me-1"></i> Sí
-                </button>
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-                  <i class="bi bi-x-circle me-1"></i> No
-                </button>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </div>
-    </div>
-    `;
+            `;
 
         // Insertar modal en el DOM
         document.body.insertAdjacentHTML('beforeend', modalHtml);

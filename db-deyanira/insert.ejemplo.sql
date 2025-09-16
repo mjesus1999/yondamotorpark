@@ -52,7 +52,7 @@ COMMIT;
 -- copia de seguridad rápida (por si acaso)
 CREATE TABLE IF NOT EXISTS requisitos_backup AS SELECT * FROM requisitos;
 
--- (opcional) permitir UPDATEs sin WHERE con clave
+-- ----- DESDE AQUI -------
 SET SQL_SAFE_UPDATES = 0;
 
 START TRANSACTION;
@@ -125,7 +125,7 @@ COMMIT;
 -- reactivar safe-updates si quieres
 SET SQL_SAFE_UPDATES = 1;
 
-
+-- ----- HASTA AQUI ------
 
 /*
 *	AGREGARE INSERTS PARA VEHICULO (MOTOLINEALES) : 09/09/25
