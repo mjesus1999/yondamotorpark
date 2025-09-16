@@ -243,7 +243,7 @@
                             <div class="input-group">
                                 <div class="form-floating">
                                     <input type="text" autocomplete="off" class="form-control" id="documento"
-                                        name="documento" placeholder="DNI / RUC">
+                                        name="documento" placeholder="DNI / RUC" required>
                                     <label for="documento">DNI / RUC <span class="text-danger">*</span></label>
                                 </div>
                                 <button type="button" id="btnBuscarCliente" class="btn btn-outline-success"
@@ -251,23 +251,22 @@
                             </div>
                         </div>
 
-
                         <!-- Apellidos y Nombres -->
                         <div class="col-md-4">
                             <div class="form-floating">
                                 <input type="text" autocomplete="off" class="form-control"
-                                    placeholder="Apellidos y Nombres / Razón Social" id="nombres" name="nombres">
+                                    placeholder="Apellidos y Nombres / Razón Social" id="nombres" name="nombres"
+                                    required>
                                 <label for="nombres">Apellidos y Nombres / Razón Social <span
                                         class="text-danger">*</span></label>
                             </div>
                         </div>
 
-
                         <div class="col-md-4">
                             <div class="input-group">
                                 <div class="form-floating">
-                                    <input type="text" class="form-control" id="direccion" name="direccion"
-                                        placeholder="Dirección">
+                                    <input type="text" autocomplete="off" class="form-control" id="direccion"
+                                        name="direccion" placeholder="Dirección">
                                     <label for="documento">Dirección</label>
                                 </div>
                             </div>
@@ -368,7 +367,8 @@
                         <!-- Tipo de moneda -->
                         <div class="col-md-2">
                             <div class="form-floating">
-                                <input type="text" class="form-control" id="monedaprecio" readonly>
+                                <input type="text" class="form-control" id="monedaprecio" placeholder="Moneda Vta."
+                                    readonly>
                                 <label for="monedaprecio">Moneda Vta. <span class="text-danger">*</span></label>
                             </div>
                         </div>
@@ -525,7 +525,8 @@
                         <!-- Fecha de Emisión -->
                         <div class="col-md-2">
                             <div class="form-floating">
-                                <input type="date" class="form-control" id="fechaEmision" name="fechaEmision" required>
+                                <input type="date" class="form-control" id="fechaEmision" name="fechaEmision" required
+                                    disabled>
                                 <label for="fechaEmision">Fecha de Emisión</label>
                             </div>
                         </div>
@@ -534,7 +535,7 @@
                         <div class="col-md-2">
                             <div class="form-floating">
                                 <input type="date" class="form-control" id="fechaCaducidad" name="fechaCaducidad"
-                                    required>
+                                    required disabled>
                                 <label for="fechaCaducidad">Fecha de Caducidad</label>
                             </div>
                         </div>
@@ -582,13 +583,13 @@
     data-bs-backdrop="static" data-bs-keyboard="true">
     <div class="modal-dialog modal-fullscreen">
         <div class="modal-content">
-            <div class="modal-header text-white">
+            <div class="modal-header">
                 <h5 class="modal-title" id="modalVehiculosLabel">Seleccionar Vehículo</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
             <div class="modal-body">
                 <div class="table-responsive">
-                    <table class="table table-sm table-hover table-bordered mt-2 display nowrap"
+                    <table class="table table-sm table-hover table-striped table-bordered mt-2 display nowrap"
                         id="tablaVehiculosModal" style="width:100%">
                         <thead>
                             <tr>
@@ -1175,94 +1176,142 @@
 
     function mostrarSugerenciaUltimoCliente(cliente) {
         const modalHtml = `
-            <div class="modal fade" id="modalSugerenciaCliente" tabindex="-1" data-bs-backdrop="static">
-                <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content border-primary">
-                        <div class="modal-header bg-primary text-white">
-                            <h5 class="modal-title">
-                                <i class="bi bi-person-plus-fill me-2"></i>
-                                Cliente Recién Registrado
-                            </h5>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                        </div>
-                        <div class="modal-body p-4">
-                            <div class="alert alert-info d-flex align-items-center mb-3" role="alert">
-                                <i class="bi bi-info-circle-fill me-2"></i>
-                                <div>Detectamos que acabas de registrar un cliente</div>
-                            </div>
-                            
-                            <div class="card bg-light">
-                                <div class="card-body">
-                                    <h6 class="card-title text-primary">
-                                        <i class="bi bi-person-badge me-2"></i>
-                                        Datos del Cliente
-                                    </h6>
-                                    <div class="row">
-                                        <div class="col-6">
-                                            <strong>Documento:</strong><br>
-                                            <span class="text-muted">${cliente.tipodoc} ${cliente.nrodoc}</span>
-                                        </div>
-                                        <div class="col-6">
-                                            <strong>Teléfono:</strong><br>
-                                            <span class="text-muted">${cliente.telprimario}</span>
-                                        </div>
-                                    </div>
-                                    <div class="mt-2">
-                                        <strong>Nombre completo:</strong><br>
-                                        <span class="text-primary fw-semibold">${cliente.apellidos} ${cliente.nombres}</span>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="mt-3 text-center">
-                                <p class="mb-3">¿Deseas usar este cliente para la cotización?</p>
-                                <div class="d-flex gap-2 justify-content-center">
-                                    <button type="button" class="btn btn-primary" onclick="usarClienteSugerido(${JSON.stringify(cliente).replace(/"/g, '&quot;')})">
-                                        <i class="bi bi-check-circle me-1"></i>Sí
-                                    </button>
-                                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-                                        <i class="bi bi-x-circle me-1"></i>No
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+    <div class="modal fade" id="modalSugerenciaCliente" tabindex="-1" data-bs-backdrop="static">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-primary">
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title">
+              <i class="bi bi-person-plus-fill me-2"></i> Cliente Recién Registrado
+            </h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body p-4">
+            <div class="alert alert-info d-flex align-items-center mb-3" role="alert">
+              <i class="bi bi-info-circle-fill me-2"></i>
+              <div>Detectamos que acabas de registrar un cliente</div>
             </div>
-        `;
+
+            <div class="card bg-light mb-3">
+              <div class="card-body">
+                <h6 class="card-title text-primary">
+                  <i class="bi bi-person-badge me-2"></i> Datos del Cliente
+                </h6>
+                <div class="row">
+                  <div class="col-6">
+                    <strong>Documento:</strong><br>
+                    <span class="text-muted">${cliente.tipodoc ?? ''} ${cliente.nrodoc ?? ''}</span>
+                  </div>
+                  <div class="col-6">
+                    <strong>Teléfono:</strong><br>
+                    <span class="text-muted">${cliente.telprimario ?? ''}</span>
+                  </div>
+                </div>
+                <div class="mt-2">
+                  <strong>Nombre completo / Razón social:</strong><br>
+                  <span class="text-primary fw-semibold">${(cliente.apellidos ?? '')} ${(cliente.nombres ?? '')}</span>
+                </div>
+                ${cliente.direccion ? `
+                <div class="mt-2">
+                  <strong>Dirección:</strong><br>
+                  <span class="text-muted">${cliente.direccion}</span>
+                </div>` : ''}
+              </div>
+            </div>
+
+            <div class="mt-3 text-center">
+              <p class="mb-3">¿Deseas usar este cliente para la cotización?</p>
+              <div class="d-flex gap-2 justify-content-center">
+                <button type="button" class="btn btn-primary" id="btnUsarCliente">
+                  <i class="bi bi-check-circle me-1"></i> Sí
+                </button>
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                  <i class="bi bi-x-circle me-1"></i> No
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+    `;
+
+        // Insertar modal en el DOM
         document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+        // Mostrar modal y añadir listener seguro al botón
         setTimeout(() => {
-            const modal = new bootstrap.Modal(document.getElementById('modalSugerenciaCliente'));
+            const modalEl = document.getElementById('modalSugerenciaCliente');
+            const modal = new bootstrap.Modal(modalEl);
             modal.show();
-            document.getElementById('modalSugerenciaCliente').addEventListener('hidden.bs.modal', function () {
+
+            // Botón "Sí" usará el objeto cliente intacto (no inyectamos JSON en HTML)
+            const btn = document.getElementById('btnUsarCliente');
+            if (btn) {
+                btn.addEventListener('click', () => {
+                    usarClienteSugerido(cliente);
+                });
+            }
+
+            // Al cerrar, remover del DOM para evitar duplicados
+            modalEl.addEventListener('hidden.bs.modal', function () {
                 this.remove();
             });
-        }, 500);
+        }, 150);
     }
 
     function usarClienteSugerido(cliente) {
-        const tipoDoc = document.getElementById('tipoDocumento');
-        const doc = document.getElementById('documento');
-        const idCliente = document.getElementById('idcliente');
-        const nombres = document.getElementById('nombres');
-        const telPrimario = document.getElementById('telprimario');
-        const telAlternativo = document.getElementById('telalternativo');
+        // IDs del formulario de cotización (debe coincidir con tu form)
+        const tipoDocEl = document.getElementById('tipoDocumento');
+        const docEl = document.getElementById('documento');
+        const idClienteEl = document.getElementById('idcliente');
+        const nombresEl = document.getElementById('nombres');
+        const telPrimarioEl = document.getElementById('telprimario');
+        const telAlternativoEl = document.getElementById('telalternativo');
+        const direccionEl = document.getElementById('direccion');
 
-        if (tipoDoc) tipoDoc.value = cliente.tipodoc.toLowerCase();
-        if (doc) doc.value = cliente.nrodoc;
-        if (idCliente) idCliente.value = cliente.idcliente;
-        if (nombres) nombres.value = `${cliente.apellidos} ${cliente.nombres}`;
-        if (telPrimario) telPrimario.value = cliente.telprimario;
-        if (telAlternativo) telAlternativo.value = cliente.telalternativo || '';
+        // Asignaciones (protegiendo contra undefined/null)
+        try {
+            if (tipoDocEl && cliente.tipodoc) {
+                // Normalizar a minúsculas si tu select usa 'dni'/'ruc'
+                const tipoLower = String(cliente.tipodoc).toLowerCase();
+                // Aceptar ambos formatos: 'dni' o 'DNI' -> usar valor existente en select si coincide
+                // Intentamos mapear 'dni'|'ruc'
+                if (tipoLower === 'dni' || tipoLower === 'ruc') {
+                    tipoDocEl.value = tipoLower;
+                } else {
+                    // fallback: intentar asignar directamente
+                    tipoDocEl.value = cliente.tipodoc;
+                }
+            }
+            if (docEl && cliente.nrodoc) docEl.value = cliente.nrodoc;
+            if (idClienteEl && cliente.idcliente) idClienteEl.value = cliente.idcliente;
+            // nombres: si viene apellidos + nombres (personas) o razon social en nombres
+            if (nombresEl) {
+                const full = `${cliente.apellidos ?? ''} ${cliente.nombres ?? ''}`.trim();
+                nombresEl.value = full || (cliente.nombres ?? '') || (cliente.razonsocial ?? '');
+            }
+            if (telPrimarioEl) telPrimarioEl.value = cliente.telprimario ?? '';
+            if (telAlternativoEl) telAlternativoEl.value = cliente.telalternativo ?? '';
+            if (direccionEl) direccionEl.value = cliente.direccion ?? '';
 
-        const modal = bootstrap.Modal.getInstance(document.getElementById('modalSugerenciaCliente'));
-        if (modal) modal.hide();
+            // Cerrar modal si está abierta
+            const modalEl = document.getElementById('modalSugerenciaCliente');
+            const instance = modalEl ? bootstrap.Modal.getInstance(modalEl) : null;
+            if (instance) instance.hide();
 
-        if (typeof showToast === 'function') {
-            showToast('Cliente cargado correctamente', 'SUCCESS', 2000);
+            // Toast opcional
+            if (typeof showToast === 'function') {
+                showToast('Cliente cargado correctamente', 'SUCCESS', 2000);
+            }
+
+            // Notificar al server para limpiar la sesión del último cliente
+            fetch('/api/limpiar-ultimo-cliente', { method: 'POST' }).catch(() => {
+                // No hacemos nada si falla; es solo limpieza
+            });
+        } catch (err) {
+            console.error('Error al usar cliente sugerido:', err);
         }
-
-        fetch('/api/limpiar-ultimo-cliente', { method: 'POST' });
     }
 
     function initDataTable() {
@@ -1288,7 +1337,7 @@
                     $('#tablaVehiculosModal').DataTable({
                         order: [[0, 'desc']],
                         pagingType: 'full_numbers',
-                        pageLength: 20,
+                        pageLength: 15,
                         lengthMenu: [[15, 20, 35, -1], [15, 20, 35, "Todos"]],
                         scrollX: true,
                         destroy: true,
@@ -1653,11 +1702,6 @@
         if (inputValorConvertidoEl) inputValorConvertidoEl.value = precioFinal;
     }
 
-    /* async function actualizarFinanciamiento() {
-        // This function is intentionally simplified since the new card-based system handles this
-        // Individual cards will recalculate themselves when needed
-    } */
-
     async function actualizarFinanciamiento() {
         const inicial = parseFloat($('#inicial').val()) || 0;
         const precioFinal = parseFloat($('#inputValorConvertido').val()) || 0;
@@ -1871,19 +1915,34 @@
             const mb = modalEl.querySelector('.modal-body');
             if (!mb) return;
 
-            // guarda valor original para poder restaurarlo luego
+            // Guarda valores originales para poder restaurarlos luego
             if (typeof mb.dataset.originalPaddingTop === 'undefined') {
                 mb.dataset.originalPaddingTop = mb.style.paddingTop || '';
+                mb.dataset.originalPaddingBottom = mb.style.paddingBottom || '';
             }
-            mb.style.paddingTop = '4px';
+
+            // Ajustar padding para centrar mejor la tabla
+            mb.style.paddingTop = '2rem';    // Más espacio arriba
+            mb.style.paddingBottom = '2rem'; // Más espacio abajo
 
             const tr = mb.querySelector('.table-responsive');
             if (tr) {
                 if (typeof tr.dataset.originalMarginTop === 'undefined') {
                     tr.dataset.originalMarginTop = tr.style.marginTop || '';
+                    tr.dataset.originalMarginBottom = tr.style.marginBottom || '';
                 }
-                tr.style.marginTop = '0';
+                tr.style.marginTop = '1rem';    // Margen superior
+                tr.style.marginBottom = '1rem'; // Margen inferior
             }
+
+            // Opcional: centrar el scroll verticalmente
+            const modalDialog = modalEl.querySelector('.modal-dialog');
+            if (modalDialog) {
+                modalDialog.style.display = 'flex';
+                modalDialog.style.alignItems = 'center';
+                modalDialog.style.minHeight = 'calc(100vh - 2rem)';
+            }
+
             mb.scrollTop = 0;
         });
 
@@ -1891,15 +1950,28 @@
             const mb = modalEl.querySelector('.modal-body');
             if (!mb) return;
 
-            // restaura valores originales
+            // Restaura valores originales
             if (typeof mb.dataset.originalPaddingTop !== 'undefined') {
                 mb.style.paddingTop = mb.dataset.originalPaddingTop;
+                mb.style.paddingBottom = mb.dataset.originalPaddingBottom || '';
                 delete mb.dataset.originalPaddingTop;
+                delete mb.dataset.originalPaddingBottom;
             }
+
             const tr = mb.querySelector('.table-responsive');
             if (tr && typeof tr.dataset.originalMarginTop !== 'undefined') {
                 tr.style.marginTop = tr.dataset.originalMarginTop;
+                tr.style.marginBottom = tr.dataset.originalMarginBottom || '';
                 delete tr.dataset.originalMarginTop;
+                delete tr.dataset.originalMarginBottom;
+            }
+
+            // Restaurar el modal-dialog
+            const modalDialog = modalEl.querySelector('.modal-dialog');
+            if (modalDialog) {
+                modalDialog.style.display = '';
+                modalDialog.style.alignItems = '';
+                modalDialog.style.minHeight = '';
             }
         });
     })();

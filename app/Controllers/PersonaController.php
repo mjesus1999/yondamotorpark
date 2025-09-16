@@ -93,6 +93,8 @@ class PersonaController extends Controller
                     'apellidos' => $registroPersona['apellidos'],
                     'telprimario' => $registroPersona['telprimario'],
                     'telalternativo' => $registroPersona['telalternativo'],
+                    'direccion'      => $registroPersona['direccion'] ?? '',
+                    /* 'referencia'     => $registroPersona['referencia'] ?? '', */
                     'timestamp' => time() // Para verificar si es reciente
                 ];
 

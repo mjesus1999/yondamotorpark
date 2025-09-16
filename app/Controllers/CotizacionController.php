@@ -343,7 +343,7 @@ class CotizacionController extends Controller
             $_SESSION['success_message'] = "Cotización registrada correctamente.";
             header('Location: /cotizacion');
             exit;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $_SESSION['error_message'] = "Error al registrar cotización: " . $e->getMessage();
             header('Location: /cotizacion/create');
             exit;
