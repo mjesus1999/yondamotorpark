@@ -16,3 +16,5 @@ $router->add('GET', '/api/concesionarioDB/{ruc}', 'ConcesionarioController', 'se
 
 // API PARA OBTENER CONCESIONARIO A LA VISTA DE ORDEN DE COMPRA CREAR:
 $router->add('GET','/api/concesionariosDB','ConcesionarioController','getConcesionariosDB');
+$router->add('GET','/api/concesionariosOCProceso','ConcesionarioController','getConcesionariosWhitOCProceso');
+$router->add('GET','/api/reporteByConcesionario/{id}','ConcesionarioController','getReporteByConcesionario');

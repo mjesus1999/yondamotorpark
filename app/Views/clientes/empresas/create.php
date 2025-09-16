@@ -391,45 +391,27 @@ require_once __DIR__ . '/../../../Helpers/functions.php'; ?>
 
                                     <div class="row g-3">
                                         <div class="col-12">
-                                            <div class="searchable-select-container">
-                                                <div class="form-floating">
-                                                    <input type="text" class="form-control searchable-select-input bg-body"
-                                                        id="departamento-input" placeholder="Buscar departamento..."
-                                                        autocomplete="off" required>
-                                                    <input type="hidden" name="departamento" id="departamento" required>
-                                                    <label for="departamento-input">Departamento <span class="text-danger">*</span></label>
-                                                </div>
-                                                <div class="searchable-select-dropdown bg-body" id="departamento-dropdown">
-                                                    <div class="dropdown-item" data-value=""></div>
-                                                </div>
+                                            <div class="form-floating">
+                                                <select name="departamento" id="departamento" class="form-select" required>
+                                                    <option value="">Seleccione</option>
+                                                </select>
+                                                <label for="departamento"><i class="bi bi-map me-1"></i>Departamento</label>
                                             </div>
                                         </div>
                                         <div class="col-12">
-                                            <div class="searchable-select-container">
-                                                <div class="form-floating">
-                                                    <input type="text" class="form-control searchable-select-input bg-body"
-                                                        id="provincia-input" placeholder="Buscar provincia..."
-                                                        autocomplete="off" required>
-                                                    <input type="hidden" name="provincia" id="provincia" required>
-                                                    <label for="provincia-input">Provincia <span class="text-danger">*</span></label>
-                                                </div>
-                                                <div class="searchable-select-dropdown" id="provincia-dropdown">
-                                                    <div class="dropdown-item" data-value=""></div>
-                                                </div>
+                                            <div class="form-floating">
+                                                <select name="provincia" id="provincia" class="form-select" required>
+                                                    <option value="">Seleccione</option>
+                                                </select>
+                                                <label for="provincia"><i class="bi bi-map me-1"></i>Provincia</label>
                                             </div>
                                         </div>
                                         <div class="col-12">
-                                            <div class="searchable-select-container">
-                                                <div class="form-floating">
-                                                    <input type="text" class="form-control searchable-select-input bg-body"
-                                                        id="distrito-input" placeholder="Buscar distrito..."
-                                                        autocomplete="off" required>
-                                                    <input type="hidden" name="iddistrito" id="distrito" required>
-                                                    <label for="distrito-input">Distrito <span class="text-danger">*</span></label>
-                                                </div>
-                                                <div class="searchable-select-dropdown" id="distrito-dropdown">
-                                                    <div class="dropdown-item" data-value=""></div>
-                                                </div>
+                                            <div class="form-floating">
+                                                <select name="distrito" id="distrito" class="form-select" required>
+                                                    <option value="">Seleccione</option>
+                                                </select>
+                                                <label for="distrito"><i class="bi bi-map me-1"></i>Distrito</label>
                                             </div>
                                         </div>
                                     </div>
@@ -724,7 +706,7 @@ require_once __DIR__ . '/../../../Helpers/functions.php'; ?>
     formRegistroClienteEmpresa.addEventListener('submit', async (event) => {
         event.preventDefault();
 
-        if (await ask("¿Registrar cliente?","Confirmar cliente")) {
+        if (await ask("¿Registrar cliente?", "Confirmar cliente")) {
             formRegistroClienteEmpresa.submit()
         }
     });

@@ -4,6 +4,7 @@
 $router->add('GET','/oc','OrdenCompraController','index');
 $router->add('GET', '/oc/create','OrdenCompraController','create');
 $router->add('GET','/oc/reporte/{id}','OrdenCompraController','html2pdfReport');
+$router->add('GET','/oc/reporte-concesionario','OrdenCompraController','indexReporteByConcesionario'); 
 
 
 $router->add('GET','/oc/listar/{estado}', 'OrdenCompraController', 'index'); // LISTAR POR ESTADO
@@ -26,4 +27,7 @@ $router->add('POST','/oc/updateEstado/{estado}/{idOC}','OrdenCompraController','
 $router->add('GET','/api/oc/{id}','OrdenCompraController','searchtDetOCByIdOc');
 
 $router->add('GET','/api/oc/infoAutos/{id}','OrdenCompraController','searchInfoAutos');
+
+$router->add('GET','/api/ocproceso/reporte','OrdenCompraController','getReporteOCProceso');
+
 

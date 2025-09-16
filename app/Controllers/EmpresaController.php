@@ -40,7 +40,7 @@ class EmpresaController extends Controller
         $data = array_map([Validador::class, 'limpiar'], $_POST);
 
         $empresa = [
-            'iddistrito' => (int) ($data['iddistrito'] ?? 0),
+            'iddistrito' => (int) ($data['distrito'] ?? 0),
             'razonsocial' => $data['razonsocial'] ?? '',
             'nombrecomercial' => $data['nombrecomercial'] ?? '',
             'ruc' => $data['ruc'] ?? '',

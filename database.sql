@@ -351,30 +351,36 @@ CREATE TABLE pagosOC (
     idpagooc INT AUTO_INCREMENT NOT NULL PRIMARY KEY,
     idorden INT NOT NULL, -- ID OC
     idlogistica INT NOT NULL, -- Persona que registro el pago
-    amortizacion DECIMAL(10, 2) NOT NULL, -- Lo que se ha adelantado
-    saldo DECIMAL(10, 2) NOT NULL, -- El saldo a pagar o lo que falta pagar si es que se ha hehco amortización
-    comprobante VARCHAR(300) NOT NULL, -- Ruta del comprobante
-    fecha DATETIME NOT NULL DEFAULT NOW(), -- Fecha y hora de que se regsitro el pago
+    identidadpago INT NOT NULL,
     fecharealpago DATETIME NOT NULL,
+    numtransaccion VARCHAR(20) NOT NULL,
+    moneda ENUM('USD', 'PEN') NOT NULL, -- Moneda en que se realizo el pago
+    tipocambio DECIMAL(5,2) NULL, -- Tipo de cambio si es  que se paga en SOLES 
+    valorUSD DECIMAL(10,2) NULL,
+    amortizacion DECIMAL(10, 2) NOT NULL, -- Lo que se ha adelantado
+    saldo DECIMAL(10, 2) NOT NULL, -- El saldo a pagar o lo que falta pagar si es que se ha hecho amortización
+    comprobante VARCHAR(300) NOT NULL, -- Ruta del comprobante
+    observaciones VARCHAR(400) NULL,
+    modificado DATETIME NULL,   
+    fecha DATETIME NOT NULL DEFAULT NOW(), -- Fecha y hora de que se regsitro el pago
     CONSTRAINT fk_idlo_pagoOC FOREIGN KEY (idlogistica) REFERENCES colaboradores (idcolaborador),
-    CONSTRAINT fk_idorde_pagosOC FOREIGN KEY (idorden) REFERENCES ordenescompra (idordencompra)
+    CONSTRAINT fk_idorde_pagosOC FOREIGN KEY (idorden) REFERENCES ordenescompra (idordencompra),
+    CONSTRAINT fk_identidadpago_pagosOC FOREIGN KEY (identidadpago) REFERENCES entidadespago (identidadpago);
 ) ENGINE = InnoDB;
 
-SELECT * FROM pagosOC;
-USE motorpark;
+-- ALTER TABLE pagosOC CHANGE COLUMN valorSoles valorUSD DECIMAL(10,2) NULL AFTER tipocambio;
+-- UPDATE pagosOC SET identidadpago = 1;
+-- ALTER TABLE pagosOC ADD COLUMN identidadpago INT NOT NULL AFTER idlogistica;
+-- 
+-- ALTER TABLE pagoSoc ADD COLUMN numtransaccion VARCHAR(20) NOT NULL AFTER fecharealpago;
+-- ALTER TABLE pagosOC ADD COLUMN moneda ENUM('USD', 'PEN') NOT NULL AFTER numtransaccion;
+-- ALTER TABLE pagosOC ADD COLUMN tipocambio DECIMAL(5,2) NULL AFTER moneda;
+-- ALTER TABLE pagosOC ADD COLUMN observaciones VARCHAR(400) NULL AFTER comprobante;
 
---ALTER TABLE pagosOC MODIFY COLUMN fecha DATETIME NULL DEFAULT NOW();
 
---ALTER TABLE pagosOC CHANGE COLUMN amortizacon amortizacion DECIMAL(10, 2) NOT NULL;
---ALTER TABLE pagosOC ADD COLUMN idorden INT NOT NULL;
---ALTER TABLE pagosOC ADD CONSTRAINT;
---ALTER TABLE pagosOC DROP COLUMN idpagooc;
 
---ALTER TABLE pagosOC
---ADD COLUMN idpagooc INT NOT NULL AUTO_INCREMENT PRIMARY KEY;
 
--- La orden de compra es el documento que se genera para solicitar la compra de un vehículo
--- Una orden de compra puede tener más de un equipo
+
 CREATE TABLE detordencompra (
     iddetordencompra INT AUTO_INCREMENT PRIMARY KEY,
     idordencompra INT NOT NULL,
@@ -463,16 +469,23 @@ CREATE TABLE cotizaciones (
     vigenciadias TINYINT NOT NULL COMMENT 'Días válidos de la cotización' DEFAULT 7,
     inicial DECIMAL(9, 2) NOT NULL,
     numcuotas SMALLINT NOT NULL,
+    gastosadministrativos DECIMAL(9,2) NOT NULL DEFAULT 0.00 COMMENT 'Gastos administrativos de la cotización',
     valorcuota DECIMAL(9, 2) NOT NULL, -- Se usara en la tabla de cronogramas
     estadocotizacion ENUM('P', 'E', 'A', 'C', 'R') NOT NULL DEFAULT 'P' COMMENT 'Pendiente | Evaluación | Aprobada | Cancelada (cliente) | Rechazada (Analista crédito)',
+     comentarios TEXT,
     creado DATETIME NOT NULL DEFAULT NOW(),
     modificado DATETIME NULL,
+    fechareactivacion DATETIME NULL,
     CONSTRAINT fk_idformato_cot FOREIGN KEY (idformato) REFERENCES formatocotizacion (idformato),
     CONSTRAINT fk_idcliente_cot FOREIGN KEY (idcliente) REFERENCES clientes (idcliente),
     CONSTRAINT fk_idvehiculo_cot FOREIGN KEY (idvehiculo) REFERENCES + (idvehiculo),
     CONSTRAINT fk_idcolventa_cot FOREIGN KEY (idasesor) REFERENCES colaboradores (idcolaborador)
 ) ENGINE = INNODB;
+USE motorpark;
+ALTER TABLE cotizaciones ADD COLUMN comentarios TEXT AFTER estadocotizacion;
 
+-- ALTER TABLE cotizaciones ADD COLUMN gastosadministrativos DECIMAL(9,2) NOT NULL DEFAULT 0.00 COMMENT 'Gastos administrativos de la cotización' AFTER valorcuota;
+--  ALTER TABLE cotizaciones ADD COLUMN fechareactivacion DATETIME NULL AFTER modificado;
 CREATE TABLE contratos (
     idcontrato INT AUTO_INCREMENT PRIMARY KEY,
     idlocal INT NOT NULL,
@@ -593,25 +606,7 @@ CREATE TABLE entidadespago (
     CONSTRAINT uk_entidad_epg UNIQUE (entidad)
 ) ENGINE = INNODB;
 
-CREATE TABLE amortizacionesoc (
-    idamortizacion INT AUTO_INCREMENT PRIMARY KEY,
-    idorden INT NOT NULL,
-    idlogistica INT NOT NULL,
-    identidadpago INT NOT NULL,
-    fechapago DATE NOT NULL,
-    numtransaccion VARCHAR(20) NOT NULL,
-    moneda ENUM('USD', 'PEN') NOT NULL,
-    tipocambio DECIMAL(5, 2) NULL,
-    amortizacion DECIMAL(9, 2) NOT NULL,
-    saldo DECIMAL(9, 2) NOT NULL,
-    comprobante VARCHAR(200) NULL,
-    observaciones VARCHAR(400) NULL,
-    creado DATETIME NOT NULL DEFAULT NOW(),
-    modificado DATETIME NULL,
-    CONSTRAINT fk_idorden_aoc FOREIGN KEY (idorden) REFERENCES ordenescompra (idordencompra),
-    CONSTRAINT fk_idlogistica_aoc FOREIGN KEY (idlogistica) REFERENCES colaboradores (idcolaborador),
-    CONSTRAINT fk_identidadpago_aoc FOREIGN KEY (identidadpago) REFERENCES entidadespago (identidadpago)
-) ENGINE = INNODB;
+
 
 
 USE motorpark;
@@ -648,3 +643,17 @@ CREATE TABLE seguimientos_morosos (
     CONSTRAINT fk_seguimiento_contrato FOREIGN KEY (idcontrato) REFERENCES contratos(idcontrato) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT fk_seguimiento_colaborador FOREIGN KEY (usuario_registro) REFERENCES colaboradores(idcolaborador) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE = InnoDB;
+
+
+
+CREATE TABLE cotizacion_financiamiento (
+    idfinanciamiento INT AUTO_INCREMENT PRIMARY KEY,
+    idcotizacion INT NOT NULL,
+    numcuotas SMALLINT NOT NULL,
+    inicial DECIMAL(9,2) NOT NULL DEFAULT 0,
+    valorcuota DECIMAL(9,2) NOT NULL,
+    moneda ENUM('PEN','USD') NOT NULL DEFAULT 'PEN',
+    precioventa DECIMAL(12,2) NOT NULL DEFAULT 0,
+    creado DATETIME NOT NULL DEFAULT NOW(),
+    CONSTRAINT fk_cotfin_cot FOREIGN KEY (idcotizacion) REFERENCES cotizaciones (idcotizacion) ON DELETE CASCADE
+) ENGINE=INNODB;
