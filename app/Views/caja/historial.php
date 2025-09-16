@@ -169,7 +169,7 @@
 
 <!-- Modal para comprobantes -->
 <div class="modal fade" id="modalcomprobante" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-dialog modal-md modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title">
