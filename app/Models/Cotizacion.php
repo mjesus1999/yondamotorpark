@@ -234,13 +234,13 @@ class Cotizacion
      */
     public function reactivar(int $idcotizacion, int $vigenciadias = 7): bool
     {
-        $query = "UPDATE cotizaciones
+        $sql = "UPDATE cotizaciones
             SET vigenciadias = :vig,
                 modificado = NOW(),
                 fechareactivacion = NOW(),
                 estadocotizacion = 'P'
             WHERE idcotizacion = :id";
-        $stmt = $this->db->prepare($query);
+        $stmt = $this->db->prepare($sql);
         $stmt->execute([
             ':vig' => $vigenciadias,
             ':id' => $idcotizacion

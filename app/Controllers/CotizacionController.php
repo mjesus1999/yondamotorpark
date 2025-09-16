@@ -498,20 +498,20 @@ class CotizacionController extends Controller
         $this->authRequired();
 
         $idasesor = $_SESSION['user']['id'] ?? null;
-        $idcargo = $_SESSION['user']['cargo'] ?? null;
+        $idcargo = $_SESSION['user']['idcargo'] ?? null;
 
         $cot = $this->cotizacionModel->getById($idcotizacion);
         if (!$cot) {
             http_response_code(404);
-            echo json_encode(['success' => false, 'message' => 'Cotizacion no encrontada.']);
+            echo json_encode(['success' => false, 'message' => 'Cotización no encontrada.']);
             exit;
         }
 
-        $cargosSuperiores = [1, 8, 10, 13, 14, 16, 17];
+        $cargosSupervisores = [1, 8, 10, 13, 14, 16, 17];
 
-        if (!in_array($idcargo, $cargosSuperiores) && (int) ($cot['idasesor'] ?? 0) !== (int) $idasesor) {
+        if (!in_array($idcargo, $cargosSupervisores) && (int) ($cot['idasesor'] ?? 0) !== (int) $idasesor) {
             http_response_code(403);
-            echo json_encode(['success' => false, 'message' => 'No tienes permiso para reactivar esta cotizacion.']);
+            echo json_encode(['success' => false, 'message' => 'No tienes permisos para reactivar esta cotización.']);
             exit;
         }
 
@@ -519,29 +519,29 @@ class CotizacionController extends Controller
         try {
             $ok = $this->cotizacionModel->reactivar($idcotizacion, $vig);
 
-            // RECUPERAR CON GETBYID
+            // RE-RECUPERAR la cotización actualizada (getById ya agrega opciones_financiamiento)
             $updated = $this->cotizacionModel->getById($idcotizacion);
 
+            // Asegurarnos también de obtener explícitamente los financiamientos
             $financiamientos = $this->cotizacionModel->getFinanciamientos($idcotizacion) ?: [];
 
-            $fecha_reactivacion = $updated['fechareactivacion'] ?? null;
-            $fecha_vencimiento = $fecha_reactivacion ? (new \DateTime($fecha_reactivacion))->modify("+{$vig} days")->format('d/m/Y') : date('d/m/Y', strtotime("+{$vig} days"));
+            $fecha_react_raw = $updated['fechareactivacion'] ?? null;
+            $fecha_venc = $fecha_react_raw ? (new \DateTime($fecha_react_raw))->modify("+{$vig} days")->format('d/m/Y') : date('d/m/Y', strtotime("+{$vig} days"));
 
-            json_encode([
+            echo json_encode([
                 'success' => true,
-                'message' => $ok ? 'Cotizacion reactivada correctamente.' : 'No se realizaron cambios',
-                'fechareactivacion' => $fecha_reactivacion,
-                'fecha_vencimiento' => $fecha_vencimiento,
+                'message' => $ok ? 'Cotización reactivada correctamente.' : 'No se realizaron cambios (ya estaba con esos valores).',
+                'fechareactivacion' => $fecha_react_raw,
+                'fecha_vencimiento' => $fecha_venc,
                 'cotizacion' => $updated,
-                'financiamiento' => $financiamientos
+                'financiamientos' => $financiamientos
             ]);
             exit;
-
         } catch (Exception $e) {
             http_response_code(500);
             echo json_encode(['success' => false, 'message' => 'Error al reactivar: ' . $e->getMessage()]);
+            exit;
         }
-
     }
 
 }
