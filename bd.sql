@@ -481,25 +481,7 @@ CREATE TABLE entidadespago (
     CONSTRAINT uk_entidad_epg UNIQUE (entidad)
 ) ENGINE = INNODB;
 
-CREATE TABLE amortizacionesoc (
-    idamortizacion INT AUTO_INCREMENT PRIMARY KEY,
-    idorden INT NOT NULL,
-    idlogistica INT NOT NULL,
-    identidadpago INT NOT NULL,
-    fechapago DATE NOT NULL,
-    numtransaccion VARCHAR(20) NOT NULL,
-    moneda ENUM('USD', 'PEN') NOT NULL,
-    tipocambio DECIMAL(5, 2) NULL,
-    amortizacion DECIMAL(9, 2) NOT NULL,
-    saldo DECIMAL(9, 2) NOT NULL,
-    comprobante VARCHAR(200) NULL,
-    observaciones VARCHAR(400) NULL,
-    creado DATETIME NOT NULL DEFAULT NOW(),
-    modificado DATETIME NULL,
-    CONSTRAINT fk_idorden_aoc FOREIGN KEY (idorden) REFERENCES ordenescompra (idordencompra),
-    CONSTRAINT fk_idlogistica_aoc FOREIGN KEY (idlogistica) REFERENCES colaboradores (idcolaborador),
-    CONSTRAINT fk_identidadpago_aoc FOREIGN KEY (identidadpago) REFERENCES entidadespago (identidadpago)
-) ENGINE = INNODB;
+
 
 CREATE TABLE accesos (
 
@@ -543,3 +525,7 @@ CREATE TABLE cotizacion_financiamiento (
 -- ALTER TABLE cotizacion_financiamiento ADD COLUMN activo TINYINT(1) NOT NULL DEFAULT 1;
 
 SELECT * FROM cotizacion_financiamiento;
+
+
+USE motorpark;
+SELECT * FROM cotizaciones;
