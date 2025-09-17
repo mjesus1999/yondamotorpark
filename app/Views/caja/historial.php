@@ -346,10 +346,10 @@
 
             const documento = {
                 pageSize: 'A4',
-                pageOrientation: 'portrait',
+                pageOrientation: 'landscape',
                 pageMargins: [40, 25, 25, 25],
                 defaultStyle: {
-                    fontSize: 7.2,
+                    fontSize: 6.8,
                 },
                 content: [{
                     columns: [{
@@ -374,7 +374,7 @@
                     text: 'HISTORIAL DE PAGOS',
                     style: 'subheader',
                     alignment: 'center',
-                    margin: [0, 0, 0, 10],
+                    margin: [0, 0, 0, 0],
                     decoration: 'underline',
                     bold: true
                 }, {

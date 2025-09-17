@@ -658,3 +658,46 @@ CREATE TABLE cotizacion_financiamiento (
     creado DATETIME NOT NULL DEFAULT NOW(),
     CONSTRAINT fk_cotfin_cot FOREIGN KEY (idcotizacion) REFERENCES cotizaciones (idcotizacion) ON DELETE CASCADE
 ) ENGINE=INNODB;
+
+
+
+CREATE TABLE conceptoegreso(
+    idconceptoegreso INT PRIMARY KEY AUTO_INCREMENT,
+    concepto VARCHAR(150) NOT NULL,
+    descripcion VARCHAR(350) NULL,
+    creado DATETIME NOT NULL DEFAULT NOW(),
+    modificado DATETIME NULL,
+    CONSTRAINT uk_concepto_egreso UNIQUE (concepto)
+)ENGINE = INNODB;
+
+
+CREATE TABLE egresos(
+    idegreso INT PRIMARY KEY AUTO_INCREMENT,
+    idconceptoegreso INT NOT NULL,
+    idcolacaja INT NOT NULL,
+    idcolsolicitante INT NOT NULL,
+    monto DECIMAL(10,2) NOT NULL,
+    comentario VARCHAR(300) NULL,
+    requierecomprobante ENUM('S','N') NOT NULL DEFAULT 'N',
+    creado DATETIME NOT NULL DEFAULT NOW(),
+    modificado DATETIME NULL,
+    CONSTRAINT fk_idconcepto_egreso FOREIGN KEY (idconceptoegreso) REFERENCES conceptoegreso (idconceptoegreso),
+    CONSTRAINT fk_colaborador_egreso_registra FOREIGN KEY (idcolaborador) REFERENCES colaboradores (idcolaborador),
+    CONSTRAINT fk_colaborador_egreso_solicita FOREIGN KEY (idcolsolicitante) REFERENCES colaboradores (idcolaborador)
+
+)ENGINE = INNODB;
+
+CREATE TABLE comprobantes(
+    idcomprobante INT PRIMARY KEY AUTO_INCREMENT,
+    idegreso INT NOT NULL,
+    tipodoc ENUM('B','F') NOT NULL COMMENT  'Boleta, Factura',
+    rucproovedor CHAR(11) NOT NULL, COMMENT 'RUC del proovedor',
+    serie VARCHAR(50) NOT NULL,
+    numdocumento VARCHAR(50) NOT NULL,
+    monto DECIMAL(10,2) NOT NULL,   
+    cargadocontabilidad ENUM('S','N') NOT NULL DEFAULT 'N', COMMENT 'Indica si ya se cargo a contabilidad',
+    rutacomprobante VARCHAR(255) NOT NULL,
+    creado DATETIME NOT NULL DEFAULT NOW(),
+    modificado DATETIME NULL,
+    CONSTRAINT fk_egreso_comprobante FOREIGN KEY (idegreso) REFERENCES egresos (idegreso)
+)

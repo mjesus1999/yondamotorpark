@@ -108,6 +108,33 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
+
+    elements.medioPagoSelect.addEventListener('change', (e) => {
+
+        if(e.target.value.toUpperCase() === MEDIOS_PAGO.efectivo.toUpperCase()){
+            elements.numeroTransaccionInput.disabled = true;
+            elements.comprobanteCuotaInput.disabled = true;
+
+        } else {
+            elements.numeroTransaccionInput.disabled = false;
+            elements.comprobanteCuotaInput.disabled = false;
+        }
+    });
+
+    elements.selectMedioPagoPenalidad.addEventListener('change', (e) => {
+
+        if(e.target.value.toUpperCase() === MEDIOS_PAGO.efectivo.toUpperCase()){
+            elements.numeroTransaccionPenalidadInput.disabled = true;
+            elements.comprobantePenalidadInput.disabled = true;
+        } else {
+            elements.numeroTransaccionPenalidadInput.disabled = false;
+            elements.comprobantePenalidadInput.disabled = false;
+        }
+    });
+
+
+
+
     /**
      * Muestra u oculta los campos de pago en el modal según el tipo de pago seleccionado.
      */
