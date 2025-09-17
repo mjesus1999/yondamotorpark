@@ -4,6 +4,24 @@
 
 	<div class="alert alert-info mt-2" role="alert">
 		<div class="row">
+			<div class="col-md-6 d-flex align-items-center justify-content-start">
+				<nav aria-label="breadcrumb">
+				<ol class="breadcrumb mb-0">
+					<li class="breadcrumb-item"><a href="#">Vehiculos</a></li>
+					<li class="breadcrumb-item active" aria-current="page">Registrar</li>
+				</ol>
+				</nav>
+			</div>
+			<div class="col-md-6 text-end">
+				<a href="/vehiculos" class="btn btn-outline-primary btn-sm">
+				<i class="bi bi-list-ul me-1"></i> Lista
+				</a>
+			</div>
+		</div>
+	</div>
+
+	<!-- <div class="alert alert-info mt-2" role="alert">
+		<div class="row">
 			<div class="col-md-6 d-flex aling-items-center justify-content-start">
 				<nav aria-label="breadcrumb">
 					<ol class="breadcrumb mb-0">
@@ -17,7 +35,7 @@
 			</div>
 		</div>
 	</div>
-
+ -->
 	<div class="mb-2">
 		<form action="/vehiculos/store" method="POST" id="registrar-vehiculos" autocomplete="off">
 			<div class="card mb-2">
@@ -178,7 +196,7 @@
 
 				<div class="card-footer text-end">
 					<button type="reset" class="btn btn-sm btn-outline-secondary">Cancelar</button>
-					<button type="submit" class="btn btn-sm btn-primary">Registrar</button>
+					<button type="submit" class="btn btn-sm btn-primary">Guardar</button>
 				</div>
 			</div><!-- ./card -->
 		</form>

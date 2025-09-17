@@ -20,19 +20,39 @@
 
   <div class="alert alert-info mt-2" role="alert">
     <div class="row">
-      <div class="col-md-6 d-flex">
-        
+      <div class="col-md-6 d-flex align-items-center justify-content-start">
+        <nav aria-label="breadcrumb">
           <ol class="breadcrumb mb-0">
             <li class="breadcrumb-item"><a href="#">Usuarios</a></li>
             <li class="breadcrumb-item active" aria-current="page">Listar</li>
           </ol>
-        
+        </nav>
       </div>
       <div class="col-md-6 text-end">
-        <a href="/usuarios/create" class="">[ Registrar ]</a>
+        <a href="/usuarios/create" class="btn btn-outline-primary btn-sm">
+          <!-- <i class="bi bi-plus"></i> -->Registrar
+        </a>
       </div>
     </div>
   </div>
+  <!-- <div class="alert alert-info mt-2" role="alert">
+    <div class="row">
+      <div class="col-md-6 d-flex">
+
+        <ol class="breadcrumb mb-0">
+          <li class="breadcrumb-item"><a href="#">Usuarios</a></li>
+          <li class="breadcrumb-item active" aria-current="page">Listar</li>
+        </ol>
+
+      </div>
+      <div class="col-md-6 text-end">
+        <a href="/usuarios/create" class="">[ Registrar ]</a>
+        <a href="/usuarios/create" class="btn btn-outline-primary btn-sm">
+          <i class="bi bi-plus"></i>Registrar
+        </a>
+      </div>
+    </div>
+  </div> -->
 
   <div class="row">
     <div class="col-md-12">
@@ -154,14 +174,126 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-sm btn-primary" id="btnAceptarCambiarClave">Aceptar</button>
+        <button type="button" class="btn btn-sm btn-primary" id="btnAceptarCambiarClave">Guardar</button>
       </div>
     </div>
   </div>
 </div>
 
 <script>
+
+  function attachCambiarClaveConfirm() {
+    const btnAceptar = document.getElementById('btnAceptarCambiarClave');
+    if (!btnAceptar) return;
+
+    btnAceptar.addEventListener('click', async (e) => {
+      e.preventDefault();
+
+      let confirmado;
+      if (typeof ask === 'function') {
+        confirmado = await ask('¿Desea confirmar el cambio de contraseña?', '¿Cambiar contraseña?');
+      } else {
+        confirmado = confirm('¿Desea confirmar el cambio de contraseña?');
+      }
+
+      if (!confirmado) return;
+
+      const form = document.getElementById('formCambiarClave');
+      const formData = new FormData(form);
+
+      // Deshabilitar botón durante el proceso
+      btnAceptar.disabled = true;
+      btnAceptar.innerHTML = 'Cambiando...';
+
+      try {
+        const res = await fetch('/api/usuarios/changePassword', {
+          method: 'POST',
+          body: formData
+        });
+
+        const json = await res.json();
+
+        // Cerrar modal
+        const modalEl = document.getElementById('modalCambiarClave');
+        bootstrap.Modal.getInstance(modalEl).hide();
+        form.reset();
+
+        window.location.reload();
+      } catch (err) {
+        console.error(err);
+        alert('Error de conexión.');
+
+        // Restaurar botón
+        btnAceptar.disabled = false;
+        btnAceptar.innerHTML = 'Aceptar';
+      }
+    });
+  }
+
+  function attachEliminarUsuarioConfirm() {
+    document.querySelectorAll('.btn-borrar').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const id = btn.getAttribute('data-idcolab');
+
+        let confirmado;
+        if (typeof ask === 'function') {
+          confirmado = await ask('¿Desea confirmar la eliminación de este usuario?', '¿Eliminar usuario?');
+        } else {
+          confirmado = confirm('¿Desea confirmar la eliminación de este usuario?');
+        }
+
+        if (!confirmado) return;
+
+        // Deshabilitar botón durante el proceso
+        btn.disabled = true;
+        const originalHTML = btn.innerHTML;
+        btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
+
+        // Enviar formulario POST
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/usuarios/disabled/${id}`;
+        document.body.appendChild(form);
+        form.submit();
+      });
+    });
+  }
+
+  function attachRestriccionHorariaConfirm() {
+    document.querySelectorAll('.toggle-restr-form').forEach(form => {
+      form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const btn = form.querySelector('button[type="submit"]');
+        const id = btn.getAttribute('data-idcolab');
+        const isActive = btn.classList.contains('btn-outline-secondary');
+
+        const mensaje = isActive
+          ? '¿Desea confirmar quitar la restricción horaria de este usuario?'
+          : '¿Desea confirmar poner restricción horaria a este usuario?';
+        const titulo = isActive ? '¿Quitar restricción?' : '¿Poner restricción?';
+
+        let confirmado;
+        if (typeof ask === 'function') {
+          confirmado = await ask(mensaje, titulo);
+        } else {
+          confirmado = confirm(mensaje);
+        }
+
+        if (!confirmado) return;
+
+        // Deshabilitar botón durante el proceso
+        btn.disabled = true;
+        const originalHTML = btn.innerHTML;
+        btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
+
+        form.submit();
+      });
+    });
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
+    // Configurar modal cambiar clave
     document.querySelectorAll('.btn-cambiar-clave').forEach(btn => {
       btn.addEventListener('click', () => {
         const idColab = btn.getAttribute('data-idcolab');
@@ -174,72 +306,12 @@
       });
     });
 
-    document.getElementById('btnAceptarCambiarClave').addEventListener('click', () => {
-      const form = document.getElementById('formCambiarClave');
-      const formData = new FormData(form);
-
-      fetch('/api/usuarios/changePassword', {
-        method: 'POST',
-        body: formData
-      })
-        .then(res => res.json())
-        .then(json => {
-          // cierro el modal
-          const modalEl = document.getElementById('modalCambiarClave');
-          bootstrap.Modal.getInstance(modalEl).hide();
-          form.reset();
-
-          window.location.reload();
-        })
-        .catch(err => {
-          console.error(err);
-          alert('Error de conexión.');
-        });
-    });
-    document.querySelectorAll('.btn-borrar').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        const id = btn.getAttribute('data-idcolab');
-        const { isConfirmed } = await Swal.fire({
-          title: '¿Eliminar usuario?',
-          text: 'Esta acción no se puede deshacer.',
-          icon: 'warning',
-          showCancelButton: true,
-          confirmButtonText: 'Sí',
-          cancelButtonText: 'Cancelar',
-          reverseButtons: false
-        });
-        if (!isConfirmed) return;
-
-        //enviamos un formulario POST
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = `/usuarios/disabled/${id}`;
-        document.body.appendChild(form);
-        form.submit();
-      });
-    });
-
-    document.querySelectorAll('.toggle-restr-form').forEach(form => {
-      form.addEventListener('submit', function (e) {
-        e.preventDefault();
-        const btn = form.querySelector('button[type="submit"]');
-        const id = btn.getAttribute('data-idcolab');
-        const isActive = btn.classList.contains('btn-outline-secondary'); // si estaba activo
-
-        Swal.fire({
-          title: isActive ? 'Quitar restricción horaria?' : 'Poner restricción horaria?',
-          text: isActive ? 'Se quitará la restricción horaria de este usuario.' : 'Se activará la restricción horaria a este usuario.',
-          icon: 'question',
-          showCancelButton: true,
-          confirmButtonText: 'Sí',
-          cancelButtonText: 'Cancelar'
-        }).then(result => {
-          if (result.isConfirmed) form.submit();
-        });
-      });
-    });
-
+    // Adjuntar confirmaciones
+    attachCambiarClaveConfirm();
+    attachEliminarUsuarioConfirm();
+    attachRestriccionHorariaConfirm();
   });
+
 </script>
 
 <?php include __DIR__ . '/../layout/footer.php'; ?>

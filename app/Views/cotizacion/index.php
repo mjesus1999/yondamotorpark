@@ -32,7 +32,7 @@
                 <a href="/cotizacion/historial" class="btn btn-outline-secondary btn-sm me-2">
                     <i class="bi bi-clock-history"></i> Historial
                 </a>
-                <a href="/cotizacion/create" class="btn btn-primary btn-sm">
+                <a href="/cotizacion/create" class="btn btn-outline-primary btn-sm">
                     <!-- <i class="bi bi-plus"></i> -->Registrar
                 </a>
             </div>

@@ -20,6 +20,24 @@
 
   <div class="alert alert-info mt-2" role="alert">
     <div class="row">
+      <div class="col-md-6 d-flex align-items-center justify-content-start">
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a href="#">Usuarios</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Registrar</li>
+          </ol>
+        </nav>
+      </div>
+      <div class="col-md-6 text-end">
+        <a href="/usuarios" class="btn btn-outline-primary btn-sm">
+          <i class="bi bi-list-ul me-1"></i> Lista
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- <div class="alert alert-info mt-2" role="alert">
+    <div class="row">
       <div class="col-md-6 d-flex">
 
         <ol class="breadcrumb mb-0">
@@ -32,7 +50,7 @@
         <a href="/usuarios" class="">[ Mostrar lista ]</a>
       </div>
     </div>
-  </div>
+  </div> -->
 
   <!-- Campos -->
   <div class="mb-2">
@@ -179,7 +197,7 @@
       <div class="card">
         <div class="card-footer text-end">
           <button type="reset" id="btn-cancelar-registro" class="btn btn-sm btn-outline-secondary">Cancelar</button>
-          <button type="submit" class="btn btn-primary btn-sm btnGuardarUsuario">Registrar</button>
+          <button type="submit" class="btn btn-primary btn-sm btnGuardarUsuario">Guardar</button>
         </div>
       </div>
     </form>

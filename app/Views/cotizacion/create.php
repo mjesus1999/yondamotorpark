@@ -209,8 +209,13 @@
                     </ol>
                 </nav>
             </div>
-            <div class="col-md-6 text-end">
+            <!-- <div class="col-md-6 text-end">
                 <a href="/cotizacion" class="btn-sm btn btn-primary">Mostrar Lista</a>
+            </div> -->
+            <div class="col-md-6 text-end">
+                <a href="/cotizacion" class="btn btn-outline-primary btn-sm">
+                    <i class="bi bi-list-ul me-1"></i> Lista
+                </a>
             </div>
         </div>
     </div>
@@ -483,8 +488,8 @@
 
                             <div class="col-md-2">
                                 <div class="form-floating">
-                                    <input type="number" class="form-control fin-numcuotas" placeholder="Meses"
-                                        step="3" id="numcuotas">
+                                    <input type="number" class="form-control fin-numcuotas" placeholder="Meses" step="3"
+                                        id="numcuotas">
                                     <label>Meses <span class="text-danger">*</span></label>
                                 </div>
                             </div>
