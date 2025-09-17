@@ -46,8 +46,9 @@
                         <div class="col-md-5">
                             <div class="form-floating">
                                 <input type="text" class="form-control" id="tipocotizacion" name="tipocotizacion"
-                                    required>
-                                <label for="tipocotizacion">Formato Cotizacion</label>
+                                    required placeholder="Formato Cotizacion">
+                                <label for="tipocotizacion">Formato Cotizacion <span
+                                        class="text-danger">*</span></label>
                             </div>
                         </div>
                         <!-- FECHA INICIO -->
@@ -55,7 +56,7 @@
                             <div class="form-floating">
                                 <input type="date" class="form-control" id="fechainicio" name="fechainicio" required
                                     value="<?= date('Y-m-d') ?>">
-                                <label for="fechainicio">Fecha Inicio</label>
+                                <label for="fechainicio">Fecha Inicio <span class="text-danger">*</span></label>
                             </div>
                         </div>
                         <!-- FECHA FIN -->
@@ -162,6 +163,31 @@
 </div>
 
 <script>
+    function attachFormatoCotizacionConfirm() {
+        const formCot = document.getElementById('formCotizacion');
+        if (!formCot) return;
+
+        formCot.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const submitButton = formCot.querySelector('button[type="submit"]');
+
+            let confirmado;
+            if (typeof ask === 'function') {
+                confirmado = await ask('¿Desea confirmar el registro de este formato de cotización?', '¿Registrar formato?');
+            } else {
+                confirmado = confirm('¿Desea confirmar el registro de este formato de cotización?');
+            }
+
+            if (!confirmado) return;
+
+            if (submitButton) {
+                submitButton.disabled = true;
+                submitButton.innerHTML = 'Registrando...';
+            }
+            formCot.submit();
+        });
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
         const chk = document.getElementById('indefinido');
         const fechaFin = document.getElementById('fechafin');
@@ -175,6 +201,9 @@
 
         toggleFecha();
         chk.addEventListener('change', toggleFecha);
+
+        // Llamar la función de confirmación para el formulario
+        attachFormatoCotizacionConfirm();
 
         //ELIMINAR
         document.querySelectorAll('.btn-eliminar-formato').forEach(btn => {
@@ -235,35 +264,6 @@
                 }
             });
         });
-
-        const formCot = document.getElementById('formCotizacion');
-        if (formCot) {
-            formCot.addEventListener('submit', async (e) => {
-                e.preventDefault();
-
-                const { isConfirmed } = await Swal.fire({
-                    title: '¿Registrar nuevo formato?',
-                    text: 'Esta acción agregará un nuevo formato de cotización.',
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonText: 'Sí',
-                    cancelButtonText: 'Cancelar',
-                    reverseButtons: false
-                });
-
-                if (isConfirmed) {
-                    // (opcional) desactivar botón submit para evitar doble clic
-                    const submitBtn = formCot.querySelector('button[type="submit"]');
-                    if (submitBtn) {
-                        submitBtn.disabled = true;
-                        submitBtn.dataset.origText = submitBtn.innerHTML;
-                        submitBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Agregando...';
-                    }
-
-                    formCot.submit();
-                }
-            });
-        }
     });
 
 </script>
