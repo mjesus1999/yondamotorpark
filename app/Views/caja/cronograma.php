@@ -23,6 +23,9 @@
                 <button class="btn btn-danger btn-sm ms-2" id="btn-pdf">
                     <i class="fa-regular fa-file-pdf"></i> PDF
                 </button>
+                <button class="btn btn-success btn-sm ms-2" id="btn-excel">
+                   <i class="bi bi-file-earmark-excel"></i> EXCEL
+                </button>
             </div>
         </div>
     </div>
@@ -419,9 +422,15 @@
 </div>
 
 <!-- USADO PARA GENERAR EL PDF -->
+<script src="/assets/js/logoBase64.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js" defer></script>
 
+<script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js" defer></script>
+
+
 
 <script src="/assets/js/cronograma-pagos/cronograma.js" type="module" defer></script>
+
+
 <?php include __DIR__ . '/../layout/footer.php'; ?>

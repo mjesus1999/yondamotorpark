@@ -174,7 +174,8 @@ include __DIR__ . '/../layout/header.php';
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js" defer></script>
-<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js" defer></script>
+<script src="/assets/js/logoBase64.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js" defer></script>
 <script>
     document.addEventListener('DOMContentLoaded', async () => {
         const form = document.getElementById('reporte-fechas-form');
@@ -190,10 +191,11 @@ include __DIR__ . '/../layout/header.php';
         const btnExcel = document.querySelector('#btn-excel');
         const mensajeModal = new bootstrap.Modal(document.getElementById('mensajeModal'));
         const mensajeInicial = document.querySelector('#mensaje-inicial');
-
         const tabla = document.querySelector('#reporte-tabla');
 
-        // Establecer fechas por defecto 
+        let reporteData = null;
+
+
         const hoy = new Date();
         const hace7Dias = new Date();
         hace7Dias.setDate(hoy.getDate() - 7);
@@ -201,9 +203,9 @@ include __DIR__ . '/../layout/header.php';
         document.getElementById('fecha-inicio').value = hace7Dias.toISOString().split('T')[0];
         document.getElementById('fecha-fin').value = hoy.toISOString().split('T')[0];
 
+
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
-
             const fechaInicio = document.getElementById('fecha-inicio').value;
             const fechaFin = document.getElementById('fecha-fin').value;
 
@@ -221,11 +223,8 @@ include __DIR__ . '/../layout/header.php';
             btnGenerar.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Generando...';
             btnPDF.style.display = 'none';
             resultadosContainer.style.display = 'none';
-
-            // Limpia la tabla y los totales
             tbody.innerHTML = '';
             limpiarTotales();
-
 
             try {
                 const url = `/api/reporte/by/fecha?fecha_inicio=${fechaInicio}&fecha_fin=${fechaFin}`;
@@ -233,7 +232,6 @@ include __DIR__ . '/../layout/header.php';
 
                 if (!response.ok) {
                     const errorData = await response.json();
-                    // console.error('Error del servidor:', errorData.message);
                     mostrarMensaje(errorData.message, 'Error');
                     mensajeInicial.classList.remove('d-none');
                     mensajeInicial.classList.add('d-flex');
@@ -241,7 +239,8 @@ include __DIR__ . '/../layout/header.php';
                 }
 
                 const data = await response.json();
-                mostrarReporteEnTabla(data.data);
+                reporteData = data.data;
+                mostrarReporteEnTabla(reporteData);
 
             } catch (error) {
                 console.error('Error en la solicitud:', error);
@@ -254,13 +253,18 @@ include __DIR__ . '/../layout/header.php';
             }
         });
 
+
         btnPDF.addEventListener('click', () => {
             generarReportePDF();
         });
 
         btnExcel.addEventListener('click', () => {
-            generarReporteExcel();
-        })
+            if (reporteData) {
+                generarReporteExcel(reporteData,formatearFecha);
+            } else {
+                mostrarMensaje('No hay datos para exportar a Excel. Por favor, genera un reporte primero.', 'Advertencia');
+            }
+        });
 
         function mostrarReporteEnTabla(datos) {
             let totalGlobal = 0;
@@ -285,13 +289,13 @@ include __DIR__ . '/../layout/header.php';
 
                     const newRow = document.createElement('tr');
                     newRow.innerHTML = `
-                    <td class="text-center">${formatearFecha(row.dia)}</td>
-                    <td class="text-end">S/ ${formatearMoneda(row.total_efectivo)}</td>
-                    <td class="text-end">S/ ${formatearMoneda(row.total_yape)}</td>
-                    <td class="text-end">S/ ${formatearMoneda(row.total_plin)}</td>
-                    <td class="text-end">S/ ${formatearMoneda(row.total_transferencia)}</td>
-                    <td class="text-end fw-bold">S/ ${formatearMoneda(totalDiario)}</td>
-                `;
+                        <td class="text-center">${formatearFecha(row.dia)}</td>
+                        <td class="text-end">S/ ${formatearMoneda(row.total_efectivo)}</td>
+                        <td class="text-end">S/ ${formatearMoneda(row.total_yape)}</td>
+                        <td class="text-end">S/ ${formatearMoneda(row.total_plin)}</td>
+                        <td class="text-end">S/ ${formatearMoneda(row.total_transferencia)}</td>
+                        <td class="text-end fw-bold">S/ ${formatearMoneda(totalDiario)}</td>
+                    `;
                     tbody.appendChild(newRow);
                 });
 
@@ -304,15 +308,13 @@ include __DIR__ . '/../layout/header.php';
 
             } else {
                 mensajeInicial.classList.add('d-flex');
-
-                // Limpia los totales
                 limpiarTotales();
                 btnPDF.style.display = 'none';
             }
-        }
+        };
 
 
-        // Nueva función para limpiar los totales
+
         function limpiarTotales() {
             totalGlobalEl.textContent = 'S/ 0.00';
             totalEfectivoEl.textContent = 'S/ 0.00';
@@ -321,19 +323,196 @@ include __DIR__ . '/../layout/header.php';
             totalTransferenciaEl.textContent = 'S/ 0.00';
         }
 
-        function generarReporteExcel() {
+
+        /* ... (código previo) ... */
+
+        async function generarReporteExcel(data, formatearFecha) { // Asegúrate de pasar la función formatearFecha como parámetro
+            const workbook = new ExcelJS.Workbook();
+            const worksheet = workbook.addWorksheet('Reporte de Pagos');
+
+            // ... (Definiciones de estilos, etc.) ...
+            const headerStyle = {
+                font: {
+                    bold: true,
+                    size: 12
+                },
+                alignment: {
+                    horizontal: 'center'
+                },
+                border: {
+                    top: {
+                        style: 'thin'
+                    },
+                    left: {
+                        style: 'thin'
+                    },
+                    bottom: {
+                        style: 'thin'
+                    },
+                    right: {
+                        style: 'thin'
+                    }
+                },
+                fill: {
+                    type: 'pattern',
+                    pattern: 'solid',
+                    fgColor: {
+                        argb: 'D3D3D3'
+                    }
+                }
+            };
+
+            const currencyStyle = {
+                numFmt: '"S/"#,##0.00',
+                font: {
+                    size: 11
+                },
+                border: {
+                    top: {
+                        style: 'thin'
+                    },
+                    left: {
+                        style: 'thin'
+                    },
+                    bottom: {
+                        style: 'thin'
+                    },
+                    right: {
+                        style: 'thin'
+                    }
+                }
+            };
+
+            const dateStyle = {
+                font: {
+                    size: 11
+                },
+                border: {
+                    top: {
+                        style: 'thin'
+                    },
+                    left: {
+                        style: 'thin'
+                    },
+                    bottom: {
+                        style: 'thin'
+                    },
+                    right: {
+                        style: 'thin'
+                    }
+                }
+            };
 
             const fechaInicio = document.getElementById('fecha-inicio').value;
             const fechaFin = document.getElementById('fecha-fin').value;
 
-            let ws = XLSX.utils.table_to_sheet(tabla);
-            // Creamos un libro de Excel y añadimos la hoja
-            let wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Hoja1");
+            worksheet.mergeCells('A1:F1');
+            const titleRow = worksheet.getRow(1);
+            titleRow.getCell(1).value = `Reporte de Pagos del ${formatearFecha(fechaInicio)} al ${formatearFecha(fechaFin)}`;
+            titleRow.getCell(1).font = {
+                bold: true,
+                size: 16
+            };
+            titleRow.getCell(1).alignment = {
+                horizontal: 'center'
+            };
 
-            // Exportamos el archivo
-            XLSX.writeFile(wb, `reporte-pagos(${formatearFecha(fechaInicio)}-${formatearFecha(fechaFin)}).xlsx`);
+            worksheet.addRow([]);
+            const columns = ['Fecha', 'Efectivo', 'Yape', 'Plin', 'Transferencia', 'Total Diario'];
+            worksheet.addRow(columns).eachCell(cell => {
+                Object.assign(cell, headerStyle);
+            });
+
+            let totalEfectivo = 0;
+            let totalYape = 0;
+            let totalPlin = 0;
+            let totalTransferencia = 0;
+            let totalGlobal = 0;
+
+            data.forEach(row => {
+                const totalDiario = parseFloat(row.total_efectivo) + parseFloat(row.total_yape) + parseFloat(row.total_plin) + parseFloat(row.total_transferencia);
+
+                const newRow = [
+                
+                    formatearFecha(row.dia),
+                    parseFloat(row.total_efectivo),
+                    parseFloat(row.total_yape),
+                    parseFloat(row.total_plin),
+                    parseFloat(row.total_transferencia),
+                    totalDiario
+                ];
+                const addedRow = worksheet.addRow(newRow);
+
+                addedRow.getCell(1).style = dateStyle;
+                addedRow.eachCell((cell, colNumber) => {
+                    if (colNumber > 1) {
+                        cell.style = currencyStyle;
+                    }
+                });
+
+                totalEfectivo += parseFloat(row.total_efectivo);
+                totalYape += parseFloat(row.total_yape);
+                totalPlin += parseFloat(row.total_plin);
+                totalTransferencia += parseFloat(row.total_transferencia);
+                totalGlobal += totalDiario;
+            });
+
+            const yellowFill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: {
+                    argb: 'FFFFFF00'
+                }
+            };
+
+            const totalsRow = worksheet.addRow(['Totales:', totalEfectivo, totalYape, totalPlin, totalTransferencia, totalGlobal]);
+            totalsRow.getCell(1).style = {
+                font: {
+                    bold: true
+                },
+                fill: yellowFill
+            };
+            totalsRow.eachCell((cell, colNumber) => {
+                if (colNumber > 1) {
+                    cell.style = {
+                        ...currencyStyle,
+                        font: {
+                            bold: true
+                        },
+                        fill: yellowFill
+                    };
+                }
+            });
+
+            worksheet.columns.forEach(column => {
+                let maxLen = 0;
+                column.eachCell({
+                    includeEmpty: true
+                }, cell => {
+                    const cellLength = cell.value ? cell.value.toString().length : 0;
+                    if (cellLength > maxLen) {
+                        maxLen = cellLength;
+                    }
+                });
+                column.width = maxLen + 1;
+            });
+
+            const fileName = `reporte-pagos(${(formatearFecha(fechaInicio))}/${formatearFecha(fechaFin)}).xlsx`;
+            const buffer = await workbook.xlsx.writeBuffer();
+            const blob = new Blob([buffer], {
+                type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            a.click();
+            window.URL.revokeObjectURL(url);
         }
+
+
+
+
 
 
         function formatearFecha(fecha) {
@@ -358,10 +537,10 @@ include __DIR__ . '/../layout/header.php';
                     maximumFractionDigits: 2
                 });
             }
-            const logo = "data:image/png;base64,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";
+            const logo = window.logoBase64 || '';
 
 
-            
+
             function obtenerDatosDeTabla() {
                 const tableData = [];
                 const tableRows = tbody.querySelectorAll('tr');
@@ -479,14 +658,14 @@ include __DIR__ . '/../layout/header.php';
                             {
                                 stack: [{
                                         text: 'YONDA & GRUPO HUARACA E.I.R.L',
-                                    
+
                                         bold: true,
                                         color: '#2c3e50',
                                         alignment: 'right'
                                     },
                                     {
                                         text: 'RUC: 20609396866',
-                                        
+
                                         margin: [0, 2, 0, 0],
                                         bold: true,
                                         alignment: 'right'
@@ -583,36 +762,36 @@ include __DIR__ . '/../layout/header.php';
                 styles: {
                     subheader: {
                         bold: true,
-                        
+
                         color: '#343a40'
                     },
                     sectionHeader: {
                         bold: true,
-                        
+
                         color: '#212529'
                     },
                     tableHeader: {
                         bold: true,
-                        
+
                         color: 'white',
                         alignment: 'center',
                         fillColor: '#007bff'
                     },
                     tableHeaderTotales: {
                         bold: true,
-                        
+
                         color: 'white',
                         alignment: 'center',
                         fillColor: '#007bff'
                     },
                     tableDiario: {
                         margin: [0, 5, 0, 15],
-                        
+
                         color: '#333333'
                     },
                     tableTotales: {
                         margin: [0, 5, 0, 15]
-                        
+
                     },
                     summaryTable: {
                         color: '#333333'
@@ -636,5 +815,6 @@ include __DIR__ . '/../layout/header.php';
             document.getElementById('mensajeModalCuerpo').textContent = mensaje;
             mensajeModal.show();
         }
+
     });
 </script>
