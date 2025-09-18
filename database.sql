@@ -483,8 +483,9 @@ CREATE TABLE cotizaciones (
     CONSTRAINT fk_idcolventa_cot FOREIGN KEY (idasesor) REFERENCES colaboradores (idcolaborador)
 ) ENGINE = INNODB;
 USE motorpark;
+
 -- ALTER TABLE cotizaciones ADD COLUMN comentarios TEXT AFTER estadocotizacion;
--- ALTER TABLE cotizaciones ADD COLUMN fechaseguimiento DATETIME NULL AFTER comentarios;
+-- --  ALTER TABLE cotizaciones ADD COLUMN fechaseguimiento DATETIME NULL AFTER comentarios;
 
 
 -- ALTER TABLE cotizaciones ADD COLUMN gastosadministrativos DECIMAL(9,2) NOT NULL DEFAULT 0.00 COMMENT 'Gastos administrativos de la cotización' AFTER valorcuota;
@@ -670,19 +671,18 @@ CREATE TABLE conceptoegreso(
     CONSTRAINT uk_concepto_egreso UNIQUE (concepto)
 )ENGINE = INNODB;
 
-
 CREATE TABLE egresos(
     idegreso INT PRIMARY KEY AUTO_INCREMENT,
     idconceptoegreso INT NOT NULL,
-    idcolacaja INT NOT NULL,
-    idcolsolicitante INT NOT NULL,
+    idcolacaja INT NOT NULL COMMENT 'Colaborador que registra el egreso',
+    idcolsolicitante INT NOT NULL COMMENT 'Colaborador que solicita el egreso',
     monto DECIMAL(10,2) NOT NULL,
     comentario VARCHAR(300) NULL,
     requierecomprobante ENUM('S','N') NOT NULL DEFAULT 'N',
     creado DATETIME NOT NULL DEFAULT NOW(),
     modificado DATETIME NULL,
     CONSTRAINT fk_idconcepto_egreso FOREIGN KEY (idconceptoegreso) REFERENCES conceptoegreso (idconceptoegreso),
-    CONSTRAINT fk_colaborador_egreso_registra FOREIGN KEY (idcolaborador) REFERENCES colaboradores (idcolaborador),
+    CONSTRAINT fk_colaborador_egreso_registra FOREIGN KEY (idcolsolicitante) REFERENCES colaboradores (idcolaborador),
     CONSTRAINT fk_colaborador_egreso_solicita FOREIGN KEY (idcolsolicitante) REFERENCES colaboradores (idcolaborador)
 
 )ENGINE = INNODB;
@@ -690,14 +690,84 @@ CREATE TABLE egresos(
 CREATE TABLE comprobantes(
     idcomprobante INT PRIMARY KEY AUTO_INCREMENT,
     idegreso INT NOT NULL,
+    idproovedor INT NOT NULL,
     tipodoc ENUM('B','F') NOT NULL COMMENT  'Boleta, Factura',
-    rucproovedor CHAR(11) NOT NULL, COMMENT 'RUC del proovedor',
+    -- rucproovedor CHAR(11) NOT NULL COMMENT 'RUC del proovedor',
     serie VARCHAR(50) NOT NULL,
     numdocumento VARCHAR(50) NOT NULL,
     monto DECIMAL(10,2) NOT NULL,   
-    cargadocontabilidad ENUM('S','N') NOT NULL DEFAULT 'N', COMMENT 'Indica si ya se cargo a contabilidad',
+    cargadocontabilidad ENUM('S','N') NOT NULL DEFAULT 'N' COMMENT 'Indica si ya se cargo a contabilidad',
     rutacomprobante VARCHAR(255) NOT NULL,
     creado DATETIME NOT NULL DEFAULT NOW(),
     modificado DATETIME NULL,
-    CONSTRAINT fk_egreso_comprobante FOREIGN KEY (idegreso) REFERENCES egresos (idegreso)
-)
+    CONSTRAINT fk_egreso_comprobante FOREIGN KEY (idegreso) REFERENCES egresos (idegreso),
+    CONSTRAINT fk_proovedor_comprobante FOREIGN KEY (idproovedor) REFERENCES proovedores (idproovedor),
+    CONSTRAINT uk_serie_numdoc_proovedor UNIQUE (idproovedor, tipodoc, serie, numdocumento)
+)ENGINE = INNODB;
+
+-- ALTER TABLE comprobantes ADD COLUMN idproovedor INT NOT NULL AFTER idegreso;
+-- ALTER TABLE comprobantes ADD CONSTRAINT fk_proovedor_comprobante FOREIGN KEY (idproovedor) REFERENCES proovedores (idproovedor);
+-- ALTER TABLE comprobantes DROP COLUMN rucproovedor;
+
+
+CREATE TABLE proovedores(
+    idproovedor INT PRIMARY KEY AUTO_INCREMENT,
+    razonsocial VARCHAR(300) NOT NULL,
+    nombrecomercial VARCHAR(150) NOT NULL,
+    ruc CHAR(11) NOT NULL UNIQUE,
+    telefono VARCHAR(12) NULL,
+    creado DATETIME NOT NULL DEFAULT NOW(),
+    modificado DATETIME NULL,
+    CONSTRAINT uk_ruc_proovedor UNIQUE (ruc)
+)ENGINE = INNODB;
+
+SELECT * FROM proovedores;
+
+-- INSERT INTO proovedores (razonsocial, nombrecomercial, ruc, telefono) VALUES
+-- ('SHALOM EMPRESARIAL S.A.C.', 'Shalom', '20512528458', '987654321')
+
+INSERT INTO proovedores (razonsocial, nombrecomercial, ruc, telefono) VALUES
+('TRANSPORTES Y SERVICIOS GENERALES S.A.C.', 'TransServ', '20567891234', '912345678'),
+('SERVICIOS ADMINISTRATIVOS INTEGRALES EIRL', 'ServAdmin', '20678912345', '923456789'),
+('MANTENIMIENTO Y LOGÍSTICA S.A.C.', 'ManLog', '20789123456', '934567890'),
+('SOLUCIONES EMPRESARIALES S.A.C.', 'SolEmp', '20891234567', '945678901'),
+('GESTIÓN Y SERVICIOS S.A.C.', 'GesServ', '20912345678', '956789012'),
+('ADMINISTRACIÓN Y LOGÍSTICA S.A.C.', 'AdmLog', '21023456789', '967890123'),
+('SERVICIOS INTEGRALES S.A.C.', 'ServInt', '21134567890', '978901234'),
+('LOGÍSTICA Y TRANSPORTE S.A.C.', 'LogTrans', '21245678901', '989012345'),
+('GESTIÓN EMPRESARIAL S.A.C.', 'GesEmp', '21356789012', '990123456');
+
+
+USE motorpark;
+
+INSERT INTO conceptoegreso (concepto, descripcion) VALUES
+('Gastos administrativos', 'Gastos administrativos por trámites diversos'),
+('Combustible', 'Gastos por consumo de combustible'),
+('Mantenimiento de vehículos', 'Gastos por mantenimiento y reparaciones de vehículos'),
+('Servicios básicos', 'Pago de servicios como agua, luz, internet, etc.'),
+('Alquiler de local', 'Pago mensual por alquiler del local'),
+('Publicidad y marketing', 'Gastos en campañas publicitarias y marketing'),
+('Sueldos y salarios', 'Pago de sueldos y beneficios a los colaboradores'),
+('Impuestos y tasas', 'Pago de impuestos municipales y otros tributos'),
+('Papelería y suministros', 'Compra de materiales de oficina y papelería'),
+('Otros gastos operativos', 'Gastos varios relacionados con la operación del negocio');
+
+SELECT * FROM conceptoegreso;
+
+
+
+
+SELECT * FROM colaboradores;
+
+
+
+SELECT * FROM contratoslaborales; -- TRAER LOS COLABORADORES DE LA TABLA CONTRATOLABORALES.
+
+SELECT * FROM cargos;
+
+
+SELECT * FROM areas;
+
+
+SELECT * FROM personas;
+SELECT * FROM egresos;
