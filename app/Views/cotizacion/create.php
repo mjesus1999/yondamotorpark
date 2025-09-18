@@ -424,8 +424,9 @@
                         <div class="col-md-2">
                             <div class="form-floating">
                                 <input type="number" step="0.01" min="0" placeholder="0.00" class="form-control"
-                                    id="gastosAdministrativos" name="gastosadministrativos" value="0.00">
-                                <label for="gastosAdministrativos">Gastos Administrativos</label>
+                                    id="gastosAdministrativos" name="gastosadministrativos" value="0.00" required>
+                                <label for="gastosAdministrativos">Gastos Administrativos <span
+                                        class="text-danger">*</span></label>
                             </div>
                         </div>
                         <input type="hidden" name="gastos_administrativos_hidden" id="inputGastosAdministrativos">
