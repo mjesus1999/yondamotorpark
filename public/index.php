@@ -86,6 +86,7 @@ require APP_ROOT . '/app/Routes/Compra.router.php';
 require APP_ROOT . '/app/Routes/Caja.router.php';
 require APP_ROOT . '/app/Routes/PagoCronograma.router.php';
 require APP_ROOT . '/app/Routes/Comprobantes.router.php';
+require APP_ROOT . '/app/Routes/Egreso.router.php';
 
 
 // DEYANIRA :

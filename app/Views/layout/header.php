@@ -196,6 +196,16 @@ $allModules = [
                   <i class="fa-solid fa-credit-card pe-2"></i> Crédito
                 </a>
               </li>
+
+                 <li class="sidebar-item">
+                <a href="/egreso" class="sidebar-link">
+                  <i class="fa-solid fa-credit-card pe-2"></i> Egresos
+                </a>
+              </li>
+
+
+
+
             </ul>
           </li>
 
