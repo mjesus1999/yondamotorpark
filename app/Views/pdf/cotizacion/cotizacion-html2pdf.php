@@ -6,7 +6,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Cotización <?= $id ?> Dependiente - YONDA PERÚ</title>
-  <link rel="stylesheet" href="/assets/css/cotizacion-reportPs.css" />
+  <link rel="stylesheet" href="/assets/css/cotizacion-reportP.css" />
 
   <style>
     .content {
@@ -23,6 +23,66 @@
 
     .detalle {
       font-size: 10pt;
+      line-height: 1.1;
+      /* Reducido de 1.3 a 1.1 */
+      margin: 8px 0;
+      /* Reducido el margen */
+    }
+
+    .detalle td {
+      padding: 2px 0;
+      /* Reducido el padding vertical */
+    }
+
+    .detalle .label {
+      width: 140px;
+      /* Mantener ancho fijo para alineación */
+      vertical-align: top;
+    }
+
+    .detalle .value {
+      vertical-align: top;
+    }
+
+    .financiamiento-table {
+      font-size: 10pt;
+      margin: 12px 0;
+      line-height: 1.2;
+    }
+
+    .financiamiento-table th {
+      background-color: #e9ecef;
+      /* Color más oscuro */
+      font-weight: bold;
+      text-align: center;
+      padding: 6px 4px;
+      /* Reducir padding */
+      border: 1px solid #000000;
+      /* Bordes negros */
+      line-height: 1.1;
+    }
+
+    .financiamiento-table td {
+      text-align: center;
+      padding: 4px;
+      /* Reducir padding */
+      border: 1px solid #000000;
+      /* Bordes negros */
+      line-height: 1.1;
+    }
+
+    .financiamiento-table tbody tr:nth-child(even) {
+      background-color: #f8f9fa;
+    }
+
+    .financiamiento-table tbody tr:hover {
+      background-color: #e9ecef;
+    }
+
+    /* Asegurar que los montos estén alineados a la derecha */
+    .financiamiento-table td:last-child {
+      text-align: right;
+      font-weight: 500;
     }
 
     #cot-id-suffix {
@@ -45,6 +105,8 @@
 
       .detalle {
         font-size: 10pt !important;
+        line-height: 1.1 !important;
+        /* Asegurar interlineado reducido en impresión */
       }
     }
   </style>
@@ -90,37 +152,56 @@
       <!-- DETALLE CLIENTE -->
       <table class="detalle">
         <tr>
-          <td class="label">NOMBRE DEL CLIENTE</td>
+          <td class="label">Nombre del cliente</td>
           <td class="value">: <span id="cliente-nombre"></span></td>
         </tr>
         <tr>
-          <td class="label">DNI</td>
+          <td class="label">Dni</td>
           <td class="value">: <span id="cliente-dni"></span></td>
         </tr>
         <tr>
-          <td class="label">CELULAR</td>
+          <td class="label">Celular</td>
           <td class="value">: <span id="cliente-celular"></span></td>
         </tr>
         <tr>
-          <td class="label">MARCA DEL VEHÍCULO</td>
+          <td class="label">Marca del vehículo</td>
           <td class="value">: <span id="vehiculo-marca"></span></td>
         </tr>
         <tr>
-          <td class="label">MODELO</td>
+          <td class="label">Modelo</td>
           <td class="value">: <span id="vehiculo-modelo"></span></td>
         </tr>
         <tr>
-          <td class="label">AÑO</td>
+          <td class="label">Año</td>
           <td class="value">: <span id="vehiculo-anio"></span></td>
         </tr>
         <tr>
-          <td class="label">COLOR</td>
+          <td class="label">Color</td>
           <td class="value">: <span id="vehiculo-color"></span></td>
+        </tr>
+        <tr>
+          <td class="label">Precio</td>
+          <td class="value">: <span id="precio-vehiculo"></span></td>
         </tr>
       </table>
 
       <!-- CUADRO DE PRECIOS -->
-      <table class="pricing">
+      <table class="financiamiento-table"
+        style="width: 100%; margin: 12px 0; border-collapse: collapse; font-size: 10pt;">
+        <thead>
+          <tr>
+            <th style="border: 1px solid #000000; padding: 6px 4px; background-color: #e9ecef;">#</th>
+            <th style="border: 1px solid #000000; padding: 6px 4px; background-color: #e9ecef;">Meses</th>
+            <th style="border: 1px solid #000000; padding: 6px 4px; background-color: #e9ecef;">Inicial</th>
+            <th style="border: 1px solid #000000; padding: 6px 4px; background-color: #e9ecef;">Moneda</th>
+            <th style="border: 1px solid #000000; padding: 6px 4px; background-color: #e9ecef;">Monto</th>
+          </tr>
+        </thead>
+        <tbody id="financiamiento-tbody">
+        </tbody>
+      </table>
+
+      <!-- <table class="pricing">
         <tr>
           <td>PRECIO</td>
           <td><span id="precio-usd"></span></td>
@@ -139,7 +220,7 @@
           <td>60 MESES</td>
           <td><span id="cuota-60"></span></td>
         </tr>
-      </table>
+      </table> -->
 
       <!-- INSTRUCCIONES -->
       <div class="instructions">
@@ -202,6 +283,48 @@
       return `${ciudad}, ${day} de ${month.toLowerCase()} de ${year}`;
     }
 
+    function populateFinanciamientoTable(opciones, moneda) {
+      const tbody = document.getElementById('financiamiento-tbody');
+      if (!tbody) return;
+
+      tbody.innerHTML = '';
+
+      if (!opciones || opciones.length === 0) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+              <td colspan="5" style="text-align: center; color: #666; font-style: italic; padding: 20px;">
+                  Sin opciones de financiamiento disponibles
+              </td>
+          `;
+        tbody.appendChild(tr);
+        return;
+      }
+
+      // Ordenar opciones por número de cuotas
+      const opcionesOrdenadas = [...opciones].sort((a, b) => {
+        return (parseInt(a.numcuotas) || 0) - (parseInt(b.numcuotas) || 0);
+      });
+
+      // Crear filas para cada opción
+      opcionesOrdenadas.forEach((opcion, index) => {
+        const meses = parseInt(opcion.numcuotas) || 0;
+        const inicial = parseFloat(opcion.inicial) || 0;
+        const cuota = parseFloat(opcion.valorcuota) || 0;
+
+        const monedaTexto = (moneda === 'USD') ? 'DÓLARES' : 'SOLES';
+        const simboloMoneda = (moneda === 'USD') ? '$' : 'S/';
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td style="text-align: center; padding: 8px; border: 1px solid #000000;">${index + 1}</td>
+            <td style="text-align: center; padding: 8px; border: 1px solid #000000;">${meses}</td>
+            <td style="text-align: center; padding: 8px; border: 1px solid #000000;">${simboloMoneda} ${inicial.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+            <td style="text-align: center; padding: 8px; border: 1px solid #000000;">${monedaTexto}</td>
+            <td style="text-align: right; padding: 8px; border: 1px solid #000000; font-weight: 500;">${simboloMoneda} ${cuota.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+          `;
+        tbody.appendChild(tr);
+      });
+    }
 
     async function fetchAndFill() {
       try {
@@ -241,13 +364,39 @@
         document.getElementById('vehiculo-anio').textContent = (cotizacion.vehiculo && cotizacion.vehiculo.anio) ? cotizacion.vehiculo.anio : '';
         document.getElementById('vehiculo-color').textContent = (cotizacion.vehiculo && cotizacion.vehiculo.color) ? cotizacion.vehiculo.color : '';
 
-        // Llenar precios
-        document.getElementById('precio-usd').textContent = cotizacion.precios ? `$ ${cotizacion.precios.precio_usd}` : '';
-        document.getElementById('inicial-soles').textContent = cotizacion.precios ? `S/ ${cotizacion.precios.inicial_soles}` : '';
-        document.getElementById('cuota-24').textContent = (cotizacion.precios && cotizacion.precios.meses_24) ? cotizacion.precios.meses_24 : '-';
-        document.getElementById('cuota-36').textContent = (cotizacion.precios && cotizacion.precios.meses_36) ? cotizacion.precios.meses_36 : '-';
-        document.getElementById('cuota-48').textContent = (cotizacion.precios && cotizacion.precios.meses_48) ? cotizacion.precios.meses_48 : '-';
-        document.getElementById('cuota-60').textContent = (cotizacion.precios && cotizacion.precios.meses_60) ? cotizacion.precios.meses_60 : '-';
+        // NUEVO: Llenar el precio del vehículo
+        /* const precioVehiculo = cotizacion.precios ? cotizacion.precios.precio_usd : '0.00'; */
+        /* const monedaCotizacion = cotizacion.moneda || 'PEN'; */
+        /* const simboloPrecio = (monedaCotizacion === 'USD') ? '$' : 'S/'; */
+        /* document.getElementById('precio-vehiculo').textContent = `${simboloPrecio} ${parseFloat(precioVehiculo).toLocaleString('es-PE', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`; */
+
+        const monedaCotizacion = cotizacion.moneda || 'PEN';
+        let precioVehiculo = 0;
+        let simboloPrecio = '';
+
+        // Obtener el precio base
+        const precioBase = cotizacion.precios ? parseFloat(cotizacion.precios.precio_original || cotizacion.precios.precio_usd || 0) : 0;
+
+        // Determinar símbolo según moneda
+        if (monedaCotizacion.toUpperCase() === 'USD') {
+          simboloPrecio = '$';
+          precioVehiculo = precioBase;
+        } else {
+          simboloPrecio = 'S/';
+          precioVehiculo = precioBase;
+        }
+
+        // Formatear y mostrar precio
+        const precioFormateado = precioVehiculo.toLocaleString('es-PE', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        });
+
+        document.getElementById('precio-vehiculo').textContent = `${simboloPrecio} ${precioFormateado}`;
+
+        // NUEVO: Llenar la tabla de financiamiento
+        const opcionesFinanciamiento = cotizacion.opciones_financiamiento || [];
+        populateFinanciamientoTable(opcionesFinanciamiento, monedaCotizacion);
 
         //Llenar datos del asesor
         if (cotizacion.asesor) {
@@ -272,7 +421,7 @@
           }
 
           if (asesorTelefono) {
-            let telefono = cotizacion.asesor.telefono || '934 008 037';
+            let telefono = cotizacion.asesor.telefono || '';
 
             if (telefono && !telefono.includes('056') && telefono.length === 9) {
               telefono = `(056) ${telefono}`;
@@ -315,69 +464,6 @@
           });
         } */
 
-        // Llenar tabla de precios con opciones de financiamiento (código existente)
-        (function populatePricingTable() {
-          const inicialCell = document.getElementById('inicial-soles');
-          const precioCell = document.getElementById('precio-usd');
-          const idMap = {
-            24: 'cuota-24',
-            36: 'cuota-36',
-            48: 'cuota-48',
-            60: 'cuota-60'
-          };
-
-          const precios = cotizacion.precios || {};
-          const inicialSoles = precios.inicial_soles ? String(precios.inicial_soles) : '0.00';
-          const precioUsd = precios.precio_usd ? String(precios.precio_usd) : '0.00';
-
-          if (precioCell) precioCell.textContent = `$ ${parseFloat(precioUsd).toFixed(2)}`;
-          if (inicialCell) inicialCell.textContent = `S/ ${parseFloat(inicialSoles).toFixed(2)}`;
-
-          Object.values(idMap).forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.textContent = '-';
-          });
-
-          const pricingTable = document.querySelector('.pricing');
-          if (!pricingTable) return;
-          pricingTable.querySelectorAll('.extra-opt').forEach(node => node.remove());
-
-          const opciones = cotizacion.opciones_financiamiento || [];
-          const extras = [];
-
-          opciones.forEach(opt => {
-            const meses = Number(opt.numcuotas || opt.numCuotas || 0);
-            const cuota = (opt.valorcuota !== undefined && opt.valorcuota !== null)
-              ? Number(opt.valorcuota)
-              : null;
-
-            if (idMap[meses]) {
-              const target = document.getElementById(idMap[meses]);
-              if (target) {
-                target.textContent = cuota !== null ? `S/ ${cuota.toFixed(2)}` : '-';
-              }
-            } else {
-              extras.push({
-                meses,
-                cuota: cuota !== null ? `S/ ${cuota.toFixed(2)}` : '-'
-              });
-            }
-          });
-
-          if (extras.length) {
-            extras.forEach(ex => {
-              const tr = document.createElement('tr');
-              tr.classList.add('extra-opt');
-              tr.innerHTML = `
-            <td>${ex.meses} meses</td>
-            <td>${ex.cuota}</td>
-            <td>S/ ${parseFloat(inicialSoles).toFixed(2)}</td>
-            <td>$ ${parseFloat(precioUsd).toFixed(2)}</td>
-          `;
-              pricingTable.appendChild(tr);
-            });
-          }
-        })();
 
         if (loadingIndicator) loadingIndicator.style.display = 'none';
         if (container) container.style.visibility = 'visible';
@@ -424,7 +510,7 @@
 
       const filename = `cotizacion-${getIdFromPath() || 'yonda'}.pdf`;
 
-      // --- Medidas del elemento para evitar desplazamientos ---
+      // Medidas del elemento para evitar desplazamientos
       const rect = element.getBoundingClientRect();
       const elWidth = Math.ceil(rect.width);
       const elHeight = Math.ceil(rect.height);
@@ -443,7 +529,6 @@
           allowTaint: false,
           logging: false,
           imageTimeout: 30000,
-          // IMPORTANTE: pasar dimensiones razonables (no las multiplicamos por scale)
           windowWidth: Math.max(document.documentElement.clientWidth, elWidth),
           windowHeight: Math.max(document.documentElement.clientHeight, elHeight),
           scrollX: 0,
@@ -465,7 +550,7 @@
         status.style.display = 'block';
       }
 
-      // Preparar imágenes de cabecera/footer (si existen) como dataURL
+      // Preparar imágenes de cabecera/footer
       const headerEl = document.querySelector('.header');
       const footerEl = document.querySelector('.footer');
       const imgTopEl = document.querySelector('.pdf-watermark.top') || (headerEl ? headerEl.querySelector('img') : null);
@@ -481,7 +566,7 @@
       const prevFooterDisplay = footerEl ? footerEl.style.display : null;
 
       try {
-        // Ocultar header/footer en la captura principal para evitar duplicados
+        // Ocultar header/footer
         if (headerEl) headerEl.style.display = 'none';
         if (footerEl) footerEl.style.display = 'none';
 
@@ -556,7 +641,7 @@
                   }
                 }
 
-                // Texto del footer (solo en última página) - dibujado como texto y no como imagen
+                // Texto del footer - dibujado como texto y no como imagen
                 const footerText = footerEl && footerEl.querySelector('.footer-text') ? footerEl.querySelector('.footer-text').innerText.trim() : '';
                 if (footerText && p === totalPages) {
                   const lines = footerText.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
@@ -575,7 +660,6 @@
 
             // Ocultar status
             if (status) status.style.display = 'none';
-
             // Mostrar modal de descarga
             showDownloadModal(pdf, filename);
 
@@ -591,7 +675,6 @@
         }).catch((err) => {
           console.error('No se obtuvo objeto jsPDF:', err);
           if (status) status.style.display = 'none';
-          // Intento fallback: generar y mostrar modal con el pdf resultante
           html2pdf().set(opt).from(element).toPdf().get('pdf').then((pdf) => {
             showDownloadModal(pdf, filename);
           });
@@ -663,7 +746,6 @@
           </button>
         </div>
       `;
-
       modalOverlay.appendChild(modal);
       document.body.appendChild(modalOverlay);
 
@@ -704,7 +786,6 @@
           }
 
           closeModal();
-
           // Cerrar ventana después de un delay
           setTimeout(() => {
             try {
@@ -713,7 +794,6 @@
               console.log('No se pudo cerrar la ventana automáticamente');
             }
           }, 1000);
-
         } catch (error) {
           console.error('Error en descarga:', error);
           alert('Error al descargar el PDF. Intente nuevamente.');
@@ -759,15 +839,10 @@
           }, 100);
         }
       });
-
-      // Auto-focus en el botón de descarga
       setTimeout(() => {
         btnDownload.focus();
       }, 100);
     }
-    /* function isPreviewMode() {
-      return false;
-    } */
     function generatePDF() {
       generarPDFCotizacion();
     }
