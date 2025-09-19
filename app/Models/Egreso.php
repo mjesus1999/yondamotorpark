@@ -82,6 +82,88 @@ class Egreso
     }
 
 
+    public function getProovedores(): array
+    {
+        $query = "SELECT idproovedor, nombrecomercial, ruc FROM proovedores ORDER BY razonsocial";
+        try {
+            $stmt = $this->db->prepare($query);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $error) {
+            error_log("Error al obtener los proovedores: " . $error->getMessage());
+            return [];
+        }
+    }
+
+    public function getDetalleEgresoById(int $id)
+    {
+        $query = "
+                SELECT
+                    c.idcomprobante,
+                    c.idegreso,
+                    c.idproovedor,
+                    c.tipodoc,
+                    c.serie,
+                    c.numdocumento,
+                    c.monto AS montocomprobante,
+                    c.cargadocontabilidad,
+                    c.rutacomprobante,
+                    e.monto AS montoegreso,
+                    CONCAT(p.nombrecomercial, ' - ', p.ruc ) AS proovedor
+                    FROM comprobantes c
+                    JOIN egresos e ON c.idegreso = e.idegreso
+                    JOIN proovedores p ON c.idproovedor = p.idproovedor
+                    WHERE c.idegreso = $id AND e.requierecomprobante = 'S';
+                        
+        
+        ";
+        try {
+            $stmt = $this->db->prepare($query);
+            $stmt->execute();
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Error al obtener el detalle del egreso: " . $e->getMessage());
+            return [];
+        }
+    }
+
+
+    public function getEgresoWithComprobantesValidados(): array
+    {
+        $query = "SELECT 
+                        eg.idegreso,
+                        cm.idcomprobante,
+                        cm.tipodoc,
+                        DATE_FORMAT(eg.creado, '%d/%m/%Y') AS fecha,
+                        ce.concepto,
+                        CONCAT(pro.razonsocial ) AS proovedor,
+                        CONCAT(p.apellidos,' ',p.nombres) AS solicitante,
+                        eg.monto,
+                        eg.comentario,
+                        cm.numdocumento,
+                        cm.monto AS monto_validado,
+                        cm.rutacomprobante,
+                        DATE_FORMAT(cm.modificado, '%d-%m-%Y %H:%i') AS modificado
+                    FROM egresos eg
+                    JOIN conceptoegreso ce ON eg.idconceptoegreso = ce.idconceptoegreso
+                    JOIN colaboradores c ON eg.idcolsolicitante = c.idcolaborador
+                    JOIN contratoslaborales cl ON c.idcontratolaboral = cl.idcontratolaboral
+                    JOIN personas p ON cl.idpersona = p.idpersona
+                    JOIN comprobantes cm ON eg.idegreso = cm.idegreso
+                    JOIN proovedores pro ON pro.idproovedor = cm.idproovedor
+                    WHERE eg.requierecomprobante = 'S' AND cm.cargadocontabilidad = 'S'
+                    ORDER BY cm.modificado DESC;";
+        try {
+            $stmt = $this->db->prepare($query);
+            $stmt->execute();
+
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $error) {
+            error_log($error->getMessage());
+            return [];
+        }
+    }
+
 
     public function add($params = []): int
     {
@@ -108,23 +190,58 @@ class Egreso
         }
     }
 
-    public function addComprobante($params = []): bool
+    public function addComprobante($params = []): int
     {
-        $query = "CALL sp_egresos_add_comprobante(:idegreso,:idproovedor, :tipodocumento,:serie, :numdocumento, :monto,:rutacomprobante)";
+        $query = "CALL sp_egresos_add_comprobante(:idegreso,:idproovedor, :tipodoc,:serie, :numdocumento, :monto,:rutacomprobante)";
         try {
             $stmt = $this->db->prepare($query);
             $stmt->execute(array(
                 ':idegreso' => $params['idegreso'],
                 ':idproovedor' => $params['idproovedor'],
-                ':tipodocumento' => $params['tipodocumento'],
+                ':tipodoc' => $params['tipodoc'],
                 ':serie' => $params['serie'],
                 ':numdocumento' => $params['numdocumento'],
                 ':monto' => $params['monto'],
                 ':rutacomprobante' => $params['rutacomprobante']
             ));
-            return true;
+
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            return (int)$result['last_insert_id'] ?? 0;
         } catch (Exception $e) {
             error_log("Error al agregar el comprobante: " . $e->getMessage());
+            return 0;
+        }
+    }
+
+    public function validarComprobante(int $idComprobante): bool
+    {
+        $query = "UPDATE comprobantes SET cargadocontabilidad = 'S', modificado = NOW() WHERE idcomprobante = :idcomprobante";
+        try {
+            $stmt = $this->db->prepare($query);
+            $stmt->bindParam(':idcomprobante', $idComprobante, PDO::PARAM_INT);
+            $stmt->execute();
+            $stmt->closeCursor();
+            return true;
+        } catch (Exception $e) {
+            error_log("Error al validar el comprobante: " . $e->getMessage());
+            return false;
+        }
+    }
+
+
+
+
+    public function deleteEgreso($id): bool
+    {
+        $query = "DELETE FROM egresos WHERE idegreso = :idegreso";
+        try {
+            $stmt = $this->db->prepare($query);
+            $stmt->bindParam(':idegreso', $id, PDO::PARAM_INT);
+            $stmt->execute();
+            $stmt->closeCursor();
+            return true;
+        } catch (Exception $e) {
+            error_log("Error al eliminar el egreso: " . $e->getMessage());
             return false;
         }
     }
