@@ -383,7 +383,6 @@
 
 <!-- Forma funcional sin TOM -->
 
-
 <!-- 
 <div class="container-fluid">
     <div class="alert alert-primary mt-3 border-0 shadow-sm" role="alert">
