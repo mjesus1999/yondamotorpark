@@ -167,10 +167,11 @@ class CotizacionController extends Controller
 
         echo json_encode([
             'cotizacion' => [
-                'id' => $idcotizacion, // Agregar el ID para el PDF
+                'id' => $idcotizacion,
                 'idformato' => $idformato,
                 'tipocotizacion' => $cot['tipocotizacion'] ?? null,
                 'fecha' => $cot['fechaRegistro'] ?? null,
+                'moneda' => $cot['moneda'] ?? 'PEN', // Asegurar que siempre esté presente
                 'cliente' => [
                     'nombre' => $cot['cliente_nombre'] ?? null,
                     'dni' => $cot['cliente_documento'] ?? null,
@@ -181,11 +182,16 @@ class CotizacionController extends Controller
                     'modelo' => $cot['vehiculo_modelo'] ?? null,
                     'anio' => $cot['vehiculo_anio'] ?? null,
                     'color' => $vehColor,
-                    /* 'color' => $cot['vehiculo_color'] ?? null, */
                 ],
                 'precios' => [
+                    // MEJORADO: Enviar precio según la moneda de la cotización
+                    'precio_original' => number_format($cot['precioventa'] ?? 0, 2, '.', ''),
                     'precio_usd' => number_format($cot['precioventa'] ?? 0, 2, '.', ''),
+                    'precio_pen' => number_format($cot['precioventa'] ?? 0, 2, '.', ''),
                     'inicial_soles' => number_format($cot['inicial'] ?? 0, 2, '.', ''),
+                    // Determinar cuál precio mostrar según la moneda
+                    'precio_mostrar' => number_format($cot['precioventa'] ?? 0, 2, '.', ''),
+                    'moneda_precio' => $cot['moneda'] ?? 'PEN'
                 ],
                 'asesor' => [
                     'nombre' => $cot['asesor_nombre'] ?? 'CHARLY YACTAYO ORTIZ',

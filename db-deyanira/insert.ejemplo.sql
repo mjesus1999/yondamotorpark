@@ -155,7 +155,7 @@ SELECT * FROM contratoslaborales;
 SELECT * FROM colaboradores;
 SELECT * FROM clientes;
 SELECT * FROM cotizaciones;
-SELECT * FROM cotizacion_financiamiento WHERE idcotizacion = 1;
+SELECT * FROM cotizacion_financiamiento WHERE idcotizacion = 48;
 
 
 

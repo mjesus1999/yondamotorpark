@@ -184,21 +184,22 @@ body {
   -moz-hyphens: auto;
 }
 
-/* ---------------- TABLA DETALLE ---------------- */
+/* ---------------- TABLA DETALLE - CORREGIDO ---------------- */
 /* Usar table-layout: fixed para alineación consistente en pantalla */
 .detalle {
   border-collapse: collapse;
   font-weight: bold;
   font-size: 12pt;
-  text-transform: uppercase;
+  /* REMOVIDO: text-transform: uppercase; */
   width: 100%;
   max-width: 520px; /* limita ancho para alinearse visualmente con el footer */
   table-layout: fixed;
-  margin-top: 8px;
+  margin: 8px 0; /* Reducido el margen - removido margin-top duplicado */
+  line-height: 1.1; /* Reducido para menos espaciado */
 }
 
 .detalle td {
-  padding: 4px 6px;
+  padding: 2px 6px; /* Reducido el padding vertical de 4px a 2px */
   vertical-align: top;
 }
 
@@ -207,6 +208,7 @@ body {
   padding-right: 6px;
   text-align: left;
   font-weight: bold;
+  text-transform: none !important; /* Forzar que no haya transformación de texto */
 }
 
 .detalle td.value {
@@ -386,6 +388,11 @@ body {
   .header,
   .footer {
     position: fixed !important;
+  }
+
+  /* Asegurar interlineado reducido en impresión */
+  .detalle {
+    line-height: 1.1 !important;
   }
 }
 

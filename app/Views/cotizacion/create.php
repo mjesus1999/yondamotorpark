@@ -421,12 +421,23 @@
                         <input type="hidden" name="valorconvertido" id="inputValorConvertido">
 
                         <!-- Gastos Administrativos -->
-                        <div class="col-md-2">
+                        <!-- <div class="col-md-2">
                             <div class="form-floating">
                                 <input type="number" step="0.01" min="0" placeholder="0.00" class="form-control"
                                     id="gastosAdministrativos" name="gastosadministrativos" value="0.00" required>
                                 <label for="gastosAdministrativos">Gastos Administrativos <span
                                         class="text-danger">*</span></label>
+                            </div>
+                        </div> -->
+                        <div class="col-md-2">
+                            <div class="form-floating">
+                                <input type="number" step="0.01" min="0.00" placeholder="0.00" class="form-control"
+                                    id="gastosAdministrativos" name="gastosadministrativos" value="0.00" required
+                                    aria-describedby="gastosHelp">
+                                <label for="gastosAdministrativos">Gastos Administrativos <span
+                                        class="text-danger">*</span></label>
+                                <div id="gastosHelp" class="form-text">Ingresa el monto de gastos administrativos <span
+                                        class="text-danger">*</span></div>
                             </div>
                         </div>
                         <input type="hidden" name="gastos_administrativos_hidden" id="inputGastosAdministrativos">
@@ -490,7 +501,7 @@
                             <div class="col-md-2">
                                 <div class="form-floating">
                                     <input type="number" class="form-control fin-numcuotas" placeholder="Meses" step="3"
-                                        id="numcuotas">
+                                        min="3" id="numcuotas">
                                     <label>Meses <span class="text-danger">*</span></label>
                                 </div>
                             </div>
@@ -872,7 +883,6 @@
     const cardsContainer = document.getElementById('cardsFinanciamiento');
     const templateCard = document.getElementById('templateCardFin');
 
-
     // Función para limpiar el valor "0" cuando el usuario empieza a escribir
     function setupZeroValueClearing(inputElement) {
         if (!inputElement) return;
@@ -917,6 +927,82 @@
         });
     }
 
+    // Función para input de meses (sin decimales)
+    function setupMesesValueClearing(inputElement) {
+        if (!inputElement) return;
+        inputElement.addEventListener('focus', function () {
+            if (this.value === '0' || this.value === '3') {
+                this.value = '';
+            }
+        });
+
+        // permitimos sólo números enteros
+        inputElement.addEventListener('input', function () {
+            this.value = this.value.replace(/[^0-9]/g, '');
+            if (/^0[0-9]/.test(this.value)) {
+                this.value = this.value.replace(/^0+/, '');
+            }
+        });
+
+        // validar y ajustar al múltiplo de 3 más cercano
+        inputElement.addEventListener('blur', function () {
+            let valor = parseInt(this.value, 10);
+
+            if (isNaN(valor) || valor <= 0) {
+                this.value = '3'; // Valor mínimo
+                return;
+            }
+
+            // Si el valor no es múltiplo de 3, ajustarlo al múltiplo de 3 más cercano
+            if (valor % 3 !== 0) {
+                // Redondear al múltiplo de 3 más cercano
+                const resto = valor % 3;
+                if (resto <= 1.5) {
+                    valor = valor - resto;
+                } else {
+                    valor = valor + (3 - resto);
+                }
+                // Asegurar que el mínimo sea 3
+                if (valor < 3) {
+                    valor = 3;
+                }
+            }
+
+            this.value = valor.toString();
+            const event = new Event('input', { bubbles: true });
+            this.dispatchEvent(event);
+        });
+
+        //solo números, no punto decimal
+        inputElement.addEventListener('keypress', function (e) {
+            const char = String.fromCharCode(e.which || e.keyCode);
+            if (!/[0-9]/.test(char) && e.which !== 8 && e.which !== 46) {
+                e.preventDefault();
+            }
+            if (char === '.') {
+                e.preventDefault();
+            }
+        });
+
+        // Manejar teclas de flecha para incrementar/decrementar de 3 en 3
+        inputElement.addEventListener('keydown', function (e) {
+            const valor = parseInt(this.value, 10) || 3;
+
+            if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                this.value = (valor + 3).toString();
+                const event = new Event('input', { bubbles: true });
+                this.dispatchEvent(event);
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                const nuevoValor = Math.max(3, valor - 3);
+                this.value = nuevoValor.toString();
+                const event = new Event('input', { bubbles: true });
+                this.dispatchEvent(event);
+            }
+        });
+    }
+
     function crearTarjetaFin(data = {}) {
         if (!cardsContainer || !templateCard) {
             console.error('Missing required elements for financing cards');
@@ -951,11 +1037,11 @@
             // Aplicar la funcionalidad de limpiar el 0
             setupZeroValueClearing(inicialEl);
         }
-
         if (numEl) {
-            numEl.value = (typeof data.numcuotas !== 'undefined') ? data.numcuotas : '0';
-            // Aplicar la funcionalidad de limpiar el 0
-            setupZeroValueClearing(numEl);
+            // Establecer valor inicial: 3 si es nuevo, o el valor proporcionado
+            const valorInicial = (typeof data.numcuotas !== 'undefined') ? data.numcuotas : '3';
+            numEl.value = valorInicial;
+            setupMesesValueClearing(numEl);
         }
 
         if (tasaEl) tasaEl.value = (typeof data.tasa !== 'undefined') ? data.tasa : 65;
@@ -1035,6 +1121,7 @@
             btnRemove.addEventListener('click', () => {
                 card.remove();
                 actualizarHiddenOpciones();
+                actualizarEstadoBotonAgregar();
             });
         }
 
@@ -1072,14 +1159,7 @@
     }
 
     function initFinancingEvents() {
-        const btnAgregar = document.getElementById('btnAgregarFin');
-        if (btnAgregar) {
-            btnAgregar.addEventListener('click', (e) => {
-                e.preventDefault();
-                crearTarjetaFin();
-            });
-        }
-
+        // Solo crear la tarjeta inicial - el listener del botón se maneja en aplicarPoliticaFinanciamientoPorTipo()
         crearTarjetaFin({
             inicial: 0,
             numcuotas: 0,
@@ -1087,6 +1167,13 @@
             valorcuota: ''
         });
 
+        // Configurar el event listener inicial del botón agregar
+        const btnAgregar = document.getElementById('btnAgregarFin');
+        if (btnAgregar) {
+            btnAgregar.addEventListener('click', agregarFinanciamientoHandler);
+        }
+
+        // Eventos globales para recalcular cuando cambie el precio
         const globalTriggers = ['inputValorConvertido', 'valor'];
         globalTriggers.forEach(id => {
             const el = document.getElementById(id);
@@ -1523,29 +1610,28 @@
     function aplicarPoliticaFinanciamientoPorTipo(tipovehiculo) {
         const esMoto = ['Mototaxi', 'Motolineal'].includes(String(tipovehiculo || '').trim());
 
-        const btnAgregar = document.getElementById('btnAgregarFin');
-        if (btnAgregar) btnAgregar.disabled = esMoto;
-
-        // tasa por defecto segun tipo
+        // Tasa por defecto según tipo
         const tasaPorDefecto = esMoto ? 80 : 65;
 
-        // Si es moto, restringe a una sola tarjeta
+        // Si es moto, limitar a máximo 2 tarjetas
         if (esMoto) {
-            // Elimina todas menos la primera
             const cards = cardsContainer?.querySelectorAll('.card-fin') || [];
+
+            // Eliminar tarjetas extras si hay más de 2
             cards.forEach((card, idx) => {
-                if (idx > 0) card.remove();
+                if (idx >= 2) card.remove();
             });
-            // Si no hay tarjetas, crea una
+
+            // Si no hay tarjetas, crear una
             if (!cardsContainer.querySelector('.card-fin')) {
                 crearTarjetaFin();
             }
-        } else {
-            // En vehículos normales permitimos múltiples y dejamos el botón activo
-            if (btnAgregar) btnAgregar.disabled = false;
         }
 
-        // Setea la tasa en las tarjetas existentes y recalcula
+        // Actualizar estado del botón agregar
+        actualizarEstadoBotonAgregar();
+
+        // Setear la tasa en las tarjetas existentes y recalcular
         (cardsContainer?.querySelectorAll('.card-fin') || []).forEach(card => {
             const tasaEl = card.querySelector('.fin-tasaAnual');
             if (tasaEl) {
@@ -1554,6 +1640,60 @@
                 tasaEl.dispatchEvent(ev);
             }
         });
+    }
+
+    function agregarFinanciamientoHandler(e) {
+        e.preventDefault();
+
+        const vehiculoMonedaEl = document.getElementById('vehiculoMoneda');
+        const tipoVehiculo = document.querySelector('[data-tipovehiculo]')?.dataset.tipovehiculo || '';
+        const esMoto = ['Mototaxi', 'Motolineal'].includes(String(tipoVehiculo).trim());
+
+        const cards = cardsContainer?.querySelectorAll('.card-fin') || [];
+
+        // Verificar límites
+        if (esMoto && cards.length >= 2) {
+            if (typeof showToast === 'function') {
+                showToast('Máximo 2 opciones de financiamiento para motos', 'WARNING', 2000);
+            } else {
+                alert('Máximo 2 opciones de financiamiento para motos');
+            }
+            return;
+        }
+
+        // Si no hay límite alcanzado, crear nueva tarjeta
+        const nuevaCard = crearTarjetaFin();
+
+        // Actualizar estado del botón después de agregar
+        if (esMoto && (cards.length + 1) >= 2) {
+            const btnAgregar = document.getElementById('btnAgregarFin');
+            if (btnAgregar) btnAgregar.disabled = true;
+        }
+    }
+
+    function actualizarEstadoBotonAgregar() {
+        const btnAgregar = document.getElementById('btnAgregarFin');
+        if (!btnAgregar) return;
+
+        const cards = cardsContainer?.querySelectorAll('.card-fin') || [];
+
+        // Obtener tipo de vehículo del elemento seleccionado o del hidden field
+        const vehiculoSeleccionado = document.querySelector('input[name="vehiculoSeleccionado"]:checked');
+        const tipoVehiculo = vehiculoSeleccionado?.dataset?.tipovehiculo || '';
+
+        const esMoto = ['Mototaxi', 'Motolineal'].includes(String(tipoVehiculo).trim());
+
+        if (esMoto) {
+            btnAgregar.disabled = cards.length >= 2;
+            if (cards.length >= 2) {
+                btnAgregar.title = 'Máximo 2 opciones para motos';
+            } else {
+                btnAgregar.title = 'Agregar opción de financiamiento';
+            }
+        } else {
+            btnAgregar.disabled = false;
+            btnAgregar.title = 'Agregar opción de financiamiento';
+        }
     }
 
     function initEventosVehiculo() {
