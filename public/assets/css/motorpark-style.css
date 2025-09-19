@@ -3,12 +3,11 @@
   color: #FFF
 }
 
-input[type=text]:focus,
-input[type=date]:focus,
+/* input[type=date]:focus,
 textarea:focus,
 select:focus {
-  background-color: #FFFAC9 !important;
-}
+  background-color: #e4e3d1 !important;
+} */
 
 .inactive{
   background-color: #ebebeb;
