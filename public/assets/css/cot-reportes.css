@@ -1,14 +1,12 @@
-/* public/assets/css/cotizacion-reportP.css
-   Versión ajustada: vista previa ordenada + comportamiento PDF intacto
-*/
+/* public/assets/css/cot-reporte.css */
 
-/* --- Página / impresión base --- */
+/* Página / impresión base */
 @page {
   size: A4 portrait;
-  margin: 10mm;
+  margin: 10mm 10mm 10mm 25mm; /* Margen izquierdo aumentado de 10mm a 25mm */
 }
 
-/* --- Reset / base --- */
+/* Reset / base */
 * {
   box-sizing: border-box;
 }
@@ -23,26 +21,26 @@ body {
   background: white;
 }
 
-/* --- Body: vista previa (NO inflar con un padding-bottom gigante) --- */
+/* Body: vista previa (NO inflar con un padding-bottom gigante) */
 body {
   font-size: 11pt;
   line-height: 1.15;
   color: #222;
   margin: 0;
   padding: 0;
-  padding-bottom: 0; /* importante: evita estirar la vista previa */
+  padding-bottom: 0;
   min-height: 100%;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* --- Contenedor principal (comportamiento tipo OC) --- */
+/* Contenedor principal */
 .container {
   display: flex;
   flex-direction: column;
   max-width: 900px;
   margin: 0 auto;
-  padding: 10mm; /* espacio interior consistente en pantalla */
+  padding: 10mm 10mm 10mm 25mm; /* Margen izquierdo aumentado para encuadernación */
   min-height: 100%;
   position: relative;
   z-index: 1;
@@ -50,7 +48,7 @@ body {
   font-family: Arial, sans-serif;
 }
 
-/* --- Indicador de carga (mantener pero ocultable) --- */
+/*  Indicador de carga (mantener pero ocultable) */
 #loading-indicator {
   position: fixed;
   top: 50%;
@@ -97,31 +95,6 @@ body {
   100% {
     transform: rotate(360deg);
   }
-}
-
-/* ---------------- HEADER (vista previa: relativo; print: fixed) ---------------- */
-/* Layout tipo OC: logo izquierda, info derecha */
-.header {
-  position: relative; /* importante para vista previa: no fixed */
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  text-align: left;
-  margin-bottom: 6mm;
-  z-index: 2;
-  pointer-events: auto;
-  opacity: 1;
-}
-
-/* Si tu header usa solo una imagen, asegúrate que no sea demasiado alta */
-.header img {
-  width: auto;
-  max-height: 48px;
-  object-fit: contain;
-  filter: none !important;
-  -webkit-filter: none !important;
-  opacity: 1 !important;
 }
 
 /* Pequeña zona a la derecha (fecha / datos) */
@@ -288,36 +261,6 @@ body {
   margin: 10px 0;
 }
 
-/* ---------------- FOOTER (vista previa relativo; print fijo) ---------------- */
-.footer {
-  position: relative; /* importante en pantalla para que no se superponga */
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  width: 100%;
-  margin-top: 16px;
-  z-index: 2;
-  pointer-events: auto;
-  opacity: 1;
-}
-
-.footer .footer-text {
-  font-size: 11pt;
-  line-height: 1.15;
-  text-align: left;
-  font-weight: normal;
-  color: rgba(0, 0, 0, 0.65);
-  white-space: nowrap;
-}
-
-/* imagen del footer */
-.footer img {
-  max-height: 48px;
-  object-fit: contain;
-  opacity: 1 !important;
-  filter: none !important;
-}
-
 /* ---------------- UTILIDADES / RESPONSIVE ---------------- */
 @media (max-width: 480px) {
   .fecha {
@@ -325,7 +268,7 @@ body {
     font-size: 10pt;
   }
   .container {
-    padding: 8mm;
+    padding: 8mm 8mm 8mm 20mm; /* Mantener margen izquierdo mayor en móvil */
   }
   .detalle td.label {
     width: 45%;
@@ -346,7 +289,7 @@ body {
   .header,
   .footer {
     position: fixed !important;
-    left: 10mm;
+    left: 25mm; /* Margen izquierdo aumentado para encuadernación */
     right: 10mm;
     z-index: 2;
   }
@@ -365,6 +308,8 @@ body {
   .container {
     padding-top: 18mm; /* espacio para cabecera fija en el A4 */
     padding-bottom: 18mm; /* espacio para footer fijo en el A4 */
+    padding-left: 25mm; /* Margen izquierdo para encuadernación */
+    padding-right: 10mm;
     max-width: 100%;
   }
 

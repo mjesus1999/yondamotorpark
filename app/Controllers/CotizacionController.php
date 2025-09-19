@@ -163,7 +163,7 @@ class CotizacionController extends Controller
         }
 
         $vehColorRaw = trim((string) ($cot['vehiculo_color'] ?? ''));
-        $vehColor = $vehColorRaw === '' ? 'POR DEFINIR' : $vehColorRaw;
+        $vehColor = $vehColorRaw === '' ? 'Por definir' : $vehColorRaw;
 
         echo json_encode([
             'cotizacion' => [
