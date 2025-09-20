@@ -71,21 +71,6 @@ CREATE TABLE empresas (
     CONSTRAINT fk_iddistrito_empre FOREIGN KEY (iddistrito) REFERENCES distritos (iddistrito)
 ) ENGINE = INNODB;
 
-CREATE TABLE clientes (
-    idcliente INT PRIMARY KEY AUTO_INCREMENT,
-    idpersona INT NULL,
-    idempresa INT NULL,
-    idcolregistra INT NULL,
-    idcolactualiza INT NULL,
-    tipocliente ENUM('P', 'E') NOT NULL,
-    estado ENUM('ACT', 'INACT') DEFAULT 'ACT' NOT NULL,
-    CONSTRAINT fk_idpersona_client FOREIGN KEY (idpersona) REFERENCES personas (idpersona),
-    CONSTRAINT fk_idcolregistra_client FOREIGN KEY (idcolregistra) REFERENCES colaboradores (idcolaborador),
-    CONSTRAINT fk_idcolactualiza_client FOREIGN KEY (idcolactualiza) REFERENCES colaboradores (idcolaborador)
-) ENGINE = INNODB;
-
-/* ALTER TABLE clientes ADD COLUMN estado ENUM('ACT', 'INACT') DEFAULT 'ACT' NOT NULL; */
-
 CREATE TABLE areas (
     idarea INT AUTO_INCREMENT PRIMARY KEY,
     area VARCHAR(40) NOT NULL,
@@ -116,7 +101,6 @@ CREATE TABLE contratoslaborales (
     CONSTRAINT fk_idcargocla FOREIGN KEY (idcargo) REFERENCES cargos (idcargo)
 ) ENGINE = INNODB;
 
-
 CREATE TABLE colaboradores (
     idcolaborador INT AUTO_INCREMENT PRIMARY KEY,
     idcontratolaboral INT NOT NULL,
@@ -132,6 +116,21 @@ CREATE TABLE colaboradores (
     CONSTRAINT fk_idcontratolaboral_col FOREIGN KEY (idcontratolaboral) REFERENCES contratoslaborales (idcontratolaboral),
     CONSTRAINT uk_usernick_col UNIQUE (usernick)
 ) ENGINE = INNODB;
+
+CREATE TABLE clientes (
+    idcliente INT PRIMARY KEY AUTO_INCREMENT,
+    idpersona INT NULL,
+    idempresa INT NULL,
+    idcolregistra INT NULL,
+    idcolactualiza INT NULL,
+    tipocliente ENUM('P', 'E') NOT NULL,
+    estado ENUM('ACT', 'INACT') DEFAULT 'ACT' NOT NULL,
+    CONSTRAINT fk_idpersona_client FOREIGN KEY (idpersona) REFERENCES personas (idpersona),
+    CONSTRAINT fk_idcolregistra_client FOREIGN KEY (idcolregistra) REFERENCES colaboradores (idcolaborador),
+    CONSTRAINT fk_idcolactualiza_client FOREIGN KEY (idcolactualiza) REFERENCES colaboradores (idcolaborador)
+) ENGINE = INNODB;
+
+/* ALTER TABLE clientes ADD COLUMN estado ENUM('ACT', 'INACT') DEFAULT 'ACT' NOT NULL; */
 
 CREATE TABLE concesionarios (
     idconcesionario INT AUTO_INCREMENT PRIMARY KEY,
@@ -438,6 +437,23 @@ CREATE TABLE cronogramas (
     CONSTRAINT fk_idcont_cronogramas FOREIGN KEY (idcontrato) REFERENCES contratos (idcontrato)
 ) ENGINE = InnoDB;
 
+CREATE TABLE entidadespago (
+    identidadpago INT AUTO_INCREMENT PRIMARY KEY,
+    entidad VARCHAR(20) NOT NULL,
+    tipo ENUM('Banco', 'Caja', 'Financiera') NOT NULL DEFAULT 'Banco',
+    creado DATETIME NOT NULL DEFAULT NOW(),
+    modificado DATETIME NULL,
+    CONSTRAINT uk_entidad_epg UNIQUE (entidad)
+) ENGINE = INNODB;
+
+CREATE TABLE cuentaspago (
+    idcuentapago INT AUTO_INCREMENT PRIMARY KEY,
+    identidadpago INT NOT NULL,
+    moneda ENUM('Soles', 'Dolares') NOT NULL,
+    numcuenta VARCHAR(35) NOT NULL,
+    CONSTRAINT fk_identipago_cuentas FOREIGN KEY (identidadpago) REFERENCES entidadespago (identidadpago)
+) ENGINE = InnoDb;
+
 CREATE TABLE pagos (
     idpago INT AUTO_INCREMENT PRIMARY KEY,
     idcronograma INT NOT NULL,
@@ -463,25 +479,6 @@ CREATE TABLE pagos (
     CONSTRAINT fk_idcuentapago_pagos FOREIGN KEY (idcuentapago) REFERENCES cuentaspago (idcuentapago),
     CONSTRAINT fk_idcolcaja_pagos FOREIGN KEY (idcolcaja) REFERENCES colaboradores (idcolaborador)
 ) ENGINE = InnoDB;
-
-CREATE TABLE cuentaspago (
-    idcuentapago INT AUTO_INCREMENT PRIMARY KEY,
-    identidadpago INT NOT NULL,
-    moneda ENUM('Soles', 'Dolares') NOT NULL,
-    numcuenta VARCHAR(35) NOT NULL,
-    CONSTRAINT fk_identipago_cuentas FOREIGN KEY (identidadpago) REFERENCES entidadespago (identidadpago)
-) ENGINE = InnoDb;
-
-CREATE TABLE entidadespago (
-    identidadpago INT AUTO_INCREMENT PRIMARY KEY,
-    entidad VARCHAR(20) NOT NULL,
-    tipo ENUM('Banco', 'Caja', 'Financiera') NOT NULL DEFAULT 'Banco',
-    creado DATETIME NOT NULL DEFAULT NOW(),
-    modificado DATETIME NULL,
-    CONSTRAINT uk_entidad_epg UNIQUE (entidad)
-) ENGINE = INNODB;
-
-
 
 CREATE TABLE accesos (
 
