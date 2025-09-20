@@ -165,6 +165,91 @@
             </div>
         </div>
     </div>
+
+
+
+    <div class="d-block d-md-none">
+        <?php if (empty($pagos)) : ?>
+            <div class="text-center py-4 text-muted">
+                <i class="fas fa-info-circle me-2"></i>No hay pagos registrados
+            </div>
+        <?php else: ?>
+            <div class="accordion" id="acordeonPagos">
+                <?php $numeroFila = 1; ?>
+                <?php foreach ($pagos as $pago) : ?>
+                    <div class="accordion-item mb-2 shadow-sm">
+                        <h2 class="accordion-header" id="heading-<?= $pago['idpago'] ?>">
+                            <button class="accordion-button collapsed" type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#collapsePago<?= $pago['idpago'] ?>"
+                                aria-expanded="false"
+                                aria-controls="collapsePago<?= $pago['idpago'] ?>">
+                                <span class="fw-bold">
+                                    Cuota #<?= htmlspecialchars($pago['numcuota']) ?>
+                                </span>
+                                <span class="ms-auto badge bg-primary">
+                                    S/. <?= htmlspecialchars($pago['amortizacion']) ?>
+                                </span>
+                            </button>
+                        </h2>
+                        <div id="collapsePago<?= $pago['idpago'] ?>"
+                            class="accordion-collapse collapse"
+                            aria-labelledby="heading-<?= $pago['idpago'] ?>"
+                            data-bs-parent="#acordeonPagos">
+                            <div class="accordion-body">
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item"><strong>#:</strong> <?= htmlspecialchars($numeroFila++) ?></li>
+                                    <li class="list-group-item"><strong>Vencimiento:</strong> <span class="badge bg-info text-white"><?= htmlspecialchars($pago['fecha_vencimiento']) ?></span></li>
+                                    <li class="list-group-item"><strong>Fecha pago:</strong> <span class="badge bg-info text-white"><?= htmlspecialchars($pago['fecha_pago']) ?></span></li>
+                                    <li class="list-group-item"><strong>Saldo restante:</strong> <?= htmlspecialchars($pago['saldorestante'] ?? '0.00') ?></li>
+                                    <li class="list-group-item"><strong>Medio de pago:</strong> <span class="badge bg-success text-white"><?= htmlspecialchars($pago['mediopago']) ?></span></li>
+                                    <li class="list-group-item"><strong>Concepto:</strong> <span class="badge <?= trim($pago['tipo']) === 'Cuota' ? 'bg-primary text-white' : 'bg-danger text-white' ?>"><?= htmlspecialchars($pago['tipo']) ?></span></li>
+                                    <li class="list-group-item"><strong>Transacción:</strong> <?= htmlspecialchars($pago['numerotransaccion'] ?? 'N/A') ?></li>
+                                    <li class="list-group-item">
+                                        <strong>Observaciones:</strong>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary ver-observacion mt-1"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#modalObservacion"
+                                            data-observacion="<?= htmlspecialchars($pago['observacion'] ?? 'Sin observaciones') ?>" title="Ver observación">
+                                            <i class="fas fa-eye"></i> Ver detalle
+                                        </button>
+                                    </li>
+                                    <li class="list-group-item">
+                                        <strong>Comprobante:</strong>
+                                        <?php if (!empty($pago['comprobante'])): ?>
+                                            <?php $urlSegura = "/archivos/" . htmlspecialchars($pago['comprobante']); ?>
+                                            <?php if (strtolower(pathinfo($pago['comprobante'], PATHINFO_EXTENSION)) === 'pdf'): ?>
+                                                <a href="<?= $urlSegura ?>" target="_blank" class="btn btn-sm btn-danger mt-1" title="Ver comprobante">
+                                                    <i class="fas fa-file-pdf me-1"></i>PDF
+                                                </a>
+                                            <?php else: ?>
+                                                <button type="button" class="btn btn-sm btn-primary ver-comprobante-img mt-1"
+                                                    data-img="<?= htmlspecialchars($urlSegura) ?>" title="Ver comprobante">
+                                                    <i class="fas fa-image me-1"></i>Comprobante
+                                                </button>
+                                            <?php endif; ?>
+                                        <?php else: ?>
+                                            <span class="badge bg-light text-muted">N/A</span>
+                                        <?php endif; ?>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
+    </div>
+
+    <style>
+        @media (max-width: 767.98px) {
+            .table-responsive {
+                display: none;
+            }
+        }
+    </style>
+
+
 </div>
 
 <!-- Modal para comprobantes -->

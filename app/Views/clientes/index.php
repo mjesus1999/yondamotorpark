@@ -77,13 +77,13 @@ include __DIR__ . '/../layout/header.php';
                                             <td><span class="badge text-body"><?= htmlspecialchars($personCliente['telprimario']) ?></span></td>
                                             <td>
                                                 <div class="d-flex gap-1">
-                                                        <div class="">
+                                                    <div class="">
 
-                                                            <a href="/personaCliente/edit/<?= htmlspecialchars($personCliente['idpersona']) ?>" class="btn btn-sm btn-outline-primary">
-                                                                <i class="fa-solid fa-pen"></i>
-                                                            </a>
+                                                        <a href="/personaCliente/edit/<?= htmlspecialchars($personCliente['idpersona']) ?>" class="btn btn-sm btn-outline-primary">
+                                                            <i class="fa-solid fa-pen"></i>
+                                                        </a>
 
-                                                        </div>
+                                                    </div>
                                                     <form action="/personaCliente/delete/<?= htmlspecialchars($personCliente['idcliente']) ?>" method="POST" class="d-inline"
                                                         onsubmit="return confirm('¿Estás seguro de que quieres eliminar este cliente?');">
                                                         <button type="submit" class="btn btn-sm btn-outline-danger delete" title="Eliminar">
@@ -103,46 +103,53 @@ include __DIR__ . '/../layout/header.php';
                     <!-- VISTA MÓVIL (ACORDEÓN) -->
                     <div class="d-block d-md-none">
                         <?php if (!empty($personClientes)): ?>
-                            <?php $numeroFila = 1; ?>
-                            <?php foreach ($personClientes as $personCliente): ?>
-                                <div class="card mb-2 shadow-sm">
-                                    <div class="card-header d-flex justify-content-between align-items-center"
-                                        data-bs-toggle="collapse"
-                                        data-bs-target="#collapseCliente<?= $personCliente['idcliente'] ?>"
-                                        aria-expanded="false"
-                                        aria-controls="collapseCliente<?= $personCliente['idcliente'] ?>"
-                                        style="cursor: pointer;">
-                                        <span><i class="bi bi-person-fill me-2 text-primary fw-bold"></i><?= htmlspecialchars($personCliente['nombrecompleto']) ?></span>
-                                        <i class="bi bi-chevron-down"></i>
-                                    </div>
-                                    <div id="collapseCliente<?= $personCliente['idcliente'] ?>" class="collapse">
-                                        <div class="card-body">
-                                            <p><strong>#:</strong> <?= $numeroFila++ ?></p>
-                                            <p><strong>Ubicación:</strong> <?= htmlspecialchars($personCliente['ubicacion']) ?></p>
-                                            <p><strong>Dirección:</strong> <?= htmlspecialchars($personCliente['direccion'] ?? 'No asignado') ?></p>
-                                            <p><strong>Tipo documento:</strong> <?= htmlspecialchars($personCliente['tipodoc']) ?></p>
-                                            <p><strong>N° documento:</strong> <?= htmlspecialchars($personCliente['nrodoc']) ?></p>
-                                            <p><strong>Correo:</strong> <?= htmlspecialchars($personCliente['email'] ?? 'No asignado') ?></p>
-                                            <p><strong>Teléfono:</strong> <?= htmlspecialchars($personCliente['telprimario']) ?></p>
-                                            <p><strong>Acciones:</strong></p>
-                                            <div class="d-flex align-items-center gap-2">
-                                                <a href="/personaCliente/edit/<?= htmlspecialchars($personCliente['idpersona']) ?>"
-                                                    class="btn btn-sm btn-outline-primary" title="Editar">
-                                                    <i class="fa-solid fa-pen"></i>
-                                                </a>
-
-                                                <form action="/personaCliente/delete/<?= htmlspecialchars($personCliente['idcliente']) ?>" method="POST"
-                                                    onsubmit="return confirm('¿Estás seguro de que quieres eliminar este cliente?');" class="m-0 p-0">
-                                                    <button type="submit" class="btn btn-sm btn-outline-danger delete" title="Eliminar">
-                                                        <i class="fa-solid fa-trash"></i>
-                                                    </button>
-                                                </form>
+                            <div class="accordion" id="acordeonClientes">
+                                <?php $numeroFila = 1; ?>
+                                <?php foreach ($personClientes as $personCliente): ?>
+                                    <div class="accordion-item mb-2 shadow-sm">
+                                        <h2 class="accordion-header" id="heading-<?= $personCliente['idcliente'] ?>">
+                                            <button class="accordion-button collapsed" type="button"
+                                                data-bs-toggle="collapse"
+                                                data-bs-target="#collapseCliente<?= $personCliente['idcliente'] ?>"
+                                                aria-expanded="false"
+                                                aria-controls="collapseCliente<?= $personCliente['idcliente'] ?>">
+                                                <span><i class="bi bi-person-fill me-2 text-primary fw-bold"></i><?= htmlspecialchars($personCliente['nombrecompleto']) ?></span>
+                                            </button>
+                                        </h2>
+                                        <div id="collapseCliente<?= $personCliente['idcliente'] ?>"
+                                            class="accordion-collapse collapse"
+                                            aria-labelledby="heading-<?= $personCliente['idcliente'] ?>"
+                                            data-bs-parent="#acordeonClientes">
+                                            <div class="accordion-body">
+                                                <ul class="list-group list-group-flush">
+                                                    <li class="list-group-item"><strong>#:</strong> <?= $numeroFila++ ?></li>
+                                                    <li class="list-group-item"><strong>Ubicación:</strong> <?= htmlspecialchars($personCliente['ubicacion']) ?></li>
+                                                    <li class="list-group-item"><strong>Dirección:</strong> <?= htmlspecialchars($personCliente['direccion'] ?? 'No asignado') ?></li>
+                                                    <li class="list-group-item"><strong>Tipo documento:</strong> <?= htmlspecialchars($personCliente['tipodoc']) ?></li>
+                                                    <li class="list-group-item"><strong>N° documento:</strong> <?= htmlspecialchars($personCliente['nrodoc']) ?></li>
+                                                    <li class="list-group-item"><strong>Correo:</strong> <?= htmlspecialchars($personCliente['email'] ?? 'No asignado') ?></li>
+                                                    <li class="list-group-item"><strong>Teléfono:</strong> <?= htmlspecialchars($personCliente['telprimario']) ?></li>
+                                                </ul>
+                                                <div class="mt-3">
+                                                    <strong>Acciones:</strong>
+                                                    <div class="d-flex align-items-center gap-2 mt-1">
+                                                        <a href="/personaCliente/edit/<?= htmlspecialchars($personCliente['idpersona']) ?>"
+                                                            class="btn btn-sm btn-outline-primary" title="Editar">
+                                                            <i class="fa-solid fa-pen"></i>
+                                                        </a>
+                                                        <form action="/personaCliente/delete/<?= htmlspecialchars($personCliente['idcliente']) ?>" method="POST"
+                                                            onsubmit="return confirm('¿Estás seguro de que quieres eliminar este cliente?');" class="m-0 p-0">
+                                                            <button type="submit" class="btn btn-sm btn-outline-danger delete" title="Eliminar">
+                                                                <i class="fa-solid fa-trash"></i>
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </div>
                                             </div>
-
                                         </div>
                                     </div>
-                                </div>
-                            <?php endforeach; ?>
+                                <?php endforeach; ?>
+                            </div>
                         <?php else: ?>
                             <div class="text-center text-muted p-3">No hay clientes personas registradas.</div>
                         <?php endif; ?>

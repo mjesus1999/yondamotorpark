@@ -97,50 +97,92 @@ include __DIR__ . '/../layout/header.php';
             <div class="card-header py-3 bg-primary">
                 <div class="d-flex justify-content-between align-items-center">
                     <h6 class="m-0 font-weight-bold text-white">Resumen Diario de Pagos</h6>
-
                     <div>
-
                         <button type="button" class="btn btn-danger btn-sm" id="btn-pdf">
                             <i class="fas fa-file-pdf me-2"></i>Exportar
                         </button>
-
                         <button type="button" class="btn btn-success btn-sm" id="btn-excel">
-                            <i class="bi bi-file-earmark-excel"></i></i> Exportar
+                            <i class="bi bi-file-earmark-excel"></i> Exportar
                         </button>
                     </div>
                 </div>
             </div>
             <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-bordered table-hover align-middle" id="reporte-tabla">
-                        <thead class="table-dark">
-                            <tr>
-                                <th class="text-center">Fecha</th>
-                                <th class="text-center">Efectivo</th>
-                                <th class="text-center">Yape</th>
-                                <th class="text-center">Plin</th>
-                                <th class="text-center">Transferencia</th>
-                                <th class="text-center bg-primary">Total Diario</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        </tbody>
-                        <tfoot>
-                            <tr class="table-active fw-bold">
-                                <td class="text-start">Totales:</td>
-                                <td class="text-center" id="total-efectivo">S/ 0.00</td>
-                                <td class="text-center" id="total-yape">S/ 0.00</td>
-                                <td class="text-center" id="total-plin">S/ 0.00</td>
-                                <td class="text-center" id="total-transferencia">S/ 0.00</td>
-                                <td class="text-center bg-primary text-white" id="total-global">S/ 0.00</td>
-                            </tr>
-                        </tfoot>
-                    </table>
+
+                <div class="d-none d-md-block">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover align-middle" id="reporte-tabla">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th class="text-center">Fecha</th>
+                                    <th class="text-center">Efectivo</th>
+                                    <th class="text-center">Yape</th>
+                                    <th class="text-center">Plin</th>
+                                    <th class="text-center">Transferencia</th>
+                                    <th class="text-center bg-primary">Total Diario</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                            <tfoot>
+                                <tr class="table-active fw-bold">
+                                    <td class="text-start">Totales:</td>
+                                    <td class="text-center" id="total-efectivo">S/ 0.00</td>
+                                    <td class="text-center" id="total-yape">S/ 0.00</td>
+                                    <td class="text-center" id="total-plin">S/ 0.00</td>
+                                    <td class="text-center" id="total-transferencia">S/ 0.00</td>
+                                    <td class="text-center bg-primary text-white" id="total-global">S/ 0.00</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="d-block d-md-none">
+                    <div class="accordion" id="acordeonReporte">
+                        <div class="accordion-item mt-4">
+                            <h2 class="accordion-header" id="heading-totales">
+                                <button class="accordion-button collapsed bg-primary text-white fw-bold" type="button"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target="#collapse-totales"
+                                    aria-expanded="false"
+                                    aria-controls="collapse-totales">
+                                    Totales
+                                    <span class="ms-auto badge bg-light text-primary">
+                                        S/ <span id="total-global-acordion">0.00</span>
+                                    </span>
+                                </button>
+                            </h2>
+                            <div id="collapse-totales"
+                                class="accordion-collapse collapse"
+                                aria-labelledby="heading-totales"
+                                data-bs-parent="#acordeonReporte">
+                                <div class="accordion-body">
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item"><strong>Total Efectivo:</strong> <span id="total-efectivo-acordion">S/ 0.00</span></li>
+                                        <li class="list-group-item"><strong>Total Yape:</strong> <span id="total-yape-acordion">S/ 0.00</span></li>
+                                        <li class="list-group-item"><strong>Total Plin:</strong> <span id="total-plin-acordion">S/ 0.00</span></li>
+                                        <li class="list-group-item"><strong>Total Transferencia:</strong> <span id="total-transferencia-acordion">S/ 0.00</span></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+
+
+
+
+
+
+
 </div>
+
+
+
 
 
 <div id="mensaje-inicial" class="card shadow d-flex justify-content-center align-items-center" style="height: 300px;">
@@ -150,6 +192,7 @@ include __DIR__ . '/../layout/header.php';
         <p>Los datos aparecerán aquí.</p>
     </div>
 </div>
+
 
 
 <!-- Modal para mensajes -->
@@ -181,20 +224,29 @@ include __DIR__ . '/../layout/header.php';
         const form = document.getElementById('reporte-fechas-form');
         const resultadosContainer = document.getElementById('reporte-resultados-container');
         const tbody = document.querySelector('#reporte-tabla tbody');
+        const acordeonContainer = document.querySelector('#acordeonReporte'); 
+
+        // Elementos de totales de la tabla
         const totalGlobalEl = document.getElementById('total-global');
         const totalEfectivoEl = document.getElementById('total-efectivo');
         const totalYapeEl = document.getElementById('total-yape');
         const totalPlinEl = document.getElementById('total-plin');
         const totalTransferenciaEl = document.getElementById('total-transferencia');
+
+        // Elementos de totales del acordeón
+        const totalGlobalAcordionEl = document.getElementById('total-global-acordion');
+        const totalEfectivoAcordionEl = document.getElementById('total-efectivo-acordion');
+        const totalYapeAcordionEl = document.getElementById('total-yape-acordion');
+        const totalPlinAcordionEl = document.getElementById('total-plin-acordion');
+        const totalTransferenciaAcordionEl = document.getElementById('total-transferencia-acordion');
+
         const btnGenerar = document.getElementById('btn-generar');
         const btnPDF = document.getElementById('btn-pdf');
         const btnExcel = document.querySelector('#btn-excel');
         const mensajeModal = new bootstrap.Modal(document.getElementById('mensajeModal'));
         const mensajeInicial = document.querySelector('#mensaje-inicial');
-        const tabla = document.querySelector('#reporte-tabla');
 
         let reporteData = null;
-
 
         const hoy = new Date();
         const hace7Dias = new Date();
@@ -202,7 +254,6 @@ include __DIR__ . '/../layout/header.php';
 
         document.getElementById('fecha-inicio').value = hace7Dias.toISOString().split('T')[0];
         document.getElementById('fecha-fin').value = hoy.toISOString().split('T')[0];
-
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -224,6 +275,7 @@ include __DIR__ . '/../layout/header.php';
             btnPDF.style.display = 'none';
             resultadosContainer.style.display = 'none';
             tbody.innerHTML = '';
+
             limpiarTotales();
 
             try {
@@ -253,14 +305,13 @@ include __DIR__ . '/../layout/header.php';
             }
         });
 
-
         btnPDF.addEventListener('click', () => {
             generarReportePDF();
         });
 
         btnExcel.addEventListener('click', () => {
             if (reporteData) {
-                generarReporteExcel(reporteData,formatearFecha);
+                generarReporteExcel(reporteData, formatearFecha);
             } else {
                 mostrarMensaje('No hay datos para exportar a Excel. Por favor, genera un reporte primero.', 'Advertencia');
             }
@@ -276,10 +327,14 @@ include __DIR__ . '/../layout/header.php';
             resultadosContainer.style.display = 'block';
             tbody.innerHTML = '';
 
+            const dataItemsAcordeon = Array.from(acordeonContainer.children).slice(0, -1);
+            dataItemsAcordeon.forEach(item => item.remove());
+
             if (datos && datos.length > 0) {
                 mensajeInicial.classList.remove('d-flex');
                 mensajeInicial.classList.add('d-none');
-                datos.forEach(row => {
+
+                datos.forEach((row, index) => {
                     const totalDiario = parseFloat(row.total_efectivo) + parseFloat(row.total_yape) + parseFloat(row.total_plin) + parseFloat(row.total_transferencia);
                     totalGlobal += totalDiario;
                     totalEfectivo += parseFloat(row.total_efectivo);
@@ -287,23 +342,67 @@ include __DIR__ . '/../layout/header.php';
                     totalPlin += parseFloat(row.total_plin);
                     totalTransferencia += parseFloat(row.total_transferencia);
 
+                    // Crear la fila de la tabla
                     const newRow = document.createElement('tr');
                     newRow.innerHTML = `
-                        <td class="text-center">${formatearFecha(row.dia)}</td>
-                        <td class="text-end">S/ ${formatearMoneda(row.total_efectivo)}</td>
-                        <td class="text-end">S/ ${formatearMoneda(row.total_yape)}</td>
-                        <td class="text-end">S/ ${formatearMoneda(row.total_plin)}</td>
-                        <td class="text-end">S/ ${formatearMoneda(row.total_transferencia)}</td>
-                        <td class="text-end fw-bold">S/ ${formatearMoneda(totalDiario)}</td>
-                    `;
+                <td class="text-center">${formatearFecha(row.dia)}</td>
+                <td class="text-end">S/ ${formatearMoneda(row.total_efectivo)}</td>
+                <td class="text-end">S/ ${formatearMoneda(row.total_yape)}</td>
+                <td class="text-end">S/ ${formatearMoneda(row.total_plin)}</td>
+                <td class="text-end">S/ ${formatearMoneda(row.total_transferencia)}</td>
+                <td class="text-end fw-bold">S/ ${formatearMoneda(totalDiario)}</td>
+            `;
                     tbody.appendChild(newRow);
+
+                    // Crear el item del acordeón
+                    const acordeonItem = document.createElement('div');
+                    acordeonItem.classList.add('accordion-item', 'mb-2', 'shadow-sm');
+                    acordeonItem.innerHTML = `
+                <h2 class="accordion-header" id="heading-${index}">
+                    <button class="accordion-button collapsed" type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#collapse-${index}"
+                        aria-expanded="false"
+                        aria-controls="collapse-${index}">
+                        <span class="fw-bold">Fecha: ${formatearFecha(row.dia)}</span>
+                        <span class="ms-auto badge bg-primary">
+                            Total: S/ ${formatearMoneda(totalDiario)}
+                        </span>
+                    </button>
+                </h2>
+                <div id="collapse-${index}"
+                    class="accordion-collapse collapse"
+                    aria-labelledby="heading-${index}"
+                    data-bs-parent="#acordeonReporte">
+                    <div class="accordion-body">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item"><strong>Efectivo:</strong> S/ ${formatearMoneda(row.total_efectivo)}</li>
+                            <li class="list-group-item"><strong>Yape:</strong> S/ ${formatearMoneda(row.total_yape)}</li>
+                            <li class="list-group-item"><strong>Plin:</strong> S/ ${formatearMoneda(row.total_plin)}</li>
+                            <li class="list-group-item"><strong>Transferencia:</strong> S/ ${formatearMoneda(row.total_transferencia)}</li>
+                            <li class="list-group-item bg-body fw-bold"><strong>Total Diario:</strong> S/ ${formatearMoneda(totalDiario)}</li>
+                        </ul>
+                    </div>
+                </div>
+            `;
+
+                    acordeonContainer.insertBefore(acordeonItem, acordeonContainer.lastElementChild);
                 });
 
+                // Actualizar los totales de la tabla
                 totalGlobalEl.textContent = `S/ ${formatearMoneda(totalGlobal)}`;
                 totalEfectivoEl.textContent = `S/ ${formatearMoneda(totalEfectivo)}`;
                 totalYapeEl.textContent = `S/ ${formatearMoneda(totalYape)}`;
                 totalPlinEl.textContent = `S/ ${formatearMoneda(totalPlin)}`;
                 totalTransferenciaEl.textContent = `S/ ${formatearMoneda(totalTransferencia)}`;
+
+                // Actualizar los totales del acordeón
+                if (totalGlobalAcordionEl) totalGlobalAcordionEl.textContent = `${formatearMoneda(totalGlobal)}`;
+                if (totalEfectivoAcordionEl) totalEfectivoAcordionEl.textContent = `S/ ${formatearMoneda(totalEfectivo)}`;
+                if (totalYapeAcordionEl) totalYapeAcordionEl.textContent = `S/ ${formatearMoneda(totalYape)}`;
+                if (totalPlinAcordionEl) totalPlinAcordionEl.textContent = `S/ ${formatearMoneda(totalPlin)}`;
+                if (totalTransferenciaAcordionEl) totalTransferenciaAcordionEl.textContent = `S/ ${formatearMoneda(totalTransferencia)}`;
+
                 btnPDF.style.display = 'inline-block';
 
             } else {
@@ -311,9 +410,7 @@ include __DIR__ . '/../layout/header.php';
                 limpiarTotales();
                 btnPDF.style.display = 'none';
             }
-        };
-
-
+        }
 
         function limpiarTotales() {
             totalGlobalEl.textContent = 'S/ 0.00';
@@ -321,16 +418,21 @@ include __DIR__ . '/../layout/header.php';
             totalYapeEl.textContent = 'S/ 0.00';
             totalPlinEl.textContent = 'S/ 0.00';
             totalTransferenciaEl.textContent = 'S/ 0.00';
+
+            // Limpiar los totales del acordeón
+            if (totalGlobalAcordionEl) totalGlobalAcordionEl.textContent = '0.00';
+            if (totalEfectivoAcordionEl) totalEfectivoAcordionEl.textContent = 'S/ 0.00';
+            if (totalYapeAcordionEl) totalYapeAcordionEl.textContent = 'S/ 0.00';
+            if (totalPlinAcordionEl) totalPlinAcordionEl.textContent = 'S/ 0.00';
+            if (totalTransferenciaAcordionEl) totalTransferenciaAcordionEl.textContent = 'S/ 0.00';
         }
 
 
-        /* ... (código previo) ... */
-
-        async function generarReporteExcel(data, formatearFecha) { // Asegúrate de pasar la función formatearFecha como parámetro
+        async function generarReporteExcel(data, formatearFecha) {
             const workbook = new ExcelJS.Workbook();
             const worksheet = workbook.addWorksheet('Reporte de Pagos');
 
-            // ... (Definiciones de estilos, etc.) ...
+
             const headerStyle = {
                 font: {
                     bold: true,
@@ -433,7 +535,7 @@ include __DIR__ . '/../layout/header.php';
                 const totalDiario = parseFloat(row.total_efectivo) + parseFloat(row.total_yape) + parseFloat(row.total_plin) + parseFloat(row.total_transferencia);
 
                 const newRow = [
-                
+
                     formatearFecha(row.dia),
                     parseFloat(row.total_efectivo),
                     parseFloat(row.total_yape),

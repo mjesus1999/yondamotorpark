@@ -30,7 +30,7 @@ function generarReporteResumenEjecutivo(data, logo) {
     // --- TABLA DE DETALLE POR ORDEN DE COMPRA ---
     const headersDetalle = [
         { text: 'OC Identificador', style: 'tableHeader', alignment: 'center' },
-        {text:'Emisión',style:'tableHeader',alignment:'center'},
+        { text: 'Emisión', style: 'tableHeader', alignment: 'center' },
         { text: 'Concesionario', style: 'tableHeader', alignment: 'center' },
         { text: 'Ubicación', style: 'tableHeader', alignment: 'center' },
         { text: 'Total OC', style: 'tableHeader', alignment: 'center' },
@@ -49,9 +49,9 @@ function generarReporteResumenEjecutivo(data, logo) {
                 { text: `${new Date(oc.emision).toLocaleDateString('es-ES')}`, alignment: 'center' },
                 { text: oc.Concesionario },
                 { text: oc.ubicacionConcesionario },
-                { text: `$${formatNumber(oc.totalOC)}`, alignment: 'right'}, 
-                { text: `$${formatNumber(oc.pagado)}`, alignment: 'right' }, 
-                { text: `$${formatNumber(oc.saldo)}`, alignment: 'right' }, 
+                { text: `$${formatNumber(oc.totalOC)}`, alignment: 'right' },
+                { text: `$${formatNumber(oc.pagado)}`, alignment: 'right' },
+                { text: `$${formatNumber(oc.saldo)}`, alignment: 'right' },
                 { text: `${formatNumber(oc.avancePorcentaje)}%`, alignment: 'center' },
                 { text: oc.totalVehiculos, alignment: 'left' }
             ]);
@@ -130,7 +130,7 @@ function generarReporteResumenEjecutivo(data, logo) {
             {
                 table: {
                     // Anchos de columna optimizados para ser compactos
-                    widths: ['*','*', 'auto', '*', 'auto', 'auto', 'auto', 'auto', 'auto'],
+                    widths: ['*', '*', 'auto', '*', 'auto', 'auto', 'auto', 'auto', 'auto'],
                     body: bodyDetalle
                 },
                 layout: 'lightHorizontalLines'
@@ -165,4 +165,8 @@ async function fetchAndGenerateReport() {
     }
 }
 
-document.getElementById('btn-exportar-pdf').addEventListener('click', fetchAndGenerateReport);
+if (document.getElementById('btn-exportar-pdf')) {
+
+    document.getElementById('btn-exportar-pdf').addEventListener('click', fetchAndGenerateReport);
+
+}

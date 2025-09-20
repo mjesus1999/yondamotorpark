@@ -150,6 +150,7 @@
                         <div class="accordion-item">
                             <h2 class="accordion-header" id="heading<?= $index ?>">
                                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse<?= $index ?>" aria-expanded="false" aria-controls="collapse<?= $index ?>">
+                                    <i class="fa-solid fa-file-invoice-dollar me-2 text-primary"></i>
                                     <?php if ($estado === 'validados'): ?>
                                         <strong class="me-2">#<?= $index + 1 ?></strong>
                                         <span class="badge bg-success me-2">Validado</span>
@@ -212,6 +213,9 @@
                 </div>
             <?php endif; ?>
         </div>
+
+
+
     </div>
 
 
@@ -360,15 +364,15 @@
 
         if (modalComentario) {
             modalComentario.addEventListener('show.bs.modal', function(event) {
-                
+
                 const button = event.relatedTarget;
-                
+
                 const comentario = button.getAttribute('data-comentario');
 
                 textoComentario.textContent = comentario;
             });
 
-            
+
             modalComentario.addEventListener('hidden.bs.modal', function() {
                 textoComentario.textContent = '';
             });

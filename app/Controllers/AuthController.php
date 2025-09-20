@@ -8,7 +8,7 @@ use App\Models\Usuario;
 
 class AuthController extends Controller
 {
-    private Usuario $usuarioModel;
+    private Usuario $usuarioModel; 
 
     public function __construct()
     {

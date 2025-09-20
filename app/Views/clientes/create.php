@@ -257,7 +257,7 @@ require_once __DIR__ . '/../../Helpers/functions.php'; ?>
 </style>
 
 
-<div class="container-fluid px-4">
+<div class="container-fluid  ">
     <!-- Encabezado con migas de pan y botón -->
     <div class="alert alert-info mt-3 rounded-3 shadow-sm" role="alert">
         <div class="row align-items-center">

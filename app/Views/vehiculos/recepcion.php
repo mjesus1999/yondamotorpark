@@ -79,7 +79,7 @@
                             <h2 class="accordion-header" id="heading-<?= $numeroFila ?>">
                                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-<?= $numeroFila ?>" aria-expanded="false" aria-controls="collapse-<?= $numeroFila ?>">
                                     <div class="d-flex w-100 justify-content-between align-items-center me-3">
-                                        <div class="fw-semibold">#<?= htmlspecialchars($numeroFila) ?> - <?= htmlspecialchars($compras['nombrecomercial']) ?></div>
+                                        <div class="fw-semibold"><i class="fa-solid fa-car me-2 text-primary"></i>#<?= htmlspecialchars($numeroFila) ?> - <?= htmlspecialchars($compras['nombrecomercial']) ?></div>
                                         <div class="d-flex flex-column text-end">
                                             <span class="badge bg-danger text-white mb-1">Pendientes: <?= htmlspecialchars($compras['vehiculos_pendientes']) ?></span>
                                             <span class="badge bg-info text-white">Liberar: <?= htmlspecialchars($compras['listos_para_liberar']) ?></span>
@@ -111,5 +111,6 @@
             </div>
         </div>
     </div>
+
 </div>
 <?php include __DIR__ . '/../layout/footer.php'; ?>

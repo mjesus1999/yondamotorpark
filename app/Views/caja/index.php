@@ -90,35 +90,49 @@ include __DIR__ . '/../layout/header.php';
                     <!-- SOLO MÓVIL (ACORDEÓN) -->
                     <div class="d-block d-md-none">
                         <?php if (!empty($contratos)) : ?>
-                            <?php $numeroFila = 1; ?>
-                            <?php foreach ($contratos as $contrato): ?>
-                                <div class="card mb-2 shadow-sm">
-                                    <div class="card-header d-flex justify-content-between align-items-center" data-bs-toggle="collapse" href="#collapse<?= $contrato['idcontrato'] ?>" style="cursor:pointer;">
-                                        <span><i class="bi bi-person-circle me-2 text-primary  fw-bold"></i><?= htmlspecialchars($contrato['cliente']) ?></span>
-                                        <i class="bi bi-chevron-down"></i>
-                                    </div>
-                                    <div id="collapse<?= $contrato['idcontrato'] ?>" class="collapse">
-                                        <div class="card-body">
-                                            <p><strong>#:</strong> <?= $numeroFila++ ?></p>
-                                            <p><strong>Documento:</strong> <?= htmlspecialchars($contrato['documento']) ?></p>
-                                            <p><strong>N° Documento:</strong> <?= htmlspecialchars($contrato['ndocumento']) ?></p>
-                                            <p><strong>Tienda:</strong> <span class="badge bg-primary"><?= htmlspecialchars($contrato['tienda']) ?></span></p>
-                                            <p><strong>Vehículo:</strong> <span class="badge bg-primary"><?= htmlspecialchars($contrato['vehiculo']) ?></span></p>
-                                            <p><strong>Meses:</strong> <?= htmlspecialchars($contrato['meses']) ?></p>
-                                            <p><strong>Cuota:</strong> <?= htmlspecialchars($contrato['cuota']) ?></p>
-                                            <p>
-                                                <strong>Acciones:</strong><br>
-                                                <a href="/caja/cronograma/<?= $contrato['idcontrato'] ?>" title="Ver Cronograma">
-                                                    <i class="bi-receipt fs-5 text-info me-2"></i>
-                                                </a>
-                                                <a href="/caja/historial/pagos/<?= $contrato['idcontrato'] ?>" title="Ver historial de pagos">
-                                                    <i class="bi bi-clock-history fs-5"></i>
-                                                </a>
-                                            </p>
+                            <div class="accordion" id="acordeonContratos">
+                                <?php $numeroFila = 1; ?>
+                                <?php foreach ($contratos as $contrato): ?>
+                                    <div class="accordion-item mb-2 shadow-sm">
+                                        <h2 class="accordion-header" id="heading-<?= $contrato['idcontrato'] ?>">
+                                            <button class="accordion-button collapsed" type="button"
+                                                data-bs-toggle="collapse"
+                                                data-bs-target="#collapse<?= $contrato['idcontrato'] ?>"
+                                                aria-expanded="false"
+                                                aria-controls="collapse<?= $contrato['idcontrato'] ?>">
+                                                <span><i class="bi bi-person-circle me-2 text-primary fw-bold"></i><?= htmlspecialchars($contrato['cliente']) ?></span>
+                                            </button>
+                                        </h2>
+                                        <div id="collapse<?= $contrato['idcontrato'] ?>"
+                                            class="accordion-collapse collapse"
+                                            aria-labelledby="heading-<?= $contrato['idcontrato'] ?>"
+                                            data-bs-parent="#acordeonContratos">
+                                            <div class="accordion-body">
+                                                <ul class="list-group list-group-flush">
+                                                    <li class="list-group-item"><strong>#:</strong> <?= $numeroFila++ ?></li>
+                                                    <li class="list-group-item"><strong>Documento:</strong> <?= htmlspecialchars($contrato['documento']) ?></li>
+                                                    <li class="list-group-item"><strong>N° Documento:</strong> <?= htmlspecialchars($contrato['ndocumento']) ?></li>
+                                                    <li class="list-group-item"><strong>Tienda:</strong> <span class="badge bg-primary"><?= htmlspecialchars($contrato['tienda']) ?></span></li>
+                                                    <li class="list-group-item"><strong>Vehículo:</strong> <span class="badge bg-primary"><?= htmlspecialchars($contrato['vehiculo']) ?></span></li>
+                                                    <li class="list-group-item"><strong>Meses:</strong> <?= htmlspecialchars($contrato['meses']) ?></li>
+                                                    <li class="list-group-item"><strong>Cuota:</strong> <?= htmlspecialchars($contrato['cuota']) ?></li>
+                                                    <li class="list-group-item">
+                                                        <strong>Acciones:</strong>
+                                                        <div class="d-flex gap-2 mt-1">
+                                                            <a href="/caja/cronograma/<?= $contrato['idcontrato'] ?>" title="Ver Cronograma" class="btn btn-sm btn-outline-info">
+                                                                <i class="bi-receipt"></i>
+                                                            </a>
+                                                            <a href="/caja/historial/pagos/<?= $contrato['idcontrato'] ?>" title="Ver historial de pagos" class="btn btn-sm btn-outline-secondary">
+                                                                <i class="bi bi-clock-history"></i>
+                                                            </a>
+                                                        </div>
+                                                    </li>
+                                                </ul>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            <?php endforeach; ?>
+                                <?php endforeach; ?>
+                            </div>
                         <?php else: ?>
                             <div class="text-center">No hay datos para mostrar.</div>
                         <?php endif; ?>
@@ -379,7 +393,7 @@ include __DIR__ . '/../layout/header.php';
 
 
 
-        async function generarReportePDFConJsPDF() { 
+        async function generarReportePDFConJsPDF() {
             const btnPdf = document.getElementById('btn-pdf');
 
             try {
@@ -419,7 +433,7 @@ include __DIR__ . '/../layout/header.php';
 
 
         async function generarPDFConDatos(datosReporte) {
-           
+
 
             const fechaHoy = new Date().toLocaleDateString('es-PE');
             const horaGeneracion = new Date().toLocaleTimeString('es-PE');
@@ -476,7 +490,7 @@ include __DIR__ . '/../layout/header.php';
                     alignment: 'center',
                     margin: [0, 20, 0, 0]
                 },
-            
+
                 totalSection: {
                     margin: [0, 10, 0, 20]
                 },
@@ -520,7 +534,7 @@ include __DIR__ . '/../layout/header.php';
                 }
             };
 
-        
+
             documento.content.push({
                 columns: [
                     logoBase64 ? {
@@ -548,7 +562,7 @@ include __DIR__ . '/../layout/header.php';
                                 text: `Generado el ${fechaHoy} a las ${horaGeneracion}`,
                                 alignment: 'right'
                             }
-            
+
                         ],
                         alignment: 'right',
                         margin: [10, 0, 0, 0]
@@ -557,7 +571,7 @@ include __DIR__ . '/../layout/header.php';
                 margin: [0, 0, 0, 20]
             });
 
-           
+
             documento.content.push({
                 text: 'REPORTE DIARIO DE PAGOS',
                 style: 'headerPrincipal',
@@ -566,7 +580,7 @@ include __DIR__ . '/../layout/header.php';
                 margin: [0, 7, 0, 20]
             });
 
-           
+
             const totalTransacciones = datosTransacciones.reduce((sum, item) => sum + (item.transacciones?.length || 0), 0);
             documento.content.push({
                 columns: [{
@@ -589,7 +603,7 @@ include __DIR__ . '/../layout/header.php';
                 margin: [0, 0, 0, 20]
             });
 
-           
+
             documento.content.push({
                 text: 'RESUMEN EJECUTIVO',
                 style: 'resumenTitulo',
@@ -641,7 +655,7 @@ include __DIR__ . '/../layout/header.php';
                 margin: [0, 5, 0, 20]
             });
 
-          
+
             documento.content.push({
                 text: 'DETALLES POR MÉTODO DE PAGO',
                 style: 'resumenTitulo',
@@ -652,7 +666,7 @@ include __DIR__ . '/../layout/header.php';
 
             datosTransacciones.forEach(item => {
                 if (item.transacciones && item.transacciones.length > 0) {
-                   
+
                     documento.content.push({
                         text: item.metodo_pago.toUpperCase(),
                         style: 'tableSubHeader',
@@ -705,7 +719,7 @@ include __DIR__ . '/../layout/header.php';
                 }
             });
 
-            
+
             pdfMake.createPdf(documento).open();
         }
 

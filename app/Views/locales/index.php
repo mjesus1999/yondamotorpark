@@ -88,52 +88,70 @@
                     </div>
 
                     <!-- Vista móvil (acordeón) -->
-                    <div class="d-block d-md-none">
-                        <?php if (!empty($locales)) : ?>
-                            <?php $numeroFila = 1; ?>
-                            <?php foreach ($locales as $local): ?>
-                                <div class="card mb-2 shadow-sm">
-                                    <div class="card-header d-flex justify-content-between align-items-center"
-                                        data-bs-toggle="collapse"
-                                        data-bs-target="#collapseLocal<?= $local['idlocal'] ?>"
-                                        aria-expanded="false"
-                                        aria-controls="collapseLocal<?= $local['idlocal'] ?>"
-                                        style="cursor: pointer;">
-                                        <span><i class="bi bi-shop me-2 text-primary fw-bold"></i><?= htmlspecialchars($local['tienda']) ?></span>
-                                        <i class="bi bi-chevron-down"></i>
-                                    </div>
-                                    <div id="collapseLocal<?= $local['idlocal'] ?>" class="collapse">
-                                        <div class="card-body">
-                                            <p><strong>#:</strong> <?= htmlspecialchars($numeroFila++) ?></p>
-                                            <p><strong>Ubicación:</strong> <?= htmlspecialchars($local['departamento'] . "/" . $local['provincia'] . '/' . $local['distrito']) ?></p>
-                                            <p><strong>Dirección:</strong> <?= htmlspecialchars($local['direccion']) ?? 'No asignado' ?></p>
-                                            <p><strong>Responsable:</strong> <?= htmlspecialchars($local['responsable']) ?></p>
-                                            <p><strong>Correo:</strong> <?= $local['correo'] ? htmlspecialchars($local['correo']) : 'No asignado' ?></p>
-                                            <p><strong>Teléfono:</strong> <?= htmlspecialchars($local['telefono']) ?></p>
-                                            <p><strong>Acciones:</strong>
-                                            <div class="d-flex align-items-center gap-2">
-                                                <a class="btn btn-sm btn-outline-primary btn-edit-local"
-                                                    data-bs-toggle="modal" data-bs-target="#modal-locales"
-                                                    data-idlocal="<?= htmlspecialchars($local['idlocal']) ?>"
-                                                    title="Editar">
-                                                    <i class="fa-solid fa-pen" data-idlocal="<?= htmlspecialchars($local['idlocal']) ?>"></i>
-                                                </a>
-                                                <form action="/locales/delete/<?= htmlspecialchars($local['idlocal']) ?>" method="POST" class="d-inline"
-                                                    onsubmit="return confirm('¿Estás seguro de que quieres eliminar este local?');">
-                                                    <button type="submit" class='btn btn-sm btn-outline-danger delete' title='Eliminar'>
-                                                        <i class="fa-solid fa-trash"></i>
-                                                    </button>
-                                                </form>
-                                            </div>
-                                            </p>
-                                        </div>
-                                    </div>
+                   <div class="d-block d-md-none">
+    <?php if (empty($locales)) : ?>
+        <div class="text-center text-muted p-3">No hay locales registrados.</div>
+    <?php else: ?>
+        <div class="accordion" id="acordeonLocales">
+            <?php $numeroFila = 1; ?>
+            <?php foreach ($locales as $local): ?>
+                <div class="accordion-item mb-2 shadow-sm">
+                    <h2 class="accordion-header" id="heading-<?= $local['idlocal'] ?>">
+                        <button class="accordion-button collapsed" type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#collapseLocal<?= $local['idlocal'] ?>"
+                            aria-expanded="false"
+                            aria-controls="collapseLocal<?= $local['idlocal'] ?>">
+                            <div class="d-flex flex-column align-items-start text-start w-100">
+                                <span class="fw-bold mb-1"><i class="bi bi-shop me-2 text-primary"></i><?= htmlspecialchars($local['tienda']) ?></span>
+                                <span class="badge bg-secondary text-white text-truncate w-100">
+                                    <i class="bi bi-geo-alt me-1"></i>
+                                    <?= htmlspecialchars($local['departamento'] . "/" . $local['provincia'] . '/' . $local['distrito']) ?>
+                                </span>
+                                <span class="badge bg-info text-dark text-truncate w-100 mt-1">
+                                    <i class="bi bi-house me-1"></i>
+                                    <?= $local['direccion'] === null ? 'N/A' : htmlspecialchars($local['direccion']) ?>
+                                </span>
+                            </div>
+                        </button>
+                    </h2>
+                    <div id="collapseLocal<?= $local['idlocal'] ?>"
+                        class="accordion-collapse collapse"
+                        aria-labelledby="heading-<?= $local['idlocal'] ?>"
+                        data-bs-parent="#acordeonLocales">
+                        <div class="accordion-body">
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item"><strong>#:</strong> <?= htmlspecialchars($numeroFila++) ?></li>
+                                <li class="list-group-item"><strong>Ubicación:</strong> <?= htmlspecialchars($local['departamento'] . "/" . $local['provincia'] . '/' . $local['distrito']) ?></li>
+                                <li class="list-group-item"><strong>Dirección:</strong> <?= $local['direccion'] === null ? 'N/A' : htmlspecialchars($local['direccion']) ?></li>
+                                <li class="list-group-item"><strong>Responsable:</strong> <?= htmlspecialchars($local['responsable']) ?></li>
+                                <li class="list-group-item"><strong>Correo:</strong> <?= $local['correo'] ? htmlspecialchars($local['correo']) : 'No asignado' ?></li>
+                                <li class="list-group-item"><strong>Teléfono:</strong> <?= htmlspecialchars($local['telefono']) ?></li>
+                            </ul>
+                            <div class="mt-3">
+                                <strong>Acciones:</strong>
+                                <div class="d-flex align-items-center gap-2 mt-1">
+                                    <a class="btn btn-sm btn-outline-primary btn-edit-local"
+                                        data-bs-toggle="modal" data-bs-target="#modal-locales"
+                                        data-idlocal="<?= htmlspecialchars($local['idlocal']) ?>"
+                                        title="Editar">
+                                        <i class="fa-solid fa-pen" data-idlocal="<?= htmlspecialchars($local['idlocal']) ?>"></i>
+                                    </a>
+                                    <form action="/locales/delete/<?= htmlspecialchars($local['idlocal']) ?>" method="POST" class="d-inline"
+                                        onsubmit="return confirm('¿Estás seguro de que quieres eliminar este local?');">
+                                        <button type="submit" class='btn btn-sm btn-outline-danger delete' title='Eliminar'>
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    </form>
                                 </div>
-                            <?php endforeach; ?>
-                        <?php else: ?>
-                            <div class="text-center text-muted p-3">No hay locales registrados.</div>
-                        <?php endif; ?>
+                            </div>
+                        </div>
                     </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    <?php endif; ?>
+</div>
 
                 </div>
             </div>

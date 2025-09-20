@@ -1,4 +1,3 @@
-
 <?php include __DIR__ . '/../layout/header.php'; ?>
 <link rel="stylesheet" href="/assets/css/cronograma-contrato.css">
 
@@ -24,220 +23,333 @@
                     <i class="fa-regular fa-file-pdf"></i> PDF
                 </button>
                 <button class="btn btn-success btn-sm ms-2" id="btn-excel">
-                   <i class="bi bi-file-earmark-excel"></i> EXCEL
+                    <i class="bi bi-file-earmark-excel"></i> EXCEL
                 </button>
             </div>
         </div>
     </div>
 
     <!-- CRONOGRAMA -->
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card card-cronograma">
-                <div class="card-header card-header-cronograma">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i> Cronograma de Pagos</h5>
-                        <div class="input-group input-group-sm" style="width: 250px">
-                            <span class="input-group-text bg-white"><i class="fas fa-search text-muted"></i></span>
-                            <input type="text" class="form-control" placeholder="Buscar cuota..." id="inputBuscar">
+    <div class="d-none d-md-block">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card card-cronograma">
+                    <div class="card-header card-header-cronograma">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i> Cronograma de Pagos</h5>
+                            <div class="input-group input-group-sm" style="width: 250px">
+                                <span class="input-group-text bg-white"><i class="fas fa-search text-muted"></i></span>
+                                <input type="text" class="form-control" placeholder="Buscar cuota..." id="inputBuscar">
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive" id="area-pdf">
-                        <table class="table table-hover cronograma-table mb-0" id="tabla-cronograma">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Fecha Vencimiento</th>
-                                    <th> Interés</th>
-                                    <th> Abono Capital</th>
-                                    <th></i> Valor Cuota</th>
-                                    <th>Amortización</th>
-                                    <th>Restante</th>
-                                    <th></i> Saldo Capital</th>
-                                    <th width="188">Estado</th>
-                                    <th>Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tabla-body" data-total-items="<?= count($cronograma) ?>">
-                                <?php if (empty($cronograma)) : ?>
+                    <div class="card-body p-0">
+                        <div class="table-responsive" id="area-pdf">
+                            <table class="table table-hover cronograma-table mb-0" id="tabla-cronograma">
+                                <thead>
                                     <tr>
-                                        <td colspan="10" class="text-center">No hay datos para mostrar</td>
+                                        <th>#</th>
+                                        <th>Fecha Vencimiento</th>
+                                        <th> Interés</th>
+                                        <th> Abono Capital</th>
+                                        <th></i> Valor Cuota</th>
+                                        <th>Amortización</th>
+                                        <th>Restante</th>
+                                        <th></i> Saldo Capital</th>
+                                        <th width="188">Estado</th>
+                                        <th>Acciones</th>
                                     </tr>
-                                <?php else: ?>
-                                    <?php
-                                    $hoy = new DateTimeImmutable('today');
-                                    $cuotaHabilitada = false;
+                                </thead>
+                                <tbody id="tabla-body" data-total-items="<?= count($cronograma) ?>">
+                                    <?php if (empty($cronograma)) : ?>
+                                        <tr>
+                                            <td colspan="10" class="text-center">No hay datos para mostrar</td>
+                                        </tr>
+                                    <?php else: ?>
+                                        <?php
+                                        $hoy = new DateTimeImmutable('today');
+                                        $cuotaHabilitada = false;
 
-                                    foreach ($cronograma as $index => $fila) {
-                                        $fecha_cuota = new DateTimeImmutable($fila['fechapago']);
-                                        $fecha_formateada = $fecha_cuota->format('d/m/Y');
-                                        $estado = strtolower(trim($fila['estado']));
-                                        $amortizacion = floatval($fila['amortizacion']);
+                                        foreach ($cronograma as $index => $fila) {
+                                            $fecha_cuota = new DateTimeImmutable($fila['fechapago']);
+                                            $fecha_formateada = $fecha_cuota->format('d/m/Y');
+                                            $estado = strtolower(trim($fila['estado']));
+                                            $amortizacion = floatval($fila['amortizacion']);
+                                            $es_sin_pago = ($amortizacion == 0);
 
-                                        $dias_restantes = $hoy->diff($fecha_cuota)->days;
-                                        $texto_vencimiento = '';
-                                        $clase_estado = '';
-                                        $icono = '';
-                                        $clase_fila = '';
-
-                                        $fila_deshabilitada = false;
-                                        $es_sin_pago = ($amortizacion == 0);
-
-                                        // Lógica para asignar las clases y el texto
-                                        if ($estado === 'pagado') {
-                                            $clase_fila = 'bg-success table-success';
-                                            $clase_estado = 'estado-pagado';
-                                            $icono = 'fa-check-circle';
-                                            $texto_vencimiento = 'Pagado';
-                                            $fila_deshabilitada = true;
-                                        } elseif (!$cuotaHabilitada) {
-                                            // Primera cuota pendiente habilitada
-                                            if ($hoy > $fecha_cuota) {
-                                                $dias_vencido = $fecha_cuota->diff($hoy)->days;
-                                                $texto_vencimiento = "Venció hace $dias_vencido días";
-                                                $clase_estado = 'estado-vencido';
-                                                $clase_fila = 'bg-danger table-danger';
-                                                $icono = 'fa-exclamation-triangle';
-                                            } else {
-                                                $dias_faltantes = $hoy->diff($fecha_cuota)->days;
-                                                $texto_vencimiento = "Vence en $dias_faltantes días";
-                                                $clase_estado = ($es_sin_pago ? 'estado-sin-pago' : 'estado-pendiente');
-                                                $icono = ($es_sin_pago ? 'fa-exclamation-triangle' : 'fa-clock');
-                                                $clase_fila = 'fila-pendiente-pago table-warning';
-                                            }
+                                            $dias_restantes = $hoy->diff($fecha_cuota)->days;
+                                            $texto_vencimiento = '';
+                                            $clase_estado = '';
+                                            $icono = '';
+                                            $clase_fila = '';
 
                                             $fila_deshabilitada = false;
-                                            $cuotaHabilitada = true; // Solo esta cuota se habilita
-                                        } else {
-                                            // Futuras cuotas
-                                            $clase_fila = 'fila-deshabilitada';
-                                            $clase_estado = 'estado-pendiente';
-                                            $icono = 'fa-lock';
 
-                                            if ($hoy > $fecha_cuota) {
-                                                $dias_vencido = $fecha_cuota->diff($hoy)->days;
-                                                $texto_vencimiento = "Venció hace $dias_vencido días";
-                                                $clase_estado = 'estado-vencido';
-                                                $clase_fila = 'bg-danger table-danger';
-                                                $icono = 'fa-exclamation-triangle';
+                                            if ($estado === 'pagado') {
+                                                $clase_fila = 'bg-success table-success';
+                                                $clase_estado = 'estado-pagado';
+                                                $icono = 'fa-check-circle';
+                                                $texto_vencimiento = 'Pagado';
+                                                $fila_deshabilitada = true;
+                                            } elseif (!$cuotaHabilitada) {
+                                                if ($hoy > $fecha_cuota) {
+                                                    $dias_vencido = $fecha_cuota->diff($hoy)->days;
+                                                    $texto_vencimiento = "Venció hace $dias_vencido días";
+                                                    $clase_estado = 'estado-vencido';
+                                                    $clase_fila = 'bg-danger table-danger';
+                                                    $icono = 'fa-exclamation-triangle';
+                                                } else {
+                                                    $dias_faltantes = $hoy->diff($fecha_cuota)->days;
+                                                    $texto_vencimiento = "Vence en $dias_faltantes días";
+                                                    $clase_estado = ($es_sin_pago ? 'estado-sin-pago' : 'estado-pendiente');
+                                                    $icono = ($es_sin_pago ? 'fa-exclamation-triangle' : 'fa-clock');
+                                                    $clase_fila = 'fila-pendiente-pago table-warning';
+                                                }
+                                                $fila_deshabilitada = false;
+                                                $cuotaHabilitada = true;
                                             } else {
-                                                $dias_faltantes = $hoy->diff($fecha_cuota)->days;
-                                                $texto_vencimiento = "Vence en $dias_faltantes días";
+                                                $clase_fila = 'fila-deshabilitada';
+                                                $clase_estado = 'estado-pendiente';
+                                                $icono = 'fa-lock';
+
+                                                if ($hoy > $fecha_cuota) {
+                                                    $dias_vencido = $fecha_cuota->diff($hoy)->days;
+                                                    $texto_vencimiento = "Venció hace $dias_vencido días";
+                                                    $clase_estado = 'estado-vencido';
+                                                    $clase_fila = 'bg-danger table-danger';
+                                                    $icono = 'fa-exclamation-triangle';
+                                                } else {
+                                                    $dias_faltantes = $hoy->diff($fecha_cuota)->days;
+                                                    $texto_vencimiento = "Vence en $dias_faltantes días";
+                                                }
+                                                $fila_deshabilitada = true;
                                             }
-                                            $fila_deshabilitada = true;
-                                        }
 
-                                        $style_display = ($index < 10) ? '' : 'style="display:none;"';
-                                        $data_page = ceil(($index + 1) / 10);
-                                    ?>
-
-                                        <tr data-page="<?= $data_page ?>"
-                                            <?= $style_display ?>
-                                            class="<?= $clase_fila ?>"
-                                            <?= $fila_deshabilitada ? 'data-disabled="true"' : '' ?>>
-
-                                            <td>
-                                                <span class="badge <?= $estado === 'pagado' ? 'bg-light text-success' : ($es_sin_pago ? 'bg-secondary' : 'bg-primary') ?> badge-cuota">
-                                                    <?= $fila['numcuota'] ?>
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <div class="d-flex flex-column">
-                                                    <span class="fw-bold"><?= $fecha_formateada ?></span>
-                                                    <small class="<?= $clase_estado === 'estado-vencido' ? 'text-danger fw-bold' : ($estado === 'pagado' ? 'text-success fw-bold' : 'text-muted') ?>">
-                                                        <?= $texto_vencimiento ?>
-                                                    </small>
-                                                </div>
-                                            </td>
-                                            <td>S/ <?= number_format($fila['interes'], 2) ?></td>
-                                            <td>S/ <?= number_format($fila['abonocapital'], 2) ?></td>
-                                            <td>S/ <?= number_format($fila['valorcuota'], 2) ?></td>
-                                            <td><?= number_format($fila['amortizacion'], 2) ?></td>
-                                            <td><?= number_format($fila['saldorestante'], 2) ?></td>
-                                            <td>S/ <?= number_format($fila['saldocapital'], 2) ?></td>
-                                            <td>
-                                                <span class="<?= $clase_estado ?>">
-                                                    <i class="fas <?= $icono ?> me-1"></i>
-                                                    <?php
-                                                    if ($estado === 'pagado') {
-                                                        echo 'Pagado';
-                                                    } elseif ($clase_estado === 'estado-vencido') {
-                                                        echo 'Vencido';
-                                                    } elseif ($es_sin_pago) {
-                                                        echo 'Pend. Sin pago';
-                                                    } else {
-                                                        echo 'Pendiente';
-                                                    }
-                                                    ?>
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <?php if ($estado === 'pagado'): ?>
-                                                    <div class="d-flex align-items-center justify-content-center">
-                                                        <span class="badge bg-light text-success fs-6 px-3 py-2">
-                                                            <i class="fas fa-check-circle me-1"></i> Completado
-                                                        </span>
+                                            $style_display = ($index < 10) ? '' : 'style="display:none;"';
+                                            $data_page = ceil(($index + 1) / 10);
+                                        ?>
+                                            <tr data-page="<?= $data_page ?>"
+                                                <?= $style_display ?>
+                                                class="<?= $clase_fila ?>"
+                                                <?= $fila_deshabilitada ? 'data-disabled="true"' : '' ?>>
+                                                <td>
+                                                    <span class="badge <?= $estado === 'pagado' ? 'bg-light text-success' : ($es_sin_pago ? 'bg-secondary' : 'bg-primary') ?> badge-cuota">
+                                                        <?= $fila['numcuota'] ?>
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex flex-column">
+                                                        <span class="fw-bold"><?= $fecha_formateada ?></span>
+                                                        <small class="<?= $clase_estado === 'estado-vencido' ? 'text-danger fw-bold' : ($estado === 'pagado' ? 'text-success fw-bold' : 'text-muted') ?>">
+                                                            <?= $texto_vencimiento ?>
+                                                        </small>
                                                     </div>
-                                                <?php elseif ($fila_deshabilitada): ?>
-                                                    <div class="d-flex align-items-center justify-content-center">
-                                                        <span class="badge bg-light text-muted fs-6 px-3 py-2">
-                                                            <i class="fas fa-lock me-1"></i> Bloqueado
-                                                        </span>
-                                                    </div>
-                                                <?php else: ?>
-                                                    <button class="btn btn-pagar btn-sm text-white bg-success" id="btn-pagar"
-                                                        data-bs-toggle="modal"
-                                                        data-bs-target="#modalPago"
-                                                        data-cuota="<?= $fila['numcuota'] ?>"
-                                                        data-idcronograma="<?= $fila['idcronograma'] ?>"
-                                                        data-valorcuota="<?= $fila['valorcuota'] ?>"
-                                                        data-penalidad="<?= $fila['penalidad'] ?>"
-                                                        data-saldo-cuota="<?= $fila['saldocuota_pendiente'] ?>"
-                                                        data-saldorestante="<?= $fila['saldorestante'] ?>"
-                                                        data-saldo-penalidad="<?= $fila['penalidad_pendiente'] ?>">
-                                                        <i class="fa-solid fa-dollar-sign me-1"></i> Pagar
-                                                    </button>
-                                                <?php endif; ?>
-                                            </td>
-                                        </tr>
-                                    <?php } ?>
-                                <?php endif; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="card-footer bg-body-tertiary text-body-secondary">
-
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div class="text-muted" id="info-paginacion">
-                            Mostrando <span class="fw-bold">1-10</span> de
-                            <span class="fw-bold"><?= count($cronograma) ?></span> cuotas
+                                                </td>
+                                                <td>S/ <?= number_format($fila['interes'], 2) ?></td>
+                                                <td>S/ <?= number_format($fila['abonocapital'], 2) ?></td>
+                                                <td>S/ <?= number_format($fila['valorcuota'], 2) ?></td>
+                                                <td><?= number_format($fila['amortizacion'], 2) ?></td>
+                                                <td><?= number_format($fila['saldorestante'], 2) ?></td>
+                                                <td>S/ <?= number_format($fila['saldocapital'], 2) ?></td>
+                                                <td>
+                                                    <span class="<?= $clase_estado ?>">
+                                                        <i class="fas <?= $icono ?> me-1"></i>
+                                                        <?php
+                                                        if ($estado === 'pagado') {
+                                                            echo 'Pagado';
+                                                        } elseif ($clase_estado === 'estado-vencido') {
+                                                            echo 'Vencido';
+                                                        } elseif ($es_sin_pago) {
+                                                            echo 'Pend. Sin pago';
+                                                        } else {
+                                                            echo 'Pendiente';
+                                                        }
+                                                        ?>
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <?php if ($estado === 'pagado'): ?>
+                                                        <div class="d-flex align-items-center justify-content-center">
+                                                            <span class="badge bg-light text-success fs-6 px-3 py-2">
+                                                                <i class="fas fa-check-circle me-1"></i> Completado
+                                                            </span>
+                                                        </div>
+                                                    <?php elseif ($fila_deshabilitada): ?>
+                                                        <div class="d-flex align-items-center justify-content-center">
+                                                            <span class="badge bg-light text-muted fs-6 px-3 py-2">
+                                                                <i class="fas fa-lock me-1"></i> Bloqueado
+                                                            </span>
+                                                        </div>
+                                                    <?php else: ?>
+                                                        <button class="btn btn-pagar btn-sm text-white bg-success" id="btn-pagar"
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#modalPago"
+                                                            data-cuota="<?= $fila['numcuota'] ?>"
+                                                            data-idcronograma="<?= $fila['idcronograma'] ?>"
+                                                            data-valorcuota="<?= $fila['valorcuota'] ?>"
+                                                            data-penalidad="<?= $fila['penalidad'] ?>"
+                                                            data-saldo-cuota="<?= $fila['saldocuota_pendiente'] ?>"
+                                                            data-saldorestante="<?= $fila['saldorestante'] ?>"
+                                                            data-saldo-penalidad="<?= $fila['penalidad_pendiente'] ?>">
+                                                            <i class="fa-solid fa-dollar-sign me-1"></i> Pagar
+                                                        </button>
+                                                    <?php endif; ?>
+                                                </td>
+                                            </tr>
+                                        <?php } ?>
+                                    <?php endif; ?>
+                                </tbody>
+                            </table>
                         </div>
-                        <nav aria-label="Page navigation">
-                            <ul class="pagination pagination-sm mb-0" id="paginacion">
-                                <li class="page-item disabled" id="prev-page">
-                                    <a class="page-link" href="#" data-page="1" tabindex="-1" aria-disabled="true">Anterior</a>
-                                </li>
-
-                                <?php for ($p = 1; $p <= ceil(count($cronograma) / 10); $p++): ?>
-                                    <li class="page-item <?= $p == 1 ? 'active' : '' ?>">
-                                        <a class="page-link" href="#" data-page="<?= $p ?>"><?= $p ?></a>
+                    </div>
+                    <div class="card-footer bg-body-tertiary text-body-secondary">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="text-muted" id="info-paginacion">
+                                Mostrando <span class="fw-bold">1-10</span> de
+                                <span class="fw-bold"><?= count($cronograma) ?></span> cuotas
+                            </div>
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination pagination-sm mb-0" id="paginacion">
+                                    <li class="page-item disabled" id="prev-page">
+                                        <a class="page-link" href="#" data-page="1" tabindex="-1" aria-disabled="true">Anterior</a>
                                     </li>
-                                <?php endfor; ?>
-
-                                <li class="page-item" id="next-page">
-                                    <a class="page-link" href="#" data-page="2">Siguiente</a>
-                                </li>
-                            </ul>
-                        </nav>
+                                    <?php for ($p = 1; $p <= ceil(count($cronograma) / 10); $p++): ?>
+                                        <li class="page-item <?= $p == 1 ? 'active' : '' ?>">
+                                            <a class="page-link" href="#" data-page="<?= $p ?>"><?= $p ?></a>
+                                        </li>
+                                    <?php endfor; ?>
+                                    <li class="page-item" id="next-page">
+                                        <a class="page-link" href="#" data-page="2">Siguiente</a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
+
+    <div class="d-block d-md-none">
+        <?php if (empty($cronograma)) : ?>
+            <div class="text-center py-4 text-muted">
+                No hay datos para mostrar.
+            </div>
+        <?php else: ?>
+            <div class="accordion" id="acordeonCronograma">
+                <?php
+                $hoy = new DateTimeImmutable('today');
+                $cuotaHabilitada = false;
+                foreach ($cronograma as $index => $fila) {
+                    $fecha_cuota = new DateTimeImmutable($fila['fechapago']);
+                    $fecha_formateada = $fecha_cuota->format('d/m/Y');
+                    $estado = strtolower(trim($fila['estado']));
+                    $amortizacion = floatval($fila['amortizacion']);
+                    $es_sin_pago = ($amortizacion == 0);
+
+                    // Determines the active installment and state
+                    $is_active_cuota = false;
+                    $active_class = '';
+
+                    if ($estado === 'pagado') {
+                        $clase_estado_badge = 'bg-success';
+                        $texto_estado = 'Pagado';
+                        $icono = 'fas fa-check-circle';
+                        $fila_deshabilitada = true;
+                    } elseif (!$cuotaHabilitada) {
+                        if ($hoy > $fecha_cuota) {
+                            $clase_estado_badge = 'bg-danger';
+                            $texto_estado = 'Vencido';
+                            $icono = 'fas fa-exclamation-triangle';
+                        } else {
+                            $clase_estado_badge = 'bg-warning text-dark';
+                            $texto_estado = 'Pendiente';
+                            $icono = 'fas fa-clock';
+                        }
+                        $fila_deshabilitada = false;
+                        $cuotaHabilitada = true;
+                        $is_active_cuota = true;
+                        $active_class = 'active-payment-accordion';
+                    } else {
+                        $clase_estado_badge = 'bg-secondary';
+                        $texto_estado = 'Bloqueado';
+                        $icono = 'fas fa-lock';
+                        $fila_deshabilitada = true;
+                    }
+                ?>
+                    <div class="accordion-item mb-2 shadow-sm <?= $active_class ?>">
+                        <h2 class="accordion-header" id="heading-<?= $fila['idcronograma'] ?>">
+                            <button class="accordion-button collapsed" type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#collapse<?= $fila['idcronograma'] ?>"
+                                aria-expanded="false"
+                                aria-controls="collapse<?= $fila['idcronograma'] ?>">
+                                <span class="fw-bold">
+                                    Cuota #<?= htmlspecialchars($fila['numcuota']) ?>
+                                </span>
+                                <span class="ms-auto me-2">
+                                    <span class="badge <?= $clase_estado_badge ?>">
+                                        <i class="<?= $icono ?> me-1"></i> <?= $texto_estado ?>
+                                    </span>
+                                </span>
+                                <span class="badge bg-primary">
+                                    S/ <?= number_format($fila['saldorestante'], 2) ?>
+                                </span>
+                            </button>
+                        </h2>
+                        <div id="collapse<?= $fila['idcronograma'] ?>"
+                            class="accordion-collapse collapse"
+                            aria-labelledby="heading-<?= $fila['idcronograma'] ?>"
+                            data-bs-parent="#acordeonCronograma">
+                            <div class="accordion-body">
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item"><strong>Fecha Vencimiento:</strong> <?= $fecha_formateada ?></li>
+                                    <li class="list-group-item"><strong>Interés:</strong> S/ <?= number_format($fila['interes'], 2) ?></li>
+                                    <li class="list-group-item"><strong>Abono Capital:</strong> S/ <?= number_format($fila['abonocapital'], 2) ?></li>
+                                    <li class="list-group-item"><strong>Valor Cuota:</strong> S/ <?= number_format($fila['valorcuota'], 2) ?></li>
+                                    <li class="list-group-item"><strong>Amortización:</strong> <?= number_format($fila['amortizacion'], 2) ?></li>
+                                    <li class="list-group-item"><strong>Restante:</strong> <?= number_format($fila['saldorestante'], 2) ?></li>
+                                    <li class="list-group-item"><strong>Saldo Capital:</strong> S/ <?= number_format($fila['saldocapital'], 2) ?></li>
+                                    <li class="list-group-item">
+                                        <strong>Estado:</strong>
+                                        <span class="badge <?= $clase_estado_badge ?>">
+                                            <i class="<?= $icono ?> me-1"></i> <?= $texto_estado ?>
+                                        </span>
+                                    </li>
+                                    <li class="list-group-item">
+                                        <strong>Acciones:</strong><br>
+                                        <?php if (!$fila_deshabilitada): ?>
+                                            <button class="btn btn-pagar btn-sm text-white bg-success mt-2"
+                                                id="btn-pagar" data-bs-toggle="modal"
+                                                data-bs-target="#modalPago"
+                                                data-cuota="<?= $fila['numcuota'] ?>"
+                                                data-idcronograma="<?= $fila['idcronograma'] ?>"
+                                                data-valorcuota="<?= $fila['valorcuota'] ?>"
+                                                data-penalidad="<?= $fila['penalidad'] ?>"
+                                                data-saldo-cuota="<?= $fila['saldocuota_pendiente'] ?>"
+                                                data-saldorestante="<?= $fila['saldorestante'] ?>"
+                                                data-saldo-penalidad="<?= $fila['penalidad_pendiente'] ?>">
+                                                <i class="fa-solid fa-dollar-sign me-1"></i> Pagar
+                                            </button>
+                                        <?php else: ?>
+                                            <span class="badge bg-light text-muted">No hay acciones disponibles</span>
+                                        <?php endif; ?>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                <?php } ?>
+            </div>
+        <?php endif; ?>
+    </div>
+
+
+
+
+
+
+
 </div>
 
 
@@ -360,11 +472,11 @@
                                         <i class="fas fa-gavel text-danger me-2"></i> Pago de Penalidad
                                     </h6>
                                     <div class="row g-3">
-                                        <div class="col-md-6 form-floating" >
+                                        <div class="col-md-6 form-floating">
                                             <input type="text" class="form-control" id="amortizacionPenalidad" name="amortizacionPenalidad">
                                             <label class="form-label small text-muted" for="amortizacionPenalidad">Monto</label>
                                         </div>
-                                        <div class="col-md-6 form-floating" >
+                                        <div class="col-md-6 form-floating">
                                             <input id="comprobantePenalidad" class="form-control" type="file" name="comprobantePenalidad" accept="image/*,.pdf">
                                             <label class="form-label small text-muted" id="comprobantePenalidad">Comprobante de Penalidad</label>
                                             <div class="invalid-feedback">Ingrese un comprobante.</div>

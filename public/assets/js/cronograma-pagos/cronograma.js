@@ -111,7 +111,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     elements.medioPagoSelect.addEventListener('change', (e) => {
 
-        if(e.target.value.toUpperCase() === MEDIOS_PAGO.efectivo.toUpperCase()){
+        if (e.target.value.toUpperCase() === MEDIOS_PAGO.efectivo.toUpperCase()) {
             elements.numeroTransaccionInput.disabled = true;
             elements.comprobanteCuotaInput.disabled = true;
 
@@ -123,7 +123,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     elements.selectMedioPagoPenalidad.addEventListener('change', (e) => {
 
-        if(e.target.value.toUpperCase() === MEDIOS_PAGO.efectivo.toUpperCase()){
+        if (e.target.value.toUpperCase() === MEDIOS_PAGO.efectivo.toUpperCase()) {
             elements.numeroTransaccionPenalidadInput.disabled = true;
             elements.comprobantePenalidadInput.disabled = true;
         } else {
@@ -435,48 +435,97 @@ document.addEventListener('DOMContentLoaded', async () => {
     showPage(currentPage);
 
     // Click en botones de pagar
-    elements.tablaBody.addEventListener('click', function (e) {
+
+    document.addEventListener('click', function (e) {
         const btn = e.target.closest('.btn-pagar');
-        if (!btn) return;
 
-        const saldoCuota = parseFloat(btn.dataset.saldoCuota) || 0;
-        const saldoPenalidad = parseFloat(btn.dataset.saldoPenalidad) || 0;
+        // Si el elemento clicado o su padre más cercano tiene la clase 'btn-pagar'
+        if (btn) {
+            const saldoCuota = parseFloat(btn.dataset.saldoCuota) || 0;
+            const saldoPenalidad = parseFloat(btn.dataset.saldoPenalidad) || 0;
 
-        idCronogramaSeleccionado = btn.dataset.idcronograma;
-        valorCuotaDeuda = saldoCuota;
-        valorPenalidadDeuda = saldoPenalidad;
+            // Llena el modal con los datos
+            const modal = document.getElementById('modalPago');
+            if (modal) {
+                idCronogramaSeleccionado = btn.dataset.idcronograma;
+                valorCuotaDeuda = saldoCuota;
+                valorPenalidadDeuda = saldoPenalidad;
 
-        elements.amortizacionCuotaInput.value = saldoCuota.toFixed(2);
-        elements.amortizacionPenalidadInput.value = saldoPenalidad.toFixed(2);
-        elements.detalleCuotaInput.value = saldoCuota.toFixed(2);
-        elements.detallePenalidadInput.value = saldoPenalidad.toFixed(2);
-        elements.detalleTotalDeudaInput.value = (saldoCuota + saldoPenalidad).toFixed(2);
-        elements.numeroCuotaDisplay.textContent = `Está a punto de registrar el pago de la cuota N° ${btn.dataset.cuota}`;
+                elements.amortizacionCuotaInput.value = saldoCuota.toFixed(2);
+                elements.amortizacionPenalidadInput.value = saldoPenalidad.toFixed(2);
+                elements.detalleCuotaInput.value = saldoCuota.toFixed(2);
+                elements.detallePenalidadInput.value = saldoPenalidad.toFixed(2);
+                elements.detalleTotalDeudaInput.value = (saldoCuota + saldoPenalidad).toFixed(2);
+                elements.numeroCuotaDisplay.textContent = `Está a punto de registrar el pago de la cuota N° ${btn.dataset.cuota}`;
 
-        const mostrarSoloPenalidad = saldoCuota === 0 && saldoPenalidad > 0;
-        const mostrarSoloCuota = saldoCuota > 0 && saldoPenalidad === 0;
-        const mostrarSelectCompleto = saldoCuota > 0 && saldoPenalidad > 0;
+                const mostrarSoloPenalidad = saldoCuota === 0 && saldoPenalidad > 0;
+                const mostrarSoloCuota = saldoCuota > 0 && saldoPenalidad === 0;
+                const mostrarSelectCompleto = saldoCuota > 0 && saldoPenalidad > 0;
 
-        elements.contenedorTipoPago.classList.toggle('hidden', !mostrarSelectCompleto);
-        configurarValidacionesFormulario(elements, valorCuotaDeuda);
+                elements.contenedorTipoPago.classList.toggle('hidden', !mostrarSelectCompleto);
 
-        if (mostrarSelectCompleto) {
-            elements.tipoPagoSelect.innerHTML = `
-                <option value='${TIPOS_PAGO.ambas}'>Cuota y Penalidad</option>
-                <option value='${TIPOS_PAGO.soloCuota}'>Solo Cuota</option>
-                <option value='${TIPOS_PAGO.soloPenalidad}'>Solo Penalidad</option>
-            `;
-            elements.tipoPagoSelect.value = TIPOS_PAGO.ambas;
-        } else if (mostrarSoloPenalidad) {
-            elements.tipoPagoSelect.innerHTML = `<option value='${TIPOS_PAGO.soloPenalidad}'>Solo Penalidad</option>`;
-            elements.tipoPagoSelect.value = TIPOS_PAGO.soloPenalidad;
-        } else if (mostrarSoloCuota) {
-            elements.tipoPagoSelect.innerHTML = `<option value='${TIPOS_PAGO.soloCuota}'>Solo Cuota</option>`;
-            elements.tipoPagoSelect.value = TIPOS_PAGO.soloCuota;
+                if (mostrarSelectCompleto) {
+                    elements.tipoPagoSelect.innerHTML = `
+                    <option value='${TIPOS_PAGO.ambas}'>Cuota y Penalidad</option>
+                    <option value='${TIPOS_PAGO.soloCuota}'>Solo Cuota</option>
+                    <option value='${TIPOS_PAGO.soloPenalidad}'>Solo Penalidad</option>
+                `;
+                    elements.tipoPagoSelect.value = TIPOS_PAGO.ambas;
+                } else if (mostrarSoloPenalidad) {
+                    elements.tipoPagoSelect.innerHTML = `<option value='${TIPOS_PAGO.soloPenalidad}'>Solo Penalidad</option>`;
+                    elements.tipoPagoSelect.value = TIPOS_PAGO.soloPenalidad;
+                } else if (mostrarSoloCuota) {
+                    elements.tipoPagoSelect.innerHTML = `<option value='${TIPOS_PAGO.soloCuota}'>Solo Cuota</option>`;
+                    elements.tipoPagoSelect.value = TIPOS_PAGO.soloCuota;
+                }
+
+                updateSelectTipoPago();
+            }
         }
-
-        updateSelectTipoPago();
     });
+    
+    // elements.tablaBody.addEventListener('click', function (e) {
+    //     const btn = e.target.closest('.btn-pagar');
+    //     if (!btn) return;
+
+    //     const saldoCuota = parseFloat(btn.dataset.saldoCuota) || 0;
+    //     const saldoPenalidad = parseFloat(btn.dataset.saldoPenalidad) || 0;
+
+    //     idCronogramaSeleccionado = btn.dataset.idcronograma;
+    //     valorCuotaDeuda = saldoCuota;
+    //     valorPenalidadDeuda = saldoPenalidad;
+
+    //     elements.amortizacionCuotaInput.value = saldoCuota.toFixed(2);
+    //     elements.amortizacionPenalidadInput.value = saldoPenalidad.toFixed(2);
+    //     elements.detalleCuotaInput.value = saldoCuota.toFixed(2);
+    //     elements.detallePenalidadInput.value = saldoPenalidad.toFixed(2);
+    //     elements.detalleTotalDeudaInput.value = (saldoCuota + saldoPenalidad).toFixed(2);
+    //     elements.numeroCuotaDisplay.textContent = `Está a punto de registrar el pago de la cuota N° ${btn.dataset.cuota}`;
+
+    //     const mostrarSoloPenalidad = saldoCuota === 0 && saldoPenalidad > 0;
+    //     const mostrarSoloCuota = saldoCuota > 0 && saldoPenalidad === 0;
+    //     const mostrarSelectCompleto = saldoCuota > 0 && saldoPenalidad > 0;
+
+    //     elements.contenedorTipoPago.classList.toggle('hidden', !mostrarSelectCompleto);
+    //     configurarValidacionesFormulario(elements, valorCuotaDeuda);
+
+    //     if (mostrarSelectCompleto) {
+    //         elements.tipoPagoSelect.innerHTML = `
+    //             <option value='${TIPOS_PAGO.ambas}'>Cuota y Penalidad</option>
+    //             <option value='${TIPOS_PAGO.soloCuota}'>Solo Cuota</option>
+    //             <option value='${TIPOS_PAGO.soloPenalidad}'>Solo Penalidad</option>
+    //         `;
+    //         elements.tipoPagoSelect.value = TIPOS_PAGO.ambas;
+    //     } else if (mostrarSoloPenalidad) {
+    //         elements.tipoPagoSelect.innerHTML = `<option value='${TIPOS_PAGO.soloPenalidad}'>Solo Penalidad</option>`;
+    //         elements.tipoPagoSelect.value = TIPOS_PAGO.soloPenalidad;
+    //     } else if (mostrarSoloCuota) {
+    //         elements.tipoPagoSelect.innerHTML = `<option value='${TIPOS_PAGO.soloCuota}'>Solo Cuota</option>`;
+    //         elements.tipoPagoSelect.value = TIPOS_PAGO.soloCuota;
+    //     }
+
+    //     updateSelectTipoPago();
+    // });
 
 
     // Eventos del modal de pago
@@ -648,11 +697,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
     elements.btnExcel.addEventListener('click', async () => {
-        
+
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet('Reporte de Pagos');
 
-        
+
         const headerStyle = {
             font: { bold: true, color: { argb: 'FF2C3E50' } },
             fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFEAECEE' } },
@@ -669,13 +718,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             numFmt: 'dd/mm/yyyy'
         };
 
-        
+
         const titleRow = worksheet.addRow(['CRONOGRAMA DE PAGOS']);
         titleRow.getCell(1).style = titleStyle;
         worksheet.mergeCells('A1:I1');
         titleRow.height = 20;
 
-        
+
         const headers = ["#", "Fecha Vencimiento", "Interés", "Abono Capital", "Valor Cuota", "Amortización", "Restante", "Saldo Capital", "Estado"];
         worksheet.addRow(headers).eachCell(cell => {
             Object.assign(cell, { style: headerStyle });
@@ -683,10 +732,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const rows = Array.from(elements.tablaBody.querySelectorAll('tr')).map(tr => {
             const tds = tr.querySelectorAll('td');
-            console.log('tds: ' ,tds[1].innerText.trim());
+            console.log('tds: ', tds[1].innerText.trim());
             const rowData = [
                 parseInt(tds[0].innerText.trim()), // #
-            tds[1].querySelector('span.fw-bold')?.innerText.trim() || '',
+                tds[1].querySelector('span.fw-bold')?.innerText.trim() || '',
                 parseFloat(tds[2].innerText.trim().replace('S/', '').replace(',', '')), // Interés
                 parseFloat(tds[3].innerText.trim().replace('S/', '').replace(',', '')), // Abono Capital
                 parseFloat(tds[4].innerText.trim().replace('S/', '').replace(',', '')), // Valor Cuota
@@ -695,32 +744,32 @@ document.addEventListener('DOMContentLoaded', async () => {
                 parseFloat(tds[7].innerText.trim().replace('S/', '').replace(',', '')), // Saldo Capital
                 tds[8].innerText.trim().split('-')[0] // Estado
             ];
-         
+
             return rowData;
         });
 
         rows.forEach(row => {
             const newRow = worksheet.addRow(row);
             newRow.eachCell((cell, colNumber) => {
-                
+
                 if (colNumber >= 3 && colNumber <= 8) {
                     Object.assign(cell, { style: currencyStyle });
                 }
-                
+
                 if (colNumber === 2) {
                     Object.assign(cell, { style: dateStyle });
                 }
             });
         });
 
-        
+
         worksheet.columns.forEach(column => {
             const lengths = column.values.map(v => v.toString().length);
             const maxLength = Math.max(...lengths.filter(v => typeof v === 'number'));
             column.width = maxLength < 10 ? 10 : maxLength + 2;
         });
 
-        
+
         const buffer = await workbook.xlsx.writeBuffer();
         const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
         const url = window.URL.createObjectURL(blob);
@@ -730,7 +779,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         a.click();
         window.URL.revokeObjectURL(url);
 
-        
+
     });
 
 
