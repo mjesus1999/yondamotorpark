@@ -1,5 +1,5 @@
 use motorpark;
-
+SELECT * FROM cotizaciones;
 /*
 * ACTUALIZAR LOS REQUISITOS:
 */
@@ -154,10 +154,11 @@ SELECT * FROM personas;
 SELECT * FROM contratoslaborales;
 SELECT * FROM colaboradores;
 SELECT * FROM clientes;
+SELECT * FROM vehiculos;
 SELECT * FROM cotizaciones;
 SELECT * FROM cotizacion_financiamiento WHERE idcotizacion = 48;
 
-
+SELECT idcotizacion, moneda, precioventa FROM cotizaciones WHERE idcotizacion = 53;
 
 SELECT idfinanciamiento, idcotizacion, numcuotas, inicial, valorcuota, moneda, precioventa, creado
 FROM cotizacion_financiamiento

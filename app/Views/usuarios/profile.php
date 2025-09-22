@@ -17,7 +17,7 @@
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 
- 
+
     .alert-gradient {
         background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
         color: white;
@@ -25,8 +25,8 @@
         border-radius: 10px;
         box-shadow: var(--card-shadow);
     }
-    
-  
+
+
     .breadcrumb-item a:hover {
         color: white !important;
     }
@@ -42,7 +42,7 @@
         background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
         border-bottom: none;
     }
-    
+
     .profile-avatar-container {
         position: relative;
     }
@@ -64,7 +64,7 @@
         border: 4px solid white;
         box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
     }
-    
+
     .avatar-overlay {
         position: absolute;
         top: 0;
@@ -80,7 +80,7 @@
         cursor: pointer;
         border-radius: 50%;
     }
-    
+
     .avatar-wrapper:hover .avatar-overlay {
         opacity: 1;
     }
@@ -88,7 +88,7 @@
     .avatar-wrapper:hover .profile-avatar {
         transform: scale(1.05);
     }
-    
+
     .profile-info {
         margin-top: 20px;
     }
@@ -99,14 +99,14 @@
         border-radius: 20px;
         margin-bottom: 5px;
     }
-    
+
     .profile-details-card {
         border: none;
         border-radius: 15px;
         background: white;
         box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
     }
-    
+
     .info-item {
         padding: 12px 15px;
         border-radius: 10px;
@@ -115,13 +115,13 @@
         margin-bottom: 15px;
         border-left: 4px solid var(--primary-color);
     }
-    
+
     .info-item:hover {
         background: #e9ecef;
         transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
     }
-    
+
     .info-label {
         font-size: 0.8rem;
         color: var(--text-light);
@@ -129,13 +129,13 @@
         font-weight: 600;
         text-transform: uppercase;
     }
-    
+
     .info-value {
         color: var(--text-dark);
         font-weight: 500;
         margin-bottom: 0;
     }
-    
+
     .btn-save-avatar {
         position: relative;
         margin-top: 15px;
@@ -143,23 +143,23 @@
         border: none;
         border-radius: 25px;
         padding: 8px 20px;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         transition: all 0.3s;
         z-index: 10;
     }
-    
+
     .btn-save-avatar:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
     }
 
     .modal-content.bg-dark {
         border-radius: 15px;
         overflow: hidden;
-        box-shadow: 0 0 30px rgba(0,0,0,0.3);
+        box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
     }
-    
-  
+
+
     .user-status {
         display: inline-block;
         width: 12px;
@@ -180,7 +180,7 @@
         min-width: 250px;
         background: white;
         border-left: 4px solid;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         border-radius: 6px;
         padding: 15px;
         display: flex;
@@ -188,42 +188,42 @@
         transform: translateX(110%);
         transition: transform 0.3s ease;
     }
-    
+
     .toast-notification.show {
         transform: translateX(0);
     }
-    
+
     .toast-notification.success {
         border-left-color: #1cc88a;
     }
-    
+
     .toast-notification.error {
         border-left-color: #e74a3b;
     }
-    
+
     .toast-icon {
         margin-right: 10px;
         font-size: 1.5rem;
     }
-    
+
     .toast-success .toast-icon {
         color: #1cc88a;
     }
-    
+
     .toast-error .toast-icon {
         color: #e74a3b;
     }
-    
+
     @media (max-width: 768px) {
         .profile-details-card {
             margin-top: 20px;
         }
-        
+
         .avatar-wrapper {
             width: 150px;
             height: 150px;
         }
-        
+
         .info-item {
             padding: 10px;
         }
@@ -232,19 +232,30 @@
 
 <div class="container-fluid py-4">
     <div class="alert alert-info mt-2" role="alert">
-    <div class="row">
-      <div class="col-md-6 d-flex">
-        <nav
-          style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='%236c757d'/%3E%3C/svg%3E&#34;);"
-          aria-label="breadcrumb">
-          <ol class="breadcrumb mb-0">
-            <li class="breadcrumb-item text-primary"><a href="#">Perfil</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Cuenta</li>
-          </ol>
-        </nav>
-      </div>
+        <div class="row">
+            <div class="col-md-6 d-flex aling-items-center justify-content-start">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a href="#">Perfil</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Cuenta</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
     </div>
-  </div>
+    <!-- <div class="alert alert-info mt-2" role="alert">
+        <div class="row">
+            <div class="col-md-6 d-flex">
+                <nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='%236c757d'/%3E%3C/svg%3E&#34;);"
+                    aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item text-primary"><a href="#">Perfil</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Cuenta</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+    </div> -->
 
 
     <form action="#" id="profile" autocomplete="off">
@@ -259,23 +270,27 @@
                         <div class="col-md-4 text-center mb-4 mb-md-0">
                             <div class="profile-avatar-container position-relative mx-auto">
                                 <div class="mt-3 avatar-wrapper">
-                                    <img src="<?= htmlspecialchars($usuario['avatar'] ?? '/assets/images/profile.jpg') ?>" class="profile-avatar rounded-circle" alt="Avatar" id="profile-avatar" data-bs-toggle="modal" data-bs-target="#avatarModal">
-                                    
+                                    <img src="<?= htmlspecialchars($usuario['avatar'] ?? '/assets/images/profile.jpg') ?>"
+                                        class="profile-avatar rounded-circle" alt="Avatar" id="profile-avatar"
+                                        data-bs-toggle="modal" data-bs-target="#avatarModal">
+
                                     <div id="avatar-overlay" class="avatar-overlay">
                                         <i class="fas fa-camera text-white fs-4"></i>
                                     </div>
-                                    
+
                                     <input type="file" id="avatar-input" accept="image/*" class="d-none">
                                 </div>
-                                
-                                <a href="#" class="d-block mt-3 text-primary fw-bold small" data-bs-toggle="modal" data-bs-target="#avatarModal">
+
+                                <a href="#" class="d-block mt-3 text-primary fw-bold small" data-bs-toggle="modal"
+                                    data-bs-target="#avatarModal">
                                     <i class="fas fa-eye me-1"></i>ver foto
                                 </a>
-                                
-                                <button type="button" class="btn btn-save-avatar text-white" id="btnSaveAvatar" style="display:none;">
+
+                                <button type="button" class="btn btn-save-avatar text-white" id="btnSaveAvatar"
+                                    style="display:none;">
                                     <i class="fas fa-save me-1"></i>Guardar foto
                                 </button>
-                                
+
                                 <div class="profile-info mt-3">
                                     <p>
                                         <span class="badge bg-primary">
@@ -284,7 +299,8 @@
                                     </p>
                                     <p>
                                         <span class="badge bg-warning text-dark">
-                                            <i class="fas fa-envelope me-1"></i><?= htmlspecialchars($usuario['email'] ?? '—') ?>
+                                            <i
+                                                class="fas fa-envelope me-1"></i><?= htmlspecialchars($usuario['email'] ?? '—') ?>
                                         </span>
                                     </p>
                                     <p class="mt-2">
@@ -302,12 +318,16 @@
                                         <div class="col-md-6">
                                             <div class="info-item">
                                                 <label class="info-label">Nombre completo</label>
-                                                <p class="info-value"><?= htmlspecialchars("{$usuario['nombres']} {$usuario['apellidos']}") ?></p>
+                                                <p class="info-value">
+                                                    <?= htmlspecialchars("{$usuario['nombres']} {$usuario['apellidos']}") ?>
+                                                </p>
                                             </div>
 
                                             <div class="info-item">
                                                 <label class="info-label">Tipo / Número doc.</label>
-                                                <p class="info-value"><?= htmlspecialchars("{$usuario['tipodoc']} {$usuario['nrodoc']}") ?></p>
+                                                <p class="info-value">
+                                                    <?= htmlspecialchars("{$usuario['tipodoc']} {$usuario['nrodoc']}") ?>
+                                                </p>
                                             </div>
 
                                             <div class="info-item">
@@ -347,17 +367,20 @@
                                         <div class="col-md-6">
                                             <div class="info-item">
                                                 <label class="info-label">Distrito</label>
-                                                <p class="info-value"><?= htmlspecialchars($usuario['nombre_distrito'] ?? '—') ?></p>
+                                                <p class="info-value">
+                                                    <?= htmlspecialchars($usuario['nombre_distrito'] ?? '—') ?></p>
                                             </div>
 
                                             <div class="info-item">
                                                 <label class="info-label">Dirección</label>
-                                                <p class="info-value"><?= htmlspecialchars($usuario['direccion'] ?? '—') ?></p>
+                                                <p class="info-value"><?= htmlspecialchars($usuario['direccion'] ?? '—') ?>
+                                                </p>
                                             </div>
 
                                             <div class="info-item">
                                                 <label class="info-label">Referencia</label>
-                                                <p class="info-value"><?= htmlspecialchars($usuario['referencia'] ?? '—') ?></p>
+                                                <p class="info-value"><?= htmlspecialchars($usuario['referencia'] ?? '—') ?>
+                                                </p>
                                             </div>
 
                                             <div class="info-item">
@@ -367,22 +390,25 @@
 
                                             <div class="info-item">
                                                 <label class="info-label">Teléfono alt.</label>
-                                                <p class="info-value"><?= htmlspecialchars($usuario['telalternativo'] ?? '—') ?></p>
+                                                <p class="info-value">
+                                                    <?= htmlspecialchars($usuario['telalternativo'] ?? '—') ?></p>
                                             </div>
 
                                             <div class="info-item">
                                                 <label class="info-label">Inicio de contrato</label>
                                                 <p class="info-value"><?= htmlspecialchars($usuario['fechainicio']) ?></p>
                                             </div>
-                                            
+
                                             <div class="info-item">
                                                 <label class="info-label">Fin de contrato</label>
-                                                <p class="info-value"><?= htmlspecialchars($usuario['fechafin'] ?? '—') ?></p>
+                                                <p class="info-value"><?= htmlspecialchars($usuario['fechafin'] ?? '—') ?>
+                                                </p>
                                             </div>
 
                                             <div class="info-item">
                                                 <label class="info-label">Cargo / Área</label>
-                                                <p class="info-value"><?= htmlspecialchars("{$usuario['cargo']} / {$usuario['area']}") ?></p>
+                                                <p class="info-value">
+                                                    <?= htmlspecialchars("{$usuario['cargo']} / {$usuario['area']}") ?></p>
                                             </div>
                                         </div>
                                     </div>
@@ -405,10 +431,12 @@
         <div class="modal-content bg-dark border-0">
             <div class="modal-header border-0 pb-0">
                 <h5 class="modal-title text-white" id="avatarModalLabel">Foto de perfil</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Cerrar"></button>
             </div>
             <div class="modal-body text-center p-0">
-                <img src="<?= htmlspecialchars($usuario['avatar'] ?? '/assets/images/profile.jpg') ?>" alt="Avatar Grande" class="img-fluid rounded">
+                <img src="<?= htmlspecialchars($usuario['avatar'] ?? '/assets/images/profile.jpg') ?>"
+                    alt="Avatar Grande" class="img-fluid rounded">
             </div>
         </div>
     </div>
@@ -458,7 +486,7 @@
         avatarDirty = true;
         avatarImg.src = URL.createObjectURL(file);
         btnSave.style.display = 'block';
-        showToastPersnoalizado  ('Imagen cargada. Haga clic en Guardar para confirmar', 'success');
+        showToastPersnoalizado('Imagen cargada. Haga clic en Guardar para confirmar', 'success');
     });
 
     // Guardar foto por AJAX
@@ -489,14 +517,14 @@
             showToast('Error de red al guardar la foto', 'error');
         }
     });
-    
+
     // Función para mostrar notificaciones toast 
     function showToastPersnoalizado(message, type = 'success', duration = 3000) {
         const toast = document.getElementById('toast');
         const toastIcon = toast.querySelector('.toast-icon');
         const toastTitle = toast.querySelector('.toast-title');
         const toastMessage = toast.querySelector('.toast-message');
-        
+
         // Configurar según el tipo
         if (type === 'success') {
             toast.className = 'toast-notification success';
@@ -507,11 +535,11 @@
             toastIcon.className = 'toast-icon fas fa-exclamation-circle';
             toastTitle.textContent = 'Error';
         }
-        
+
         toastMessage.textContent = message;
         toast.classList.add('show');
-        
-      
+
+
         setTimeout(() => {
             toast.classList.remove('show');
         }, duration);

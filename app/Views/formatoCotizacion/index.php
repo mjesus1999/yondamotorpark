@@ -95,7 +95,7 @@
                     <table class="table table-sm" id="tabla-formatocotizacion">
                         <thead>
                             <tr>
-                                <th>Nombre de la cotizacion</th>
+                                <th>Nombre del formato de cotizacion</th>
                                 <th>Fecha Inicio</th>
                                 <th>Fecha Fin</th>
                                 <th>Opciones</th>

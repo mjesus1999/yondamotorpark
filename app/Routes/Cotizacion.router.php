@@ -27,3 +27,5 @@ $router->add('GET', '/cotizacion/historial', 'CotizacionController', 'historial'
 
 //FECHA DE REACTIVACION
 $router->add('POST', '/cotizacion/reactivar/(\d+)', 'CotizacionController', 'reactivar');
+
+$router->add('GET', '/cotizacion/reporteCot/(\d+)', 'CotizacionController', 'reporte-cotizacion');

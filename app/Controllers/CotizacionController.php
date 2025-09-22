@@ -117,6 +117,12 @@ class CotizacionController extends Controller
         ]);
     }
 
+    public function indexReporteByCotizacion(): void
+    {
+        $this->authRequired();
+        $this->view('cotizacion.reporte-cotizacion');
+    }
+
 
     // En CotizacionController.php - Método apiShow actualizado
     public function apiShow(int $idcotizacion): void
@@ -133,6 +139,12 @@ class CotizacionController extends Controller
         $idformato = isset($cot['idformato']) ? (int) $cot['idformato'] : null;
         $requisitos = $idformato ? $this->formatoModel->getDetalleRequisitos($idformato) : [];
         $financiamientos = $this->cotizacionModel->getFinanciamientos($idcotizacion);
+
+        $fechaRegistro = $cot['fechaRegistro'] ?? null;
+        $fechaReact = $cot['fechareactivacion'] ?? null;
+
+        // usar la fecha de reactivación si existe; si no, la fecha de registro
+        $fechaParaMostrar = $fechaReact ?: $fechaRegistro;
 
         // PROCESAR REQUISITOS DINÁMICOS
         $gastosAdmin = (float) ($cot['gastosadministrativos'] ?? 1500.00);
@@ -170,7 +182,8 @@ class CotizacionController extends Controller
                 'id' => $idcotizacion,
                 'idformato' => $idformato,
                 'tipocotizacion' => $cot['tipocotizacion'] ?? null,
-                'fecha' => $cot['fechaRegistro'] ?? null,
+                'fecha' => $fechaParaMostrar,
+                /* 'fecha' => $cot['fechaRegistro'] ?? null, */
                 'moneda' => $cot['moneda'] ?? 'PEN', // Asegurar que siempre esté presente
                 'cliente' => [
                     'nombre' => $cot['cliente_nombre'] ?? null,
