@@ -190,7 +190,13 @@ LEFT JOIN colaboradores col ON c.idasesor = col.idcolaborador
 LEFT JOIN contratoslaborales cl_ase ON col.idcontratolaboral = cl_ase.idcontratolaboral
 LEFT JOIN personas pase ON cl_ase.idpersona = pase.idpersona
 LEFT JOIN cargos cg ON cl_ase.idcargo = cg.idcargo
-WHERE DATE_ADD(IFNULL(c.fechareactivacion, c.creado), INTERVAL c.vigenciadias DAY) >= CURDATE();
+WHERE DATE_ADD(IFNULL(c.fechareactivacion, c.creado), INTERVAL c.vigenciadias DAY) >= CURDATE()
+ORDER BY COALESCE(c.fechareactivacion, c.creado) ASC, c.creado ASC;
+
+/*
+ORDER BY COALESCE (fechaRegistro, fechareactivacion) DESC
+ORDER BY COALESCE(c.fechareactivacion, c.creado) DESC, c.creado DESC
+*/
 
 /*
 CREATE OR REPLACE VIEW vwGetAllCotizacion AS
@@ -268,6 +274,7 @@ SELECT
   c.valorcuota,
   c.idasesor,
   c.creado AS fechaRegistro,
+  c.fechareactivacion,
   c.gastosadministrativos,
   -- Datos del cliente (normalizado: persona o empresa)
   CASE
@@ -364,6 +371,8 @@ LEFT JOIN contratoslaborales cl_ase ON col.idcontratolaboral = cl_ase.idcontrato
 LEFT JOIN personas pase ON cl_ase.idpersona = pase.idpersona
 LEFT JOIN cargos cg ON cl_ase.idcargo = cg.idcargo
 WHERE DATE_ADD(IFNULL(c.fechareactivacion, c.creado), INTERVAL c.vigenciadias DAY) < CURDATE();
+
+/*ORDER BY COALESCE (fechaRegistro, fechareactivacion) DESC;*/
 
 /*
 CREATE OR REPLACE VIEW vwGetAllCotizacionVencidas AS
