@@ -1,8 +1,11 @@
 <?php if ($estadoActual == 'emitido'): ?>
     <!-- Emitido -->
-    <a href="/oc/reporte/<?= $ordenCompra['idordencompra'] ?>" target="_blank" title="PDF OC">
+    <!-- <a href="/oc/reporte/<?= $ordenCompra['idordencompra'] ?>" target="_blank" title="PDF OC">
         <i class="bi bi-filetype-pdf text-danger fs-5 me-2"></i>
-    </a>
+    </a> -->
+    <button type="button" title="PDF OC" data-idoc=<?= $ordenCompra['idordencompra'] ?> id="btn-pdf-oc" class="btn-pdf-oc-class" style="background: none; border: none; padding: 0;">
+            <i class="bi bi-filetype-pdf text-danger fs-5 me-2"></i>
+    </button>
     <a href="#" class="show-details" data-idoc="<?= $ordenCompra['idordencompra'] ?>" title="Ver detalle">
         <i class="bi bi-info-circle text-primary fs-5 me-2"></i>
     </a>

@@ -61,10 +61,7 @@ class OrdenCompraController extends Controller
         $this->view('oc.reporteBy-concesionario');
     }
 
-    public function html2pdfReport($id): void
-    {
-        $this->view('pdf/oc/oc-html2pdf', ['id' => $id]);
-    }
+
 
 
 

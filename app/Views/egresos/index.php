@@ -220,8 +220,6 @@
 
 
 
-
-
     <div class="modal fade" id="modal-comprobante" tabindex="-1" aria-labelledby="title-modal" aria-hidden="true">
         <div class="modal-dialog modal-xl modal-fullscreen-lg-down">
             <div class="modal-content">
@@ -444,8 +442,8 @@
 
 
         function renderDocument(url) {
-            const extension = url.split('.').pop().toLowerCase();
-            // Clear previous content
+            const extension = url.split('.').pop().toLowerCase();            
+            // console.log('EXTENSION DEL COMPROBANTE: ', extension);
             comprobanteViewer.innerHTML = '';
 
             const container = document.createElement('div');

@@ -588,8 +588,6 @@
 
 
 
-
-
             document.querySelectorAll(".btn-abrir-modal-estado").forEach(btn => {
                 btn.addEventListener("click", (e) => {
                     e.preventDefault();
@@ -813,6 +811,485 @@
                     $("#lista-oc").slideDown(speedAnimation);
                 });
             }
+
+
+
+        });
+
+        const btnPdfOcs = document.querySelectorAll('.btn-pdf-oc-class');
+
+        btnPdfOcs.forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                const ocId = btn.getAttribute('data-idoc');
+
+                if (!ocId) {
+                    console.error('No se encontró el ID de la orden de compra en el atributo data-idoc.');
+                    return;
+                }
+
+                try {
+
+
+                    //  Obtener los datos de la API
+                    const response = await fetch(`/api/oc/${ocId}`);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    const data = await response.json();
+
+                    if (!data || !data.orden || !Array.isArray(data.vehiculos)) {
+                        throw new Error('No se encontraron datos válidos en la respuesta de la API.');
+                    }
+
+                    const ocOrden = data.orden;
+                    const ocDetalles = data.vehiculos;
+                    const logoBase64 = window.logoBase64;
+
+
+                    const documento = {
+                        pageSize: 'A4',
+                        pageOrientation: 'portrait',
+                        pageMargins: [40, 25, 25, 25],
+                        defaultStyle: {
+                            fontSize: 7.2,
+                            alignment: 'center'
+                        },
+                        content: [
+                            // Header
+                            {
+                                columns: [{
+                                        image: logoBase64,
+                                        width: 90,
+                                        alignment: 'left'
+                                    },
+                                    {
+                                        text: '',
+                                        width: '*'
+                                    },
+                                    {
+                                        table: {
+                                            widths: ['auto'],
+                                            body: [
+                                                [{
+                                                    text: 'ORDEN DE COMPRA',
+                                                    alignment: 'center',
+                                                    fontSize: 14,
+                                                    bold: true,
+                                                    margin: [0, 5, 0, 0],
+                                                    color: '#000'
+                                                }],
+                                                [{
+                                                    text: ocOrden.numero_oc_formateado || '-',
+                                                    alignment: 'center',
+                                                    fontSize: 14,
+                                                    bold: true,
+                                                    fillColor: 'yellow',
+                                                    margin: [0, 8, 0, 5],
+                                                    border: [true, false, true, true]
+                                                }],
+                                            ],
+                                        },
+                                        layout: 'noBorders',
+                                        alignment: 'right',
+                                        width: 150,
+                                    },
+                                ],
+                            },
+                            {
+                                text: '',
+                                margin: [0, 10]
+                            },
+
+                            // Sección de Concesionario
+                            {
+                                table: {
+                                    widths: ['*'],
+                                    body: [
+                                        [{
+                                            text: 'CONCESIONARIO',
+                                            alignment: 'center',
+                                            bold: true,
+                                            fillColor: '#E0E0E0'
+                                        }]
+                                    ]
+                                },
+                                layout: 'noBorders',
+                                margin: [0, 5, 0, 5],
+                            },
+                            {
+                                table: {
+                                    widths: ['auto', '*', 'auto', '*'],
+                                    body: [
+                                        [{
+                                            text: 'Punto de venta:',
+                                            bold: true,
+                                            alignment: 'left'
+                                        }, {
+                                            text: ocOrden.concesionario.ubigeo || '-',
+                                            alignment: 'left'
+                                        }, {
+                                            text: 'Banco:',
+                                            bold: true,
+                                            alignment: 'left'
+                                        }, {
+                                            text: '-',
+                                            alignment: 'left'
+                                        }],
+                                        [{
+                                            text: 'Razón Social:',
+                                            bold: true,
+                                            alignment: 'left'
+                                        }, {
+                                            text: ocOrden.concesionario.razon_social || '-',
+                                            alignment: 'left'
+                                        }, {
+                                            text: 'N° Oper:',
+                                            bold: true,
+                                            alignment: 'left'
+                                        }, {
+                                            text: '-',
+                                            alignment: 'left'
+                                        }],
+                                        [{
+                                            text: 'RUC:',
+                                            bold: true,
+                                            alignment: 'left'
+                                        }, {
+                                            text: ocOrden.concesionario.ruc || '-',
+                                            alignment: 'left'
+                                        }, {
+                                            text: 'Fecha:',
+                                            bold: true,
+                                            alignment: 'left'
+                                        }, {
+                                            text: ocOrden.fecha_emision_oc || '-',
+                                            alignment: 'left'
+                                        }],
+                                        [{
+                                            text: 'Dirección:',
+                                            bold: true,
+                                            alignment: 'left'
+                                        }, {
+                                            text: ocOrden.concesionario.direccion || '-',
+                                            alignment: 'left',
+                                            colSpan: 3
+                                        }, {}, {}],
+                                        [{
+                                            text: 'Vendedor:',
+                                            bold: true,
+                                            alignment: 'left'
+                                        }, {
+                                            text: ocOrden.concesionario.vendedor_contacto || '-',
+                                            alignment: 'left'
+                                        }, {
+                                            text: 'Teléfono:',
+                                            bold: true,
+                                            alignment: 'left'
+                                        }, {
+                                            text: ocOrden.concesionario.telefono || '-',
+                                            alignment: 'left'
+                                        }],
+                                    ],
+                                },
+                                layout: 'lightHorizontalLines',
+                                margin: [0, 0, 0, 10],
+                            },
+
+                            // Sección de Asociado
+                            {
+                                table: {
+                                    widths: ['*'],
+                                    body: [
+                                        [{
+                                            text: 'ASOCIADO',
+                                            alignment: 'center',
+                                            bold: true,
+                                            fillColor: '#E0E0E0'
+                                        }]
+                                    ]
+                                },
+                                layout: 'noBorders',
+                                margin: [0, 5, 0, 5],
+                            },
+                            {
+                                table: {
+                                    widths: ['auto', '*', 'auto', '*'],
+                                    body: [
+                                        [{
+                                            text: 'Titular:',
+                                            bold: true,
+                                            alignment: 'left'
+                                        }, {
+                                            text: 'YONDA & GRUPO HUARACA EIRL',
+                                            alignment: 'left'
+                                        }, {
+                                            text: 'Teléfono:',
+                                            bold: true,
+                                            alignment: 'left'
+                                        }, {
+                                            text: '926743607',
+                                            alignment: 'left'
+                                        }],
+                                        [{
+                                            text: 'DNI o RUC:',
+                                            bold: true,
+                                            alignment: 'left'
+                                        }, {
+                                            text: '20609396866',
+                                            alignment: 'left'
+                                        }, {
+                                            text: 'Correo:',
+                                            bold: true,
+                                            alignment: 'left'
+                                        }, {
+                                            text: 'asistentecontable@yondaperu.com',
+                                            alignment: 'left'
+                                        }],
+                                        [{
+                                            text: 'Dirección:',
+                                            bold: true,
+                                            alignment: 'left'
+                                        }, {
+                                            text: 'PANAMERICANA SUR KM PUERTA 201',
+                                            alignment: 'left',
+                                            colSpan: 3
+                                        }, {}, {}],
+                                    ],
+                                },
+                                layout: 'lightHorizontalLines',
+                                margin: [0, 0, 0, 10],
+                            },
+
+                            // Sección de Vehículos
+                            {
+                                table: {
+                                    widths: ['*'],
+                                    body: [
+                                        [{
+                                            text: 'DESCRIPCIÓN DE VEHÍCULOS',
+                                            alignment: 'center',
+                                            bold: true,
+                                            fillColor: '#E0E0E0'
+                                        }]
+                                    ]
+                                },
+                                layout: 'noBorders',
+                                margin: [0, 5, 0, 5],
+                            },
+                            {
+                                table: {
+                                    headerRows: 1,
+                                    widths: ['auto', 'auto', 'auto', 'auto', 'auto', '*', 'auto', 'auto', 'auto', 'auto'],
+                                    body: [
+                                        ['MARCA', 'MODELO', 'VERSIÓN', 'AÑO', 'COLOR', 'CHASIS', 'PLACA', 'PLACA R.', 'SERIE MOTOR', 'PRECIO INDIVIDUAL'].map(text => ({
+                                            text,
+                                            bold: true,
+                                            alignment: 'center'
+                                        })),
+                                        ...ocDetalles.map(v => [{
+                                                text: v.marca || '',
+                                                alignment: 'center'
+                                            },
+                                            {
+                                                text: v.modelo || '',
+                                                alignment: 'center'
+                                            },
+                                            {
+                                                text: v.version || '',
+                                                alignment: 'center'
+                                            },
+                                            {
+                                                text: v.anio_modelo || '',
+                                                alignment: 'center'
+                                            },
+                                            {
+                                                text: v.color || '',
+                                                alignment: 'center'
+                                            },
+                                            {
+                                                text: v.chasis || '',
+                                                alignment: 'center'
+                                            },
+                                            {
+                                                text: v.placa || '',
+                                                alignment: 'center'
+                                            },
+                                            {
+                                                text: v.placa_rotativa || '',
+                                                alignment: 'center'
+                                            },
+                                            {
+                                                text: v.serie_motor || '',
+                                                alignment: 'center'
+                                            },
+                                            {
+                                                text: `$ ${parseFloat(v.precio_unitario || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
+                                                alignment: 'right'
+                                            },
+                                        ]),
+                                    ],
+                                },
+                                layout: 'lightHorizontalLines',
+                            },
+                            {
+                                text: '',
+                                margin: [0, 10]
+                            },
+
+                            // Resumen Financiero y Observaciones
+                            {
+                                columns: [{
+                                        text: 'Observaciones:',
+                                        width: 'auto',
+                                        bold: true,
+                                        alignment: 'left',
+                                        margin: [0, 0, 0, 5],
+                                    },
+                                    {
+                                        text:   ocOrden.observaciones_oc || 'Sin observaciones',
+                                        width: '*',
+                                        alignment: 'left',
+                                        margin: [0, 0, 0, 5],
+                                    },
+                                    {
+                                        table: {
+                                            widths: ['auto', 'auto'],
+                                            body: [
+                                                [{
+                                                    text: 'RESUMEN FINANCIERO',
+                                                    colSpan: 2,
+                                                    bold: true,
+                                                    alignment: 'center',
+                                                    fillColor: '#E0E0E0'
+                                                }, {}],
+                                                [{
+                                                    text: 'Valor Venta:',
+                                                    bold: true,
+                                                    alignment: 'left'
+                                                }, {
+                                                    text: `$ ${parseFloat(ocOrden.totales.valor_venta || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
+                                                    alignment: 'right'
+                                                }],
+                                                [{
+                                                    text: 'IGV:',
+                                                    bold: true,
+                                                    alignment: 'left'
+                                                }, {
+                                                    text: `$ ${parseFloat(ocOrden.totales.igv || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
+                                                    alignment: 'right'
+                                                }],
+                                                [{
+                                                    text: 'TOTAL:',
+                                                    bold: true,
+                                                    alignment: 'left'
+                                                }, {
+                                                    text: `$ ${parseFloat(ocOrden.totales.total || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
+                                                    alignment: 'right'
+                                                }],
+                                            ],
+                                        },
+                                        width: 'auto',
+                                    },
+                                ],
+                            },
+                            {
+                                text: '',
+                                margin: [0, 10]
+                            },
+
+                            // Sección de Aprobaciones
+                            {
+                                table: {
+                                    widths: ['*'],
+                                    body: [
+                                        [{
+                                            text: 'APROBACIONES',
+                                            alignment: 'center',
+                                            bold: true,
+                                            fillColor: '#E0E0E0'
+                                        }]
+                                    ]
+                                },
+                                layout: 'noBorders',
+                                margin: [0, 5, 0, 5],
+                            },
+                            {
+                                table: {
+                                    widths: ['*', '*', '*', '*'],
+                                    body: [
+                                        [{
+                                            text: 'PREPARADO',
+                                            bold: true,
+                                            alignment: 'center'
+                                        }, {
+                                            text: 'APROBADO',
+                                            bold: true,
+                                            alignment: 'center'
+                                        }, {
+                                            text: 'AUTORIZADO',
+                                            bold: true,
+                                            alignment: 'center'
+                                        }, {
+                                            text: 'PROCESADO',
+                                            bold: true,
+                                            alignment: 'center'
+                                        }],
+                                        [{
+                                            text: ' ',
+                                            margin: [0, 35]
+                                        }, {
+                                            text: ' ',
+                                            margin: [0, 35]
+                                        }, {
+                                            text: ' ',
+                                            margin: [0, 35]
+                                        }, {
+                                            text: ' ',
+                                            margin: [0, 35]
+                                        }],
+                                    ],
+                                },
+                                layout: {
+                                    hLineWidth: function(i, node) {
+                                        return 1;
+                                    },
+                                    vLineWidth: function(i, node) {
+                                        return 1;
+                                    },
+                                    hLineColor: function(i, node) {
+                                        return '#000';
+                                    },
+                                    vLineColor: function(i, node) {
+                                        return '#000';
+                                    },
+                                    paddingLeft: function(i, node) {
+                                        return 4;
+                                    },
+                                    paddingRight: function(i, node) {
+                                        return 4;
+                                    },
+                                    paddingTop: function(i, node) {
+                                        return 4;
+                                    },
+                                    paddingBottom: function(i, node) {
+                                        return 4;
+                                    },
+                                },
+                            },
+                        ],
+                    };
+
+
+                    pdfMake.createPdf(documento).open();
+
+                } catch (error) {
+                    console.error('Error al generar el PDF:', error);
+                    alert('Ocurrió un error al generar el PDF. Por favor, inténtelo de nuevo.');
+                }
+            });
+
+
 
 
 

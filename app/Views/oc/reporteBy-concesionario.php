@@ -996,6 +996,7 @@
         pdfMake.createPdf(docDefinition).open();
     }
 
+
     // EVENTO PARA GENERAR EL ARCHIVO EXCEL:
     document.getElementById("btn-generar-excel").addEventListener("click", async () => {
 
@@ -1277,7 +1278,7 @@
             headerRowVehiculos.eachCell(cell => cell.style = headerStyle);
 
             oc.vehiculos.forEach(vehiculo => {
-                const caracteristicas = vehiculo.caracteristicas.split(',');
+                const caracteristicas = vehiculo.caracteristicas ? vehiculo.caracteristicas.split(',') : ['-'];
                 const row = worksheet.addRow([
                     vehiculo.marcaymodelo,
                     caracteristicas[0]?.trim() || '-',
@@ -1340,6 +1341,8 @@
         a.click();
         window.URL.revokeObjectURL(url);
     });
+
+
 
 
 
