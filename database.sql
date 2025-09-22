@@ -682,10 +682,13 @@ CREATE TABLE egresos(
     creado DATETIME NOT NULL DEFAULT NOW(),
     modificado DATETIME NULL,
     CONSTRAINT fk_idconcepto_egreso FOREIGN KEY (idconceptoegreso) REFERENCES conceptoegreso (idconceptoegreso),
-    CONSTRAINT fk_colaborador_egreso_registra FOREIGN KEY (idcolsolicitante) REFERENCES colaboradores (idcolaborador),
+    CONSTRAINT fk_colaborador_egreso_registra FOREIGN KEY (idcolacaja REFERENCES colaboradores (idcolaborador),
     CONSTRAINT fk_colaborador_egreso_solicita FOREIGN KEY (idcolsolicitante) REFERENCES colaboradores (idcolaborador)
 
 )ENGINE = INNODB;
+
+
+
 
 CREATE TABLE comprobantes(
     idcomprobante INT PRIMARY KEY AUTO_INCREMENT,

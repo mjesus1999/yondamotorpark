@@ -38,7 +38,12 @@
                         class="btn btn-sm <?= $estadoActual === 'validados' ? 'btn-success' : 'btn-outline-success' ?>">
                         Validados
                     </a>
+                    <a href="/egreso/reporteByFecha" class="btn btn-sm btn-outline-secondary">Reporte por Fecha</a>
                 </div>
+
+               
+
+                
 
             </div>
 
@@ -442,7 +447,7 @@
 
 
         function renderDocument(url) {
-            const extension = url.split('.').pop().toLowerCase();            
+            const extension = url.split('.').pop().toLowerCase();
             // console.log('EXTENSION DEL COMPROBANTE: ', extension);
             comprobanteViewer.innerHTML = '';
 

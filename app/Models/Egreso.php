@@ -245,4 +245,40 @@ class Egreso
             return false;
         }
     }
+
+
+    public function getReporteByFecha($fechaInicio, $fechaFin): array
+    {
+
+        $query = "CALL sp_obtener_reporte_egresos_completo(:fechainicio, :fechafin);";
+
+        try {
+            $stmt = $this->db->prepare($query);
+            $stmt->bindParam(':fechainicio', $fechaInicio);
+            $stmt->bindParam(':fechafin', $fechaFin);
+            $stmt->execute();
+
+            $allResults = [];
+            $resultCount = 0;
+
+
+            do {
+
+                $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+
+                if ($results) {
+                    $allResults[$resultCount] = $results;
+                    $resultCount++;
+                }
+            } while ($stmt->nextRowset());
+
+
+            return $allResults;
+        } catch (PDOException $error) {
+
+            error_log("Error al llamar al procedimiento almacenado: " . $error->getMessage());
+            return [];
+        }
+    }
 }

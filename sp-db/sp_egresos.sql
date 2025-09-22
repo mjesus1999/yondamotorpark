@@ -182,3 +182,144 @@ SELECT * FROM conceptoegreso;
 INSERT INTO conceptoegreso (concepto, descripcion)
 VALUES ('Servicios de envío', 'Gastos relacionados con el envío de documentos, paquetes o encomiendas.');
 
+
+
+
+SELECT SUM(monto) FROM comprobantes WHERE cargadocontabilidad = 'S';
+
+
+SELECT SUM(monto) FROM comprobantes WHERE cargadocontabilidad = 'N';
+
+SELECT SUM(monto) FROM comprobantes;
+
+SELECT * FROM pagos;
+
+SELECT SUM(amortizacion) FROM pagos;
+
+SELECT * FROM egresos;
+
+
+
+
+
+
+SELECT SUM(monto) FROM egresos;
+
+drop procedure  sp_obtener_reporte_egresos_completo;
+
+
+
+DELIMITER //
+
+CREATE PROCEDURE sp_obtener_reporte_egresos_completo(
+    IN fecha_inicio DATE,
+    IN fecha_fin DATE
+)
+BEGIN
+    -- Resultado 1: Detalle de egresos que NO requieren comprobante ('N')
+    SELECT
+        e.idegreso,
+        ce.concepto,
+        e.monto,
+        e.comentario,
+        e.creado,
+        CONCAT(perreg.apellidos, ' ', perreg.nombres) AS registrador,
+        CONCAT(persol.apellidos, ' ', persol.nombres) AS solicitante
+    FROM
+        egresos AS e
+    JOIN
+        conceptoegreso AS ce ON e.idconceptoegreso = ce.idconceptoegreso
+    JOIN
+        colaboradores AS registrador ON e.idcolacaja = registrador.idcolaborador
+    JOIN
+        colaboradores AS solicitante ON e.idcolsolicitante = solicitante.idcolaborador
+    JOIN
+        contratoslaborales AS contlre ON registrador.idcontratolaboral = contlre.idcontratolaboral
+    JOIN
+        contratoslaborales AS contlsol ON solicitante.idcontratolaboral = contlsol.idcontratolaboral
+    JOIN
+        personas AS perreg ON contlre.idpersona = perreg.idpersona
+    JOIN
+        personas AS persol ON contlsol.idpersona = persol.idpersona
+    WHERE
+        e.requierecomprobante = 'N'
+        AND e.creado >= fecha_inicio
+        AND e.creado < DATE_ADD(fecha_fin, INTERVAL 1 DAY)
+    ORDER BY
+        e.creado DESC;
+
+    -- Resultado 2: Detalle de egresos que SÍ requieren comprobante y están cargados ('S')
+    SELECT
+        e.idegreso,
+        ce.concepto,
+        e.monto,
+        e.comentario,
+        e.creado,
+        com.modificado,
+        CONCAT(perreg.apellidos, ' ', perreg.nombres) AS registrador,
+        CONCAT(persol.apellidos, ' ', persol.nombres) AS solicitante,
+        com.cargadocontabilidad AS estado_comprobante,
+        com.monto AS monto_comprobante
+    FROM
+        egresos AS e
+    JOIN
+        conceptoegreso AS ce ON e.idconceptoegreso = ce.idconceptoegreso
+    JOIN
+        comprobantes AS com ON e.idegreso = com.idegreso
+    JOIN
+        colaboradores AS registrador ON e.idcolacaja = registrador.idcolaborador
+    JOIN
+        colaboradores AS solicitante ON e.idcolsolicitante = solicitante.idcolaborador
+    JOIN
+        contratoslaborales AS contlre ON registrador.idcontratolaboral = contlre.idcontratolaboral
+    JOIN
+        contratoslaborales AS contlsol ON solicitante.idcontratolaboral = contlsol.idcontratolaboral
+    JOIN
+        personas AS perreg ON contlre.idpersona = perreg.idpersona
+    JOIN
+        personas AS persol ON contlsol.idpersona = persol.idpersona
+    WHERE
+        e.requierecomprobante = 'S' 
+        AND com.cargadocontabilidad = 'S'
+        AND e.creado >= fecha_inicio
+        AND e.creado < DATE_ADD(fecha_fin, INTERVAL 1 DAY)
+    ORDER BY
+        e.creado DESC;
+
+    -- Resultado 3: Resumen por concepto de los egresos válidos
+    SELECT
+        ce.concepto,
+        SUM(e.monto) AS total_por_concepto
+    FROM
+        egresos AS e
+    JOIN
+        conceptoegreso AS ce ON e.idconceptoegreso = ce.idconceptoegreso
+    LEFT JOIN
+        comprobantes AS com ON e.idegreso = com.idegreso
+    WHERE
+        (e.requierecomprobante = 'N' OR (e.requierecomprobante = 'S' AND com.cargadocontabilidad = 'S'))
+        AND e.creado >= fecha_inicio
+        AND e.creado < DATE_ADD(fecha_fin, INTERVAL 1 DAY)
+    GROUP BY
+        ce.concepto
+    ORDER BY
+        total_por_concepto DESC;
+
+    -- Resultado 4: Resumen consolidado de totales
+    SELECT
+        SUM(CASE WHEN e.requierecomprobante = 'N' THEN e.monto ELSE 0 END) AS total_sin_comprobante,
+        SUM(CASE WHEN e.requierecomprobante = 'S' AND com.cargadocontabilidad = 'S' THEN e.monto ELSE 0 END) AS total_con_comprobante_cargado,
+        SUM(CASE WHEN e.requierecomprobante = 'N' OR (e.requierecomprobante = 'S' AND com.cargadocontabilidad = 'S') THEN e.monto ELSE 0 END) AS gran_total
+    FROM
+        egresos AS e
+    LEFT JOIN
+        comprobantes AS com ON e.idegreso = com.idegreso
+    WHERE
+        e.creado >= fecha_inicio
+        AND e.creado < DATE_ADD(fecha_fin, INTERVAL 1 DAY);
+END//
+
+DELIMITER ;
+
+CALL sp_obtener_reporte_egresos_completo(CURDATE(), CURDATE());
+
