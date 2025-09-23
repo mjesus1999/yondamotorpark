@@ -440,7 +440,8 @@
           {
             table: {
               headerRows: 1,
-              widths: [30, 50, 70, 80, '*'],
+              /* widths: [30, 50, 70, 80, '*'], */
+              widths: ['8%', '14%', '26%', '26%', '26%'],
               body: [
                 [
                   { text: '#', style: 'tableHeader' },
