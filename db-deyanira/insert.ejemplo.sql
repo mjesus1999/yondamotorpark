@@ -280,6 +280,7 @@ SHOW COLUMNS FROM cotizaciones;
 UPDATE colaboradores SET idcontratolaboral = 2 WHERE usernick = 'leticiall';
 SELECT * FROM colaboradores;
 SELECT * FROM personas;
+
 -- CONTRASEÑA ACTUALIZADA PARA PODER ENTRAR EN EL LOGIN
 -- anonimo$$123%
 UPDATE colaboradores

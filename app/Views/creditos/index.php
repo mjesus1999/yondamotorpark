@@ -4,25 +4,36 @@
     .card-gradient {
         background: linear-gradient(135deg, var(--bs-primary), var(--bs-info));
     }
+
     .border-4 {
         border-width: 4px !important;
     }
+
     .moroso-item {
         transition: all 0.3s ease;
     }
+
     .moroso-item:hover {
         transform: translateY(-2px);
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
+    } 
+
     .upload-area {
         transition: all 0.3s ease;
     }
+
     .upload-area:hover {
         background-color: #f8f9fa;
     }
+
     .badge.custom-warning {
         background: #ffc107;
         color: #212529;
+    }
+
+    .direccion-info {
+        font-size: 0.85rem;
+        color: #6c757d;
     }
 </style>
 
@@ -204,7 +215,9 @@ function fmtMoney($val)
                     $dias = (int) ($m['dias_atraso'] ?? $m['dias_max_vencido'] ?? 0);
                     $deuda = $m['saldo_pendiente'] ?? $m['deuda_total'] ?? 0;
                     $fecha_venc = $m['fecha_vencimiento'] ?? ($m['fechapago'] ?? '');
-                    $direccion = htmlspecialchars($m['direccion'] ?? ($m['direccion_completa'] ?? ''));
+                    $direccion_persona = htmlspecialchars($m['direccion_persona'] ?? 'Sin dirección');
+                    $direccion_local = htmlspecialchars($m['direccion'] ?? ($m['direccion_completa'] ?? $m['direccion_local'] ?? 'Sin dirección del local'));
+                    /* $direccion = htmlspecialchars($m['direccion'] ?? ($m['direccion_completa'] ?? '')); */
                     $deudaFmt = fmtMoney($deuda);
                     ?>
                     <div class="col-md-6 mb-3 moroso-item" data-categoria="<?= $categoria ?>" id="cliente-<?= $idcontrato ?>">
@@ -217,6 +230,9 @@ function fmtMoney($val)
                                         <?php if ($telefono): ?>
                                             <p class="text-muted small mb-0"><strong>Teléfono:</strong> <?= $telefono ?></p>
                                         <?php endif; ?>
+                                        <p class="direccion-info mb-0">
+                                            <i class="fas fa-home me-1"></i><strong>Dirección:</strong> <?= $direccion_persona ?>
+                                        </p>
                                     </div>
                                     <span class="badge <?= $map[$categoria]['badge'] ?>"><?= $dias ?> días</span>
                                 </div>
@@ -226,9 +242,12 @@ function fmtMoney($val)
                                         <p class="text-muted small mb-1"><strong>Vencimiento:</strong>
                                             <?= htmlspecialchars($fecha_venc) ?></p>
                                     <?php endif; ?>
-                                    <?php if ($direccion): ?>
+                                    <p class="text-muted small mb-0">
+                                        <i class="fas fa-store me-1"></i><strong>Local:</strong> <?= $direccion_local ?>
+                                    </p>
+                                    <!-- <?php if ($direccion): ?>
                                         <p class="text-muted small mb-0"><strong>Dirección:</strong> <?= $direccion ?></p>
-                                    <?php endif; ?>
+                                    <?php endif; ?> -->
                                 </div>
                                 <div class="d-flex gap-2 flex-wrap">
                                     <button class="btn btn-success btn-sm flex-grow-1"
@@ -280,15 +299,18 @@ function fmtMoney($val)
                     <div class="alert alert-info">
                         <div class="row">
                             <div class="col-md-4">
-                                <label class="form-label"><strong><i class="fas fa-user me-1"></i>Cliente:</strong></label>
+                                <label class="form-label"><strong><i
+                                            class="fas fa-user me-1"></i>Cliente:</strong></label>
                                 <p id="clienteNombre" class="mb-0 text-primary fw-bold"></p>
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label"><strong><i class="fas fa-dollar-sign me-1"></i>Deuda:</strong></label>
+                                <label class="form-label"><strong><i
+                                            class="fas fa-dollar-sign me-1"></i>Deuda:</strong></label>
                                 <p id="clienteDeuda" class="mb-0 text-danger fw-bold"></p>
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label"><strong><i class="fas fa-clock me-1"></i>Fecha y Hora:</strong></label>
+                                <label class="form-label"><strong><i class="fas fa-clock me-1"></i>Fecha y
+                                        Hora:</strong></label>
                                 <p id="fechaHora" class="mb-0"></p>
                             </div>
                         </div>

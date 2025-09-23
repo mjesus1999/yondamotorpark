@@ -59,7 +59,7 @@ $allModules = [
   <link rel="stylesheet" href="/assets/css/motorpark-style.css">
   <link rel="stylesheet" href="https://cdn.datatables.net/2.2.2/css/dataTables.bootstrap5.min.css">
 
- 
+
 </head>
 
 <body>
@@ -104,12 +104,11 @@ $allModules = [
 
           <!-- Modulos de Gestión de Vehículos -->
           <li class="sidebar-item">
-            <a href="#" class="sidebar-link collapsed" data-bs-toggle="collapse"
-              data-bs-target="#gestionVehiculos" aria-expanded="false">
+            <a href="#" class="sidebar-link collapsed" data-bs-toggle="collapse" data-bs-target="#gestionVehiculos"
+              aria-expanded="false">
               <i class="fa-solid fa-car pe-2"></i> Gestión de Vehículos
             </a>
-            <ul id="gestionVehiculos" class="sidebar-dropdown list-unstyled collapse ms-3"
-              data-bs-parent="#sidebar">
+            <ul id="gestionVehiculos" class="sidebar-dropdown list-unstyled collapse ms-3" data-bs-parent="#sidebar">
               <li class="sidebar-item">
                 <a href="/marcas" class="sidebar-link">
                   <i class="fa-solid fa-tag pe-2"></i> Marcas
@@ -131,12 +130,11 @@ $allModules = [
 
           <!-- Modulos de Gestión de Compras -->
           <li class="sidebar-item">
-            <a href="#" class="sidebar-link collapsed" data-bs-toggle="collapse"
-              data-bs-target="#gestionCompras" aria-expanded="false">
+            <a href="#" class="sidebar-link collapsed" data-bs-toggle="collapse" data-bs-target="#gestionCompras"
+              aria-expanded="false">
               <i class="fa-solid fa-shopping-cart pe-2"></i> Gestión de Compras
             </a>
-            <ul id="gestionCompras" class="sidebar-dropdown list-unstyled collapse ms-4"
-              data-bs-parent="#sidebar">
+            <ul id="gestionCompras" class="sidebar-dropdown list-unstyled collapse ms-4" data-bs-parent="#sidebar">
               <li class="sidebar-item">
                 <a href="/oc" class="sidebar-link">
                   <i class="fa-solid fa-file pe-2"></i> Orden de compra
@@ -152,8 +150,8 @@ $allModules = [
 
           <!-- Modulos de Cotización y Requisitos -->
           <li class="sidebar-item">
-            <a href="#" class="sidebar-link collapsed" data-bs-toggle="collapse"
-              data-bs-target="#cotizacionRequisitos" aria-expanded="false">
+            <a href="#" class="sidebar-link collapsed" data-bs-toggle="collapse" data-bs-target="#cotizacionRequisitos"
+              aria-expanded="false">
               <i class="fa-solid fa-clipboard-list pe-2"></i> Cotización y Requisitos
             </a>
             <ul id="cotizacionRequisitos" class="sidebar-dropdown list-unstyled collapse ms-4"
@@ -180,12 +178,11 @@ $allModules = [
 
           <!-- Modulos de Gestión de Crédito y Caja -->
           <li class="sidebar-item">
-            <a href="#" class="sidebar-link collapsed" data-bs-toggle="collapse"
-              data-bs-target="#gestionCreditoCaja" aria-expanded="false">
+            <a href="#" class="sidebar-link collapsed" data-bs-toggle="collapse" data-bs-target="#gestionCreditoCaja"
+              aria-expanded="false">
               <i class="fa-solid fa-money-bill pe-2"></i> Gestión de Crédito y Caja
             </a>
-            <ul id="gestionCreditoCaja" class="sidebar-dropdown list-unstyled collapse ms-4"
-              data-bs-parent="#sidebar">
+            <ul id="gestionCreditoCaja" class="sidebar-dropdown list-unstyled collapse ms-4" data-bs-parent="#sidebar">
               <li class="sidebar-item">
                 <a href="/caja" class="sidebar-link">
                   <i class="fa-solid fa-cash-register pe-2"></i> Caja
@@ -197,14 +194,29 @@ $allModules = [
                 </a>
               </li>
 
-                 <li class="sidebar-item">
+              <li class="sidebar-item">
                 <a href="/egreso" class="sidebar-link">
                   <i class="fa-solid fa-credit-card pe-2"></i> Egresos
                 </a>
               </li>
 
+            </ul>
+          </li>
 
+          <!-- Modulo de cobranza -->
+          <li class="sidebar-item">
+            <a href="#" class="sidebar-link collapsed" data-bs-toggle="collapse" data-bs-target="#gestionCobranza"
+              aria-expanded="false">
+              <i class="fa-solid fa-money-check-alt pe-2"></i> Gestión de Cobranza
+            </a>
+            <ul id="gestionCobranza" class="sidebar-dropdown list-unstyled collapse ms-4" data-bs-parent="#sidebar">
 
+              <!-- Solo Cobranza -->
+              <li class="sidebar-item">
+                <a href="/cobranza" class="sidebar-link">
+                  <i class="fa-solid fa-money-bill-wave pe-2"></i> Cobranza
+                </a>
+              </li>
 
             </ul>
           </li>
@@ -222,7 +234,8 @@ $allModules = [
                     contraseña</a></li>
               <?php endif; ?>
               <?php if (in_array('auth', $modulosPermitidos, true)): ?>
-                <li class="sidebar-item"><a href="/createAccount" class="sidebar-link"><i class="fa-solid fa-user-plus pe-2"></i>Registrar
+                <li class="sidebar-item"><a href="/createAccount" class="sidebar-link"><i
+                      class="fa-solid fa-user-plus pe-2"></i>Registrar
                     cuenta</a></li>
               <?php endif; ?>
             </ul>
@@ -265,7 +278,7 @@ $allModules = [
 
 
         <script>
-          document.addEventListener('DOMContentLoaded', function() {
+          document.addEventListener('DOMContentLoaded', function () {
             const currentPath = window.location.pathname;
             const sidebarLinks = document.querySelectorAll('.sidebar-link');
             const collapseElements = document.querySelectorAll('.collapse');
@@ -283,12 +296,12 @@ $allModules = [
             });
 
             // Controlar la persistencia del estado
-            document.body.addEventListener('shown.bs.collapse', function(event) {
+            document.body.addEventListener('shown.bs.collapse', function (event) {
               const openedCollapseId = event.target.id;
               localStorage.setItem(openedCollapseId, 'open');
             });
 
-            document.body.addEventListener('hidden.bs.collapse', function(event) {
+            document.body.addEventListener('hidden.bs.collapse', function (event) {
               const hiddenCollapseId = event.target.id;
               localStorage.setItem(hiddenCollapseId, 'closed');
             });
