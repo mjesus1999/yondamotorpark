@@ -13,10 +13,10 @@
         transition: all 0.3s ease;
     }
 
-    .moroso-item:hover {
+    /* .moroso-item:hover {
         transform: translateY(-2px);
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    } 
+    }  */
 
     .upload-area {
         transition: all 0.3s ease;
@@ -87,7 +87,7 @@ function fmtMoney($val)
 }
 ?>
 
-<div class="container-fluid p-4">
+<div class="container-fluid">
     <!-- Encabezado-->
     <div class="alert alert-info mt-2" role="alert">
         <div class="row">
@@ -231,7 +231,7 @@ function fmtMoney($val)
                                             <p class="text-muted small mb-0"><strong>Teléfono:</strong> <?= $telefono ?></p>
                                         <?php endif; ?>
                                         <p class="direccion-info mb-0">
-                                            <i class="fas fa-home me-1"></i><strong>Dirección:</strong> <?= $direccion_persona ?>
+                                            <!-- <i class="fas fa-home me-1"></i> --><strong>Dirección:</strong> <?= $direccion_persona ?>
                                         </p>
                                     </div>
                                     <span class="badge <?= $map[$categoria]['badge'] ?>"><?= $dias ?> días</span>
