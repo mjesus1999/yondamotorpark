@@ -194,7 +194,9 @@
             <div class="card-header">
                 <div class="d-flex justify-content-between align-items-center">
                     <h5 class="mb-0"><i class="fas fa-filter me-2"></i>Filtrar Deudores</h5>
+
                     <div class="btn-group" role="group">
+                        
                         <input type="radio" class="btn-check" name="filtroDeuda" id="filtroPorVencer" autocomplete="off"
                             checked>
                         <label class="btn btn-outline-warning" for="filtroPorVencer" onclick="filtrarPor('por-vencer')">
@@ -214,6 +216,7 @@
                             <span class="badge bg-light text-dark ms-1">8</span>
                         </label>
                     </div>
+
                 </div>
             </div>
         </div>

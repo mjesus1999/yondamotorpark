@@ -40,13 +40,8 @@
     }
 
     @keyframes spin {
-      0% {
-        transform: rotate(0deg);
-      }
-
-      100% {
-        transform: rotate(360deg);
-      }
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
 
     #download-modal-overlay {
@@ -145,7 +140,7 @@
           pdfDocGenerator.download(filename);
           closeModal();
           setTimeout(() => {
-            try { window.close(); } catch (e) { }
+            try { window.close(); } catch (e) {}
           }, 1000);
         } catch (error) {
           console.error('Error al descargar:', error);
@@ -156,7 +151,7 @@
       btnCancel.addEventListener('click', () => {
         closeModal();
         setTimeout(() => {
-          try { window.close(); } catch (e) { }
+          try { window.close(); } catch (e) {}
         }, 100);
       });
 
@@ -166,7 +161,7 @@
           closeModal();
           document.removeEventListener('keydown', escHandler);
           setTimeout(() => {
-            try { window.close(); } catch (e) { }
+            try { window.close(); } catch (e) {}
           }, 100);
         }
       });
@@ -176,7 +171,7 @@
         if (e.target === modalOverlay) {
           closeModal();
           setTimeout(() => {
-            try { window.close(); } catch (e) { }
+            try { window.close(); } catch (e) {}
           }, 100);
         }
       });
@@ -243,7 +238,7 @@
       btnClose.addEventListener('click', () => {
         previewContainer.remove();
         setTimeout(() => {
-          try { window.close(); } catch (e) { }
+          try { window.close(); } catch (e) {}
         }, 100);
       });
 
@@ -252,7 +247,7 @@
           previewContainer.remove();
           document.removeEventListener('keydown', escHandler);
           setTimeout(() => {
-            try { window.close(); } catch (e) { }
+            try { window.close(); } catch (e) {}
           }, 100);
         }
       });
@@ -289,7 +284,7 @@
       });
     }
 
-    function createNotificacionPDF(headerImageBase64) {
+    function createNotificacionPDF(headerImageBase64, footerImageBase64) {
       return {
         pageSize: 'A4',
         pageOrientation: 'portrait',
@@ -308,37 +303,15 @@
         },
 
         footer: function (currentPage, pageCount, pageSize) {
-          return {
-            stack: [
-              // Información de contacto alineada a la derecha
-              {
-                text: [
-                  'Contacto: Área de cobranza\n',
-                  '987454555\n',
-                  'cobranza@yondaperu.com'
-                ],
-                style: 'contactInfo',
-                alignment: 'right',
-                margin: [0, 0, 40, 10]
-              },
-              // Línea naranja centrada
-              {
-                canvas: [
-                  {
-                    type: 'line',
-                    x1: 0,
-                    y1: 0,
-                    x2: 525,
-                    y2: 0,
-                    lineWidth: 4,
-                    lineColor: '#ff6600'
-                  }
-                ],
-                alignment: 'center',
-                margin: [0, 0, 0, 0]
-              }
-            ]
-          };
+          if (footerImageBase64) {
+            return {
+              image: footerImageBase64,
+              width: 500,
+              alignment: 'center',
+              margin: [0, 0, 0, 20]
+            };
+          }
+          return null;
         },
 
         content: [
@@ -470,7 +443,7 @@
             table: {
               widths: ['*'],
               body: [
-                [{
+                [{ 
                   canvas: [
                     {
                       type: 'line',
@@ -486,17 +459,17 @@
                   border: [false, false, false, false],
                   margin: [0, 0, 0, 5]
                 }],
-                [{
-                  text: 'YHON MENDOZA HUARACA',
-                  style: 'firma',
-                  alignment: 'center',
+                [{ 
+                  text: 'YHON MENDOZA HUARACA', 
+                  style: 'firma', 
+                  alignment: 'center', 
                   border: [false, false, false, false],
                   margin: [0, 0, 0, 2]
                 }],
-                [{
-                  text: 'GERENTE GENERAL',
-                  style: 'cargo',
-                  alignment: 'center',
+                [{ 
+                  text: 'GERENTE GENERAL', 
+                  style: 'cargo', 
+                  alignment: 'center', 
                   border: [false, false, false, false]
                 }]
               ]
@@ -546,11 +519,6 @@
             fontSize: 11,
             bold: true,
             color: '#000'
-          },
-          contactInfo: {
-            fontSize: 10,
-            color: '#333333',
-            lineHeight: 1.2
           }
         }
       };
@@ -562,9 +530,10 @@
       try {
         // Convertir imágenes a base64
         const headerImageBase64 = await convertImageToBase64('/assets/images/logos/cabecera-yondaa.png');
+        const footerImageBase64 = await convertImageToBase64('/assets/images/logos/footer-yonda1.png');
 
-        // Crear definición del PDF con datos estáticos (sin footer image)
-        const docDefinition = createNotificacionPDF(headerImageBase64);
+        // Crear definición del PDF con datos estáticos
+        const docDefinition = createNotificacionPDF(headerImageBase64, footerImageBase64);
 
         // Crear PDF
         const pdfDocGenerator = pdfMake.createPdf(docDefinition);

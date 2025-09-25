@@ -473,10 +473,9 @@
           ...(requisitos.length > 0 ? [{
             ol: requisitos,
             style: 'lista',
-            margin: [30, 0, 0, 12] // Aumentado el margen izquierdo de 0 a 30
+            margin: [30, 0, 0, 12]
           }] : []),
 
-          // Nota destacada con fondo amarillo suave
           {
             table: {
               widths: ['*'],
@@ -502,8 +501,6 @@
             alignment: 'center',
             margin: [20, 8, 20, 12]
           },
-
-          // Cierre
           {
             text: 'Finalmente, agradecemos su confianza en nosotros y reiteramos nuestro compromiso en dar cumplimiento a todos los procesos señalados.',
             style: 'normal',
@@ -530,18 +527,17 @@
             fontSize: 11,
             lineHeight: 1.15
           },
-          // Estilos específicos para la tabla de cliente con interlineado reducido
           tableClienteLabel: {
             fontSize: 10,
             bold: true,
-            lineHeight: 0.95,  // Interlineado reducido
-            margin: [0, 1, 0, 1]  // Espaciado vertical reducido
+            lineHeight: 0.95,
+            margin: [0, 1, 0, 1]
           },
           tableClienteValue: {
             fontSize: 10,
             bold: true,
-            lineHeight: 0.95,  // Interlineado reducido
-            margin: [0, 1, 0, 1]  // Espaciado vertical reducido
+            lineHeight: 0.95,
+            margin: [0, 1, 0, 1]
           },
           tableLabel: {
             fontSize: 10,

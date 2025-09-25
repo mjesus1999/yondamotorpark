@@ -106,8 +106,8 @@ BEGIN
         
         -- Dirección del local
         CONCAT(
-            COALESCE(l.tienda, 'Sin tienda'), ' / ',
-            COALESCE(dep.departamento, 'Sin depto'), ' / ',
+            /*COALESCE(l.tienda, 'Sin tienda'), ' / ',*/
+            /*COALESCE(dep.departamento, 'Sin depto'), ' / ',*/
             COALESCE(d.distrito, 'Sin distrito'), ' / ',
             COALESCE(pro.provincia, 'Sin provincia')
         ) AS direccion_local,
