@@ -84,6 +84,10 @@
                                                 onclick="window.open('/reportesAtrasado', '_blank')">
                                             <i class="fas fa-file-pdf"></i>
                                         </button>
+                                        <button class="btn btn-sm btn-danger mt-2" title="Generar reporte PDF Recojo"
+                                                onclick="window.open('/reportesRecojo', '_blank')">
+                                            <i class="fas fa-file-pdf"></i>
+                                        </button>
                                         <!-- <button class="btn btn-sm btn-danger mt-2" title="Generar reporte PDF"
                                             onclick="window.open('/reportesAtrasado', '_blank')">
                                             <i class="fas fa-file-pdf"></i>
@@ -113,9 +117,13 @@
                                     </td>
                                     <td>2 cuotas vencidas</td>
                                     <td class="text-center">
-                                        <button class="btn btn-sm btn-danger mt-2" title="Generar reporte PDF">
+                                        <button class="btn btn-sm btn-danger mt-2" title="Generar reporte PDF"
+                                                onclick="window.open('/reportesAtrasado2', '_blank')">
                                             <i class="fas fa-file-pdf"></i>
                                         </button>
+                                        <!-- <button class="btn btn-sm btn-danger mt-2" title="Generar reporte PDF">
+                                            <i class="fas fa-file-pdf"></i>
+                                        </button> -->
                                     </td>
                                 </tr>
 
@@ -212,7 +220,7 @@
 </head>
 
 <?php include __DIR__ . '/../layout/footer.php'; ?>
-
+<!-- 
 <script>
     // Auto-generar PDF cuando se carga la página
     window.onload = function () {
@@ -224,4 +232,4 @@
         // Generar y abrir PDF automáticamente
         pdfMake.createPdf(docDefinition).open();
     };
-</script>
+</script> -->

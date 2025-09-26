@@ -97,9 +97,9 @@
           <p id="telefono">987454555</p>
           <p id="gmail">cobranza@yondaperu.com</p>
         </div>
-        <div class="logo">
+        <!-- <div class="logo">
           <img src="/assets/images/logos/footer-yonda1.png" alt="Cabecera Yonda" />
-        </div>
+        </div> -->
       </div>
     </div>
   </div>

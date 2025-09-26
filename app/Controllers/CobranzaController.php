@@ -35,14 +35,26 @@ class CobranzaController extends Controller
     public function reporteCobranzaAtrasado()
     {
         $this->authRequired();
-        $this->view('cobranza.reporteCobranzaAtrasado');
+        /* $this->view('cobranza.reporteCobranzaAtrasado'); */
+        $this->view('cobranza/reports.reporte_atraso_01_mes');
     }
     
+    public function reporteCobranzaAtrasado2()
+    {
+        $this->authRequired();
+        $this->view('cobranza/reports.reporte_atraso_01_mes2');
+    }
 
-    public function reportesAtrasado()
+    public function reporteRecojoVehicular()
+    {
+        $this->authRequired();
+        $this->view('cobranza/reports.reporte-constancia-recojo');
+    }
+
+    /* public function reportesAtrasado()
     {
         $this->authRequired();
         $this->view('cobranza.reporteCobranzaPDF');
-    }
+    } */
 
 }
