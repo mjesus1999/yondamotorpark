@@ -332,7 +332,8 @@ FROM egresos e
 JOIN conceptoegreso ce ON e.idconceptoegreso = ce.idconceptoegreso
 LEFT JOIN comprobantes com ON e.idegreso = com.idegreso
 WHERE 
-    e.fecha BETWEEN DATE(v_fecha_hora_inicio) AND DATE(v_fecha_hora_fin)
+    
+    e.creado >= v_fecha_hora_inicio AND v_fecha_hora_fin 
     AND (e.requierecomprobante = 'N' 
          OR (e.requierecomprobante = 'S' AND com.cargadocontabilidad = 'S'))
 GROUP BY ce.concepto
@@ -356,7 +357,7 @@ ORDER BY p.mediopago, ep.entidad;
 
 END //
 DELIMITER ;
-CALL sp_reporte_arqueo_por_fecha_por_ciclo('2,3,4,5');
+CALL sp_reporte_arqueo_por_fecha_por_ciclo('12,13');
 
 
 
@@ -389,3 +390,9 @@ DELETE FROM locales WHERE idlocal = 3;
 
 DROP PROCEDURE IF EXISTS sp_reporte_arqueo_por_fecha_por_ciclo;
 
+
+
+
+CALL sp_reporte_arqueo_por_fecha_por_ciclo('19,20');
+SELECT * FROM egresos;
+SELECT * FROM arqueocaja;

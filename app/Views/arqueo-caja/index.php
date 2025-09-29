@@ -91,9 +91,9 @@
                                 <th><input type="checkbox" id="selectAllArqueos"></th>
                                 <th>#</th>
                                 <th>Fecha</th>
-                                <th>Monto Inicial <br><span class="badge bg-primary text-white">(Inicio del día)</span></th>
-                                <th>Monto Final <br><span class="badge bg-warning text-white">(Último arqueo)</span></th>
-                                <th>Diferencia <br><span class="badge bg-success text-white">(Final del día)</span></th>
+                                <th>Monto Inicial </th>
+                                <th>Monto Final </th>
+                                <th>Diferencia </th>
                                 <th>Estado</th>
                                 <th>Acciones</th>
                             </tr>
@@ -115,7 +115,7 @@
                                         <td>S/ <?= number_format($arqueo['monto_fisico_dia'], 2); ?></td>
                                         <td>
                                             <?php
-                                            // USAMOS EL CAMPO DE DIFERENCIA FINAL
+
                                             $diferencia = $arqueo['diferencia_final'];
                                             if ($diferencia > 0) {
                                                 echo '<span class="text-warning fw-bold">S/ ' . number_format($diferencia, 2) . '</span>';
@@ -196,7 +196,7 @@
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label for="fechaInicio" class="form-label fw-bold">Hora de Inicio <span class="text-danger fw-bold">* </span> </label>
-                            <input type="time" class="form-control" id="fechaInicio" name="hora_inicio" value="08:00"  required>
+                            <input type="time" class="form-control" id="fechaInicio" name="hora_inicio" value="08:00" required>
                         </div>
                         <div class="col-md-6">
                             <label for="fechaFin" class="form-label fw-bold">Hora de Fin <span class="text-danger fw-bold">* </span> </label>
@@ -215,8 +215,10 @@
                                 id="saldoInicial"
                                 name="saldo_inicial"
                                 value="<?= htmlspecialchars($saldo_inicial) ?>"
+                                required
+                                readonly>
 
-                                required>
+                            <span class="small text-danger fw-bold" id="info-saldo-inicial">Puede ingresar el saldo inicial, siempre en cuando no haya un registro previo.</span>
 
                         </div>
                         <div class="col-md-6">
@@ -238,7 +240,7 @@
                     </div>
                     <div class="d-flex justify-content-end gap-2">
                         <button class="btn btn-sm btn-outline-secondary">Cancelar</button>
-                        <button type="submit" class="btn btn-outline-primary bt-sm">Finalizar Arqueo</button>
+                        <button type="submit" class="btn btn-outline-primary bt-sm" id="btnFinalizarArqueo" disabled>Finalizar Arqueo</button>
 
                     </div>
                 </form>
@@ -319,6 +321,7 @@
                                 const alertDiv = document.getElementById('alert-diferencia');
                                 const observacionesGroup = document.getElementById('observaciones-group');
                                 const observacionesInput = document.getElementById('observaciones');
+                                const infoSaldoInicial = document.getElementById('info-saldo-inicial');
 
                                 const saldoInicial = parseFloat("<?= htmlspecialchars($saldo_inicial) ?>");
                                 const ingresosEfectivo = parseFloat("<?= htmlspecialchars($ingresos_efectivo) ?>");
@@ -341,7 +344,7 @@
                                 const entregaForm = document.getElementById('entregaForm');
                                 const submitButton = entregaForm.querySelector('button[type="submit"]');
 
-                           
+
                                 const inputHora = document.getElementById("fechaFin");
                                 const ahora = new Date();
                                 const horas = String(ahora.getHours()).padStart(2, '0');
@@ -351,6 +354,27 @@
                                 const pdfButtons = document.querySelectorAll('.btn-pdf-arqueo');
 
                                 const esPrimerArqueo = form.dataset.esPrimerArqueo === 'true';
+                                const btnFinalizarArqueo = document.getElementById('btnFinalizarArqueo');
+
+
+                                if (esPrimerArqueo) {
+                                    saldoInicialInput.removeAttribute('readonly');
+                                    infoSaldoInicial.style.display = 'block';
+
+                                } else {
+                                    infoSaldoInicial.style.display = 'none';
+                                }
+
+
+                                if (ingresosEfectivo !== 0 || egresosDia !== 0) {
+                                   
+                                    btnFinalizarArqueo.removeAttribute('disabled');
+                                } else {
+                                
+                                    console.log('No se detectaron ingresos en efectivo ni egresos, el botón de arqueo está deshabilitado.');
+                                }
+
+
 
                                 function calcularDiferencia() {
                                     const montoFisico = parseFloat(montoFisicoInput.value) || 0;
@@ -390,41 +414,51 @@
                                 saldoInicialInput.addEventListener('input', calcularDiferencia);
                                 montoFisicoInput.addEventListener('input', calcularDiferencia);
 
+
+
                                 form.addEventListener('submit', async (event) => {
                                     event.preventDefault();
-                                    if (await ask('¿Confirmar arqueo?', 'Confirmar')) {
-                                        const formData = new FormData(form);
-                                        const submitButton = form.querySelector('button[type="submit"]');
-                                        submitButton.disabled = true;
-                                        showToast('Registrando arqueo...', 'bg-primary');
 
-                                        try {
-                                            const response = await fetch('/arqueocaja/store', {
-                                                method: 'POST',
-                                                body: formData,
-                                            });
+                                    if (ingresosEfectivo == 0 && egresosDia == 0) {
+                                        showToast('No hay ingresos y egresos para registrar', 'bg-warning', 1350);
+                                        return;
 
-                                            if (!response.ok) {
-                                                throw new Error(`Error HTTP: ${response.status}`);
+                                    } else {
+                                        if (await ask('¿Confirmar arqueo?', 'Confirmar')) {
+                                            const formData = new FormData(form);
+                                            const submitButton = form.querySelector('button[type="submit"]');
+                                            submitButton.disabled = true;
+                                            showToast('Registrando arqueo...', 'bg-primary');
+
+                                            try {
+                                                const response = await fetch('/arqueocaja/store', {
+                                                    method: 'POST',
+                                                    body: formData,
+                                                });
+
+                                                if (!response.ok) {
+                                                    throw new Error(`Error HTTP: ${response.status}`);
+                                                }
+
+                                                const data = await response.json();
+
+                                                if (data.success) {
+                                                    showToast(data.message, 'bg-success');
+                                                    setTimeout(() => window.location.reload(), 1000);
+                                                } else {
+                                                    showToast(data.message, 'bg-danger');
+                                                }
+                                            } catch (error) {
+
+                                                showToast('Ocurrió un error inesperado al registrar el arqueo.', 'bg-danger');
+                                                console.error('Error en el envío de arqueo:', error);
+                                            } finally {
+
+                                                submitButton.disabled = false;
                                             }
-
-                                            const data = await response.json();
-
-                                            if (data.success) {
-                                                showToast(data.message, 'bg-success');
-                                                setTimeout(() => window.location.reload(), 1000);
-                                            } else {
-                                                showToast(data.message, 'bg-danger');
-                                            }
-                                        } catch (error) {
-
-                                            showToast('Ocurrió un error inesperado al registrar el arqueo.', 'bg-danger');
-                                            console.error('Error en el envío de arqueo:', error);
-                                        } finally {
-
-                                            submitButton.disabled = false;
                                         }
                                     }
+
                                 });
 
 
@@ -458,16 +492,16 @@
                                 });
 
 
-                            
+
                                 document.getElementById('btn-entregar-seleccionados').addEventListener('click', () => {
                                     const checkboxes = document.querySelectorAll('.arqueo-checkbox:checked');
                                     const ids = Array.from(checkboxes).map(cb => cb.dataset.ids).join(',');
                                     const montoTotal = Array.from(checkboxes).reduce((sum, cb) => sum + parseFloat(cb.dataset.monto), 0);
 
-                                    document.getElementById('idsArqueosEntrega').value = ids; 
+                                    document.getElementById('idsArqueosEntrega').value = ids;
                                     document.getElementById('montoTotalEntrega').value = montoTotal.toFixed(2);
 
-                                    
+
                                     const entregaModal = new bootstrap.Modal(document.getElementById('entregaModal'));
                                     entregaModal.show();
                                 });
@@ -515,6 +549,7 @@
                                         console.log('ERROR:', error)
                                     }
                                 }
+                                cargarDestinos();
 
                                 // Añade un nuevo campo de depósito al formulario
 
@@ -601,7 +636,7 @@
 
                                     // Validaciones para DEPOSITO
                                     if (tipoDestino === 'Deposito') {
-                                        
+
                                         delete jsonData.iddestino;
 
                                         const totalDepositos = Array.from(document.querySelectorAll('.deposito-monto'))
@@ -615,9 +650,9 @@
                                         }
                                     }
 
-                              
+
                                     const depositoFields = document.querySelectorAll('.deposito-field');
-                                    if (depositoFields.length > 0 && tipoDestino === 'Deposito') { 
+                                    if (depositoFields.length > 0 && tipoDestino === 'Deposito') {
                                         jsonData.destinos_multiples = [];
                                         depositoFields.forEach(field => {
                                             const id = field.querySelector('select').value;
@@ -696,7 +731,7 @@
 
                                         const ids_arqueo = btn.dataset.ids;
 
-                                
+
                                         const fecha = btn.dataset.fecha;
 
                                         if (!ids_arqueo) {
@@ -708,7 +743,7 @@
                                         btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
 
                                         try {
-                                            
+
                                             const response = await fetch(`/api/arqueo/reporte-ciclo/${ids_arqueo}`);
 
                                             if (!response.ok) {
@@ -718,7 +753,7 @@
                                             const data = await response.json();
 
                                             if (data.success && data.data) {
-                                                
+
                                                 generateArqueoPdf(data.data);
                                             } else {
                                                 alert('No se pudo obtener el reporte: ' + (data.message || 'Respuesta API inválida.'));
@@ -733,14 +768,14 @@
                                         }
                                     });
                                 });
-                               
+
 
                                 function generateArqueoPdf(data) {
                                     const logo = window.logoBase64;
                                     const nombreEmpresa = 'YONDA & GRUPO HUARACA E.I.R.L';
                                     const rucEmpresa = 'RUC: 20609396866';
 
-                                
+
 
                                     const styles = {
                                         header: {
@@ -861,13 +896,13 @@
                                                     }],
                                                     [{
                                                         text: 'Efectivo'
-                                                    
+
                                                     }, {
                                                         text: `S/ ${parseFloat(data.arqueo.ingresos_efectivo_total).toFixed(2)}`,
                                                         alignment: 'right'
                                                     }],
                                                     ...data.ingresos_digitales.map(item => [
-                                                 
+
                                                         `${item.concepto} - ${item.entidad_bancaria || ''}`,
                                                         {
                                                             text: `S/ ${parseFloat(item.monto).toFixed(2)}`,
@@ -877,7 +912,7 @@
                                                     [{
                                                         text: '**Total Ingresos Digitales**',
                                                         bold: true
-                                                        
+
                                                     }, {
                                                         text: `S/ ${parseFloat(data.arqueo.ingresos_digital_total).toFixed(2)}`,
                                                         alignment: 'right',
@@ -916,7 +951,7 @@
                                                     [{
                                                         text: '**Total Egresos**',
                                                         bold: true
-                                                        
+
                                                     }, {
                                                         text: `S/ ${parseFloat(data.arqueo.egresos_dia_total).toFixed(2)}`,
                                                         alignment: 'right',
@@ -943,12 +978,12 @@
                                                         alignment: 'right'
                                                     }],
                                                     ['Ingreso diario en efectivo', {
-                                                     
+
                                                         text: `S/ ${parseFloat(data.arqueo.ingresos_efectivo_total).toFixed(2)}`,
                                                         alignment: 'right'
                                                     }],
                                                     ['Total de egresos', {
-                                                        
+
                                                         text: `S/ ${parseFloat(data.arqueo.egresos_dia_total).toFixed(2)}`,
                                                         alignment: 'right'
                                                     }],
@@ -957,13 +992,13 @@
                                                         bold: true,
                                                         fillColor: '#FFF2CC'
                                                     }, {
-                                                      
+
                                                         text: `S/ ${parseFloat(data.arqueo.monto_teorico_final).toFixed(2)}`,
                                                         style: 'summaryValue',
                                                         fillColor: '#FFF2CC'
                                                     }],
                                                     ['Ingresos digitales', {
-                                                      
+
                                                         text: `S/ ${parseFloat(data.arqueo.ingresos_digital_total).toFixed(2)}`,
                                                         alignment: 'right'
                                                     }]

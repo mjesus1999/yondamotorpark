@@ -94,3 +94,4 @@ SELECT * FROM arqueocaja WHERE entregado = 'N' ORDER BY fecha DESC;
 
 
 SELECT * FROM arqueocaja;
+SELECT * FROM egresos;
