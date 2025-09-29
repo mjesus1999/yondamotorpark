@@ -38,7 +38,8 @@ class EgresoController extends Controller
         }
     }
 
-    public function indexReporteByFecha():void {
+    public function indexReporteByFecha(): void
+    {
 
         $this->view('egresos.reporteByFecha');
     }
@@ -290,19 +291,34 @@ class EgresoController extends Controller
 
         if (!$fechaInicio || !$fechaFin) {
             http_response_code(400);
-            echo json_encode(['error' => 'Fechas de inicio y fin son requeridas.']);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Fechas de inicio y fin son requeridas.'
+            ]);
             exit();
         }
 
         $datos = $this->egresoModel->getReporteByFecha($fechaInicio, $fechaFin);
 
-        // isset() para verificar si cada índice existe antes de usarlo
-        $egresoSinComprobantes = isset($datos[0]) ? $datos[0] : [];
-        $egresoConComprobantes = isset($datos[1]) ? $datos[1] : [];
-        $egresoByConceptos = isset($datos[2]) ? $datos[2] : [];
-        $egresoGeneral = isset($datos[3]) ? $datos[3] : [];
+        $egresoSinComprobantes = $datos[0] ?? [];
+        $egresoConComprobantes = $datos[1] ?? [];
+        $egresoByConceptos = $datos[2] ?? [];
+        $egresoGeneral = $datos[3] ?? [];
 
-        
+        // Validar si hay datos en alguno de los dos primeros conjuntos
+        if (empty($egresoSinComprobantes) && empty($egresoConComprobantes)) {
+            http_response_code(404);
+            echo json_encode([
+                'success' => false,
+                'message' => 'No se encontraron egresos en el rango de fechas seleccionado.',
+                'egresoSinComprobante' => [],
+                'egresoConComprobante' => [],
+                'egresoByConcepto' => [],
+                'egresoGeneral' => []
+            ]);
+            exit();
+        }
+
         echo json_encode([
             'success' => true,
             'egresoSinComprobante' => $egresoSinComprobantes,

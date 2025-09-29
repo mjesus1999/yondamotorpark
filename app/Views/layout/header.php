@@ -59,7 +59,7 @@ $allModules = [
   <link rel="stylesheet" href="/assets/css/motorpark-style.css">
   <link rel="stylesheet" href="https://cdn.datatables.net/2.2.2/css/dataTables.bootstrap5.min.css">
 
- 
+
 </head>
 
 <body>
@@ -197,9 +197,18 @@ $allModules = [
                 </a>
               </li>
 
-                 <li class="sidebar-item">
+              <li class="sidebar-item">
                 <a href="/egreso" class="sidebar-link">
-                  <i class="fa-solid fa-credit-card pe-2"></i> Egresos
+
+                  <i class="bi bi-door-open pe-2"></i> Egresos
+                </a>
+              </li>
+
+              <li class="sidebar-item">
+                <a href="/arqueoCaja" class="sidebar-link">
+
+
+                  <i class="bi bi-piggy-bank-fill pe-2"></i> Arqueo
                 </a>
               </li>
 

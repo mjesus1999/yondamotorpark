@@ -83,30 +83,6 @@ class PagoCronogramaController extends Controller
 
 
 
-    // private function guardarComprobante(array $archivo): ?string
-    // {
-    //     // Verificar si el archivo es válido antes de procesarlo
-    //     if (!isset($archivo['error']) || is_array($archivo['error'])) {
-    //         return null;
-    //     }
-
-    //     $nombreArchivo = uniqid('comprobante_') . '_' . basename($archivo['name']);
-    //     $directorioDestino = realpath(__DIR__ . '/../../storage/comprobantes/');
-
-
-    //     if (!is_dir($directorioDestino)) {
-    //         mkdir($directorioDestino, 0777, true);
-    //     }
-
-    //     $rutaCompleta = $directorioDestino . $nombreArchivo;
-
-    //     if (move_uploaded_file($archivo['tmp_name'], $rutaCompleta)) {
-    //         return '/' . $rutaCompleta;
-    //     }
-
-    //     return null;
-    // }
-
 
     public function store(): void
     {
@@ -262,7 +238,6 @@ class PagoCronogramaController extends Controller
                 $pagoCuota = [
                     'idcronograma' => $idCronograma,
                     'idcuentapago' => empty($idCuentaPago) ? null : (int)$idCuentaPago,
-                    // 'idcolcaja' => 2,
                     'mediopago' => $medioPago,
                     'numerotransaccion' => $numeroTransaccion,
                     'fechapago' => $fechaPago,
@@ -278,7 +253,6 @@ class PagoCronogramaController extends Controller
                 $pagoPenalidad = [
                     'idcronograma' => $idCronograma,
                     'idcuentapago' => empty($idCuentaPagoPenalidad) ? null : (int)$idCuentaPagoPenalidad,
-                    // 'idcolcaja' => 2,
                     'mediopago' => $medioPagoPenalidad,
                     'numerotransaccion' => $numeroTransaccionPenalidad,
                     'fechapago' => $fechaPago,
@@ -324,6 +298,7 @@ class PagoCronogramaController extends Controller
             ]);
         }
     }
+    
 
     // TRAER LOS NUMEROS DE CUENTAS
     public function searchNumCuentasPagos(): void

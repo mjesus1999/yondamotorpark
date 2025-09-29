@@ -250,9 +250,12 @@ END$
 DELIMITER ;
 
 -- DELETE FROM pagos;
-CALL generar_cronograma(1, 4.263224089);
+CALL generar_cronograma(3, 4.263224089);
 SELECT * FROM cronogramas;
+SELECT * FROM contratos;
+SELECT * FROM cotizaciones;
 
+INSERT INTO contratos (idlocal,idcotizacion,idlogistica,fechainicio,diapago,escredito,fecharevision) VALUES (7,12,3,'2025-09-26','16','S','2025-10-26')
 
 SELECT SUM(interes) AS TotalInteres, SUM(abonocapital) AS TotalAbonos, COUNT(*) AS Filas
 FROM cronogramas WHERE idcontrato = 1;

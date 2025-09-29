@@ -427,6 +427,10 @@ include __DIR__ . '/../layout/header.php';
             if (totalTransferenciaAcordionEl) totalTransferenciaAcordionEl.textContent = 'S/ 0.00';
         }
 
+        
+
+
+        
 
         async function generarReporteExcel(data, formatearFecha) {
             const workbook = new ExcelJS.Workbook();
