@@ -4,25 +4,31 @@
     .card-gradient {
         background: linear-gradient(135deg, var(--bs-primary), var(--bs-info));
     }
+
     .border-4 {
         border-width: 4px !important;
     }
+
     .moroso-item {
         transition: all 0.3s ease;
     }
-    .moroso-item:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
+
     .upload-area {
         transition: all 0.3s ease;
     }
+
     .upload-area:hover {
-        background-color: #f8f9fa;
+        background-color: #020f1dff;
     }
+
     .badge.custom-warning {
         background: #ffc107;
         color: #212529;
+    }
+
+    .direccion-info {
+        font-size: 0.85rem;
+        color: #6c757d;
     }
 </style>
 
@@ -48,7 +54,6 @@ if (!empty($morososRaw)) {
         $morososClasificados['2-semanas'] = $morososRaw['2-semanas'] ?? [];
         $morososClasificados['1-mes'] = $morososRaw['1-mes'] ?? [];
     } else {
-        // Viene como lista plana -> clasificar por dias (campos posibles: dias_atraso o dias_max_vencido)
         foreach ($morososRaw as $m) {
             $dias = (int) ($m['dias_atraso'] ?? $m['dias_max_vencido'] ?? 0);
             if ($dias <= 5) {
@@ -62,21 +67,19 @@ if (!empty($morososRaw)) {
     }
 }
 
-// Contadores para botones
 $counts = [
     '5-dias' => count($morososClasificados['5-dias']),
     '2-semanas' => count($morososClasificados['2-semanas']),
     '1-mes' => count($morososClasificados['1-mes'])
 ];
 
-// Helpers para formateo
 function fmtMoney($val)
 {
     return 'S/. ' . number_format((float) $val, 2, ',', '.');
 }
 ?>
 
-<div class="container-fluid p-4">
+<div class="container-fluid">
     <!-- Encabezado-->
     <div class="alert alert-info mt-2" role="alert">
         <div class="row">
@@ -89,50 +92,41 @@ function fmtMoney($val)
                     </ol>
                 </nav>
             </div>
-            <div class="col-md-6 text-end">
-                <!-- <button class="btn btn-primary me-2" onclick="generarReporte()">
-                    <i class="fas fa-file-pdf me-1"></i>Generar Reporte
-                </button>
-                <button class="btn btn-success" onclick="actualizarDatos()">
-                    <i class="fas fa-sync-alt me-1"></i>Actualizar
-                </button> -->
-            </div>
         </div>
     </div>
 
-    <!-- Estadísticas principales (usando datos reales si están disponibles) -->
-    <div class="row mb-4">
+    <div class="row mb-2">
         <div class="col-md-3 mb-3">
-            <div class="card bg-gradient h-100" style="background: linear-gradient(135deg, #dc3545, #fd7e14);">
+            <div class="card h-100">
                 <div class="card-body text-center">
-                    <i class="fas fa-exclamation-triangle fa-2x mb-3"></i>
+                    <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
                     <h3 class="card-title"><?= (int) $estadisticas['total_morosos'] ?></h3>
                     <p class="card-text mb-0">Total Morosos</p>
                 </div>
             </div>
         </div>
         <div class="col-md-3 mb-3">
-            <div class="card bg-gradient h-100" style="background: linear-gradient(135deg, #28a745, #20c997);">
+            <div class="card  h-100">
                 <div class="card-body text-center">
-                    <i class="fas fa-dollar-sign fa-2x mb-3"></i>
+                    <i class="fas fa-dollar-sign fa-2x mb-2"></i>
                     <h3 class="card-title"><?= fmtMoney($estadisticas['deuda_total']) ?></h3>
                     <p class="card-text mb-0">Deuda Total</p>
                 </div>
             </div>
         </div>
         <div class="col-md-3 mb-3">
-            <div class="card bg-gradient h-100" style="background: linear-gradient(135deg, #007bff, #6f42c1);">
+            <div class="card  h-100">
                 <div class="card-body text-center">
-                    <i class="fas fa-clock fa-2x mb-3"></i>
+                    <i class="fas fa-clock fa-2x mb-2"></i>
                     <h3 class="card-title"><?= (int) $estadisticas['seguimientos_hoy'] ?></h3>
                     <p class="card-text mb-0">Seguimientos Hoy</p>
                 </div>
             </div>
         </div>
         <div class="col-md-3 mb-3">
-            <div class="card bg-gradient h-100" style="background: linear-gradient(135deg, #ffc107, #fd7e14);">
+            <div class="card  h-100">
                 <div class="card-body text-center">
-                    <i class="fas fa-calendar fa-2x mb-3"></i>
+                    <i class="fas fa-calendar fa-2x mb-2"></i>
                     <h3 class="card-title"><?= round($estadisticas['dias_promedio'], 1) ?></h3>
                     <p class="card-text mb-0">Días Promedio</p>
                 </div>
@@ -142,31 +136,31 @@ function fmtMoney($val)
 
     <!-- Panel de clasificación -->
     <div class="card mb-4">
-        <div class="card-header bg-light">
+        <div class="card-header">
             <div class="d-flex justify-content-between align-items-center">
-                <h5 class="mb-0"><i class="fas fa-users me-2"></i>Clasificación por Morosidad</h5>
+                <h6 class="mb-0"><i class="fas fa-users me-2"></i>Clasificación por Morosidad</h6>
                 <div class="btn-group" role="group">
                     <input type="radio" class="btn-check" name="filtroMorosidad" id="filtro5dias" autocomplete="off"
                         checked>
-                    <label class="btn btn-outline-warning" for="filtro5dias" onclick="filtrarPor('5-dias')">
+                    <label class="btn btn-sm btn-outline-warning" for="filtro5dias" onclick="filtrarPor('5-dias')">
                         <i class="fas fa-clock me-1"></i>5 Días
                         <span class="badge bg-warning text-dark ms-1"><?= $counts['5-dias'] ?></span>
                     </label>
 
                     <input type="radio" class="btn-check" name="filtroMorosidad" id="filtro2semanas" autocomplete="off">
-                    <label class="btn btn-outline-warning" for="filtro2semanas" onclick="filtrarPor('2-semanas')">
+                    <label class="btn btn-sm btn-outline-warning" for="filtro2semanas" onclick="filtrarPor('2-semanas')">
                         <i class="fas fa-calendar-week me-1"></i>2 Semanas
                         <span class="badge bg-warning text-dark ms-1"><?= $counts['2-semanas'] ?></span>
                     </label>
 
                     <input type="radio" class="btn-check" name="filtroMorosidad" id="filtro1mes" autocomplete="off">
-                    <label class="btn btn-outline-danger" for="filtro1mes" onclick="filtrarPor('1-mes')">
+                    <label class="btn btn-sm btn-outline-danger" for="filtro1mes" onclick="filtrarPor('1-mes')">
                         <i class="fas fa-calendar-times me-1"></i>+1 Mes
                         <span class="badge bg-danger ms-1"><?= $counts['1-mes'] ?></span>
                     </label>
 
                     <input type="radio" class="btn-check" name="filtroMorosidad" id="filtroTodos" autocomplete="off">
-                    <label class="btn btn-outline-primary" for="filtroTodos" onclick="filtrarPor('todos')">
+                    <label class="btn btn-sm     btn-outline-primary" for="filtroTodos" onclick="filtrarPor('todos')">
                         <i class="fas fa-list me-1"></i>Ver Todos
                     </label>
                 </div>
@@ -204,7 +198,9 @@ function fmtMoney($val)
                     $dias = (int) ($m['dias_atraso'] ?? $m['dias_max_vencido'] ?? 0);
                     $deuda = $m['saldo_pendiente'] ?? $m['deuda_total'] ?? 0;
                     $fecha_venc = $m['fecha_vencimiento'] ?? ($m['fechapago'] ?? '');
-                    $direccion = htmlspecialchars($m['direccion'] ?? ($m['direccion_completa'] ?? ''));
+                    $direccion_persona = htmlspecialchars($m['direccion_persona'] ?? 'Sin dirección');
+                    $direccion_local = htmlspecialchars($m['direccion'] ?? ($m['direccion_completa'] ?? $m['direccion_local'] ?? 'Sin dirección del local'));
+                    /* $direccion = htmlspecialchars($m['direccion'] ?? ($m['direccion_completa'] ?? '')); */
                     $deudaFmt = fmtMoney($deuda);
                     ?>
                     <div class="col-md-6 mb-3 moroso-item" data-categoria="<?= $categoria ?>" id="cliente-<?= $idcontrato ?>">
@@ -217,6 +213,10 @@ function fmtMoney($val)
                                         <?php if ($telefono): ?>
                                             <p class="text-muted small mb-0"><strong>Teléfono:</strong> <?= $telefono ?></p>
                                         <?php endif; ?>
+                                        <p class="direccion-info mb-0">
+                                            <!-- <i class="fas fa-home me-1"></i> --><strong>Dirección:</strong>
+                                            <?= $direccion_persona ?>
+                                        </p>
                                     </div>
                                     <span class="badge <?= $map[$categoria]['badge'] ?>"><?= $dias ?> días</span>
                                 </div>
@@ -226,9 +226,12 @@ function fmtMoney($val)
                                         <p class="text-muted small mb-1"><strong>Vencimiento:</strong>
                                             <?= htmlspecialchars($fecha_venc) ?></p>
                                     <?php endif; ?>
-                                    <?php if ($direccion): ?>
+                                    <p class="text-muted small mb-0">
+                                        <i class="fas fa-store me-1"></i><strong>Local:</strong> <?= $direccion_local ?>
+                                    </p>
+                                    <!-- <?php if ($direccion): ?>
                                         <p class="text-muted small mb-0"><strong>Dirección:</strong> <?= $direccion ?></p>
-                                    <?php endif; ?>
+                                    <?php endif; ?> -->
                                 </div>
                                 <div class="d-flex gap-2 flex-wrap">
                                     <button class="btn btn-success btn-sm flex-grow-1"
@@ -280,15 +283,18 @@ function fmtMoney($val)
                     <div class="alert alert-info">
                         <div class="row">
                             <div class="col-md-4">
-                                <label class="form-label"><strong><i class="fas fa-user me-1"></i>Cliente:</strong></label>
+                                <label class="form-label"><strong><i
+                                            class="fas fa-user me-1"></i>Cliente:</strong></label>
                                 <p id="clienteNombre" class="mb-0 text-primary fw-bold"></p>
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label"><strong><i class="fas fa-dollar-sign me-1"></i>Deuda:</strong></label>
+                                <label class="form-label"><strong><i
+                                            class="fas fa-dollar-sign me-1"></i>Deuda:</strong></label>
                                 <p id="clienteDeuda" class="mb-0 text-danger fw-bold"></p>
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label"><strong><i class="fas fa-clock me-1"></i>Fecha y Hora:</strong></label>
+                                <label class="form-label"><strong><i class="fas fa-clock me-1"></i>Fecha y
+                                        Hora:</strong></label>
                                 <p id="fechaHora" class="mb-0"></p>
                             </div>
                         </div>

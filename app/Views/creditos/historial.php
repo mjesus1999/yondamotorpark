@@ -26,7 +26,7 @@ function esc($s)
                 </nav>
             </div>
             <div class="col-md-6 text-end">
-                <a href="/creditos" class="">[ Volver ]</a>
+                <a href="/creditos" class="btn btn-sm btn-outline-primary">Volver</a>
                 <!-- <button class="btn btn-primary me-2" onclick="generarReporte()">
                     <i class="fas fa-file-pdf me-1"></i>Generar Reporte
                 </button> -->
@@ -151,10 +151,10 @@ function esc($s)
                 </div>
             </div>
             <div class="modal-footer">
-                <a id="descargarEvidencia" href="#" class="btn btn-primary" download>
+                <a id="descargarEvidencia" href="#" class="btn btn-sm btn-primary" download>
                     <i class="fas fa-download me-1"></i> Descargar
                 </a>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">
                     <i class="fas fa-times me-1"></i> Cerrar
                 </button>
             </div>

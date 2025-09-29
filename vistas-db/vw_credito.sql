@@ -73,16 +73,44 @@ BEGIN
         CONCAT(p.apellidos, ' ', p.nombres) AS cliente,
         p.tipodoc AS documento,
         p.nrodoc AS ndocumento,
-        -- usar telprimario o telalternativo
         COALESCE(p.telprimario, p.telalternativo, '') AS telefono,
         
-        -- Dirección completa
+        -- Dirección de la persona
+        CASE 
+            WHEN p.direccion IS NOT NULL AND TRIM(p.direccion) != '' THEN
+                CONCAT(
+                    p.direccion,
+                    CASE 
+                        WHEN p.referencia IS NOT NULL AND TRIM(p.referencia) != '' 
+                        THEN CONCAT(' - ', p.referencia)
+                        ELSE ''
+                    END,
+                    CASE 
+                        WHEN dp.distrito IS NOT NULL 
+                        THEN CONCAT(' / ', dp.distrito)
+                        ELSE ''
+                    END,
+                    CASE 
+                        WHEN prop.provincia IS NOT NULL 
+                        THEN CONCAT(' / ', prop.provincia)
+                        ELSE ''
+                    END,
+                    CASE 
+                        WHEN depp.departamento IS NOT NULL 
+                        THEN CONCAT(' / ', depp.departamento)
+                        ELSE ''
+                    END
+                )
+            ELSE 'Sin dirección registrada'
+        END AS direccion_persona,
+        
+        -- Dirección del local
         CONCAT(
-            COALESCE(l.tienda, 'Sin tienda'), ' / ',
-            COALESCE(dep.departamento, 'Sin depto'), ' / ',
+            /*COALESCE(l.tienda, 'Sin tienda'), ' / ',*/
+            /*COALESCE(dep.departamento, 'Sin depto'), ' / ',*/
             COALESCE(d.distrito, 'Sin distrito'), ' / ',
             COALESCE(pro.provincia, 'Sin provincia')
-        ) AS direccion,
+        ) AS direccion_local,
         
         -- Información del vehículo
         CONCAT(
@@ -133,10 +161,17 @@ BEGIN
     INNER JOIN modelos model ON v.idmodelo = model.idmodelo
     INNER JOIN marcas mar ON model.idmarca = mar.idmarca
     INNER JOIN combustibles cb ON v.idcombustible = cb.idcombustible
+    
+    -- dirección del local
     LEFT JOIN locales l ON c.idlocal = l.idlocal
     LEFT JOIN distritos d ON l.iddistrito = d.iddistrito
     LEFT JOIN provincias pro ON d.idprovincia = pro.idprovincia
     LEFT JOIN departamentos dep ON pro.iddepartamento = dep.iddepartamento
+    
+    -- dirección de la persona
+    LEFT JOIN distritos dp ON p.iddistrito = dp.iddistrito
+    LEFT JOIN provincias prop ON dp.idprovincia = prop.idprovincia
+    LEFT JOIN departamentos depp ON prop.iddepartamento = depp.iddepartamento
     
     WHERE c.estado = 'ACT'
       AND cro.estado IN ('Vencido', 'Pendiente')

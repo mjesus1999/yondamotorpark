@@ -506,7 +506,7 @@ CREATE TABLE seguimientos_morosos (
     INDEX idx_seguimiento_usuario (usuario_registro),
     CONSTRAINT fk_seguimiento_contrato FOREIGN KEY (idcontrato) REFERENCES contratos(idcontrato) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT fk_seguimiento_colaborador FOREIGN KEY (usuario_registro) REFERENCES colaboradores(idcolaborador) ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE = InnoDB;
+) ENGINE = INNODB;
 
 CREATE TABLE cotizacion_financiamiento (
     idfinanciamiento INT AUTO_INCREMENT PRIMARY KEY,
