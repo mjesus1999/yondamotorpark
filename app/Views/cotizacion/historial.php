@@ -76,7 +76,7 @@
 
                             <tbody>
                                 <?php foreach ($cotizaciones as $index => $c): ?>
-                                    <tr class="table-light">
+                                    <tr>
                                         <td><?= $index + 1 ?></td>
                                         <td><?= htmlspecialchars($c['nombrecliente']) ?></td>
 

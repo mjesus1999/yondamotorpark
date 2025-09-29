@@ -17,19 +17,33 @@ class CobranzaController extends Controller
     public function index(): void
     {
         $this->authRequired();
-        $this->view('cobranza.index');
+        
+        // estadisticas + resumen
+        $data = $this->cobranzaModel->getEstadisticasContratos();
+
+        // MOSTRAR ESTADISTICAS :D
+        $this->view('cobranza.index', [
+            'estadisticas' => $data['estadisticas'],
+            'resumen' => $data['resumen']
+        ]);
+
     }
 
     public function indexNotificar()
     {
         $this->authRequired();
-        $this->view('cobranza.indexNotificar');
+        $datos =  $this->cobranzaModel->getClientesNotificar();
+        $this->view('cobranza.indexNotificar', [
+            'cobranza' => $datos
+        ]);
     }
 
     public function indexVencidos()
     {
         $this->authRequired();
-        $this->view('cobranza.indexVencidos');
+
+        $vencidos = $this->cobranzaModel->getCuotasVencidas();
+        $this->view('cobranza.indexVencidos', ['vencidos' => $vencidos]);
     }
 
     public function reporteCobranzaAtrasado()
