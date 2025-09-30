@@ -64,6 +64,10 @@ SELECT * FROM entregasdinero;
 SELECT * FROM entregasdineroarqueos;
 SELECT * FROM arqueocaja;
 
+SELECT *
+FROM entregasdinero
+ORDER BY identrega DESC
+LIMIT 1;
 
 
 SELECT * FROM pagos;
@@ -97,3 +101,5 @@ SELECT * FROM arqueocaja;
 SELECT * FROM egresos;
 SELECT * FROM pagos;
 
+SELECT * FROM contratos;
+SELECT
