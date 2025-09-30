@@ -326,6 +326,7 @@
                                 const saldoInicial = parseFloat("<?= htmlspecialchars($saldo_inicial) ?>");
                                 const ingresosEfectivo = parseFloat("<?= htmlspecialchars($ingresos_efectivo) ?>");
                                 const egresosDia = parseFloat("<?= htmlspecialchars($egresos_dia) ?>");
+                                const ingresoDigital = parseFloat("<?= htmlspecialchars($ingresos_digital) ?>")
 
 
 
@@ -366,50 +367,73 @@
                                 }
 
 
-                                if (ingresosEfectivo !== 0 || egresosDia !== 0) {
-                                   
+                                if (ingresosEfectivo !== 0 || egresosDia !== 0 || ingresoDigital !== 0) {
+
                                     btnFinalizarArqueo.removeAttribute('disabled');
                                 } else {
-                                
+
                                     console.log('No se detectaron ingresos en efectivo ni egresos, el botón de arqueo está deshabilitado.');
+                                }
+                                function roundToTwoDecimals(num) {
+                                    return Math.round(num * 100) / 100;
                                 }
 
 
-
                                 function calcularDiferencia() {
+                                    // 1. Obtener los montos
                                     const montoFisico = parseFloat(montoFisicoInput.value) || 0;
+                                    console.log('MONTO FISICO: ', montoFisico);
+
                                     let montoTeoricoCalculado;
 
                                     if (esPrimerArqueo) {
+                                       
                                         const saldoInicialUser = parseFloat(saldoInicialInput.value) || 0;
-                                        montoTeoricoCalculado = saldoInicialUser + ingresosEfectivo - egresosDia;
+
+                                        const suma = roundToTwoDecimals(saldoInicialUser + ingresosEfectivo);
+                                        montoTeoricoCalculado = roundToTwoDecimals(suma - egresosDia);
+
                                     } else {
-                                        montoTeoricoCalculado = saldoInicial + ingresosEfectivo - egresosDia;
+                                        
+                                        const suma = roundToTwoDecimals(saldoInicial + ingresosEfectivo);
+                                        montoTeoricoCalculado = roundToTwoDecimals(suma - egresosDia);
+
+                                        console.log('MONTO TEORICO: ', montoTeoricoCalculado);
                                     }
 
-                                    const diferencia = montoFisico - montoTeoricoCalculado;
+                                
+                                    const diferencia = roundToTwoDecimals(montoFisico - montoTeoricoCalculado);
+                                    console.log('DIFERENCIA: ', diferencia);
 
+                                 
+                                    const esDiferenciaCero = Math.abs(diferencia) < 0.0000000001;
+
+                                
                                     montoTeoricoH2.textContent = `S/ ${montoTeoricoCalculado.toFixed(2)}`;
                                     montoTeoricoInput.value = montoTeoricoCalculado.toFixed(2);
                                     diferenciaSpan.textContent = `S/ ${diferencia.toFixed(2)}`;
                                     diferenciaInput.value = diferencia.toFixed(2);
 
+                          
                                     alertDiv.classList.remove('alert-info', 'alert-warning', 'alert-danger', 'alert-success');
-                                    if (diferencia > 0) {
-                                        alertDiv.classList.add('alert-warning');
-                                        observacionesGroup.classList.add('d-none');
-                                        observacionesInput.removeAttribute('required');
-                                    } else if (diferencia < 0) {
-                                        alertDiv.classList.add('alert-danger');
-                                        observacionesGroup.classList.remove('d-none');
-                                        observacionesInput.setAttribute('required', 'required');
-                                    } else {
+
+                                    if (esDiferenciaCero) {
+                                  
                                         alertDiv.classList.add('alert-success');
                                         observacionesGroup.classList.add('d-none');
                                         observacionesInput.removeAttribute('required');
+                                    } else if (diferencia > 0) {
+                                    
+                                        alertDiv.classList.add('alert-warning');
+                                        observacionesGroup.classList.add('d-none');
+                                        observacionesInput.removeAttribute('required');
+                                    } else { 
+                                    
+                                        alertDiv.classList.add('alert-danger');
+                                        observacionesGroup.classList.remove('d-none');
+                                        observacionesInput.setAttribute('required', 'required');
                                     }
                                 }
-
                                 // calcularDiferencia();
                                 saldoInicialInput.addEventListener('input', calcularDiferencia);
                                 montoFisicoInput.addEventListener('input', calcularDiferencia);

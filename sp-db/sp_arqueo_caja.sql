@@ -72,7 +72,7 @@ END$$
 DELIMITER ;
 
 
-CALL sp_obtener_ingresos_desde ('2025-09-26','20:10:13');
+CALL sp_obtener_ingresos_desde ('2025-09-30','08:23:13');
 
 
 UPDATE arqueocaja SET hora_fin = '15:10:13' WHERE idarqueo = 2;
