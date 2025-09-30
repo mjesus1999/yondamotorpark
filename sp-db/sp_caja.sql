@@ -51,7 +51,7 @@ BEGIN
                     
 END $$
 DELIMITER;
-CALL sp_getAll_contratos_caja();
+
 
 DROP PROCEDURE IF EXISTS sp_get_cronogramas_by_idcontrato;
 
@@ -67,7 +67,7 @@ BEGIN
         cro.estado = 'Vencido',
         cro.aplicapenalidad = 'S',
         cro.penalidad = coti.valorcuota * cont.penalidadbase
-    WHERE cro.fechapago < CURDATE()
+    WHERE cro.fechapago < DATE_SUB(CURDATE(), INTERVAL 3 DAY)
       AND cro.estado != 'Pagado'
       AND cont.idcontrato = idcontrato_;
 
@@ -123,9 +123,8 @@ END$$
 DELIMITER ;
 
 
-CALL sp_get_cronogramas_by_idcontrato (1);
-
 DROP PROCEDURE IF EXISTS sp_addPagoCronograma;
+
 DELIMITER $$
 
 CREATE PROCEDURE sp_addPagoCronograma(

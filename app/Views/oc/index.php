@@ -342,7 +342,7 @@
             let idOC = null; // Para identifcar el idoc a actualizar desde el modal para verificar si los autos llegarón de acuerdo a la OC
 
             const btnExportarExcel = document.getElementById("btn-exportar-excel");
-             const btnPdfOcs = document.querySelectorAll('.btn-pdf-oc-class');
+            const btnPdfOcs = document.querySelectorAll('.btn-pdf-oc-class');
 
 
             if (btnExportarExcel) {
@@ -816,10 +816,8 @@
 
 
 
-        });
 
-       
-        btnPdfOcs.forEach(btn => {
+               btnPdfOcs.forEach(btn => {
             btn.addEventListener('click', async (e) => {
                 e.preventDefault();
                 const ocId = btn.getAttribute('data-idoc');
@@ -885,7 +883,7 @@
                                                     alignment: 'center',
                                                     fontSize: 14,
                                                     bold: true,
-                                                    fillColor: 'yellow',
+                        
                                                     margin: [0, 8, 0, 5],
                                                     border: [true, false, true, true]
                                                 }],
@@ -1295,6 +1293,17 @@
 
 
         });
+
+
+
+
+
+
+
+        });
+
+       
+     
     </script>
 
 

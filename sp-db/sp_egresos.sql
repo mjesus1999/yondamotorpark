@@ -31,9 +31,6 @@ SELECT * FROM contratoslaborales;
 
 
 
-
-
-
 DELIMITER $$
 CREATE PROCEDURE sp_egresos_por_estado(
     IN requiereComprobante_ VARCHAR(10)
@@ -98,8 +95,8 @@ CREATE PROCEDURE sp_egresos_add(
 )
 BEGIN
 
-    INSERT INTO egresos (idconceptoegreso, idcolacaja, idcolsolicitante, monto, comentario, requierecomprobante)
-    VALUES (idconceptoegreso_, idcolacaja_, idcolsolicitante_, monto_, comentario_, requierecomprobante_);
+    INSERT INTO egresos (idconceptoegreso, idcolacaja, idcolsolicitante, monto, comentario, requierecomprobante,fecha)
+    VALUES (idconceptoegreso_, idcolacaja_, idcolsolicitante_, monto_, comentario_, requierecomprobante_,CURDATE());
 
     SELECT LAST_INSERT_ID() AS last_insert_id;
 
@@ -110,8 +107,6 @@ DELIMITER;
 
 SELECT * FROM egresos;
 
-
-CALL sp_egresos_add(1,2,6,5000.00,'Combustible','N');
 DROP PROCEDURE IF EXISTS sp_egresos_add_comprobante;
 
 SELECT * FROM egresos;
@@ -179,31 +174,8 @@ SELECT * FROM conceptoegreso;
 
 
 
-INSERT INTO conceptoegreso (concepto, descripcion)
-VALUES ('Servicios de envío', 'Gastos relacionados con el envío de documentos, paquetes o encomiendas.');
 
 
-
-
-SELECT SUM(monto) FROM comprobantes WHERE cargadocontabilidad = 'S';
-
-
-SELECT SUM(monto) FROM comprobantes WHERE cargadocontabilidad = 'N';
-
-SELECT SUM(monto) FROM comprobantes;
-
-SELECT * FROM pagos;
-
-SELECT SUM(amortizacion) FROM pagos;
-
-SELECT * FROM egresos;
-
-
-
-
-
-
-SELECT SUM(monto) FROM egresos;
 
 drop procedure  sp_obtener_reporte_egresos_completo;
 
@@ -323,3 +295,37 @@ DELIMITER ;
 
 CALL sp_obtener_reporte_egresos_completo(CURDATE(), CURDATE());
 
+
+
+
+
+
+DELIMITER //
+
+CREATE PROCEDURE sp_obtener_egresos_diarios_por_concepto_hoy()
+BEGIN
+  SELECT
+    ce.concepto,
+    SUM(e.monto) AS total_por_concepto
+  FROM
+    egresos AS e
+  JOIN
+    conceptoegreso AS ce ON e.idconceptoegreso = ce.idconceptoegreso
+  LEFT JOIN
+    comprobantes AS com ON e.idegreso = com.idegreso
+  WHERE
+    (e.requierecomprobante = 'N' OR (e.requierecomprobante = 'S' AND com.cargadocontabilidad = 'S'))
+    AND DATE(e.creado) = CURDATE()
+  GROUP BY
+    ce.concepto
+  ORDER BY
+    total_por_concepto DESC;
+END//
+
+DELIMITER ;
+
+CALL sp_obtener_egresos_diarios_por_concepto_hoy
+
+
+
+SELECT * from egresos;

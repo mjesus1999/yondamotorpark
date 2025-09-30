@@ -604,3 +604,14 @@ BEGIN
 END //
 DELIMITER ;
 CALL sp_reporte_concesionario_detallado(25);
+
+
+
+CREATE PROCEDURE sp_eliminar_OC(
+IN idordencompra_ INT
+)
+BEGIN
+	DELETE FROM detordencompra WHERE idordencompra = idordencompra_;
+    DELETE FROM ordenescompra WHERE idordencompra = idordencompra_;
+
+END //

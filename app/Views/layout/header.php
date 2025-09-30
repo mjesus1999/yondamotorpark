@@ -196,7 +196,16 @@ $allModules = [
 
               <li class="sidebar-item">
                 <a href="/egreso" class="sidebar-link">
-                  <i class="fa-solid fa-credit-card pe-2"></i> Egresos
+
+                  <i class="bi bi-door-open pe-2"></i> Egresos
+                </a>
+              </li>
+
+              <li class="sidebar-item">
+                <a href="/arqueoCaja" class="sidebar-link">
+
+
+                  <i class="bi bi-piggy-bank-fill pe-2"></i> Arqueo
                 </a>
               </li>
 

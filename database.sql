@@ -611,6 +611,11 @@ CREATE TABLE entidadespago (
 ) ENGINE = INNODB;
 
 
+SELECT * FROM entidadespago;
+SELECT * FROM cuentaspago;
+
+INSERT INTO cuentaspago(identidadpago,moneda,numcuenta)VALUES(3,'Soles','000132121521212');
+
 
 
 
@@ -679,6 +684,7 @@ CREATE TABLE egresos(
     monto DECIMAL(10,2) NOT NULL,
     comentario VARCHAR(300) NULL,
     requierecomprobante ENUM('S','N') NOT NULL DEFAULT 'N',
+    fecha DATE NULL,
     creado DATETIME NOT NULL DEFAULT NOW(),
     modificado DATETIME NULL,
     CONSTRAINT fk_idconcepto_egreso FOREIGN KEY (idconceptoegreso) REFERENCES conceptoegreso (idconceptoegreso),
@@ -687,7 +693,9 @@ CREATE TABLE egresos(
 
 )ENGINE = INNODB;
 
+SELECT * FROM egresos;
 
+ALTER TABLE egresos ADD COLUMN fecha DATE NULL AFTER requierecomprobante;
 
 
 CREATE TABLE comprobantes(
@@ -724,53 +732,48 @@ CREATE TABLE proovedores(
     CONSTRAINT uk_ruc_proovedor UNIQUE (ruc)
 )ENGINE = INNODB;
 
-SELECT * FROM proovedores;
-
--- INSERT INTO proovedores (razonsocial, nombrecomercial, ruc, telefono) VALUES
--- ('SHALOM EMPRESARIAL S.A.C.', 'Shalom', '20512528458', '987654321')
-
-INSERT INTO proovedores (razonsocial, nombrecomercial, ruc, telefono) VALUES
-('TRANSPORTES Y SERVICIOS GENERALES S.A.C.', 'TransServ', '20567891234', '912345678'),
-('SERVICIOS ADMINISTRATIVOS INTEGRALES EIRL', 'ServAdmin', '20678912345', '923456789'),
-('MANTENIMIENTO Y LOGÍSTICA S.A.C.', 'ManLog', '20789123456', '934567890'),
-('SOLUCIONES EMPRESARIALES S.A.C.', 'SolEmp', '20891234567', '945678901'),
-('GESTIÓN Y SERVICIOS S.A.C.', 'GesServ', '20912345678', '956789012'),
-('ADMINISTRACIÓN Y LOGÍSTICA S.A.C.', 'AdmLog', '21023456789', '967890123'),
-('SERVICIOS INTEGRALES S.A.C.', 'ServInt', '21134567890', '978901234'),
-('LOGÍSTICA Y TRANSPORTE S.A.C.', 'LogTrans', '21245678901', '989012345'),
-('GESTIÓN EMPRESARIAL S.A.C.', 'GesEmp', '21356789012', '990123456');
 
 
-USE motorpark;
+CREATE TABLE arqueocaja (
+    idarqueo INT PRIMARY KEY AUTO_INCREMENT,
+    idcolaborador INT NOT NULL,
+    fecha DATE NOT NULL,
+    hora_inicio TIME NOT NULL,
+    hora_fin TIME NOT NULL,
+    saldo_inicial DECIMAL(10, 2) NOT NULL,
+    ingresos_efectivo DECIMAL(10, 2) NOT NULL,
+    ingresos_digital DECIMAL(10, 2) NOT NULL,
+    egresos_dia DECIMAL(10, 2) NOT NULL,
+    monto_teorico DECIMAL(10, 2) NOT NULL,
+    monto_fisico DECIMAL(10, 2) NOT NULL,
+    diferencia DECIMAL(10, 2) NOT NULL,
+    observaciones VARCHAR(500) NULL,
+    estado ENUM('Cuadrado', 'Faltante','Sobrante') NOT NULL DEFAULT 'Cuadrado',
+    entregado ENUM('S', 'N') NOT NULL DEFAULT 'N',
+    creado DATETIME NOT NULL DEFAULT NOW(),
+    CONSTRAINT fk_colaborador_arqueo FOREIGN KEY (idcolaborador) REFERENCES colaboradores(idcolaborador)
+) ENGINE = InnoDB;
 
-INSERT INTO conceptoegreso (concepto, descripcion) VALUES
-('Gastos administrativos', 'Gastos administrativos por trámites diversos'),
-('Combustible', 'Gastos por consumo de combustible'),
-('Mantenimiento de vehículos', 'Gastos por mantenimiento y reparaciones de vehículos'),
-('Servicios básicos', 'Pago de servicios como agua, luz, internet, etc.'),
-('Alquiler de local', 'Pago mensual por alquiler del local'),
-('Publicidad y marketing', 'Gastos en campañas publicitarias y marketing'),
-('Sueldos y salarios', 'Pago de sueldos y beneficios a los colaboradores'),
-('Impuestos y tasas', 'Pago de impuestos municipales y otros tributos'),
-('Papelería y suministros', 'Compra de materiales de oficina y papelería'),
-('Otros gastos operativos', 'Gastos varios relacionados con la operación del negocio');
+-- ALTER TABLE arqueocaja ADD COLUMN entregado ENUM('S', 'N') NOT NULL DEFAULT 'N';
 
-SELECT * FROM conceptoegreso;
+-- INSERT INTO areas(area)values('Gerencia');
+
+-- SELECT * FROM cargos;
+-- INSERT INTO cargos(idarea,cargo)VALUES(10,'Gerente general');
+-- SELECT * FROM contratoslaborales;
+--     INSERT INTO contratoslaborales(idpersona,idcargo,fechainicio,tipocontrato)VALUES(37,18,'2022-01-01','P')
+
+-- INSERT INTO personas(apellidos,nombres,tipodoc,nrodoc,genero,fechanac,estadocivil,iddistrito,telprimario)
+--     VALUES('Mendoza Huaraca','Yohn Kennidey','DNI','45546464','M','1988-10-08','SOL',100,'969693698');
 
 
+SELECT * FROM arqueocaja;
+
+SELECT * FROM  entregasdinero_destinos;
+
+SELECT * FROM arqueocaja WHERE entregado = 'S';
 
 
-SELECT * FROM colaboradores;
 
 
 
-SELECT * FROM contratoslaborales; -- TRAER LOS COLABORADORES DE LA TABLA CONTRATOLABORALES.
-
-SELECT * FROM cargos;
-
-
-SELECT * FROM areas;
-
-
-SELECT * FROM personas;
-SELECT * FROM egresos;

@@ -29,7 +29,7 @@ class CajaController extends Controller
         $tiempoFin = microtime(true);
         $tiempoEjecucion = $tiempoFin - $tiempoInicio;
 
-        error_log("Tiempo de ejecución de CAJA/Contratos: " . number_format($tiempoEjecucion, 4) . " segundos.");
+        error_log("Tiempo de ejecución de CAJA/Contratos: " . number_format($tiempoEjecucion, 2) . " segundos.");
     }
 
     // MEOTOD QUE ME MEUSTRA LA VISTA DE REPORTES POR FECHA:
@@ -119,6 +119,7 @@ class CajaController extends Controller
 
         exit();
     }
+    
 
     public function reportePagosByFecha()
     {

@@ -4,7 +4,7 @@ header('Content-Type: application/json; charset=utf-8');
 function obtenerIGV() {
     $url = "https://orientacion.sunat.gob.pe/3109-05-calculo-del-impuesto";
 
-    // Inicializar cURL
+    // Inicializar cURLñ
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);

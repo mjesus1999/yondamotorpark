@@ -1,4 +1,5 @@
 use motorpark;
+
 SELECT * FROM cotizaciones;
 /*
 * ACTUALIZAR LOS REQUISITOS:

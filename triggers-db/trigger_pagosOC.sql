@@ -1,5 +1,4 @@
 
-USE motorpark2;
 
 DROP TRIGGER IF EXISTS tr_set_saldo_pagoOC;
 
@@ -91,17 +90,8 @@ DELIMITER ;
 
 
 
-CREATE PROCEDURE sp_eliminar_OC(
-IN idordencompra_ INT
-)
-BEGIN
-	DELETE FROM detordencompra WHERE idordencompra = idordencompra_;
-    DELETE FROM ordenescompra WHERE idordencompra = idordencompra_;
-
-END //
 
 
-USE motorpark2;
 
 SHOW TRIGGERS;
 
@@ -109,3 +99,9 @@ SHOW TRIGGERS;
 SELECT * FROM pagosOC;
 
 
+use motorpark;
+
+
+SHOW EVENTS FROM motorpark;
+
+SHOW TRIGGERS;
