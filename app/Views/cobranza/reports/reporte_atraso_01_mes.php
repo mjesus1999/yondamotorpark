@@ -386,7 +386,7 @@
                     {
                         text: [
                             { text: 'Sra. ', style: 'normal', bold: true },
-                            { text: 'Ana Lucia Torres', style: 'normal', bold: '' }
+                            { text: 'Aná Lucia Torres', style: 'normal', bold: '' }
                         ],
                         margin: [0, 0, 0, 5]
                     },
@@ -474,7 +474,7 @@
                             'ya que según registros de cobranza de nuestra empresa Usted adeuda,',
                             { text: ' POR LA MORA DE FEBRERO DE S/ 389.00 SOLES, DE LA CUOTA DE MARZO CON MORA DE S/ 1,556.50, CUYO MONTO TOTAL A PAGAR ES DE S/ 1,945.50 SOLES', bold: true },
                             'Y HABIENDO USTED COMPROMETIDO SEGÚN EL CONTRATO NOTARIAL FIRMADO EL  05',
-                            { text: 'DE OCTUBRE DEL 2023. (CADA NOTIFICACIÓN LLEGADA AL DOMICILIO SE HARÁ EL COBRO ADICIONAL DE S/50 SOLES). ', bold: true }
+                            { text: ' DE OCTUBRE DEL 2023. (CADA NOTIFICACIÓN LLEGADA AL DOMICILIO SE HARÁ EL COBRO ADICIONAL DE S/50 SOLES). ', bold: true }
                         ],
                         style: 'normal',
                         alignment: 'justify',

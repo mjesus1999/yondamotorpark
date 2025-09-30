@@ -64,7 +64,7 @@
 
                                 <tbody>
 
-                                    <?php $i = 1; ?>
+                                    <!-- <?php $i = 1; ?>
                                     <?php foreach ($cobranza as $fila): ?>
                                         <tr>
                                             <td><?= $i++ ?></td>
@@ -79,10 +79,10 @@
                                                 <a href="#" class="btn btn-sm btn-primary"><i class="fas fa-check"></i></a>
                                             </td>
                                         </tr>
-                                    <?php endforeach; ?>
+                                    <?php endforeach; ?> -->
 
                                     <!-- Primera persona -->
-                                    <!-- <tr>
+                                    <tr>
                                     <td>1</td>
                                     <td>Juan Carlos Pérez</td>
                                     <td>987456123</td>
@@ -96,10 +96,10 @@
                                             <i class="fas fa-check"></i>
                                         </button>
                                     </td>
-                                </tr> -->
+                                </tr>
 
                                     <!-- Segunda persona -->
-                                    <!-- <tr>
+                                    <tr>
                                     <td>2</td>
                                     <td>Maria Gonzales Lopéz</td>
                                     <td>985647162</td>
@@ -113,10 +113,10 @@
                                             <i class="fas fa-check"></i>
                                         </button>
                                     </td>
-                                </tr> -->
+                                </tr>
 
                                     <!-- Tercera persona -->
-                                    <!-- <tr>
+                                    <tr>
                                     <td>3</td>
                                     <td>Carlos Antonio Ruiz</td>
                                     <td>985455518</td>
@@ -130,7 +130,7 @@
                                             <i class="fas fa-minus"></i>
                                         </button>
                                     </td>
-                                </tr> -->
+                                </tr>
 
                                     <!-- <tr>
                                     <td>4</td>

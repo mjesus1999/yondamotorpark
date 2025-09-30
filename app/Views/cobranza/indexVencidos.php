@@ -43,6 +43,14 @@
                     <!-- TABLA CON DATOS -->
                     <div class="card-body">
                         <?php if (!empty($vencidos)): ?>
+                            <?php 
+                            // Calcular el total de deuda
+                            $totalDeuda = 0;
+                            foreach ($vencidos as $row) {
+                                $totalDeuda += (float) $row['deuda_total'];
+                            }
+                            ?>
+                            
                             <table class="table table-sm table-hover table-hover-yonda">
                                 <thead>
                                     <tr>
@@ -75,14 +83,14 @@
                                             <td><span
                                                     class="<?= ((float) $row['deuda_total'] > 0) ? 'text-danger fw-bold' : '' ?>">S/.
                                                     <?= number_format((float) $row['deuda_total'], 2) ?></span></td>
-                                            <td><?= htmlspecialchars($row['cuotas_vencidas']) ?> cuotas vencidas</td>
+                                            <td><?= htmlspecialchars($row['estado_pagos']) ?></td>
                                             <td class="text-center">
                                                 <button class="btn btn-sm btn-danger mt-2" title="Notificar PDF"
                                                     onclick="window.open('/reportesAtrasado?contrato=<?= (int) $row['idcontrato'] ?>', '_blank')">
                                                     <i class="fas fa-file-pdf"></i>
                                                 </button>
                                                 <button class="btn btn-sm btn-danger mt-2" title="Recojo PDF"
-                                                        onclick="window.open('/reportesRecojo', '_blank')">
+                                                    onclick="window.open('/reportesRecojo', '_blank')">
                                                     <i class="fas fa-file-pdf"></i>
                                                 </button>
                                             </td>
@@ -90,22 +98,23 @@
                                     <?php endforeach; ?>
 
                                 </tbody>
-                                <!-- <tfoot>
+                                <tfoot>
                                     <tr>
-                                        <td colspan="8" class="text-end fw-bold">
+                                        <td colspan="7" class="text-end fw-bold">
                                             <i class="fas fa-calculator me-2"></i>Total deuda:
                                         </td>
                                         <td class="fw-bold text-danger fs-6">
-                                            S/. 27,895.00
+                                            S/. <?= number_format($totalDeuda, 2) ?>
                                         </td>
                                         <td></td>
+                                        <td></td>
                                     </tr>
-                                </tfoot> -->
+                                </tfoot>
                             </table>
                         <?php else: ?>
-                            <tr>
-                                <td colspan="10">No hay contratos vencidos.</td>
-                            </tr>
+                            <div class="alert alert-warning">
+                                No hay contratos vencidos.
+                            </div>
                         <?php endif; ?>
                     </div>
 
@@ -119,16 +128,3 @@
 </head>
 
 <?php include __DIR__ . '/../layout/footer.php'; ?>
-<!-- 
-<script>
-    // Auto-generar PDF cuando se carga la página
-    window.onload = function () {
-        // Aquí iría tu código de pdfMake que ya tienes
-        const docDefinition = {
-            // Tu definición del documento aquí
-        };
-
-        // Generar y abrir PDF automáticamente
-        pdfMake.createPdf(docDefinition).open();
-    };
-</script> -->

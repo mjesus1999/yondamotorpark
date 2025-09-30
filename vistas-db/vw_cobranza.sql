@@ -218,7 +218,9 @@ BEGIN
          LIMIT 1
         ) AS monto_cuota,
         IFNULL(SUM(CASE WHEN cron.estado IN ('Pendiente','Vencido') THEN (cron.abonocapital + cron.interes + IFNULL(cron.penalidad,0)) ELSE 0 END), 0) AS deuda_total,
-        SUM(cron.estado = 'Vencido') AS cuotas_vencidas
+        CONCAT(SUM(cron.estado = 'Vencido'), ' vencidas de ', cot.numcuotas) AS estado_pagos
+        /*CONCAT(SUM(cron.estado = 'Vencido'), ' vencidas de ', cot.numcuotas) AS cuotas_vencidas*/	
+        /*SUM(cron.estado = 'Vencido') AS cuotas_vencidas*/
     FROM contratos c
     JOIN cotizaciones cot ON c.idcotizacion = cot.idcotizacion
     JOIN clientes cli ON cot.idcliente = cli.idcliente
@@ -237,3 +239,85 @@ BEGIN
 END$$
 DELIMITER ;
 
+CALL sp_get_cuotas_vencidas();
+
+/*
+SELECT COUNT(*) AS cuotas_pagadas
+FROM cronogramas
+WHERE idcontrato = 1
+  AND estado = 'Pagado';
+*/
+
+DROP PROCEDURE IF EXISTS sp_get_cuotas_proximas_vencer;
+DELIMITER $$
+
+CREATE PROCEDURE sp_get_cuotas_proximas_vencer()
+BEGIN
+    SELECT 
+        cro.idcronograma,
+        c.idcontrato,
+        CONCAT(p.apellidos, ' ', p.nombres) AS cliente,
+        p.telprimario AS telefono,
+        CONCAT(m.marca, ' ', mo.modelo) AS vehiculo,
+        CONCAT(
+            COALESCE(d.distrito, 'Sin distrito'), ' / ',
+            COALESCE(pro.provincia, 'Sin provincia')
+        ) AS direccion_local,  -- Cambiado de 'tienda' a 'direccion_local'
+        cot.numcuotas AS cuotas_totales,
+        cro.numcuota,
+        CONCAT(cro.numcuota, ' de ', cot.numcuotas) AS cuota_formato,
+        (cro.abonocapital + cro.interes + IFNULL(cro.penalidad, 0)) AS montocuota,  -- Cambiado de 'monto_cuota' a 'montocuota'
+        cro.fechapago,
+        cro.estado,
+        DATEDIFF(cro.fechapago, CURDATE()) AS dias_para_vencer,
+        CASE 
+            WHEN DATEDIFF(cro.fechapago, CURDATE()) = 3 THEN 'Vence en 3 días'
+            WHEN DATEDIFF(cro.fechapago, CURDATE()) = 2 THEN 'Vence en 2 días'
+            WHEN DATEDIFF(cro.fechapago, CURDATE()) = 1 THEN 'Vence mañana'
+            WHEN DATEDIFF(cro.fechapago, CURDATE()) = 0 THEN 'Vence HOY'
+            WHEN DATEDIFF(cro.fechapago, CURDATE()) < 0 THEN CONCAT('Vencido hace ', ABS(DATEDIFF(cro.fechapago, CURDATE())), ' días')
+            ELSE CONCAT('Vence en ', DATEDIFF(cro.fechapago, CURDATE()), ' días')
+        END AS estado_vencimiento,
+        (
+            SELECT SUM(cr2.abonocapital + cr2.interes + IFNULL(cr2.penalidad, 0))
+            FROM cronogramas cr2 
+            WHERE cr2.idcontrato = c.idcontrato 
+              AND cr2.estado IN ('Pendiente', 'Vencido')
+        ) AS deuda_total,
+        (
+            SELECT COUNT(*)
+            FROM cronogramas cr2 
+            WHERE cr2.idcontrato = c.idcontrato 
+              AND cr2.estado = 'Vencido'
+        ) AS cuotas_vencidas
+    FROM cronogramas cro
+    INNER JOIN contratos c ON cro.idcontrato = c.idcontrato
+    INNER JOIN cotizaciones cot ON c.idcotizacion = cot.idcotizacion
+    INNER JOIN clientes cli ON cot.idcliente = cli.idcliente
+    INNER JOIN personas p ON cli.idpersona = p.idpersona
+    INNER JOIN vehiculos v ON cot.idvehiculo = v.idvehiculo
+    INNER JOIN modelos mo ON v.idmodelo = mo.idmodelo
+    INNER JOIN marcas m ON mo.idmarca = m.idmarca
+    LEFT JOIN locales loc ON c.idlocal = loc.idlocal  
+    LEFT JOIN distritos d ON loc.iddistrito = d.iddistrito
+    LEFT JOIN provincias pro ON d.idprovincia = pro.idprovincia
+    WHERE c.estado = 'ACT'
+      AND cro.estado = 'Pendiente'  -- Solo pendientes, no vencidos
+      -- RANGO: desde 3 días antes (-3) hasta el día del vencimiento (0)
+      -- DATEDIFF(fechapago, CURDATE()) da valores negativos si la fecha ya pasó
+      -- Queremos: fechapago entre HOY y HOY+3
+      AND DATEDIFF(cro.fechapago, CURDATE()) BETWEEN 0 AND 3
+      -- CLAVE: Solo la primera cuota pendiente por contrato en este rango
+      AND cro.idcronograma = (
+          SELECT cr3.idcronograma
+          FROM cronogramas cr3
+          WHERE cr3.idcontrato = c.idcontrato
+            AND cr3.estado = 'Pendiente'
+            AND DATEDIFF(cr3.fechapago, CURDATE()) BETWEEN 0 AND 3
+          ORDER BY cr3.fechapago ASC, cr3.numcuota ASC
+          LIMIT 1
+      )
+    ORDER BY cro.fechapago ASC, cro.numcuota ASC;
+END$$
+
+DELIMITER ;

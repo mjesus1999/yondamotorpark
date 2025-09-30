@@ -37,7 +37,10 @@
                 <div class="card estadistica-card h-100">
                     <div class="card-body text-center">
                         <i class="fas fa-users fa-2x mb-2"></i>
-                        <h3 class="card-title"><?= htmlspecialchars($estadisticas['total_deudores'] ?? 0) ?></h3>
+                        <h3 class="card-title">
+                            6
+                            <!-- <?= htmlspecialchars($estadisticas['total_deudores'] ?? 0) ?> -->
+                        </h3>
                         <p class="card-text mb-0">
                             Cliente Deudores
                         </p>
@@ -51,7 +54,10 @@
                 <div class="card estadistica-card h-100">
                     <div class="card-body text-center">
                         <i class="fas fa-clock fa-2x mb-2"></i>
-                        <h3 class="card-title"><?= htmlspecialchars($estadisticas['por_vencer_3dias'] ?? 0) ?></h3>
+                        <h3 class="card-title">
+                            4
+                            <!-- <?= htmlspecialchars($estadisticas['por_vencer_3dias'] ?? 0) ?> -->
+                        </h3>
                         <p class="card-text mb-0">Por vencer (3 Dias)</p>
                     </div>
                 </div>
@@ -84,7 +90,7 @@
         </div>
 
         <!-- Opciones -->
-        <div class="card mb-4">
+        <div class="card mb-3">
             <div class="card-header">
                 <div class="d-flex justify-content-between align-items-center">
                     <h6 class="mb-0"><i class="fas fa-filter me-2"></i> Opciones </h6>
@@ -93,6 +99,7 @@
                     <div class="btn-group" role="group">
 
                         <!-- BOTON POR DEFECTO QUE MOSTRARA UN RESUMEN -->
+                        <input type="radio" id="btnTodos" name="filtro" class="d-none">
                         <label for="btnTodos" class="btn btn-sm btn-outline-primary me-2">
                             <i class="fas fa-list me-1"></i>Todos
                             <span class="badge bg-primary text-dark ms-1">
@@ -104,7 +111,8 @@
                         <a href="/Recordatorios" class="btn btn-sm btn-outline-warning me-2">
                             <i class="fas fa-exclamation-triangle me-1"></i> Vence: 3 días
                             <span class="badge bg-warning text-dark ms-1">
-                                <?= htmlspecialchars($estadisticas['por_vencer_3dias'] ?? 0) ?>
+                                4
+                                <!-- <?= htmlspecialchars($estadisticas['por_vencer_3dias'] ?? 0) ?> -->
                             </span>
                         </a>
 
@@ -126,7 +134,7 @@
 
             <?php if (!empty($resumen)): ?>
                 <?php foreach ($resumen as $fila): ?>
-                    <div class="col-lg-3 mb-5 cobranza-item" id="contrato-card-<?= (int) $fila['idcontrato'] ?>"
+                    <div class="col-lg-4 mb-5 cobranza-item" id="contrato-card-<?= (int) $fila['idcontrato'] ?>"
                         data-categoria="<?= (strpos($fila['estado_vencimiento'], 'Vencido') !== false) ? 'vencidos' : 'por-vencer' ?>"
                         data-deuda="<?= htmlspecialchars((float) $fila['deuda_total'], ENT_QUOTES) ?>"
                         data-monto="<?= htmlspecialchars((float) $fila['monto_cuota'], ENT_QUOTES) ?>">
@@ -135,8 +143,8 @@
                             <div class="card-body">
                                 <div class="d-flex justify-content-between align-items-start mb-3">
                                     <div>
-                                        <h5 class="card-title mb-1"><i
-                                                class="fas fa-user me-2"></i><?= htmlspecialchars($fila['cliente']) ?></h5>
+                                        <h6 class="card-title mb-1"><i
+                                                class="fas fa-user me-2"></i><?= htmlspecialchars($fila['cliente']) ?></h6>
                                         <p class="text-muted small mb-1"><strong>Teléfono:</strong>
                                             <?= htmlspecialchars($fila['telefono']) ?></p>
                                         <p class="text-muted small mb-0"><strong>Local:</strong>
