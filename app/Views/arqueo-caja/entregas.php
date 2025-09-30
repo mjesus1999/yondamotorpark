@@ -8,6 +8,30 @@ include __DIR__ . '/../layout/header.php';
         color: white;
         text-align: center;
     }
+
+    #detalleEntregaModal .nav-tabs .nav-link {
+        transition: all 0.3s ease;
+    }
+
+    #detalleEntregaModal .nav-tabs .nav-link:hover {
+        color: #667eea;
+        background-color: #f8f9fa;
+    }
+
+    #detalleEntregaModal .nav-tabs .nav-link.active {
+        border-bottom: 3px solid #667eea !important;
+        color: #667eea !important;
+    }
+
+
+
+    #detalleEntregaModal .card {
+        transition: all 0.3s ease;
+    }
+
+    #detalleEntregaModal .card:hover {
+        transform: translateY(-2px);
+    }
 </style>
 
 <div class="container-fluid mt-2">
@@ -104,131 +128,180 @@ include __DIR__ . '/../layout/header.php';
 
     <div class="modal fade" id="detalleEntregaModal" tabindex="-1" aria-labelledby="detalleEntregaModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-            <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
+            
+                <div class="modal-header text-white p-4 position-relative" style="background: linear-gradient(135deg, #3055f7ff 0%, #f2e4ffff 100%); border: none;">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="bg-white bg-opacity-25 p-3 rounded-circle">
+                            <i class="fas fa-box-open fs-4"></i>
+                        </div>
+                        <div>
+                            <p class="modal-title fw-bold mb-1 fs-4" id="detalleEntregaModalLabel">
+                                Detalle de Entrega: #<span id="modal-identrega"></span>
+                            </p>
+                            <p class="mb-0 opacity-75" style="font-size: 0.9rem;">
 
-                <div class="modal-header bg-primary text-white p-4 border-bottom border-primary border-3">
-                    <h5 class="modal-title fw-bolder fs-4" id="detalleEntregaModalLabel">
-                        <i class="fas fa-box-open me-2"></i> Detalle de Entrega #<span id="modal-identrega"></span>
-                    </h5>
-             
-                       
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                  
+                            </p>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
 
-                <div class="modal-body p-4 bg-light">
+                <div class="modal-body p-4">
 
-                    <div class="card p-4 mb-4 bg-white shadow-lg rounded-4 border-1 border-primary border-opacity-25">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h5 class="text-primary fw-bolder mb-0 fs-5">
-                                <i class="fas fa-chart-bar me-2"></i> Análisis de Arqueos
-                            </h5>
-
-                             <button type="button" class="btn btn-sm btn-outline-danger me-2 rounded" id="btn-descargar-pdf" title="Descargar Reporte PDF">
-                            <i class="fas fa-file-pdf me-1"></i> PDF
-                        </button>
+                    
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <div class="card border-0 shadow-sm h-100" style="border-radius: 12px; overflow: hidden;">
+                                <div class="card-body p-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="text-white">
+                                            <p class="mb-2 opacity-75" style="font-size: 0.85rem; font-weight: 500;">
+                                                <i class="fas fa-hand-holding-usd me-2"></i>TOTAL ENTREGADO
+                                            </p>
+                                            <h3 class="mb-0 fw-bold">S/ <span id="card-monto-entregado">0.00</span></h3>
+                                        </div>
+                                        <div class="bg-white bg-opacity-25 p-3 rounded-circle">
+                                            <i class="fas fa-coins fs-2 text-white"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div style="height: 350px;">
-                            <canvas id="entregaChart"></canvas>
+                        <div class="col-md-6">
+                            <div class="card border-0 shadow-sm h-100" style="border-radius: 12px; overflow: hidden;">
+                                <div class="card-body p-4" style="background: linear-gradient(135deg, #ff7e42ff 0%, #f5576c 100%);">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="text-white">
+                                            <p class="mb-2 opacity-75" style="font-size: 0.85rem; font-weight: 500;">
+                                                <i class="fas fa-receipt me-2"></i>EGRESOS REGISTRADOS
+                                            </p>
+                                            <h3 class="mb-0 fw-bold">- S/ <span id="card-total-egresos">0.00</span></h3>
+                                        </div>
+                                        <div class="bg-white bg-opacity-25 p-3 rounded-circle">
+                                            <i class="fas fa-file-invoice-dollar fs-2 text-white"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="d-flex justify-content-center align-items-center  gap-2 mb-2">
-                        <div class="col-md-3 mb-3">
-                            <div class="card p-3 shadow-sm rounded-4 bg-primary text-white border-white border-1 h-100">
-                                <p class=" fw-bold mb-1 text-center"><i class="fas fa-hand-holding-usd me-2"></i> TOTAL ENTREGADO</p>
-                                <h4 class="fw-bolder text-center mb-0 ">S/ <span id="card-monto-entregado">0.00</span></h4>
+                   
+                    <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px; overflow: hidden;">
+                        <div class="card-header bg-body  border border-secondary p-4">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="mb-1 fw-bold" style="color: #667eea;">
+                                        <i class="fas fa-chart-bar me-2"></i>Análisis de Arqueos
+                                    </h5>
+                                    <p class="text-muted mb-0" style="font-size: 0.85rem;">Visualización comparativa de ingresos y egresos</p>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-outline-danger shadow-sm" id="btn-descargar-pdf">
+                                    <i class="fas fa-file-pdf me-2"></i>PDF
+                                </button>
                             </div>
                         </div>
-                        <div class="col-md-3 mb-3">
-                            <div class="card p-3 shadow-sm rounded-4  border-white border-1 bg-danger text-white h-100">
-                                <p class="fw-bold mb-1 text-center"><i class="fas fa-receipt me-2"></i> EGRESOS REGISTRADOS</p>
-                                <h4 class="fw-bolder text-center mb-0">- S/ <span id="card-total-egresos">0.00</span></h4>
+                        <div class="card-body p-4 bg-body border border-secondary">
+                            <div style="height: 380px; position: relative;">
+                                <div id="entregaChart"></div>
+
                             </div>
                         </div>
                     </div>
 
-                    <div class="card shadow-lg rounded-4 p-3" style="background-color: #f8f9fa;">
-
-                        <ul class="nav nav-tabs nav-justified" id="detalleEntregaTabs" role="tablist">
+               
+                    <div class="card border-0 shadow-sm" style="border-radius: 12px; overflow: hidden;">
+                        <ul class="nav nav-tabs border-0 px-3 pt-3" id="detalleEntregaTabs" role="tablist" style="background: linear-gradient(135deg, #68cdecff 0%, #ffbc6fff 100%);">
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link active fw-bold" id="arqueos-tab" data-bs-toggle="tab" data-bs-target="#arqueos-content" type="button" role="tab" aria-controls="arqueos-content" aria-selected="true">
-                                    <i class="fas fa-cash-register me-1"></i> Detalle de Arqueos
+                                <button class="nav-link active fw-bold px-4 py-3" id="arqueos-tab" data-bs-toggle="tab" data-bs-target="#arqueos-content" type="button" role="tab"">
+                                <i class=" fas fa-cash-register me-2"></i>Detalle de Arqueos
                                 </button>
                             </li>
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link fw-bold" id="destino-tab" data-bs-toggle="tab" data-bs-target="#destino-content" type="button" role="tab" aria-controls="destino-content" aria-selected="false">
-                                    <i class="fas fa-map-pin me-1"></i> Destino del Dinero
+                                <button class="nav-link fw-bold px-4 py-3" id="destino-tab" data-bs-toggle="tab" data-bs-target="#destino-content" type="button" role="tab"">
+                                <i class=" fas fa-map-pin me-2"></i>Destino del Dinero
                                 </button>
                             </li>
                         </ul>
 
-                        <div class="tab-content pt-3" id="detalleEntregaTabsContent">
-
-                            <div class="tab-pane fade show active" id="arqueos-content" role="tabpanel" aria-labelledby="arqueos-tab">
+                        <div class="tab-content p-4 bg-body border border-secondary " id="detalleEntregaTabsContent">
+                            
+                            <div class="tab-pane fade show active" id="arqueos-content" role="tabpanel">
                                 <div class="table-responsive">
-                                    <table class="table table-sm table-hover table-light table-striped mt-2">
-                                        <thead class="table-primary text-white">
+                                    <table class="table table-hover bg-body align-middle mb-0">
+                                        <thead>
                                             <tr>
-                                                <th>#</th>
-                                                <th class="text-end">Ingresos Efect.</th>
-                                                <th class="text-end">Ingresos Dig.</th>
-                                                <th class="text-end">Egresos</th>
-                                                <th class="text-end">Total Neto</th>
-                                                <th>Estado</th>
+                                                <th class="py-3" style="border-bottom: 2px solid #667eea;">#</th>
+                                                <th class="text-end text-body fw-bold py-3" style="border-bottom: 2px solid #667eea;">Ingresos Efect.</th>
+                                                <th class="text-end  text-body fw-bold py-3" style="border-bottom: 2px solid #667eea;">Ingresos Dig.</th>
+                                                <th class="text-end text-body fw-bold py-3" style="border-bottom: 2px solid #667eea;">Egresos</th>
+                                                <th class="text-end text-body fw-bold py-3" style="border-bottom: 2px solid #667eea;">Total Neto</th>
+                                                <th class="py-3 text-body fw-bold" style="border-bottom: 2px solid #667eea;">Estado</th>
                                             </tr>
                                         </thead>
                                         <tbody id="arqueos-detalle-body">
                                             <tr>
-                                                <td colspan="6" class="text-center text-muted py-3">Cargando datos...</td>
+                                                <td colspan="6" class="text-center text-muted py-4">
+                                                    <i class="fas fa-spinner fa-spin me-2"></i>Cargando datos...
+                                                </td>
                                             </tr>
                                         </tbody>
                                     </table>
                                 </div>
                             </div>
 
-                            <div class="tab-pane fade" id="destino-content" role="tabpanel" aria-labelledby="destino-tab">
+                            <div class="tab-pane fade" id="destino-content" role="tabpanel">
                                 <div class="table-responsive">
-                                    <table class="table table-sm table-hover table-light table-striped mt-2">
-                                        <thead class="table-success text-white">
+                                    <table class="table table-hover align-middle mb-0">
+                                        <thead style="background-color: #f8f9fa;">
                                             <tr>
-                                                <th>Tipo</th>
-                                                <th>Destino</th>
-                                                <th class="text-end">Monto</th>
+                                                <th class="py-3" style="border-bottom: 2px solid #667eea; color: #495057; font-weight: 600;">Tipo</th>
+                                                <th class="py-3" style="border-bottom: 2px solid #667eea; color: #495057; font-weight: 600;">Destino</th>
+                                                <th class="text-end py-3" style="border-bottom: 2px solid #667eea; color: #495057; font-weight: 600;">Monto</th>
                                             </tr>
                                         </thead>
                                         <tbody id="destinos-detalle-body">
                                             <tr>
-                                                <td colspan="3" class="text-center text-muted py-3">Cargando destinos...</td>
+                                                <td colspan="3" class="text-center text-muted py-4">
+                                                    <i class="fas fa-spinner fa-spin me-2"></i>Cargando destinos...
+                                                </td>
                                             </tr>
                                         </tbody>
                                     </table>
                                 </div>
                             </div>
-
                         </div>
                     </div>
 
-                    <div class="mt-4 p-3 shadow-sm rounded-4 border-1" style="background-color: #eaf1f5ff;">
-                        <h5 class="mb-3 text-secondary fw-bold">
-                            <i class="fas fa-comment-alt me-2"></i> Observaciones de la Entrega
-                        </h5>
-                        <p id="obs-entrega" class="mb-0 text-dark p-3 bg-white rounded border border-secondary border-opacity-25 fst-italic shadow-sm"></p>
+                    
+                    <div class="card border-0 shadow-sm mt-4" style="border-radius: 12px; overflow: hidden;">
+                        <div class="card-body p-4" style="background: linear-gradient(135deg, #ffc981ff 0%, #fdffe7ff 100%);">
+                            <h6 class="mb-3 fw-bold text-dark">
+                                <i class="fas fa-comment-alt me-2"></i>Observaciones de la Entrega
+                            </h6>
+                            <div class="bg-white p-3 rounded shadow-sm" style="border-left: 4px solid #667eea;">
+                                <p id="obs-entrega" class="mb-0 text-dark fst-italic" style="line-height: 1.6;"></p>
+                            </div>
+                        </div>
                     </div>
+
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-
-
     <?php include __DIR__ . '/../layout/footer.php'; ?>
+
+    <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> -->
+
+
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="/assets/js/logoBase64.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
 
@@ -276,12 +349,12 @@ include __DIR__ . '/../layout/header.php';
                 document.getElementById('modal-identrega').textContent = identrega;
                 document.getElementById('obs-entrega').textContent = obs || 'Sin observaciones registradas.';
                 document.getElementById('card-monto-entregado').textContent = montoEntrega.toFixed(2);
-                document.getElementById('card-total-egresos').textContent = '0.00'; // Se actualizará después de la carga
+                document.getElementById('card-total-egresos').textContent = '0.00'; 
 
                 const arqueosBody = document.getElementById('arqueos-detalle-body');
                 const destinosBody = document.getElementById('destinos-detalle-body');
 
-                // Mostrar spinners
+                
                 const loadingArqueos = '<tr><td colspan="6" class="text-center text-primary py-3"><i class="fas fa-spinner fa-spin me-2"></i>Cargando...</td></tr>';
                 const loadingDestinos = '<tr><td colspan="3" class="text-center text-primary py-3"><i class="fas fa-spinner fa-spin me-2"></i>Cargando...</td></tr>';
                 arqueosBody.innerHTML = loadingArqueos;
@@ -337,8 +410,8 @@ include __DIR__ . '/../layout/header.php';
                     <td>${numeroFila++}</td>
                     <td class="text-end">S/ ${parseFloat(a.ingresos_efectivo).toFixed(2)}</td>
                     <td class="text-end">S/ ${parseFloat(a.ingresos_digital).toFixed(2)}</td>
-                    <td class="text-end text-danger fw-bold">S/ ${parseFloat(a.egresos_dia).toFixed(2)}</td>
-                    <td class="text-end fw-bolder text-primary">S/ ${parseFloat(a.total).toFixed(2)}</td>
+                    <td class="text-end fw-bold fw-bold">S/ ${parseFloat(a.egresos_dia).toFixed(2)}</td>
+                    <td class="text-end fw-bolder fw-bold">S/ ${parseFloat(a.total).toFixed(2)}</td>
                     <td><span class="badge ${a.estado_arqueo === 'Cuadrado' ? 'bg-success' : 'bg-warning text-dark'}">${a.estado_arqueo}</span></td>
                 </tr>
             `).join('');
@@ -359,96 +432,159 @@ include __DIR__ . '/../layout/header.php';
             }
 
 
+
             function updateChart(montoEntrega, arqueos) {
                 const chartElement = document.getElementById('entregaChart');
                 if (!chartElement) return;
-                const ctx = chartElement.getContext('2d');
 
-                if (myChart) myChart.destroy();
+                if (myChart) {
+                    myChart.destroy(); 
+                }
 
-                const COLOR_ENTREGA = 'rgba(13, 110, 253, 0.9)';
-                const COLOR_APORTACION_POS = 'rgba(25, 135, 84, 0.9)';
-                const COLOR_APORTACION_NEG = 'rgba(255, 193, 7, 0.9)';
-                const COLOR_EGRESO = 'rgba(220, 53, 69, 0.9)';
-                const BORDER_COLOR = '#444';
+               
+                const COLOR_ENTREGA = '#667eea';
+                const COLOR_APORTACION_POS = '#10b981';
+                const COLOR_EGRESO = '#ef4444';
+                const COLOR_PERDIDA = '#f59e0b';
 
+               
                 const arqueoLabels = arqueos.map((a, index) => `Arqueo #${index + 1}`);
-                const aportacionNetaMontos = arqueos.map(a => parseFloat(a.total) || 0);
+                const labels = ['Total Entregado', ...arqueoLabels];
+
+             
+                const aportacionNetaMontos = arqueos.map(a => {
+                    const total = parseFloat(a.total) || 0;
+                    return total > 0 ? total : null;
+                });
+
                 const egresoMontos = arqueos.map(a => {
                     const egreso = parseFloat(a.egresos_dia) || 0;
                     return egreso > 0 ? egreso * -1 : null;
                 });
 
-                const labels = ['Total Entregado', ...arqueoLabels];
+                const perdidaNetaMontos = arqueos.map(a => {
+                    const ingresoEfectivo = parseFloat(a.ingresos_efectivo) || 0;
+                    const ingresoDigital = parseFloat(a.ingresos_digital) || 0;
+                    const totalIngresos = ingresoEfectivo + ingresoDigital;
+                    const total = parseFloat(a.total) || 0;
+                    return (totalIngresos > 0 && total < 0) ? total : null;
+                });
+
+               
                 const dataSetMontoEntregado = [montoEntrega, ...new Array(aportacionNetaMontos.length).fill(null)];
                 const dataSetAportacionNeta = [null, ...aportacionNetaMontos];
                 const dataSetEgresos = [null, ...egresoMontos];
+                const dataSetPerdidas = [null, ...perdidaNetaMontos];
 
-                myChart = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                                label: 'Egresos',
-                                data: dataSetEgresos,
-                                backgroundColor: COLOR_EGRESO,
-                                borderColor: BORDER_COLOR,
-                                borderWidth: 1,
-                                order: 0,
-                                stack: 'stack1'
-                            },
-                            {
-                                label: 'Aportación Neta',
-                                data: dataSetAportacionNeta,
-                                backgroundColor: aportacionNetaMontos.map(monto =>
-                                    monto >= 0 ? COLOR_APORTACION_POS : COLOR_APORTACION_NEG
-                                ),
-                                borderColor: BORDER_COLOR,
-                                borderWidth: 1,
-                                order: 1,
-                                stack: 'stack1'
-                            },
-                            {
-                                label: 'Monto de la Entrega',
-                                data: dataSetMontoEntregado,
-                                backgroundColor: COLOR_ENTREGA,
-                                borderColor: BORDER_COLOR,
-                                borderWidth: 1,
-                                order: 2,
-                                stack: 'stack2'
+                
+                const options = {
+                    chart: {
+                        type: 'bar',
+                        height: 400,
+                        stacked: true,
+                        toolbar: {
+                            show: true, 
+                            tools: {
+                                download: true, 
+                                selection: true,
+                                zoom: true,
+                                zoomin: true,
+                                zoomout: true,
+                                pan: true,
+                                reset: true
                             }
-                        ]
+                        }
                     },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            x: {
-                                stacked: true,
-                                grid: {
-                                    display: false
-                                }
+
+                    plotOptions: {
+                        bar: {
+                            borderRadius: 6,
+                            horizontal: false
+                        }
+                    },
+                    dataLabels: {
+                        enabled: false
+                    },
+                    series: [{
+                            name: 'Egresos',
+                            data: dataSetEgresos,
+                            color: COLOR_EGRESO
+                        },
+                        {
+                            name: 'Aportación Neta',
+                            data: dataSetAportacionNeta,
+                            color: COLOR_APORTACION_POS
+                        },
+                        {
+                            name: 'Monto de la Entrega',
+                            data: dataSetMontoEntregado,
+                            color: COLOR_ENTREGA
+                        },
+                        {
+                            name: 'Pérdidas',
+                            data: dataSetPerdidas,
+                            color: COLOR_PERDIDA
+                        }
+                    ],
+                    xaxis: {
+                        categories: labels,
+                        labels: {
+                            style: {
+                                fontSize: '11px',
+                                bold:true,
+                                colors: '#1354afff'
+                            }
+                        }
+                    },
+                    yaxis: {
+                        labels: {
+                            formatter: function(value) {
+                                return 'S/ ' + value.toLocaleString('es-PE', {
+                                    minimumFractionDigits: 0,
+                                    maximumFractionDigits: 0
+                                });
                             },
-                            y: {
-                                stacked: true,
-                                beginAtZero: false,
-                                title: {
-                                    display: true,
-                                    text: 'Monto (S/)'
-                                }
+                            style: {
+                                fontSize: '11px',
+                                colors: '#64748b'
                             }
                         },
-                        plugins: {
-                            legend: {
-                                position: 'bottom'
-                            },
-                            title: {
-                                display: false
+                        title: {
+                            text: 'Monto (S/)',
+                            style: {
+                                fontSize: '13px',
+                                fontWeight: 'bold',
+                                color: '#475569'
+                            }
+                        }
+                    },
+                    legend: {
+                        position: 'bottom',
+                        fontSize: '12px',
+                        labels: {
+                            colors: '#475569'
+                        },
+                        markers: {
+                            radius: 12
+                        }
+                    },
+                    tooltip: {
+                        y: {
+                            formatter: function(value) {
+                                return 'S/ ' + Math.abs(value).toLocaleString('es-PE', {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2
+                                });
                             }
                         }
                     }
-                });
+                };
+                // Renderizar gráfico
+                myChart = new ApexCharts(chartElement, options);
+                myChart.render();
             }
+
+
 
 
             function buildTable(tableElement, headerColor = '#CCCCCC') {
@@ -679,14 +815,12 @@ include __DIR__ . '/../layout/header.php';
                 pdfMake.createPdf(docDefinition).open();
             }
 
-
-
-
-
-
-
-
-
-
         });
+
+
+
+
+
+
+        
     </script>

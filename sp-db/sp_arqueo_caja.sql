@@ -113,6 +113,7 @@ SELECT * FROM Arqueocaja;
 
 UPDATE arqueocaja SET hora_fin = '10:45' WHERE idarqueo = 2;
 DROP PROCEDURE IF EXISTS sp_listar_arqueos_consolidados;
+
 DELIMITER / /
 
 CREATE PROCEDURE sp_listar_arqueos_consolidados()
@@ -332,8 +333,8 @@ FROM egresos e
 JOIN conceptoegreso ce ON e.idconceptoegreso = ce.idconceptoegreso
 LEFT JOIN comprobantes com ON e.idegreso = com.idegreso
 WHERE 
-    
-    e.creado >= v_fecha_hora_inicio AND v_fecha_hora_fin 
+  
+    e.creado BETWEEN v_fecha_hora_inicio AND v_fecha_hora_fin 
     AND (e.requierecomprobante = 'N' 
          OR (e.requierecomprobante = 'S' AND com.cargadocontabilidad = 'S'))
 GROUP BY ce.concepto
@@ -349,7 +350,8 @@ FROM pagos p
 LEFT JOIN cuentaspago cp ON p.idcuentapago = cp.idcuentapago
 LEFT JOIN entidadespago ep ON cp.identidadpago = ep.identidadpago
 WHERE 
-    p.fechapago BETWEEN v_fecha_hora_inicio AND v_fecha_hora_fin
+    
+    p.fecharegistro BETWEEN v_fecha_hora_inicio AND v_fecha_hora_fin
     AND p.mediopago != 'Efectivo'
 GROUP BY p.mediopago, ep.entidad
 ORDER BY p.mediopago, ep.entidad;
@@ -357,7 +359,7 @@ ORDER BY p.mediopago, ep.entidad;
 
 END //
 DELIMITER ;
-CALL sp_reporte_arqueo_por_fecha_por_ciclo('12,13');
+CALL sp_reporte_arqueo_por_fecha_por_ciclo('21,22,23');
 
 
 

@@ -1,4 +1,23 @@
 <?php include __DIR__ . '/../layout/header.php'; ?>
+<!-- 
+<?php
+// 1. Contar cuántos arqueos están pendientes (ya que la lista está filtrada por 'N')
+$arqueos_pendientes_count = isset($arqueos) && is_array($arqueos) ? count($arqueos) : 0;
+
+// 2. Determinar el flujo de entrega
+$solo_un_pendiente = $arqueos_pendientes_count === 1;
+
+// 3. Obtener el ID único del último arqueo pendiente para el flujo de Consolidación
+// Usaremos la clave 'ultimo_idarqueo' del primer elemento (el más reciente)
+$id_ultimo_arqueo_consolidado = $arqueos_pendientes_count > 0 ? $arqueos[0]['ultimo_idarqueo'] : null;
+
+var_dump($id_ultimo_arqueo_consolidado);
+// var_dump($arqueos["fecha"]);
+// La lógica es simple:
+// Si $solo_un_pendiente es TRUE, se usa el botón singular de la fila [0].
+// Si $solo_un_pendiente es FALSE (arrastre), se usan los checkboxes y el botón consolidado.
+?> -->
+
 
 <!-- <?php var_dump($ingresos_efectivo) ?>
 <?php var_dump($egresos_dia) ?>
@@ -61,8 +80,8 @@
                     <i class="fas fa-plus me-1"></i> Registrar Nuevo Arqueo
                 </button>
                 <?php if ($entregado !== 'S'): ?>
-                    <button type="button" class="btn btn-success btn-sm" id="btn-entregar-seleccionados" disabled>
-                        <i class="fas fa-handshake me-1"></i> Entregar Seleccionados
+                    <button type="button" class="btn btn-outline-success btn-sm" id="btnEntregarAll">
+                        <i class="fas fa-handshake me-1"></i> Entregar todo
                     </button>
                 <?php endif; ?>
             </div>
@@ -88,7 +107,14 @@
                     <table class="table table-hover table-bordered mb-0">
                         <thead class="table-light">
                             <tr>
-                                <th><input type="checkbox" id="selectAllArqueos"></th>
+                                <th></th>
+                             
+                                <!-- <th style="width: 100px;">
+                                    <button class="btn btn-sm btn-outline-primary" id="btnEntregarAll">
+                                        Entregar
+                                    </button>
+                                </th>
+                 -->
                                 <th>#</th>
                                 <th>Fecha</th>
                                 <th>Monto Inicial </th>
@@ -99,51 +125,77 @@
                             </tr>
                         </thead>
                         <tbody>
+                           
                             <?php if (isset($arqueos) && is_array($arqueos) && !empty($arqueos)): ?>
                                 <?php $numeroFila = 1; ?>
                                 <?php foreach ($arqueos as $arqueo): ?>
                                     <tr>
                                         <td>
+                                           
                                             <input type="checkbox"
-                                                class="arqueo-checkbox"
+                                                class="arqueo-data-collector"
                                                 data-ids="<?= htmlspecialchars($arqueo['ids_arqueos_del_dia']) ?>"
-                                                data-monto="<?= htmlspecialchars($arqueo['monto_fisico_dia']) ?>">
+                                                data-monto="<?= htmlspecialchars($arqueo['monto_fisico_dia']) ?>"
+                                                style="display:none;">
                                         </td>
-                                        <td><?= $numeroFila++ ?></td>
+                                    <td><?= $numeroFila++ ?></td>
+
                                         <td><i class="far fa-calendar-alt text-muted me-1"></i><?= htmlspecialchars(date('d/m/Y', strtotime($arqueo['fecha']))); ?></td>
+
                                         <td>S/ <?= number_format($arqueo['saldo_inicial_dia'], 2); ?></td>
+
                                         <td>S/ <?= number_format($arqueo['monto_fisico_dia'], 2); ?></td>
+
                                         <td>
                                             <?php
-
                                             $diferencia = $arqueo['diferencia_final'];
+
                                             if ($diferencia > 0) {
+
                                                 echo '<span class="text-warning fw-bold">S/ ' . number_format($diferencia, 2) . '</span>';
+
                                             } elseif ($diferencia < 0) {
+
                                                 echo '<span class="text-danger fw-bold">S/ ' . number_format($diferencia, 2) . '</span>';
+
                                             } else {
+
                                                 echo '<span class="text-success fw-bold">S/ ' . number_format($diferencia, 2) . '</span>';
+
                                             }
+
                                             ?>
+
                                         </td>
+
                                         <td><span class="badge bg-warning text-dark"><i class="fas fa-exclamation-triangle"></i> Pendiente</span></td>
+
                                         <td>
+
                                             <button class="btn btn-sm btn-danger btn-pdf-arqueo" title="Generar PDF" data-fecha='<?= $arqueo['fecha'] ?>' data-ids=<?= htmlspecialchars($arqueo['ids_arqueos_del_dia']) ?>>
+
                                                 <i class="fas fa-file-pdf"></i>
+
                                             </button>
-                                            <button class="btn btn-sm btn-success btn-entregar-singular"
+
+                                            <!-- <button class="btn btn-sm btn-success btn-entregar-singular"
+
                                                 title="Marcar como Entregado"
+
                                                 data-ids="<?= htmlspecialchars($arqueo['ids_arqueos_del_dia']) ?>"
+
                                                 data-monto="<?= htmlspecialchars($arqueo['monto_fisico_dia']) ?>">
+
                                                 <i class="fas fa-handshake"></i>
-                                            </button>
-                                        </td>
+
+                                            </button> -->
+
+                                        </td> 
                                     </tr>
                                 <?php endforeach; ?>
                             <?php else: ?>
-                                <tr>
-                                    <td colspan="8" class="text-center">No hay arqueos registrados sin entregar.</td>
-                                </tr>
+                                <div class="text-center">No hay datos para mostrar.</div>
+                              
                             <?php endif; ?>
                         </tbody>
                     </table>
@@ -356,6 +408,7 @@
 
                                 const esPrimerArqueo = form.dataset.esPrimerArqueo === 'true';
                                 const btnFinalizarArqueo = document.getElementById('btnFinalizarArqueo');
+                                const btnEntregarAll = document.getElementById('btnEntregarAll');
 
 
                                 if (esPrimerArqueo) {
@@ -374,6 +427,7 @@
 
                                     console.log('No se detectaron ingresos en efectivo ni egresos, el botón de arqueo está deshabilitado.');
                                 }
+
                                 function roundToTwoDecimals(num) {
                                     return Math.round(num * 100) / 100;
                                 }
@@ -387,48 +441,48 @@
                                     let montoTeoricoCalculado;
 
                                     if (esPrimerArqueo) {
-                                       
+
                                         const saldoInicialUser = parseFloat(saldoInicialInput.value) || 0;
 
                                         const suma = roundToTwoDecimals(saldoInicialUser + ingresosEfectivo);
                                         montoTeoricoCalculado = roundToTwoDecimals(suma - egresosDia);
 
                                     } else {
-                                        
+
                                         const suma = roundToTwoDecimals(saldoInicial + ingresosEfectivo);
                                         montoTeoricoCalculado = roundToTwoDecimals(suma - egresosDia);
 
                                         console.log('MONTO TEORICO: ', montoTeoricoCalculado);
                                     }
 
-                                
+
                                     const diferencia = roundToTwoDecimals(montoFisico - montoTeoricoCalculado);
                                     console.log('DIFERENCIA: ', diferencia);
 
-                                 
+
                                     const esDiferenciaCero = Math.abs(diferencia) < 0.0000000001;
 
-                                
+
                                     montoTeoricoH2.textContent = `S/ ${montoTeoricoCalculado.toFixed(2)}`;
                                     montoTeoricoInput.value = montoTeoricoCalculado.toFixed(2);
                                     diferenciaSpan.textContent = `S/ ${diferencia.toFixed(2)}`;
                                     diferenciaInput.value = diferencia.toFixed(2);
 
-                          
+
                                     alertDiv.classList.remove('alert-info', 'alert-warning', 'alert-danger', 'alert-success');
 
                                     if (esDiferenciaCero) {
-                                  
+
                                         alertDiv.classList.add('alert-success');
                                         observacionesGroup.classList.add('d-none');
                                         observacionesInput.removeAttribute('required');
                                     } else if (diferencia > 0) {
-                                    
+
                                         alertDiv.classList.add('alert-warning');
                                         observacionesGroup.classList.add('d-none');
                                         observacionesInput.removeAttribute('required');
-                                    } else { 
-                                    
+                                    } else {
+
                                         alertDiv.classList.add('alert-danger');
                                         observacionesGroup.classList.remove('d-none');
                                         observacionesInput.setAttribute('required', 'required');
@@ -487,48 +541,164 @@
 
 
 
-                                function updateEntregarButton() {
-                                    const checkedCount = document.querySelectorAll('.arqueo-checkbox:checked').length;
-                                    btnEntregarSeleccionados.disabled = checkedCount === 0;
+                                // function updateEntregarButton() {
+                                //     const checkedCount = document.querySelectorAll('.arqueo-checkbox:checked').length;
+                                //     btnEntregarSeleccionados.disabled = checkedCount === 0;
+                                // }
+
+                                // checkboxes.forEach(checkbox => {
+                                //     checkbox.addEventListener('change', updateEntregarButton);
+                                // });
+
+                                // selectAllCheckbox.addEventListener('change', function() {
+                                //     checkboxes.forEach(checkbox => {
+                                //         checkbox.checked = this.checked;
+                                //     });
+                                //     updateEntregarButton();
+                                // });
+
+                                // document.querySelectorAll('.btn-entregar-singular').forEach(button => {
+                                //     button.addEventListener('click', function() {
+                                //         const id = this.dataset.ids;
+                                //         console.log('IDS: ', id);
+                                //         const monto = this.dataset.monto;
+                                //         idsArqueosEntregaInput.value = id;
+                                //         console.log('IDS A ENTREGAR: ', idsArqueosEntregaInput.value);
+                                //         montoTotalEntregaInput.value = parseFloat(monto).toFixed(2);
+                                //         console.log(montoTotalEntregaInput.value);
+                                //         tipoDestinoSelect.value = 'Gerente';
+                                //         cargarDestinos();
+                                //         entregaModal.show();
+                                //     });
+                                // });
+
+                                // btnEntregarAll.addEventListener('click', () => {
+
+
+                                // });
+
+
+
+                                // document.getElementById('btn-entregar-seleccionados').addEventListener('click', () => {
+
+                                //     const checkboxes = document.querySelectorAll('.arqueo-checkbox:checked');
+
+                                //     if (checkboxes.length === 0) {
+                                //         alert('Por favor, selecciona al menos un arqueo para la entrega.');
+                                //         return;
+                                //     }
+
+                                //     let maxArqueoId = -1;
+                                //     let ultimoArqueoCheckbox = null;
+                                //     let todosLosIds = [];
+
+                                //     checkboxes.forEach(cb => {
+
+                                //         const idsString = cb.dataset.ids || '';
+                                //         const ids = idsString.split(',').map(id => parseInt(id.trim(), 10)).filter(id => !isNaN(id));
+
+                                //         todosLosIds.push(...ids);
+                                //         console.log('TODOS LOS IDS: ', todosLosIds);
+
+                                //         // 2. Encontrar el ID individual más alto entre TODOS los seleccionados
+                                //         const maxIdEnEsteCheckbox = Math.max(...ids);
+                                //         console.log('ID MAS ALTO: ', maxIdEnEsteCheckbox);
+
+                                //         if (maxIdEnEsteCheckbox > maxArqueoId) {
+                                //             maxArqueoId = maxIdEnEsteCheckbox;
+                                //             // Guardamos la referencia al checkbox que contiene el ID más alto
+                                //             ultimoArqueoCheckbox = cb;
+                                //         }
+                                //     });
+
+                                //     // 3. Obtener el monto usando el checkbox del arqueo más reciente (el que tiene el ID más alto)
+                                //     // Usamos el ID más alto como el criterio, no la posición en el DOM.
+                                //     const montoTotal = parseFloat(ultimoArqueoCheckbox.dataset.monto) || 0;
+
+                                //     // 4. Asignar valores
+                                //     // Unimos todos los IDs únicos para el campo de entrega
+                                //     const idsParaEntrega = [...new Set(todosLosIds)].join(',');
+
+                                //     console.log('IDS A ENTREGAR: ', idsParaEntrega)
+
+                                //     document.getElementById('idsArqueosEntrega').value = idsParaEntrega;
+                                //     document.getElementById('montoTotalEntrega').value = montoTotal.toFixed(2);
+
+                                //     // 5. Mostrar modal
+                                //     const entregaModal = new bootstrap.Modal(document.getElementById('entregaModal'));
+                                //     entregaModal.show();
+                                // });
+
+
+
+                                if (btnEntregarAll) {
+                                    btnEntregarAll.addEventListener('click', () => {
+                                    
+                                        const allDataCollectors = document.querySelectorAll('.arqueo-data-collector');
+
+                                        if (allDataCollectors.length === 0) {
+
+                                            showToast('No hay arqueos pendientes para entregar.', 'bg-warning', 1500);
+                                            return;
+                                        }
+
+                                        let maxArqueoId = -1;
+                                        let ultimoArqueoCollector = null;
+                                        let todosLosIds = []; 
+
+                                  
+                                        allDataCollectors.forEach(collector => {
+                                            const idsString = collector.dataset.ids || '';
+
+                                            
+                                            const ids = idsString.split(',').map(id => parseInt(id.trim(), 10)).filter(id => !isNaN(id));
+
+                                           
+                                            todosLosIds.push(...ids);
+
+                                            const maxIdEnEsteElemento = Math.max(...ids);
+
+                                            if (maxIdEnEsteElemento > maxArqueoId) {
+                                                maxArqueoId = maxIdEnEsteElemento;
+                                                // Almacena la referencia del elemento que contiene el ID más alto (para tomar su monto)
+                                                ultimoArqueoCollector = collector;
+                                            }
+                                        });
+
+                                        //  Obtener el monto final del arqueo más reciente
+                                        const montoTotal = ultimoArqueoCollector ?
+                                            parseFloat(ultimoArqueoCollector.dataset.monto) || 0 :
+                                            0;
+
+                                        const idsParaEntrega = [...new Set(todosLosIds)].join(',');
+
+                                        if (idsParaEntrega.length === 0) {
+                                            showToast('No se pudieron extraer los IDs de arqueo.', 'bg-danger', 1500);
+                                            return;
+                                        }
+
+                                 
+                                        if (idsArqueosEntregaInput && montoTotalEntregaInput) {
+                                            idsArqueosEntregaInput.value = idsParaEntrega;
+                                            montoTotalEntregaInput.value = montoTotal.toFixed(2);
+
+                                          
+                                            if (typeof cargarDestinos === 'function') {
+                                                cargarDestinos();
+                                            }
+
+                                        
+                                            if (typeof entregaModal !== 'undefined' && typeof entregaModal.show === 'function') {
+                                                entregaModal.show();
+                                            } else {
+                                                console.error("El modal de entrega no está inicializado o la variable no existe.");
+                                            }
+
+                                        } else {
+                                            console.error("No se encontraron los campos ocultos del modal para IDs o Monto.");
+                                        }
+                                    });
                                 }
-
-                                checkboxes.forEach(checkbox => {
-                                    checkbox.addEventListener('change', updateEntregarButton);
-                                });
-
-                                selectAllCheckbox.addEventListener('change', function() {
-                                    checkboxes.forEach(checkbox => {
-                                        checkbox.checked = this.checked;
-                                    });
-                                    updateEntregarButton();
-                                });
-
-                                document.querySelectorAll('.btn-entregar-singular').forEach(button => {
-                                    button.addEventListener('click', function() {
-                                        const id = this.dataset.ids;
-                                        const monto = this.dataset.monto;
-                                        idsArqueosEntregaInput.value = id;
-                                        montoTotalEntregaInput.value = parseFloat(monto).toFixed(2);
-                                        tipoDestinoSelect.value = 'Gerente';
-                                        cargarDestinos();
-                                        entregaModal.show();
-                                    });
-                                });
-
-
-
-                                document.getElementById('btn-entregar-seleccionados').addEventListener('click', () => {
-                                    const checkboxes = document.querySelectorAll('.arqueo-checkbox:checked');
-                                    const ids = Array.from(checkboxes).map(cb => cb.dataset.ids).join(',');
-                                    const montoTotal = Array.from(checkboxes).reduce((sum, cb) => sum + parseFloat(cb.dataset.monto), 0);
-
-                                    document.getElementById('idsArqueosEntrega').value = ids;
-                                    document.getElementById('montoTotalEntrega').value = montoTotal.toFixed(2);
-
-
-                                    const entregaModal = new bootstrap.Modal(document.getElementById('entregaModal'));
-                                    entregaModal.show();
-                                });
 
 
                                 // Carga los destinos 
@@ -919,11 +1089,14 @@
                                                         style: 'tableHeader'
                                                     }],
                                                     [{
-                                                        text: 'Efectivo'
+                                                        text: 'Efectivo',
+                                                        bold: true
 
                                                     }, {
                                                         text: `S/ ${parseFloat(data.arqueo.ingresos_efectivo_total).toFixed(2)}`,
-                                                        alignment: 'right'
+                                                        alignment: 'right',
+                                                        bold: true,
+                                                        background: '#FFF2CC',
                                                     }],
                                                     ...data.ingresos_digitales.map(item => [
 
