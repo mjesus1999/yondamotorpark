@@ -46,24 +46,43 @@
 
                     <!-- TABLA CON DATOS -->
                     <div class="card-body">
-                        <table class="table table-sm table-hover table-hover-yonda">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Nombre</th>
-                                    <th>Telefono</th>
-                                    <th>Vehiculo</th>
-                                    <th>Tienda</th>
-                                    <th>Cuotas</th>
-                                    <th>Monto Cuota</th>
-                                    <th>Fecha</th>
-                                    <th>Acciones</th>
-                                </tr>
-                            </thead>
+                        <?php if (!empty($cobranza)): ?>
+                            <table class="table table-sm table-hover table-hover-yonda">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Nombre</th>
+                                        <th>Telefono</th>
+                                        <th>Vehiculo</th>
+                                        <th>Tienda</th>
+                                        <th>Cuotas</th>
+                                        <th>Monto Cuota</th>
+                                        <th>Fecha</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
 
-                            <tbody>
-                                <!-- Primera persona -->
-                                <tr>
+                                <tbody>
+
+                                    <?php $i = 1; ?>
+                                    <?php foreach ($cobranza as $fila): ?>
+                                        <tr>
+                                            <td><?= $i++ ?></td>
+                                            <td><?= htmlspecialchars($fila['cliente']) ?></td>
+                                            <td><?= htmlspecialchars($fila['telefono']) ?></td>
+                                            <td><?= htmlspecialchars($fila['vehiculo']) ?></td>
+                                            <td><?= htmlspecialchars($fila['direccion_local']) ?></td>
+                                            <td><?= htmlspecialchars($fila['cuota_formato']) ?></td>
+                                            <td>S/. <?= htmlspecialchars($fila['montocuota'], 2) ?></td>
+                                            <td><?= date('d/m/Y', strtotime($fila['fechapago'])) ?></td>
+                                            <td class="text-center">
+                                                <a href="#" class="btn btn-sm btn-primary"><i class="fas fa-check"></i></a>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+
+                                    <!-- Primera persona -->
+                                    <!-- <tr>
                                     <td>1</td>
                                     <td>Juan Carlos Pérez</td>
                                     <td>987456123</td>
@@ -77,10 +96,10 @@
                                             <i class="fas fa-check"></i>
                                         </button>
                                     </td>
-                                </tr>
+                                </tr> -->
 
-                                <!-- Segunda persona -->
-                                <tr>
+                                    <!-- Segunda persona -->
+                                    <!-- <tr>
                                     <td>2</td>
                                     <td>Maria Gonzales Lopéz</td>
                                     <td>985647162</td>
@@ -94,10 +113,10 @@
                                             <i class="fas fa-check"></i>
                                         </button>
                                     </td>
-                                </tr>
+                                </tr> -->
 
-                                <!-- Tercera persona -->
-                                <tr>
+                                    <!-- Tercera persona -->
+                                    <!-- <tr>
                                     <td>3</td>
                                     <td>Carlos Antonio Ruiz</td>
                                     <td>985455518</td>
@@ -111,9 +130,9 @@
                                             <i class="fas fa-minus"></i>
                                         </button>
                                     </td>
-                                </tr>
+                                </tr> -->
 
-                                <tr>
+                                    <!-- <tr>
                                     <td>4</td>
                                     <td>Jorge Saldaña Ara</td>
                                     <td>953245845</td>
@@ -127,11 +146,16 @@
                                             <i class="fas fa-times"></i>
                                         </button>
                                     </td>
-                                </tr>
+                                </tr> -->
 
-                            </tbody>
+                                </tbody>
 
-                        </table>
+                            </table>
+
+                        <?php else: ?>
+                            <p>No hay cuotas proximas</p>
+                        <?php endif; ?>
+
                     </div>
                 </div>
             </div>

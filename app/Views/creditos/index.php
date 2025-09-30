@@ -48,7 +48,6 @@ $morososClasificados = [
 ];
 
 if (!empty($morososRaw)) {
-    // Si ya viene clasificado por claves
     if (isset($morososRaw['5-dias']) || isset($morososRaw['2-semanas']) || isset($morososRaw['1-mes'])) {
         $morososClasificados['5-dias'] = $morososRaw['5-dias'] ?? [];
         $morososClasificados['2-semanas'] = $morososRaw['2-semanas'] ?? [];
@@ -177,7 +176,6 @@ function fmtMoney($val)
             '1-mes' => ['badge' => 'bg-danger', 'border' => 'border-danger']
         ];
 
-        // Renderizamos por categoría: si está vacía mostramos alerta específica; si tiene datos mostramos las tarjetas
         foreach (['5-dias', '2-semanas', '1-mes'] as $categoria):
             $morososCategoria = $morososClasificados[$categoria] ?? [];
             $noMorososDisplay = empty($morososCategoria) ? 'block' : 'none';
@@ -419,23 +417,16 @@ function fmtMoney($val)
         const globalNo = document.getElementById('noMorososTodosGlobal');
 
         if (categoria === 'todos') {
-            // Mostrar todas las tarjetas
             items.forEach(item => item.style.display = 'block');
-
-            // Ocultar alertas por categoria
             noMorososAlerts.forEach(alert => alert.style.display = 'none');
-
-            // Mostrar mensaje global solo si no hay ninguna tarjeta
             globalNo.style.display = (items.length === 0) ? 'block' : 'none';
             return;
         }
 
-        // Mostrar solo las tarjetas de la categoría solicitada
         items.forEach(item => {
             item.style.display = (item.dataset.categoria === categoria) ? 'block' : 'none';
         });
 
-        // Para las alertas por categoría
         noMorososAlerts.forEach(alert => {
             if (alert.dataset.categoria === categoria) {
                 const count = document.querySelectorAll('.moroso-item[data-categoria="' + categoria + '"]').length;
@@ -445,24 +436,18 @@ function fmtMoney($val)
             }
         });
 
-        // Ocultar mensaje global
         if (globalNo) globalNo.style.display = 'none';
     }
 
-
-    // Función para iniciar seguimiento (poblamos modal y hidden input)
     function iniciarSeguimiento(id, nombre, deuda) {
         document.getElementById('clienteNombre').textContent = nombre;
         document.getElementById('clienteDeuda').textContent = 'S/. ' + deuda;
         document.getElementById('fechaHora').textContent = new Date().toLocaleString('es-PE');
         document.getElementById('hiddenIdContrato').value = id;
-
-        // Reset visual de upload
         document.getElementById('uploadDefault').style.display = 'block';
         document.getElementById('uploadSuccess').style.display = 'none';
         document.getElementById('evidenciaFile').value = '';
 
-        // Mostrar modal
         const modal = new bootstrap.Modal(document.getElementById('modalSeguimiento'));
         modal.show();
     }
@@ -489,12 +474,10 @@ function fmtMoney($val)
         document.getElementById('evidenciaFile').click();
     }
 
-    // Ver historial abre la vista del historial
     function verHistorial(id) {
         window.location.href = '/creditos/historial/' + id;
     }
 
-    // Toast helper
     function showToast(mensaje, tipo = 'success') {
         const toastEl = document.getElementById('toast');
         const toastMessage = document.getElementById('toastMessage');
@@ -514,7 +497,6 @@ function fmtMoney($val)
         toast.show();
     }
 
-    // Manejar envío del formulario (enviar al endpoint real /credito/seguimiento)
     document.getElementById('formSeguimiento').addEventListener('submit', function (e) {
 
         const observaciones = document.getElementById('observaciones').value;
@@ -535,12 +517,10 @@ function fmtMoney($val)
         showToast('Guardando seguimiento...', 'info');
     });
 
-    // Inicializar
     document.addEventListener('DOMContentLoaded', function () {
         filtrarPor('5-dias');
     });
 
-    // Animación simple al cargar tarjetas
     window.addEventListener('load', function () {
         const cards = document.querySelectorAll('.moroso-item');
         cards.forEach((card, index) => {
