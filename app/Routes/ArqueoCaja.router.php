@@ -19,3 +19,9 @@ $router->add('GET', '/arqueocaja/destinos/{desitno}', 'ArqueoCajaController', 'd
 $router->add('GET', '/api/arqueo/reporte-ciclo/{ids}', 'ArqueoCajaController', 'getReporteArqueoPorCiclo');
 
 $router->add('GET', '/api/arqueo/entregas/{id}', 'EntregaDineroController', 'detalle');
+
+$router->add('POST', '/api/arqueo/reporte/sede', 'ArqueoCajaController', 'reportePorSede');
+
+
+
+$router->add('GET', '/api/arqueo/reporte/sede', 'ArqueoCajaController', 'reportePorSede');

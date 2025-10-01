@@ -66,6 +66,7 @@ SELECT * FROM arqueocaja;
 
 
 
+
 SELECT * FROM pagos;
 
 UPDATE pagos SET fechapago = '2025-09-24' WHERE idpago = 393;
@@ -97,3 +98,11 @@ SELECT * FROM arqueocaja;
 SELECT * FROM egresos;
 SELECT * FROM pagos;
 
+SELECT * FROM contratos;
+
+
+SELECT DATE_FORMAT(fechaentrega,'%H:%i') AS ultima_hora_entrega
+FROM entregasdinero
+WHERE DATE(fechaentrega) = CURDATE()
+ORDER BY identrega DESC
+LIMIT 1;
