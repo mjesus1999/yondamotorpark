@@ -15,14 +15,15 @@ class ArqueoCajaController extends Controller
         $this->arqueoCajaModel = new ArqueoCaja();
     }
 
-    
+
     public function index(string $entregado = 'N'): void
     {
-        
+
         $datosArqueoBase = $this->arqueoCajaModel->obtenerDatosUltimoArqueo();
         $saldoInicialParaArqueo = $datosArqueoBase['saldo_inicial_para_hoy'];
         $horaReferencia = $datosArqueoBase['hora_ultimo_arqueo'];
         $fechaReferencia = $datosArqueoBase['fecha_ultimo_arqueo'];
+        $horaUltimaEntrega = $this->arqueoCajaModel->getHoraUltimaEntregaHoy();
         // error_log('HORA: ' .  $horaReferencia);
         // error_log('FECHA' . $fechaReferencia);
         $ingresosNuevos = $this->arqueoCajaModel->obtenerIngresosDesde($fechaReferencia, $horaReferencia);
@@ -32,7 +33,7 @@ class ArqueoCajaController extends Controller
         $ingresosDigitalNuevos = $ingresosNuevos['ingresos_digital_nuevos'];
         $egresosDiaNuevos = $egresosNuevos;
 
-    
+
         $montoTeorico = $saldoInicialParaArqueo + $ingresosEfectivoNuevos - $egresosDiaNuevos;
 
 
@@ -43,13 +44,14 @@ class ArqueoCajaController extends Controller
             'egresos_dia' => number_format($egresosDiaNuevos, 2, '.', ''),
             'monto_teorico' => number_format($montoTeorico, 2, '.', ''),
             'entregado' => $entregado,
-            'es_primer_arqueo' => ($saldoInicialParaArqueo == 0.00)
+            'es_primer_arqueo' => ($saldoInicialParaArqueo == 0.00),
+            'hora_ultima_entrega' => $horaUltimaEntrega,
         ];
 
-        
+
         $data['arqueos'] = $this->arqueoCajaModel->listarConsolidado();
 
-    
+
         $this->view('arqueo-caja.index', $data);
     }
 
@@ -176,11 +178,35 @@ class ArqueoCajaController extends Controller
     }
 
 
-    public function getReporteArqueoPorCiclo(string $ids_arqueo):void
+
+    public function reportePorSede()
     {
         header('Content-Type: application/json');
 
-     
+        $ids_arqueo = $_GET['ids_arqueo'] ?? '';
+        $idlocal = (int)($_GET['idlocal'] ?? 0);
+
+        if (empty($ids_arqueo) || $idlocal <= 0) {
+            echo json_encode(['success' => false, 'message' => 'Faltan parámetros.']);
+            return;
+        }
+
+        // Llamar al modelo
+        $reporte = $this->arqueoCajaModel->getReporteArqueoBySede($ids_arqueo, $idlocal);
+
+        if (!empty($reporte)) {
+            echo json_encode(['success' => true, 'reporte' => $reporte]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'No se pudo generar el reporte.']);
+        }
+    }
+
+
+    public function getReporteArqueoPorCiclo(string $ids_arqueo): void
+    {
+        header('Content-Type: application/json');
+
+
         $data = $this->arqueoCajaModel->getReporteArqueoPorCiclo($ids_arqueo);
 
         if (!empty($data) && !empty($data['arqueo'])) {

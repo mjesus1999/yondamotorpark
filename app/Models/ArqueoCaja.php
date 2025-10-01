@@ -15,7 +15,7 @@ class ArqueoCaja
         $this->db = Database::getInstance();
     }
 
-    
+
     public function listarConsolidado(): array
     {
         try {
@@ -30,7 +30,7 @@ class ArqueoCaja
         }
     }
 
-    
+
     public function obtenerDatosUltimoArqueo(): array
     {
         try {
@@ -256,37 +256,91 @@ class ArqueoCaja
 
 
     public function getReporteArqueoPorCiclo(string $ids_arqueo): array
-{
-   
-    $query = "CALL sp_reporte_arqueo_por_fecha_por_ciclo(:ids_arqueo_param);";
+    {
 
-    try {
-        $stmt = $this->db->prepare($query);
-        $stmt->bindParam(":ids_arqueo_param", $ids_arqueo, PDO::PARAM_STR); 
-        $stmt->execute();
+        $query = "CALL sp_reporte_arqueo_por_fecha_por_ciclo(:ids_arqueo_param);";
 
-        $data = [];
+        try {
+            $stmt = $this->db->prepare($query);
+            $stmt->bindParam(":ids_arqueo_param", $ids_arqueo, PDO::PARAM_STR);
+            $stmt->execute();
 
-      
-        $data['arqueo'] = $stmt->fetch(PDO::FETCH_ASSOC);
+            $data = [];
 
-        if (!$data['arqueo']) {
+
+            $data['arqueo'] = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$data['arqueo']) {
+                return [];
+            }
+
+
+            $stmt->nextRowset();
+            $data['egresos'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+
+            $stmt->nextRowset();
+            $data['ingresos_digitales'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            $stmt->closeCursor();
+            return $data;
+        } catch (PDOException $e) {
+            error_log("Error en el modelo getReporteArqueoPorCiclo: " . $e->getMessage());
             return [];
         }
-
-      
-        $stmt->nextRowset();
-        $data['egresos'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        
-        $stmt->nextRowset();
-        $data['ingresos_digitales'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        $stmt->closeCursor(); 
-        return $data;
-    } catch (PDOException $e) {
-        error_log("Error en el modelo getReporteArqueoPorCiclo: " . $e->getMessage());
-        return [];
     }
-}
+
+    public function getReporteArqueoBySede(string $ids_arqueo, int $sede_id): array
+    {
+        $resultado = [
+            'resumen' => [],
+            'ingresos_digitales' => []
+        ];
+
+        try {
+            
+            $stmt = $this->db->prepare("CALL sp_reporte_arqueo_por_fecha_y_sede(:ids_arqueo, :idlocal)");
+            $stmt->bindParam(':ids_arqueo', $ids_arqueo, PDO::PARAM_STR);
+            $stmt->bindParam(':idlocal', $sede_id, PDO::PARAM_INT);
+
+            $stmt->execute();
+
+           
+            $resultado['resumen'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            if ($stmt->nextRowset()) {
+                $resultado['ingresos_digitales'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            }
+
+            $stmt->closeCursor();
+            return $resultado;
+        } catch (PDOException $e) {
+            error_log("Error en getReporteArqueoBySede: " . $e->getMessage());
+            return [];
+        }
+    }
+
+
+    public function getHoraUltimaEntregaHoy(): string
+    {
+        $query = "SELECT DATE_FORMAT(fechaentrega,'%H:%i') AS ultima_hora_entrega
+              FROM entregasdinero
+              WHERE DATE(fechaentrega) = CURDATE()
+              ORDER BY identrega DESC
+              LIMIT 1;";
+        try {
+            $stmt = $this->db->prepare($query);
+            $stmt->execute();
+            $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($resultado) {
+                return $resultado['ultima_hora_entrega'];
+            } else {
+
+                return "";
+            }
+        } catch (PDOException $e) {
+            error_log("Error al obtener la última hora de entrega: " . $e->getMessage());
+            return "";
+        }
+    }
 }

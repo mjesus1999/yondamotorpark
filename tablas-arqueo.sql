@@ -64,10 +64,7 @@ SELECT * FROM entregasdinero;
 SELECT * FROM entregasdineroarqueos;
 SELECT * FROM arqueocaja;
 
-SELECT *
-FROM entregasdinero
-ORDER BY identrega DESC
-LIMIT 1;
+
 
 
 SELECT * FROM pagos;
@@ -102,4 +99,10 @@ SELECT * FROM egresos;
 SELECT * FROM pagos;
 
 SELECT * FROM contratos;
-SELECT
+
+
+SELECT DATE_FORMAT(fechaentrega,'%H:%i') AS ultima_hora_entrega
+FROM entregasdinero
+WHERE DATE(fechaentrega) = CURDATE()
+ORDER BY identrega DESC
+LIMIT 1;

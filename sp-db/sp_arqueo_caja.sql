@@ -220,7 +220,6 @@ SELECT * FROM arqueocaja;
 DROP PROCEDURE IF EXISTS sp_reporte_arqueo_por_fecha_por_ciclo;
 
 DELIMITER //
-
 CREATE PROCEDURE sp_reporte_arqueo_por_fecha_por_ciclo(
     IN ids_arqueo_param TEXT
 )
@@ -395,6 +394,111 @@ DROP PROCEDURE IF EXISTS sp_reporte_arqueo_por_fecha_por_ciclo;
 
 
 
-CALL sp_reporte_arqueo_por_fecha_por_ciclo('19,20');
+CALL sp_reporte_arqueo_por_fecha_por_ciclo('30,31,32');
 SELECT * FROM egresos;
 SELECT * FROM arqueocaja;
+
+SELECT entregasdineros
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+DROP PROCEDURE sp_reporte_arqueo_por_fecha_y_sede;
+DELIMITER //
+
+CREATE PROCEDURE sp_reporte_arqueo_por_fecha_y_sede(
+    IN ids_arqueo_param TEXT,
+    IN idlocal_param INT
+)
+BEGIN
+    DECLARE v_id_inicio INT;
+    DECLARE v_id_cierre INT;
+    DECLARE v_fecha_hora_inicio DATETIME;
+    DECLARE v_fecha_hora_fin DATETIME;
+
+    -- obtener arqueo inicial y final
+    SELECT MIN(idarqueo), MAX(idarqueo)
+    INTO v_id_inicio, v_id_cierre
+    FROM arqueocaja
+    WHERE FIND_IN_SET(idarqueo, ids_arqueo_param) > 0;
+
+    -- obtener límites de fecha/hora
+    SELECT TIMESTAMP(fecha, hora_inicio) INTO v_fecha_hora_inicio
+    FROM arqueocaja WHERE idarqueo = v_id_inicio;
+
+    SELECT TIMESTAMP(fecha, hora_fin) INTO v_fecha_hora_fin
+    FROM arqueocaja WHERE idarqueo = v_id_cierre;
+
+    -- ingresos de la sede solicitada
+    SELECT
+        l.idlocal,
+        l.tienda,
+        CONCAT(dep.departamento, ' / ', pro.provincia, ' / ', dist.distrito, ' / ', l.direccion) AS ubicacion,
+        l.responsable,
+        COALESCE(SUM(CASE WHEN p.mediopago = 'Efectivo' THEN p.amortizacion ELSE 0 END),0) AS ingresos_efectivo,
+        COALESCE(SUM(CASE WHEN p.mediopago != 'Efectivo' THEN p.amortizacion ELSE 0 END),0) AS ingresos_digital,
+        COALESCE(SUM(p.amortizacion),0) AS total_ingresos
+    FROM pagos p
+    JOIN cronogramas cr ON p.idcronograma = cr.idcronograma
+    JOIN contratos ct ON cr.idcontrato = ct.idcontrato
+    JOIN locales l ON ct.idlocal = l.idlocal
+    JOIN distritos dist ON l.iddistrito = dist.iddistrito
+    JOIN provincias pro ON dist.idprovincia = pro.idprovincia
+    JOIN departamentos dep ON pro.iddepartamento = dep.iddepartamento
+    WHERE p.fecharegistro BETWEEN v_fecha_hora_inicio AND v_fecha_hora_fin
+      AND ct.idlocal = idlocal_param
+      AND p.amortizacion > 0
+    GROUP BY l.idlocal, l.tienda, l.direccion, l.responsable;
+
+   
+    SELECT
+        p.mediopago AS concepto,
+        ep.entidad AS entidad_bancaria,
+        SUM(p.amortizacion) AS monto
+    FROM pagos p
+    LEFT JOIN cuentaspago cp ON p.idcuentapago = cp.idcuentapago
+    LEFT JOIN entidadespago ep ON cp.identidadpago = ep.identidadpago
+    JOIN cronogramas cr ON p.idcronograma = cr.idcronograma
+    JOIN contratos ct ON cr.idcontrato = ct.idcontrato
+    WHERE p.fecharegistro BETWEEN v_fecha_hora_inicio AND v_fecha_hora_fin
+      AND p.mediopago != 'Efectivo'
+      AND ct.idlocal = idlocal_param
+      AND p.amortizacion > 0
+    GROUP BY p.mediopago, ep.entidad
+    ORDER BY p.mediopago, ep.entidad;
+
+END //
+
+DELIMITER ;
+
+CALL  sp_reporte_arqueo_por_fecha_y_sede('30,31,32,33,34',7);
+
+
+
+SELECT * FROM locales;
+SELECT * FROM distritos;
+SELECT * FROM provincias;
+SELECT * FROM departamentos;
+SELECT * FROM pagos;
+SELECT * FROM contratos;
