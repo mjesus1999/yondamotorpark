@@ -116,7 +116,7 @@
             const day = dt.getDate();
             const month = months[dt.getMonth()];
             const year = dt.getFullYear();
-            return `Chincha Alta ${day} de ${month} del ${year}`;
+            return `Chincha Alta, ${day} de ${month} del ${year}`;
         }
 
         function downloadPdfFromBlob(blob, filename) {
@@ -468,16 +468,16 @@
                             paddingTop: function () { return 2; },
                             paddingBottom: function () { return 2; }
                         },
-                        margin: [0, 0, 0, 10]
+                        margin: [0, 0, 0, 15]
                     },
 
                     // Párrafo de incumplimiento
                     {
                         text: [
                             { text: 'Por Incumplimiento de pago', bold: true },
-                            'ya que según registros de cobranza de nuestra empresa Usted adeuda',
-                            { text: ', LA CUOTA DEL MES DE SETIEMBRE DE S/ 1,540.00, LA CUOTA DE OCTUBRE DE S/ 1,540.00.00 Y LA CUOTA DE NOVIEMBRE DE S/ 1400.00, SIENDO ASI SU DEUDA TOTAL EL MONTO DE S/ 4,480.00 SOLES.', bold: true },
-                            'y habiendo usted comprometido según el contrato notarial firmado el 2/27/2023 . TODOS LOS 27 DE CADA MES Y NO CUMPLIENDOLO CON SU CRONOGRAMA DE PAGO.',
+                            'ya que según registros de cobranza de nuestra empresa Usted adeuda,',
+                            { text: 'LA CUOTA DEL MES DE SETIEMBRE DE S/ 1,540.00, LA CUOTA DE OCTUBRE DE S/ 1,540.00.00 Y LA CUOTA DE NOVIEMBRE DE S/ 1400.00, SIENDO ASI SU DEUDA TOTAL EL MONTO DE S/ 4,480.00 SOLES.', bold: true },
+                            'y habiendo usted comprometido según el contrato notarial firmado el 2/27/2023 . Todos lso 27 de cada mes y no cumpliendolo con su cronograma de pago.',
                             { text: '(CADA NOTIFICACIÓN LLEGADA AL DOMICILIO SE HARA EL COBRO ADICIONAL DE S/50 SOLES).', bold: true }
                         ],
                         /* text: [

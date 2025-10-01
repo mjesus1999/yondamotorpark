@@ -43,14 +43,14 @@
                     <!-- TABLA CON DATOS -->
                     <div class="card-body">
                         <?php if (!empty($vencidos)): ?>
-                            <?php 
+                            <?php
                             // Calcular el total de deuda
                             $totalDeuda = 0;
                             foreach ($vencidos as $row) {
-                                $totalDeuda += (float) $row['deuda_total'];
+                                $totalDeuda += (float) $row['deuda_vencida'];
                             }
                             ?>
-                            
+
                             <table class="table table-sm table-hover table-hover-yonda">
                                 <thead>
                                     <tr>
@@ -64,6 +64,7 @@
                                         <!-- <th>F.Vencimiento</th> -->
                                         <th>Deuda</th>
                                         <th>Estado de pagos</th>
+                                        <th>Cuota P.</th>
                                         <th>Reporte</th>
                                     </tr>
                                 </thead>
@@ -79,11 +80,12 @@
                                             <td><?= htmlspecialchars($row['vehiculo']) ?></td>
                                             <td><?= htmlspecialchars($row['tienda']) ?></td>
                                             <td><?= htmlspecialchars($row['cuotas_totales']) ?></td>
-                                            <td>S/. <?= number_format((float) $row['monto_cuota'], 2) ?></td>
+                                            <td>S/. <?= number_format((float) $row['monto_primera_vencida'], 2) ?></td>
                                             <td><span
-                                                    class="<?= ((float) $row['deuda_total'] > 0) ? 'text-danger fw-bold' : '' ?>">S/.
-                                                    <?= number_format((float) $row['deuda_total'], 2) ?></span></td>
+                                                    class="<?= ((float) $row['deuda_vencida'] > 0) ? 'text-danger fw-bold' : '' ?>">S/.
+                                                    <?= number_format((float) $row['deuda_vencida'], 2) ?></span></td>
                                             <td><?= htmlspecialchars($row['estado_pagos']) ?></td>
+                                            <td><?= htmlspecialchars($row['cuotas_pagadas']) ?></td>
                                             <td class="text-center">
                                                 <button class="btn btn-sm btn-danger mt-2" title="Notificar PDF"
                                                     onclick="window.open('/reportesAtrasado?contrato=<?= (int) $row['idcontrato'] ?>', '_blank')">
@@ -96,6 +98,7 @@
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
+                                    
 
                                 </tbody>
                                 <tfoot>
@@ -106,6 +109,7 @@
                                         <td class="fw-bold text-danger fs-6">
                                             S/. <?= number_format($totalDeuda, 2) ?>
                                         </td>
+                                        <td></td>
                                         <td></td>
                                         <td></td>
                                     </tr>
