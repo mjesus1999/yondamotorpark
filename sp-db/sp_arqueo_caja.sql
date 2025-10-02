@@ -24,7 +24,9 @@ END //
 DELIMITER ;
 CALL sp_obtener_datos_ultimo_arqueo ();
 
-
+SELECT * FROM arqueocaja;
+UPDATE arqueocaja SET fecha = '2025-10-01' WHERE idarqueo = 43;
+SELECT * FROM pagos;
 DROP PROCEDURE IF EXISTS sp_obtener_egresos_desde;
 
 DELIMITER $$
@@ -72,7 +74,7 @@ END$$
 DELIMITER ;
 
 
-CALL sp_obtener_ingresos_desde ('2025-09-30','08:23:13');
+CALL sp_obtener_ingresos_desde ('2025-10-01','16:43:45');
 
 
 UPDATE arqueocaja SET hora_fin = '15:10:13' WHERE idarqueo = 2;
@@ -502,3 +504,4 @@ SELECT * FROM provincias;
 SELECT * FROM departamentos;
 SELECT * FROM pagos;
 SELECT * FROM contratos;
+SELECT * FROM arqueocaja;

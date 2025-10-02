@@ -1,12 +1,12 @@
 <?php
-// phpinfo();
+
 include __DIR__ . '/../layout/header.php';
 ?>
 <div class="container-fluid">
 
     <div class="alert alert-info mt-2" role="alert">
         <div class="row align-items-center">
-            <!-- Barra de navegación responsiva -->
+        
             <div class="col-12 col-md-6 d-flex align-items-center">
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb mb-0" style="background-color: transparent; padding: 0;">
@@ -16,7 +16,7 @@ include __DIR__ . '/../layout/header.php';
                     </ol>
                 </nav>
             </div>
-            <!-- Botones responsivos -->
+           
             <div class="col-12 col-md-6 d-flex flex-column flex-md-row justify-content-end">
                 <a href="/caja/reporte/by/fecha" class="btn btn-sm btn-outline-primary mb-2 mb-md-0 w-100 w-md-auto">
                     <i class="bi bi-calendar3"></i> Reporte por fecha
@@ -206,6 +206,7 @@ include __DIR__ . '/../layout/header.php';
                 }
 
                 const data = await response.json();
+                console.log('DATA: ', data);
 
                 if (!data.success || !data.data) {
                     throw new Error('No se pudieron obtener los datos del reporte');
@@ -299,24 +300,30 @@ include __DIR__ . '/../layout/header.php';
                     let totalMonto = 0;
                     let contador = 1;
 
+                   
                     data.data.forEach(item => {
                         item.transacciones.forEach(transaccion => {
+                          
                             const rowData = [
                                 contador++,
                                 transaccion.metodo_pago,
                                 new Date(transaccion.fecha),
-                                transaccion.entidad_bancaria || '',
-                                transaccion.numero_cuenta || '',
+                                transaccion.numero_operacion || '', 
+                                transaccion.entidad_bancaria || '', 
+                                transaccion.numero_cuenta || '', 
                                 parseFloat(transaccion.monto)
                             ];
+
                             const newRow = worksheet.addRow(rowData);
+
+                  
                             newRow.eachCell(cell => {
                                 Object.assign(cell, cellStyle);
                             });
 
+                            newRow.getCell(3).numFmt = 'DD/MM/YYYY'; 
 
-                            newRow.getCell(3).numFmt = 'DD/MM/YYYY';
-                            newRow.getCell(7).numFmt = '"S/"#,##0.00';
+                            newRow.getCell(7).numFmt = '"S/"#,##0.00'; 
 
                             totalMonto += parseFloat(transaccion.monto);
                         });

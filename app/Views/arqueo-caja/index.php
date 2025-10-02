@@ -268,7 +268,7 @@
                             <label for="montoFisico" class="form-label fw-bold">Monto Físico Contado <span class="text-danger fw-bold">* </span> </label>
                             <div class="input-group">
                                 <span class="input-group-text bg-success text-white fw-bold">S/</span>
-                                <input type="number" step="0.01" class="form-control form-control-lg" id="montoFisico" name="monto_fisico" placeholder="Ingresa el monto que contaste" required>
+                                <input type="number" step="0.01" class="form-control form-control-lg" id="montoFisico" name="monto_fisico" placeholder="Ingresa el monto que contaste" disabled required>
                             </div>
                             <div class="form-text">Billetes y monedas en tu caja.</div>
                         </div>
@@ -282,7 +282,7 @@
                         <h5 class="mb-0">Diferencia: <span id="diferencia-span">S/ 0.00</span></h5>
                     </div>
                     <div class="d-flex justify-content-end gap-2">
-                        <button class="btn btn-sm btn-outline-secondary">Cancelar</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
                         <button type="submit" class="btn btn-outline-primary bt-sm" id="btnFinalizarArqueo" disabled>Finalizar Arqueo</button>
 
                     </div>
@@ -472,7 +472,6 @@
                             }
 
 
-
                             try {
                                 if (radioGeneral.checked) {
 
@@ -512,9 +511,6 @@
 
 
 
-
-
-
                         if (esPrimerArqueo) {
                             saldoInicialInput.removeAttribute('readonly');
                             infoSaldoInicial.style.display = 'block';
@@ -527,9 +523,7 @@
                         if (ingresosEfectivo !== 0 || egresosDia !== 0 || ingresoDigital !== 0) {
 
                             btnFinalizarArqueo.removeAttribute('disabled');
-                        } else {
-
-                            console.log('No se detectaron ingresos en efectivo ni egresos, el botón de arqueo está deshabilitado.');
+                            montoFisicoInput.removeAttribute('disabled');
                         }
 
                         function roundToTwoDecimals(num) {
@@ -601,7 +595,7 @@
                         form.addEventListener('submit', async (event) => {
                             event.preventDefault();
 
-                            if (ingresosEfectivo == 0 && egresosDia == 0) {
+                            if (ingresosEfectivo == 0 && egresosDia == 0 && ingresoDigital == 0) {
                                 showToast('No hay ingresos y egresos para registrar', 'bg-warning', 1350);
                                 return;
 

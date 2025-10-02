@@ -1,4 +1,5 @@
-USE motorpark2;
+
+USE motorpark;
 
 INSERT INTO formatocotizacion (tipocotizacion, fechainicio, fechafin)
 VALUES
@@ -138,12 +139,12 @@ INSERT INTO contratos (
     fecharevision,
     observaciones
 ) VALUES (
-    1,         -- idlocal
-    2,         -- idcotizacion 
-    2,         -- idlogistica 
-    '2025-08-13', -- fechainicio
-    12,        -- día de pago
-    '2025-09-13', -- fecharevision
+    9,         -- idlocal
+    12,         -- idcotizacion 
+    3,         -- idlogistica 
+    '2025-10-01', -- fechainicio
+    01,        -- día de pago
+    '2025-11-01', -- fecharevision
     'Contrato inicial para entrega de vehículo.'
 );
 
@@ -250,7 +251,7 @@ END$
 DELIMITER ;
 
 -- DELETE FROM pagos;
-CALL generar_cronograma(3, 4.263224089);
+CALL generar_cronograma(4, 4.263224089);
 SELECT * FROM cronogramas;
 SELECT * FROM contratos;
 SELECT * FROM cotizaciones;
@@ -262,7 +263,9 @@ FROM cronogramas WHERE idcontrato = 1;
 
 SELECT SUM(interes)+SUM(abonocapital) AS TotalPagado
 FROM cronogramas WHERE idcontrato = 1;
+DELETE from cronogramas;
 DELETE FROM pagos;
 
 SELECT * FROM pagos;
-USE motorpark2;
+
+SELECT * FROM locales;
