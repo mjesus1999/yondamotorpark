@@ -24,7 +24,7 @@ class ArqueoCajaController extends Controller
         $horaReferencia = $datosArqueoBase['hora_ultimo_arqueo'];
         $fechaReferencia = $datosArqueoBase['fecha_ultimo_arqueo'];
         $horaUltimaEntrega = $this->arqueoCajaModel->getHoraUltimaEntregaHoy();
-        // error_log('HORA: ' .  $horaReferencia);
+        //  error_log('HORA: ' .  $horaReferencia);
         // error_log('FECHA' . $fechaReferencia);
         $ingresosNuevos = $this->arqueoCajaModel->obtenerIngresosDesde($fechaReferencia, $horaReferencia);
         $egresosNuevos = $this->arqueoCajaModel->obtenerEgresosDesde($fechaReferencia, $horaReferencia);

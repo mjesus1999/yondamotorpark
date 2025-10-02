@@ -64,11 +64,14 @@ SELECT * FROM entregasdinero;
 SELECT * FROM entregasdineroarqueos;
 SELECT * FROM arqueocaja;
 
+UPDATE arqueocaja SET creado = '2025-10-01 16:46:30' WHERE idarqueo= 43;
+UPDATE entregasdinero SET fechaentrega = '2025-10-01 16:48:26' WHERE identrega = 10;
 
-
-
+SELECT * FROM egresos;
 SELECT * FROM pagos;
 
+DELETE FROM egresos;
+DELETE FROM comprobantes;
 UPDATE pagos SET fechapago = '2025-09-24' WHERE idpago = 393;
 
 SELECT * FROM egresos;
@@ -106,3 +109,7 @@ FROM entregasdinero
 WHERE DATE(fechaentrega) = CURDATE()
 ORDER BY identrega DESC
 LIMIT 1;
+
+
+
+SELECT * FROM pagos;
