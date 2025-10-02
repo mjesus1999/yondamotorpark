@@ -116,7 +116,7 @@
             const day = dt.getDate();
             const month = months[dt.getMonth()];
             const year = dt.getFullYear();
-            return `Chincha Alta ${day} de ${month} del ${year}`;
+            return `Chincha Alta, ${day} de ${month} del ${year}`;
         }
 
         function downloadPdfFromBlob(blob, filename) {
@@ -386,14 +386,14 @@
                     {
                         text: [
                             { text: 'Sra. ', style: 'normal', bold: true },
-                            { text: 'Ana Lucia Torres', style: 'normal', bold: '' }
+                            { text: 'Pérez Mendoza Enrique Martín', style: 'normal', bold: '' }
                         ],
                         margin: [0, 0, 0, 5]
                     },
                     {
                         text: [
                             { text: 'DNI: ', style: 'normal', bold: true },
-                            { text: '78956232', style: 'normal', bold: '' }
+                            { text: '77464646', style: 'normal', bold: '' }
                         ],
                         margin: [0, 0, 0, 5]
                     },
@@ -416,7 +416,7 @@
                         ],
                         style: 'normal',
                         alignment: 'justify',
-                        margin: [0, 0, 0, 20]
+                        margin: [0, 0, 0, 10]
                     },
 
                     // Detalles del vehículo en tabla
@@ -464,7 +464,7 @@
                             paddingTop: function () { return 2; },
                             paddingBottom: function () { return 2; }
                         },
-                        margin: [0, 0, 0, 25]
+                        margin: [0, 0, 0, 15]
                     },
 
                     // Párrafo de incumplimiento
@@ -473,8 +473,8 @@
                             { text: 'Por Incumplimiento de pago', bold: true },
                             'ya que según registros de cobranza de nuestra empresa Usted adeuda,',
                             { text: ' POR LA MORA DE FEBRERO DE S/ 389.00 SOLES, DE LA CUOTA DE MARZO CON MORA DE S/ 1,556.50, CUYO MONTO TOTAL A PAGAR ES DE S/ 1,945.50 SOLES', bold: true },
-                            'Y HABIENDO USTED COMPROMETIDO SEGÚN EL CONTRATO NOTARIAL FIRMADO EL  05',
-                            { text: 'DE OCTUBRE DEL 2023. (CADA NOTIFICACIÓN LLEGADA AL DOMICILIO SE HARÁ EL COBRO ADICIONAL DE S/50 SOLES). ', bold: true }
+                            'y habiendo usted comprometido según el contrato notarial firmado el 05 de octubre del 2023',
+                            { text: ' (CADA NOTIFICACIÓN LLEGADA AL DOMICILIO SE HARÁ EL COBRO ADICIONAL DE S/50 SOLES). ', bold: true }
                         ],
                         style: 'normal',
                         alignment: 'justify',
@@ -494,7 +494,7 @@
                         text: 'Atte: Gerencia', bold: true,
                         style: 'normal',
                         alignment: 'left',
-                        margin: [0, 0, 0, 50]
+                        margin: [0, 0, 0, 40]
                     },
 
                     // Sección de firma

@@ -134,7 +134,7 @@ function fmtMoney($val)
     </div>
 
     <!-- Panel de clasificación -->
-    <div class="card mb-4">
+    <div class="card mb-3">
         <div class="card-header">
             <div class="d-flex justify-content-between align-items-center">
                 <h6 class="mb-0"><i class="fas fa-users me-2"></i>Clasificación por Morosidad</h6>

@@ -40,6 +40,50 @@ FROM temp_fechas_backup;
 -- PASO 3: MODIFICAR FECHAS PARA LA PRUEBA
 -- ========================================
 
+UPDATE cronogramas 
+SET fechapago = DATE_ADD(CURDATE(), INTERVAL 3 DAY), estado = 'Pendiente'
+WHERE idcontrato IN (SELECT idcontrato FROM contratos WHERE estado = 'ACT')
+  AND numcuota = 1
+  AND estado <> 'Pagado';
+
+UPDATE cronogramas 
+SET fechapago = DATE_ADD(CURDATE(), INTERVAL 3 DAY), estado = 'Pendiente'
+WHERE idcontrato IN (SELECT idcontrato FROM contratos WHERE estado = 'ACT')
+  AND numcuota = 2
+  AND estado <> 'Pagado';
+
+UPDATE cronogramas 
+SET fechapago = DATE_ADD(CURDATE(), INTERVAL 3 DAY), estado = 'Pendiente'
+WHERE idcontrato IN (SELECT idcontrato FROM contratos WHERE estado = 'ACT')
+  AND numcuota = 3
+  AND estado <> 'Pagado';
+
+UPDATE cronogramas 
+SET fechapago = DATE_ADD(CURDATE(), INTERVAL 3 DAY), estado = 'Pendiente'
+WHERE idcontrato IN (SELECT idcontrato FROM contratos WHERE estado = 'ACT')
+  AND numcuota = 4
+  AND estado <> 'Pagado';
+
+UPDATE cronogramas 
+SET fechapago = DATE_ADD(CURDATE(), INTERVAL 3 DAY), estado = 'Pendiente'
+WHERE idcontrato IN (SELECT idcontrato FROM contratos WHERE estado = 'ACT')
+  AND numcuota = 5
+  AND estado <> 'Pagado';
+
+UPDATE cronogramas 
+SET fechapago = DATE_ADD(CURDATE(), INTERVAL 3 DAY), estado = 'Pendiente'
+WHERE idcontrato IN (SELECT idcontrato FROM contratos WHERE estado = 'ACT')
+  AND numcuota = 6
+  AND estado <> 'Pagado';
+
+UPDATE cronogramas 
+SET fechapago = DATE_ADD(CURDATE(), INTERVAL 3 DAY), estado = 'Pendiente'
+WHERE idcontrato IN (SELECT idcontrato FROM contratos WHERE estado = 'ACT')
+  AND numcuota = 7
+  AND estado <> 'Pagado';
+
+
+/*
 -- Escenario 1: Vence en 3 días
 UPDATE cronogramas 
 SET fechapago = DATE_ADD(CURDATE(), INTERVAL 3 DAY), estado = 'Pendiente'
@@ -83,6 +127,7 @@ WHERE idcontrato IN (SELECT idcontrato FROM contratos WHERE estado = 'ACT')
   AND numcuota = 7;
 
 SELECT 'Datos de prueba creados' AS resultado;
+*/
 
 -- ========================================
 -- VERIFICACIÓN

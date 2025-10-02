@@ -38,7 +38,7 @@
                     <div class="card-header">
                         <div class="d-flex justify-content-between align-items-center">
                             <h6 class="mb-0"><i class="fas fa-bell me-2"></i>Clientes por Notificar</h6>
-                            <button class="btn btn-primary btn-sm">
+                            <button class="btn btn-primary btn-sm" id="btnNotificarTodos">
                                 <i class="fas fa-paper-plane me-1"></i>Notificar Todos
                             </button>
                         </div>
@@ -64,7 +64,7 @@
 
                                 <tbody>
 
-                                    <?php $i = 1; ?>
+                                    <!-- <?php $i = 1; ?>
                                     <?php foreach ($cobranza as $fila): ?>
                                         <tr>
                                             <td><?= $i++ ?></td>
@@ -79,58 +79,58 @@
                                                 <a href="#" class="btn btn-sm btn-primary"><i class="fas fa-check"></i></a>
                                             </td>
                                         </tr>
-                                    <?php endforeach; ?>
+                                    <?php endforeach; ?> -->
 
                                     <!-- Primera persona -->
-                                    <!-- <tr>
-                                    <td>1</td>
-                                    <td>Juan Carlos Pérez</td>
-                                    <td>987456123</td>
-                                    <td>Honda CB 125</td>
-                                    <td>Chincha Alta</td>
-                                    <td>3 de 12</td>
-                                    <td>S/. 350.00</td>
-                                    <td>25/09/2025</td>
-                                    <td class="text-center">
-                                        <button class="btn btn-sm btn-success">
-                                            <i class="fas fa-check"></i>
-                                        </button>
-                                    </td>
-                                </tr> -->
+                                    <tr data-row="1">
+                                        <td>1</td>
+                                        <td>Juan Carlos Pérez</td>
+                                        <td>987456123</td>
+                                        <td>Honda CB 125</td>
+                                        <td>Chincha Alta</td>
+                                        <td>3 de 12</td>
+                                        <td>S/. 350.00</td>
+                                        <td>25/09/2025</td>
+                                        <td class="text-center">
+                                            <button class="btn btn-sm btn-secondary btn-estado">
+                                                <i class="fas fa-minus"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
 
                                     <!-- Segunda persona -->
-                                    <!-- <tr>
-                                    <td>2</td>
-                                    <td>Maria Gonzales Lopéz</td>
-                                    <td>985647162</td>
-                                    <td>Yamaha YBR 125</td>
-                                    <td>Chincha Alta</td>
-                                    <td>8 de 24</td>
-                                    <td>S/. 2000.00</td>
-                                    <td>26/09/2025</td>
-                                    <td class="text-center">
-                                        <button class="btn btn-sm btn-success">
-                                            <i class="fas fa-check"></i>
-                                        </button>
-                                    </td>
-                                </tr> -->
+                                    <tr data-row="2">
+                                        <td>2</td>
+                                        <td>Maria Gonzales Lopéz</td>
+                                        <td>985647162</td>
+                                        <td>Yamaha YBR 125</td>
+                                        <td>Chincha Alta</td>
+                                        <td>8 de 24</td>
+                                        <td>S/. 2000.00</td>
+                                        <td>26/09/2025</td>
+                                        <td class="text-center">
+                                            <button class="btn btn-sm btn-secondary btn-estado">
+                                                <i class="fas fa-minus"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
 
                                     <!-- Tercera persona -->
-                                    <!-- <tr>
-                                    <td>3</td>
-                                    <td>Carlos Antonio Ruiz</td>
-                                    <td>985455518</td>
-                                    <td>Bajaj Pulsar 180</td>
-                                    <td>Chincha Alta</td>
-                                    <td>15 de 18</td>
-                                    <td>S/. 2500.00</td>
-                                    <td>27/09/2025</td>
-                                    <td class="text-center">
-                                        <button class="btn btn-sm btn-secondary">
-                                            <i class="fas fa-minus"></i>
-                                        </button>
-                                    </td>
-                                </tr> -->
+                                    <tr data-row="3">
+                                        <td>3</td>
+                                        <td>Carlos Antonio Ruiz</td>
+                                        <td>985455518</td>
+                                        <td>Bajaj Pulsar 180</td>
+                                        <td>Chincha Alta</td>
+                                        <td>15 de 18</td>
+                                        <td>S/. 2500.00</td>
+                                        <td>27/09/2025</td>
+                                        <td class="text-center">
+                                            <button class="btn btn-sm btn-secondary btn-estado">
+                                                <i class="fas fa-minus"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
 
                                     <!-- <tr>
                                     <td>4</td>
@@ -163,6 +163,47 @@
 
     </div>
 
+    <script>
+        document.getElementById('btnNotificarTodos').addEventListener('click', function () {
+            const btn = this;
+            const rows = document.querySelectorAll('tbody tr[data-row]');
+
+            // Deshabilitar el botón durante el proceso
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Enviando...';
+
+            let delay = 0;
+
+            rows.forEach((row, index) => {
+                setTimeout(() => {
+                    const btnEstado = row.querySelector('.btn-estado');
+
+                    // Simulación: la segunda persona (índice 1) falla el envío
+                    if (index === 1) {
+                        // Mensaje NO enviado
+                        btnEstado.className = 'btn btn-sm btn-danger btn-estado';
+                        btnEstado.innerHTML = '<i class="fas fa-times"></i>';
+                        btnEstado.title = 'Error al enviar';
+                    } else {
+                        // Mensaje enviado correctamente
+                        btnEstado.className = 'btn btn-sm btn-success btn-estado';
+                        btnEstado.innerHTML = '<i class="fas fa-check"></i>';
+                        btnEstado.title = 'Notificación enviada';
+                    }
+
+                    // Cuando termine con todas las filas
+                    if (index === rows.length - 1) {
+                        setTimeout(() => {
+                            btn.disabled = false;
+                            btn.innerHTML = '<i class="fas fa-paper-plane me-1"></i>Notificar Todos';
+                        }, 500);
+                    }
+                }, delay);
+
+                delay += 800; // 800ms entre cada envío
+            });
+        });
+    </script>
 
 </body>
 
