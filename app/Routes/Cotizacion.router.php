@@ -1,6 +1,13 @@
 <?php
 
 $router->add('GET', '/cotizacion', 'CotizacionController', 'index');
+
+$router->add('GET', '/cotizacion/([A-Za-z])', 'CotizacionController', 'index');
+
+$router->add('POST', '/cotizacion/aprobar/{id}', 'CotizacionController', 'aprobarCotizacion');
+
+
+
 $router->add('GET', '/cotizacion/create', 'CotizacionController', 'create');
 
 $router->add('GET', '/cotizacion/reporte/(\d+)', 'CotizacionController', 'html2pdfReport');

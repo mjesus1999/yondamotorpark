@@ -156,9 +156,6 @@ DROP PROCEDURE generar_cronograma;
 
 update cronogramas SET fechapago = '2025-08-07', penalidad = 300.00 WHERE numcuota = 1;
 
-
-
-
 DELIMITER $
 CREATE PROCEDURE generar_cronograma(IN p_idcontrato INT, IN p_tasaMensual DECIMAL(15,9))
 BEGIN

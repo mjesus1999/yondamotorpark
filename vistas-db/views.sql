@@ -243,14 +243,10 @@ SELECT
     WHEN cl.tipocliente = 'P' THEN p.telprimario
     ELSE e.telprimario
   END AS cliente_telefono,
-  
-  -- Datos del vehículo
   ma.marca      AS vehiculo_marca,
   mo.modelo     AS vehiculo_modelo,
   mo.anio       AS vehiculo_anio,
   v.color       AS vehiculo_color,
-  
-  -- INFORMACIÓN COMPLETA DEL ASESOR
   CONCAT(pase.apellidos, ' ', pase.nombres) AS asesor_nombre,
   UPPER(CONCAT(pase.nombres, ' ', pase.apellidos)) AS asesor_nombre_completo,
   cg.cargo AS asesor_cargo,

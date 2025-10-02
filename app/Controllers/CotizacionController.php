@@ -22,7 +22,7 @@ class CotizacionController extends Controller
         $this->formatoModel = new FormatoCotizacion();
     }
 
-    public function index(): void
+    public function index(string $estado = 'P'): void
     {
         $this->authRequired();
 
@@ -31,6 +31,7 @@ class CotizacionController extends Controller
         $idcargo = $_SESSION['user']['idcargo'] ?? null;
 
         if (!$idasesor || !$idcargo) {
+
             $_SESSION['error_message'] = "No se pudo identificar al usuario.";
             header('Location: /login');
             exit;
@@ -38,37 +39,41 @@ class CotizacionController extends Controller
 
         // Definir cargos que pueden ver todas las cotizaciones (supervisores/jefes)
         $cargosSupervisores = [
-            1,  // Jefe de sistemas
-            8,  // Jefe de Logística
-            10, // Jefe de Recursos Humanos
-            13, // Jefe de Contabilidad
-            14, // Jefe de Marketing
-            16, // Jefe de Ventas
-            17  // Jefe de Caja
+            1,
+            8,
+            10,
+            13,
+            14,
+            16,
+            17
         ];
 
         // Verificar si el usuario puede ver todas las cotizaciones o solo las suyas
         $puedeVerTodas = in_array($idcargo, $cargosSupervisores);
 
-        if ($puedeVerTodas) {
-            // Supervisores/Jefes ven todas las cotizaciones con información del asesor
-            $cotizaciones = $this->cotizacionModel->getAll();
 
-            // Log para debugging (opcional)
-            error_log('USUARIO SUPERVISOR - Puede ver todas las cotizaciones');
+        $cotizaciones = [];
+        $estadoUpperCase = strtoupper($estado); // Esto convierte 'p' en 'P' o usa 'P' si es por defecto.
+
+
+        if ($puedeVerTodas) {
+
+            $cotizaciones = $this->cotizacionModel->getAll($estadoUpperCase);
+
+            error_log('USUARIO SUPERVISOR - Puede ver todas las cotizaciones de estado: ' . $estadoUpperCase);
             error_log('COTIZACIONES CARGADAS: ' . count($cotizaciones));
         } else {
-            // Asesores y otros cargos ven solo sus cotizaciones
-            $cotizaciones = $this->cotizacionModel->getAllByAsesor($idasesor);
+            // Asesores ven solo sus cotizaciones, FILTRADAS por estado
+            $cotizaciones = $this->cotizacionModel->getAllByAsesor($idasesor, $estadoUpperCase);
 
-            // Log para debugging (opcional)
-            error_log('USUARIO ASESOR - Solo ve sus cotizaciones');
+            error_log('USUARIO ASESOR - Solo ve sus cotizaciones de estado: ' . $estadoUpperCase);
             error_log('COTIZACIONES DEL ASESOR ' . $idasesor . ': ' . count($cotizaciones));
         }
 
         $this->view("cotizacion.index", [
             'cotizaciones' => $cotizaciones,
             'puede_ver_todas' => $puedeVerTodas,
+            'estadoActual' => $estadoUpperCase,
             'usuario_actual' => [
                 'id' => $idasesor,
                 'cargo' => $idcargo,
@@ -76,6 +81,7 @@ class CotizacionController extends Controller
             ]
         ]);
     }
+
 
     public function html2pdfReport($id): void
     {
@@ -563,4 +569,23 @@ class CotizacionController extends Controller
         }
     }
 
+
+    public function aprobarCotizacion($idcotizacion)
+    {
+        header('Content-Type: application/json; charset=utf-8');
+
+        $idcotizacion = intval($idcotizacion);
+
+        $result = $this->cotizacionModel->aprobarCotizacion($idcotizacion);
+
+        if ($result > 0) {
+            echo json_encode([
+
+                'success' => true,
+                'message' => 'Cotización aprobada'
+            ]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'No se pudo aprobar la cotización']);
+        }
+    }
 }

@@ -31,10 +31,13 @@ SELECT
     fechapago,
     estado
 FROM cronogramas
-WHERE idcontrato IN (1, 2, 7);
+WHERE idcontrato IN (1, 2, 3,4);
 
 SELECT 'Backup realizado' AS mensaje, COUNT(*) AS registros_respaldados
 FROM temp_fechas_backup;
+
+SELECT * FROM contratos;
+SELECT * FROM cronogramas;
 
 -- ========================================
 -- PASO 3: MODIFICAR FECHAS PARA LA PRUEBA

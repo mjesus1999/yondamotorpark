@@ -471,18 +471,19 @@ CREATE TABLE cotizaciones (
     numcuotas SMALLINT NOT NULL,
     gastosadministrativos DECIMAL(9,2) NOT NULL DEFAULT 0.00 COMMENT 'Gastos administrativos de la cotización',
     valorcuota DECIMAL(9, 2) NOT NULL, -- Se usara en la tabla de cronogramas
-    estadocotizacion ENUM('P', 'E', 'A', 'C', 'R') NOT NULL DEFAULT 'P' COMMENT 'Pendiente | Evaluación | Aprobada | Cancelada (cliente) | Rechazada (Analista crédito)',
-     comentarios TEXT,
-      fechaseguimiento DATETIME NULL,
+    estadocotizacion ENUM('P', 'E', 'A', 'C', 'R','CONT') NOT NULL DEFAULT 'P' COMMENT 'Pendiente | Evaluación | Aprobada | Cancelada (cliente) | Rechazada (Analista crédito) | CONTRATO',
+    comentarios TEXT,
+    fechaseguimiento DATETIME NULL,
     creado DATETIME NOT NULL DEFAULT NOW(),
     modificado DATETIME NULL,
     fechareactivacion DATETIME NULL,
     CONSTRAINT fk_idformato_cot FOREIGN KEY (idformato) REFERENCES formatocotizacion (idformato),
     CONSTRAINT fk_idcliente_cot FOREIGN KEY (idcliente) REFERENCES clientes (idcliente),
-    CONSTRAINT fk_idvehiculo_cot FOREIGN KEY (idvehiculo) REFERENCES + (idvehiculo),
+    CONSTRAINT fk_idvehiculo_cot FOREIGN KEY (idvehiculo) REFERENCES  (idvehiculo),
     CONSTRAINT fk_idcolventa_cot FOREIGN KEY (idasesor) REFERENCES colaboradores (idcolaborador)
 ) ENGINE = INNODB;
 USE motorpark;
+-- ALTER TABLE cotizaciones MODIFY COLUMN estadocotizacion ENUM('P', 'E', 'A', 'C', 'R','CONT') NOT NULL DEFAULT 'P' COMMENT 'Pendiente | Evaluación | Aprobada | Cancelada (cliente) | Rechazada (Analista crédito) | CONTRATO';
 
 -- ALTER TABLE cotizaciones ADD COLUMN comentarios TEXT AFTER estadocotizacion;
 -- --  ALTER TABLE cotizaciones ADD COLUMN fechaseguimiento DATETIME NULL AFTER comentarios;
@@ -490,12 +491,37 @@ USE motorpark;
 
 -- ALTER TABLE cotizaciones ADD COLUMN gastosadministrativos DECIMAL(9,2) NOT NULL DEFAULT 0.00 COMMENT 'Gastos administrativos de la cotización' AFTER valorcuota;
 --  ALTER TABLE cotizaciones ADD COLUMN fechareactivacion DATETIME NULL AFTER modificado;
+
+
+CREATE TABLE fichasolicitud (
+    idficha         INT PRIMARY KEY AUTO_INCREMENT,
+    idcotizacion    INT NOT NULL UNIQUE,
+    idcolcredito    INT NOT NULL,
+    idconyuge       INT NULL COMMENT 'CONYUGE DEL SOLICITANTE',
+    idaval          INT NULL COMMENT 'AVAL DEL SOLICITANTE',
+    idavalconyuge   INT NULL COMMENT 'CONYUGE DEL AVAL',
+    fechavisista    DATE NOT NULL,
+    rutaficha       VARCHAR(300) NOT NULL,
+    comentarios     TEXT NULL,
+    estado          ENUM('Aprobado','Observado','Anulado'),
+    CONSTRAINT fk_idcotizacion_ficha FOREIGN KEY(idcotizacion) REFERENCES cotizaciones(idcotizacion),
+    CONSTRAINT fk_idcolcredito_ficha  FOREIGN KEY(idcolcredito) REFERENCES colaboradores(idcolaborador),
+    CONSTRAINT fk_idconyugue_ficha FOREIGN KEY(idconyuge) REFERENCES personas(idpersona),
+    CONSTRAINT fk_idaval_ficha FOREIGN KEY(idaval) REFERENCES personas(idpersona),
+    CONSTRAINT fk_idavalconyuge_ficha FOREIGN KEY(idavalconyuge) REFERENCES personas(idpersona)
+) ENGINE = INNODB;
+
+SELECT * FROM fichasolicitud;
+
+
+
 CREATE TABLE contratos (
     idcontrato INT AUTO_INCREMENT PRIMARY KEY,
     idlocal INT NOT NULL,
     idcotizacion INT NOT NULL,
-    idlogistica INT NULL,
+    idlogistica INT NULL, CREDITO.
     fechainicio DATE NOT NULL,
+    fechacreacion
     diapago TINYINT NOT NULL,
     escredito ENUM('S', 'N') NOT NULL DEFAULT 'S',
     fecharevision DATE NULL,
@@ -507,7 +533,7 @@ CREATE TABLE contratos (
     CONSTRAINT fk_idlogistica_contrato FOREIGN KEY (idlogistica) REFERENCES colaboradores (idcolaborador)
 ) ENGINE = InnoDB;
 
-
+SHOW COLUMNS FROM contratos;
 -- ALTER TABLE contratos
 -- ADD COLUMN penalidadbase DECIMAL(10, 2) NOT NULL DEFAULT 0.1;
 

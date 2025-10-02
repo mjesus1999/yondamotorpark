@@ -17,7 +17,7 @@ class ApiSms
         $this->url = "https://api3.gamanet.pe/token/smssend";
     }
 
-    public function sendMessage(string $phone, string $message): bool
+    public function sendMessage(string $phone, string $message): bool 
     {
     
 
