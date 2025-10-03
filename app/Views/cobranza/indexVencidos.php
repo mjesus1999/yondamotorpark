@@ -25,7 +25,7 @@
                     </nav>
                 </div>
                 <div class="col-md-6 text-end">
-                    <a href="/cobranza" class="btn btn-sm btn-outline-primary">Volver</a>
+                    <a href="/Cobranza" class="btn btn-sm btn-outline-primary">Volver</a>
                 </div>
             </div>
         </div>
@@ -98,7 +98,7 @@
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
-                                    
+
 
                                 </tbody>
                                 <tfoot>

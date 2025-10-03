@@ -222,7 +222,7 @@ $allModules = [
 
               <!-- Solo Cobranza -->
               <li class="sidebar-item">
-                <a href="/cobranza" class="sidebar-link">
+                <a href="/Cobranza" class="sidebar-link">
                   <i class="fa-solid fa-money-bill-wave pe-2"></i> Cobranza
                 </a>
               </li>
