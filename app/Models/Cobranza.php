@@ -6,14 +6,19 @@ namespace App\Models;
 use App\Core\Database;
 use PDO;
 use PDOException;
+/* use ApiSms; */
+
+/* require_once '/../Helpers/ApiSms.php'; */
 
 class Cobranza
 {
     private PDO $db;
+    /* private $apiSms; */
 
     public function __construct()
     {
         $this->db = Database::getInstance();
+        /* $this->apiSms = new \ApiSms(); */
     }
 
     /* MOSTRAR ESTADISTICAS DE LOS CONTRATOS */
@@ -182,6 +187,24 @@ class Cobranza
         }
     }
 
+    public function getClientesNotificar()
+    {
+        $query = "CALL sp_get_cuotas_proximas_vencer()";
+
+        try{
+            $stmt = $this->db->prepare($query);
+            $stmt->execute();
+
+            $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $stmt->closeCursor();
+
+            return $results;
+        } catch (PDOException $error) {
+            error_log("Error en getClientesNotificar: " . $error->getMessage());
+            return[];
+        }
+    }
+
     /* MUESTRA CUOTAS VENCIDOS */
     public function getCuotasVencidas()
     {
@@ -201,5 +224,28 @@ class Cobranza
         }
 
     }
+
+    /* API PARA MANDAR NOTIFICACION (SMS) */
+    /* public function enviarSmsNotificacion($idContrato, $telefono, $nombreCliente, $montoCuota, $fechaVencimiento): array
+    {
+        
+        try{
+            $mensaje = "Estimad@ {$nombreCliente}, le recordamos que su cuota de {$montoCuota} vence el {$fechaVencimiento} :D";
+
+            $resultado = $this->apiSms->sendMessage($telefono, $mensaje);
+
+            return [
+                'success' => $resultado,
+                'message' => $resultado ? 'Sms enviado con exito' : 'Error al enviar Sms'
+            ];
+        } catch (PDOException $e) {
+            error_log("Error al enviar sms: " . $e->getMessage());
+            return [
+                'success' => false,
+                'message' => 'Error al enviar: ' . $e->getMessage()
+            ];
+        }
+    } */
+
 
 }

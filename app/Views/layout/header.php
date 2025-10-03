@@ -285,8 +285,60 @@ $allModules = [
       </nav>
       <main class="content px-3 py-2">
 
-
         <script>
+          document.addEventListener('DOMContentLoaded', function () {
+            const currentPath = window.location.pathname;
+            const sidebarLinks = document.querySelectorAll('.sidebar-link');
+            const collapseElements = document.querySelectorAll('.collapse');
+
+            const rutasCobranza = ['/Cobranza', '/Recordatorios', '/Vencidos'];
+            const esRutaCobranza = rutasCobranza.some(ruta => currentPath.startsWith(ruta));
+
+            // Resaltar el enlace activo y abrir su menú padre
+            sidebarLinks.forEach(link => {
+              const href = link.getAttribute('href');
+
+              if (href && href !== '#' && currentPath.startsWith(href)) {
+                link.classList.add('active');
+                const parentCollapse = link.closest('.sidebar-item').querySelector('.collapse');
+                if (parentCollapse) {
+                  parentCollapse.classList.add('show');
+                }
+              }
+
+              if (esRutaCobranza && href === '/Cobranza') {
+                link.classList.add('active');
+                const cobranzaMenu = document.getElementById('gestionCobranza');
+                if (cobranzaMenu) {
+                  cobranzaMenu.classList.add('show');
+                }
+              }
+            });
+
+            // Controlar la persistencia del estado
+            document.body.addEventListener('shown.bs.collapse', function (event) {
+              const openedCollapseId = event.target.id;
+              localStorage.setItem(openedCollapseId, 'open');
+            });
+
+            document.body.addEventListener('hidden.bs.collapse', function (event) {
+              const hiddenCollapseId = event.target.id;
+              localStorage.setItem(hiddenCollapseId, 'closed');
+            });
+
+            collapseElements.forEach(collapse => {
+              const collapseId = collapse.id;
+              if (localStorage.getItem(collapseId) === 'open') {
+                const bsCollapse = new bootstrap.Collapse(collapse, {
+                  toggle: false
+                });
+                bsCollapse.show();
+              }
+            });
+          });
+        </script>
+
+        <!-- <script>
           document.addEventListener('DOMContentLoaded', function () {
             const currentPath = window.location.pathname;
             const sidebarLinks = document.querySelectorAll('.sidebar-link');
@@ -326,4 +378,4 @@ $allModules = [
               }
             });
           });
-        </script>
+        </script> -->

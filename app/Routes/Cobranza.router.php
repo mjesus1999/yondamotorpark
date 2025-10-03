@@ -3,6 +3,7 @@
 $router->add('GET', '/Cobranza', 'CobranzaController', 'index');
 $router->add('GET', '/Cobranza/getEstadisticas', 'CobranzaController', 'getEstadisticas');
 $router->add('GET', '/Cobranza/getTarjetas', 'CobranzaController', 'getTarjetas');
+$router->add('GET', '/Cobranza/getClientesNotificar', 'CobranzaController', 'getClientesNotificar');
 
 // RUTAS PARA EL MODAL DE DETALLE
 $router->add('GET', '/Cobranza/getInfoCliente/{id}', 'CobranzaController', 'getInfoCliente');
@@ -12,6 +13,11 @@ $router->add('GET', '/Cobranza/getResumenFinanciero/{id}', 'CobranzaController',
 $router->add('GET', '/Cobranza/getHistorialPagos/{id}/{limite}', 'CobranzaController', 'getHistorialPagos');
 $router->add('GET', '', 'CobranzaController', '');
 
+
+
+//SMS
+// En tu router o CobranzaController
+/* $router->add('POST', '/api/enviar-sms', 'CobranzaController', 'enviarSms'); */
 
 /* $router->get('/Cobranza/getResumenFinanciero/{id}', 'CobranzaController@getResumenFinanciero');
 $router->get('/Cobranza/getHistorialPagos/{id}/{limite}', 'CobranzaController@getHistorialPagos'); */
@@ -27,7 +33,3 @@ $router->add('GET', '/reportesAtrasado', 'CobranzaController', 'reporteCobranzaA
 $router->add('GET', '/reportesAtrasado2', 'CobranzaController', 'reporteCobranzaAtrasado2');
 
 $router->add('GET', '/reportesRecojo', 'CobranzaController', 'reporteRecojoVehicular');
-
-
-
-//reporteCobranzaAtrasado.php

@@ -244,7 +244,7 @@
                                             <th class="text-end">Interés</th>
                                             <th class="text-end">Penalidad</th>
                                             <th class="text-end">Total Cuota</th>
-                                            <th class="text-end">Saldo</th>
+                                            <th class="text-end">Saldo Capital</th>
                                             <th class="text-center">Estado</th>
                                             <th class="text-center">Días</th>
                                         </tr>
@@ -303,9 +303,7 @@
 </div>
 
 <script>
-    // ===================== FUNCIONES CON PROMISES =====================
-
-    // Función para cargar estadísticas usando Promise
+    // Función para cargar estadísticas
     function cargarEstadisticas() {
         return new Promise((resolve, reject) => {
             fetch('/Cobranza/getEstadisticas')
@@ -328,7 +326,7 @@
         });
     }
 
-    // Función para cargar tarjetas usando Promise
+    // Función para cargar tarjetas
     function cargarTarjetas() {
         return new Promise((resolve, reject) => {
             fetch('/Cobranza/getTarjetas')
@@ -393,11 +391,11 @@
 
         if (tarjetas.length === 0) {
             contenedor.innerHTML = `
-            <div class="col-12 text-center py-5">
-                <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
-                <p class="text-muted">No hay clientes con cuotas pendientes o próximas a vencer</p>
-            </div>
-        `;
+                <div class="col-12 text-center py-5">
+                    <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">No hay clientes con cuotas pendientes o próximas a vencer</p>
+                </div>
+            `;
             return;
         }
 
@@ -408,33 +406,33 @@
             const claseBorde = obtenerClaseBorde(tarjeta.estado_vencimiento);
 
             html += `
-            <div class="col-lg-4 mb-2 cobranza-item" id="contrato-card-${tarjeta.idcontrato}">
-                <div class="card card-deuda border-start ${claseBorde}">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-start mb-2">
-                            <div>
-                                <h6 class="card-title mb-2">
-                                    <i class="fas fa-user me-2"></i>${tarjeta.nombre_cliente}
-                                </h6>
-                                <p class="text-muted small mb-1"><strong>Teléfono:</strong> ${tarjeta.telefono || 'N/A'}</p>
-                                <p class="text-muted small mb-1"><strong>Local:</strong> ${tarjeta.local}</p>
-                                <p class="text-muted small mb-0"><strong>Tipo de vehículo:</strong> ${tarjeta.tipo_vehiculo}</p>
+                <div class="col-lg-4 mb-2 cobranza-item" id="contrato-card-${tarjeta.idcontrato}">
+                    <div class="card card-deuda border-start ${claseBorde}">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <h6 class="card-title mb-2">
+                                        <i class="fas fa-user me-2"></i>${tarjeta.nombre_cliente}
+                                    </h6>
+                                    <p class="text-muted small mb-1"><strong>Teléfono:</strong> ${tarjeta.telefono || 'N/A'}</p>
+                                    <p class="text-muted small mb-1"><strong>Local:</strong> ${tarjeta.local}</p>
+                                    <p class="text-muted small mb-0"><strong>Tipo de vehículo:</strong> ${tarjeta.tipo_vehiculo}</p>
+                                </div>
+                                <span class="badge ${claseBadge}">${tarjeta.estado_vencimiento}</span>
                             </div>
-                            <span class="badge ${claseBadge}">${tarjeta.estado_vencimiento}</span>
-                        </div>
-                        <div class="mb-3">
-                            <p class="text-muted small mb-1"><strong>Fecha de Vencimiento:</strong> ${tarjeta.fecha_vencimiento}</p>
-                        </div>
-                        <div class="d-flex gap-2">
-                            <button class="btn btn-success btn-sm flex-grow-1"
-                                onclick="mostrarFormularioPago(${tarjeta.idcontrato}, '${tarjeta.nombre_cliente}')">
-                                Ver detalle
-                            </button>
+                            <div class="mb-3">
+                                <p class="text-muted small mb-1"><strong>Fecha de Vencimiento:</strong> ${tarjeta.fecha_vencimiento}</p>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-success btn-sm flex-grow-1"
+                                    onclick="mostrarFormularioPago(${tarjeta.idcontrato}, '${tarjeta.nombre_cliente}')">
+                                    Ver detalle
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        `;
+            `;
         });
 
         contenedor.innerHTML = html;
@@ -465,14 +463,23 @@
     document.addEventListener('DOMContentLoaded', inicializarVista);
 
     async function mostrarFormularioPago(idContrato, nombreCliente) {
-        // Mostrar el modal
+
+        //RESETEAR MODAL A LA PESTAÑA
+        const allTabs = document.querySelectorAll('#tabsDetalleContrato .nav-link');
+        allTabs.forEach(tab => tab.classList.remove('active'));
+
+        const allTabContents = document.querySelectorAll('#tabsDetalleContratoContent .tab-pane');
+        allTabContents.forEach(content => {
+            content.classList.remove('show', 'active');
+        });
+        document.getElementById('tab-cliente').classList.add('active');
+        document.getElementById('contenido-cliente').classList.add('show', 'active');
+        //FIN DEL RESET
+
         const modal = new bootstrap.Modal(document.getElementById('modalDetalleContrato'));
         modal.show();
-
         // Actualizar nombre del cliente en el header
         document.getElementById('modal-nombre-cliente').textContent = nombreCliente;
-
-        // Mostrar loader y ocultar contenido
         document.getElementById('modal-loader').style.display = 'block';
         document.getElementById('modal-contenido').style.display = 'none';
 
@@ -495,8 +502,8 @@
             const contrato = detalleContrato.data;
             const simboloMoneda = contrato.moneda === 'PEN' ? 'S/' : '$';
             document.getElementById('modal-moneda').textContent = simboloMoneda;
-            document.getElementById('modal-deuda-total').textContent = 
-            parseFloat(contrato.deuda_total || 0).toFixed(2);
+            document.getElementById('modal-deuda-total').textContent =
+                parseFloat(contrato.deuda_total || 0).toFixed(2);
 
             // Renderizar cada sección
             renderizarInfoCliente(infoCliente.data);
@@ -578,6 +585,8 @@
     }
 
     function renderizarDetalleContrato(data) {
+        const nombreMoneda = data.moneda === 'PEN' ? 'Soles' : 'Dolares';
+        const simboloMoneda = data.moneda === 'PEN' ? 'S/.' : '$';
         const html = `
         <div class="row">
             <div class="col-md-6">
@@ -600,12 +609,12 @@
         <div class="row mt-3">
             <div class="col-md-6">
                 <h6 class="border-bottom pb-2 mb-3"><i class="fas fa-dollar-sign me-2"></i>Información Financiera</h6>
-                <p><strong>Moneda:</strong> ${data.moneda || 'N/A'}</p>
-                <p><strong>Monto:</strong> ${data.moneda === 'PEN' ? 'S/.' : '$'} ${parseFloat(data.precioventa || 0).toFixed(2)}</p>
-                <p><strong>Inicial:</strong> ${data.moneda === 'PEN' ? 'S/.' : '$'} ${parseFloat(data.inicial || 0).toFixed(2)}</p>
+                <p><strong>Moneda:</strong> ${nombreMoneda}</p>
+                <p><strong>Monto:</strong> ${simboloMoneda} ${parseFloat(data.precioventa || 0).toFixed(2)}</p>
+                <p><strong>Inicial:</strong> ${simboloMoneda} ${parseFloat(data.inicial || 0).toFixed(2)}</p>
                 <p><strong>Total de Cuotas:</strong> ${data.numcuotas || 'N/A'}</p>
-                <p><strong>Valor Cuota:</strong> ${data.moneda === 'PEN' ? 'S/.' : '$'} ${parseFloat(data.valorcuota || 0).toFixed(2)}</p>
-                <p><strong>Gastos Administrativos:</strong> ${data.moneda === 'PEN' ? 'S/.' : '$'} ${parseFloat(data.gastosadministrativos || 0).toFixed(2)}</p>
+                <p><strong>Valor Cuota:</strong> ${simboloMoneda} ${parseFloat(data.valorcuota || 0).toFixed(2)}</p>
+                <p><strong>Gastos Administrativos:</strong> ${simboloMoneda} ${parseFloat(data.gastosadministrativos || 0).toFixed(2)}</p>
             </div>
             <div class="col-md-6">
                 <div class="col-12">
@@ -621,6 +630,11 @@
 
     function renderizarCronograma(cronograma) {
         const tbody = document.getElementById('tbody-cronograma');
+
+        // Destruir DataTable existente si existe
+        if ($.fn.DataTable.isDataTable('#tabla-cronograma')) {
+            $('#tabla-cronograma').DataTable().destroy();
+        }
 
         if (cronograma.length === 0) {
             tbody.innerHTML = `
@@ -643,19 +657,19 @@
             switch (cuota.estado_vencimiento) {
                 case 'PAGADO':
                     badgeClass = 'bg-success';
-                    estadoTexto = 'PAGADO';
+                    estadoTexto = 'Pagado';
                     break;
                 case 'VENCIDO':
                     badgeClass = 'bg-danger';
-                    estadoTexto = 'VENCIDO';
+                    estadoTexto = 'Vencido';
                     break;
                 case 'VENCE HOY':
                     badgeClass = 'bg-warning text-dark';
-                    estadoTexto = 'VENCE HOY';
+                    estadoTexto = 'Vence Hoy';
                     break;
                 case 'POR VENCER':
-                    badgeClass = 'bg-info';
-                    estadoTexto = 'POR VENCER';
+                    badgeClass = 'bg-info text-dark';
+                    estadoTexto = 'Por Vencer';
                     break;
                 default:
                     badgeClass = 'bg-warning text-dark';
@@ -692,7 +706,48 @@
         });
 
         tbody.innerHTML = html;
+
+        // Inicializar DataTable
+        /* $('#tabla-cronograma').DataTable({
+            language: {
+                url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json'
+            },
+            pageLength: 10,
+            order: [[0, 'asc']],
+            responsive: true
+        }); */
+        $('#tabla-cronograma').DataTable({
+            language: {
+                decimal: "",
+                emptyTable: "No hay datos disponibles en la tabla",
+                info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
+                infoEmpty: "Mostrando 0 a 0 de 0 registros",
+                infoFiltered: "(filtrado de _MAX_ registros totales)",
+                infoPostFix: "",
+                thousands: ",",
+                lengthMenu: "Mostrar _MENU_ registros",
+                loadingRecords: "Cargando...",
+                processing: "Procesando...",
+                search: "Buscar:",
+                zeroRecords: "No se encontraron registros coincidentes",
+                paginate: {
+                    first: '«',
+                    last: '»',
+                    next: '›',
+                    previous: '‹'
+                },
+                aria: {
+                    sortAscending: ": activar para ordenar la columna ascendente",
+                    sortDescending: ": activar para ordenar la columna descendente"
+                }
+            },
+            lengthMenu: [[10, 20, 50, 100], [10, 20, 50, 100]],
+            pageLength: 20,
+            order: [[0, 'asc']],
+            responsive: true
+        });
     }
+
     function renderizarHistorialPagos(historial) {
         const tbody = document.getElementById('tbody-historial');
 
