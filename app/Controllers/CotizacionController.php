@@ -53,21 +53,21 @@ class CotizacionController extends Controller
 
 
         $cotizaciones = [];
-        $estadoUpperCase = strtoupper($estado); // Esto convierte 'p' en 'P' o usa 'P' si es por defecto.
+        $estadoUpperCase = strtoupper($estado); 
 
 
         if ($puedeVerTodas) {
 
             $cotizaciones = $this->cotizacionModel->getAll($estadoUpperCase);
 
-            error_log('USUARIO SUPERVISOR - Puede ver todas las cotizaciones de estado: ' . $estadoUpperCase);
-            error_log('COTIZACIONES CARGADAS: ' . count($cotizaciones));
+            // error_log('USUARIO SUPERVISOR - Puede ver todas las cotizaciones de estado: ' . $estadoUpperCase);
+            // error_log('COTIZACIONES CARGADAS: ' . count($cotizaciones));
         } else {
             // Asesores ven solo sus cotizaciones, FILTRADAS por estado
             $cotizaciones = $this->cotizacionModel->getAllByAsesor($idasesor, $estadoUpperCase);
 
-            error_log('USUARIO ASESOR - Solo ve sus cotizaciones de estado: ' . $estadoUpperCase);
-            error_log('COTIZACIONES DEL ASESOR ' . $idasesor . ': ' . count($cotizaciones));
+            // error_log('USUARIO ASESOR - Solo ve sus cotizaciones de estado: ' . $estadoUpperCase);
+            // error_log('COTIZACIONES DEL ASESOR ' . $idasesor . ': ' . count($cotizaciones));
         }
 
         $this->view("cotizacion.index", [

@@ -146,7 +146,7 @@
 
                                             
                                                 <a href="/fichasolicitud/<?= htmlspecialchars($c['idcotizacion'])?>"><i class="bi bi-file-earmark-plus fs-5 text-warning fw-bold" title="Adjuntar Ficha"></i></a>
-                                                <a
+                                                <!-- <a
                                                     title="Aprobar Cotización"
                                                     data-id="<?= $c['idcotizacion'] ?>"
                                                     data-nombre-cliente="<?= htmlspecialchars($c['nombrecliente']) ?>"
@@ -158,7 +158,7 @@
                                                     data-bs-toggle="modal"
                                                     data-bs-target="#aprobarModal">
                                                     <i class="bi bi-check2-circle text-primary fs-5"></i>
-                                                </a>
+                                                </a> -->
 
                                                 <?php
 

@@ -512,6 +512,8 @@ CREATE TABLE fichasolicitud (
 ) ENGINE = INNODB;
 
 SELECT * FROM fichasolicitud;
+USE motorpark;
+ALTER TABLE fichasolicitud CHANGE COLUMN fechavisista  fechavisita   DATE NOT NULL;
 
 
 

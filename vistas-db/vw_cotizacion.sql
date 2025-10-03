@@ -22,6 +22,7 @@ SELECT
         e.razonsocial,
         'Cliente no definido'
     ) AS nombrecliente,
+    p.direccion,
     COALESCE(
         CASE WHEN cl.tipocliente = 'P' THEN p.nrodoc END,
         e.ruc,
@@ -42,6 +43,7 @@ SELECT
     c.moneda,
     c.inicial,
     c.precioventa,
+    c.valorcuota,
     -- Calcular vencimiento
     DATE_ADD(IFNULL(c.fechareactivacion, c.creado), INTERVAL c.vigenciadias DAY) AS fecha_vencimiento,
     c.fechareactivacion,

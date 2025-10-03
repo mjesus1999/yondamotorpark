@@ -8,6 +8,7 @@ $router->add('POST', '/cotizacion/aprobar/{id}', 'CotizacionController', 'aproba
 
 
 
+
 $router->add('GET', '/cotizacion/create', 'CotizacionController', 'create');
 
 $router->add('GET', '/cotizacion/reporte/(\d+)', 'CotizacionController', 'html2pdfReport');
