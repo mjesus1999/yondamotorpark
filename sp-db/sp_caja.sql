@@ -56,7 +56,6 @@ DELIMITER;
 DROP PROCEDURE IF EXISTS sp_get_cronogramas_by_idcontrato;
 
 DELIMITER $$
-
 CREATE PROCEDURE sp_get_cronogramas_by_idcontrato(IN idcontrato_ INT)
 BEGIN
     -- Primero actualizamos las cuotas vencidas
@@ -238,3 +237,7 @@ VALUES (
         'hghfd/ghfghdf'
     );
 
+
+
+SHOW EVENTS;
+SHOW TRIGGERS;

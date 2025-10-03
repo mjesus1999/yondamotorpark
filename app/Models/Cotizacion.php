@@ -1,6 +1,5 @@
 <?php
 //app/Controller/Cotizacion.php
-
 namespace App\Models;
 
 use App\Core\Database;
@@ -8,6 +7,7 @@ use PDO;
 use Exception;
 use DateTime;
 use DateInterval;
+use PDOException;
 
 class Cotizacion
 {
@@ -18,26 +18,52 @@ class Cotizacion
         $this->db = Database::getInstance();
     }
 
-    //ORDER BY fechaRegistro DESC LIMIT 10000
-    public function getAll(): array
+
+    public function getAll(string $estado): array
     {
-        $query = "SELECT * FROM vwGetAllCotizacion";
-        $stmt = $this->db->query($query);
+
+        $query = "SELECT * FROM vwGetAllCotizacion WHERE estadocotizacion = :estado 
+              ORDER BY fechaRegistro DESC";
+
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(":estado", $estado, PDO::PARAM_STR);
+        $stmt->execute();
+
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    /**
-     * Obtiene todas las cotizaciones de un asesor específico
-     * ORDER BY fechaRegistro DESC
-     */
-    public function getAllByAsesor(int $idasesor): array
+    public function getAllByAsesor(int $idasesor, string $estado): array
     {
-        $query = "SELECT * FROM vwGetAllCotizacion WHERE idasesor = :idasesor";
+        $query = "SELECT * FROM vwGetAllCotizacion 
+              WHERE idasesor = :idasesor AND estadocotizacion = :estado 
+              ORDER BY fechaRegistro DESC";
+
         $stmt = $this->db->prepare($query);
-        $stmt->bindValue(':idasesor', $idasesor, PDO::PARAM_INT);
+        $stmt->bindParam(":idasesor", $idasesor, PDO::PARAM_INT);
+        $stmt->bindParam(":estado", $estado, PDO::PARAM_STR);
         $stmt->execute();
+
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+
+    public function aprobarCotizacion(int $id): int
+    {
+        try {
+
+            $query = "UPDATE cotizaciones SET estadocotizacion = 'A' WHERE idcotizacion = :id";
+            $stmt = $this->db->prepare($query);
+
+            $stmt->bindParam(":id", $id, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->rowCount();
+        } catch (PDOException $e) {
+
+            error_log("Error al aprobar cotización ID {$id}: " . $e->getMessage());
+            return 0;
+        }
+    }
+
 
     public function getClienteByDoc(string $tipo, string $doc): ?array
     {
@@ -247,6 +273,4 @@ class Cotizacion
         ]);
         return $stmt->rowCount() > 0;
     }
-
-
 }

@@ -96,3 +96,4 @@ function searchByDNI($dni = "")
       break;
   }
 }
+

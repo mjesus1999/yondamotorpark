@@ -23,15 +23,15 @@ class PagoCronogramaController extends Controller
     public function indexHistorialPagos(int $id): void
     {
         $this->authRequired();
-        $tiempoInicio = microtime(true);
+        // $tiempoInicio = microtime(true);
 
         $datos = $this->pagoCronogramaModel->getHistorialPagosByContrato($id);
         $this->view('caja.historial', ['pagos' => $datos]);
 
-        $tiempoFin = microtime(true);
-        $tiempoEjecucion = $tiempoFin - $tiempoInicio;
+        // $tiempoFin = microtime(true);
+        // $tiempoEjecucion = $tiempoFin - $tiempoInicio;
 
-        error_log("Tiempo de ejecución de indexHistorialPagos: " . number_format($tiempoEjecucion, 4) . " segundos.");
+        // error_log("Tiempo de ejecución de indexHistorialPagos: " . number_format($tiempoEjecucion, 4) . " segundos.");
     }
 
 

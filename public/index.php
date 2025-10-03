@@ -88,6 +88,9 @@ require APP_ROOT . '/app/Routes/PagoCronograma.router.php';
 require APP_ROOT . '/app/Routes/Comprobantes.router.php';
 require APP_ROOT . '/app/Routes/Egreso.router.php';
 require APP_ROOT . '/app/Routes/ArqueoCaja.router.php';
+require APP_ROOT . '/app/Routes/Contrato.router.php';
+require APP_ROOT . '/app/Routes/FichaSolicitud.router.php';
+
 
 // DEYANIRA :
 require APP_ROOT . '/app/Routes/Usuario.router.php';

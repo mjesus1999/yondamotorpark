@@ -70,7 +70,7 @@ public function addMultiplePagos(?array $pagoCuota = null, ?array $pagoPenalidad
     }
 }
     /**
-     * Inserta un único pago en la tabla `pagos` usando el SP.
+     * Inserta un único pago en la tabla `pagos` 
      *
      * @param array $params
      * @return int
