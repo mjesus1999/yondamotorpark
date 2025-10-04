@@ -75,12 +75,7 @@
     function cargarClientesProximosVencer() {
         return new Promise((resolve, reject) => {
             fetch('/Cobranza/getClientesNotificar')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Error en la respuesta del servidor');
-                    }
-                    return response.json();
-                })
+                .then(response => response.json())
                 .then(data => {
                     if (data.success) {
                         resolve(data.data);
@@ -88,9 +83,7 @@
                         reject(new Error(data.message || 'Error al cargar clientes'));
                     }
                 })
-                .catch(error => {
-                    reject(error);
-                });
+                .catch(error => reject(error));
         });
     }
 
@@ -113,7 +106,12 @@
         let html = '';
         clientes.forEach((cliente, index) => {
             html += `
-                <tr data-row="${index + 1}">
+                <tr data-row="${index + 1}" 
+                    data-idcontrato="${cliente.idcontrato}"
+                    data-telefono="${cliente.telefono}"
+                    data-cliente="${cliente.cliente}"
+                    data-monto="${cliente.monto_cuota}"
+                    data-fecha="${cliente.fecha_vencimiento}">
                     <td>${index + 1}</td>
                     <td>${cliente.cliente}</td>
                     <td>${cliente.telefono || 'N/A'}</td>
@@ -132,6 +130,49 @@
         });
 
         tbody.innerHTML = html;
+    }
+
+    // Función para enviar SMS individual
+    async function enviarSms(row) {
+        const btnEstado = row.querySelector('.btn-estado');
+
+        const datosCliente = {
+            idcontrato: row.dataset.idcontrato,
+            telefono: row.dataset.telefono,
+            cliente: row.dataset.cliente,
+            monto_cuota: row.dataset.monto,
+            fecha_vencimiento: row.dataset.fecha
+        };
+
+        try {
+            const response = await fetch('/Cobranza/enviarSmsNotificacion', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(datosCliente)
+            });
+
+            const resultado = await response.json();
+
+            if (resultado.success) {
+                btnEstado.className = 'btn btn-sm btn-success btn-estado';
+                btnEstado.innerHTML = '<i class="fas fa-check"></i>';
+                btnEstado.title = 'Notificación enviada';
+                return true;
+            } else {
+                btnEstado.className = 'btn btn-sm btn-danger btn-estado';
+                btnEstado.innerHTML = '<i class="fas fa-times"></i>';
+                btnEstado.title = 'Error al enviar';
+                return false;
+            }
+        } catch (error) {
+            console.error('Error al enviar SMS:', error);
+            btnEstado.className = 'btn btn-sm btn-danger btn-estado';
+            btnEstado.innerHTML = '<i class="fas fa-times"></i>';
+            btnEstado.title = 'Error al enviar';
+            return false;
+        }
     }
 
     // Inicializar vista
@@ -156,40 +197,29 @@
             });
     });
 
-    // Botón Notificar Todos (mantiene tu lógica actual)
-    document.getElementById('btnNotificarTodos').addEventListener('click', function () {
+    // Botón Notificar Todos
+    document.getElementById('btnNotificarTodos').addEventListener('click', async function () {
         const btn = this;
         const rows = document.querySelectorAll('tbody tr[data-row]');
+
+        if (rows.length === 0) {
+            alert('No hay clientes para notificar');
+            return;
+        }
 
         btn.disabled = true;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Enviando...';
 
-        let delay = 0;
+        for (const row of rows) {
+            await enviarSms(row);
+            // Esperar 1 segundo entre cada envío
+            await new Promise(resolve => setTimeout(resolve, 1000));
+        }
 
-        rows.forEach((row, index) => {
-            setTimeout(() => {
-                const btnEstado = row.querySelector('.btn-estado');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-paper-plane me-1"></i>Notificar Todos';
 
-                if (index === 1) {
-                    btnEstado.className = 'btn btn-sm btn-danger btn-estado';
-                    btnEstado.innerHTML = '<i class="fas fa-times"></i>';
-                    btnEstado.title = 'Error al enviar';
-                } else {
-                    btnEstado.className = 'btn btn-sm btn-success btn-estado';
-                    btnEstado.innerHTML = '<i class="fas fa-check"></i>';
-                    btnEstado.title = 'Notificación enviada';
-                }
-
-                if (index === rows.length - 1) {
-                    setTimeout(() => {
-                        btn.disabled = false;
-                        btn.innerHTML = '<i class="fas fa-paper-plane me-1"></i>Notificar Todos';
-                    }, 500);
-                }
-            }, delay);
-
-            delay += 800;
-        });
+        alert('Proceso de notificación completado');
     });
 </script>
 

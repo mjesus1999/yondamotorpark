@@ -203,7 +203,7 @@ class CobranzaController extends Controller
         $this->view('cobranza/reports.reporte-constancia-recojo');
     }
 
-    /* public function enviarSmsNotificacion()
+    public function enviarSmsNotificacion()
     {
         $this->authRequired();
         header('Content-Type: application/json');
@@ -238,6 +238,6 @@ class CobranzaController extends Controller
             ]);
         }
 
-    } */
+    }
 
 }

@@ -13,7 +13,8 @@ $router->add('GET', '/Cobranza/getResumenFinanciero/{id}', 'CobranzaController',
 $router->add('GET', '/Cobranza/getHistorialPagos/{id}/{limite}', 'CobranzaController', 'getHistorialPagos');
 $router->add('GET', '', 'CobranzaController', '');
 
-
+//ruta de sms
+$router->add('POST', '/Cobranza/enviarSmsNotificacion', 'CobranzaController', 'enviarSmsNotificacion');
 
 //SMS
 // En tu router o CobranzaController

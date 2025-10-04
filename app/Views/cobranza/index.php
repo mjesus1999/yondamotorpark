@@ -352,14 +352,14 @@
     // Actualizar las estadísticas en el DOM
     function actualizarEstadisticas(estadisticas) {
         document.getElementById('stat-deudores').textContent = estadisticas.total_deudores || 0;
-        document.getElementById('stat-por-vencer').textContent = estadisticas.por_vencer_3dias || 3;
+        document.getElementById('stat-por-vencer').textContent = estadisticas.por_vencer_3dias || 0;
         document.getElementById('stat-vencidos').textContent = estadisticas.contratos_con_vencidos || 0;
         document.getElementById('stat-total-cobrar').textContent =
             'S/. ' + parseFloat(estadisticas.total_por_cobrar || 0).toFixed(2);
 
         // Actualizar badges
         document.getElementById('badge-todos').textContent = estadisticas.total_deudores || 0;
-        document.getElementById('badge-por-vencer').textContent = estadisticas.por_vencer_3dias || 3;
+        document.getElementById('badge-por-vencer').textContent = estadisticas.por_vencer_3dias || 0;
         document.getElementById('badge-vencidos').textContent = estadisticas.contratos_con_vencidos || 0;
     }
 
