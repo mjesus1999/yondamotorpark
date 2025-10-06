@@ -1,8 +1,37 @@
 <?php include __DIR__ . '/../layout/header.php'; ?>
-<?php
-// var_dump($estadoActual) ;
-// var_dump($puede_ver_todas);
-?>
+<link href="https://unpkg.com/tabulator-tables@5.5.2/dist/css/tabulator_simple.min.css" rel="stylesheet">
+<style>
+    [data-bs-theme="dark"] .tabulator .tabulator-header,
+    [data-bs-theme="dark"] .tabulator .tabulator-col {
+        /* Fondo del header y las columnas */
+        background-color: #343a40 !important;
+        color: #f8f9fa !important;
+        border-color: #495057 !important;
+    }
+
+    /* El Contenido de la Columna (Título del Header) */
+    [data-bs-theme="dark"] .tabulator .tabulator-header .tabulator-col-content {
+        color: #f8f9fa !important;
+    }
+
+    /* Filas y Paginación */
+
+    [data-bs-theme="dark"] .tabulator-row {
+        background-color: #212529 !important;
+        border-color: #495057 !important;
+        color: #f8f9fa !important;
+    }
+
+    [data-bs-theme="dark"] .tabulator-row:nth-child(even) {
+        background-color: #2a2f33 !important;
+        /* Fondo rayado alterno  */
+    }
+
+    [data-bs-theme="dark"] .tabulator-footer {
+        background-color: #343a40 !important;
+        color: #f8f9fa !important;
+    }
+</style>
 <div class="container-fluid">
 
     <?php if (!empty($_SESSION['success_message'])): ?>
@@ -48,158 +77,64 @@
 
                 <div class="card-header">
                     <?php
-
                     $estadoActual = $estadoActual ?? 'P';
+                    // Asume que $cotizaciones y $puede_ver_todas ya están definidos
                     ?>
                     <div class="d-flex justify-content-between align-items-center flex-wrap">
                         <div class="btn-group m-1 mb-2" id="botones-filtro">
-
                             <a href="/cotizacion/P"
                                 class="btn btn-sm <?= strtoupper($estadoActual) === 'P' ? 'btn-warning' : 'btn-outline-warning' ?>">
                                 <i class="bi bi-clock"></i> Pendientes
                             </a>
-
+                             <a href="/cotizacion/O"
+                                class="btn btn-sm <?= strtoupper($estadoActual) === 'O' ? 'btn-info' : 'btn-outline-info' ?>">
+                               <i class="bi bi-eye"></i> Observadas
+                            </a>
                             <a href="/cotizacion/A"
                                 class="btn btn-sm <?= strtoupper($estadoActual) === 'A' ? 'btn-success' : 'btn-outline-success' ?>">
                                 <i class="bi bi-check-circle"></i> Aprobadas
                             </a>
-
+                            <a href="/cotizacion/R"
+                                class="btn btn-sm <?= strtoupper($estadoActual) === 'R' ? 'btn-danger' : 'btn-outline-danger' ?>">
+                                <i class="bi bi-x-octagon"></i></i> Rechazadas
+                            </a>
                         </div>
                     </div>
                 </div>
                 <div class="card-body">
                     <?php if (count($cotizaciones) > 0): ?>
-                        <table class="table table-sm table-hover table-hover-yonda" id="tabla-cotizacion">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Cliente</th>
-                                    <th>Vehículo</th>
-                                    <th>Modalidad</th>
-                                    <th>Inicial</th>
-                                    <th class="text-start">N° de Doc</th>
-                                    <th class="text-start">Teléfono</th>
-                                    <?php if ($puede_ver_todas): ?>
-                                        <th>Registrado por</th>
-                                    <?php endif; ?>
-                                    <th class="text-end">Opciones</th>
-                                </tr>
-                            </thead>
 
-                            <tbody>
-                                <?php foreach ($cotizaciones as $index => $c): ?>
-                                    <tr>
-                                        <td><?= $index + 1 ?></td>
-                                        <td><?= htmlspecialchars($c['nombrecliente']) ?></td>
+                        <div class="mb-3">
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-search"></i>
+                                </span>
+                                <input
 
-                                        <td>
-                                            <?php
-                                            $vehiculo = $c['vehiculo'] ?? ($c['marcaVehiculo'] ?? '') . '/' . ($c['modeloVehiculo'] ?? '') . '/' . ($c['anio'] ?? '');
-                                            echo htmlspecialchars($vehiculo);
-                                            ?>
-                                        </td>
+                                    type="text"
+                                    id="busqueda-global"
+                                    class="form-control"
+                                    placeholder="Buscar ....">
+                            </div>
+                        </div>
 
-                                        <td><?= htmlspecialchars($c['tipocotizacion'] ?? '') ?></td>
+                        <div id="tabla-cotizacion" class="table-responsive"></div>
 
-                                        <td>
-                                            <?php
-                                            if (isset($c['inicial']) && $c['inicial'] !== '') {
-                                                $mon = $c['moneda'] ?? 'PEN';
-                                                $symbol = ($mon === 'USD') ? '$' : 'S/';
-                                                $formatted = number_format((float) $c['inicial'], 2, '.', ',');
-                                                echo htmlspecialchars($symbol . ' ' . $formatted);
-                                            } else {
-                                                echo '';
-                                            }
-                                            ?>
-                                        </td>
+                        <!-- <script>
+                            window.APP_DATA_TABLE = <?php echo json_encode($cotizaciones); ?>;
 
-                                        <td class="text-start"><?= htmlspecialchars($c['documento']) ?></td>
-                                        <td class="text-start"><?= htmlspecialchars($c['telefono']) ?></td>
+                            window.APP_CONFIG = {
+                                puedeVerTodas: <?php echo $puede_ver_todas ? 'true' : 'false'; ?>,
+                                estadoActual: '<?php echo $estadoActual; ?>'
+                            };
+                        </script> -->
 
-                                        <?php if ($puede_ver_todas): ?>
-                                            <td>
-                                                <div class="d-flex flex-column">
-                                                    <small class="fw-bold text-primary">
-                                                        <?= htmlspecialchars($c['asesor_nombre'] ?? 'Sin asignar') ?>
-                                                    </small>
-                                                    <small class="text-muted">
-                                                        <?= htmlspecialchars($c['asesor_cargo'] ?? '') ?>
-                                                    </small>
-                                                    <?php if (!empty($c['asesor_usuario'])): ?>
-                                                    <?php endif; ?>
-                                                </div>
-                                            </td>
-                                        <?php endif; ?>
-
-                                        <td class="text-end">
-                                            <a href="/cotizacion/reporte/<?= $c['idcotizacion'] ?>" class="p-1 btn-download-pdf"
-                                                data-id="<?= $c['idcotizacion'] ?>"
-                                                data-cliente="<?= htmlspecialchars($c['nombrecliente']) ?>"
-                                                title="PDF Cotización">
-                                                <i class="bi bi-filetype-pdf text-danger fs-5"></i>
-                                            </a>
-
-                                            <?php
-                                            if ($estadoActual == 'P'):
-                                            ?>
-
-                                            
-                                                <a href="/fichasolicitud/<?= htmlspecialchars($c['idcotizacion'])?>"><i class="bi bi-file-earmark-plus fs-5 text-warning fw-bold" title="Adjuntar Ficha"></i></a>
-                                                <!-- <a
-                                                    title="Aprobar Cotización"
-                                                    data-id="<?= $c['idcotizacion'] ?>"
-                                                    data-nombre-cliente="<?= htmlspecialchars($c['nombrecliente']) ?>"
-                                                    data-inicial="<?= htmlspecialchars(number_format((float) $c['inicial'], 2, '.', ',')); ?>"
-                                                    data-vehiculo="<?= htmlspecialchars($c['vehiculo']) ?>"
-                                                    data-marca="<?= htmlspecialchars($c['marcaVehiculo']) ?>"
-                                                    data-modelo="<?= htmlspecialchars($c['modeloVehiculo']) ?>"
-                                                    data_anio="<?= htmlspecialchars($c['anio']) ?>"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#aprobarModal">
-                                                    <i class="bi bi-check2-circle text-primary fs-5"></i>
-                                                </a> -->
-
-                                                <?php
-
-                                                ?>
-
-                                            <?php endif; ?>
-
-
-                                            <?php if ($c['estadocotizacion'] == 'A'): ?>
-                                                <a
-                                                    class="text-info fw-bold btnCrearContrato"
-                                                    title="Crear Contrato"
-                                                    data-id="<?= $c['idcotizacion'] ?>"
-                                                    data-cliente="<?= htmlspecialchars($c['nombrecliente']) ?>"
-                                                    data-numcuotas="<?= $c['numcuotas'] ?>"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#contratoModal">
-                                                    <i class="bi bi-file-earmark-text fs-5"></i>
-                                                </a>
-                                            <?php endif; ?>
-
-
-
-
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
                     <?php else: ?>
                         <div class="text-center py-5">
                             <i class="bi bi-file-earmark-text display-1 text-muted"></i>
                             <h4 class="text-muted mt-3">
                                 No hay cotizaciones
-                                <?php
-                                if (isset($estadoActual) && strtoupper($estadoActual) === 'A') {
-                                    echo 'Aprobadas';
-                                } else {
-                                    echo 'Pendientes/Activas';
-                                }
-                                ?>
+                                <?php echo (strtoupper($estadoActual) === 'A') ? 'Aprobadas' : 'Pendientes/Activas'; ?>
                             </h4>
                             <p class="text-muted">No se encontraron cotizaciones con el estado seleccionado. Las cotizaciones vencidas se
                                 pueden ver en el historial.</p>
@@ -335,6 +270,11 @@
     </div>
 </div>
 
+<script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.5.2/dist/js/tabulator.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+<script src="/assets/js/cotizacionPDF.js"></script>
+
 <script>
     document.addEventListener('DOMContentLoaded', async () => {
 
@@ -345,6 +285,304 @@
         const confirmarAprobarBtn = document.getElementById('confirmarAprobarBtn');
 
         const selectLocal = document.getElementById('idlocal');
+
+        window.APP_DATA_TABLE = <?php echo json_encode($cotizaciones); ?>;
+
+        window.APP_CONFIG = {
+            puedeVerTodas: <?php echo $puede_ver_todas ? 'true' : 'false'; ?>,
+            estadoActual: '<?php echo $estadoActual; ?>'
+        };
+
+        // const tabla = new Tabulator("#tabla-cotizacion", {
+
+        //     // Carga la data de la tabla HTML (tbody)
+        //     data: true,
+        //     // Carga la configuración de columnas desde el thead
+        //     htmlColumns: true,
+
+        //     theme: "simple",
+        //     pagination: "local",
+        //     responsiveLayout: "collapse", // hace que colapse columnas en móvil
+        //     paginationSize: 4,
+        //     paginationSizeSelector: [10, 25, 50, 100, true],
+        //     layout: "fitColumns",
+        //     movableRows: true,
+        //     columns: [
+        //         // 1. #
+        //         {
+        //             title: "#",
+        //             field: "rownum",
+        //             formatter: "rownum",
+        //                responsive: 1
+
+        //         },
+        //         // 2. Cliente
+        //         {
+        //             title: "Cliente",
+        //             field: "nombrecliente",
+        //             widthGrow:2,
+        //             responsive: 2
+
+
+        //         },
+        //         // 3. Vehículo
+        //         {
+        //             title: "Vehículo",
+        //             field: "vehiculo",
+        //               widthGrow:2,
+        //         },
+        //         // 4. Modalidad
+        //         {
+        //             title: "Modalidad",
+        //             field: "tipocotizacion",
+        //               widthGrow:2,
+        //         },
+        //         {
+        //             title: "Inicial",
+        //             field: "inicial"
+        //         },
+        //         // 6. N° de Doc
+        //         {
+        //             title: "N° de Doc",
+        //             field: "documento"
+        //         },
+        //         // 7. Teléfono
+        //         {
+        //             title: "Teléfono",
+        //             field: "telefono"
+        //         },
+        //         {
+        //             title: "Registrado por",
+        //             field: "asesor_info",
+        //               widthGrow:2,
+        //             formatter: "html",
+        //             visible: <?php echo isset($puede_ver_todas) && $puede_ver_todas ? 'true' : 'false'; ?>
+        //         },
+
+
+        //         {
+        //             title: "Opciones",
+        //             field: "acciones",
+        //             formatter: "html",
+        //             headerSort: false,
+        //             hozAlign: "left"
+        //         },
+        //     ],
+        //     langs: {
+        //         "es-es": {
+        //             "pagination": {
+        //                 "page_size": "Registros por página",
+        //                 "first": "Primero",
+        //                 "last": "Último",
+        //                 "prev": "Anterior",
+        //                 "next": "Siguiente",
+        //                 "counter": {
+        //                     "showing": "Mostrando",
+        //                     "of": "de",
+        //                     "rows": "registros"
+        //                 }
+        //             }
+        //         }
+        //     },
+
+
+        //     locale: "es-es"
+        // });
+
+        // window.tablaCotizaciones = tabla;
+
+
+
+        const container = document.getElementById("tabla-cotizacion");
+        if (!container) return;
+
+        const cotizaciones = window.APP_DATA_TABLE || [];
+        const config = window.APP_CONFIG || {};
+
+        if (cotizaciones.length > 0) {
+            const tabla = new Tabulator("#tabla-cotizacion", {
+                data: cotizaciones,
+                theme: "simple",
+                layout: "fitDataStrech",
+                layout: "fitColumns",
+                responsiveLayout: "collapse", //hace que colapse columnas en móvil
+                pagination: true,
+                paginationSize: 5,
+                paginationCounter: "rows",
+
+                columns: [{
+                        title: "#",
+                        formatter: "rownum",
+                        headerSort: false,
+                        hozAlign: "center",
+                        width: 30,
+                        responsive: 1
+                    },
+                    {
+                        title: "Cliente",
+                        field: "nombrecliente",
+                        hozAlign: "left",
+                        widthGrow: 2,
+                        responsive: 2 // OCULTAR DESPUES _> '0' ES NO MOSTRARA
+                    },
+                    {
+                        title: "Vehículo",
+                        field: "vehiculo",
+                        hozAlign: "left",
+
+
+                        responsive: 1
+                    },
+                    {
+                        title: "Inicial",
+                        field: "inicial",
+                        hozAlign: "right",
+                        formatter: "money",
+                        formatterParams: {
+                            decimal: ".",
+                            thousand: ",",
+                            symbol: "S/ ",
+                            precision: 2
+                        },
+                        minWidth: 50,
+                        responsive: 1
+                    },
+                    {
+                        title: "Documento",
+                        field: "documento",
+                        hozAlign: "center",
+                        minWidth: 120,
+                        responsive: 0
+                    },
+                    {
+                        title: "Asesor",
+                        field: "asesor_nombre",
+                        hozAlign: "left",
+                        minWidth: 150,
+                        responsive: 0
+                    },
+                    {
+                        title: "Acciones",
+                        field: "idcotizacion",
+                        headerSort: false,
+                        minWidth: 120,
+                        responsive: 0,
+                        formatter: function(cell) {
+                            const row = cell.getRow().getData();
+                            const id = row.idcotizacion;
+                            const nombrecliente = row.nombrecliente;
+                            const numcuotas = row.numcuotas;
+
+                            let html = `
+                        <button type="button" class="btn btn-sm btn-download-pdf" data-id="${id}" 
+                            data-cliente="${nombrecliente}" title="PDF Cotización">
+                            <i class="bi bi-filetype-pdf text-danger fs-5"></i>
+                        </button>`;
+
+                            if (config.estadoActual === "P") {
+                                html += `<a href="/fichasolicitud/${id}" class="" title="Adjuntar Ficha">
+                                    <i class="bi bi-file-earmark-plus fs-5 text-warning fw-bold"></i>
+                                 </a>`;
+                            }
+                            if (config.estadoActual === "A") {
+                                html += `<a class="text-info fw-bold btnCrearContrato" title="Crear Contrato"
+                                    data-id="${id}" 
+                                    data-cliente="${nombrecliente}" 
+                                    data-numcuotas="${numcuotas}"
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#contratoModal">
+                                    <i class="bi bi-file-earmark-text fs-5"></i>
+                                 </a>`;
+                            }
+                            return html;
+                        }
+                    }
+                ],
+
+                langs: {
+                    "es-es": {
+                        "pagination": {
+                            "page_size": "Registros por página",
+                            "first": "Primero",
+                            "last": "Último",
+                            "prev": "Anterior",
+                            "next": "Siguiente",
+                            "counter": {
+                                "showing": "Mostrando",
+                                "of": "de",
+                                "rows": "registros"
+                            }
+                        }
+                    }
+                },
+                locale: "es-es"
+            });
+
+            const searchInput = document.getElementById("busqueda-global");
+            if (searchInput) {
+                searchInput.addEventListener("keyup", function(e) {
+                    const value = e.target.value;
+                    if (value === "") {
+                        tabla.clearFilter();
+                    } else {
+                        tabla.setFilter([
+                            [{
+                                    field: "nombrecliente",
+                                    type: "like",
+                                    value: value
+                                },
+                                {
+                                    field: "vehiculo",
+                                    type: "like",
+                                    value: value
+                                },
+                                {
+                                    field: "documento",
+                                    type: "like",
+                                    value: value
+                                },
+                                {
+                                    field: "asesor_nombre",
+                                    type: "like",
+                                    value: value
+                                }
+                            ]
+                        ]);
+                    }
+                });
+            }
+
+
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -418,6 +656,7 @@
 
 
 
+
         const aprobarModal = new bootstrap.Modal(aprobarModalElement);
 
         aprobarModalElement.addEventListener('show.bs.modal', function(event) {
@@ -466,160 +705,7 @@
 
 
 
-
-
-
-
-
-
-
-
-        // Inicializar DataTable
-        initDataTableCotizacion();
-
-        // Modal functionality
-        const downloadModal = new bootstrap.Modal(document.getElementById('downloadModal'));
-        let currentUrl = '';
-        let currentClientName = '';
-
-
-        // Manejar clicks en los botones de descarga (icono PDF en la tabla)
-        document.querySelectorAll('.btn-download-pdf').forEach(button => {
-            button.addEventListener('click', function(e) {
-                e.preventDefault();
-                const cotizacionId = this.getAttribute('data-id');
-                const clienteName = this.getAttribute('data-cliente');
-
-                currentUrl = `/cotizacion/reporte/${cotizacionId}`;
-                currentClientName = clienteName;
-                document.getElementById('cliente-name').textContent = clienteName;
-
-                downloadModal.show();
-            });
-        });
-
-        // Utilidad para agregar ?preview=1 de forma robusta
-        function withPreview(url) {
-            try {
-                const u = new URL(url, window.location.origin);
-                u.searchParams.set('preview', '1');
-                return u.toString();
-            } catch (e) {
-                return url + (url.includes('?') ? '&' : '?') + 'preview=1';
-            }
-        }
-
-        // Confirmar (abrir vista previa del PDF)
-        document.getElementById('confirmDownload').addEventListener('click', function() {
-            const openInNewTab = document.getElementById('openInNewTab').checked;
-            const target = withPreview(currentUrl);
-
-            if (openInNewTab) {
-                window.open(target, '_blank', 'noopener,noreferrer');
-            } else {
-                window.location.href = target;
-            }
-
-            downloadModal.hide();
-        });
     });
-
-    function initDataTableCotizacion() {
-        if (typeof $ === 'undefined' || typeof $.fn.DataTable === 'undefined') {
-            console.warn('jQuery or DataTables not loaded yet');
-            return;
-        }
-
-        const table = document.getElementById('tabla-cotizacion');
-        if (!table) {
-            console.warn('Table tabla-cotizacion not found');
-            return;
-        }
-
-        try {
-            if ($.fn.DataTable.isDataTable('#tabla-cotizacion')) {
-                $('#tabla-cotizacion').DataTable().clear().destroy();
-            }
-
-            setTimeout(() => {
-                const tableElement = document.getElementById('tabla-cotizacion');
-                if (tableElement && tableElement.parentNode) {
-                    $('#tabla-cotizacion').DataTable({
-                        order: [
-                            [0, 'desc']
-                        ], // Ordenar por # descendente
-                        pagingType: 'full_numbers',
-                        pageLength: 10,
-                        lengthMenu: [
-                            [5, 10, 25, 50, -1],
-                            [5, 10, 25, 50, "Todos"]
-                        ],
-                        /* scrollX: true, */
-                        destroy: true,
-                        responsive: true,
-                        language: {
-                            url: "https://cdn.datatables.net/plug-ins/2.0.7/i18n/es-ES.json",
-                            paginate: {
-                                first: '«',
-                                previous: '‹',
-                                next: '›',
-                                last: '»'
-                            }
-                        },
-                        columnDefs: [{
-                                targets: -1, // Última columna (Opciones)
-                                orderable: false, // No permitir ordenamiento
-                                searchable: false // No incluir en búsqueda
-                            },
-                            {
-                                targets: 0, // # 
-                                width: "3%"
-                            },
-                            {
-                                targets: 1, // Cliente
-                                width: "20%"
-                            },
-                            {
-                                targets: 2, // Vehículo
-                                width: "18%"
-                            },
-                            {
-                                targets: 3, // Modalidad
-                                width: "12%"
-                            },
-                            {
-                                targets: 4, // Inicial
-                                width: "10%"
-                            },
-                            {
-                                targets: 5, // N° Doc
-                                width: "8%"
-                            },
-                            {
-                                targets: 6, // Teléfono
-                                width: "8%"
-                            }
-                            <?php if ($puede_ver_todas): ?>, {
-                                    targets: 7, // Registrado por
-                                    width: "15%"
-                                },
-                                {
-                                    targets: 8, // Opciones
-                                    width: "5%"
-                                }
-                            <?php else: ?>, {
-                                    targets: 7, // Opciones
-                                    width: "5%"
-                                }
-                            <?php endif; ?>
-                        ]
-                    });
-                }
-            }, 100);
-        } catch (error) {
-            console.error('Error initializing cotizacion table:', error);
-        }
-    }
 </script>
 
 <?php include __DIR__ . '/../layout/footer.php'; ?>

@@ -1,71 +1,27 @@
 
 USE MOTORPARK;
 
+SELECT * FROM fichasolicitud;
+SELECT * FROM cotizaciones WHERE estadocotizacion = 'O';
+UPDATE cotizaciones SET estadocotizacion = 'A' WHERE idcotizacion =25;
 
 SELECT * FROM cotizaciones;
-SELECT * FROM contratos;
-
-SHOW COLUMNS FROM  cotizaciones;
-SELECT * FROM cotizaciones LIMIT 1;
-SELECT * FROM contratos;
-SELECT * FROM cronogramas LIMIT 5;
-
-UPDATE cotizaciones SET estadocotizacion = 'CONT';
-
-SELECT * FROM cronogramas;
-DELETE FROM cotizaciones;
-DELETE FROM contratos;
-DELETE FROM cronogramas;
-
-SELECT * FROM personas;
-DELETE FROM pagos;
+CREATE TABLE conceptospago(
+idconcepto    INT PRIMARY KEY AUTO_INCREMENT,
+idcolregistra INT NOT NULL,
+idcolactualiza  INT NULL,
+concepto     VARCHAR(150) NOT NULL,
+descripcion   TEXT NULL,
+montosugerido DECIMAL(10,2)  NULL,
+)ENGINE=INNODB;
 
 
+CREATE TABLE pagosvarios(
+idpagovario   INT PRIMARY KEY AUTO_INCREMENT,
+idcotizacion  INT NOT NULL,
+idconcepto    INT NOT NULL,
+idcuentapago  INT NOT NULL,
+montofinal    DECIMAL(10,2) NOT NULL,
+fechapago     DATE NOT NULL,
+)ENGINE=INNODB;
 
-SELECT idcotizacion, precioventa, inicial, numcuotas, valorcuota, moneda 
-              FROM cotizaciones
-              WHERE idcotizacion = 16;
-
-
-
-              SELECT 
-              idcotizacion,
-              tipocotizacion,
-              CONCAT(vehiculo, ' / ', color) AS vehiculo,
-              precioventa,
-              moneda,
-              inicial,
-              nombrecliente,
-              documento,
-              telefono,
-              direccion,
-              numcuotas,
-              estadocotizacion
-            FROM vwGetAllCotizacion
-            WHERE idcotizacion = :idcotizacion LIMIT 1;
-              
-
-SELECT * FROM personas;
-
-
-
-
-
-SELECT
-                nombres,
-                apellidos,
-                nrodoc AS dni,
-                telprimario,
-                genero,
-                CASE estadocivil
-                    WHEN 'SOL' THEN 'Soltero(a)'
-                    WHEN 'CAS' THEN 'Casado(a)'
-                    WHEN 'VDO' THEN 'Viudo(a)'
-                    WHEN 'DVC' THEN 'Divorciado(a)'
-                    WHEN 'CNV' THEN 'Conviviente'
-                    ELSE 'No especificado'
-                END AS estadocivil
-              FROM personas 
-              WHERE tipodoc = 'DNI' AND nrodoc = :dni;
-
-SELECT * FROM pagos;

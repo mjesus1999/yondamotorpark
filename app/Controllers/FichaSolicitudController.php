@@ -139,11 +139,25 @@ class FichaSolicitudController extends Controller
             $idFicha = $this->fichaSolicitudModel->createFicha($registro);
 
             if ($idFicha > 0) {
+
                 echo json_encode([
                     'success' => true,
                     'message' => 'Ficha registrada correctamente',
                     'id' => $idFicha
                 ]);
+
+
+                switch ($registro['estado']) {
+                    case 'Aprobado':
+                        $this->fichaSolicitudModel->updateCotizacion($registro['idcotizacion'], 'A'); // Aprobada
+                        break;
+                    case 'Observado':
+                        $this->fichaSolicitudModel->updateCotizacion($registro['idcotizacion'], 'O'); // Observado
+                        break;
+                    case 'Anulado':
+                        $this->fichaSolicitudModel->updateCotizacion($registro['idcotizacion'], 'R'); // OJO: aquí R significa Rechazada
+                        break;
+                }
             } else {
                 // si falla, borro el archivo para no dejar basura
                 if (file_exists($rutaCompleta)) {

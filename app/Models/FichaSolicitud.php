@@ -57,7 +57,6 @@ class FichaSolicitud
                 CASE genero
                     WHEN 'M' THEN 'Masculino'
                     ELSE 'Femenino' 
-                    
                     END AS genero,
                
                 CASE estadocivil
@@ -134,6 +133,7 @@ class FichaSolicitud
                     :estado
               )";
 
+
         try {
             if (!isset($_SESSION['user']['id'])) {
                 throw new Exception("Usuario no autenticado en sesión");
@@ -149,7 +149,7 @@ class FichaSolicitud
                 ":idaval"         => $params["idaval"],
                 ":idavalconyuge"  => $params["idavalconyuge"],
                 ":fechavisita"    => $params["fechavisita"],
-                ":rutaficha"      => $params["rutaficha"], 
+                ":rutaficha"      => $params["rutaficha"],
                 ":comentarios"    => $params["comentarios"],
                 ":estado"         => $params["estado"],
             ]);
@@ -157,6 +157,20 @@ class FichaSolicitud
             return (int) $this->db->lastInsertId();
         } catch (Exception $e) {
             error_log("Error en createFicha: " . $e->getMessage());
+            return -1;
+        }
+    }
+    public function updateCotizacion(int $id, string $estado): int
+    {
+        $query = "UPDATE cotizaciones SET estadocotizacion = :estado WHERE idcotizacion = :id";
+        try {
+            $stmt = $this->db->prepare($query);
+            $stmt->bindValue(":id", $id, PDO::PARAM_INT);
+            $stmt->bindValue(":estado", $estado, PDO::PARAM_STR);
+            $stmt->execute();
+            return $stmt->rowCount();
+        } catch (PDOException $e) {
+            error_log("Error en updateCotizacion: " . $e->getMessage());
             return -1;
         }
     }
