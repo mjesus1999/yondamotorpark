@@ -1,3 +1,5 @@
+SELECT * FROM PERSONAS;
+
 -- Verificar si Miguel Angel ya es cliente
 SELECT c.idcliente, c.tipocliente, p.nombres, p.apellidos 
 FROM clientes c
@@ -48,7 +50,7 @@ INSERT INTO contratos (
     15,                     
     'S',                    
     0.10,                   
-    'Contrato de prueba - Miguel Angel Arias Anton',
+    'Contrato de prueba X2',
     'ACT'
 );
 
@@ -94,7 +96,7 @@ CALL sp_get_cronograma_pagos_cobranza(8);
 
 -- 1. Actualizar la fecha de inicio del contrato
 UPDATE contratos 
-SET fechainicio = '2025-08-15'
+SET fechainicio = '2025-07-15'
 WHERE idcontrato = 8;
 
 -- 2. Eliminar el cronograma actual
@@ -114,3 +116,124 @@ SELECT
 FROM cronogramas
 WHERE idcontrato = 8
 ORDER BY numcuota;
+
+DELETE FROM pagos 
+WHERE idcronograma IN (
+    SELECT idcronograma FROM cronogramas WHERE idcontrato = 9
+);
+
+-- Luego sí puedes eliminar el cronograma:
+DELETE FROM cronogramas WHERE idcontrato = 9;
+DELETE FROM pagos
+WHERE idpago IN (
+    SELECT idpago FROM (
+        SELECT p.idpago
+        FROM pagos p
+        JOIN cronogramas c ON p.idcronograma = c.idcronograma
+        WHERE c.idcontrato = 9
+    ) AS sub
+);
+
+CALL generar_cronograma(9, 4.263224089);
+
+SELECT 
+    numcuota,
+    DATE_FORMAT(fechapago, '%d/%m/%Y') AS fecha_pago,
+    ROUND(abonocapital, 2) AS capital,
+    ROUND(interes, 2) AS interes,
+    ROUND(abonocapital + interes, 2) AS cuota_total,
+    ROUND(saldocapital, 2) AS saldo,
+    estado
+FROM cronogramas
+WHERE idcontrato = 9
+ORDER BY numcuota;
+
+SELECT * FROM contratos WHERE idcontrato = 10; -- Debe retornar vacío
+SELECT * FROM cronogramas WHERE idcontrato = 10; -- También vacío
+
+
+DELETE FROM contratos
+WHERE idcontrato = 10;
+
+
+DELETE FROM cronogramas
+WHERE idcontrato = 10;
+
+
+DELETE FROM pagos
+WHERE idcronograma IN (
+    SELECT idcronograma FROM cronogramas WHERE idcontrato = 10
+);
+
+-- **********************************************************************
+SELECT 
+    idcronograma,
+    numcuota,
+    fechapago,
+    estado,
+    aplicapenalidad,
+    penalidad,
+    abonocapital + interes AS cuota_base,
+    penalidad AS penalidad_guardada
+FROM cronogramas
+WHERE idcontrato = 9
+  AND numcuota IN (1, 2);
+
+/*
+DROP PROCEDURE IF EXISTS sp_get_cronograma_pagos_cobranza;
+DELIMITER $$
+CREATE PROCEDURE sp_get_cronograma_pagos_cobranza(
+    IN p_idcontrato INT
+)
+BEGIN
+    SELECT 
+        cr.idcronograma,
+        cr.numcuota,
+        DATE_FORMAT(cr.fechapago, '%d/%m/%Y') AS fecha_pago_formateada,
+        cr.fechapago,
+        cr.abonocapital,
+        cr.interes,
+        
+        -- Penalidad SOLO si ya pasó la fecha de pago
+        CASE
+            WHEN cr.estado = 'Pagado' THEN 0
+            WHEN DATEDIFF(CURDATE(), cr.fechapago) > 0 AND cr.aplicapenalidad = 'S' THEN IFNULL(cr.penalidad, 0)
+            ELSE 0
+        END AS penalidad,
+        
+        -- Monto total de la cuota
+        (cr.abonocapital + cr.interes + 
+            CASE
+                WHEN cr.estado = 'Pagado' THEN 0
+                WHEN DATEDIFF(CURDATE(), cr.fechapago) > 0 AND cr.aplicapenalidad = 'S' THEN IFNULL(cr.penalidad, 0)
+                ELSE 0
+            END
+        ) AS monto_total_cuota,
+        
+        cr.saldocapital,
+        cr.estado,
+        cr.aplicapenalidad,
+        
+        -- Estado de vencimiento
+        CASE
+            WHEN cr.estado = 'Pagado' THEN 'PAGADO'
+            WHEN DATEDIFF(cr.fechapago, CURDATE()) < 0 THEN 'VENCIDO'
+            WHEN DATEDIFF(cr.fechapago, CURDATE()) = 0 THEN 'VENCE HOY'
+            WHEN DATEDIFF(cr.fechapago, CURDATE()) BETWEEN 1 AND 3 THEN 'POR VENCER'
+            ELSE 'VIGENTE'
+        END AS estado_vencimiento,
+        
+        -- Días de atraso o días para vencer
+        CASE 
+            WHEN cr.estado = 'Pagado' THEN 0
+            WHEN DATEDIFF(CURDATE(), cr.fechapago) > 0 THEN DATEDIFF(CURDATE(), cr.fechapago)
+            ELSE DATEDIFF(cr.fechapago, CURDATE())
+        END AS dias_diferencia
+        
+    FROM cronogramas cr
+    WHERE cr.idcontrato = p_idcontrato
+    ORDER BY cr.numcuota ASC;
+    
+END$$
+DELIMITER ;
+*/

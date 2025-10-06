@@ -1,41 +1,46 @@
 -- VISTA DE COBRANZA.INDEX
 
--- 1) ESTADÍSTICAS + RESUMEN POR CONTRATO 
-
+-- 1) ESTADÍSTICAS + RESUMEN POR CONTRATO
+ 
 DROP PROCEDURE IF EXISTS sp_get_estadisticas_cobranza;
 DELIMITER $$
 CREATE PROCEDURE sp_get_estadisticas_cobranza()
 BEGIN
     SELECT
-        -- TOTAL DE CONTRATOS
+        -- TOTAL DE CONTRATOS CON DEUDAS
         (SELECT COUNT(DISTINCT c2.idcontrato)
          FROM contratos c2
          JOIN cronogramas cr2 ON cr2.idcontrato = c2.idcontrato
-         WHERE c2.estado = 'ACT' AND cr2.estado IN ('Pendiente','Vencido')
+         WHERE c2.estado = 'ACT' 
+           AND cr2.estado IN ('Pendiente','Vencido')
         ) AS total_deudores,
         
-        -- CUOTA POR VENCER (próximos 3 días)
+        -- CUOTAS POR VENCER
         (SELECT COUNT(DISTINCT c3.idcontrato)
          FROM contratos c3
          JOIN cronogramas cr3 ON cr3.idcontrato = c3.idcontrato
          WHERE c3.estado = 'ACT'
-           AND cr3.estado IN ('Pendiente','Vencido')
+           AND cr3.estado != 'Pagado'
+           -- Cuotas que vencen en 0-3 días
            AND DATEDIFF(cr3.fechapago, CURDATE()) BETWEEN 0 AND 3
+           -- Solo la primera cuota no pagada
            AND cr3.fechapago = (
                SELECT MIN(cr_min.fechapago)
                FROM cronogramas cr_min
                WHERE cr_min.idcontrato = c3.idcontrato
-                 AND cr_min.estado IN ('Pendiente','Vencido')
+                 AND cr_min.estado != 'Pagado'
            )
         ) AS por_vencer_3dias,
         
-        -- CUOTAS VENCIDAS (filtrado por próxima cuota <= 3 días)
+        -- CUOTAS VENCIDAS
         (SELECT COUNT(DISTINCT c4.idcontrato)
          FROM contratos c4
          JOIN cronogramas cr4 ON cr4.idcontrato = c4.idcontrato
          WHERE c4.estado = 'ACT'
            AND cr4.estado = 'Vencido'
-           AND DATEDIFF(cr4.fechapago, CURDATE()) <= 3
+           -- Solo cuotas que YA pasaron su fecha
+           AND DATEDIFF(CURDATE(), cr4.fechapago) > 0
+           -- Solo la primera cuota vencida
            AND cr4.fechapago = (
                SELECT MIN(cr_min2.fechapago)
                FROM cronogramas cr_min2
@@ -44,7 +49,7 @@ BEGIN
            )
         ) AS contratos_con_vencidos,
         
-        -- TOTAL POR COBRAR
+        -- TOTAL POR COBRAR (todas las cuotas pendientes y vencidas)
         (SELECT IFNULL(SUM(cr5.abonocapital + cr5.interes + IFNULL(cr5.penalidad,0)),0)
          FROM contratos c5
          JOIN cronogramas cr5 ON cr5.idcontrato = c5.idcontrato
@@ -55,51 +60,6 @@ BEGIN
 END$$
 DELIMITER ;
 
-/*
-DROP PROCEDURE IF EXISTS sp_get_estadisticas_cobranza;
-DELIMITER $$
-CREATE PROCEDURE sp_get_estadisticas_cobranza()
-BEGIN
-    -- 1) ESTADÍSTICAS
-    SELECT
-        -- TOTAL DE CONTRATOS
-        (SELECT COUNT(DISTINCT c2.idcontrato)
-         FROM contratos c2
-         JOIN cronogramas cr2 ON cr2.idcontrato = c2.idcontrato
-         WHERE c2.estado = 'ACT' AND cr2.estado IN ('Pendiente','Vencido')
-        ) AS total_deudores,
-        -- CUOTA POR VENCER
-        (SELECT COUNT(DISTINCT c3.idcontrato)
-         FROM contratos c3
-         JOIN cronogramas cr3 ON cr3.idcontrato = c3.idcontrato
-         WHERE c3.estado = 'ACT'
-           AND cr3.estado IN ('Pendiente','Vencido')
-           AND DATEDIFF(cr3.fechapago, CURDATE()) BETWEEN 0 AND 3
-        ) AS por_vencer_3dias,
-        -- CUOTAS VENCIDAS
-        (SELECT COUNT(DISTINCT c4.idcontrato)
-         FROM contratos c4
-         JOIN cronogramas cr4 ON cr4.idcontrato = c4.idcontrato
-         WHERE c4.estado = 'ACT'
-           AND cr4.estado = 'Vencido'
-        ) AS contratos_con_vencidos,
-        -- TOTAL POR COBRAR
-        (SELECT IFNULL(SUM(cr5.abonocapital + cr5.interes + IFNULL(cr5.penalidad,0)),0)
-         FROM contratos c5
-         JOIN cronogramas cr5 ON cr5.idcontrato = c5.idcontrato
-         WHERE c5.estado = 'ACT'
-           AND cr5.estado IN ('Pendiente','Vencido')
-        ) AS total_por_cobrar;
-        -- TOTAL DE CUOTAS PAGADAS
-        (SELECT COUNT(*)
-         FROM cronogramas crp
-         JOIN contratos cpr ON crp.idcontrato = cpr.idcontrato
-         WHERE cpr.estado = 'ACT'
-           AND crp.estado = 'Pagado'
-        ) AS total_cuotas_pagadas;
-END$$
-DELIMITER ;
-*/
 
 -- 2) PROCEDIMIENTO PARA OBTENER LAS TARJETAS DE COBRANZA VENCIDAS
 
@@ -109,7 +69,7 @@ CREATE PROCEDURE sp_get_tarjetas_cobranza()
 BEGIN
     SELECT 
         c.idcontrato,
-        
+
         -- Nombre del cliente
         CASE 
             WHEN cl.tipocliente = 'P' THEN CONCAT(p.apellidos, ' ', p.nombres)
@@ -130,7 +90,6 @@ BEGIN
         
         -- Estado de vencimiento
         CASE
-			-- Primero revisa los días
 			WHEN DATEDIFF(cr.fechapago, CURDATE()) < 0 THEN 'VENCIDO'
 			WHEN DATEDIFF(cr.fechapago, CURDATE()) = 0 THEN 'VENCE HOY'
 			WHEN DATEDIFF(cr.fechapago, CURDATE()) = 1 THEN 'Vence en 1 día'
@@ -185,9 +144,10 @@ END$$
 DELIMITER ;
 
 
--- DETALLE:
+-- DETALLE DE CONTRATOS (INFORMACION MAS COMPLETA PARA EL MODAL)
 
--- 3) PROCEMIENTO PARA LA INFORMACION GENERAL DEL CONTRATO
+
+-- 3) PROCEMIENTO PARA LA INFORMACION GENERAL DEL CLIENTE CON UN CONTRATO
 
 DROP PROCEDURE IF EXISTS sp_get_info_cliente_cobranza;
 DELIMITER $$
@@ -297,6 +257,7 @@ BEGIN
 END$$
 DELIMITER ;
 
+
 -- 4) PROCEDIMIENTO PARA MOSTRAR EL DETALLE DEL CONTRATO
 
 DROP PROCEDURE IF EXISTS sp_get_detalle_contrato_cobranza;
@@ -315,7 +276,7 @@ BEGIN
         cnt.observaciones,
         
         -- Información del vehículo
-        CONCAT(ma.marca, ' ', mo.modelo, ' ', mo.anio) AS vehiculo_descripcion,
+        CONCAT(ma.marca, ' / ', mo.modelo, ' / ', mo.anio) AS vehiculo_descripcion,
         tv.tipovehiculo,
         v.version,
         v.condicion,
@@ -359,7 +320,8 @@ BEGIN
 END$$
 DELIMITER ;
 
--- 5) PROCEDIMIENTO PARA MOSTRAR CRONOGRAMA DE PAGOS
+
+-- 5) PROCEDIMIENTO PARA MOSTRAR CRONOGRAMA DE PAGOS / Muestra penalidad SOLO si la cuota ya está vencida o fue pagada con penalidad
 
 DROP PROCEDURE IF EXISTS sp_get_cronograma_pagos_cobranza;
 DELIMITER $$
@@ -374,8 +336,29 @@ BEGIN
         cr.fechapago,
         cr.abonocapital,
         cr.interes,
-        IFNULL(cr.penalidad, 0) AS penalidad,
-        (cr.abonocapital + cr.interes + IFNULL(cr.penalidad, 0)) AS monto_total_cuota,
+        
+        -- PENALIDAD Solo se muestra si:
+        -- 1) La cuota está PAGADA y tenía penalidad aplicada
+        -- 2) La cuota está VENCIDA
+        CASE
+            WHEN cr.estado = 'Pagado' AND cr.aplicapenalidad = 'S' 
+                THEN IFNULL(cr.penalidad, 0)
+            WHEN cr.estado = 'Vencido' AND DATEDIFF(CURDATE(), cr.fechapago) > 0 
+                THEN IFNULL(cr.penalidad, 0)
+            ELSE 0
+        END AS penalidad,
+        
+        -- Monto total de la cuota
+        (cr.abonocapital + cr.interes + 
+            CASE
+                WHEN cr.estado = 'Pagado' AND cr.aplicapenalidad = 'S' 
+                    THEN IFNULL(cr.penalidad, 0)
+                WHEN cr.estado = 'Vencido' AND DATEDIFF(CURDATE(), cr.fechapago) > 0 
+                    THEN IFNULL(cr.penalidad, 0)
+                ELSE 0
+            END
+        ) AS monto_total_cuota,
+        
         cr.saldocapital,
         cr.estado,
         cr.aplicapenalidad,
@@ -383,13 +366,13 @@ BEGIN
         -- Estado de vencimiento
         CASE
             WHEN cr.estado = 'Pagado' THEN 'PAGADO'
-            WHEN cr.estado = 'Vencido' OR DATEDIFF(cr.fechapago, CURDATE()) < 0 THEN 'VENCIDO'
+            WHEN DATEDIFF(cr.fechapago, CURDATE()) < 0 THEN 'VENCIDO'
             WHEN DATEDIFF(cr.fechapago, CURDATE()) = 0 THEN 'VENCE HOY'
             WHEN DATEDIFF(cr.fechapago, CURDATE()) BETWEEN 1 AND 3 THEN 'POR VENCER'
             ELSE 'VIGENTE'
         END AS estado_vencimiento,
         
-        -- Días de atraso o días para vencer
+        -- Dias de atraso o días para vencer
         CASE 
             WHEN cr.estado = 'Pagado' THEN 0
             WHEN DATEDIFF(CURDATE(), cr.fechapago) > 0 THEN DATEDIFF(CURDATE(), cr.fechapago)
@@ -403,75 +386,8 @@ BEGIN
 END$$
 DELIMITER ;
 
--- 6) PROCEDIMIENTO PARA MOSTRAR EL RESUMEN FINANCIERO
-/*
-DROP PROCEDURE IF EXISTS sp_get_resumen_financiero_cobranza;
-DELIMITER $$
-CREATE PROCEDURE sp_get_resumen_financiero_cobranza(
-    IN p_idcontrato INT
-)
-BEGIN
-    SELECT 
-        -- Total del contrato
-        (SELECT precioventa 
-         FROM cotizaciones cot 
-         JOIN contratos cnt ON cnt.idcotizacion = cot.idcotizacion
-         WHERE cnt.idcontrato = p_idcontrato
-        ) AS precio_venta_total,
-        
-        (SELECT inicial 
-         FROM cotizaciones cot 
-         JOIN contratos cnt ON cnt.idcotizacion = cot.idcotizacion
-         WHERE cnt.idcontrato = p_idcontrato
-        ) AS inicial_pagado,
-        
-        -- Total pagado (cuotas)
-        IFNULL(SUM(
-            CASE 
-                WHEN cr.estado = 'Pagado' 
-                THEN cr.abonocapital + cr.interes + IFNULL(cr.penalidad, 0)
-                ELSE 0
-            END
-        ), 0) AS total_pagado_cuotas,
-        
-        -- Total pendiente
-        IFNULL(SUM(
-            CASE 
-                WHEN cr.estado IN ('Pendiente', 'Vencido')
-                THEN cr.abonocapital + cr.interes + IFNULL(cr.penalidad, 0)
-                ELSE 0
-            END
-        ), 0) AS total_pendiente,
-        
-        -- Total vencido
-        IFNULL(SUM(
-            CASE 
-                WHEN cr.estado = 'Vencido'
-                THEN cr.abonocapital + cr.interes + IFNULL(cr.penalidad, 0)
-                ELSE 0
-            END
-        ), 0) AS total_vencido,
-        
-        -- Cuotas pagadas
-        COUNT(CASE WHEN cr.estado = 'Pagado' THEN 1 END) AS cuotas_pagadas,
-        
-        -- Cuotas pendientes
-        COUNT(CASE WHEN cr.estado IN ('Pendiente', 'Vencido') THEN 1 END) AS cuotas_pendientes,
-        
-        -- Total de cuotas
-        COUNT(*) AS total_cuotas,
-        
-        -- Penalidades acumuladas
-        IFNULL(SUM(IFNULL(cr.penalidad, 0)), 0) AS total_penalidades
-        
-    FROM cronogramas cr
-    WHERE cr.idcontrato = p_idcontrato;
-    
-END$$
-DELIMITER ;
-*/
 
--- 7) PROCEDIMIENTO PARA MOSTRAR HISTORIAL DE PAGOS
+-- 6) PROCEDIMIENTO PARA MOSTRAR HISTORIAL DE PAGOS
 
 DROP PROCEDURE IF EXISTS sp_get_historial_pagos_cobranza;
 DELIMITER $$
@@ -500,7 +416,9 @@ BEGIN
 END$$
 DELIMITER ;
 
-/*
+
+-- 7) OBTENER CUOTAS VENCIDAS
+
 DROP PROCEDURE IF EXISTS sp_get_cuotas_vencidas;
 DELIMITER $$
 CREATE PROCEDURE sp_get_cuotas_vencidas()
@@ -514,92 +432,9 @@ BEGIN
         cot.numcuotas AS cuotas_totales,
         
         -- Primera cuota VENCIDA
-        (SELECT (crn.abonocapital + crn.interes + IFNULL(crn.penalidad,0))
-         FROM cronogramas crn
-         WHERE crn.idcontrato = c.idcontrato
-           AND crn.estado = 'Vencido'
-         ORDER BY crn.fechapago
-         LIMIT 1
-        ) AS monto_primera_vencida,
-        
-        -- Deuda cuotas VENCIDAS
-        IFNULL(SUM(cron.abonocapital + cron.interes + IFNULL(cron.penalidad,0)), 0) AS deuda_vencida,
-        
-        -- Cantidad numérica de cuotas vencidas
-        SUM(cron.estado = 'Vencido') AS cuotas_vencidas,
-        
-        -- Cuotas pagadas del contrato
-        (SELECT COUNT(*)
-         FROM cronogramas crp
-         WHERE crp.idcontrato = c.idcontrato
-           AND crp.estado = 'Pagado'
-        ) AS cuotas_pagadas,
-        
-        -- Estado legible: "X vencidas de Y" donde Y = total - pagadas
-        CONCAT(
-            SUM(cron.estado = 'Vencido'),
-            ' vencidas de ',
-            GREATEST(
-                cot.numcuotas - (
-                    SELECT COUNT(*)
-                    FROM cronogramas crp2
-                    WHERE crp2.idcontrato = c.idcontrato
-                      AND crp2.estado = 'Pagado'
-                ),
-                0
-            )
-        ) AS estado_pagos,
-        
-        -- Fecha de la cuota vencida más antigua
-        MIN(cron.fechapago) AS fecha_vencida_mas_antigua
-        
-    FROM contratos c
-    JOIN cotizaciones cot ON c.idcotizacion = cot.idcotizacion
-    JOIN clientes cli ON cot.idcliente = cli.idcliente
-    JOIN personas p ON cli.idpersona = p.idpersona
-    JOIN cronogramas cron ON cron.idcontrato = c.idcontrato
-    JOIN vehiculos v ON cot.idvehiculo = v.idvehiculo
-    JOIN modelos mo ON v.idmodelo = mo.idmodelo
-    JOIN marcas m ON mo.idmarca = m.idmarca
-    LEFT JOIN locales loc ON c.idlocal = loc.idlocal
-    LEFT JOIN distritos d ON loc.iddistrito = d.iddistrito
-    LEFT JOIN provincias pro ON d.idprovincia = pro.idprovincia
-    WHERE c.estado = 'ACT'
-      AND cron.estado = 'Vencido'
-    GROUP BY c.idcontrato
-    ORDER BY deuda_vencida DESC;
-    
-END$$
-DELIMITER ;
-*/
-
--- CALL sp_get_estadisticas_cobranza();
--- CALL sp_get_tarjetas_cobranza();
--- CALL sp_get_info_cliente_cobranza(8);
--- CALL sp_get_detalle_contrato_cobranza(8);
--- CALL sp_get_cronograma_pagos_cobranza(8);
--- CALL sp_get_historial_pagos_cobranza(8, 5);
--- CALL sp_get_cuotas_vencidas();
-
--- CALL sp_get_resumen_financiero_cobranza(1);
-
-
-DROP PROCEDURE IF EXISTS sp_get_cuotas_vencidas;
-DELIMITER $$
-CREATE PROCEDURE sp_get_cuotas_vencidas()
-BEGIN
-    SELECT
-        c.idcontrato,
-        CONCAT(p.apellidos, ' ', p.nombres) AS cliente,
-        p.telprimario AS telefono,
-        CONCAT(m.marca, ' ', mo.modelo) AS vehiculo,
-        CONCAT(COALESCE(d.distrito,'Sin distrito')) AS tienda,
-        cot.numcuotas AS cuotas_totales,
-        
-        -- Primera cuota VENCIDA (la próxima a pagar)
         (cron.abonocapital + cron.interes + IFNULL(cron.penalidad,0)) AS monto_primera_vencida,
         
-        -- Deuda TOTAL de cuotas vencidas y pendientes
+        -- Deuda TOTAL de cuotas vencidas
         (SELECT IFNULL(SUM(cr_total.abonocapital + cr_total.interes + IFNULL(cr_total.penalidad,0)), 0)
          FROM cronogramas cr_total
          WHERE cr_total.idcontrato = c.idcontrato
@@ -636,7 +471,10 @@ BEGIN
         ) AS estado_pagos,
         
         -- Fecha de la cuota vencida más antigua
-        cron.fechapago AS fecha_vencida_mas_antigua
+        cron.fechapago AS fecha_vencida_mas_antigua,
+        
+        -- Días de atraso
+        DATEDIFF(CURDATE(), cron.fechapago) AS dias_atraso
         
     FROM contratos c
     JOIN cotizaciones cot ON c.idcotizacion = cot.idcotizacion
@@ -648,19 +486,122 @@ BEGIN
     LEFT JOIN locales loc ON c.idlocal = loc.idlocal
     LEFT JOIN distritos d ON loc.iddistrito = d.iddistrito
     LEFT JOIN provincias pro ON d.idprovincia = pro.idprovincia
-    -- JOIN con la próxima cuota a pagar
     JOIN cronogramas cron ON cron.idcontrato = c.idcontrato
     
     WHERE c.estado = 'ACT'
       AND cron.estado = 'Vencido'
-      AND DATEDIFF(cron.fechapago, CURDATE()) <= 3  -- ← Filtro de 3 días
-      AND cron.fechapago = (  -- ← Solo la próxima cuota vencida
+      -- Solo cuotas que YA vencieron
+      AND DATEDIFF(CURDATE(), cron.fechapago) > 0
+      -- Solo la primera cuota vencida de cada contrato
+      AND cron.fechapago = (
           SELECT MIN(cr_min.fechapago)
           FROM cronogramas cr_min
           WHERE cr_min.idcontrato = c.idcontrato
             AND cr_min.estado IN ('Pendiente', 'Vencido')
       )
-    ORDER BY deuda_vencida DESC;
+    ORDER BY dias_atraso DESC, deuda_vencida DESC;
     
 END$$
 DELIMITER ;
+
+
+-- 8) PROCEDIMIENTO PARA OBTENER CUOTAS PRÓXIMAS A VENCER (3 DÍAS ANTES)
+
+DROP PROCEDURE IF EXISTS sp_get_cuotas_proximas_vencer;
+DELIMITER $$
+CREATE PROCEDURE sp_get_cuotas_proximas_vencer()
+BEGIN
+    SELECT
+        c.idcontrato,
+        
+        -- Información del cliente
+        CASE 
+            WHEN cli.tipocliente = 'P' THEN CONCAT(p.apellidos, ' ', p.nombres)
+            WHEN cli.tipocliente = 'E' THEN e.razonsocial
+        END AS cliente,
+        
+        -- Teléfono
+        CASE 
+            WHEN cli.tipocliente = 'P' THEN p.telprimario
+            WHEN cli.tipocliente = 'E' THEN e.telprimario
+        END AS telefono,
+        
+        -- Local
+        CONCAT(d.distrito, ' / ', pro.provincia) AS local,
+        
+        -- Información del vehículo
+        CONCAT(m.marca, ' / ', mo.modelo) AS vehiculo,
+        
+        -- Estado de vencimiento descriptivo
+        CASE
+            WHEN DATEDIFF(cron.fechapago, CURDATE()) = 0 THEN 'VENCE HOY'
+            WHEN DATEDIFF(cron.fechapago, CURDATE()) = 1 THEN 'Vence mañana'
+            WHEN DATEDIFF(cron.fechapago, CURDATE()) = 2 THEN 'Vence en 2 días'
+            WHEN DATEDIFF(cron.fechapago, CURDATE()) = 3 THEN 'Vence en 3 días'
+            ELSE 'Próximo a vencer'
+        END AS estado_vencimiento,
+        
+        -- Fecha de vencimiento formateada
+        DATE_FORMAT(cron.fechapago, '%d/%m/%Y') AS fecha_vencimiento,
+        
+        -- Número de cuota
+        cron.numcuota,
+        
+        -- Monto de la cuota (sin penalidad porque aún no vencio)
+        (cron.abonocapital + cron.interes) AS monto_cuota,
+        
+        -- Total de cuotas del contrato
+        cot.numcuotas AS cuotas_totales,
+        
+        -- Cuotas pagadas
+        (SELECT COUNT(*)
+         FROM cronogramas crp
+         WHERE crp.idcontrato = c.idcontrato
+           AND crp.estado = 'Pagado'
+        ) AS cuotas_pagadas,
+        
+        -- Días para vencer (0, 1, 2 o 3)
+        DATEDIFF(cron.fechapago, CURDATE()) AS dias_para_vencer
+        
+    FROM contratos c
+    JOIN cotizaciones cot ON c.idcotizacion = cot.idcotizacion
+    JOIN clientes cli ON cot.idcliente = cli.idcliente
+    LEFT JOIN personas p ON cli.idpersona = p.idpersona
+    LEFT JOIN empresas e ON cli.idempresa = e.idempresa
+    JOIN vehiculos v ON cot.idvehiculo = v.idvehiculo
+    JOIN modelos mo ON v.idmodelo = mo.idmodelo
+    JOIN marcas m ON mo.idmarca = m.idmarca
+    JOIN locales loc ON c.idlocal = loc.idlocal
+    JOIN distritos d ON loc.iddistrito = d.iddistrito
+    JOIN provincias pro ON d.idprovincia = pro.idprovincia
+    JOIN cronogramas cron ON cron.idcontrato = c.idcontrato
+    
+    WHERE c.estado = 'ACT'
+      AND cron.estado != 'Pagado'
+      AND DATEDIFF(cron.fechapago, CURDATE()) BETWEEN 0 AND 3
+      AND cron.fechapago = (
+          SELECT MIN(cr_min.fechapago)
+          FROM cronogramas cr_min
+          WHERE cr_min.idcontrato = c.idcontrato
+            AND cr_min.estado != 'Pagado'
+      )
+    ORDER BY 
+        dias_para_vencer ASC,
+        cron.fechapago ASC;
+    
+END$$
+DELIMITER ;
+
+
+-- LLAMADAS DE SP
+
+-- CALL sp_get_estadisticas_cobranza();
+-- CALL sp_get_tarjetas_cobranza();
+-- CALL sp_get_info_cliente_cobranza(9);
+-- CALL sp_get_detalle_contrato_cobranza(9);
+-- CALL sp_get_cronograma_pagos_cobranza(9);
+
+-- CALL sp_get_historial_pagos_cobranza(9, 5);
+
+-- CALL sp_get_cuotas_vencidas();
+-- CALL sp_get_cuotas_proximas_vencer();

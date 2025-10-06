@@ -117,7 +117,7 @@ class CobranzaController extends Controller
     }
 
     /* OBTENER RESUMEN FINANCIERO */
-    public function getResumenFinanciero($idContrato): void
+    /* public function getResumenFinanciero($idContrato): void
     {
         $this->authRequired();
         header('Content-Type: application/json');
@@ -131,7 +131,7 @@ class CobranzaController extends Controller
                 'message' => 'Error al obtener resumen financiero'
             ]);
         }
-    }
+    } */
 
     /* OBTENER HISTORIAL DE PAGOS */
     public function getHistorialPagos($idContrato, $limite = 5): void
@@ -150,13 +150,30 @@ class CobranzaController extends Controller
         }
     }
 
+    public function getClientesNotificar(): void
+    {
+        $this->authRequired();
+        header('Content-Type: application/json');
+
+        try {
+            $clientes = $this->cobranzaModel->getClientesNotificar();
+            echo json_encode([
+                'success' => true,
+                'data' => $clientes
+            ]);
+        } catch (\Exception $e) {
+            http_response_code(500);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Error al obtener clientes: ' . $e->getMessage()
+            ]);
+        }
+    }
+
     public function indexNotificar()
     {
         $this->authRequired();
-        /* $datos = $this->cobranzaModel->getClientesNotificar(); */
-        $this->view(
-            'cobranza.indexNotificar'/* , ['cobranza' => $datos] */
-        );
+        $this->view('cobranza.indexNotificar');
     }
 
     public function indexVencidos()
@@ -184,6 +201,43 @@ class CobranzaController extends Controller
     {
         $this->authRequired();
         $this->view('cobranza/reports.reporte-constancia-recojo');
+    }
+
+    public function enviarSmsNotificacion()
+    {
+        $this->authRequired();
+        header('Content-Type: application/json');
+
+        try {
+            $data = json_decode(file_get_contents('php://input'), true);
+
+            $idContrato = $data['idcontrato'] ?? null;
+            $telefono = $data['telefono'] ?? null;
+            $nombreCliente = $data['cliente'] ?? null;
+            $montoCuota = $data['monto_cuota'] ?? null;
+            $fechaVencimiento = $data['fecha_vencimiento'] ?? null;
+
+            if (!$telefono || !$nombreCliente || !$montoCuota || !$fechaVencimiento) {
+                throw new \Exception('Datos incompletos para enviar SMS');
+            }
+
+            $resultado = $this->cobranzaModel->enviarSmsNotificacion(
+                $idContrato,
+                $telefono,
+                $nombreCliente,
+                $montoCuota,
+                $fechaVencimiento
+            );
+
+            echo json_encode($resultado);
+        } catch (\Exception $e) {
+            http_response_code(500);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Error al enviar SMS: ' . $e->getMessage()
+            ]);
+        }
+
     }
 
 }
