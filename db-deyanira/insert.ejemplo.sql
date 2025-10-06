@@ -151,7 +151,7 @@ VALUES
 
 
 
-SELECT * FROM personas;
+SELECT * FROM personas limit 200;
 SELECT * FROM contratoslaborales;
 SELECT * FROM colaboradores;
 SELECT * FROM clientes;

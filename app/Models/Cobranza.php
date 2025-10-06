@@ -230,7 +230,7 @@ class Cobranza
     {
 
         try {
-            $mensaje = "Estimad@ {$nombreCliente}, le recordamos que su cuota de {$montoCuota} vence el {$fechaVencimiento} :D";
+            $mensaje = "Estimado(a) {$nombreCliente}, le recordamos que su cuota de {$montoCuota} vence el {$fechaVencimiento} :D";
 
             $resultado = $this->apiSms->sendMessage($telefono, $mensaje);
 
@@ -243,6 +243,36 @@ class Cobranza
             return [
                 'success' => false,
                 'message' => 'Error al enviar: ' . $e->getMessage()
+            ];
+        }
+    }
+
+    public function actualizarTelefonoCliente($idContrato, $telefonoNuevo): array
+    {
+        try {
+            $stmt = $this->db->prepare("CALL sp_actualizar_telefono_cliente(?, ?)");
+            $stmt->execute([$idContrato, $telefonoNuevo]);
+
+            $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+            $stmt->closeCursor();
+
+            if ($resultado && $resultado['status'] === 'success') {
+                return [
+                    'success' => true,
+                    'message' => $resultado['message'],
+                    'telefono_nuevo' => $resultado['telefono_nuevo']
+                ];
+            } else {
+                return [
+                    'success' => false,
+                    'message' => $resultado['message'] ?? 'Error desconocido al actualizar'
+                ];
+            }
+        } catch (PDOException $e) {
+            error_log("Error al actualizar teléfono: " . $e->getMessage());
+            return [
+                'success' => false,
+                'message' => 'Error en la base de datos: ' . $e->getMessage()
             ];
         }
     }

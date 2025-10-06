@@ -438,15 +438,17 @@ BEGIN
         (SELECT IFNULL(SUM(cr_total.abonocapital + cr_total.interes + IFNULL(cr_total.penalidad,0)), 0)
          FROM cronogramas cr_total
          WHERE cr_total.idcontrato = c.idcontrato
-           AND cr_total.estado = 'Vencido'
+           AND cr_total.estado IN ('Pendiente', 'Vencido')
+           AND cr_total.fechapago < CURDATE()
         ) AS deuda_vencida,
         
         -- Cantidad de cuotas vencidas
         (SELECT COUNT(*)
-         FROM cronogramas cr_count
-         WHERE cr_count.idcontrato = c.idcontrato
-           AND cr_count.estado = 'Vencido'
-        ) AS cuotas_vencidas,
+		 FROM cronogramas cr_count
+		 WHERE cr_count.idcontrato = c.idcontrato
+		   AND cr_count.estado IN ('Pendiente', 'Vencido')
+		   AND cr_count.fechapago < CURDATE()
+		) AS cuotas_vencidas,
         
         -- Cuotas pagadas del contrato
         (SELECT COUNT(*)
@@ -457,18 +459,23 @@ BEGIN
         
         -- Estado legible: "X vencidas de Y"
         CONCAT(
-            (SELECT COUNT(*) FROM cronogramas cr_v WHERE cr_v.idcontrato = c.idcontrato AND cr_v.estado = 'Vencido'),
-            ' vencidas de ',
-            GREATEST(
-                cot.numcuotas - (
-                    SELECT COUNT(*)
-                    FROM cronogramas crp2
-                    WHERE crp2.idcontrato = c.idcontrato
-                      AND crp2.estado = 'Pagado'
-                ),
-                0
-            )
-        ) AS estado_pagos,
+			(SELECT COUNT(*) 
+			 FROM cronogramas cr_v 
+			 WHERE cr_v.idcontrato = c.idcontrato 
+			   AND cr_v.estado IN ('Pendiente', 'Vencido')
+			   AND cr_v.fechapago < CURDATE()
+			),
+			' vencidas de ',
+			GREATEST(
+				cot.numcuotas - (
+					SELECT COUNT(*)
+					FROM cronogramas crp2
+					WHERE crp2.idcontrato = c.idcontrato
+					  AND crp2.estado = 'Pagado'
+				),
+				0
+			)
+		) AS estado_pagos,
         
         -- Fecha de la cuota vencida más antigua
         cron.fechapago AS fecha_vencida_mas_antigua,
@@ -507,6 +514,58 @@ DELIMITER ;
 
 -- 8) PROCEDIMIENTO PARA OBTENER CUOTAS PRÓXIMAS A VENCER (3 DÍAS ANTES)
 
+/*
+-- SOLO PRUEBA
+DELIMITER $$
+
+CREATE PROCEDURE sp_get_cuotas_proximas_vencer()
+BEGIN
+    SELECT 
+        con.idcontrato,
+        -- Obtener teléfono según tipo de cliente
+        CASE 
+            WHEN cli.tipocliente = 'P' THEN per.telprimario
+            WHEN cli.tipocliente = 'E' THEN emp.telprimario
+            ELSE NULL
+        END AS telefono,
+        
+        -- Obtener nombre según tipo de cliente
+        CASE 
+            WHEN cli.tipocliente = 'P' THEN CONCAT(per.apellidos, ', ', per.nombres)
+            WHEN cli.tipocliente = 'E' THEN emp.nombrecomercial
+            ELSE 'Cliente desconocido'
+        END AS cliente,
+        
+        veh.modelo AS vehiculo,
+        suc.nombre AS local,
+        COUNT(cp.idcuota) AS cuotas_pagadas,
+        con.cuotas AS cuotas_totales,
+        cro.monto AS monto_cuota,
+        cro.fechavencimiento AS fecha_vencimiento,
+        DATEDIFF(cro.fechavencimiento, CURDATE()) AS dias_para_vencer
+    FROM 
+        contratos con
+    INNER JOIN clientes cli ON con.idcliente = cli.idcliente
+    LEFT JOIN personas per ON cli.idpersona = per.idpersona AND cli.tipocliente = 'P'
+    LEFT JOIN empresas emp ON cli.idempresa = emp.idempresa AND cli.tipocliente = 'E'
+    INNER JOIN vehiculos veh ON con.idvehiculo = veh.idvehiculo
+    INNER JOIN sucursales suc ON con.idsucursal = suc.idsucursal
+    INNER JOIN cronogramas cro ON con.idcontrato = cro.idcontrato
+    LEFT JOIN cuotaspagadas cp ON cro.idcronograma = cp.idcronograma
+    WHERE 
+        con.estado = 'FIR'
+        AND cro.estado = 'PEN'
+        AND cro.fechavencimiento BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 3 DAY)
+    GROUP BY 
+        con.idcontrato, cro.idcronograma
+    ORDER BY 
+        cro.fechavencimiento ASC;
+END$$
+
+DELIMITER ;
+*/
+
+-- REAL
 DROP PROCEDURE IF EXISTS sp_get_cuotas_proximas_vencer;
 DELIMITER $$
 CREATE PROCEDURE sp_get_cuotas_proximas_vencer()
@@ -592,6 +651,96 @@ BEGIN
 END$$
 DELIMITER ;
 
+
+-- 9) ACTUALIZAR TELEFONO
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS sp_actualizar_telefono_cliente$$
+
+CREATE PROCEDURE sp_actualizar_telefono_cliente(
+    IN p_idcontrato INT,
+    IN p_telefono_nuevo VARCHAR(15),
+    IN p_telefono_actual VARCHAR(15)  -- Añadimos el teléfono actual como parámetro
+)
+BEGIN
+    DECLARE v_idpersona INT DEFAULT NULL;
+    DECLARE v_idempresa INT DEFAULT NULL;
+    DECLARE v_filas_afectadas INT DEFAULT 0;
+    DECLARE v_mensaje VARCHAR(255);
+    
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SELECT 
+            'error' as status,
+            'Error en la base de datos al actualizar el teléfono' as message,
+            NULL as telefono_nuevo;
+    END;
+    
+    -- Intentar encontrar la persona por teléfono actual
+    SELECT idpersona INTO v_idpersona
+    FROM personas
+    WHERE telprimario = p_telefono_actual
+       OR telalternativo = p_telefono_actual
+    LIMIT 1;
+    
+    IF v_idpersona IS NOT NULL THEN
+        -- Actualizar teléfono de persona
+        UPDATE personas 
+        SET telprimario = p_telefono_nuevo,
+            modificado = NOW()
+        WHERE idpersona = v_idpersona;
+        
+        SET v_filas_afectadas = ROW_COUNT();
+        
+        IF v_filas_afectadas > 0 THEN
+            SELECT 
+                'success' as status,
+                'Teléfono de persona actualizado correctamente' as message,
+                p_telefono_nuevo as telefono_nuevo;
+        ELSE
+            SELECT 
+                'error' as status,
+                'No se pudo actualizar el teléfono de la persona' as message,
+                NULL as telefono_nuevo;
+        END IF;
+    ELSE
+        -- Si no es persona, buscar en empresas
+        SELECT idempresa INTO v_idempresa
+        FROM empresas
+        WHERE telprimario = p_telefono_actual
+           OR telsecundario = p_telefono_actual
+        LIMIT 1;
+        
+        IF v_idempresa IS NOT NULL THEN
+            -- Actualizar teléfono de empresa
+            UPDATE empresas 
+            SET telprimario = p_telefono_nuevo
+            WHERE idempresa = v_idempresa;
+            
+            SET v_filas_afectadas = ROW_COUNT();
+            
+            IF v_filas_afectadas > 0 THEN
+                SELECT 
+                    'success' as status,
+                    'Teléfono de empresa actualizado correctamente' as message,
+                    p_telefono_nuevo as telefono_nuevo;
+            ELSE
+                SELECT 
+                    'error' as status,
+                    'No se pudo actualizar el teléfono de la empresa' as message,
+                    NULL as telefono_nuevo;
+            END IF;
+        ELSE
+            -- No se encontró ni persona ni empresa con ese teléfono
+            SELECT 
+                'error' as status,
+                CONCAT('No se encontró ningún cliente con el teléfono: ', p_telefono_actual) as message,
+                NULL as telefono_nuevo;
+        END IF;
+    END IF;
+END$$
+
+DELIMITER ;
 
 -- LLAMADAS DE SP
 
