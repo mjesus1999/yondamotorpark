@@ -149,7 +149,7 @@
         animation-delay: 0.4s;
     }
 
-  
+
     @media (max-width: 768px) {
         .display-4 {
             font-size: 2.5rem;
@@ -164,14 +164,14 @@
         }
     }
 
-  
+
     .form-control:focus,
     .form-select:focus {
         border-color: #2563eb;
         box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
     }
 
-  
+
     .was-validated .form-control:valid {
         border-color: #10b981;
     }
@@ -180,7 +180,7 @@
         border-color: #ef4444;
     }
 
-  
+
     .alert {
         border-radius: 0.75rem;
         border: none;
@@ -267,7 +267,7 @@
             <div class="col-12 text-end">
                 <button class="btn btn-gradient-green shadow-lg" data-bs-toggle="modal" data-bs-target="#fichaSolicitudModal">
                     <i class="bi bi-plus-circle me-2"></i>
-                    Registrar Ficha de Solicitud
+                    Registrar Ficha 
                 </button>
             </div>
         </div>
@@ -431,7 +431,7 @@
 
 
                     <form id="fichaSolicitudForm">
-                        <input type="hidden" value="<?= htmlspecialchars($infoFicha['idcotizacion'])?>" id="idcotizacion">
+                        <input type="hidden" value="<?= htmlspecialchars($infoFicha['idcotizacion']) ?>" id="idcotizacion">
                         <!-- Información básica -->
                         <div class="row mb-4">
 
@@ -512,7 +512,7 @@
                                 Subir Ficha <span class="text-danger fw-bold"> *</span>
                             </label>
                             <input type="file" class="form-control" id="archivoFicha" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" required>
-                            <div class="form-text">Formatos aceptados: PDF, DOC, DOCX, JPG, PNG (Máx. 10MB)</div>
+                      
                             <div id="archivoSeleccionado" class="text-success small mt-1 d-none"></div>
                         </div>
 
@@ -526,13 +526,13 @@
                                     </label>
                                 </div>
                                 <div class="form-check text-warning fw-bold">
-                                    <input class="form-check-input" type="radio" name="detalle"  value="Observado" id="observado">
+                                    <input class="form-check-input" type="radio" name="detalle" value="Observado" id="observado">
                                     <label class="form-check-label" for="observado">
                                         Observado
                                     </label>
                                 </div>
                                 <div class="form-check text-danger fw-bold">
-                                    <input class="form-check-input" type="radio" name="detalle"  value="Anulado" id="anulado">
+                                    <input class="form-check-input" type="radio" name="detalle" value="Anulado" id="anulado">
                                     <label class="form-check-label" for="anulado">
                                         Anulado
                                     </label>
@@ -559,7 +559,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-sm text-white"  id="submitBtn" style="background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);">
+                    <button type="button" class="btn btn-sm text-white" id="submitBtn" style="background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);">
                         Registrar Ficha
                     </button>
                 </div>
@@ -674,23 +674,6 @@
                                 </select>
                             </div>
 
-
-
-                            <!-- <div class="col-md-6">
-                            <label for="newFechaNac" class="form-label">Fecha de Nacimiento</label>
-                            <input type="date" class="form-control" id="newFechaNac">
-                        </div> -->
-                            <!-- <div class="col-md-6">
-                            <label for="newEstadoCivil" class="form-label">Estado Civil</label>
-                            <select class="form-select" id="newEstadoCivil">
-                                <option value="SOL">Soltero(a)</option>
-                                <option value="CAS">Casado(a)</option>
-                                <option value="VDO">Viudo(a)</option>
-                                <option value="DVC">Divorciado(a)</option>
-                                <option value="CNV">Conviviente</option>
-                            </select>
-                        </div> -->
-
                         </div>
                         <hr>
                         <button type="button" class="btn bg-dark text-white border border-secondary w-100" onclick="addNewPerson()" id="addPersonBtn">
@@ -720,7 +703,7 @@
         let currentPersonType = '';
         let foundPerson = null;
 
-        
+
 
 
         // Configurar event listeners
@@ -855,26 +838,32 @@
                 } else {
 
                     try {
-                        const response = await fetch(`/api/fichaSolicitud/searchPersonaByReniec/${dni}`)
+                        const response = await fetch(`/api/fichaSolicitud/searchPersonaByReniec/${dni}`);
                         const data = await response.json();
-                        if (data.success) {
 
+                        if (data.success) {
+                          
                             showNewPersonForm(data, dni);
                             const personFound = document.getElementById('personFound');
                             if (personFound) personFound.classList.add('d-none');
-                            showToast('No se encontró la persona en los registros, pero puede registrarla', 'INFO', 1800);
+                            showToast('No se encontró en registros locales, pero sí en RENIEC', 'INFO', 1800);
                             console.log('PERSONA EN RENIEC: ', data);
+                        } else {
+                            
+                            showToast('No se encontró la persona en ningún registro', 'WARNING', 1800);
+                            console.log('PERSONA NO EXISTE');
                         }
 
                     } catch (error) {
-                        console.log(error);
+                        console.error('Error en búsqueda RENIEC:', error);
+                        showToast('Error al consultar RENIEC', 'ERROR', 1250);
                     }
 
                 }
 
             } catch (error) {
                 console.error('Error en búsqueda:', error);
-                showToast('Ocurrió un error al buscar la persona','ERROR',1250);
+                showToast('Ocurrió un error al buscar la persona', 'ERROR', 1250);
             }
         }
 
@@ -1020,7 +1009,7 @@
                     return;
                 }
 
-            
+
                 const response = await fetch('/storePersonaFicha', {
                     method: 'POST',
                     headers: {
@@ -1042,7 +1031,7 @@
                     newPerson.idpersona = data.lastId;
                     selectPerson(newPerson);
 
-               
+
                     const modal = bootstrap.Modal.getInstance(document.getElementById('personSearchModal'));
                     if (modal) modal.hide();
 
@@ -1099,14 +1088,14 @@
             // Validar radio estado
             const estadoRadio = document.querySelector("input[name='detalle']:checked");
             if (!estadoRadio) {
-                showToast("Debes seleccionar un estado (Observado, Aprobado o Anulado).","INFO",1300);
+                showToast("Debes seleccionar un estado (Observado, Aprobado o Anulado).", "INFO", 1300);
                 return;
             }
             const estado = estadoRadio.value.toUpperCase();
 
             // Validaciones mínimas
             if (!idcotizacion || !fechaVisita || !archivo) {
-                showToast('Por favor complete todos los campos obligatorios','WARNING',1300);
+                showToast('Por favor complete todos los campos obligatorios', 'WARNING', 1300);
                 return;
             }
 
@@ -1131,24 +1120,24 @@
 
                 const result = await response.json();
                 if (result.success) {
-                    showToast("Ficha registrada correctamente",'SUCCESS', 1250);
+                    showToast("Ficha registrada correctamente", 'SUCCESS', 1250);
 
                     // Cerrar modal y resetear
                     const modal = bootstrap.Modal.getInstance(document.getElementById('fichaSolicitudModal'));
                     if (modal) modal.hide();
                     resetForm();
                 } else {
-                    showToast(result.message,'ERROR', 1250);
+                    showToast(result.message, 'ERROR', 1250);
                 }
             } catch (err) {
                 console.error(err);
-                showToast("Ocurrió un error en la conexión.","ERROR",1250);
+                showToast("Ocurrió un error en la conexión.", "ERROR", 1250);
             }
         }
 
         document.getElementById('submitBtn').addEventListener('click', async () => {
-            if(await ask('¿Seguro de registrar la ficha?','Registrar')) {
-                    submitFichaSolicitud();
+            if (await ask('¿Seguro de registrar la ficha?', 'Registrar')) {
+                submitFichaSolicitud();
             }
         })
 
@@ -1193,7 +1182,7 @@
             validateForm();
         }
 
-      
+
         document.addEventListener('DOMContentLoaded', function() {
             const distritoInput = document.getElementById('distrito');
             if (distritoInput) {

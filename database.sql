@@ -471,7 +471,7 @@ CREATE TABLE cotizaciones (
     numcuotas SMALLINT NOT NULL,
     gastosadministrativos DECIMAL(9,2) NOT NULL DEFAULT 0.00 COMMENT 'Gastos administrativos de la cotización',
     valorcuota DECIMAL(9, 2) NOT NULL, -- Se usara en la tabla de cronogramas
-    estadocotizacion ENUM('P', 'E', 'A', 'C', 'R','CONT') NOT NULL DEFAULT 'P' COMMENT 'Pendiente | Evaluación | Aprobada | Cancelada (cliente) | Rechazada (Analista crédito) | CONTRATO',
+    estadocotizacion ENUM('P', 'O', 'A', 'C', 'R','CONT') NOT NULL DEFAULT 'P' COMMENT 'Pendiente | OBSERVADA  | Aprobada | Cancelada (cliente) | Rechazada (Analista crédito) | CONTRATO',
     comentarios TEXT,
     fechaseguimiento DATETIME NULL,
     creado DATETIME NOT NULL DEFAULT NOW(),
@@ -483,7 +483,8 @@ CREATE TABLE cotizaciones (
     CONSTRAINT fk_idcolventa_cot FOREIGN KEY (idasesor) REFERENCES colaboradores (idcolaborador)
 ) ENGINE = INNODB;
 USE motorpark;
--- ALTER TABLE cotizaciones MODIFY COLUMN estadocotizacion ENUM('P', 'E', 'A', 'C', 'R','CONT') NOT NULL DEFAULT 'P' COMMENT 'Pendiente | Evaluación | Aprobada | Cancelada (cliente) | Rechazada (Analista crédito) | CONTRATO';
+
+ ALTER TABLE cotizaciones MODIFY COLUMN estadocotizacion ENUM('P', 'O', 'A', 'C', 'R','CONT') NOT NULL DEFAULT 'P' COMMENT 'Pendiente | OBSERVADA | Aprobada |  Rechazada (Analista crédito) | CONTRATO';
 
 -- ALTER TABLE cotizaciones ADD COLUMN comentarios TEXT AFTER estadocotizacion;
 -- --  ALTER TABLE cotizaciones ADD COLUMN fechaseguimiento DATETIME NULL AFTER comentarios;
@@ -491,7 +492,6 @@ USE motorpark;
 
 -- ALTER TABLE cotizaciones ADD COLUMN gastosadministrativos DECIMAL(9,2) NOT NULL DEFAULT 0.00 COMMENT 'Gastos administrativos de la cotización' AFTER valorcuota;
 --  ALTER TABLE cotizaciones ADD COLUMN fechareactivacion DATETIME NULL AFTER modificado;
-
 
 CREATE TABLE fichasolicitud (
     idficha         INT PRIMARY KEY AUTO_INCREMENT,
@@ -513,7 +513,7 @@ CREATE TABLE fichasolicitud (
 
 SELECT * FROM fichasolicitud;
 USE motorpark;
-ALTER TABLE fichasolicitud CHANGE COLUMN fechavisista  fechavisita   DATE NOT NULL;
+-- ALTER TABLE fichasolicitud CHANGE COLUMN fechavisista  fechavisita   DATE NOT NULL;
 
 
 
