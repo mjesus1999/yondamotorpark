@@ -37,7 +37,8 @@ class Empresa
                         INNER JOIN distritos d ON e.iddistrito = d.iddistrito
                         INNER JOIN provincias p ON d.idprovincia = p.idprovincia
                         INNER JOIN departamentos dep ON p.iddepartamento = dep.iddepartamento
-                        WHERE c.tipocliente = 'E'  AND c.estado = 'ACT'";
+                        WHERE c.tipocliente = 'E'  AND c.estado = 'ACT'
+                        ORDER BY c.idcliente DESC;";
 
             $stmt = $this->db->prepare($query);
             $stmt->execute();
@@ -200,7 +201,4 @@ class Empresa
             return null;
         }
     }
-
 }
-
-

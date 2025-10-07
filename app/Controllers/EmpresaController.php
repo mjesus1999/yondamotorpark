@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Controllers;
 
 use App\Core\Controller;
@@ -29,6 +30,7 @@ class EmpresaController extends Controller
     {
         $this->view('/clientes/empresas.create');
     }
+
     public function storeEmpresaClient(): int
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -40,19 +42,20 @@ class EmpresaController extends Controller
         $data = array_map([Validador::class, 'limpiar'], $_POST);
 
         $empresa = [
-            'iddistrito' => (int) ($data['distrito'] ?? 0),
-            'razonsocial' => $data['razonsocial'] ?? '',
-            'nombrecomercial' => $data['nombrecomercial'] ?? '',
-            'ruc' => $data['ruc'] ?? '',
-            'representante' => $data['representante'] ?? '',
-            'email' => !empty($data['email']) ? $data['email'] : null,
-            'direccion' => !empty($data['direccion']) ? $data['direccion'] : null,
-            'referencia' => !empty($data['referencia']) ? $data['referencia'] : null,
-            'latitud' => !empty($data['latitud']) ? $data['latitud'] : null,
-            'longitud' => !empty($data['longitud']) ? $data['longitud'] : null,
-            'telprimario' => $data['telprimario'] ?? '',
-            'telsecundario' => !empty($data['telsecundario']) ? $data['telsecundario'] : null,
+            'iddistrito'      => (int) ($data['distrito'] ?? 0),
+            'razonsocial'     => html_entity_decode($data['razonsocial'] ?? '', ENT_QUOTES | ENT_HTML5, 'UTF-8'),
+            'nombrecomercial' => html_entity_decode($data['nombrecomercial'] ?? '', ENT_QUOTES | ENT_HTML5, 'UTF-8'),
+            'ruc'             => $data['ruc'] ?? '',
+            'representante'   => html_entity_decode($data['representante'] ?? '', ENT_QUOTES | ENT_HTML5, 'UTF-8'),
+            'email'           => !empty($data['email']) ? $data['email'] : null,
+            'direccion'       => !empty($data['direccion']) ? html_entity_decode($data['direccion'], ENT_QUOTES | ENT_HTML5, 'UTF-8') : null,
+            'referencia'      => !empty($data['referencia']) ? html_entity_decode($data['referencia'], ENT_QUOTES | ENT_HTML5, 'UTF-8') : null,
+            'latitud'         => !empty($data['latitud']) ? $data['latitud'] : null,
+            'longitud'        => !empty($data['longitud']) ? $data['longitud'] : null,
+            'telprimario'     => $data['telprimario'] ?? '',
+            'telsecundario'   => !empty($data['telsecundario']) ? $data['telsecundario'] : null,
         ];
+
 
         $errores = [];
 
@@ -272,7 +275,6 @@ class EmpresaController extends Controller
             } else {
                 echo $apiResponse;
             }
-
         } catch (Exception $e) {
             error_log('Error en búsqueda por API RUC: ' . $e->getMessage());
             echo json_encode([

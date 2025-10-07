@@ -27,7 +27,7 @@
 
     <!-- Tarjeta principal -->
     <div class="card border-0 shadow-sm">
-        <div class="card-header bg-white border-bottom">
+        <div class="card-header bg-body border-bottom">
             <div class="d-flex justify-content-between align-items-center">
                 <h5 class="mb-0 fw-bold ">Detalle de Pagos</h5>
                 <span class="badge bg-primary">
@@ -43,7 +43,7 @@
                         <thead>
                             <tr>
                                 <th width="50">#</th>
-                                <th width="80">N° Cuota</th>
+                                <th width="100">N° Cuota</th>
                                 <th>Vencimiento</th>
                                 <th>Fecha pago</th>
                                 <th>Amortización</th>
@@ -313,6 +313,12 @@
         let currentPage = parseInt(localStorage.getItem('pageHistorialPago') || '1');
         const botonesObservacion = document.querySelectorAll('.ver-observacion');
         const contenidoModal = document.getElementById('contenidoObservacion');
+        
+
+
+
+
+
 
 
 

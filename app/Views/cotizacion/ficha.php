@@ -36,7 +36,7 @@
     }
 
     .card-gradient-green {
-        background: linear-gradient(135deg, #b2fd6cff 0%, #97e4d1ff 100%);
+        background: linear-gradient(135deg, #cfdac4ff 0%, #defff7ff 100%);
         border: 1px solid #bbf7d0;
     }
 
@@ -172,15 +172,6 @@
     }
 
 
-    .was-validated .form-control:valid {
-        border-color: #10b981;
-    }
-
-    .was-validated .form-control:invalid {
-        border-color: #ef4444;
-    }
-
-
     .alert {
         border-radius: 0.75rem;
         border: none;
@@ -234,8 +225,6 @@
         outline-offset: 2px;
     }
 </style>
-
-
 
 <div class="container-fluid">
 
@@ -1045,6 +1034,8 @@
             }
         }
 
+  
+
 
         // Seleccionar persona
         function selectPerson(person) {
@@ -1120,11 +1111,19 @@
 
                 const result = await response.json();
                 if (result.success) {
-                    showToast("Ficha registrada correctamente", 'SUCCESS', 1250);
+                    
+                    showToast("Ficha registrada correctamente", 'SUCCESS', 1200);
 
                     // Cerrar modal y resetear
                     const modal = bootstrap.Modal.getInstance(document.getElementById('fichaSolicitudModal'));
                     if (modal) modal.hide();
+
+                    const ruta = estado ? estado[0] : 'P';
+
+                    setTimeout(() => {
+                        window.location = `/cotizacion/${ruta}`;
+                    },1280);
+
                     resetForm();
                 } else {
                     showToast(result.message, 'ERROR', 1250);
@@ -1134,6 +1133,7 @@
                 showToast("Ocurrió un error en la conexión.", "ERROR", 1250);
             }
         }
+
 
         document.getElementById('submitBtn').addEventListener('click', async () => {
             if (await ask('¿Seguro de registrar la ficha?', 'Registrar')) {

@@ -1,4 +1,6 @@
 <?php include __DIR__ . '/../layout/header.php'; ?>
+<link href="https://unpkg.com/tabulator-tables@5.5.2/dist/css/tabulator_simple.min.css" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/tabulator.css">
 <div class="container-fluid">
 
     <div class="alert alert-info mt-2" role="alert">
@@ -16,118 +18,20 @@
             </div>
         </div>
     </div>
+
     <!-- Lista principal -->
     <div id="lista-oc">
-        <!-- Vista de ESCRITORIO -->
-        <div class="d-none d-md-block">
-            <div class="card">
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-sm table-hover" id="tabla-compras">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Concesionario</th>
-                                    <th>Fecha entrega</th>
-                                    <th>Fecha recepción</th>
-                                    <th>Tipo doc</th>
-                                    <th>Serie</th>
-                                    <th>Número</th>
-                                    <th>Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php if (empty($compras)): ?>
-                                    <tr>
-                                        <td colspan="8" class="text-center">No hay compras registradas.</td>
-                                    </tr>
-                                <?php else: ?>
-                                    <?php $numeroFila = 1; ?>
-                                    <?php foreach ($compras as $compra): ?>
-                                        <tr>
-                                            <td><?= $numeroFila++ ?></td>
-                                            <td><?= htmlspecialchars($compra['razon_concesionario']) ?></td>
-                                            <td><?= htmlspecialchars($compra['fechacompra']) ?></td>
-                                            <td><?= htmlspecialchars($compra['fecharecepcion'] ?? 'N/A') ?></td>
-                                            <td><?= $compra['tipodoc'] == 'B' ? 'Boleta' : 'Factura' ?></td>
-                                            <td><?= htmlspecialchars($compra['serie']) ?></td>
-                                            <td><?= htmlspecialchars($compra['numdocumento']) ?></td>
-                                            <td>
-                                                <a href="#" class="show-details" data-idoc="<?= $compra['idorden'] ?>" title="Ver detalle">
-                                                    <i class="bi bi-info-circle text-primary fs-5"></i>
-                                                </a>
-                                                <?php if (!empty($compra['rutadoc'])): ?>
-                                                    <a href="#" class="ver-documento" data-url="/archivos/<?= htmlspecialchars($compra['rutadoc']) ?>" title="Ver Documento">
-                                                        <i class="fa-solid fa-file-invoice  fs-5" style="color: #ff0000;"></i>
-                                                    </a>
-                                                <?php else: ?>
-                                                    <span class="badge bg-light text-muted">N/A</span>
-                                                <?php endif; ?>
-                                            </td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                <?php endif; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+        <div class="card">
+            <div class="card-body">
+                <!-- Aquí Tabulator dibuja la tabla -->
+                <div id="tabla-compras"></div>
             </div>
-        </div>
-
-        <!-- VISTA MÓVIL: Acordeón colapsable -->
-        <div class="d-block d-md-none">
-            <?php if (empty($compras)): ?>
-                <div class="text-center text-muted p-3">No hay compras registradas.</div>
-            <?php else: ?>
-                <div class="accordion" id="accordionEgresosMovil"> <?php $numeroFila = 1; ?>
-                    <?php foreach ($compras as $compra): ?>
-                        <div class="accordion-item mb-2 shadow-sm">
-                            <h2 class="accordion-header" id="heading<?= $compra['idorden'] ?>">
-                                <button class="accordion-button collapsed" type="button"
-                                    data-bs-toggle="collapse"
-                                    data-bs-target="#collapseCompra<?= $compra['idorden'] ?>"
-                                    aria-expanded="false"
-                                    aria-controls="collapseCompra<?= $compra['idorden'] ?>">
-                                    <span><i class="bi bi-truck me-2 text-primary fw-bold"></i>#<?= $numeroFila ?> - <?= htmlspecialchars($compra['razon_concesionario']) ?></span>
-                                </button>
-                            </h2>
-                            <div id="collapseCompra<?= $compra['idorden'] ?>" class="accordion-collapse collapse"
-                                aria-labelledby="heading<?= $compra['idorden'] ?>"
-                                data-bs-parent="#accordionEgresosMovil">
-                                <div class="accordion-body">
-                                    <p><strong>#:</strong> <?= $numeroFila++ ?></p>
-                                    <p><strong>Fecha entrega:</strong> <?= htmlspecialchars($compra['fechacompra']) ?></p>
-                                    <p><strong>Fecha recepción:</strong> <?= htmlspecialchars($compra['fecharecepcion'] ?? 'N/A') ?></p>
-                                    <p><strong>Tipo documento:</strong> <?= $compra['tipodoc'] == 'B' ? 'Boleta' : 'Factura' ?></p>
-                                    <p><strong>Serie:</strong> <?= htmlspecialchars($compra['serie']) ?></p>
-                                    <p><strong>Número:</strong> <?= htmlspecialchars($compra['numdocumento']) ?></p>
-                                    <p>
-                                        <strong>Acciones:</strong><br>
-                                        <a href="#" class="show-details" data-idoc="<?= $compra['idorden'] ?>" title="Ver detalle">
-                                            <i class="bi bi-info-circle text-primary fs-5 me-2"></i>
-                                        </a>
-                                        <?php if (!empty($compra['rutadoc'])): ?>
-                                            <a href="#" class="ver-documento" data-url="/archivos/<?= htmlspecialchars($compra['rutadoc']) ?>" title="Ver Documento">
-                                                <i class="fa-solid fa-file-invoice fa-beat fs-5" style="color: #ff0000;"></i>
-                                            </a>
-                                        <?php else: ?>
-                                            <span class="badge bg-light text-muted">N/A</span>
-                                        <?php endif; ?>
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
-                </div>
-            <?php endif; ?>
         </div>
     </div>
 
-
-
 </div>
 
-<!-- Detalle OC (inicialmente oculto) -->
+
 <div id="detalle-oc" style="display: none;">
     <div class="card mt-4">
         <div class="card-header d-flex justify-content-between align-items-center">
@@ -176,116 +80,212 @@
     </div>
 </div>
 
-
 <?php include __DIR__ . '/../layout/footer.php'; ?>
-
+<script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.5.2/dist/js/tabulator.min.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', async () => {
-        const detailLinks = document.querySelectorAll('.show-details');
-        const detailConcesionarioRazonSocial = document.getElementById('detalle-concesionario-razon');
-        const detailOcSummary = document.getElementById('detalle-oc-summary');
-        const tablaDetallesBody = document.querySelector('#tabla-detalle-oc tbody');
-        const speedAnimation = 850;
-        const botonVolver = document.getElementById('btn-volver-detalle');
+    document.addEventListener('DOMContentLoaded', () => {
 
-        // Variables para poder visualizar la factura:            
-        const links = document.querySelectorAll('.ver-documento');
-        const modal = new bootstrap.Modal(document.getElementById('modalFactura'));
-        const iframe = document.getElementById('visorFactura');
+        const compras = <?php echo json_encode($compras ?? []); ?>;
+        const tablaCompras = new Tabulator("#tabla-compras", {
+            data: compras,
+            layout: "fitColumns",
+            responsiveLayout: "collapse",
+            responsiveLayoutCollapseStartOpen: false, // Inicia colapsado
 
-
-        links.forEach(link => {
-            link.addEventListener('click', function(e) {
-                e.preventDefault();
-                const pdfUrl = this.dataset.url;
-                if (pdfUrl) {
-                    iframe.src = pdfUrl;
-                    modal.show();
+            pagination: "local",
+            paginationSize: 10,
+            paginationSizeSelector: [10, 25, 50, 100],
+            columns: [{
+                    title: "#",
+                    formatter: 'rownum',
+                    width: 60,
+                    responsive: 0, // Siempre visible
+                    headerSort: false,
+                    hozAlign: "center"
+                },
+                {
+                    title: "Concesionario",
+                    field: "razon_concesionario",
+                    minWidth: 150,
+                    responsive: 0, // Siempre visible
+                    headerFilter: "input",
+                    headerFilterPlaceholder: "Buscar..."
+                },
+                {
+                    title: "Fecha entrega",
+                    field: "fechacompra",
+                    width: 150,
+                    responsive: 3, // Se oculta tercero
+                    hozAlign: "center",
+                    sorter: "date",
+                    sorterParams: {
+                        format: "YYYY-MM-DD"
+                    }
+                },
+                {
+                    title: "Fecha recepción",
+                    field: "fecharecepcion",
+                    width: 150,
+                    responsive: 4, // Se oculta cuarto
+                    hozAlign: "center",
+                    formatter: (cell) => cell.getValue() || "N/A"
+                },
+                {
+                    title: "Tipo doc",
+                    field: "tipodoc",
+                    width: 110,
+                    responsive: 5, // Se oculta quinto
+                    hozAlign: "center",
+                    formatter: (cell) => {
+                        const val = cell.getValue();
+                        if (val === "B") {
+                            return '<span class="badge bg-info">Boleta</span>';
+                        } else if (val === "F") {
+                            return '<span class="badge bg-success">Factura</span>';
+                        }
+                        return val;
+                    }
+                },
+                {
+                    title: "Serie",
+                    field: "serie",
+                    width: 120,
+                    responsive: 2, // Se oculta segundo
+                    hozAlign: "center"
+                },
+                {
+                    title: "Número",
+                    field: "numdocumento",
+                    width: 150,
+                    responsive: 1, // Se oculta primero
+                    hozAlign: "center"
+                },
+                {
+                    title: "Acciones",
+                    field: "acciones",
+                    responsive: 0, // Siempre visible
+                    hozAlign: "center",
+                    headerSort: false,
+                    formatter: (cell) => {
+                        const row = cell.getRow().getData();
+                        let html = `<a href="#" class="show-details" data-idoc="${row.idorden}" title="Ver detalle">
+                                <i class="bi bi-info-circle text-primary fs-5"></i>
+                            </a>`;
+                        if (row.rutadoc) {
+                            html += `<a href="#" class="ver-documento ms-2" data-url="/archivos/${row.rutadoc}" title="Ver Documento">
+                                <i class="fa-solid fa-file-invoice fs-5" style="color:#ff0000;"></i>
+                             </a>`;
+                        } else {
+                            html += `<span class="badge bg-light text-muted ms-2">N/A</span>`;
+                        }
+                        return html;
+                    },
+                    width: 150
                 }
-            });
+            ],
+            langs: {
+                "es-es": {
+                    "pagination": {
+                        "page_size": "Registros por página",
+                        "first": "Primero",
+                        "first_title": "Primera página",
+                        "last": "Último",
+                        "last_title": "Última página",
+                        "prev": "Anterior",
+                        "prev_title": "Página anterior",
+                        "next": "Siguiente",
+                        "next_title": "Página siguiente",
+                        "all": "Todos",
+                        "counter": {
+                            "showing": "Mostrando",
+                            "of": "de",
+                            "rows": "registros",
+                            "pages": "páginas"
+                        }
+                    },
+                    "data": {
+                        "loading": "Cargando...",
+                        "error": "Error"
+                    },
+                    "headerFilters": {
+                        "default": "filtrar columna...",
+                        "columns": {
+                            "name": "filtrar nombre..."
+                        }
+                    }
+                }
+            },
+            locale: "es-es",
+            // Estilos adicionales
+            rowFormatter: function(row) {
+                row.getElement().style.cursor = "pointer";
+            }
         });
 
 
-
-        function limpiarVistaDetalle() {
-            if (tablaDetallesBody) tablaDetallesBody.innerHTML = '';
-            if (detailConcesionarioRazonSocial) detailConcesionarioRazonSocial.textContent = '';
-            if (detailOcSummary) detailOcSummary.textContent = '';
-        }
-
-        detailLinks.forEach(link => {
-            link.addEventListener('click', async (event) => {
-                event.preventDefault();
-                const ocId = event.currentTarget.dataset.idoc;
-
-                if (!ocId) {
-                    console.warn('ID de Orden de Compra no encontrado.');
-                    return;
+        document.addEventListener("click", (e) => {
+            if (e.target.closest(".ver-documento")) {
+                e.preventDefault();
+                const link = e.target.closest(".ver-documento");
+                const pdfUrl = link.dataset.url;
+                if (pdfUrl) {
+                    document.getElementById("visorFactura").src = pdfUrl;
+                    new bootstrap.Modal(document.getElementById("modalFactura")).show();
                 }
+            }
+        });
 
-                limpiarVistaDetalle();
+
+        document.addEventListener("click", async (e) => {
+            if (e.target.closest(".show-details")) {
+                e.preventDefault();
+                const ocId = e.target.closest(".show-details").dataset.idoc;
+
+                if (!ocId) return;
+
+                const tablaDetallesBody = document.querySelector('#tabla-detalle-oc tbody');
+                tablaDetallesBody.innerHTML = "";
 
                 try {
                     const response = await fetch(`/api/oc/${ocId}`);
-                    if (!response.ok) throw new Error(`Error ${response.status}`);
                     const data = await response.json();
+                    if (!data || !data.orden || !Array.isArray(data.vehiculos)) return;
 
-                    if (!data || !data.orden || !Array.isArray(data.vehiculos)) {
-                        showToast('No hay datos válidos para la OC', 'WARNING', 1200);
-                        return;
-                    }
+                    $("#lista-oc").slideUp(850);
+                    $("#detalle-oc").slideDown(850);
 
-                    const {
-                        orden,
-                        vehiculos
-                    } = data;
+                    document.getElementById('detalle-concesionario-razon').textContent = data.orden.concesionario.razon_social || "N/A";
+                    document.getElementById('detalle-oc-summary').textContent =
+                        `${data.orden.numero_oc_formateado} | ${data.orden.fecha_emision_oc} | ${data.orden.moneda_oc} ${parseFloat(data.orden.totales.total || 0).toFixed(2)}`;
 
-                    $("#lista-oc").slideUp(speedAnimation);
-                    $("#detalle-oc").slideDown(speedAnimation);
-
-                    detailConcesionarioRazonSocial.textContent = orden.concesionario.razon_social || 'N/A';
-                    const numeroOc = orden.numero_oc_formateado || 'N/A';
-                    const fechaEmision = orden.fecha_emision_oc || 'N/A';
-                    const moneda = orden.moneda_oc || 'N/A';
-                    const total = orden.totales.total ? parseFloat(orden.totales.total).toFixed(2) : '0.00';
-                    detailOcSummary.textContent = `${numeroOc} | ${fechaEmision} | ${moneda} ${total}`;
-
-                    vehiculos.forEach((vehiculo, index) => {
-                        const row = document.createElement('tr');
+                    data.vehiculos.forEach((vehiculo, index) => {
+                        const row = document.createElement("tr");
                         row.innerHTML = `
-                            <td>${index + 1}</td>
-                            <td>${vehiculo.marca || 'N/A'}</td>
-                            <td>${vehiculo.modelo || 'N/A'}</td>
-                            <td>${vehiculo.version || 'N/A'}</td>
-                            <td>${vehiculo.combustible || 'N/A'}</td>
-                            <td>${vehiculo.anio_modelo || 'N/A'}</td>
-                            <td>${vehiculo.chasis || 'N/A'}</td>
-                            <td>${vehiculo.serie_motor || 'N/A'}</td>
-                            <td>${vehiculo.placa || 'N/A'}</td>
-                            <td>${vehiculo.placa_rotativa || 'N/A'}</td>
-                            <td>${vehiculo.color || 'N/A'}</td>
-                            <td>${orden.moneda_oc || 'N/A'}</td>
-                            <td>${vehiculo.precio_unitario ? parseFloat(vehiculo.precio_unitario).toFixed(2) : '0.00'}</td>
-                        `;
+                            <td>${index+1}</td>
+                            <td>${vehiculo.marca || "N/A"}</td>
+                            <td>${vehiculo.modelo || "N/A"}</td>
+                            <td>${vehiculo.version || "N/A"}</td>
+                            <td>${vehiculo.combustible || "N/A"}</td>
+                            <td>${vehiculo.anio_modelo || "N/A"}</td>
+                            <td>${vehiculo.chasis || "N/A"}</td>
+                            <td>${vehiculo.serie_motor || "N/A"}</td>
+                            <td>${vehiculo.placa || "N/A"}</td>
+                            <td>${vehiculo.placa_rotativa || "N/A"}</td>
+                            <td>${vehiculo.color || "N/A"}</td>
+                            <td>${data.orden.moneda_oc || "N/A"}</td>
+                            <td>${vehiculo.precio_unitario ? parseFloat(vehiculo.precio_unitario).toFixed(2) : "0.00"}</td>`;
                         tablaDetallesBody.appendChild(row);
                     });
-
-                } catch (error) {
-                    console.error(error);
-                    showToast('No se ha podido cargar los datos', 'WARNING', 1200);
+                } catch (err) {
+                    console.error(err);
                 }
-            });
+            }
         });
 
-        if (botonVolver) {
-            botonVolver.addEventListener('click', () => {
-                limpiarVistaDetalle();
-                $("#detalle-oc").slideUp(speedAnimation);
-                $("#lista-oc").slideDown(speedAnimation);
-            });
-        }
-
-
-
+        // Botón volver
+        document.getElementById('btn-volver-detalle').addEventListener('click', () => {
+            $("#detalle-oc").slideUp(850);
+            $("#lista-oc").slideDown(850);
+        });
     });
 </script>

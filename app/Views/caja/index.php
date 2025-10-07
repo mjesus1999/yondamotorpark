@@ -2,11 +2,13 @@
 
 include __DIR__ . '/../layout/header.php';
 ?>
+<link href="https://unpkg.com/tabulator-tables@5.5.2/dist/css/tabulator_simple.min.css" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/tabulator.css">
 <div class="container-fluid">
 
     <div class="alert alert-info mt-2" role="alert">
         <div class="row align-items-center">
-        
+
             <div class="col-12 col-md-6 d-flex align-items-center">
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb mb-0" style="background-color: transparent; padding: 0;">
@@ -16,7 +18,7 @@ include __DIR__ . '/../layout/header.php';
                     </ol>
                 </nav>
             </div>
-           
+
             <div class="col-12 col-md-6 d-flex flex-column flex-md-row justify-content-end">
                 <a href="/caja/reporte/by/fecha" class="btn btn-sm btn-outline-primary mb-2 mb-md-0 w-100 w-md-auto">
                     <i class="bi bi-calendar3"></i> Reporte por fecha
@@ -40,8 +42,21 @@ include __DIR__ . '/../layout/header.php';
                 <div class="card-body">
                     <!-- SOLO ESCRITORIO -->
                     <div class="table-responsive d-none d-md-block">
-                        <table class="table table-sm table-hover table-hover-yonda" id="tabla-contratos">
-                            <thead>
+                        <div class="mb-3">
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-search"></i>
+                                </span>
+                                <input
+
+                                    type="text"
+                                    id="busqueda-global"
+                                    class="form-control"
+                                    placeholder="Buscar ....">
+                            </div>
+                        </div>
+                        <div id="tabla-contratos">
+                            <!-- <thead>
                                 <tr>
                                     <th><span class="text-body fw-bold badge">#</span></th>
                                     <th><span class="text-body fw-bold badge">Cliente</span></th>
@@ -82,8 +97,8 @@ include __DIR__ . '/../layout/header.php';
                                         </tr>
                                     <?php endforeach; ?>
                                 <?php endif; ?>
-                            </tbody>
-                        </table>
+                            </tbody> -->
+                        </div>
                     </div>
 
 
@@ -151,36 +166,136 @@ include __DIR__ . '/../layout/header.php';
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js" defer></script>
 <script src="/assets/js/logoBase64.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js" defer></script>
+<script src="https://unpkg.com/tabulator-tables@5.5.2/dist/js/tabulator.min.js"></script>
 
 <script>
     const btnPdf = document.getElementById('btn-pdf');
     const btnExcel = document.querySelector('#btn-excel');
+    const datos = <?= json_encode($contratos) ?>
+
     document.addEventListener('DOMContentLoaded', async () => {
 
-        $('#tabla-contratos').DataTable({
-            responsive: true,
-            language: {
-                emptyTable: "No hay datos disponibles en la tabla",
-                info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
-                infoEmpty: "Mostrando 0 a 0 de 0 entradas",
-                infoFiltered: "(filtrado de _MAX_ entradas totales)",
-                lengthMenu: "Mostrar _MENU_ registros",
-                loadingRecords: "Cargando...",
-                processing: "Procesando...",
-                search: "Buscar:",
-                zeroRecords: "No se encontraron registros coincidentes",
-                paginate: {
-                    first: "Primero",
-                    last: "Último",
-                    next: "Siguiente",
-                    previous: "Anterior"
+        const tabla = new Tabulator('#tabla-contratos', {
+            data: datos,
+            pagination: "local",
+            layout: "fitColumns",
+            paginationSize: 15,
+            paginationSizeSelector: [5, 10, 20],
+            movableRows: true,
+
+            columns: [{
+                    title: "#",
+                    formatter: "rownum",
+                    width: 50
                 },
-                aria: {
-                    sortAscending: ": activar para ordenar la columna ascendente",
-                    sortDescending: ": activar para ordenar la columna descendente"
+                {
+                    title: "Cliente",
+                    field: "cliente",
+                    widthGrow: 8,
+                    tooltip: true
+                },
+                {
+                    title: "Documento",
+                    field: "documento",
+                    widthGrow: 3,
+                    tooltip: true
+                },
+                {
+                    title: "N° documento",
+                    field: "ndocumento",
+                    widthGrow: 3,
+                    tooltip: true
+                },
+                {
+                    title: "Tienda",
+                    field: "tienda",
+                    widthGrow: 7,
+                    tooltip: true
+                },
+                {
+                    title: "Vehículo",
+                    field: "vehiculo",
+                    widthGrow: 7,
+                    tooltip: true
+                },
+                {
+                    title: "Meses",
+                    field: "meses",
+                    widthGrow: 3,
+                    tooltip: true,
+                },
+                {
+                    title: "Cuota",
+                    field: "cuota",
+                    widthGrow: 3,
+                    tooltip: true,
+
+                },
+                {
+                    title: "Acciones",
+                    field: "acciones",
+                    widthGrow: 2,
+                    headerSort: false,
+
+                    formatter: function(cell, formatterParams) {
+                        const data = cell.getRow().getData();
+                        return `
+                        
+                             <a href="/caja/cronograma/${data.idcontrato}" title="Ver Cronograma">
+                                                    <i class="bi-receipt fs-5 text-info"></i>
+                            </a>
+                            <a href="/caja/historial/pagos/${data.idcontrato}" title="Ver historial de pagos">
+                                <i class="bi bi-clock-history fs-5"></i>
+                            </a>
+                            
+                                 `;
+                    }
                 }
-            }
+            ],
+            locale: "es-es",
+            langs: {
+                "es-es": {
+                    "pagination": {
+                        "page_size": "Registros por página",
+                        "first": "Primero",
+                        "last": "Último",
+                        "prev": "Anterior",
+                        "next": "Siguiente",
+                    }
+                }
+            },
+
         });
+
+        const searchInput = document.getElementById("busqueda-global");
+        if (searchInput) {
+            searchInput.addEventListener("keyup", function(e) {
+                const value = e.target.value;
+                if (value === "") {
+                    tabla.clearFilter();
+                } else {
+                    tabla.setFilter([
+                        [{
+                                field: "ndocumento",
+                                type: "like",
+                                value: value
+                            },
+                            {
+                                field: "cliente",
+                                type: "like",
+                                value: value
+                            },
+
+                        ]
+                    ]);
+                }
+            });
+        }
+
+
+
+
+
 
 
         if (btnPdf) {
@@ -300,30 +415,30 @@ include __DIR__ . '/../layout/header.php';
                     let totalMonto = 0;
                     let contador = 1;
 
-                   
+
                     data.data.forEach(item => {
                         item.transacciones.forEach(transaccion => {
-                          
+
                             const rowData = [
                                 contador++,
                                 transaccion.metodo_pago,
                                 new Date(transaccion.fecha),
-                                transaccion.numero_operacion || '', 
-                                transaccion.entidad_bancaria || '', 
-                                transaccion.numero_cuenta || '', 
+                                transaccion.numero_operacion || '',
+                                transaccion.entidad_bancaria || '',
+                                transaccion.numero_cuenta || '',
                                 parseFloat(transaccion.monto)
                             ];
 
                             const newRow = worksheet.addRow(rowData);
 
-                  
+
                             newRow.eachCell(cell => {
                                 Object.assign(cell, cellStyle);
                             });
 
-                            newRow.getCell(3).numFmt = 'DD/MM/YYYY'; 
+                            newRow.getCell(3).numFmt = 'DD/MM/YYYY';
 
-                            newRow.getCell(7).numFmt = '"S/"#,##0.00'; 
+                            newRow.getCell(7).numFmt = '"S/"#,##0.00';
 
                             totalMonto += parseFloat(transaccion.monto);
                         });

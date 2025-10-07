@@ -1,4 +1,6 @@
 <?php include __DIR__ . '/../../layout/header.php'; ?>
+<link href="https://unpkg.com/tabulator-tables@5.5.2/dist/css/tabulator_simple.min.css" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/tabulator.css">
 
 <?php if (isset($_SESSION['success'])): ?>
     <script>
@@ -43,8 +45,22 @@
 
                     <!-- Vista de escritorio (tabla) -->
                     <div class="table-responsive d-none d-md-block">
-                        <table class="table table-sm table-hover" id="tabla-cliente-empresa">
-                            <thead>
+                         <div class="mb-3">
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-search"></i>
+                                </span>
+                                <input
+
+                                    type="text"
+                                    id="busqueda-global"
+                                    class="form-control"
+                                    placeholder="Buscar ....">
+                            </div>
+                        </div>
+                        
+                        <div id="tabla-cliente-empresa">
+                            <!-- <thead>
                                 <tr>
                                     <th><span class="text-body badge">#</span></th>
                                     <th> <span class="text-body badge">Ubicación</span></th>
@@ -100,8 +116,9 @@
                                         </tr>
                                     <?php endforeach; ?>
                                 <?php endif; ?>
-                            </tbody>
-                        </table>
+                            </tbody> -->
+                            </table>
+                        </div>
                     </div>
 
                     <!-- Vista móvil (acordeón) -->
@@ -166,8 +183,131 @@
 
 </div>
 
-
-
-
-
 <?php include __DIR__ . '/../../layout/footer.php'; ?>
+
+
+<script src="https://unpkg.com/tabulator-tables@5.5.2/dist/js/tabulator.min.js"></script>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const datos = <?= json_encode($empresasClientes) ?>
+
+
+        const tabla = new Tabulator('#tabla-cliente-empresa', {
+
+            data: datos,
+            pagination: "local",
+            layout: "fitColumns",
+            paginationSize: 15,
+            paginationSizeSelector: [5, 10, 20],
+            movableRows: true,
+
+            columns: [{
+                    title: "#",
+                    formatter: "rownum",
+                    width: 50
+                },
+                {
+                    title: "Ubicación",
+                    field: "ubicacion",
+                    widthGrow: 5,
+                    tooltip: true
+                },
+                {
+                    title: "Responsable",
+                    field: "responsable",
+                    widthGrow: 5,
+                    tooltip: true
+                },
+                {
+                    title: "Ruc",
+                    field: "ruc",
+                    widthGrow: 2,
+                    tooltip: true
+                },
+                {
+                    title: "Empresa",
+                    field: "nombrecomercial",
+                    widthGrow: 7,
+                    tooltip: true
+                },
+                {
+                    title: "Correo",
+                    field: "email",
+                    widthGrow: 3,
+                    tooltip: true
+                },
+                {
+                    title: "Teléfono",
+                    field: "telprimario",
+                    widthGrow: 3,
+                    tooltip: true,
+                },
+                {
+                    title: "Acciones",
+                    field: "acciones",
+                    widthGrow: 2,
+                    headerSort: false,
+                
+                    formatter: function(cell, formatterParams) {
+                        const data = cell.getRow().getData();
+                        return `
+                        
+                            <a href="/clientes/empresaCliente/edit/${data.idempresa}" class="btn btn-sm btn-outline-primary">
+                                <i class="fa-solid fa-pen"></i>
+                            </a>
+                            <form action="/empresaCliente/delete/${data.idcliente}" method="POST" class="d-inline"
+                                onsubmit="return confirm('¿Estás seguro?');">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </form>
+                      
+                    `;
+                    }
+                }
+            ],
+            locale: "es-es",
+            langs: {
+                "es-es": {
+                    "pagination": {
+                        "page_size": "Registros por página",
+                        "first": "Primero",
+                        "last": "Último",
+                        "prev": "Anterior",
+                        "next": "Siguiente",
+                    }
+                }
+            },
+
+        });
+
+          const searchInput = document.getElementById("busqueda-global");
+        if (searchInput) {
+            searchInput.addEventListener("keyup", function(e) {
+                const value = e.target.value;
+                if (value === "") {
+                    tabla.clearFilter();
+                } else {
+                    tabla.setFilter([
+                        [{
+                                field: "nombrecomercial",
+                                type: "like",
+                                value: value
+                            },
+                            {
+                                field: "ruc",
+                                type: "like",
+                                value: value
+                            },
+
+                        ]
+                    ]);
+                }
+            });
+        }
+
+
+    });
+</script>

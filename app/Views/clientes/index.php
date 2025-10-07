@@ -3,6 +3,9 @@
 include __DIR__ . '/../layout/header.php';
 ?>
 
+<link href="https://unpkg.com/tabulator-tables@5.5.2/dist/css/tabulator_simple.min.css" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/tabulator.css">
+
 <?php if (isset($_SESSION['success'])): ?>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -41,11 +44,23 @@ include __DIR__ . '/../layout/header.php';
         <div class="col-md-12">
             <div class="card">
                 <div class="card-body">
-
                     <!-- VISTA DE ESCRITORIO (tabla) -->
                     <div class="table-responsive d-none d-md-block">
-                        <table class="table table-sm table-hover" id="tabla-clientes-personas">
-                            <thead>
+                        <div class="mb-3">
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-search"></i>
+                                </span>
+                                <input
+
+                                    type="text"
+                                    id="busqueda-global"
+                                    class="form-control"
+                                    placeholder="Buscar ....">
+                            </div>
+                        </div>
+                        <div" id="tabla-clientes-personas">
+                            <!-- <thead>
                                 <tr class="text-primary">
                                     <th>#</th>
                                     <th><span class="text-body badge">Ubicación</span></th>
@@ -53,7 +68,6 @@ include __DIR__ . '/../layout/header.php';
                                     <th><span class="text-body badge">Nombre completo</span> </th>
                                     <th> <span class="text-body badge">Documento</span></th>
                                     <th><span class="text-body badge">N° documento</span></th>
-                                    <!-- <th><span class="text-body badge">Correo</span></th> -->
                                     <th><span class="text-body badge">Teléfono</span></th>
                                     <th><span class="text-body badge">Acciones</span></th>
                                 </tr>
@@ -73,7 +87,7 @@ include __DIR__ . '/../layout/header.php';
                                             <td> <span class="badge text-body"><?= htmlspecialchars($personCliente['nombrecompleto']) ?></td>
                                             <td> <span class="badge text-body"><?= htmlspecialchars($personCliente['tipodoc']) ?></span></td>
                                             <td><span class="badge text-body"><?= htmlspecialchars($personCliente['nrodoc']) ?></span> </td>
-                                            <!-- <td><span class="badge text-body"><?= htmlspecialchars($personCliente['email'] ?? 'N/A') ?></span></td> -->
+                                
                                             <td><span class="badge text-body"><?= htmlspecialchars($personCliente['telprimario']) ?></span></td>
                                             <td>
                                                 <div class="d-flex gap-1">
@@ -96,8 +110,8 @@ include __DIR__ . '/../layout/header.php';
                                         </tr>
                                     <?php endforeach; ?>
                                 <?php endif; ?>
-                            </tbody>
-                        </table>
+                            </tbody> -->
+                            </table>
                     </div>
 
                     <!-- VISTA MÓVIL (ACORDEÓN) -->
@@ -165,3 +179,122 @@ include __DIR__ . '/../layout/header.php';
 
 
 <?php include __DIR__ . '/../layout/footer.php'; ?>
+
+<script src="https://unpkg.com/tabulator-tables@5.5.2/dist/js/tabulator.min.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+
+        const datos = <?= json_encode($personClientes) ?>;
+        console.log('PERSONAS: ', datos)
+
+        const tabla = new Tabulator("#tabla-clientes-personas", {
+            data: datos,
+            layout: "fitColumns",
+            pagination: "local",
+            paginationSize: 15,
+             paginationSizeSelector:[5, 10, 20],
+            movableRows: true,
+            columns: [{
+                    title: "#",
+                    formatter: "rownum",
+                    width: 50
+                },
+                {
+                    title: "Ubicación",
+                    field: "ubicacion",
+                    widthGrow: 2,
+                      tooltip: true
+                },
+                {
+                    title: "Dirección",
+                    field: "direccion",
+                    widthGrow: 3,
+                      tooltip: true
+                },
+                {
+                    title: "Nombre Completo",
+                    field: "nombrecompleto",
+                    widthGrow: 2,
+                      tooltip: true
+                },
+                {
+                    title: "Documento",
+                    field: "tipodoc",
+                      tooltip: true
+                },
+                {
+                    title: "N° documento",
+                    field: "nrodoc",
+                      tooltip: true
+                },
+                {
+                    title: "Teléfono",
+                    field: "telprimario",
+                      tooltip: true
+                },
+                {
+                    title: "Acciones",
+                    field: "acciones",
+                    headerSort: false,
+                    formatter: function(cell, formatterParams) {
+                        const data = cell.getRow().getData();
+                        return `
+                        
+                            <a href="/personaCliente/edit/${data.idpersona}" class="btn btn-sm btn-outline-primary">
+                                <i class="fa-solid fa-pen"></i>
+                            </a>
+                            <form action="/personaCliente/delete/${data.idcliente}" method="POST" class="d-inline"
+                                onsubmit="return confirm('¿Estás seguro?');">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </form>
+                      
+                    `;
+                    }
+                }
+            ],
+            locale: "es-es",
+            langs: {
+                "es-es": {
+                    "pagination": {
+                        "page_size": "Registros por página",
+                        "first": "Primero",
+                        "last": "Último",
+                        "prev": "Anterior",
+                        "next": "Siguiente",
+                    }
+                }
+            },
+
+        });
+
+        const searchInput = document.getElementById("busqueda-global");
+        if (searchInput) {
+            searchInput.addEventListener("keyup", function(e) {
+                const value = e.target.value;
+                if (value === "") {
+                    tabla.clearFilter();
+                } else {
+                    tabla.setFilter([
+                        [{
+                                field: "nombrecompleto",
+                                type: "like",
+                                value: value
+                            },
+                            {
+                                field: "nrodoc",
+                                type: "like",
+                                value: value
+                            },
+
+                        ]
+                    ]);
+                }
+            });
+        }
+
+
+    });
+</script>

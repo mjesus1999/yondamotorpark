@@ -1,4 +1,7 @@
 <?php include __DIR__ . '/../layout/header.php'; ?>
+<link href="https://unpkg.com/tabulator-tables@5.5.2/dist/css/tabulator_simple.min.css" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/tabulator.css">
+
 
 <?php if (isset($_SESSION['success'])) : ?>
 
@@ -37,8 +40,8 @@
 
                     <!-- Vista de escritorio (tabla) -->
                     <div class="table-responsive d-none d-md-block">
-                        <table class="table table-sm table-hover" id="tabla-locales">
-                            <thead>
+                        <div id="tabla-locales">
+                            <!-- <thead>
                                 <tr>
                                     <th>#</th>
                                     <th>Tienda</th>
@@ -83,75 +86,75 @@
                                         </tr>
                                     <?php endforeach; ?>
                                 <?php endif; ?>
-                            </tbody>
-                        </table>
+                            </tbody> -->
+                        </div>
                     </div>
 
                     <!-- Vista móvil (acordeón) -->
-                   <div class="d-block d-md-none">
-    <?php if (empty($locales)) : ?>
-        <div class="text-center text-muted p-3">No hay locales registrados.</div>
-    <?php else: ?>
-        <div class="accordion" id="acordeonLocales">
-            <?php $numeroFila = 1; ?>
-            <?php foreach ($locales as $local): ?>
-                <div class="accordion-item mb-2 shadow-sm">
-                    <h2 class="accordion-header" id="heading-<?= $local['idlocal'] ?>">
-                        <button class="accordion-button collapsed" type="button"
-                            data-bs-toggle="collapse"
-                            data-bs-target="#collapseLocal<?= $local['idlocal'] ?>"
-                            aria-expanded="false"
-                            aria-controls="collapseLocal<?= $local['idlocal'] ?>">
-                            <div class="d-flex flex-column align-items-start text-start w-100">
-                                <span class="fw-bold mb-1"><i class="bi bi-shop me-2 text-primary"></i><?= htmlspecialchars($local['tienda']) ?></span>
-                                <span class="badge bg-secondary text-white text-truncate w-100">
-                                    <i class="bi bi-geo-alt me-1"></i>
-                                    <?= htmlspecialchars($local['departamento'] . "/" . $local['provincia'] . '/' . $local['distrito']) ?>
-                                </span>
-                                <span class="badge bg-info text-dark text-truncate w-100 mt-1">
-                                    <i class="bi bi-house me-1"></i>
-                                    <?= $local['direccion'] === null ? 'N/A' : htmlspecialchars($local['direccion']) ?>
-                                </span>
+                    <div class="d-block d-md-none">
+                        <?php if (empty($locales)) : ?>
+                            <div class="text-center text-muted p-3">No hay locales registrados.</div>
+                        <?php else: ?>
+                            <div class="accordion" id="acordeonLocales">
+                                <?php $numeroFila = 1; ?>
+                                <?php foreach ($locales as $local): ?>
+                                    <div class="accordion-item mb-2 shadow-sm">
+                                        <h2 class="accordion-header" id="heading-<?= $local['idlocal'] ?>">
+                                            <button class="accordion-button collapsed" type="button"
+                                                data-bs-toggle="collapse"
+                                                data-bs-target="#collapseLocal<?= $local['idlocal'] ?>"
+                                                aria-expanded="false"
+                                                aria-controls="collapseLocal<?= $local['idlocal'] ?>">
+                                                <div class="d-flex flex-column align-items-start text-start w-100">
+                                                    <span class="fw-bold mb-1"><i class="bi bi-shop me-2 text-primary"></i><?= htmlspecialchars($local['tienda']) ?></span>
+                                                    <span class="badge bg-secondary text-white text-truncate w-100">
+                                                        <i class="bi bi-geo-alt me-1"></i>
+                                                        <?= htmlspecialchars($local['departamento'] . "/" . $local['provincia'] . '/' . $local['distrito']) ?>
+                                                    </span>
+                                                    <span class="badge bg-info text-dark text-truncate w-100 mt-1">
+                                                        <i class="bi bi-house me-1"></i>
+                                                        <?= $local['direccion'] === null ? 'N/A' : htmlspecialchars($local['direccion']) ?>
+                                                    </span>
+                                                </div>
+                                            </button>
+                                        </h2>
+                                        <div id="collapseLocal<?= $local['idlocal'] ?>"
+                                            class="accordion-collapse collapse"
+                                            aria-labelledby="heading-<?= $local['idlocal'] ?>"
+                                            data-bs-parent="#acordeonLocales">
+                                            <div class="accordion-body">
+                                                <ul class="list-group list-group-flush">
+                                                    <li class="list-group-item"><strong>#:</strong> <?= htmlspecialchars($numeroFila++) ?></li>
+                                                    <li class="list-group-item"><strong>Ubicación:</strong> <?= htmlspecialchars($local['departamento'] . "/" . $local['provincia'] . '/' . $local['distrito']) ?></li>
+                                                    <li class="list-group-item"><strong>Dirección:</strong> <?= $local['direccion'] === null ? 'N/A' : htmlspecialchars($local['direccion']) ?></li>
+                                                    <li class="list-group-item"><strong>Responsable:</strong> <?= htmlspecialchars($local['responsable']) ?></li>
+                                                    <li class="list-group-item"><strong>Correo:</strong> <?= $local['correo'] ? htmlspecialchars($local['correo']) : 'No asignado' ?></li>
+                                                    <li class="list-group-item"><strong>Teléfono:</strong> <?= htmlspecialchars($local['telefono']) ?></li>
+                                                </ul>
+                                                <div class="mt-3">
+                                                    <strong>Acciones:</strong>
+                                                    <div class="d-flex align-items-center gap-2 mt-1">
+                                                        <a class="btn btn-sm btn-outline-primary btn-edit-local"
+                                                            data-bs-toggle="modal" data-bs-target="#modal-locales"
+                                                            data-idlocal="<?= htmlspecialchars($local['idlocal']) ?>"
+                                                            title="Editar">
+                                                            <i class="fa-solid fa-pen" data-idlocal="<?= htmlspecialchars($local['idlocal']) ?>"></i>
+                                                        </a>
+                                                        <form action="/locales/delete/<?= htmlspecialchars($local['idlocal']) ?>" method="POST" class="d-inline"
+                                                            onsubmit="return confirm('¿Estás seguro de que quieres eliminar este local?');">
+                                                            <button type="submit" class='btn btn-sm btn-outline-danger delete' title='Eliminar'>
+                                                                <i class="fa-solid fa-trash"></i>
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
                             </div>
-                        </button>
-                    </h2>
-                    <div id="collapseLocal<?= $local['idlocal'] ?>"
-                        class="accordion-collapse collapse"
-                        aria-labelledby="heading-<?= $local['idlocal'] ?>"
-                        data-bs-parent="#acordeonLocales">
-                        <div class="accordion-body">
-                            <ul class="list-group list-group-flush">
-                                <li class="list-group-item"><strong>#:</strong> <?= htmlspecialchars($numeroFila++) ?></li>
-                                <li class="list-group-item"><strong>Ubicación:</strong> <?= htmlspecialchars($local['departamento'] . "/" . $local['provincia'] . '/' . $local['distrito']) ?></li>
-                                <li class="list-group-item"><strong>Dirección:</strong> <?= $local['direccion'] === null ? 'N/A' : htmlspecialchars($local['direccion']) ?></li>
-                                <li class="list-group-item"><strong>Responsable:</strong> <?= htmlspecialchars($local['responsable']) ?></li>
-                                <li class="list-group-item"><strong>Correo:</strong> <?= $local['correo'] ? htmlspecialchars($local['correo']) : 'No asignado' ?></li>
-                                <li class="list-group-item"><strong>Teléfono:</strong> <?= htmlspecialchars($local['telefono']) ?></li>
-                            </ul>
-                            <div class="mt-3">
-                                <strong>Acciones:</strong>
-                                <div class="d-flex align-items-center gap-2 mt-1">
-                                    <a class="btn btn-sm btn-outline-primary btn-edit-local"
-                                        data-bs-toggle="modal" data-bs-target="#modal-locales"
-                                        data-idlocal="<?= htmlspecialchars($local['idlocal']) ?>"
-                                        title="Editar">
-                                        <i class="fa-solid fa-pen" data-idlocal="<?= htmlspecialchars($local['idlocal']) ?>"></i>
-                                    </a>
-                                    <form action="/locales/delete/<?= htmlspecialchars($local['idlocal']) ?>" method="POST" class="d-inline"
-                                        onsubmit="return confirm('¿Estás seguro de que quieres eliminar este local?');">
-                                        <button type="submit" class='btn btn-sm btn-outline-danger delete' title='Eliminar'>
-                                            <i class="fa-solid fa-trash"></i>
-                                        </button>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
+                        <?php endif; ?>
                     </div>
-                </div>
-            <?php endforeach; ?>
-        </div>
-    <?php endif; ?>
-</div>
 
                 </div>
             </div>
@@ -199,7 +202,98 @@
         </div>
     </div>
 </div>
+
+<script src="https://unpkg.com/tabulator-tables@5.5.2/dist/js/tabulator.min.js"></script>
 <script>
+    const localesData = <?= json_encode($locales, JSON_UNESCAPED_UNICODE) ?>;
+    console.log(localesData)
+    const tablaLocales = new Tabulator("#tabla-locales", {
+        data: localesData,
+        layout: "fitColumns",
+        pagination: "local",
+        paginationSize: 10,
+        paginationSizeSelector: [5, 10, 20],
+        columns: [{
+                title: "#",
+                formatter: "rownum",
+                hozAlign: "center",
+                width: 50
+            },
+            {
+                title: "Tienda",
+                field: "tienda",
+
+                tooltip: true
+            },
+            {
+                title: "Ubicación",
+                field: "ubicacion",
+                tooltip: true,
+                formatter: (cell) => {
+                    const d = cell.getRow().getData();
+                    return `${d.departamento}/${d.provincia}/${d.distrito}`;
+                }
+            },
+            {
+                title: "Dirección",
+                field: "direccion",
+                tooltip: true,
+                formatter: (cell) => cell.getValue() || "N/A"
+            },
+            {
+                title: "Responsable",
+                field: "responsable",
+                tooltip: true
+            },
+            {
+                title: "Correo",
+                field: "correo",
+                  tooltip: true,
+                formatter: (cell) => cell.getValue() || "N/A"
+            },
+            {
+                title: "Teléfono",
+                field: "telefono",
+                  tooltip: true,
+            },
+            {
+                title: "Acciones",
+                headerSort: false,
+                hozAlign: "center",
+                width: 150,
+                formatter: function(cell) {
+                    const d = cell.getRow().getData();
+                    return `
+                
+                        <a class="btn btn-sm btn-outline-primary btn-edit-local" 
+                           data-bs-toggle="modal" data-bs-target="#modal-locales"
+                           data-idlocal="${d.idlocal}" title="Editar">
+                            <i class="fa-solid fa-pen"></i>
+                        </a>
+                        <form action="/locales/delete/${d.idlocal}" method="POST" class="d-inline"
+                            onsubmit="return confirm('¿Estás seguro de que quieres eliminar este local?');">
+                            <button type="submit" class='btn btn-sm btn-outline-danger delete' title='Eliminar'>
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </form>
+                    `;
+                }
+            }
+        ],
+        locale: "es-es",
+        langs: {
+            "es-es": {
+                "pagination": {
+                    "page_size": "Registros por página",
+                    "first": "Primero",
+                    "last": "Último",
+                    "prev": "Anterior",
+                    "next": "Siguiente",
+                }
+            }
+        }
+    });
+
     document.addEventListener("DOMContentLoaded", () => {
         const modalLocales = document.getElementById('modal-locales');
         const formularioLocales = document.getElementById('formulario-locales');
@@ -209,9 +303,10 @@
 
 
 
-        document.querySelectorAll('.btn-edit-local').forEach(button => {
-            button.addEventListener('click', async (event) => {
-                const idlocal = event.target.dataset.idlocal;
+        document.addEventListener("click", async (event) => {
+            if (event.target.closest(".btn-edit-local")) {
+                const button = event.target.closest(".btn-edit-local");
+                const idlocal = button.dataset.idlocal;
 
                 if (!idlocal) {
                     showToast("Error: No se pudo obtener el ID del local para editar.", "ERROR");
@@ -219,33 +314,22 @@
                 }
 
                 try {
-                    const response = await fetch(`/api/locales/${idlocal}`, {
-                        method: 'GET'
-                    });
-
-                    const contentType = response.headers.get("content-type");
-                    if (!contentType || contentType.indexOf("application/json") === -1) {
-                        const errorText = await response.text();
-                        showToast("Error inesperado del servidor al cargar datos. Revisa la consola.", "ERROR");
-                        return;
-                    }
-
+                    const response = await fetch(`/api/locales/${idlocal}`);
                     const result = await response.json();
-
 
                     if (result.success && result.local) {
                         modalIdlocal.value = result.local.idlocal;
                         modalResponsable.value = result.local.responsable;
                         modalTelefono.value = result.local.telefono;
                     } else {
-
+                        showToast("No se pudo cargar la información del local", "ERROR");
                     }
                 } catch (error) {
-
                     showToast("Error de conexión al cargar datos del local.", "ERROR");
                 }
-            });
+            }
         });
+
 
         formularioLocales.addEventListener('submit', async (event) => {
             event.preventDefault();

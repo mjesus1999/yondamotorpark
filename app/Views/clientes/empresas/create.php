@@ -775,7 +775,7 @@ require_once __DIR__ . '/../../../Helpers/functions.php'; ?>
         limpiarCamposEmpresa();
 
         try {
-            // CORRECCIÓN: Cambiar la ruta para que coincida con tu estructura
+            
             const response = await fetch(`/clientes/empresas/searchByRUCApi?ruc=${ruc}`, {
                 method: 'GET',
                 headers: {

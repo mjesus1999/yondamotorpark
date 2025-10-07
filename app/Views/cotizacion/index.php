@@ -1,37 +1,6 @@
 <?php include __DIR__ . '/../layout/header.php'; ?>
 <link href="https://unpkg.com/tabulator-tables@5.5.2/dist/css/tabulator_simple.min.css" rel="stylesheet">
-<style>
-    [data-bs-theme="dark"] .tabulator .tabulator-header,
-    [data-bs-theme="dark"] .tabulator .tabulator-col {
-        /* Fondo del header y las columnas */
-        background-color: #343a40 !important;
-        color: #f8f9fa !important;
-        border-color: #495057 !important;
-    }
-
-    /* El Contenido de la Columna (Título del Header) */
-    [data-bs-theme="dark"] .tabulator .tabulator-header .tabulator-col-content {
-        color: #f8f9fa !important;
-    }
-
-    /* Filas y Paginación */
-
-    [data-bs-theme="dark"] .tabulator-row {
-        background-color: #212529 !important;
-        border-color: #495057 !important;
-        color: #f8f9fa !important;
-    }
-
-    [data-bs-theme="dark"] .tabulator-row:nth-child(even) {
-        background-color: #2a2f33 !important;
-        /* Fondo rayado alterno  */
-    }
-
-    [data-bs-theme="dark"] .tabulator-footer {
-        background-color: #343a40 !important;
-        color: #f8f9fa !important;
-    }
-</style>
+<link rel="stylesheet" href="/assets/css/tabulator.css">
 <div class="container-fluid">
 
     <?php if (!empty($_SESSION['success_message'])): ?>
@@ -645,18 +614,6 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
         const aprobarModal = new bootstrap.Modal(aprobarModalElement);
 
         aprobarModalElement.addEventListener('show.bs.modal', function(event) {
@@ -698,7 +655,7 @@
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('Hubo un error de conexión al aprobar la cotización.');
+                    showToast('Hubo un error de conexión al aprobar la cotización.','ERROR',1200);
                 });
         });
 

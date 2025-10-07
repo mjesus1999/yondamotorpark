@@ -146,16 +146,17 @@ class FichaSolicitudController extends Controller
                     'id' => $idFicha
                 ]);
 
+                error_log('DATOOS DE LA COTIZACION: ' .$registro['estado'].$idFicha);
 
-                switch ($registro['estado']) {
-                    case 'Aprobado':
-                        $this->fichaSolicitudModel->updateCotizacion($registro['idcotizacion'], 'A'); // Aprobada
+                switch (strtolower(trim($registro['estado']))) {
+                    case 'aprobado':
+                        $this->fichaSolicitudModel->updateCotizacion($registro['idcotizacion'], 'A');
                         break;
-                    case 'Observado':
-                        $this->fichaSolicitudModel->updateCotizacion($registro['idcotizacion'], 'O'); // Observado
+                    case 'observado':
+                        $this->fichaSolicitudModel->updateCotizacion($registro['idcotizacion'], 'O');
                         break;
-                    case 'Anulado':
-                        $this->fichaSolicitudModel->updateCotizacion($registro['idcotizacion'], 'R'); // OJO: aquí R significa Rechazada
+                    case 'anulado':
+                        $this->fichaSolicitudModel->updateCotizacion($registro['idcotizacion'], 'R');
                         break;
                 }
             } else {

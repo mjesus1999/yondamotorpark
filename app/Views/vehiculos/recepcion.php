@@ -1,5 +1,7 @@
 <?php include __DIR__ . '/../layout/header.php'; ?>
 
+<link href="https://unpkg.com/tabulator-tables@5.5.2/dist/css/tabulator_simple.min.css" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/tabulator.css">
 
 <div class="container-fluid">
     <div class="alert alert-info mt-2" role="alert">
@@ -20,7 +22,7 @@
             <div class="card">
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-sm table-hover">
+                        <table class="table table-sm table-hover" id="tabla-vehiculos-recepcion">
                             <thead>
                                 <tr>
                                     <th>#</th>
@@ -114,3 +116,84 @@
 
 </div>
 <?php include __DIR__ . '/../layout/footer.php'; ?>
+<script src="https://unpkg.com/tabulator-tables@5.5.2/dist/js/tabulator.min.js"></script>
+
+
+<script>
+    const tablaVehiculos = new Tabulator("#tabla-vehiculos-recepcion", {
+        layout: "fitColumns",
+        pagination: "local",
+        paginationSize: 10,
+        responsiveLayout: "collapse",
+        paginationSizeSelector: [5, 10, 20],
+        columns: [{
+                title: "#",
+                field: "#",
+                width:20
+            },
+            {
+                title: "Concesionario",
+                field: "Concesionario",
+             minWidth:180,
+             tooltip:true,
+            },
+            {
+                title: "Dirección Conces.",
+                field: "direccion_completa_concesionario",
+                      minWidth:350,
+                      tooltip:true,
+            },
+            {
+                title: "Emisión OC",
+                field: "Emisión OC",
+                width:150,
+                tooltip:true,
+            },
+            {
+                title: "Serie OC",
+                field: "Serie OC",
+                  width:150,
+                  tooltip:true,
+            },
+            {
+                title: "Fecha compra",
+                field: "Fecha compra",
+                  width:150,
+                  tooltip:true,
+            },
+            {
+                title: "Cant. Pendientes",
+                field: "vehiculos_pendientes'",
+                formatter: "html",
+                   width:150,
+                   tooltip:true,
+            },
+            {
+                title: "Por / Liberar",
+                field: "listos_por_liberar",
+                formatter: "html",
+                   width:150,
+                   tooltip:true,
+            },
+            {
+                title: "Acciones",
+                field: "Acciones",
+                formatter: "html",
+                minWidth:150,
+                  
+            }
+        ],
+        locale: "es-es",
+        langs: {
+            "es-es": {
+                "pagination": {
+                    "page_size": "Registros por página",
+                    "first": "Primero",
+                    "last": "Último",
+                    "prev": "Anterior",
+                    "next": "Siguiente",
+                }
+            }
+        }
+    });
+</script>
