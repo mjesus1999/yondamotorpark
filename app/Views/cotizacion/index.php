@@ -55,9 +55,9 @@
                                 class="btn btn-sm <?= strtoupper($estadoActual) === 'P' ? 'btn-warning' : 'btn-outline-warning' ?>">
                                 <i class="bi bi-clock"></i> Pendientes
                             </a>
-                             <a href="/cotizacion/O"
+                            <a href="/cotizacion/O"
                                 class="btn btn-sm <?= strtoupper($estadoActual) === 'O' ? 'btn-info' : 'btn-outline-info' ?>">
-                               <i class="bi bi-eye"></i> Observadas
+                                <i class="bi bi-eye"></i> Observadas
                             </a>
                             <a href="/cotizacion/A"
                                 class="btn btn-sm <?= strtoupper($estadoActual) === 'A' ? 'btn-success' : 'btn-outline-success' ?>">
@@ -262,106 +262,7 @@
             estadoActual: '<?php echo $estadoActual; ?>'
         };
 
-        // const tabla = new Tabulator("#tabla-cotizacion", {
-
-        //     // Carga la data de la tabla HTML (tbody)
-        //     data: true,
-        //     // Carga la configuración de columnas desde el thead
-        //     htmlColumns: true,
-
-        //     theme: "simple",
-        //     pagination: "local",
-        //     responsiveLayout: "collapse", // hace que colapse columnas en móvil
-        //     paginationSize: 4,
-        //     paginationSizeSelector: [10, 25, 50, 100, true],
-        //     layout: "fitColumns",
-        //     movableRows: true,
-        //     columns: [
-        //         // 1. #
-        //         {
-        //             title: "#",
-        //             field: "rownum",
-        //             formatter: "rownum",
-        //                responsive: 1
-
-        //         },
-        //         // 2. Cliente
-        //         {
-        //             title: "Cliente",
-        //             field: "nombrecliente",
-        //             widthGrow:2,
-        //             responsive: 2
-
-
-        //         },
-        //         // 3. Vehículo
-        //         {
-        //             title: "Vehículo",
-        //             field: "vehiculo",
-        //               widthGrow:2,
-        //         },
-        //         // 4. Modalidad
-        //         {
-        //             title: "Modalidad",
-        //             field: "tipocotizacion",
-        //               widthGrow:2,
-        //         },
-        //         {
-        //             title: "Inicial",
-        //             field: "inicial"
-        //         },
-        //         // 6. N° de Doc
-        //         {
-        //             title: "N° de Doc",
-        //             field: "documento"
-        //         },
-        //         // 7. Teléfono
-        //         {
-        //             title: "Teléfono",
-        //             field: "telefono"
-        //         },
-        //         {
-        //             title: "Registrado por",
-        //             field: "asesor_info",
-        //               widthGrow:2,
-        //             formatter: "html",
-        //             visible: <?php echo isset($puede_ver_todas) && $puede_ver_todas ? 'true' : 'false'; ?>
-        //         },
-
-
-        //         {
-        //             title: "Opciones",
-        //             field: "acciones",
-        //             formatter: "html",
-        //             headerSort: false,
-        //             hozAlign: "left"
-        //         },
-        //     ],
-        //     langs: {
-        //         "es-es": {
-        //             "pagination": {
-        //                 "page_size": "Registros por página",
-        //                 "first": "Primero",
-        //                 "last": "Último",
-        //                 "prev": "Anterior",
-        //                 "next": "Siguiente",
-        //                 "counter": {
-        //                     "showing": "Mostrando",
-        //                     "of": "de",
-        //                     "rows": "registros"
-        //                 }
-        //             }
-        //         }
-        //     },
-
-
-        //     locale: "es-es"
-        // });
-
-        // window.tablaCotizaciones = tabla;
-
-
-
+       
         const container = document.getElementById("tabla-cotizacion");
         if (!container) return;
 
@@ -575,21 +476,22 @@
 
 
 
-
         const inputIdCotizacion = document.getElementById('contrato-idcotizacion');
         const displayIdCotizacion = document.getElementById('contrato-cotizacion-id-display');
 
-        document.querySelectorAll('.btnCrearContrato').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const idCotizacion = this.dataset.id;
-                const cliente = this.dataset.cliente;
-                const numCuotas = this.dataset.numcuotas;
+        document.addEventListener('click', (event) => {
+            const btn = event.target.closest('.btnCrearContrato');
+            if (!btn) return;
 
-                inputIdCotizacion.value = idCotizacion;
-                displayIdCotizacion.textContent = `${idCotizacion} - ${cliente} (${numCuotas} cuotas)`;
-            });
+            const idCotizacion = btn.dataset.id;
+            const cliente = btn.dataset.cliente;
+            const numCuotas = btn.dataset.numcuotas;
+
+            inputIdCotizacion.value = idCotizacion;
+            displayIdCotizacion.textContent = `${idCotizacion} - ${cliente} (${numCuotas} cuotas)`;
         });
 
+        // Envío del formulario
         document.getElementById('formCrearContrato').addEventListener('submit', function(e) {
             e.preventDefault();
 
@@ -610,6 +512,12 @@
                 })
                 .catch(err => console.error("Error:", err));
         });
+
+
+
+
+
+
 
 
 
@@ -655,7 +563,7 @@
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    showToast('Hubo un error de conexión al aprobar la cotización.','ERROR',1200);
+                    showToast('Hubo un error de conexión al aprobar la cotización.', 'ERROR', 1200);
                 });
         });
 

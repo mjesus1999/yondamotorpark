@@ -603,6 +603,8 @@ CREATE TABLE pagos (
     CONSTRAINT fk_idcolcaja_pagos FOREIGN KEY (idcolcaja) REFERENCES colaboradores (idcolaborador)
 ) ENGINE = InnoDB;
 
+
+
 -- ALTER TABLE pagos MODIFY COLUMN comprobante VARCHAR(200) NULL;
 -- ALTER TABLE pagos MODIFY COLUMN numerotransaccion VARCHAR(30) NULL;
 -- ADD COLUMN tipo ENUM('Cuota', 'Penalidad') NOT NULL DEFAULT 'Cuota';

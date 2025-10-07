@@ -1,5 +1,5 @@
 -- VISTA DE COBRANZA.INDEX
-
+USE motorpark;
 -- 1) ESTADÍSTICAS + RESUMEN POR CONTRATO
  
 DROP PROCEDURE IF EXISTS sp_get_estadisticas_cobranza;
