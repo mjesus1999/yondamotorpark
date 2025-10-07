@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Core\Controller;
 use App\Models\Cobranza;
+use Exception;
 
 class CobranzaController extends Controller
 {
@@ -34,7 +35,7 @@ class CobranzaController extends Controller
                 'success' => true,
                 'data' => $data
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             http_response_code(500);
             echo json_encode([
                 'success' => false,
@@ -56,7 +57,7 @@ class CobranzaController extends Controller
                 'success' => true,
                 'data' => $tarjetas
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             http_response_code(500);
             echo json_encode([
                 'success' => false,
@@ -73,7 +74,7 @@ class CobranzaController extends Controller
 
         try {
             $this->cobranzaModel->getInfoCliente($idContrato);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             http_response_code(500);
             echo json_encode([
                 'success' => false,
@@ -90,7 +91,7 @@ class CobranzaController extends Controller
 
         try {
             $this->cobranzaModel->getDetalleContrato($idContrato);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             http_response_code(500);
             echo json_encode([
                 'success' => false,
@@ -107,7 +108,7 @@ class CobranzaController extends Controller
 
         try {
             $this->cobranzaModel->getCronogramaPagos($idContrato);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             http_response_code(500);
             echo json_encode([
                 'success' => false,
@@ -141,7 +142,7 @@ class CobranzaController extends Controller
 
         try {
             $this->cobranzaModel->getHistorialPagos($idContrato, $limite);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             http_response_code(500);
             echo json_encode([
                 'success' => false,
@@ -161,7 +162,7 @@ class CobranzaController extends Controller
                 'success' => true,
                 'data' => $clientes
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             http_response_code(500);
             echo json_encode([
                 'success' => false,
@@ -218,7 +219,7 @@ class CobranzaController extends Controller
             $fechaVencimiento = $data['fecha_vencimiento'] ?? null;
 
             if (!$telefono || !$nombreCliente || !$montoCuota || !$fechaVencimiento) {
-                throw new \Exception('Datos incompletos para enviar SMS');
+                throw new Exception('Datos incompletos para enviar SMS');
             }
 
             $resultado = $this->cobranzaModel->enviarSmsNotificacion(
@@ -230,7 +231,7 @@ class CobranzaController extends Controller
             );
 
             echo json_encode($resultado);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             http_response_code(500);
             echo json_encode([
                 'success' => false,
@@ -239,5 +240,41 @@ class CobranzaController extends Controller
         }
 
     }
+
+    /* public function actualizarTelefono(): void
+    {
+        $this->authRequired();
+        header('Content-Type: application/json');
+
+        try {
+            $data = json_decode(file_get_contents('php://input'), true);
+
+            $idContrato = $data['idcontrato'] ?? null;
+            $telefonoNuevo = $data['telefono_nuevo'] ?? null;
+
+            if (!$idContrato || !$telefonoNuevo) {
+                throw new Exception('Datos incompletos');
+            }
+
+            // Validar formato de teléfono
+            $telefonoLimpio = preg_replace('/[^0-9]/', '', $telefonoNuevo);
+            if (strlen($telefonoLimpio) < 9 || strlen($telefonoLimpio) > 15) {
+                throw new Exception('El teléfono debe tener entre 9 y 15 dígitos');
+            }
+
+            $resultado = $this->cobranzaModel->actualizarTelefonoCliente(
+                $idContrato,
+                $telefonoLimpio
+            );
+
+            echo json_encode($resultado);
+        } catch (Exception $e) {
+            http_response_code(400);
+            echo json_encode([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
+    } */
 
 }
