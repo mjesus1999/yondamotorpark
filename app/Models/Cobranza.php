@@ -247,11 +247,11 @@ class Cobranza
         }
     }
 
-    public function actualizarTelefonoCliente($idContrato, $telefonoNuevo): array
+    public function actualizarTelefonoCliente($idContrato, $telefonoActual, $telefonoNuevo): array
     {
         try {
-            $stmt = $this->db->prepare("CALL sp_actualizar_telefono_cliente(?, ?)");
-            $stmt->execute([$idContrato, $telefonoNuevo]);
+            $stmt = $this->db->prepare("CALL sp_actualizar_telefono_cliente(?, ?, ?)");
+            $stmt->execute([$idContrato, $telefonoNuevo, $telefonoActual]);
 
             $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
             $stmt->closeCursor();
@@ -268,6 +268,7 @@ class Cobranza
                     'message' => $resultado['message'] ?? 'Error desconocido al actualizar'
                 ];
             }
+
         } catch (PDOException $e) {
             error_log("Error al actualizar teléfono: " . $e->getMessage());
             return [
@@ -277,5 +278,21 @@ class Cobranza
         }
     }
 
+
+    // AVANCE DE LOS REPORTES
+    /* public function getReporteNotificar($idContrato)
+    {
+        try {
+            $stmt = $this->db->prepare("CALL sp_get_datos_reporte_notificacion(?)");
+            $stmt->execute([$idContrato]);
+            $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+            $stmt->closeCursor();
+
+            return $resultado ?: [];
+        } catch (PDOException $error) {
+            error_log("Error en getReporteNotificar: " . $error->getMessage());
+            return [];
+        }
+    } */
 
 }

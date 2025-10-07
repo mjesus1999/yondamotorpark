@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Core\Controller;
 use App\Models\Cobranza;
 use Exception;
+use PDOException;
 
 class CobranzaController extends Controller
 {
@@ -185,10 +186,39 @@ class CobranzaController extends Controller
         $this->view('cobranza.indexVencidos', ['vencidos' => $vencidos]);
     }
 
+    //AVANCE DE LOS REPORTES
+    /* public function reporteCobranzaAtrasado()
+    {
+        $this->authRequired();
+
+        // Obtener el idcontrato del parámetro GET
+        $idContrato = $_GET['contrato'] ?? null;
+
+        if (!$idContrato) {
+            // Si no hay contrato, redirigir o mostrar error
+            header('Location: /Cobranza/vencidos');
+            exit;
+        }
+
+        // Obtener los datos del reporte
+        $datosReporte = $this->cobranzaModel->getReporteNotificar($idContrato);
+
+        if (empty($datosReporte)) {
+            // Manejar caso donde no se encuentran datos
+            echo "No se encontraron datos para el contrato especificado.";
+            exit;
+        }
+
+        // Pasar los datos a la vista
+        $this->view('cobranza/reports.reporte_atraso_01_mes', [
+            'datos' => $datosReporte
+        ]);
+    } */
+
     public function reporteCobranzaAtrasado()
     {
         $this->authRequired();
-        /* $this->view('cobranza.reporteCobranzaAtrasado'); */
+
         $this->view('cobranza/reports.reporte_atraso_01_mes');
     }
 
@@ -241,7 +271,7 @@ class CobranzaController extends Controller
 
     }
 
-    /* public function actualizarTelefono(): void
+    public function actualizarTelefono(): void
     {
         $this->authRequired();
         header('Content-Type: application/json');
@@ -250,13 +280,13 @@ class CobranzaController extends Controller
             $data = json_decode(file_get_contents('php://input'), true);
 
             $idContrato = $data['idcontrato'] ?? null;
+            $telefonoActual = $data['telefono_actual'] ?? null;
             $telefonoNuevo = $data['telefono_nuevo'] ?? null;
 
-            if (!$idContrato || !$telefonoNuevo) {
+            if (!$idContrato || !$telefonoActual || !$telefonoNuevo) {
                 throw new Exception('Datos incompletos');
             }
 
-            // Validar formato de teléfono
             $telefonoLimpio = preg_replace('/[^0-9]/', '', $telefonoNuevo);
             if (strlen($telefonoLimpio) < 9 || strlen($telefonoLimpio) > 15) {
                 throw new Exception('El teléfono debe tener entre 9 y 15 dígitos');
@@ -264,10 +294,12 @@ class CobranzaController extends Controller
 
             $resultado = $this->cobranzaModel->actualizarTelefonoCliente(
                 $idContrato,
+                $telefonoActual,
                 $telefonoLimpio
             );
 
             echo json_encode($resultado);
+
         } catch (Exception $e) {
             http_response_code(400);
             echo json_encode([
@@ -275,6 +307,6 @@ class CobranzaController extends Controller
                 'message' => $e->getMessage()
             ]);
         }
-    } */
+    }
 
 }

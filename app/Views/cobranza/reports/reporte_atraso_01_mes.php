@@ -411,7 +411,7 @@
                         text: [
                             'Mediante el presente: YHON KENNIDEY MENDOZA HUARACA. Representante General de',
                             { text: 'YONDA & GRUPO HUARACA E.I.R.L', bold: true },
-                            'hace de su conocimiento',
+                            'hace de su conocimiento que',
                             { text: 'TIENE DEUDA PENDIENTE CON NUESTRA EMPRESA DEL VEHÍCULO CON LAS SIGUIENTES CARACTERÍSTICAS:', bold: true }
                         ],
                         style: 'normal',
@@ -422,7 +422,7 @@
                     // Detalles del vehículo en tabla
                     {
                         table: {
-                            widths: [80, 15, '*'],
+                            widths: [70, 15, '*'],
                             body: [
                                 [
                                     { text: 'Modelo', style: 'detalleLabel' },
@@ -471,9 +471,9 @@
                     {
                         text: [
                             { text: 'Por Incumplimiento de pago', bold: true },
-                            'ya que según registros de cobranza de nuestra empresa Usted adeuda,',
-                            { text: ' POR LA MORA DE FEBRERO DE S/ 389.00 SOLES, DE LA CUOTA DE MARZO CON MORA DE S/ 1,556.50, CUYO MONTO TOTAL A PAGAR ES DE S/ 1,945.50 SOLES', bold: true },
-                            'y habiendo usted comprometido según el contrato notarial firmado el 05 de octubre del 2023',
+                            'ya que según registros de cobranza de nuestra empresa Ud. adeuda,',
+                            { text: ' POR LA MORA DE FEBRERO DE S/ 389.00 SOLES, DE LA CUOTA DE MARZO CON MORA DE S/ 1,556.50, CUYO MONTO TOTAL A PAGAR ES DE S/ 1,945.50 SOLES ', bold: true },
+                            'y habiendo Ud. comprometido según el contrato notarial firmado el 05 de octubre del 2023',
                             { text: ' (CADA NOTIFICACIÓN LLEGADA AL DOMICILIO SE HARÁ EL COBRO ADICIONAL DE S/50 SOLES). ', bold: true }
                         ],
                         style: 'normal',

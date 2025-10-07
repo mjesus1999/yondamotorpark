@@ -71,19 +71,21 @@
 </div>
 
 <!-- MODAL EDITAR TELÉFONO -->
-<div class="modal fade" id="modalEditarTelefono" tabindex="-1" aria-labelledby="modalEditarTelefonoLabel" aria-hidden="true">
+<div class="modal fade" id="modalEditarTelefono" tabindex="-1" aria-labelledby="modalEditarTelefonoLabel"
+    aria-hidden="true" data-bs-backdrop="static">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title" id="modalEditarTelefonoLabel">
                     <i class="fas fa-phone-alt me-2"></i>Actualizar Teléfono
                 </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <form id="formEditarTelefono">
                     <input type="hidden" id="idcontratoModal">
-                    
+
                     <div class="mb-3">
                         <label class="form-label fw-bold">Cliente:</label>
                         <p class="text-muted mb-0" id="nombreClienteModal"></p>
@@ -97,24 +99,16 @@
                     <div class="row g-2">
                         <div class="col-md-6 mb-2">
                             <div class="form-floating">
-                                <input type="text" name="telefonoActual" 
-                                class="form-control" 
-                                id="telefonoActual" 
-                                placeholder="Telefono Actual"
-                                readonly>
+                                <input type="text" name="telefonoActual" class="form-control" id="telefonoActual"
+                                    placeholder="Telefono Actual" readonly>
                                 <label for="telefonoActual">Telefono Actual</label>
                             </div>
                         </div>
 
                         <div class="col-md-6 mb-2">
                             <div class="form-floating">
-                                <input type="text" name="telefonoNuevo" 
-                                class="form-control" 
-                                id="telefonoNuevo" 
-                                maxlength="15"
-                                placeholder="Ingrese el nuevo número" 
-                                autocomplete="off"
-                                required>
+                                <input type="text" name="telefonoNuevo" class="form-control" id="telefonoNuevo"
+                                    maxlength="15" placeholder="Ingrese el nuevo número" autocomplete="off" required>
                                 <label for="telefonoNuevo">Nuevo Teléfono <span class="text-danger">*</span></label>
                                 <div class="form-text">Solo números, mínimo 9 dígitos</div>
                             </div>
@@ -137,7 +131,7 @@
 
                     <div class="alert alert-info d-flex align-items-center" role="alert">
                         <i class="fas fa-info-circle me-2"></i>
-                        <small>El cambio se aplicará inmediatamente para futuras notificaciones</small>
+                        <small>El cambio se aplicará inmediatamente <!-- para futuras notificaciones --></small>
                     </div>
                 </form>
             </div>
@@ -173,22 +167,20 @@
         });
     }
 
-    // Función para validar teléfono
     function validarTelefono(telefono) {
         const regex = /^[0-9]{9,15}$/;
         return regex.test(telefono.replace(/\s/g, ''));
     }
 
-    // Función para abrir modal de edición
     function abrirModalTelefono(row) {
         filaActual = row;
-        
+
         document.getElementById('idcontratoModal').value = row.dataset.idcontrato;
         document.getElementById('nombreClienteModal').textContent = row.dataset.cliente;
         document.getElementById('telefonoActual').value = row.dataset.telefono || 'Sin teléfono';
         document.getElementById('telefonoNuevo').value = '';
         document.getElementById('telefonoNuevo').classList.remove('is-invalid');
-        
+
         modalEditarTelefono.show();
     }
 
@@ -204,14 +196,14 @@
                         <p class="text-muted">No hay clientes próximos a vencer</p>
                     </td>
                 </tr>
-            `; 
+            `;
             return;
         }
 
         let html = '';
         clientes.forEach((cliente, index) => {
             const telefono = cliente.telefono || 'N/A';
-            const telefonoHtml = telefono !== 'N/A' 
+            const telefonoHtml = telefono !== 'N/A'
                 ? `<a href="#" class="text-decoration-none link-telefono" title="Cambiar teléfono">
                        <i class="fas fa-phone-alt me-1"></i>${telefono}
                    </a>`
@@ -245,7 +237,7 @@
 
         // Agregar event listeners a los enlaces de teléfono
         document.querySelectorAll('.link-telefono').forEach(link => {
-            link.addEventListener('click', function(e) {
+            link.addEventListener('click', function (e) {
                 e.preventDefault();
                 const row = this.closest('tr');
                 abrirModalTelefono(row);
@@ -322,7 +314,7 @@
             });
 
         // Validación en tiempo real
-        document.getElementById('telefonoNuevo').addEventListener('input', function() {
+        document.getElementById('telefonoNuevo').addEventListener('input', function () {
             const valor = this.value.replace(/\s/g, '');
             if (valor && !validarTelefono(valor)) {
                 this.classList.add('is-invalid');
@@ -331,11 +323,12 @@
             }
         });
 
-        // Guardar teléfono (SIMULADO - sin backend)
-        document.getElementById('btnGuardarTelefono').addEventListener('click', async function() {
+        // Guardar teléfono
+        document.getElementById('btnGuardarTelefono').addEventListener('click', async function () {
+            const telefonoActual = document.getElementById('telefonoActual').value.trim();
             const telefonoNuevo = document.getElementById('telefonoNuevo').value.trim();
             const idContrato = document.getElementById('idcontratoModal').value;
-            
+
             if (!telefonoNuevo) {
                 document.getElementById('telefonoNuevo').classList.add('is-invalid');
                 return;
@@ -358,6 +351,7 @@
                     },
                     body: JSON.stringify({
                         idcontrato: idContrato,
+                        telefono_actual: telefonoActual,
                         telefono_nuevo: telefonoNuevo
                     })
                 });
@@ -375,59 +369,26 @@
                     `;
 
                     // Re-agregar event listener
-                    tdTelefono.querySelector('.link-telefono').addEventListener('click', function(e) {
+                    tdTelefono.querySelector('.link-telefono').addEventListener('click', function (e) {
                         e.preventDefault();
                         const row = this.closest('tr');
                         abrirModalTelefono(row);
                     });
 
-                    // Cerrar modal
                     modalEditarTelefono.hide();
 
-                    // Mostrar notificación de éxito
-                    mostrarToast('success', resultado.message || 'Teléfono actualizado correctamente');
+                    showToast(resultado.message || 'Teléfono actualizado correctamente', 'SUCCESS');
                 } else {
-                    mostrarToast('error', resultado.message || 'Error al actualizar el teléfono');
+                    showToast(resultado.message || 'Error al actualizar el teléfono', 'ERROR');
                 }
             } catch (error) {
                 console.error('Error:', error);
-                mostrarToast('error', 'Error de conexión al actualizar el teléfono');
+                showToast('Error de conexión al actualizar el teléfono', 'ERROR');
             } finally {
                 btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-save me-1"></i>Guardar Cambios';
+                btn.innerHTML = 'Guardar Cambios';
             }
         });
-
-        function mostrarToast(tipo, mensaje) {
-            const bgClass = tipo === 'success' ? 'bg-success' : 'bg-danger';
-            const icon = tipo === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
-            
-            const toastHtml = `
-                <div class="position-fixed top-0 end-0 p-3" style="z-index: 9999">
-                    <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
-                        <div class="toast-header ${bgClass} text-white">
-                            <i class="fas ${icon} me-2"></i>
-                            <strong class="me-auto">${tipo === 'success' ? 'Éxito' : 'Error'}</strong>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
-                        </div>
-                        <div class="toast-body">
-                            ${mensaje}
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            document.body.insertAdjacentHTML('beforeend', toastHtml);
-            
-            // Auto-eliminar después de 3 segundos
-            setTimeout(() => {
-                const toastElement = document.querySelector('.toast');
-                if (toastElement) {
-                    toastElement.remove();
-                }
-            }, 3000);
-        }
-
     });
 
     // Botón Notificar Todos
@@ -436,7 +397,7 @@
         const rows = document.querySelectorAll('tbody tr[data-row]');
 
         if (rows.length === 0) {
-            alert('No hay clientes para notificar');
+            showToast('No hay clientes para notificar', 'WARNING');
             return;
         }
 
@@ -451,7 +412,7 @@
         btn.disabled = false;
         btn.innerHTML = '<i class="fas fa-paper-plane me-1"></i>Notificar Todos';
 
-        alert('Proceso de notificación completado');
+        showToast('Proceso de notificación completado', 'SUCCESS');
     });
 </script>
 
