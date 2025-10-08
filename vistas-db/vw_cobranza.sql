@@ -632,7 +632,7 @@ BEGIN
         mo.anio AS vehiculo_anio,
         v.placa,
         v.chasis AS numero_chasis,
-        v.motor AS numero_motor,
+        v.seriemotor AS numero_motor,  -- CORREGIDO: era v.motor
         v.color,
         
         -- Datos financieros
@@ -699,10 +699,11 @@ BEGIN
         cnt.idcontrato, cl.tipocliente, p.apellidos, p.nombres, 
         p.tipodoc, p.nrodoc, e.razonsocial, e.ruc,
         dp.distrito, pp.provincia, de.distrito, pe.provincia,
-        ma.marca, mo.modelo, mo.anio, v.placa, v.chasis, v.motor, v.color,
+        ma.marca, mo.modelo, mo.anio, v.placa, v.chasis, v.seriemotor, v.color,
         cot.moneda, cot.valorcuota, cnt.fechainicio;
 END$$
 DELIMITER ;
+
 
 /*
 DROP PROCEDURE IF EXISTS sp_get_datos_reporte_notificacion;
@@ -789,6 +790,7 @@ END$$
 DELIMITER ;
 */
 
+-- CALL sp_get_datos_reporte_notificacion();
 -- CALL sp_get_datos_reporte_notificacion(8);
 
 -- PRUEBAS

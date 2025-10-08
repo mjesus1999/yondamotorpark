@@ -309,4 +309,67 @@ class CobranzaController extends Controller
         }
     }
 
+    //AVANCE DE LOS REPORTES DE ATRASO
+    /* public function getDatosReporteNotificacion(): void
+    {
+        $this->authRequired();
+        header('Content-Type: application/json');
+
+        try {
+            $idContrato = $_GET['contrato'] ?? null;
+
+            if (!$idContrato) {
+                throw new Exception('ID de contrato no proporcionado');
+            }
+
+            $datos = $this->cobranzaModel->getReporteNotificacion($idContrato);
+
+            if (!$datos) {
+                throw new Exception('No se encontraron datos para el contrato');
+            }
+
+            echo json_encode([
+                'success' => true,
+                'data' => $datos
+            ]);
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Error al obtener datos del reporte: ' . $e->getMessage()
+            ]);
+        }
+    } */
+
+    public function getDatosReporteNotificacion(): void
+    {
+        $this->authRequired();
+        header('Content-Type: application/json');
+
+        try {
+            $idContrato = $_GET['contrato'] ?? null;
+
+            if (!$idContrato) {
+                throw new Exception('ID de contrato no proporcionado');
+            }
+
+            $datos = $this->cobranzaModel->getReporteNotificacion($idContrato);
+
+            if (!$datos) {
+                throw new Exception('No se encontraron datos para el contrato');
+            }
+
+            echo json_encode([
+                'success' => true,
+                'data' => $datos
+            ]);
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Error al obtener datos del reporte: ' . $e->getMessage()
+            ]);
+        }
+    }
+
 }

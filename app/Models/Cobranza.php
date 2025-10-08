@@ -280,19 +280,34 @@ class Cobranza
 
 
     // AVANCE DE LOS REPORTES
-    /* public function getReporteNotificar($idContrato)
+    /* public function getReporteNotificacion($idContrato)
     {
         try {
             $stmt = $this->db->prepare("CALL sp_get_datos_reporte_notificacion(?)");
             $stmt->execute([$idContrato]);
-            $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+            $data = $stmt->fetch(PDO::FETCH_ASSOC);
             $stmt->closeCursor();
 
-            return $resultado ?: [];
-        } catch (PDOException $error) {
-            error_log("Error en getReporteNotificar: " . $error->getMessage());
-            return [];
+            return $data;
+        } catch (PDOException $e) {
+            error_log("Error en getDatosReporteNotificacion: " . $e->getMessage());
+            return null;
         }
     } */
+
+    public function getReporteNotificacion($idContrato)
+    {
+        try {
+            $stmt = $this->db->prepare("CALL sp_get_datos_reporte_notificacion_pdf(?)");
+            $stmt->execute([$idContrato]);
+            $data = $stmt->fetch(PDO::FETCH_ASSOC);
+            $stmt->closeCursor();
+
+            return $data;
+        } catch (PDOException $e) {
+            error_log("Error en getReporteNotificacion: " . $e->getMessage());
+            return null;
+        }
+    }
 
 }
