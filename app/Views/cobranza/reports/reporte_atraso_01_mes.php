@@ -127,7 +127,10 @@
             document.body.appendChild(modalOverlay);
             const btnDownload = modalOverlay.querySelector('#btn-download-pdf');
             const btnCancel = modalOverlay.querySelector('#btn-cancel-download');
-            function closeModal() { if (modalOverlay && modalOverlay.parentNode) modalOverlay.parentNode.removeChild(modalOverlay); }
+            function closeModal() 
+            { 
+                if (modalOverlay && modalOverlay.parentNode) modalOverlay.parentNode.removeChild(modalOverlay); 
+            }
             btnDownload.addEventListener('click', () => { try { if (globalPdfBlob) { downloadPdfFromBlob(globalPdfBlob, filename); closeModal(); setTimeout(() => { try { window.close(); } catch (e) { } }, 1000); } } catch (e) { console.error(e); alert('Error al descargar el PDF'); } });
             btnCancel.addEventListener('click', () => { closeModal(); setTimeout(() => { try { window.close(); } catch (e) { } }, 100); });
             document.addEventListener('keydown', function escHandler(e) { if (e.key === 'Escape') { closeModal(); document.removeEventListener('keydown', escHandler); setTimeout(() => { try { window.close(); } catch (e) { } }, 100); } });
@@ -191,11 +194,6 @@
             });
         }
 
-        /* ---------------------------
-           Helpers y fetch de datos
-           --------------------------- */
-
-        // Devuelve el valor "tal cual" si viene como string; si es número lo vuelve a string sin separador de miles
         function rawValueAsString(value) {
             if (value === null || value === undefined) return '0.00';
             if (typeof value === 'string') return value.trim();
@@ -203,7 +201,6 @@
             return String(value);
         }
 
-        // Recibe fechas tipo "2023-10-05" o "2023-10-05 00:00:00" y devuelve "05/10/2023"
         function formatDateDdMmYyyy(value) {
             if (!value) return '';
             const s = String(value).trim();
@@ -212,7 +209,6 @@
             if (m) {
                 return `${m[3]}/${m[2]}/${m[1]}`;
             }
-            // si viene en otro formato, devolver tal cual
             return s;
         }
 
@@ -232,20 +228,14 @@
             }
         }
 
-        // Convierte detalle_cuotas_vencidas ("... || ...") a un texto para el párrafo
-        // NO re-formatea números: deja las cifras tal cual vienen desde el SP
         function detalleToParrafo(detalleStr) {
             if (!detalleStr) return '';
             const parts = detalleStr.split(' || ').map(s => s.trim()).filter(Boolean);
             if (parts.length === 0) return '';
-            // unir con ", " y pasar a mayúsculas el texto (los números quedan igual)
             const joined = parts.map(s => s.toUpperCase()).join(', ');
             return joined;
         }
 
-        /* ---------------------------
-           PDF definition usando 'datos' reales (sin formatear números)
-           --------------------------- */
         function createNotificacionPDF(headerImageBase64, datos) {
             // valores seguros (sin formatear números)
             const nombre = rawValueAsString(datos.nombre_cliente || '');
@@ -257,10 +247,12 @@
             const anio = rawValueAsString(datos.vehiculo_anio || '');
             /* const color = rawValueAsString(datos.color || ''); */
             const color = (datos.color === null || datos.color === undefined || String(datos.color).trim() === '') ? 'N/A' : rawValueAsString(datos.color);
-            const placa = rawValueAsString(datos.placa || '');
-            const chasis = rawValueAsString(datos.numero_chasis || '');
+            /* const placa = rawValueAsString(datos.placa || ''); */
+            const placa = (datos.placa === null || datos.placa === undefined || String(datos.placa).trim() === '') ? 'N/A' : rawValueAsString(datos.placa);
+            /* const chasis = rawValueAsString(datos.numero_chasis || ''); */
+            const chasis = (datos.numero_chasis === null || datos.numero_chasis === undefined || String(datos.numero_chasis).trim() === '') ? 'N/A' : rawValueAsString(datos.numero_chasis);
             /* const motor = rawValueAsString(datos.numero_motor || ''); */
-            const motor = (datos.numero_motor === null || datos.numero_motor == undefined || String(datos.numero_motor).trim() == '') ? 'N/A' : rawValueAsString(datos.numero_motor);
+            const motor = (datos.numero_motor === null || datos.numero_motor === undefined || String(datos.numero_motor).trim() === '') ? 'N/A' : rawValueAsString(datos.numero_motor);
             const moneda = rawValueAsString(datos.moneda || 'PEN');
 
             const totalCuotas = rawValueAsString(datos.total_cuotas_vencidas);
@@ -269,7 +261,6 @@
             const fechaPrimera = rawValueAsString(datos.fecha_primera_vencida || '');
             const diasAtraso = rawValueAsString(datos.dias_atraso !== undefined ? datos.dias_atraso : '');
 
-            // fecha real de contrato (campo fecha_contrato que devuelve tu SP)
             const fechaContrato = formatDateDdMmYyyy(datos.fecha_contrato);
 
             const detalleParrafo = detalleToParrafo(datos.detalle_cuotas_vencidas || '');
@@ -278,7 +269,7 @@
                 { text: 'Por Incumplimiento de pago', bold: true },
                 ' ya que según registros de cobranza de nuestra empresa Ud. adeuda, ',
                 { text: detalleParrafo ? (` ${detalleParrafo} `) : '', bold: true },
-                { text: `CUYO MONTO TOTAL A PAGAR ES DE ${totalDeuda} `, bold: true },
+                { text: `CUYO MONTO TOTAL A PAGAR ES DE S/ ${totalDeuda} `, bold: true },
                 'y habiendo Ud. comprometido según el contrato notarial firmado el ',
                 { text: fechaContrato || '05/10/2023', bold: true },
                 ' ',
@@ -314,13 +305,8 @@
                     { text: [{ text: 'Señor(a): ', style: 'normal', bold: true }, { text: nombre, style: 'normal' }], margin: [0, 0, 0, 5] },
                     { text: [{ text: `${tipo_doc}: `, style: 'normal', bold: true }, { text: nro_doc, style: 'normal' }], margin: [0, 0, 0, 5] },
                     { text: [{ text: 'Dirección: ', style: 'normal', bold: true }, { text: direccion, style: 'normal' }], margin: [0, 0, 0, 5] },
-                    // Fecha de contrato mostrada claramente
                     { text: [{ text: 'Fecha de contrato: ', style: 'normal', bold: true }, { text: fechaContrato || '', style: 'normal' }], margin: [0, 0, 0, 10] },
-
-                    // TEXTO EXPLICATIVO
                     { text: ['Mediante el presente: YHON KENNIDEY MENDOZA HUARACA. Representante General de', { text: ' YONDA & GRUPO HUARACA E.I.R.L', bold: true }, ' hace de su conocimiento que', { text: ' TIENE DEUDA PENDIENTE CON NUESTRA EMPRESA DEL VEHÍCULO CON LAS SIGUIENTES CARACTERÍSTICAS:', bold: true }], style: 'normal', alignment: 'justify', margin: [0, 0, 0, 10] },
-
-                    // DETALLE VEHÍCULO
                     {
                         table: {
                             widths: [70, 15, '*'], body: [
@@ -333,11 +319,7 @@
                             ]
                         }, layout: { hLineWidth: () => 0, vLineWidth: () => 0, paddingLeft: () => 0, paddingRight: () => 0, paddingTop: () => 2, paddingBottom: () => 2 }, margin: [0, 0, 0, 15]
                     },
-
-                    // PÁRRAFO EXACTO (con datos reales del SP, SIN formatear números)
                     { text: parrafoIncumplimiento, style: 'normal', alignment: 'justify', margin: [0, 0, 0, 15] },
-
-                    // Párrafo de denuncia
                     { text: 'A su vez se procederá a realizar la denuncia correspondiente mediante instancias legales y judiciales que amerita el caso.', style: 'normal', alignment: 'justify', margin: [0, 0, 0, 15] },
 
                     // Totales (tal cual vienen del SP / sin formatear)
@@ -356,7 +338,6 @@
                         ], margin: [0, 10, 0, 20]
                     }, */
 
-                    // Atentamente y firma
                     { text: 'Atte: Gerencia', bold: true, style: 'normal', alignment: 'left', margin: [0, 0, 0, 40] },
                     {
                         table: {
@@ -384,9 +365,6 @@
             };
         }
 
-        /* ---------------------------
-           Generación principal: obtiene datos y crea el PDF (usa el parámetro "contrato")
-           --------------------------- */
         async function generatePDFNotificacion() {
             const loadingIndicator = document.getElementById('loading-indicator');
             try {
