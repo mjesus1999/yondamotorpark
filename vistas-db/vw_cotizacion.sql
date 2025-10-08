@@ -13,6 +13,7 @@ CREATE OR REPLACE VIEW vwGetAllCotizacion AS
 SELECT
     c.idcotizacion,
     c.idformato,
+    c.idvehiculo,
     c.idasesor,
     c.numcuotas,
     c.estadocotizacion,

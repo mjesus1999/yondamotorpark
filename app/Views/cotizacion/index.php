@@ -277,7 +277,7 @@
                 layout: "fitColumns",
                 responsiveLayout: "collapse", //hace que colapse columnas en móvil
                 pagination: true,
-                paginationSize: 5,
+                paginationSize: 15,
                 paginationCounter: "rows",
 
                 columns: [{
@@ -344,10 +344,10 @@
                             const numcuotas = row.numcuotas;
 
                             let html = `
-                        <button type="button" class="btn btn-sm btn-download-pdf" data-id="${id}" 
+                        <a type="button" class="btn-download-pdf" data-id="${id}" 
                             data-cliente="${nombrecliente}" title="PDF Cotización">
                             <i class="bi bi-filetype-pdf text-danger fs-5"></i>
-                        </button>`;
+                        </a>`;
 
                             if (config.estadoActual === "P") {
                                 html += `<a href="/fichasolicitud/${id}" class="" title="Adjuntar Ficha">
@@ -362,7 +362,12 @@
                                     data-bs-toggle="modal" 
                                     data-bs-target="#contratoModal">
                                     <i class="bi bi-file-earmark-text fs-5"></i>
-                                 </a>`;
+                                 </a>
+
+                                 <a href="/cotizacion/pagoInicial/${id}"><i class="bi bi-currency-dollar fs-5 text-success "></i></a>
+                                 
+                                 
+                                 `;
                             }
                             return html;
                         }

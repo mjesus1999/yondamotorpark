@@ -47,6 +47,127 @@ class Cotizacion
     }
 
 
+
+    public function getDatosCotizacion(string $id): array
+    {
+
+        $query = "SELECT 
+              idcotizacion,
+              idvehiculo,
+              tipocotizacion,
+              CONCAT(vehiculo, ' / ', color) AS vehiculo,
+              precioventa,
+              moneda,
+              inicial,
+              nombrecliente,
+              documento,
+              telefono,
+              direccion,
+              numcuotas,
+              valorcuota,
+              estadocotizacion
+            FROM vwGetAllCotizacion
+            WHERE idcotizacion = :idcotizacion LIMIT 1;";
+
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(":idcotizacion", $id, PDO::PARAM_STR);
+        $stmt->execute();
+
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+
+    public function getTotalPagadoYSaldoPendiente($id):array {
+        $query = "
+                    SELECT 
+                        v.idvehiculo,
+                        c.idcotizacion,
+                        c.inicial AS monto_inicial,
+                        COALESCE(SUM(p.amortizacion), 0) AS totalpagado,
+                        COALESCE(
+                            (
+                                SELECT pp.saldorestante
+                                FROM pagos pp
+                                WHERE pp.idvehiculo = v.idvehiculo
+                                AND pp.idconcepto = (SELECT idconcepto FROM conceptospago WHERE concepto = 'Inicial' LIMIT 1)
+                                ORDER BY pp.fechapago DESC, pp.idpago DESC
+                                LIMIT 1
+                            ),
+                            c.inicial
+                        ) AS saldorestante
+                    FROM cotizaciones c
+                    INNER JOIN vehiculos v 
+                        ON v.idvehiculo = c.idvehiculo
+                    LEFT JOIN pagos p 
+                        ON p.idvehiculo = v.idvehiculo
+                    AND p.idconcepto = (SELECT idconcepto FROM conceptospago WHERE concepto = 'Inicial' LIMIT 1)
+                    WHERE c.estadocotizacion = 'A'  
+                    AND c.idcotizacion = :idcotizacion
+                    GROUP BY v.idvehiculo, c.idcotizacion, c.inicial;
+
+        ";  
+        try {
+            $stmt = $this->db->prepare($query);
+            $stmt->bindParam(":idcotizacion", $id, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+
+        } catch(PDOException $e) {
+            error_log($e->getMessage());
+            return [];
+        }
+    }
+
+
+    public  function getHistorialPagosInicial($idcotizacion):array {
+        
+        $query = "
+        
+                SELECT 
+                   DATE_FORMAT(p.fechapago,'%d-%m-%Y') AS fechapago,
+                    e.entidad AS entidadbancaria,
+                    cp.numcuenta,
+                    cp.moneda,
+                    p.mediopago,
+                    p.numerotransaccion,
+                    p.amortizacion,
+                    p.saldorestante,
+                    p.comprobante,
+                    p.observacion
+                FROM cotizaciones c
+                INNER JOIN vehiculos v 
+                    ON v.idvehiculo = c.idvehiculo
+                INNER JOIN pagos p 
+                    ON p.idvehiculo = v.idvehiculo
+                AND p.idconcepto = (SELECT idconcepto FROM conceptospago WHERE concepto = 'Inicial' LIMIT 1)
+                LEFT JOIN cuentaspago cp 
+                    ON p.idcuentapago = cp.idcuentapago
+                LEFT JOIN entidadespago e 
+                    ON cp.identidadpago = e.identidadpago
+                WHERE c.idcotizacion = :idcotizacion
+                ORDER BY p.fechapago ASC, p.idpago ASC;
+
+        ";
+        try {
+            $stmt = $this->db->prepare($query);
+            $stmt->bindParam(":idcotizacion", $idcotizacion,PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        } catch(PDOException $e) {
+            error_log($e->getMessage());
+            return [];
+        }
+    }
+
+
+
+
+
+
+
+
+
     public function aprobarCotizacion(int $id): int
     {
         try {

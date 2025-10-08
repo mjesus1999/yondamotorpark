@@ -3,6 +3,7 @@
 $router->add('GET', '/cotizacion', 'CotizacionController', 'index');
 
 $router->add('GET', '/cotizacion/([A-Za-z])', 'CotizacionController', 'index');
+$router->add('GET', '/cotizacion/pagoInicial/{id}','CotizacionController', 'indexPagoInicial');
 
 $router->add('POST', '/cotizacion/aprobar/{id}', 'CotizacionController', 'aprobarCotizacion');
 

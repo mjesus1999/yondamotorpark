@@ -81,6 +81,13 @@ class CotizacionController extends Controller
             ]
         ]);
     }
+    public function indexPagoInicial($idCotizacion) {
+        $datos = $this->cotizacionModel->getDatosCotizacion($idCotizacion);
+        $montosInfo = $this->cotizacionModel->getTotalPagadoYSaldoPendiente($idCotizacion);
+        $historialPagos = $this->cotizacionModel->getHistorialPagosInicial($idCotizacion);
+        $this->view('cotizacion.pagoInicial', ['cotizacion' => $datos, 'montosInfo' => $montosInfo, 'historialPagos' => $historialPagos]);
+
+    }
 
 
     public function html2pdfReport($id): void
@@ -128,6 +135,17 @@ class CotizacionController extends Controller
         $this->authRequired();
         $this->view('cotizacion.reporte-cotizacion');
     }
+
+
+
+
+
+
+
+
+
+
+
 
 
     // En CotizacionController.php - Método apiShow actualizado
