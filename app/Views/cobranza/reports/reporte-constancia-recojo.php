@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reporte de Cobranza Atrasado - Vista Previa PDF</title>
+    <title>Reporte de recojo - PDF</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -313,321 +313,198 @@
             });
         }
 
-        function createNotificacionPDF(headerImageBase64) {
+        function formatMesEspanol(numeroMes) {
+            const meses = ['ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO',
+                'JULIO', 'AGOSTO', 'SETIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'];
+            return meses[parseInt(numeroMes) - 1] || '';
+        }
+
+        function detalleToParrafo(detalleStr) {
+            if (!detalleStr) return '';
+
+            const parts = detalleStr.split(' || ').map(s => {
+                // Reemplazar "MES:X" con el nombre del mes
+                let texto = s.replace(/MES:(\d+)/g, (match, num) => formatMesEspanol(num));
+                // Reemplazar "MONTO:" con "DE S/ "
+                texto = texto.replace(/MONTO:/g, 'DE S/ ');
+                return texto;
+            });
+
+            return parts.join(', ');
+        }
+
+        function rawValueAsString(value) {
+            if (value === null || value === undefined) return '0.00';
+            if (typeof value === 'string') return value.trim();
+            if (typeof value === 'number') return value.toFixed(2);
+            return String(value);
+        }
+
+        async function getDatosReporteRecojoVehicular(idContrato) {
+            try {
+                const resp = await fetch(`/Cobranza/getDatosReporteRecojoVehicular?contrato=${encodeURIComponent(idContrato)}`);
+                const json = await resp.json();
+                if (!resp.ok || !json.success) {
+                    const msg = json && json.message ? json.message : `Error HTTP ${resp.status}`;
+                    throw new Error(msg);
+                }
+                return json.data;
+            } catch (error) {
+                console.error("Error al obtener los datos:", error);
+                alert("Error al obtener los datos del reporte: " + (error.message || error));
+                return null;
+            }
+        }
+
+        function createNotificacionPDF(headerImageBase64, datos) {
+            // Valores seguros
+            const nombre = rawValueAsString(datos.nombre_cliente || '');
+            const tipo_doc = rawValueAsString(datos.tipo_documento || '');
+            const nro_doc = rawValueAsString(datos.numero_documento || '');
+            const direccion = rawValueAsString(datos.direccion_completa || '');
+            const telefono = rawValueAsString(datos.telefono || '');
+            const marca = rawValueAsString(datos.marca || '');
+            const modelo = rawValueAsString(datos.modelo || '');
+            const anio = rawValueAsString(datos.vehiculo_anio || '');
+            const color = (datos.color === null || datos.color === undefined || String(datos.color).trim() === '') ? 'N/A' : rawValueAsString(datos.color);
+            const placa = (datos.placa === null || datos.placa === undefined || String(datos.placa).trim() === '') ? 'N/A' : rawValueAsString(datos.placa);
+            const chasis = (datos.numero_chasis === null || datos.numero_chasis === undefined || String(datos.numero_chasis).trim() === '') ? 'N/A' : rawValueAsString(datos.numero_chasis);
+            const motor = (datos.numero_motor === null || datos.numero_motor === undefined || String(datos.numero_motor).trim() === '') ? 'N/A' : rawValueAsString(datos.numero_motor);
+
+            const totalDeuda = rawValueAsString(datos.total_deuda_vencida);
+            const detalleParrafo = detalleToParrafo(datos.detalle_cuotas_vencidas || '');
+            const fechaContrato = datos.fecha_contrato ? 
+                new Date(datos.fecha_contrato).toLocaleDateString('es-PE', { 
+                    day: '2-digit', 
+                    month: '2-digit', 
+                    year: 'numeric' 
+                }) : '';
+            const diaPago = datos.dia_pago_mensual ? Math.floor(Number(datos.dia_pago_mensual)) : '';
+            /* const diaPago = rawValueAsString(datos.dia_pago_mensual || ''); */
+
+            const parrafoIncumplimiento = [
+                { text: 'Por Incumplimiento de pago ', bold: true },
+                'ya que según registros de cobranza de nuestra empresa Usted adeuda, ',
+                { text: detalleParrafo ? `${detalleParrafo}, ` : '', bold: true },
+                { text: `SIENDO ASÍ SU DEUDA TOTAL EL MONTO DE S/ ${totalDeuda} SOLES. `, bold: true },
+                { text: `Y HABIENDO USTED COMPROMETIDO SEGÚN EL CONTRATO NOTARIAL FIRMADO EL ${fechaContrato}. `, bold: true },
+                { text: `TODOS LOS ${diaPago} DE CADA MES `, bold: true },
+                'Y NO CUMPLIÉNDOLO CON SU CRONOGRAMA DE PAGO. ',
+                { text: '(CADA NOTIFICACIÓN LLEGADA AL DOMICILIO SE HARÁ EL COBRO ADICIONAL DE S/50 SOLES).', bold: true }
+            ];
+            /* const parrafoIncumplimiento = [
+                { text: 'Por Incumplimiento de pago ', bold: true },
+                'ya que según registros de cobranza de nuestra empresa Usted adeuda, ',
+                { text: detalleParrafo ? `${detalleParrafo}, ` : '', bold: true },
+                { text: `SIENDO ASÍ SU DEUDA TOTAL EL MONTO DE S/ ${totalDeuda} SOLES. `, bold: true },
+                'Y habiendo usted comprometido según el contrato notarial firmado. Todos los días de pago de cada mes y no cumpliéndolo con su cronograma de pago. ',
+                { text: '(CADA NOTIFICACIÓN LLEGADA AL DOMICILIO SE HARÁ EL COBRO ADICIONAL DE S/50 SOLES).', bold: true }
+            ]; */
+
             return {
                 pageSize: 'A4',
                 pageOrientation: 'portrait',
                 pageMargins: [60, 80, 60, 80],
 
-                header: function (currentPage, pageCount, pageSize) {
+                header: function () {
                     if (headerImageBase64) {
-                        return {
-                            image: headerImageBase64,
-                            width: 500,
-                            alignment: 'center',
-                            margin: [0, 20, 0, 0]
-                        };
+                        return { image: headerImageBase64, width: 500, alignment: 'center', margin: [0, 20, 0, 0] };
                     }
                     return null;
                 },
 
-                footer: function (currentPage, pageCount, pageSize) {
+                footer: function () {
                     return {
                         stack: [
-                            // Información de contacto alineada a la derecha
-                            {
-                                text: [
-                                    'Contacto: Área de cobranza\n',
-                                    '987454555\n',
-                                    'cobranza@yondaperu.com'
-                                ],
-                                style: 'contactInfo',
-                                alignment: 'right',
-                                margin: [0, 0, 40, 10]
-                            },
-                            // Línea naranja centrada
-                            {
-                                canvas: [
-                                    {
-                                        type: 'line',
-                                        x1: 0,
-                                        y1: 0,
-                                        x2: 525,
-                                        y2: 0,
-                                        lineWidth: 4,
-                                        lineColor: '#ff6600'
-                                    }
-                                ],
-                                alignment: 'center',
-                                margin: [0, 0, 0, 0]
-                            }
+                            { text: ['Contacto: Área de cobranza\n', '987454555\n', 'cobranza@yondaperu.com'], style: 'contactInfo', alignment: 'right', margin: [0, 0, 40, 10] },
+                            { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 525, y2: 0, lineWidth: 4, lineColor: '#ff6600' }], alignment: 'center' }
                         ]
                     };
                 },
 
                 content: [
-                    // Fecha
-                    {
-                        text: formatDateSpanish(),
-                        style: 'fecha',
-                        alignment: 'right',
-                        margin: [0, 0, 0, 20]
-                    },
+                    { text: formatDateSpanish(), style: 'fecha', alignment: 'right', margin: [0, 0, 0, 20] },
+                    { text: 'CONSTANCIA DE RECOJO VEHICULAR', style: 'titulo', alignment: 'center', margin: [0, 0, 0, 15] },
 
-                    // Título principal
-                    {
-                        text: 'CONSTANCIA DE RECOJO VEHICULAR',
-                        style: 'titulo',
-                        alignment: 'center',
-                        margin: [0, 0, 0, 15]
-                    },
+                    // DATOS CLIENTE
+                    { text: [{ text: 'Señor(a): ', style: 'normal', bold: true }, { text: nombre, style: 'normal' }], margin: [0, 0, 0, 5] },
+                    { text: [{ text: `${tipo_doc}: `, style: 'normal', bold: true }, { text: nro_doc, style: 'normal' }], margin: [0, 0, 0, 5] },
+                    { text: [{ text: 'Dirección: ', style: 'normal', bold: true }, { text: direccion, style: 'normal' }], margin: [0, 0, 0, 5] },
+                    { text: [{ text: 'Celular: ', style: 'normal', bold: true }, { text: telefono, style: 'normal' }], margin: [0, 0, 0, 10] },
 
-                    // Presentación del cliente
-                    {
-                        text: [
-                            { text: 'Sra. ', style: 'normal', bold: true },
-                            { text: 'Aná Lucia Torres', style: 'normal', bold: '' }
-                        ],
-                        margin: [0, 0, 0, 5]
-                    },
-                    {
-                        text: [
-                            { text: 'DNI: ', style: 'normal', bold: true },
-                            { text: '78956232', style: 'normal', bold: '' }
-                        ],
-                        margin: [0, 0, 0, 5]
-                    },
-                    {
-                        text: [
-                            { text: 'Direccion: ', style: 'normal', bold: true },
-                            { text: 'Chincha Alta', style: 'normal', bold: '' }
-                        ],
-                        margin: [0, 0, 0, 5]
-                    },
-                    {
-                        text: [
-                            { text: 'Celular: ', style: 'normal', bold: true },
-                            { text: '999888777', style: 'normal', bold: '' }
-                        ],
-                        margin: [0, 0, 0, 10]
-                    },
+                    { text: ['Mediante el presente: YHON KENNIDEY MENDOZA HUARACA. Representante General de', { text: ' YONDA & GRUPO HUARACA E.I.R.L', bold: true }, ' hace de su conocimiento', { text: ' EL RECOJO DEL VEHÍCULO CON LAS SIGUIENTES CARACTERÍSTICAS:', bold: true }], style: 'normal', alignment: 'justify', margin: [0, 0, 0, 10] },
 
-                    // Párrafo explicativo
-                    {
-                        text: [
-                            'Mediante el presente: YHON KENNIDEY MENDOZA HUARACA. Representante General de YONDA & GRUPO HUARACA E.I.R.L hace de su conocimiento',
-                            { text: 'EL RECOJO DEL VEHÍCULO CON LAS SIGUIENTES CARACTERISTICAS:', bold: true }
-                        ],
-                        style: 'normal',
-                        alignment: 'justify',
-                        margin: [0, 0, 0, 10]
-                    },
-
-                    // Detalles del vehículo en tabla
+                    // TABLA VEHÍCULO
                     {
                         table: {
-                            widths: [80, 15, '*'],
-                            body: [
-                                [
-                                    { text: 'Modelo', style: 'detalleLabel' },
-                                    { text: ':', style: 'detalleSeparador' },
-                                    { text: 'SCH1111', style: 'detalleValue' }
-                                ],
-                                [
-                                    { text: 'Marca', style: 'detalleLabel' },
-                                    { text: ':', style: 'detalleSeparador' },
-                                    { text: 'Suzuki Swift', style: 'detalleValue' }
-                                ],
-                                [
-                                    { text: 'Chasis', style: 'detalleLabel' },
-                                    { text: ':', style: 'detalleSeparador' },
-                                    { text: 'L3HMCKBE3PA000111', style: 'detalleValue' }
-                                ],
-                                [
-                                    { text: 'Motor', style: 'detalleLabel' },
-                                    { text: ':', style: 'detalleSeparador' },
-                                    { text: '209000111', style: 'detalleValue' }
-                                ],
-                                [
-                                    { text: 'Color', style: 'detalleLabel' },
-                                    { text: ':', style: 'detalleSeparador' },
-                                    { text: 'Gris', style: 'detalleValue' }
-                                ],
-                                [
-                                    { text: 'Placa', style: 'detalleLabel' },
-                                    { text: ':', style: 'detalleSeparador' },
-                                    { text: 'Z7L-111', style: 'detalleValue' }
-                                ]
+                            widths: [70, 15, '*'], body: [
+                                [{ text: 'Marca', style: 'detalleLabel' }, { text: ':', style: 'detalleSeparador' }, { text: marca, style: 'detalleValue' }],
+                                [{ text: 'Modelo', style: 'detalleLabel' }, { text: ':', style: 'detalleSeparador' }, { text: `${modelo} ${anio}`, style: 'detalleValue' }],
+                                [{ text: 'Chasis', style: 'detalleLabel' }, { text: ':', style: 'detalleSeparador' }, { text: chasis, style: 'detalleValue' }],
+                                [{ text: 'Motor', style: 'detalleLabel' }, { text: ':', style: 'detalleSeparador' }, { text: motor, style: 'detalleValue' }],
+                                [{ text: 'Color', style: 'detalleLabel' }, { text: ':', style: 'detalleSeparador' }, { text: color, style: 'detalleValue' }],
+                                [{ text: 'Placa', style: 'detalleLabel' }, { text: ':', style: 'detalleSeparador' }, { text: placa, style: 'detalleValue' }]
                             ]
-                        },
-                        layout: {
-                            hLineWidth: function () { return 0; },
-                            vLineWidth: function () { return 0; },
-                            paddingLeft: function () { return 0; },
-                            paddingRight: function () { return 0; },
-                            paddingTop: function () { return 2; },
-                            paddingBottom: function () { return 2; }
-                        },
-                        margin: [0, 0, 0, 15]
+                        }, layout: { hLineWidth: () => 0, vLineWidth: () => 0, paddingLeft: () => 0, paddingRight: () => 0, paddingTop: () => 2, paddingBottom: () => 2 }, margin: [0, 0, 0, 15]
                     },
 
-                    // Párrafo de incumplimiento
-                    {
-                        text: [
-                            { text: 'Por Incumplimiento de pago', bold: true },
-                            'ya que según registros de cobranza de nuestra empresa Usted adeuda,',
-                            { text: 'LA CUOTA DEL MES DE SETIEMBRE DE S/ 1,540.00, LA CUOTA DE OCTUBRE DE S/ 1,540.00.00 Y LA CUOTA DE NOVIEMBRE DE S/ 1400.00, SIENDO ASI SU DEUDA TOTAL EL MONTO DE S/ 4,480.00 SOLES.', bold: true },
-                            'y habiendo usted comprometido según el contrato notarial firmado el 2/27/2023 . Todos lso 27 de cada mes y no cumpliendolo con su cronograma de pago.',
-                            { text: '(CADA NOTIFICACIÓN LLEGADA AL DOMICILIO SE HARA EL COBRO ADICIONAL DE S/50 SOLES).', bold: true }
-                        ],
-                        /* text: [
-                            'Por Incumplimiento de pago ya que según registros de cobranza de nuestra empresa Usted adeuda, POR LA MORA DE FEBRERO DE S/ 389.00 SOLES, DE LA CUOTA DE MARZO CON MORA DE S/ 1,556.50, ',
-                            { text: 'CUYO MONTO TOTAL A PAGAR ES DE S/ 1,945.50 SOLES', bold: true },
-                            ' Y HABIENDO USTED COMPROMETIDO SEGÚN EL CONTRATO NOTARIAL FIRMADO EL 05 DE OCTUBRE DEL 2023. (CADA NOTIFICACIÓN LLEGADA AL DOMICILIO SE HARA EL COBRO ADICIONAL DE S/50 SOLES).'
-                        ], */
-                        style: 'normal',
-                        alignment: 'justify',
-                        margin: [0, 0, 0, 15]
-                    },
+                    { text: parrafoIncumplimiento, style: 'normal', alignment: 'justify', margin: [0, 0, 0, 15] },
+                    { text: 'A su vez se procederá a realizar la denuncia correspondiente mediante instancias legales y judiciales que amerita el caso.', style: 'normal', alignment: 'justify', margin: [0, 0, 0, 15] },
 
-                    // Párrafo de denuncia
-                    {
-                        text: 'A su vez se procederá a realizar la denuncia correspondiente mediante instancias legales y judiciales que amerita el caso.',
-                        style: 'normal',
-                        alignment: 'justify',
-                        margin: [0, 0, 0, 15]
-                    },
-
-                    // Atentamente
-                    {
-                        text: 'Atte: Gerencia', bold: true,
-                        style: 'normal',
-                        alignment: 'left',
-                        margin: [0, 0, 0, 40]
-                    },
-
-                    // Sección de firma
+                    { text: 'Atte: Gerencia', bold: true, style: 'normal', alignment: 'left', margin: [0, 0, 0, 40] },
                     {
                         table: {
-                            widths: ['*'],
-                            body: [
-                                [{
-                                    canvas: [
-                                        {
-                                            type: 'line',
-                                            x1: 0,
-                                            y1: 0,
-                                            x2: 200,
-                                            y2: 0,
-                                            lineWidth: 1,
-                                            lineColor: 'black'
-                                        }
-                                    ],
-                                    alignment: 'center',
-                                    border: [false, false, false, false],
-                                    margin: [0, 0, 0, 5]
-                                }],
-                                [{
-                                    text: 'YHON MENDOZA HUARACA',
-                                    style: 'firma',
-                                    alignment: 'center',
-                                    border: [false, false, false, false],
-                                    margin: [0, 0, 0, 2]
-                                }],
-                                [{
-                                    text: 'GERENTE GENERAL',
-                                    style: 'cargo',
-                                    alignment: 'center',
-                                    border: [false, false, false, false]
-                                }]
+                            widths: ['*'], body: [
+                                [{ canvas: [{ type: 'line', x1: 0, y1: 0, x2: 200, y2: 0, lineWidth: 1, lineColor: 'black' }], alignment: 'center', border: [false, false, false, false], margin: [0, 0, 0, 5] }],
+                                [{ text: 'YHON MENDOZA HUARACA', style: 'firma', alignment: 'center', border: [false, false, false, false], margin: [0, 0, 0, 2] }],
+                                [{ text: 'GERENTE GENERAL', style: 'cargo', alignment: 'center', border: [false, false, false, false] }]
                             ]
-                        },
-                        layout: 'noBorders',
-                        margin: [0, 0, 0, 0]
+                        }, layout: 'noBorders', margin: [0, 0, 0, 0]
                     }
                 ],
 
                 styles: {
-                    fecha: {
-                        fontSize: 12,
-                        color: '#333'
-                    },
-                    titulo: {
-                        fontSize: 15,
-                        bold: true,
-                        color: '#000'
-                    },
-                    normal: {
-                        fontSize: 12,
-                        lineHeight: 1.3,
-                        color: '#000'
-                    },
-                    detalleLabel: {
-                        fontSize: 12,
-                        bold: true,
-                        color: '#000'
-                    },
-                    detalleSeparador: {
-                        fontSize: 12,
-                        bold: true,
-                        color: '#000',
-                        alignment: 'center'
-                    },
-                    detalleValue: {
-                        fontSize: 12,
-                        bold: true,
-                        color: '#000'
-                    },
-                    firma: {
-                        fontSize: 12,
-                        bold: true,
-                        color: '#000'
-                    },
-                    cargo: {
-                        fontSize: 12,
-                        bold: true,
-                        color: '#000'
-                    },
-                    contactInfo: {
-                        fontSize: 12,
-                        color: '#333333',
-                        lineHeight: 1.2
-                    }
+                    fecha: { fontSize: 12, color: '#333' },
+                    titulo: { fontSize: 15, bold: true, color: '#000' },
+                    normal: { fontSize: 12, lineHeight: 1.3, color: '#000' },
+                    detalleLabel: { fontSize: 12, bold: true, color: '#000' },
+                    detalleSeparador: { fontSize: 12, bold: true, color: '#000', alignment: 'center' },
+                    detalleValue: { fontSize: 12, bold: true, color: '#000' },
+                    firma: { fontSize: 12, bold: true, color: '#000' },
+                    cargo: { fontSize: 12, bold: true, color: '#000' },
+                    contactInfo: { fontSize: 12, color: '#333333', lineHeight: 1.2 }
                 }
             };
         }
 
         async function generatePDFNotificacion() {
             const loadingIndicator = document.getElementById('loading-indicator');
-
             try {
-                const headerImageBase64 = await convertImageToBase64('/assets/images/logos/cabecera-yondaa.png');
+                const idContrato = new URLSearchParams(window.location.search).get('contrato');
+                if (!idContrato) throw new Error("Falta el parámetro 'contrato' en la URL. Ej: ?contrato=8");
 
-                const docDefinition = createNotificacionPDF(headerImageBase64);
+                const datos = await getDatosReporteRecojoVehicular(idContrato);
+                if (!datos) throw new Error("No se encontraron datos para el contrato especificado.");
+
+                const headerImageBase64 = await convertImageToBase64('/assets/images/logos/cabecera-yondaa.png').catch(() => null);
+
+                const docDefinition = createNotificacionPDF(headerImageBase64, datos);
                 const pdfDocGenerator = pdfMake.createPdf(docDefinition);
-                globalFilename = 'notificacion-cobranza-ana-torres.pdf';
 
-                // Generar el blob UNA SOLA VEZ y guardarlo globalmente
+                const safeName = (datos.nombre_cliente || 'cliente').replace(/\s+/g, '-').replace(/[^a-zA-Z0-9\-]/g, '').toLowerCase();
+                globalFilename = `constancia-recojo-${safeName}-${idContrato}.pdf`;
+
                 pdfDocGenerator.getBlob((blob) => {
                     globalPdfBlob = blob;
-
-                    if (loadingIndicator) {
-                        loadingIndicator.style.display = 'none';
-                    }
-
-                    if (isPreview || !urlParams.has('preview')) {
-                        showPDFPreview(globalFilename);
-                    } else {
-                        showDownloadModal(globalFilename);
-                    }
+                    if (loadingIndicator) loadingIndicator.style.display = 'none';
+                    if (isPreview || !urlParams.has('preview')) showPDFPreview(globalFilename);
+                    else showDownloadModal(globalFilename);
                 });
 
             } catch (error) {
                 console.error('Error al generar PDF:', error);
-                if (loadingIndicator) {
-                    loadingIndicator.style.display = 'none';
-                }
-                alert('Error al generar el PDF. La ventana se cerrará.');
+                if (loadingIndicator) loadingIndicator.style.display = 'none';
+                alert('Error al generar el PDF: ' + (error.message || error));
                 setTimeout(() => window.close(), 50);
             }
         }

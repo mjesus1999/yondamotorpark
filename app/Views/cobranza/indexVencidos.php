@@ -92,9 +92,13 @@
                                                     <i class="fas fa-file-pdf"></i>
                                                 </button>
                                                 <button class="btn btn-sm btn-danger mt-2" title="Recojo PDF"
-                                                    onclick="window.open('/reportesRecojo', '_blank')">
+                                                    onclick="window.open('/reportesRecojo?contrato=<?= (int) $row['idcontrato'] ?>', '_blank')">
                                                     <i class="fas fa-file-pdf"></i>
                                                 </button>
+                                                <!-- <button class="btn btn-sm btn-danger mt-2" title="Recojo PDF"
+                                                    onclick="window.open('/reportesRecojo', '_blank')">
+                                                    <i class="fas fa-file-pdf"></i>
+                                                </button> -->
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>

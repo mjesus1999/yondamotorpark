@@ -1,4 +1,3 @@
--- ========================================
 -- VISTA DE COBRANZA 
 -- ========================================
 
@@ -128,24 +127,40 @@ BEGIN
         cl.idcliente,
         cl.tipocliente,
         
-        CASE WHEN cl.tipocliente = 'P' THEN CONCAT(p.apellidos, ' ', p.nombres) ELSE NULL END AS nombre_completo,
-        CASE WHEN cl.tipocliente = 'P' THEN p.tipodoc ELSE NULL END AS tipo_documento,
-        CASE WHEN cl.tipocliente = 'P' THEN p.nrodoc ELSE NULL END AS numero_documento,
-        CASE WHEN cl.tipocliente = 'P' THEN p.email ELSE NULL END AS email_persona,
-        CASE WHEN cl.tipocliente = 'P' THEN p.direccion ELSE NULL END AS direccion_persona,
-        CASE WHEN cl.tipocliente = 'P' THEN p.telprimario ELSE NULL END AS telefono_primario_persona,
-        CASE WHEN cl.tipocliente = 'P' THEN p.telalternativo ELSE NULL END AS telefono_alternativo_persona,
+        CASE WHEN cl.tipocliente = 'P' THEN CONCAT(p.apellidos, ' ', p.nombres) 
+        ELSE NULL END AS nombre_completo,
+        CASE WHEN cl.tipocliente = 'P' THEN p.tipodoc 
+        ELSE NULL END AS tipo_documento,
+        CASE WHEN cl.tipocliente = 'P' THEN p.nrodoc 
+        ELSE NULL END AS numero_documento,
+        CASE WHEN cl.tipocliente = 'P' THEN p.email 
+        ELSE NULL END AS email_persona,
+        CASE WHEN cl.tipocliente = 'P' THEN p.direccion 
+        ELSE NULL END AS direccion_persona,
+        CASE WHEN cl.tipocliente = 'P' THEN p.telprimario 
+        ELSE NULL END AS telefono_primario_persona,
+        CASE WHEN cl.tipocliente = 'P' THEN p.telalternativo 
+        ELSE NULL END AS telefono_alternativo_persona,
         
-        CASE WHEN cl.tipocliente = 'E' THEN e.razonsocial ELSE NULL END AS razon_social,
-        CASE WHEN cl.tipocliente = 'E' THEN e.ruc ELSE NULL END AS ruc,
-        CASE WHEN cl.tipocliente = 'E' THEN e.representante ELSE NULL END AS representante_legal,
-        CASE WHEN cl.tipocliente = 'E' THEN e.email ELSE NULL END AS email_empresa,
-        CASE WHEN cl.tipocliente = 'E' THEN e.direccion ELSE NULL END AS direccion_empresa,
-        CASE WHEN cl.tipocliente = 'E' THEN e.telprimario ELSE NULL END AS telefono_primario_empresa,
-        CASE WHEN cl.tipocliente = 'E' THEN e.telsecundario ELSE NULL END AS telefono_secundario_empresa,
+        CASE WHEN cl.tipocliente = 'E' THEN e.razonsocial 
+        ELSE NULL END AS razon_social,
+        CASE WHEN cl.tipocliente = 'E' THEN e.ruc 
+        ELSE NULL END AS ruc,
+        CASE WHEN cl.tipocliente = 'E' THEN e.representante 
+        ELSE NULL END AS representante_legal,
+        CASE WHEN cl.tipocliente = 'E' THEN e.email 
+        ELSE NULL END AS email_empresa,
+        CASE WHEN cl.tipocliente = 'E' THEN e.direccion 
+        ELSE NULL END AS direccion_empresa,
+        CASE WHEN cl.tipocliente = 'E' THEN e.telprimario 
+        ELSE NULL END AS telefono_primario_empresa,
+        CASE WHEN cl.tipocliente = 'E' THEN e.telsecundario 
+        ELSE NULL END AS telefono_secundario_empresa,
         
-        CASE WHEN cl.tipocliente = 'P' THEN dp.distrito WHEN cl.tipocliente = 'E' THEN de.distrito END AS distrito,
-        CASE WHEN cl.tipocliente = 'P' THEN pp.provincia WHEN cl.tipocliente = 'E' THEN pe.provincia END AS provincia
+        CASE WHEN cl.tipocliente = 'P' THEN dp.distrito WHEN cl.tipocliente = 'E' 
+        THEN de.distrito END AS distrito,
+        CASE WHEN cl.tipocliente = 'P' THEN pp.provincia WHEN cl.tipocliente = 'E' 
+        THEN pe.provincia END AS provincia
         
     FROM contratos cnt
     JOIN cotizaciones cot ON cnt.idcotizacion = cot.idcotizacion
@@ -215,7 +230,9 @@ BEGIN
     JOIN provincias pl ON dl.idprovincia = pl.idprovincia
     LEFT JOIN cronogramas cr ON cr.idcontrato = cnt.idcontrato
     
-    WHERE cnt.idcontrato = p_idcontrato
+    WHERE cnt.idcontrato = p_idcontrato;
+    
+    /*
     GROUP BY 
         cnt.idcontrato, cnt.fechainicio, cnt.diapago, cnt.escredito,
         cnt.penalidadbase, cnt.estado, cnt.observaciones,
@@ -223,7 +240,7 @@ BEGIN
         v.version, v.condicion, v.color, v.placa, v.chasis,
         cmb.combustible, cot.moneda, cot.precioventa, cot.inicial,
         cot.numcuotas, cot.valorcuota, cot.gastosadministrativos,
-        l.tienda, dl.distrito, pl.provincia;
+        l.tienda, dl.distrito, pl.provincia;*/
 END$$
 DELIMITER ;
 
@@ -320,7 +337,7 @@ BEGIN
         COALESCE(d.distrito, 'Sin distrito') AS tienda,
         cot.numcuotas AS cuotas_totales,
         
-        -- Monto primera vencida (del JOIN)
+        -- Monto primera vencida 
         (cron.abonocapital + cron.interes + IFNULL(cron.penalidad, 0)) AS monto_primera_vencida,
         
         -- SUM/COUNT 
@@ -480,12 +497,13 @@ BEGIN
     
     WHERE c.estado = 'ACT'
     
+    /*
     GROUP BY 
         c.idcontrato, cli.tipocliente, p.apellidos, p.nombres, 
         p.telprimario, e.razonsocial, e.telprimario,
         d.distrito, pro.provincia, m.marca, mo.modelo,
         cron.fechapago, cron.numcuota, cron.abonocapital, 
-        cron.interes, cot.numcuotas
+        cron.interes, cot.numcuotas*/
     
     ORDER BY dias_para_vencer ASC, cron.fechapago ASC;
 END$$
@@ -519,7 +537,6 @@ BEGIN
     
     START TRANSACTION;
     
-    -- Obtener el tipo de cliente y sus IDs desde el contrato
     SELECT 
         cli.tipocliente,
         cli.idpersona,
@@ -639,20 +656,136 @@ BEGIN
             (CASE
                 WHEN (ROUND(GREATEST((cot.valorcuota * cnt.penalidadbase) - COALESCE(pgs.pagado_penal,0),0),2) > 0)
                      AND (ROUND(GREATEST(cot.valorcuota - COALESCE(pgs.pagado_cuota,0),0),2) = 0)
+				THEN CONCAT(
+					'MORA DE MES:', MONTH(cr.fechapago), 
+					' MONTO:', 
+					REPLACE(FORMAT(ROUND(GREATEST((cot.valorcuota * cnt.penalidadbase) - COALESCE(pgs.pagado_penal,0),0),2),2),',','')
+				)
+                WHEN ROUND(GREATEST(cot.valorcuota - COALESCE(pgs.pagado_cuota,0),0),2) > 0
+                
                 THEN CONCAT(
-                    'MORA DE ', UPPER(ELT(MONTH(cr.fechapago),
-                        'enero','febrero','marzo','abril','mayo','junio','julio','agosto','setiembre','octubre','noviembre','diciembre'
-                    )),
-                    ' DE S/ ',
+					'CUOTA DE MES:', MONTH(cr.fechapago), 
+					' CON MORA MONTO:', 
+					REPLACE(FORMAT(
+						ROUND(GREATEST(cot.valorcuota - COALESCE(pgs.pagado_cuota,0),0),2)
+						+
+						ROUND(GREATEST((cot.valorcuota * cnt.penalidadbase) - COALESCE(pgs.pagado_penal,0),0),2)
+					,2),',','')
+				)
+                ELSE NULL
+            END)
+            ORDER BY cr.fechapago
+            SEPARATOR ' || '
+        ) AS detalle_cuotas_vencidas,
+
+        SUM(
+            CASE
+                WHEN (GREATEST(cot.valorcuota - COALESCE(pgs.pagado_cuota,0),0) > 0)
+                  OR (GREATEST((cot.valorcuota * cnt.penalidadbase) - COALESCE(pgs.pagado_penal,0),0) > 0)
+                THEN 1 ELSE 0
+            END
+        ) AS cantidad_cuotas_vencidas,
+
+        ROUND(SUM( GREATEST(cot.valorcuota - COALESCE(pgs.pagado_cuota,0),0) ),2) AS total_cuotas_vencidas,
+
+        ROUND(SUM( GREATEST((cot.valorcuota * cnt.penalidadbase) - COALESCE(pgs.pagado_penal,0),0) ),2) AS total_penalidades_vencidas,
+
+        ROUND(SUM(
+            GREATEST(cot.valorcuota - COALESCE(pgs.pagado_cuota,0),0)
+            +
+            GREATEST((cot.valorcuota * cnt.penalidadbase) - COALESCE(pgs.pagado_penal,0),0)
+        ),2) AS total_deuda_vencida,
+
+        MIN(cr.fechapago) AS fecha_primera_vencida,
+        DATEDIFF(CURDATE(), MIN(cr.fechapago)) AS dias_atraso
+
+    FROM contratos cnt
+    JOIN cotizaciones cot ON cnt.idcotizacion = cot.idcotizacion
+    JOIN clientes cl ON cot.idcliente = cl.idcliente
+    LEFT JOIN personas pe ON cl.idpersona = pe.idpersona
+    LEFT JOIN empresas e ON cl.idempresa = e.idempresa
+    LEFT JOIN distritos dp ON pe.iddistrito = dp.iddistrito
+    LEFT JOIN provincias pp ON dp.idprovincia = pp.idprovincia
+    LEFT JOIN distritos de ON e.iddistrito = de.iddistrito
+    LEFT JOIN provincias peprov ON de.idprovincia = peprov.idprovincia
+    JOIN vehiculos v ON cot.idvehiculo = v.idvehiculo
+    JOIN modelos mo ON v.idmodelo = mo.idmodelo
+    JOIN marcas ma ON mo.idmarca = ma.idmarca
+
+    LEFT JOIN cronogramas cr ON cr.idcontrato = cnt.idcontrato
+        AND cr.estado IN ('Pendiente', 'Vencido')
+        AND cr.fechapago < CURDATE()
+
+    LEFT JOIN (
+        SELECT 
+            idcronograma,
+            SUM(CASE WHEN tipo = 'Cuota' THEN amortizacion ELSE 0 END) AS pagado_cuota,
+            SUM(CASE WHEN tipo = 'Penalidad' THEN amortizacion ELSE 0 END) AS pagado_penal
+        FROM pagos
+        GROUP BY idcronograma
+    ) pgs ON pgs.idcronograma = cr.idcronograma
+
+    WHERE cnt.idcontrato = p_idcontrato
+    GROUP BY cnt.idcontrato;
+END$$
+DELIMITER ;
+
+
+-- 11) CONSULTA PARA EL PDF DE RECOJO VEHICULAR DE COBRANZA
+
+DROP PROCEDURE IF EXISTS sp_get_datos_reporte_recojo_vehicular_pdf;
+DELIMITER $$
+CREATE PROCEDURE sp_get_datos_reporte_recojo_vehicular_pdf(IN p_idcontrato INT)
+BEGIN
+    SELECT 
+        -- Datos del cliente
+        CASE 
+            WHEN cl.tipocliente = 'P' THEN CONCAT(pe.apellidos, ' ', pe.nombres)
+            WHEN cl.tipocliente = 'E' THEN e.razonsocial
+        END AS nombre_cliente,
+
+        CASE WHEN cl.tipocliente = 'P' THEN pe.tipodoc ELSE 'RUC' END AS tipo_documento,
+        CASE WHEN cl.tipocliente = 'P' THEN pe.nrodoc WHEN cl.tipocliente = 'E' THEN e.ruc END AS numero_documento,
+        CASE WHEN cl.tipocliente = 'P' THEN CONCAT(pe.direccion, ', ', dp.distrito, ', ', pp.provincia)
+             WHEN cl.tipocliente = 'E' THEN CONCAT(e.direccion, ', ', de.distrito, ', ', peprov.provincia)
+        END AS direccion_completa,
+        
+        CASE 
+            WHEN cl.tipocliente = 'P' THEN pe.telprimario
+            WHEN cl.tipocliente = 'E' THEN e.telprimario
+        END AS telefono,
+
+        ma.marca,
+        mo.modelo,
+        mo.anio AS vehiculo_anio,
+        v.color,
+        v.placa,
+        v.chasis AS numero_chasis,
+        v.seriemotor AS numero_motor,
+
+        cnt.idcontrato,
+        cnt.fechainicio AS fecha_contrato,
+        cnt.diapago AS dia_pago_mensual,
+        cnt.penalidadbase AS porcentaje_penalidad,
+
+        cot.moneda,
+        cot.valorcuota,
+        
+        GROUP_CONCAT(
+            DISTINCT
+            (CASE
+                WHEN (ROUND(GREATEST((cot.valorcuota * cnt.penalidadbase) - COALESCE(pgs.pagado_penal,0),0),2) > 0)
+                     AND (ROUND(GREATEST(cot.valorcuota - COALESCE(pgs.pagado_cuota,0),0),2) = 0)
+                THEN CONCAT(
+                    'MORA DE MES:', MONTH(cr.fechapago), 
+                    ' MONTO:', 
                     REPLACE(FORMAT(ROUND(GREATEST((cot.valorcuota * cnt.penalidadbase) - COALESCE(pgs.pagado_penal,0),0),2),2),',','')
                 )
-
+                
                 WHEN ROUND(GREATEST(cot.valorcuota - COALESCE(pgs.pagado_cuota,0),0),2) > 0
                 THEN CONCAT(
-                    'CUOTA DE ', UPPER(ELT(MONTH(cr.fechapago),
-                        'enero','febrero','marzo','abril','mayo','junio','julio','agosto','setiembre','octubre','noviembre','diciembre'
-                    )),
-                    ' CON MORA DE S/ ',
+                    'CUOTA DE MES:', MONTH(cr.fechapago), 
+                    ' CON MORA MONTO:', 
                     REPLACE(FORMAT(
                         ROUND(GREATEST(cot.valorcuota - COALESCE(pgs.pagado_cuota,0),0),2)
                         +
@@ -715,14 +848,134 @@ BEGIN
 
     WHERE cnt.idcontrato = p_idcontrato
     GROUP BY cnt.idcontrato;
+    
 END$$
 DELIMITER ;
 
+/*
+DROP PROCEDURE IF EXISTS sp_get_datos_reporte_recojo_vehicular_pdf;
+DELIMITER $$
+CREATE PROCEDURE sp_get_datos_reporte_recojo_vehicular_pdf(IN p_idcontrato INT)
+BEGIN
+	SELECT 
+        -- Datos del cliente
+        CASE 
+            WHEN cl.tipocliente = 'P' THEN CONCAT(pe.apellidos, ' ', pe.nombres)
+            WHEN cl.tipocliente = 'E' THEN e.razonsocial
+        END AS nombre_cliente,
 
---  	
+        CASE WHEN cl.tipocliente = 'P' THEN pe.tipodoc ELSE 'RUC' END AS tipo_documento,
+        CASE WHEN cl.tipocliente = 'P' THEN pe.nrodoc WHEN cl.tipocliente = 'E' THEN e.ruc END AS numero_documento,
+        CASE WHEN cl.tipocliente = 'P' THEN CONCAT(pe.direccion, ', ', dp.distrito, ', ', pp.provincia)
+             WHEN cl.tipocliente = 'E' THEN CONCAT(e.direccion, ', ', de.distrito, ', ', peprov.provincia)
+        END AS direccion_completa,
+        
+        CASE 
+			WHEN cl.tipocliente = 'P' THEN pe.telprimario
+			WHEN cl.tipocliente = 'E' THEN e.telprimario
+		END AS telefono,
 
+        ma.marca,
+        mo.modelo,
+        mo.anio AS vehiculo_anio,
+        v.color,
+        v.placa,
+        v.chasis AS numero_chasis,
+        v.seriemotor AS numero_motor,
+
+        cnt.idcontrato,
+        cnt.fechainicio AS fecha_contrato,
+        cnt.penalidadbase AS porcentaje_penalidad,
+
+        cot.moneda,
+        cot.valorcuota,
+        
+        GROUP_CONCAT(
+            DISTINCT
+            (CASE
+                WHEN (ROUND(GREATEST((cot.valorcuota * cnt.penalidadbase) - COALESCE(pgs.pagado_penal,0),0),2) > 0)
+                     AND (ROUND(GREATEST(cot.valorcuota - COALESCE(pgs.pagado_cuota,0),0),2) = 0)
+				THEN CONCAT(
+					'MORA DE MES:', MONTH(cr.fechapago), 
+					' MONTO:', 
+					REPLACE(FORMAT(ROUND(GREATEST((cot.valorcuota * cnt.penalidadbase) - COALESCE(pgs.pagado_penal,0),0),2),2),',','')
+				)
+                
+                WHEN ROUND(GREATEST(cot.valorcuota - COALESCE(pgs.pagado_cuota,0),0),2) > 0
+                
+                THEN CONCAT(
+					'CUOTA DE MES:', MONTH(cr.fechapago), 
+					' CON MORA MONTO:', 
+					REPLACE(FORMAT(
+						ROUND(GREATEST(cot.valorcuota - COALESCE(pgs.pagado_cuota,0),0),2)
+						+
+						ROUND(GREATEST((cot.valorcuota * cnt.penalidadbase) - COALESCE(pgs.pagado_penal,0),0),2)
+					,2),',','')
+				)
+
+                ELSE NULL
+            END)
+            ORDER BY cr.fechapago
+            SEPARATOR ' || '
+        ) AS detalle_cuotas_vencidas,
+
+        SUM(
+            CASE
+                WHEN (GREATEST(cot.valorcuota - COALESCE(pgs.pagado_cuota,0),0) > 0)
+                  OR (GREATEST((cot.valorcuota * cnt.penalidadbase) - COALESCE(pgs.pagado_penal,0),0) > 0)
+                THEN 1 ELSE 0
+            END
+        ) AS cantidad_cuotas_vencidas,
+
+        ROUND(SUM( GREATEST(cot.valorcuota - COALESCE(pgs.pagado_cuota,0),0) ),2) AS total_cuotas_vencidas,
+
+        ROUND(SUM( GREATEST((cot.valorcuota * cnt.penalidadbase) - COALESCE(pgs.pagado_penal,0),0) ),2) AS total_penalidades_vencidas,
+
+        ROUND(SUM(
+            GREATEST(cot.valorcuota - COALESCE(pgs.pagado_cuota,0),0)
+            +
+            GREATEST((cot.valorcuota * cnt.penalidadbase) - COALESCE(pgs.pagado_penal,0),0)
+        ),2) AS total_deuda_vencida,
+
+        MIN(cr.fechapago) AS fecha_primera_vencida,
+        DATEDIFF(CURDATE(), MIN(cr.fechapago)) AS dias_atraso
+
+    FROM contratos cnt
+    JOIN cotizaciones cot ON cnt.idcotizacion = cot.idcotizacion
+    JOIN clientes cl ON cot.idcliente = cl.idcliente
+    LEFT JOIN personas pe ON cl.idpersona = pe.idpersona
+    LEFT JOIN empresas e ON cl.idempresa = e.idempresa
+    LEFT JOIN distritos dp ON pe.iddistrito = dp.iddistrito
+    LEFT JOIN provincias pp ON dp.idprovincia = pp.idprovincia
+    LEFT JOIN distritos de ON e.iddistrito = de.iddistrito
+    LEFT JOIN provincias peprov ON de.idprovincia = peprov.idprovincia
+    JOIN vehiculos v ON cot.idvehiculo = v.idvehiculo
+    JOIN modelos mo ON v.idmodelo = mo.idmodelo
+    JOIN marcas ma ON mo.idmarca = ma.idmarca
+
+    LEFT JOIN cronogramas cr ON cr.idcontrato = cnt.idcontrato
+        AND cr.estado IN ('Pendiente', 'Vencido')
+        AND cr.fechapago < CURDATE()
+
+    LEFT JOIN (
+        SELECT 
+            idcronograma,
+            SUM(CASE WHEN tipo = 'Cuota' THEN amortizacion ELSE 0 END) AS pagado_cuota,
+            SUM(CASE WHEN tipo = 'Penalidad' THEN amortizacion ELSE 0 END) AS pagado_penal
+        FROM pagos
+        GROUP BY idcronograma
+    ) pgs ON pgs.idcronograma = cr.idcronograma
+
+    WHERE cnt.idcontrato = p_idcontrato
+    GROUP BY cnt.idcontrato;
+	
+END$$
+DELIMITER ;
+*/    
+        
 -- PRUEBAS
-
+-- CALL sp_get_datos_reporte_recojo_vehicular_pdf(7);
+-- CALL sp_get_datos_reporte_notificacion_pdf(7);
 -- CALL sp_get_estadisticas_cobranza();
 -- CALL sp_get_tarjetas_cobranza();
 -- CALL sp_get_info_cliente_cobranza(7);

@@ -219,7 +219,7 @@ class CobranzaController extends Controller
     {
         $this->authRequired();
 
-        $this->view('cobranza/reports.reporte_atraso_01_mes');
+        $this->view('cobranza/reports.reporte_atraso_mes');
     }
 
     public function reporteCobranzaAtrasado2()
@@ -310,7 +310,7 @@ class CobranzaController extends Controller
     }
 
     //AVANCE DE LOS REPORTES DE ATRASO
-    /* public function getDatosReporteNotificacion(): void
+    public function getDatosReporteNotificacion(): void
     {
         $this->authRequired();
         header('Content-Type: application/json');
@@ -339,9 +339,9 @@ class CobranzaController extends Controller
                 'message' => 'Error al obtener datos del reporte: ' . $e->getMessage()
             ]);
         }
-    } */
+    }
 
-    public function getDatosReporteNotificacion(): void
+    public function getDatosReporteRecojoVehicular()
     {
         $this->authRequired();
         header('Content-Type: application/json');
@@ -353,7 +353,7 @@ class CobranzaController extends Controller
                 throw new Exception('ID de contrato no proporcionado');
             }
 
-            $datos = $this->cobranzaModel->getReporteNotificacion($idContrato);
+            $datos = $this->cobranzaModel->getReporteRecojoVehicular($idContrato);
 
             if (!$datos) {
                 throw new Exception('No se encontraron datos para el contrato');
@@ -363,11 +363,11 @@ class CobranzaController extends Controller
                 'success' => true,
                 'data' => $datos
             ]);
-        } catch (Exception $e) {
+        } catch (Exception $error) {
             http_response_code(500);
             echo json_encode([
                 'success' => false,
-                'message' => 'Error al obtener datos del reporte: ' . $e->getMessage()
+                'message' => 'Error al obtener datos del reporte: ' . $error->getMessage()
             ]);
         }
     }

@@ -280,21 +280,6 @@ class Cobranza
 
 
     // AVANCE DE LOS REPORTES
-    /* public function getReporteNotificacion($idContrato)
-    {
-        try {
-            $stmt = $this->db->prepare("CALL sp_get_datos_reporte_notificacion(?)");
-            $stmt->execute([$idContrato]);
-            $data = $stmt->fetch(PDO::FETCH_ASSOC);
-            $stmt->closeCursor();
-
-            return $data;
-        } catch (PDOException $e) {
-            error_log("Error en getDatosReporteNotificacion: " . $e->getMessage());
-            return null;
-        }
-    } */
-
     public function getReporteNotificacion($idContrato)
     {
         try {
@@ -306,6 +291,21 @@ class Cobranza
             return $data;
         } catch (PDOException $e) {
             error_log("Error en getReporteNotificacion: " . $e->getMessage());
+            return null;
+        }
+    }
+
+    public function getReporteRecojoVehicular($idContrato)
+    {
+        try {
+            $stmt = $this->db->prepare("CALL sp_get_datos_reporte_recojo_vehicular_pdf(?);");
+            $stmt->execute([$idContrato]);
+            $data = $stmt->fetch(PDO::FETCH_ASSOC);
+            $stmt->closeCursor();
+
+            return $data;
+        } catch (PDOException $e) {
+            error_log("Error en getReporteRecojoVehicular: " . $e->getMessage());
             return null;
         }
     }

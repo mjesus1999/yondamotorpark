@@ -23,19 +23,15 @@ $router->add('POST', '/Cobranza/actualizarTelefono', 'CobranzaController', 'actu
 $router->add('GET', '/Recordatorios', 'CobranzaController', 'indexNotificar');
 $router->add('GET', '/Vencidos', 'CobranzaController', 'indexVencidos');
 
-//REPORTES PDF
+//REPORTES PDF NOTIFICACION DE COBRANZA ATRASADO
 /* $router->add('GET', '/reportes', 'CobranzaController', 'reporteCobranza'); */
 $router->add('GET', '/reportesAtrasado', 'CobranzaController', 'reporteCobranzaAtrasado');
 //CARGAR DATOS AL PDF
 $router->add('GET', '/Cobranza/getDatosReporteNotificacion', 'CobranzaController', 'getDatosReporteNotificacion');
 
+//REPORTE PDF RECOJO VEHICULAFR
+$router->add('GET', '/reportesRecojo', 'CobranzaController', 'reporteRecojoVehicular');
+$router->add('GET', '/Cobranza/getDatosReporteRecojoVehicular', 'CobranzaController', 'getDatosReporteRecojoVehicular');
+
 
 $router->add('GET', '/reportesAtrasado2', 'CobranzaController', 'reporteCobranzaAtrasado2');
-$router->add('GET', '/reportesRecojo', 'CobranzaController', 'reporteRecojoVehicular');
-
-
-//EJEMPLOS
-// En tu router o CobranzaController
-/* $router->add('POST', '/api/enviar-sms', 'CobranzaController', 'enviarSms'); */
-/* $router->get('/Cobranza/getResumenFinanciero/{id}', 'CobranzaController@getResumenFinanciero');
-$router->get('/Cobranza/getHistorialPagos/{id}/{limite}', 'CobranzaController@getHistorialPagos'); */

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reporte de Cobranza Atrasado - Vista Previa PDF</title>
+    <title>Reporte de Cobranza Atrasado - PDF</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -127,9 +127,8 @@
             document.body.appendChild(modalOverlay);
             const btnDownload = modalOverlay.querySelector('#btn-download-pdf');
             const btnCancel = modalOverlay.querySelector('#btn-cancel-download');
-            function closeModal() 
-            { 
-                if (modalOverlay && modalOverlay.parentNode) modalOverlay.parentNode.removeChild(modalOverlay); 
+            function closeModal() {
+                if (modalOverlay && modalOverlay.parentNode) modalOverlay.parentNode.removeChild(modalOverlay);
             }
             btnDownload.addEventListener('click', () => { try { if (globalPdfBlob) { downloadPdfFromBlob(globalPdfBlob, filename); closeModal(); setTimeout(() => { try { window.close(); } catch (e) { } }, 1000); } } catch (e) { console.error(e); alert('Error al descargar el PDF'); } });
             btnCancel.addEventListener('click', () => { closeModal(); setTimeout(() => { try { window.close(); } catch (e) { } }, 100); });
@@ -228,12 +227,27 @@
             }
         }
 
+        function formatMesEspanol(numeroMes) {
+            const meses = ['ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO', 'JULIO', 'AGOSTO', 'SETIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'];
+            return meses[parseInt(numeroMes) - 1] || '';
+        }
+
         function detalleToParrafo(detalleStr) {
             if (!detalleStr) return '';
-            const parts = detalleStr.split(' || ').map(s => s.trim()).filter(Boolean);
+
+            const parts = detalleStr.split(' || ').map(s => {
+
+                let texto = s.replace(/MES:(\d+)/g, (match, num) => formatMesEspanol(num));
+
+                texto = texto.replace(/MONTO:/g, 'DE S/ ');
+                return texto;
+            });
+
+            return parts.join(', ');
+            /* const parts = detalleStr.split(' || ').map(s => s.trim()).filter(Boolean);
             if (parts.length === 0) return '';
-            const joined = parts.map(s => s.toUpperCase()).join(', ');
-            return joined;
+                const joined = parts.map(s => s.toUpperCase()).join(', ');
+            return joined; */
         }
 
         function createNotificacionPDF(headerImageBase64, datos) {
@@ -261,7 +275,7 @@
             const fechaPrimera = rawValueAsString(datos.fecha_primera_vencida || '');
             const diasAtraso = rawValueAsString(datos.dias_atraso !== undefined ? datos.dias_atraso : '');
 
-            const fechaContrato = formatDateDdMmYyyy(datos.fecha_contrato);
+            /* const fechaContrato = formatDateDdMmYyyy(datos.fecha_contrato); */
 
             const detalleParrafo = detalleToParrafo(datos.detalle_cuotas_vencidas || '');
 
@@ -271,7 +285,7 @@
                 { text: detalleParrafo ? (` ${detalleParrafo} `) : '', bold: true },
                 { text: `CUYO MONTO TOTAL A PAGAR ES DE S/ ${totalDeuda} `, bold: true },
                 'y habiendo Ud. comprometido según el contrato notarial firmado el ',
-                { text: fechaContrato || '05/10/2023', bold: true },
+                /* { text: fechaContrato || '05/10/2023', bold: true }, */
                 ' ',
                 { text: '(CADA NOTIFICACIÓN LLEGADA AL DOMICILIO SE HARÁ EL COBRO ADICIONAL DE S/50 SOLES).', bold: true }
             ];
@@ -304,8 +318,8 @@
                     // DATOS CLIENTE
                     { text: [{ text: 'Señor(a): ', style: 'normal', bold: true }, { text: nombre, style: 'normal' }], margin: [0, 0, 0, 5] },
                     { text: [{ text: `${tipo_doc}: `, style: 'normal', bold: true }, { text: nro_doc, style: 'normal' }], margin: [0, 0, 0, 5] },
-                    { text: [{ text: 'Dirección: ', style: 'normal', bold: true }, { text: direccion, style: 'normal' }], margin: [0, 0, 0, 5] },
-                    { text: [{ text: 'Fecha de contrato: ', style: 'normal', bold: true }, { text: fechaContrato || '', style: 'normal' }], margin: [0, 0, 0, 10] },
+                    { text: [{ text: 'Dirección: ', style: 'normal', bold: true }, { text: direccion, style: 'normal' }], margin: [0, 0, 0, 15] },
+                    /* { text: [{ text: 'Fecha de contrato: ', style: 'normal', bold: true }, { text: fechaContrato || '', style: 'normal' }], margin: [0, 0, 0, 10] } */
                     { text: ['Mediante el presente: YHON KENNIDEY MENDOZA HUARACA. Representante General de', { text: ' YONDA & GRUPO HUARACA E.I.R.L', bold: true }, ' hace de su conocimiento que', { text: ' TIENE DEUDA PENDIENTE CON NUESTRA EMPRESA DEL VEHÍCULO CON LAS SIGUIENTES CARACTERÍSTICAS:', bold: true }], style: 'normal', alignment: 'justify', margin: [0, 0, 0, 10] },
                     {
                         table: {
