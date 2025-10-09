@@ -33,5 +33,5 @@ $router->add('GET', '/Cobranza/getDatosReporteNotificacion', 'CobranzaController
 $router->add('GET', '/reportesRecojo', 'CobranzaController', 'reporteRecojoVehicular');
 $router->add('GET', '/Cobranza/getDatosReporteRecojoVehicular', 'CobranzaController', 'getDatosReporteRecojoVehicular');
 
-
+//EJEMPLO ESTATICO
 $router->add('GET', '/reportesAtrasado2', 'CobranzaController', 'reporteCobranzaAtrasado2');
