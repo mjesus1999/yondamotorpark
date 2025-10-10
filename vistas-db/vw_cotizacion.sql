@@ -2,13 +2,11 @@
 -- VISTAS DE COTIZACION.PHP
 */
 
-USE motorpark;
+USE motorpark2;
 
 -- OBTENER TODAS LAS COTIZACIONES REALIZADAS / getAll 
 /*
--- (solo mostrando los que esten en los dias de vigenicas se mostrara)
-*/
-
+-- (solo mostrando los que esten en los dias de vigenicas se mostrara)*/
 CREATE OR REPLACE VIEW vwGetAllCotizacion AS
 SELECT
     c.idcotizacion,
@@ -19,20 +17,15 @@ SELECT
     c.estadocotizacion,
     fc.tipocotizacion,
     COALESCE(
-        CASE WHEN cl.tipocliente = 'P' THEN CONCAT(p.apellidos, ', ', p.nombres) END,
-        e.razonsocial,
+        CASE WHEN cl.tipocliente = 'P' THEN CONCAT(p.apellidos, ', ', p.nombres) ELSE e.razonsocial END,
         'Cliente no definido'
     ) AS nombrecliente,
     p.direccion,
     COALESCE(
-        CASE WHEN cl.tipocliente = 'P' THEN p.nrodoc END,
-        e.ruc,
-        ''
+        CASE WHEN cl.tipocliente = 'P' THEN p.nrodoc ELSE e.ruc END, ''
     ) AS documento,
     COALESCE(
-        CASE WHEN cl.tipocliente = 'P' THEN p.telprimario END,
-        e.telprimario,
-        ''
+        CASE WHEN cl.tipocliente = 'P' THEN p.telprimario ELSE e.telprimario END, ''
     ) AS telefono,
     ma.marca AS marcaVehiculo,
     mo.modelo AS modeloVehiculo,
@@ -45,12 +38,25 @@ SELECT
     c.inicial,
     c.precioventa,
     c.valorcuota,
-    -- Calcular vencimiento
     DATE_ADD(IFNULL(c.fechareactivacion, c.creado), INTERVAL c.vigenciadias DAY) AS fecha_vencimiento,
     c.fechareactivacion,
     CONCAT(pase.apellidos, ' ', pase.nombres) AS asesor_nombre,
     col.usernick AS asesor_usuario,
-    cg.cargo AS asesor_cargo
+    cg.cargo AS asesor_cargo,
+    info_reserva.idcotizacion AS idcotizacion_reserva,
+    CASE WHEN info_reserva.idcotizacion IS NOT NULL THEN 1 ELSE 0 END AS existe_reserva,
+    info_reserva.nombrecliente AS reserva_cliente_nombre,
+    info_contrato.nombrecliente AS contrato_cliente_nombre, 
+    CASE WHEN info_contrato.idvehiculo IS NOT NULL THEN 1 ELSE 0 END AS vehiculo_en_contrato,
+    CASE 
+        WHEN (
+            SELECT COALESCE(SUM(p_sum.amortizacion), 0)
+            FROM pagos p_sum
+            WHERE p_sum.idcotizacion = c.idcotizacion AND p_sum.idconcepto = (SELECT idconcepto FROM conceptospago WHERE concepto = 'Inicial' LIMIT 1)
+        ) >= c.inicial
+        THEN 1 ELSE 0
+    END AS habilitar_contrato
+
 FROM cotizaciones c
 JOIN clientes cl ON c.idcliente = cl.idcliente
 LEFT JOIN personas p ON cl.idpersona = p.idpersona
@@ -63,21 +69,57 @@ LEFT JOIN colaboradores col ON c.idasesor = col.idcolaborador
 LEFT JOIN contratoslaborales cl_ase ON col.idcontratolaboral = cl_ase.idcontratolaboral
 LEFT JOIN personas pase ON cl_ase.idpersona = pase.idpersona
 LEFT JOIN cargos cg ON cl_ase.idcargo = cg.idcargo
+LEFT JOIN (
+    WITH RankedReserva AS (
+        SELECT
+            c_res.idvehiculo,
+            c_res.idcotizacion,
+            COALESCE(
+                CASE WHEN cl_res.tipocliente = 'P' THEN CONCAT(p_res.apellidos, ', ', p_res.nombres) ELSE e_res.razonsocial END
+            ) AS nombrecliente,
+            ROW_NUMBER() OVER(PARTITION BY c_res.idvehiculo ORDER BY c_res.creado DESC) as rn
+        FROM cotizaciones c_res
+        JOIN clientes cl_res ON c_res.idcliente = cl_res.idcliente
+        LEFT JOIN personas p_res ON cl_res.idpersona = p_res.idpersona
+        LEFT JOIN empresas e_res ON cl_res.idempresa = e_res.idempresa
+        WHERE c_res.estadocotizacion IN ('S', 'A')
+    )
+    SELECT idvehiculo, idcotizacion, nombrecliente FROM RankedReserva WHERE rn = 1
+) AS info_reserva ON info_reserva.idvehiculo = v.idvehiculo
+LEFT JOIN (
+    WITH RankedContracts AS (
+        SELECT
+            c_cont.idvehiculo,
+            COALESCE(
+                CASE WHEN cl_cont.tipocliente = 'P' THEN CONCAT(p_cont.apellidos, ', ', p_cont.nombres) ELSE e_cont.razonsocial END
+            ) AS nombrecliente,
+            ROW_NUMBER() OVER(PARTITION BY c_cont.idvehiculo ORDER BY co.idcontrato DESC) as rn
+        FROM contratos co
+        JOIN cotizaciones c_cont ON co.idcotizacion = c_cont.idcotizacion
+        JOIN clientes cl_cont ON c_cont.idcliente = cl_cont.idcliente
+        LEFT JOIN personas p_cont ON cl_cont.idpersona = p_cont.idpersona
+        LEFT JOIN empresas e_cont ON cl_cont.idempresa = e_cont.idempresa
+    )
+    SELECT idvehiculo, nombrecliente FROM RankedContracts WHERE rn = 1
+) AS info_contrato ON info_contrato.idvehiculo = v.idvehiculo
+LEFT JOIN (
+    SELECT idcotizacion, SUM(amortizacion) AS total_pagado
+    FROM pagos
+    GROUP BY idcotizacion
+) AS pagos_sum ON pagos_sum.idcotizacion = c.idcotizacion
+
 WHERE 
 (
-  
     c.estadocotizacion NOT IN ('CONT') 
-    AND
-    (
-        -- Regla de vigencia: Vigente O Aprobada
-        DATE_ADD(IFNULL(c.fechareactivacion, c.creado), INTERVAL c.vigenciadias DAY) >= CURDATE()
-        OR c.estadocotizacion = 'A'
+    AND (
+        (c.estadocotizacion = 'P' AND COALESCE(pagos_sum.total_pagado, 0) = 0 AND DATE_ADD(IFNULL(c.fechareactivacion, c.creado), INTERVAL c.vigenciadias DAY) >= CURDATE())
+        OR c.estadocotizacion IN ('A', 'S')
     )
 )
-ORDER BY COALESCE(c.fechareactivacion, c.creado) ASC, c.creado DESC;
+ORDER BY c.creado DESC;
 
-SELECT * FROM vwGetAllCotizacion WHERE estadocotizacion = 'P';
 
+SELECT * FROM  vwGetAllCotizacion WHERE estadocotizacion = 'P';
 
 SELECT * FROM cotizaciones;
 

@@ -67,7 +67,7 @@ use App\Core\Router;
 
 $router = new Router();
 
-// echo "Intentando cargar: " . APP_ROOT . '/app/Routes/ConceptoPagos.router.php' . "<br>";ñgit
+// echo "Intentando cargar: " . APP_ROOT . '/app/Routes/ConceptoPagos.router.php' . "<br>";
 //RUTAS POR MÓDULO
 require APP_ROOT . '/app/Routes/Home.router.php';
 require APP_ROOT . '/app/Routes/Marca.router.php';

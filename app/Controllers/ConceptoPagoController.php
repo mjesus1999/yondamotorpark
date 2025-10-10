@@ -3,7 +3,6 @@
 namespace App\Controllers;
 
 use App\Core\Controller;
-use App\Helpers\Validador;
 use App\Models\ConceptoPago;
 
 

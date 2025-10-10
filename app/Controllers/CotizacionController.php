@@ -7,7 +7,9 @@ use App\Core\Controller;
 use App\Models\Cotizacion;
 use App\Models\Vehiculo;
 use App\Models\FormatoCotizacion;
+use App\Helpers\Validador;
 use Exception;
+use PDOException;
 
 class CotizacionController extends Controller
 {
@@ -53,7 +55,7 @@ class CotizacionController extends Controller
 
 
         $cotizaciones = [];
-        $estadoUpperCase = strtoupper($estado); 
+        $estadoUpperCase = strtoupper($estado);
 
 
         if ($puedeVerTodas) {
@@ -81,13 +83,19 @@ class CotizacionController extends Controller
             ]
         ]);
     }
-    public function indexPagoInicial($idCotizacion) {
+
+    public function indexPagoInicial($idCotizacion)
+    {
         $datos = $this->cotizacionModel->getDatosCotizacion($idCotizacion);
+        $completoIncial = $this->cotizacionModel->completoInicial($idCotizacion);
+        // error_log('IDCLIENTE' . print_r($datos, true));
         $montosInfo = $this->cotizacionModel->getTotalPagadoYSaldoPendiente($idCotizacion);
         $historialPagos = $this->cotizacionModel->getHistorialPagosInicial($idCotizacion);
-        $this->view('cotizacion.pagoInicial', ['cotizacion' => $datos, 'montosInfo' => $montosInfo, 'historialPagos' => $historialPagos]);
-
+        $this->view('cotizacion.pagoInicial', ['cotizacion' => $datos, 'montosInfo' => $montosInfo, 'historialPagos' => $historialPagos, 'completoInicial' => $completoIncial]);
     }
+
+
+
 
 
     public function html2pdfReport($id): void
@@ -136,6 +144,119 @@ class CotizacionController extends Controller
         $this->view('cotizacion.reporte-cotizacion');
     }
 
+    public function storePagoInicial()
+    {
+        header('Content-Type: application/json');
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            echo json_encode(['success' => false, 'message' => 'Método no permitido']);
+            return;
+        }
+
+        $rutaArchivoGuardado = null;
+
+        try {
+            $data = array_map([Validador::class, 'limpiar'], $_POST);
+            $errores = [];
+
+            $registro = [
+                'idconcepto'        => $data['idconcepto'] ?? null,
+                'idcotizacion'      => $data['idcotizacion'] ?? null,
+                'idvehiculo'        => $data['idvehiculo'] ?? null,
+                'idcuentapago'      => empty($data['idcuentapago']) ? null : $data['idcuentapago'],
+                'mediopago'         => $data['mediopago'] ?? null,
+                'numerotransaccion' => empty($data['numerotransaccion']) ? null : $data['numerotransaccion'],
+                'fechapago'         => $data['fechapago'] ?? null,
+                'amortizacion'      => $data['amortizacion'] ?? null,
+                'saldorestante'     => $data['saldorestante'] ?? null,
+                'comprobante'       => null,
+                'observacion'       => empty($data['observacion']) ? null : $data['observacion'],
+            ];
+
+            // Validaciones
+            $errores[] = Validador::campoObligatorio($registro['idconcepto'], 'Concepto');
+            $errores[] = Validador::campoObligatorio($registro['idvehiculo'], 'Identificador del vehículo');
+            $errores[] = Validador::campoObligatorio($registro['mediopago'], 'Medio de pago');
+            $errores[] = Validador::campoObligatorio($registro['fechapago'], 'Fecha de pago');
+            $errores[] = Validador::campoObligatorio($registro['amortizacion'], 'Amortización');
+            $errores[] = Validador::campoObligatorio($registro['saldorestante'], 'Saldo restante');
+
+            $errores = array_filter($errores);
+
+            if (count($errores) > 0) {
+                echo json_encode(['success' => false, 'message' => implode('<br>', $errores)]);
+                return;
+            }
+
+            // Subida de archivo
+            if (isset($_FILES['comprobante']) && $_FILES['comprobante']['error'] === UPLOAD_ERR_OK) {
+                $directorioDestino = __DIR__ . '/../../storage/comprobantes/';
+
+                if (!is_dir($directorioDestino)) {
+                    mkdir($directorioDestino, 0777, true);
+                }
+
+                $nombreArchivo = 'pagoInicial_' . uniqid() . '_' . basename($_FILES['comprobante']['name']);
+                $rutaArchivoGuardado = $directorioDestino . $nombreArchivo;
+
+                if (!move_uploaded_file($_FILES['comprobante']['tmp_name'], $rutaArchivoGuardado)) {
+                    throw new Exception('No se pudo guardar el archivo del comprobante.');
+                }
+
+                $registro['comprobante'] = 'comprobantes/' . $nombreArchivo;
+            }
+
+            // Insertar pago
+            $idPago = $this->cotizacionModel->addPagoInicial($registro);
+
+            if ($idPago > 0) {
+                echo json_encode([
+                    'success' => true,
+                    'message' => 'Pago registrado correctamente',
+                    'id' => $idPago
+                ]);
+            } else {
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'No se pudo registrar el pago de inicial'
+                ]);
+            }
+        } catch (PDOException $e) {
+            // Si el SP lanza el error del vehículo ya separado
+            if (strpos($e->getMessage(), 'El vehículo ya fue separado') !== false) {
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Este vehículo ya fue separado por otra cotización',
+                    'id' => 0
+                ]);
+                return;
+            }
+
+            // Si se había guardado un archivo, lo eliminamos
+            if ($rutaArchivoGuardado && file_exists($rutaArchivoGuardado)) {
+                @unlink($rutaArchivoGuardado);
+            }
+
+            http_response_code(500);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Error interno del servidor: ' . $e->getMessage(),
+                'id' => 0
+            ]);
+        } catch (Exception $e) {
+            if ($rutaArchivoGuardado && file_exists($rutaArchivoGuardado)) {
+                @unlink($rutaArchivoGuardado);
+            }
+
+            http_response_code(500);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Error interno del servidor: ' . $e->getMessage(),
+                'id' => 0
+            ]);
+        }
+    }
 
 
 

@@ -427,20 +427,18 @@
 </div>
 
 <div class="modal fade" id="avatarModal" tabindex="-1" aria-labelledby="avatarModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content bg-dark border-0">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title text-white" id="avatarModalLabel">Foto de perfil</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                    aria-label="Cerrar"></button>
-            </div>
-            <div class="modal-body text-center p-0">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: fit-content;">
+        <div class="modal-content border-0">
+            <div class="text-center mt-1">
                 <img src="<?= htmlspecialchars($usuario['avatar'] ?? '/assets/images/profile.jpg') ?>"
-                    alt="Avatar Grande" class="img-fluid rounded">
+                    alt="Avatar Grande"
+                    class="img-fluid rounded"
+                    style="max-height: 80vh; max-width: 100%;">
             </div>
         </div>
     </div>
 </div>
+
 
 <div class="toast-notification" id="toast">
     <i class="toast-icon fas fa-check-circle"></i>

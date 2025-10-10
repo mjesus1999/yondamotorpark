@@ -56,7 +56,7 @@ CREATE TABLE cotizaciones (
     numcuotas SMALLINT NOT NULL,
     gastosadministrativos DECIMAL(9,2) NOT NULL DEFAULT 0.00 COMMENT 'Gastos administrativos de la cotización',
     valorcuota DECIMAL(9, 2) NOT NULL, -- Se usara en la tabla de cronogramas
-    estadocotizacion ENUM('P', 'O', 'A', 'C', 'R','CONT') NOT NULL DEFAULT 'P' COMMENT 'Pendiente | OBSERVADA  | Aprobada | Cancelada (cliente) | Rechazada (Analista crédito) | CONTRATO',
+    estadocotizacion ENUM('P', 'S','O', 'A', 'C', 'R','CONT') NOT NULL DEFAULT 'P' COMMENT 'Pendiente | Separada ( Ya se realizo un pago )| OBSERVADA  | Aprobada | Cancelada (cliente) | Rechazada (Analista crédito) | CONTRATO',
     comentarios TEXT,
     fechaseguimiento DATETIME NULL,
     creado DATETIME NOT NULL DEFAULT NOW(),
@@ -68,6 +68,7 @@ CREATE TABLE cotizaciones (
     CONSTRAINT fk_idcolventa_cot FOREIGN KEY (idasesor) REFERENCES colaboradores (idcolaborador)
 ) ENGINE = INNODB;
 
+ALTER TABLE cotizaciones MODIFY COLUMN estadocotizacion ENUM('P', 'S','O', 'A', 'C', 'R','CONT') NOT NULL DEFAULT 'P' COMMENT 'Pendiente | Separada ( Ya se realizo un pago )| OBSERVADA  | Aprobada | Cancelada (cliente) | Rechazada (Analista crédito) | CONTRATO';
 
 CREATE TABLE conceptospago (
     idconcepto INT PRIMARY KEY AUTO_INCREMENT,
@@ -82,6 +83,7 @@ CREATE TABLE conceptospago (
 
 CREATE TABLE pagos (
     idpago INT AUTO_INCREMENT PRIMARY KEY,
+    idcotizacion INT NULL COMMENT 'SOLO TENDRÁ UN VALOR CUANDO EL PAGO SEA EN CONCEPTO "INICIAL DE UNA COTIZACION"',
     idcliente INT NULL COMMENT 'CUANDO SE REALIZA UN PAGO AL CONTADO SE IDENTIFICA QUE CLIENTE REALIZO EL PAGO',
     idconcepto  INT NULL COMMENT 'CONCEPTO DE PAGO',
     idvehiculo  INT NULL COMMENT 'TENDRÁ UN VALOR CUANDO EL CONCEPTO DE PAGO SEA INICIAL O CONTADO',
@@ -114,8 +116,10 @@ CREATE TABLE pagos (
     CONSTRAINT fk_idcliente_pagos  FOREIGN KEY(idcliente) REFERENCES clientes(idcliente)
 ) ENGINE = InnoDB;
 
+SELECT * FROM pagos;
+-- ALTER TABLE pagos ADD COLUMN idcotizacion INT NULL AFTER idpago;
 
-
+-- ALTER TABLE pagos ADD CONSTRAINT fk_idcotizacion_pagos FOREIGN KEY (idcotizacion) REFERENCES cotizaciones (idcotizacion);
 
 CREATE TABLE cuentaspago (
     idcuentapago INT AUTO_INCREMENT PRIMARY KEY,
@@ -230,7 +234,7 @@ LEFT JOIN pagos p
     ON p.idvehiculo = v.idvehiculo
    AND p.idconcepto = (SELECT idconcepto FROM conceptospago WHERE concepto = 'Inicial' LIMIT 1)
 WHERE c.estadocotizacion = 'A'  
-  AND c.idcotizacion = 34
+  AND c.idcotizacion = 20
 GROUP BY v.idvehiculo, c.idcotizacion, c.inicial;
 
 
@@ -287,3 +291,76 @@ LEFT JOIN entidadespago e
     ON cp.identidadpago = e.identidadpago
 WHERE c.idcotizacion = 34
 ORDER BY p.fechapago ASC, p.idpago ASC;
+
+
+SELECT idconcepto,concepto FROM conceptospago;
+SELECT identidadpago, entidad FROM entidadespago ORDER BY entidad ASC;
+SELECT * FROM cuentasPago;
+SELECT * FROM pagos;
+
+SELECT * FROM cotizaciones;
+
+
+SELECT * FROM vehiculos WHERE idvehiculo = 70;
+
+SELECT * FROM vehiculos;
+UPDATE cotizaciones SET estadocotizacion = 'P' WHERE idcotizacion = 38;
+
+
+
+SELECT COUNT(*) AS cnt
+FROM pagos p
+JOIN conceptospago cp ON p.idconcepto = cp.idconcepto
+WHERE p.idcotizacion = 37
+  AND cp.concepto = 'Inicial';
+
+  SELECT * FROM pagos;
+
+
+
+SELECT 
+SUM(amortizacion) amortizacion,
+cot.inicial
+FROM pagos p 
+JOIN cotizaciones cot ON p.idcotizacion = cot.idcotizacion
+WHERE p.idcotizacion = 37 AND cot.estadocotizacion = 'A';
+
+
+SELECT 
+    cot.idcotizacion,
+    cot.inicial,
+    COALESCE(SUM(p.amortizacion),0) AS total_pagado,
+    CASE 
+        WHEN cot.estadocotizacion IN ('A','P') 
+             AND COALESCE(SUM(p.amortizacion),0) >= cot.inicial
+        THEN 1 ELSE 0 
+    END AS habilitar_contrato
+FROM cotizaciones cot
+LEFT JOIN pagos p ON p.idcotizacion = cot.idcotizacion
+WHERE cot.idcotizacion = 41
+GROUP BY cot.idcotizacion, cot.inicial, cot.estadocotizacion;
+
+
+
+SELECT * FROM pagos;
+
+UPDATE pagos SET amortizacion = 20000, saldorestante = 10000 WHERE idpago = 571;
+
+SELECT * FROM fichasolicitud;
+
+DELETE FROM fichasolicitud;
+
+UPDATE cotizaciones SET estadocotizacion = 'S' WHERE idcotizacion IN(39);
+
+SELECT * FROM cotizaciones;
+
+SELECT * FROM pagos;
+SELECT * FROM contratos;
+
+DELETE FROM cronogramas;
+
+
+DELETE FROM contratos;
+
+
+SELECT * FROM cronogramas;

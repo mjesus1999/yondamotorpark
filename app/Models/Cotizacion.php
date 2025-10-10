@@ -46,6 +46,34 @@ class Cotizacion
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function completoInicial(int $idcotizacion): int
+    {
+        $query = "SELECT 
+                cot.idcotizacion,
+                cot.inicial,
+                COALESCE(SUM(p.amortizacion),0) AS total_pagado,
+                CASE 
+                    WHEN cot.estadocotizacion = 'A' 
+                        AND COALESCE(SUM(p.amortizacion),0) >= cot.inicial
+                    THEN 1 ELSE 0 
+                END AS habilitar_contrato
+            FROM cotizaciones cot
+            LEFT JOIN pagos p ON p.idcotizacion = cot.idcotizacion
+            WHERE cot.idcotizacion = :idcotizacion
+            GROUP BY cot.idcotizacion, cot.inicial, cot.estadocotizacion;";
+        try {
+            $stmt = $this->db->prepare($query);
+            $stmt->bindParam(":idcotizacion", $idcotizacion, PDO::PARAM_INT);
+            $stmt->execute();
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            return intval($result["habilitar_contrato"]);
+        } catch (PDOException $e) {
+            error_log($e->getMessage());
+            return -1;
+        }
+    }
+
 
 
     public function getDatosCotizacion(string $id): array
@@ -76,19 +104,19 @@ class Cotizacion
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-
-    public function getTotalPagadoYSaldoPendiente($id):array {
+    public function getTotalPagadoYSaldoPendiente($idcotizacion): array
+    {
         $query = "
                     SELECT 
-                        v.idvehiculo,
                         c.idcotizacion,
+                        v.idvehiculo,
                         c.inicial AS monto_inicial,
                         COALESCE(SUM(p.amortizacion), 0) AS totalpagado,
                         COALESCE(
                             (
                                 SELECT pp.saldorestante
                                 FROM pagos pp
-                                WHERE pp.idvehiculo = v.idvehiculo
+                                WHERE pp.idcotizacion = c.idcotizacion
                                 AND pp.idconcepto = (SELECT idconcepto FROM conceptospago WHERE concepto = 'Inicial' LIMIT 1)
                                 ORDER BY pp.fechapago DESC, pp.idpago DESC
                                 LIMIT 1
@@ -99,65 +127,83 @@ class Cotizacion
                     INNER JOIN vehiculos v 
                         ON v.idvehiculo = c.idvehiculo
                     LEFT JOIN pagos p 
-                        ON p.idvehiculo = v.idvehiculo
-                    AND p.idconcepto = (SELECT idconcepto FROM conceptospago WHERE concepto = 'Inicial' LIMIT 1)
-                    WHERE c.estadocotizacion = 'A'  
-                    AND c.idcotizacion = :idcotizacion
+                        ON p.idcotizacion = c.idcotizacion
+                        AND p.idconcepto = (SELECT idconcepto FROM conceptospago WHERE concepto = 'Inicial' LIMIT 1)
+                    WHERE c.idcotizacion = :idcotizacion
                     GROUP BY v.idvehiculo, c.idcotizacion, c.inicial;
+    ";
 
-        ";  
         try {
             $stmt = $this->db->prepare($query);
-            $stmt->bindParam(":idcotizacion", $id, PDO::PARAM_INT);
+            $stmt->bindParam(":idcotizacion", $idcotizacion, PDO::PARAM_INT);
             $stmt->execute();
             return $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log($e->getMessage());
+            return [];
+        }
+    }
 
-        } catch(PDOException $e) {
+    public function getHistorialPagosInicial($idcotizacion): array
+    {
+        $query = "
+        SELECT 
+            DATE_FORMAT(p.fechapago,'%d-%m-%Y') AS fechapago,
+            e.entidad AS entidadbancaria,
+            cp.numcuenta,
+            cp.moneda,
+            p.mediopago,
+            p.numerotransaccion,
+            p.amortizacion,
+            p.saldorestante,
+            p.comprobante,
+            p.observacion
+        FROM pagos p
+        INNER JOIN cotizaciones c 
+            ON c.idcotizacion = p.idcotizacion
+        LEFT JOIN cuentaspago cp 
+            ON p.idcuentapago = cp.idcuentapago
+        LEFT JOIN entidadespago e 
+            ON cp.identidadpago = e.identidadpago
+        WHERE c.idcotizacion = :idcotizacion
+          AND p.idconcepto = (SELECT idconcepto FROM conceptospago WHERE concepto = 'Inicial' LIMIT 1)
+        ORDER BY p.fechapago ASC, p.idpago ASC;
+    ";
+
+        try {
+            $stmt = $this->db->prepare($query);
+            $stmt->bindParam(":idcotizacion", $idcotizacion, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
             error_log($e->getMessage());
             return [];
         }
     }
 
 
-    public  function getHistorialPagosInicial($idcotizacion):array {
-        
-        $query = "
-        
-                SELECT 
-                   DATE_FORMAT(p.fechapago,'%d-%m-%Y') AS fechapago,
-                    e.entidad AS entidadbancaria,
-                    cp.numcuenta,
-                    cp.moneda,
-                    p.mediopago,
-                    p.numerotransaccion,
-                    p.amortizacion,
-                    p.saldorestante,
-                    p.comprobante,
-                    p.observacion
-                FROM cotizaciones c
-                INNER JOIN vehiculos v 
-                    ON v.idvehiculo = c.idvehiculo
-                INNER JOIN pagos p 
-                    ON p.idvehiculo = v.idvehiculo
-                AND p.idconcepto = (SELECT idconcepto FROM conceptospago WHERE concepto = 'Inicial' LIMIT 1)
-                LEFT JOIN cuentaspago cp 
-                    ON p.idcuentapago = cp.idcuentapago
-                LEFT JOIN entidadespago e 
-                    ON cp.identidadpago = e.identidadpago
-                WHERE c.idcotizacion = :idcotizacion
-                ORDER BY p.fechapago ASC, p.idpago ASC;
 
-        ";
-        try {
-            $stmt = $this->db->prepare($query);
-            $stmt->bindParam(":idcotizacion", $idcotizacion,PDO::PARAM_INT);
-            $stmt->execute();
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        } catch(PDOException $e) {
-            error_log($e->getMessage());
-            return [];
-        }
+    public function addPagoInicial($params = [])
+    {
+        $query = "CALL sp_pagoInicial(:idconcepto, :idcotizacion, :idvehiculo, :idcuentapago, :idcolcaja, :mediopago, :numerotransaccion, :fechapago, :amortizacion, :saldorestante, :comprobante, :observacion)";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute([
+            ':idconcepto' => $params['idconcepto'],
+            ':idcotizacion' => $params['idcotizacion'],
+            ':idvehiculo' => $params['idvehiculo'],
+            ':idcuentapago' => $params['idcuentapago'] ?? 0,
+            ':idcolcaja' => $params['idcolcaja'] ?? null,
+            ':mediopago' => $params['mediopago'],
+            ':numerotransaccion' => $params['numerotransaccion'],
+            ':fechapago' => $params['fechapago'],
+            ':amortizacion' => $params['amortizacion'],
+            ':saldorestante' => $params['saldorestante'],
+            ':comprobante' => $params['comprobante'],
+            ':observacion' => $params['observacion']
+        ]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        $stmt->closeCursor();
+        return (int)($result['idpago'] ?? 0);
     }
 
 

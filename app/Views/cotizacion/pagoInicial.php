@@ -1,12 +1,5 @@
 <?php include __DIR__ . '/../layout/header.php'; ?>
 
-<?php
-
-// var_dump($montosInfo); 
-
-
-var_dump($historialPagos) ?>
-
 
 <style>
     :root {
@@ -280,7 +273,28 @@ var_dump($historialPagos) ?>
     }
 </style>
 
-<div class="container-fluid py-4 px-3 px-md-5">
+<div class="container-fluid">
+
+    <div class="alert alert-info mt-2" role="alert">
+        <div class="row">
+            <div class="col-md-6 d-flex align-items-center justify-content-start">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a href="#">Cotizacion</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Pago de inicial</li>
+                    </ol>
+                </nav>
+            </div>
+            <div class="col-md-6 text-end">
+                <a href="/cotizacion/P" class="border border-1 border-primary p-2" style="border-radius: 5px;">
+                    <i class="bi bi-list-task me-1"></i> Listar
+                </a>
+            </div>
+        </div>
+    </div>
+
+
+
     <!-- Encabezado Principal -->
     <div class="encabezado-principal">
         <div class="d-flex align-items-center gap-3 mb-4">
@@ -288,7 +302,7 @@ var_dump($historialPagos) ?>
                 <i class="bi bi-car-front-fill" style="font-size: 2rem;"></i>
             </div>
             <div>
-                <h1 class="h2 mb-1">Gestión de Pagos - Cotización #<span id="numeroCotizacion">34</span></h1>
+                <h1 class="h2 mb-1">Gestión de Pagos - Cotización #<span id="numeroCotizacion"><?= htmlspecialchars($cotizacion['idcotizacion']) ?></span></h1>
                 <p class="mb-0 opacity-75">Sistema de Registro y Control de Pagos Iniciales</p>
             </div>
         </div>
@@ -393,7 +407,7 @@ var_dump($historialPagos) ?>
                                 </div>
                                 <div>
                                     <small class="d-block">Dirección</small>
-                                    <strong id="direccionCliente"><?= htmlspecialchars($cotizacion['direccion' ?? 'No especificado']) ?></strong>
+                                    <strong id="direccionCliente"><?= htmlspecialchars($cotizacion['direccion'] == null ? 'No especificado' : $cotizacion['direccion']) ?></strong>
                                 </div>
                             </div>
                         </div>
@@ -550,7 +564,11 @@ var_dump($historialPagos) ?>
                         <div class="row g-3">
                             <div class="col-md-4">
                                 <small class="text-warning-emphasis  fw-bold d-block">Saldo Pendiente Actual</small>
-                                <strong class="text-warning-emphasis fs-5" id="saldoActualForm">PEN 45,000.00</strong>
+                                <strong class="text-warning-emphasis fs-5"
+                                    id="saldoActualForm"
+                                    data-valor="<?= htmlspecialchars($montosInfo['saldorestante']) ?>">
+                                    S/ <?= number_format(htmlspecialchars($montosInfo['saldorestante']), 2, '.', ',') ?>
+                                </strong>
                             </div>
                             <div class="col-md-4" id="montoAPagarContainer" style="display: none;">
                                 <small class="text-warning-emphasis d-block">Monto a Pagar</small>
@@ -564,30 +582,29 @@ var_dump($historialPagos) ?>
                     </div>
 
                     <!-- Formulario -->
-                    <form id="formularioPago">
+                    <form id="formularioPago" enctype="multipart/form-data" method="POST">
+
+                        <input type="hidden" value="<?= htmlspecialchars($cotizacion['idvehiculo']) ?>" id="idvehiculo" name="idvehiculo">
+                        <input type="hidden" value="<?= htmlspecialchars($cotizacion['idcotizacion']) ?>" id="idcotizacion" name="idcotizacion">
                         <div class="row g-4">
 
                             <div class="col-md-4">
                                 <label for="fechapago" class="form-label">Fecha de Pago <span class="text-danger fgw-bold">*</span></label>
-                                <input type="date" class="form-control" id="fechapago" required>
+                                <input type="date" class="form-control" id="fechapago" name="fechapago" required>
                             </div>
 
                             <!-- Concepto -->
                             <div class="col-md-4">
                                 <label for="idconcepto" class="form-label">Concepto de Pago <span class="text-danger fgw-bold">*</span></label>
-                                <select class="form-select" id="idconcepto" required>
-                                    <option value="">Seleccione el concepto</option>
-                                    <option value="Inicial">Inicial</option>
-                                    <option value="Cuota Mensual">Cuota Mensual</option>
-                                    <option value="Pago Adelantado">Pago Adelantado</option>
-                                    <option value="Pago Extraordinario">Pago Extraordinario</option>
+                                <select class="form-select" id="idconcepto" required name="idconcepto">
+                                    <option value="">Seleccione un concepto</option>
                                 </select>
                             </div>
 
 
                             <div class="col-md-4">
                                 <label for="mediopago" class="form-label">Medio de Pago <span class="text-danger fgw-bold">*</span></label>
-                                <select class="form-select" id="mediopago" name="mediopago">
+                                <select class="form-select" id="mediopago" name="mediopago" required>
                                     <option value="">Seleccione un medio de pago</option>
                                     <option value="Efectivo">Efectivo</option>
                                     <option value="Yape">Yape</option>
@@ -597,43 +614,35 @@ var_dump($historialPagos) ?>
                             </div>
 
                             <!-- Cuenta de Pago -->
-                            <div class="col-md-6">
+                            <div class="col-md-3">
                                 <label for="idcuentapago" class="form-label">Cuenta de Pago </label>
-                                <select class="form-select" id="idcuentapago" required>
+                                <select class="form-select" id="idcuentapago" name="idcuentapago">
                                     <option value="">Seleccione la cuenta</option>
-                                    <option value="BCP - Cuenta Corriente - 191-123456789-0-50">BCP - Cuenta Corriente - 191-123456789-0-50</option>
-                                    <option value="BBVA - Cuenta de Ahorros - 0011-0222-0333344444">BBVA - Cuenta de Ahorros - 0011-0222-0333344444</option>
-                                    <option value="Interbank - Cuenta Corriente - 200-3001234567">Interbank - Cuenta Corriente - 200-3001234567</option>
-                                    <option value="Scotiabank - Cuenta de Ahorros - 039-123456">Scotiabank - Cuenta de Ahorros - 039-123456</option>
                                 </select>
                             </div>
 
 
-
-                            <!-- Número de Transacción -->
-                            <div class="col-md-6">
-                                <label for="numerotransaccion" class="form-label">Número de Transacción </label>
-                                <input type="text" class="form-control" id="numerotransaccion" placeholder="Ej: TRF-2025-001234" required>
-                            </div>
-
-
-
                             <!-- Amortización -->
-                            <div class="col-md-6">
+                            <div class="col-md-3">
                                 <label for="amortizacion" class="form-label">Monto a Amortizar (PEN) <span class="text-danger fgw-bold">*</span></label>
-                                <input type="number" class="form-control" id="amortizacion" step="0.01" min="0.01" placeholder="0.00" required>
+                                <input type="number" class="form-control" id="amortizacion" step="0.01" min="0.01" placeholder="0.00" name="amortizacion" required>
+                            </div>
+                            <!-- Número de Transacción -->
+                            <div class="col-md-3">
+                                <label for="numerotransaccion" class="form-label">Número de Transacción </label>
+                                <input type="text" class="form-control" id="numerotransaccion" name="numerotransaccion" placeholder="Ej: TRF-2025-001234">
                             </div>
 
                             <!-- Comprobante -->
-                            <div class="col-md-6">
+                            <div class="col-md-3">
                                 <label for="comprobante" class="form-label">Comprobante</label>
-                                <input type="file" class="form-control" id="comprobante" placeholder="Nombre del archivo o código">
+                                <input type="file" class="form-control" id="comprobante" name="comprobante">
                             </div>
 
                             <!-- Observación -->
                             <div class="col-12">
                                 <label for="observacion" class="form-label">Observaciones</label>
-                                <textarea class="form-control" id="observacion" rows="4" placeholder="Ingrese observaciones adicionales sobre el pago..."></textarea>
+                                <textarea class="form-control" id="observacion" rows="4" placeholder="Ingrese observaciones adicionales sobre el pago..." name="observacion"></textarea>
                             </div>
 
 
@@ -643,9 +652,16 @@ var_dump($historialPagos) ?>
                                     <i class="bi bi-arrow-counterclockwise me-2"></i>Cancelar
                                 </button>
 
-                                <button type="submit" class="btn btn-gradient text-white">
-                                    <i class="bi bi-check-circle me-2"></i>Registrar Pago
-                                </button>
+                                <?php if ($completoInicial === 0): ?>
+                                    <button type="submit" class="btn btn-gradient text-white">
+                                        <i class="bi bi-check-circle me-2"></i>Registrar Pago
+                                    </button>
+                                <?php else: ?>
+                                    <span class="text-success fw-bold">
+                                        <i class="bi bi-check2-circle me-2"></i>Inicial completo
+                                    </span>
+                                <?php endif; ?>
+
                             </div>
 
                         </div>
@@ -742,7 +758,9 @@ var_dump($historialPagos) ?>
                                                 </td>
                                                 <td>
                                                     <?php if (!empty($pago['comprobante'])): ?>
-                                                        <a href="<?= htmlspecialchars($pago['comprobante']) ?>" target="_blank" class="badge bg-light text-dark">Ver</a>
+                                                        <button data-bs-toggle="modal"
+                                                            data-bs-target="#modalComprobante"
+                                                            data-src="/archivos/<?= htmlspecialchars($pago['comprobante']) ?>" data-bs-toggle="modal" data-bs-target="#modalComprobante" class="badge bg-light text-dark ver-comprobante">Ver</button>
                                                     <?php else: ?>
                                                         <span class="badge bg-secondary">N/A</span>
                                                     <?php endif; ?>
@@ -764,227 +782,232 @@ var_dump($historialPagos) ?>
     </div>
 </div>
 
+<div class="modal fade" id="modalComprobante" tabindex="-1" aria-labelledby="modalComprobanteLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header text-white" style="background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);">
+                <h5 class="modal-title" id="modalComprobanteLabel">Comprobante</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+                <img id="imagenComprobante" src="" class="img-fluid" alt="Comprobante de Pago">
+            </div>
+        </div>
+    </div>
+</div>
 
 
 <script>
-    // DATOS DE LA COTIZACIÓN
-    const datosCotizacion = {
-        idcotizacion: 34,
-        idvehiculo: 167,
-        tipocotizacion: "Independiente formal",
-        vehiculo: "KIA / Carens / 2025 / MORADO",
-        precioventa: 58044.80,
-        moneda: "PEN",
-        inicial: 45000.00,
-        nombrecliente: "PADILLA CHILET, CAROLINA ALEXANDRA",
-        documento: "70255454",
-        telefono: "965545454",
-        direccion: "Vía Expresa Elmer Faucett, 25 de Febrero",
-        numcuotas: 24,
-        valorcuota: 878.62,
-        estadocotizacion: "A"
-    };
+    const selectConcepto = document.getElementById('idconcepto');
+    const selectCuentaPago = document.getElementById('idcuentapago');
+    const selectMedioPago = document.getElementById('mediopago');
+    const inputNumeroTransaccion = document.getElementById('numerotransaccion');
+    const inputAmortizacion = document.getElementById('amortizacion');
+    const inputComprobante = document.getElementById('comprobante');
+    const formularioPago = document.getElementById('formularioPago');
+    const fechaPago = document.getElementById('fechapago');
 
-    // ARRAY DE PAGOS
-    let listaPagos = [];
+    const fechaActualISO = new Date().toISOString().slice(0, 10);
 
-    // FUNCIONES AUXILIARES
-    function formatearMoneda(cantidad) {
-        return cantidad.toLocaleString('es-PE', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        });
-    }
+    // console.log(fechaActualISO); 
 
-    function formatearFecha(fechaString) {
-        const fecha = new Date(fechaString);
-        const opciones = {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        };
-        return fecha.toLocaleDateString('es-PE', opciones);
-    }
-
-    function formatearFechaHora(fechaString) {
-        const fecha = new Date(fechaString);
-        const opciones = {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit'
-        };
-        return fecha.toLocaleString('es-PE', opciones);
-    }
-
-    function calcularTotalPagado() {
-        return listaPagos.reduce((total, pago) => total + parseFloat(pago.amortizacion), 0);
-    }
-
-    function calcularSaldoPendiente() {
-        return datosCotizacion.inicial - calcularTotalPagado();
-    }
-
-    // // INICIALIZAR DATOS
-    // function inicializarDatos() {
-    //     Encabezado
-    //     document.getElementById('numeroCotizacion').textContent = datosCotizacion.idcotizacion;
+    // Asignar el valor al input
+    fechaPago.value = fechaActualISO;
+    const modalComprobante = document.getElementById('modalComprobante');
 
 
-    //     document.getElementById('nombreCliente').textContent = datosCotizacion.nombrecliente;
-    //     document.getElementById('documentoCliente').textContent = datosCotizacion.documento;
-    //     document.getElementById('telefonoCliente').textContent = datosCotizacion.telefono;
-    //     document.getElementById('direccionCliente').textContent = datosCotizacion.direccion;
+    modalComprobante.addEventListener('show.bs.modal', function(event) {
+        // 'event.relatedTarget' es el botón en el que se hizo clic
+        const boton = event.relatedTarget;
+        const rutaImagen = boton.getAttribute('data-src');
+        const imagenEnModal = document.getElementById('imagenComprobante');
+        imagenEnModal.src = rutaImagen;
+    });
 
-    //     Detalles Vehículo
-    //     document.getElementById('nombreVehiculo').textContent = datosCotizacion.vehiculo;
-    //     document.getElementById('idVehiculo').textContent = '#' + datosCotizacion.idvehiculo;
-    //     document.getElementById('precioVenta').textContent = datosCotizacion.moneda + ' ' + formatearMoneda(datosCotizacion.precioventa);
-    //     document.getElementById('tipoCotizacion').textContent = datosCotizacion.tipocotizacion;
 
-    //     Tabla Financiamiento
-    //     document.getElementById('tablaPrecionVenta').textContent = datosCotizacion.moneda + ' ' + formatearMoneda(datosCotizacion.precioventa);
-    //     document.getElementById('tablaInicial').textContent = datosCotizacion.moneda + ' ' + formatearMoneda(datosCotizacion.inicial);
-    //     document.getElementById('tablaFinanciar').textContent = datosCotizacion.moneda + ' ' + formatearMoneda(datosCotizacion.precioventa - datosCotizacion.inicial);
-    //     document.getElementById('tablaCuotas').textContent = datosCotizacion.numcuotas + ' cuotas';
-    //     document.getElementById('tablaValorCuota').textContent = datosCotizacion.moneda + ' ' + formatearMoneda(datosCotizacion.valorcuota);
+    selectMedioPago.addEventListener('change', (e) => {
+        inputNumeroTransaccion.disabled = false;
+        selectCuentaPago.disabled = false;
 
-    //     Fecha máxima para el formulario
-    //     const hoy = new Date().toISOString().split('T')[0];
-    //     document.getElementById('fechapago').setAttribute('max', hoy);
+        switch (e.target.value) {
+            case 'Efectivo':
+                inputNumeroTransaccion.disabled = true;
+                selectCuentaPago.disabled = true;
+                inputComprobante.disabled = true;
 
-    //     actualizarResumen();
-    // }
-
-    // ACTUALIZAR RESUMEN
-    function actualizarResumen() {
-        const totalPagado = calcularTotalPagado();
-        const saldoPendiente = calcularSaldoPendiente();
-
-        document.getElementById('inicialRequerido').textContent = datosCotizacion.moneda + ' ' + formatearMoneda(datosCotizacion.inicial);
-        document.getElementById('totalPagado').textContent = datosCotizacion.moneda + ' ' + formatearMoneda(totalPagado);
-        document.getElementById('saldoPendiente').textContent = datosCotizacion.moneda + ' ' + formatearMoneda(saldoPendiente);
-        document.getElementById('saldoActualForm').textContent = datosCotizacion.moneda + ' ' + formatearMoneda(saldoPendiente);
-
-        // Actualizar estado
-        const elementoEstado = document.getElementById('estadoPago');
-        if (saldoPendiente <= 0) {
-            elementoEstado.className = 'estado-badge estado-completado';
-            elementoEstado.innerHTML = '<span class="badge rounded-circle bg-success p-1"></span> Completado';
-        } else {
-            elementoEstado.className = 'estado-badge estado-pendiente';
-            elementoEstado.innerHTML = '<span class="badge rounded-circle bg-warning p-1"></span> Pendiente';
+                break;
+            case 'Yape':
+            case 'Plin':
+                selectCuentaPago.disabled = true;
+                inputComprobante.disabled = false;
+                break;
         }
-    }
+    });
 
-    // CALCULAR SALDO RESTANTE EN TIEMPO REAL
-    document.getElementById('amortizacion').addEventListener('input', function() {
+    // Calcula y muestra el saldo restante en tiempo real mientras se escribe
+    inputAmortizacion.addEventListener('input', function() {
         const monto = parseFloat(this.value) || 0;
-        const saldoPendiente = calcularSaldoPendiente();
-        const saldoRestante = saldoPendiente - monto;
+        const saldoPendienteActual = parseFloat(document.getElementById('saldoActualForm').dataset.valor);
+        const nuevoSaldoRestante = saldoPendienteActual - monto;
 
         if (monto > 0) {
             document.getElementById('montoAPagarContainer').style.display = 'block';
             document.getElementById('saldoRestanteContainer').style.display = 'block';
-            document.getElementById('montoAPagar').textContent = datosCotizacion.moneda + ' ' + formatearMoneda(monto);
-            document.getElementById('saldoRestanteForm').textContent = datosCotizacion.moneda + ' ' + formatearMoneda(saldoRestante);
+            document.getElementById('montoAPagar').textContent = 'S/ ' + monto.toFixed(2);
+            document.getElementById('saldoRestanteForm').textContent = 'S/ ' + nuevoSaldoRestante.toFixed(2);
         } else {
             document.getElementById('montoAPagarContainer').style.display = 'none';
             document.getElementById('saldoRestanteContainer').style.display = 'none';
         }
     });
 
-    // VALIDAR FORMULARIO
-    function validarFormulario(datos) {
-        if (!datos.idconcepto) return 'Debe seleccionar un concepto';
-        if (!datos.idcuentapago) return 'Debe seleccionar una cuenta de pago';
-        if (!datos.mediopago) return 'Debe seleccionar un medio de pago';
-        if (!datos.numerotransaccion.trim()) return 'Debe ingresar el número de transacción';
-        if (!datos.fechapago) return 'Debe seleccionar la fecha de pago';
-        if (!datos.amortizacion || parseFloat(datos.amortizacion) <= 0) return 'Debe ingresar un monto válido';
-        if (parseFloat(datos.amortizacion) > calcularSaldoPendiente()) return 'El monto no puede ser mayor al saldo pendiente';
+
+
+
+    async function getConceptos() {
+        try {
+            const response = await fetch('/api/conceptospagos');
+            const data = await response.json();
+            data.forEach(el => {
+                selectConcepto.innerHTML += `<option value="${el.idconcepto}">${el.concepto}</option>`;
+            });
+        } catch (error) {
+            console.error('Error al cargar conceptos:', error);
+            mostrarAlerta('error', 'No se pudieron cargar los conceptos de pago.');
+        }
+    }
+
+    async function cargarCuentasBancarias() {
+        try {
+            const res = await fetch('/api/numcuentaspagos');
+            const data = await res.json();
+            data.forEach(cuenta => {
+                selectCuentaPago.innerHTML += `<option value="${cuenta.idcuentapago}">${cuenta.nombrecuenta}</option>`;
+            });
+        } catch (error) {
+            console.error('Error al cargar cuentas:', error);
+            mostrarAlerta('error', 'No se pudieron cargar las cuentas bancarias.');
+        }
+    }
+
+
+
+    /**
+     * Valida los datos del formulario antes de enviarlos.
+     * Las reglas cambian según el medio de pago.
+     * @returns {string|null} - Devuelve un mensaje de error o null si todo es válido.
+     */
+    function validarFormulario() {
+        const datos = new FormData(formularioPago);
+        const medioPago = datos.get('mediopago');
+        const amortizacion = parseFloat(datos.get('amortizacion'));
+        const saldoPendienteActual = parseFloat(document.getElementById('saldoActualForm').dataset.valor);
+
+        if (!datos.get('fechapago')) return 'Debe seleccionar la fecha de pago.';
+        if (!datos.get('idconcepto')) return 'Debe seleccionar un concepto de pago.';
+        if (!medioPago) return 'Debe seleccionar un medio de pago.';
+
+        // Reglas específicas según el medio de pago
+        if (medioPago === 'Transferencia Bancaria') {
+            if (!datos.get('idcuentapago')) return 'Debe seleccionar una cuenta de pago para la transferencia.';
+            if (!datos.get('numerotransaccion').trim()) return 'Debe ingresar el número de transacción.';
+        }
+
+        if (medioPago === 'Yape' || medioPago === 'Plin') {
+            if (!datos.get('numerotransaccion').trim()) return 'Debe ingresar el número de operación de Yape/Plin.';
+        }
+
+        if (!amortizacion || amortizacion <= 0) return 'El monto a pagar debe ser mayor a cero.';
+        if (amortizacion > saldoPendienteActual) return 'El monto a pagar no puede ser mayor al saldo pendiente.';
+
         return null;
     }
 
-    // LIMPIAR FORMULARIO
-    function limpiarFormulario() {
-        document.getElementById('formularioPago').reset();
-        document.getElementById('montoAPagarContainer').style.display = 'none';
-        document.getElementById('saldoRestanteContainer').style.display = 'none';
-        ocultarAlertas();
-    }
+    /**
+     * Función principal que valida y luego registra el pago.
+     */
 
-    // MOSTRAR ALERTA
-    function mostrarAlerta(tipo, mensaje) {
-        ocultarAlertas();
+    async function validarYRegistrarPago() {
+        event.preventDefault();
 
-        if (tipo === 'exito') {
-            document.getElementById('alertaExito').classList.remove('d-none');
-        } else if (tipo === 'error') {
-            document.getElementById('mensajeError').textContent = mensaje;
-            document.getElementById('alertaError').classList.remove('d-none');
-        }
-
-        // Scroll al inicio del formulario
-        document.getElementById('contenido-pago').scrollIntoView({
-            behavior: 'smooth',
-            block: 'start'
-        });
-    }
-
-    // OCULTAR ALERTAS
-    function ocultarAlertas() {
-        document.getElementById('alertaExito').classList.add('d-none');
-        document.getElementById('alertaError').classList.add('d-none');
-    }
-
-    // REGISTRAR PAGO
-    document.getElementById('formularioPago').addEventListener('submit', function(e) {
-        e.preventDefault();
-
-        const datosPago = {
-            idconcepto: document.getElementById('idconcepto').value,
-            idcuentapago: document.getElementById('idcuentapago').value,
-            mediopago: document.getElementById('mediopago').value,
-            numerotransaccion: document.getElementById('numerotransaccion').value,
-            fechapago: document.getElementById('fechapago').value,
-            amortizacion: document.getElementById('amortizacion').value,
-            comprobante: document.getElementById('comprobante').value || 'Sin comprobante',
-            observacion: document.getElementById('observacion').value || 'Sin observaciones'
-        };
-
-        const error = validarFormulario(datosPago);
+        // Primero, validamos los datos
+        const error = validarFormulario();
         if (error) {
             mostrarAlerta('error', error);
             return;
         }
 
-        const nuevoPago = {
-            id: listaPagos.length + 1,
-            idconcepto: datosPago.idconcepto,
-            idcuentapago: datosPago.idcuentapago,
-            mediopago: datosPago.mediopago,
-            numerotransaccion: datosPago.numerotransaccion,
-            fechapago: datosPago.fechapago,
-            amortizacion: parseFloat(datosPago.amortizacion).toFixed(2),
-            saldorestante: (calcularSaldoPendiente() - parseFloat(datosPago.amortizacion)).toFixed(2),
-            comprobante: datosPago.comprobante,
-            observacion: datosPago.observacion,
-            fecharegistro: new Date().toISOString()
-        };
 
-        listaPagos.push(nuevoPago);
-        mostrarAlerta('exito', '');
-        actualizarResumen();
-        renderizarHistorial();
+        const formData = new FormData(formularioPago);
 
-        setTimeout(() => {
-            limpiarFormulario();
-        }, 2000);
+        // Calculamos y añadimos el saldo restante al FormData
+        const monto = parseFloat(formData.get('amortizacion'));
+        const saldoPendienteActual = parseFloat(document.getElementById('saldoActualForm').dataset.valor);
+        const nuevoSaldoRestante = saldoPendienteActual - monto;
+        formData.append('saldorestante', nuevoSaldoRestante.toFixed(2));
+
+
+        try {
+            const request = await fetch('/cotizaciones/storePagoInicial', {
+                method: 'POST',
+                body: formData
+            });
+            const response = await request.json();
+
+            if (response.success) {
+                mostrarAlerta('exito', response.message);
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            } else {
+                mostrarAlerta('error', response.message || 'Ocurrió un error inesperado.');
+            }
+        } catch (fetchError) {
+            console.error('Error en el fetch:', fetchError);
+            mostrarAlerta('error', 'No se pudo conectar con el servidor.');
+        }
+    }
+
+
+    formularioPago.addEventListener('submit', async (e) => {
+
+        e.preventDefault();
+
+        if (await ask('¿Confirmar pago de inicial?', 'Confirmar')) {
+            validarYRegistrarPago();
+        }
+    });
+
+
+    function limpiarFormulario() {
+        formularioPago.reset();
+        document.getElementById('montoAPagarContainer').style.display = 'none';
+        document.getElementById('saldoRestanteContainer').style.display = 'none';
+        ocultarAlertas();
+    }
+
+    function mostrarAlerta(tipo, mensaje) {
+        ocultarAlertas();
+        if (tipo === 'exito') {
+            document.querySelector('#alertaExito .text-success-emphasis').textContent = mensaje;
+            document.getElementById('alertaExito').classList.remove('d-none');
+        } else if (tipo === 'error') {
+            document.getElementById('mensajeError').textContent = mensaje;
+            document.getElementById('alertaError').classList.remove('d-none');
+        }
+    }
+
+    function ocultarAlertas() {
+        document.getElementById('alertaExito').classList.add('d-none');
+        document.getElementById('alertaError').classList.add('d-none');
+    }
+
+
+    document.addEventListener('DOMContentLoaded', () => {
+
+        getConceptos();
+        cargarCuentasBancarias();
     });
 </script>
-
-
 
 <?php include __DIR__ . '/../layout/footer.php'; ?>
