@@ -169,6 +169,13 @@ $allModules = [
             </ul>
           </li>
 
+            <li class="sidebar-item">
+            <a href="/contratos" class="sidebar-link">
+             <i class="bi bi-journal-text pe-2"></i> Contratos
+            </a>
+          </li>
+
+
           <!-- Modulos de Gestión de Usuarios -->
           <li class="sidebar-item">
             <a href="/usuarios" class="sidebar-link">

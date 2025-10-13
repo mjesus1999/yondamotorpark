@@ -1,7 +1,4 @@
-
 <?php
-    
-
 // $token = "ODc2NTc4NTYyNjpTWUMxOFBGOTVQTDI=";
 // $autorization = "Authorization: Bearer ".$token;
 // $fields_string = "";

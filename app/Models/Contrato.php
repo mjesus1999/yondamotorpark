@@ -17,6 +17,78 @@ class Contrato
     {
         $this->db = Database::getInstance();
     }
+    public function getAll(): array
+    {
+        $query = "
+            SELECT
+                c.idcontrato,
+                DATE_FORMAT(c.fechainicio, '%d-%m-%Y') AS fechainicio,
+                c.diapago,
+                c.observaciones,
+                CONCAT(dep.departamento, ' / ', pro.provincia, ' / ', dist.distrito) AS tienda,
+                CONCAT(ma.marca, ' / ', m.modelo, ' / ', v.version, ' / ', v.color, ' / ', m.anio) AS vehiculo,
+                CASE
+                    WHEN cli.tipocliente = 'P' THEN CONCAT(p.apellidos, ', ', p.nombres)
+                    ELSE e.razonsocial
+                END AS cliente,
+                CASE
+                    WHEN cli.tipocliente = 'P' THEN p.nrodoc
+                    ELSE e.ruc
+                END AS doc_cliente,
+                CONCAT(per.apellidos, ', ', per.nombres) AS asesor,
+                cot.moneda,
+                cot.precioventa,
+                cot.inicial,
+                cot.valorcuota,
+                cot.numcuotas
+            FROM contratos AS c
+                INNER JOIN cotizaciones AS cot ON c.idcotizacion = cot.idcotizacion
+                INNER JOIN locales AS l ON c.idlocal = l.idlocal
+                INNER JOIN distritos AS dist ON l.iddistrito = dist.iddistrito
+                INNER JOIN provincias AS pro ON dist.idprovincia = pro.idprovincia
+                INNER JOIN departamentos AS dep ON pro.iddepartamento = dep.iddepartamento
+                INNER JOIN clientes AS cli ON cot.idcliente = cli.idcliente
+                LEFT JOIN personas AS p ON cli.idpersona = p.idpersona
+                LEFT JOIN empresas AS e ON cli.idempresa = e.idempresa
+                LEFT JOIN colaboradores AS col ON cot.idasesor = col.idcolaborador
+                LEFT JOIN contratoslaborales AS clab ON col.idcontratolaboral = clab.idcontratolaboral
+                LEFT JOIN personas AS per ON clab.idpersona = per.idpersona
+                LEFT JOIN vehiculos AS v ON cot.idvehiculo = v.idvehiculo
+                LEFT JOIN modelos AS m ON v.idmodelo = m.idmodelo
+                LEFT JOIN marcas AS ma ON m.idmarca = ma.idmarca
+           WHERE c.estado = 'ACT' AND cot.estadocotizacion IN ('CONT')
+            ORDER BY c.idcontrato DESC;
+
+        ";
+        try {
+            $stmt = $this->db->prepare($query);
+            $stmt->execute();
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            return $result;
+        } catch (PDOException $e) {
+            error_log($e->getMessage());
+            return [];
+        }
+    }
+
+    public function disabledContrato(int $id): int
+    {
+        try {
+            $stmt = $this->db->prepare("
+            UPDATE contratos
+            SET estado = 'INACT'
+            WHERE idcontrato = :idcontrato
+        ");
+            $stmt->bindValue(":idcontrato", $id, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->rowCount();
+        } catch (PDOException $e) {
+            error_log("Error al desactivar contrato: " . $e->getMessage());
+            return 0;
+        }
+    }
+
+
 
     private function createContrato(array $data): int
     {
@@ -37,7 +109,7 @@ class Contrato
         return (int)$this->db->lastInsertId();
     }
 
-   
+
     private function insertCronograma(int $idcontrato, array $cronograma): bool
     {
         $query = "INSERT INTO cronogramas (idcontrato, fechapago, interes, abonocapital, numcuota, saldocapital) 
@@ -65,7 +137,7 @@ class Contrato
         $stmt->execute();
     }
 
-    
+
     public function createContratoYCronograma(array $contractData, array $cotizacionData): int
     {
         $this->db->beginTransaction();

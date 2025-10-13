@@ -46,6 +46,8 @@ class FichaSolicitud
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
+    
+
     public function searchPersonaByDNI(string $dni): array|false
     {
         $query = "SELECT

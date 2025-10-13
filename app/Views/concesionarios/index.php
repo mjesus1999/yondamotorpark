@@ -25,7 +25,7 @@
 
           <!-- Vista de escritorio -->
           <div class="table-responsive d-none d-md-block">
-            <table class="table table-sm table-hover" id="tabla-concesionarios">
+            <table class="table table-sm table-bordered table-hover" id="tabla-concesionarios">
               <thead>
                 <tr>
                   <th>#</th>
@@ -35,7 +35,7 @@
                   <th>Acciones</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody class="table-group-divider">
                 <?php if (empty($concesionarios)): ?>
                   <tr>
                     <td colspan="5" class="text-center">No hay concesionarios registrados.</td>
@@ -156,6 +156,8 @@
       </form>
     </div>
   </div>
+  <?php include __DIR__ . '/../layout/footer.php'; ?>
+  <script src="https://cdn.jsdelivr.net/npm/simple-datatables@9.0.3"></script>
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -164,6 +166,19 @@
       const modalConcesionario = new bootstrap.Modal(document.getElementById('modal-concesionario'));
       const formulario = document.querySelector('#formulario-concesionario');
       const inputNombreComercial = document.querySelector('#nombre-comercial');
+
+      let datatable = new DataTable(tablaConcesionarios, {
+        language: {
+          search: "Buscar:",
+          lengthMenu: "Mostrar _MENU_ registros por página",
+          info: "Mostrando página _PAGE_ de _PAGES_",
+          infoEmpty: "No hay registros disponibles",
+          infoFiltered: "(filtrado de _MAX_ registros totales)",
+          emptyTable: "No hay datos disponibles en la tabla",
+          zeroRecords: "No se encontraron resultados"
+        }
+      });
+
 
       let idActual = null;
 
@@ -251,4 +266,3 @@
       });
     });
   </script>
-  <?php include __DIR__ . '/../layout/footer.php'; ?>

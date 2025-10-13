@@ -184,7 +184,7 @@ public function addMultiplePagos(?array $pagoCuota = null, ?array $pagoPenalidad
     {
         $query = " SELECT 
                         cp.idcuentapago,
-                        CONCAT(ep.entidad, ' - ', cp.numcuenta) AS nombrecuenta
+                        CONCAT(ep.entidad, ' - ', cp.numcuenta, ' - ' , cp.moneda) AS nombrecuenta
                     FROM 
                         cuentaspago cp
                     JOIN 

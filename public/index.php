@@ -2,6 +2,7 @@
 // public/index.php
 
 
+
 // Define el directorio raíz de la aplicación para mayor claridad
 define('APP_ROOT', dirname(__DIR__));
 
@@ -66,6 +67,7 @@ use App\Core\Router;
 
 $router = new Router();
 
+// echo "Intentando cargar: " . APP_ROOT . '/app/Routes/ConceptoPagos.router.php' . "<br>";
 //RUTAS POR MÓDULO
 require APP_ROOT . '/app/Routes/Home.router.php';
 require APP_ROOT . '/app/Routes/Marca.router.php';
@@ -90,7 +92,7 @@ require APP_ROOT . '/app/Routes/Egreso.router.php';
 require APP_ROOT . '/app/Routes/ArqueoCaja.router.php';
 require APP_ROOT . '/app/Routes/Contrato.router.php';
 require APP_ROOT . '/app/Routes/FichaSolicitud.router.php';
-
+require APP_ROOT .'/app/Routes/ConceptoPagos.router.php';
 
 // DEYANIRA :
 require APP_ROOT . '/app/Routes/Usuario.router.php';
@@ -99,6 +101,7 @@ require APP_ROOT . '/app/Routes/ForCotizacion.router.php';
 require APP_ROOT . '/app/Routes/Cotizacion.router.php';
 require APP_ROOT .'/app/Routes/Credito.router.php';
 require APP_ROOT .'/app/Routes/Cobranza.router.php';
+
 
 
 
