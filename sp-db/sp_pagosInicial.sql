@@ -82,33 +82,3 @@ END //
 DELIMITER ;
 
 
-
-SELECT * FROM pagos;
-UPDATE vehiculos SET disponibilidad = 'separado' WHERE idvehiculo = 167;
-SELECT disponibilidad FROM vehiculos WHERE idvehiculo = 167;
-
-
-
-DELETE FROM cotizaciones;
-DELETE FROM fichasolicitud;
-DELETE FROM contratos;
-DELETE FROM cronogramas;
-
-SELECT * FROM contratos;
-DELETE FROM pagos;
-
-SELECT * FROM vehiculos WHERE disponibilidad = 'separado';
-
-UPDATE vehiculos
-SET disponibilidad = 'libre'
-WHERE disponibilidad = 'separado'
-  AND idvehiculo <> 170;
-
-
-SELECT * FROM fichasolicitud;
-
-SELECT * FROM cotizaciones;
-
-36, 40
-
-UPDATE cotizaciones SET estadocotizacion = 'P' WHERE idcotizacion IN(37,40);

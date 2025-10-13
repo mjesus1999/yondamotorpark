@@ -29,17 +29,28 @@
         color: #f8f9fa !important;
     }
 
-   
+    .tabulator .tabulator-header .tabulator-col .tabulator-header-filter {
+        padding: 2px;
+    }
+
+
+    .tabulator .tabulator-header .tabulator-col .tabulator-header-filter input {
+        height: 25px;
+        padding: 4px 6px;
+        font-size: 0.8rem;
+        border-radius: 4px;
+    }
+
     .tabulator-tooltip {
         background-color: #1e3a8a;
-       
+
         color: #fff;
-   
+
         font-size: 14px;
         padding: 6px 10px;
         border-radius: 6px;
         border: 1px solid #0f172a;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
         z-index: 9999;
-    
+
     }

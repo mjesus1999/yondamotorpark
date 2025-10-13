@@ -427,7 +427,7 @@
         <!-- Botón para registrar ficha -->
         <div class="row mt-4 mb-4">
             <div class="col-12 text-end">
-                <button class="btn btn-gradient-green shadow-lg" data-bs-toggle="modal" data-bs-target="#fichaSolicitudModal">
+                <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#fichaSolicitudModal">
                     <i class="bi bi-plus-circle me-2"></i>
                     Registrar Ficha
                 </button>

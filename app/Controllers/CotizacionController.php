@@ -8,6 +8,7 @@ use App\Models\Cotizacion;
 use App\Models\Vehiculo;
 use App\Models\FormatoCotizacion;
 use App\Helpers\Validador;
+use App\Config\ConceptosPago;
 use Exception;
 use PDOException;
 
@@ -161,7 +162,7 @@ class CotizacionController extends Controller
             $errores = [];
 
             $registro = [
-                'idconcepto'        => $data['idconcepto'] ?? null,
+                'idconcepto'        => ConceptosPago::INICIAL_ID, //$data['idconcepto'] ?? null SOLOS E LE MANDA EL ID DEL CONCPETO(INICIAL),
                 'idcotizacion'      => $data['idcotizacion'] ?? null,
                 'idvehiculo'        => $data['idvehiculo'] ?? null,
                 'idcuentapago'      => empty($data['idcuentapago']) ? null : $data['idcuentapago'],
@@ -709,22 +710,4 @@ class CotizacionController extends Controller
     }
 
 
-    public function aprobarCotizacion($idcotizacion)
-    {
-        header('Content-Type: application/json; charset=utf-8');
-
-        $idcotizacion = intval($idcotizacion);
-
-        $result = $this->cotizacionModel->aprobarCotizacion($idcotizacion);
-
-        if ($result > 0) {
-            echo json_encode([
-
-                'success' => true,
-                'message' => 'Cotización aprobada'
-            ]);
-        } else {
-            echo json_encode(['success' => false, 'message' => 'No se pudo aprobar la cotización']);
-        }
-    }
 }

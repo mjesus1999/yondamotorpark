@@ -588,18 +588,19 @@
                         <input type="hidden" value="<?= htmlspecialchars($cotizacion['idcotizacion']) ?>" id="idcotizacion" name="idcotizacion">
                         <div class="row g-4">
 
-                            <div class="col-md-4">
+                            <div class="col-md-5">
                                 <label for="fechapago" class="form-label">Fecha de Pago <span class="text-danger fgw-bold">*</span></label>
                                 <input type="date" class="form-control" id="fechapago" name="fechapago" required>
                             </div>
 
-                            <!-- Concepto -->
+                            <!-- Concepto
                             <div class="col-md-4">
                                 <label for="idconcepto" class="form-label">Concepto de Pago <span class="text-danger fgw-bold">*</span></label>
                                 <select class="form-select" id="idconcepto" required name="idconcepto">
                                     <option value="">Seleccione un concepto</option>
                                 </select>
-                            </div>
+                            </div> -->
+
 
 
                             <div class="col-md-4">
@@ -628,13 +629,13 @@
                                 <input type="number" class="form-control" id="amortizacion" step="0.01" min="0.01" placeholder="0.00" name="amortizacion" required>
                             </div>
                             <!-- Número de Transacción -->
-                            <div class="col-md-3">
+                            <div class="col-md-4">
                                 <label for="numerotransaccion" class="form-label">Número de Transacción </label>
                                 <input type="text" class="form-control" id="numerotransaccion" name="numerotransaccion" placeholder="Ej: TRF-2025-001234">
                             </div>
 
                             <!-- Comprobante -->
-                            <div class="col-md-3">
+                            <div class="col-md-5">
                                 <label for="comprobante" class="form-label">Comprobante</label>
                                 <input type="file" class="form-control" id="comprobante" name="comprobante">
                             </div>
@@ -809,7 +810,7 @@
 
     const fechaActualISO = new Date().toISOString().slice(0, 10);
 
-    // console.log(fechaActualISO); 
+    // console.log(fechaActualISO);
 
     // Asignar el valor al input
     fechaPago.value = fechaActualISO;
@@ -838,7 +839,13 @@
                 break;
             case 'Yape':
             case 'Plin':
+
                 selectCuentaPago.disabled = true;
+                inputComprobante.disabled = false;
+                break;
+
+            case 'Transferencia Bancaria':
+                selectCuentaPago.disabled = false;
                 inputComprobante.disabled = false;
                 break;
         }
@@ -864,18 +871,18 @@
 
 
 
-    async function getConceptos() {
-        try {
-            const response = await fetch('/api/conceptospagos');
-            const data = await response.json();
-            data.forEach(el => {
-                selectConcepto.innerHTML += `<option value="${el.idconcepto}">${el.concepto}</option>`;
-            });
-        } catch (error) {
-            console.error('Error al cargar conceptos:', error);
-            mostrarAlerta('error', 'No se pudieron cargar los conceptos de pago.');
-        }
-    }
+    // async function getConceptos() {
+    //     try {
+    //         const response = await fetch('/api/conceptospagos');
+    //         const data = await response.json();
+    //         data.forEach(el => {
+    //             selectConcepto.innerHTML += `<option value="${el.idconcepto}">${el.concepto}</option>`;
+    //         });
+    //     } catch (error) {
+    //         console.error('Error al cargar conceptos:', error);
+    //         mostrarAlerta('error', 'No se pudieron cargar los conceptos de pago.');
+    //     }
+    // }
 
     async function cargarCuentasBancarias() {
         try {
@@ -904,7 +911,6 @@
         const saldoPendienteActual = parseFloat(document.getElementById('saldoActualForm').dataset.valor);
 
         if (!datos.get('fechapago')) return 'Debe seleccionar la fecha de pago.';
-        if (!datos.get('idconcepto')) return 'Debe seleccionar un concepto de pago.';
         if (!medioPago) return 'Debe seleccionar un medio de pago.';
 
         // Reglas específicas según el medio de pago
@@ -1005,7 +1011,7 @@
 
     document.addEventListener('DOMContentLoaded', () => {
 
-        getConceptos();
+        // getConceptos();
         cargarCuentasBancarias();
     });
 </script>

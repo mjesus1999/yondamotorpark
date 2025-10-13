@@ -821,9 +821,10 @@
 
                             // Acción de PDF (siempre presente)
                             acciones.push(`
-                                    <a class="px-1" href="#" onclick="event.preventDefault(); /* tu función para ver PDF */" title="PDF Cotización">
-                                        <i class="bi bi-filetype-pdf text-danger fs-5"></i>
-                                    </a>
+                                         <a type="button" class="btn btn-sm btn-download-pdf" data-id="${id}" 
+                                            data-cliente="${nombrecliente}" title="PDF Cotización">
+                                            <i class="bi bi-filetype-pdf text-danger fs-5"></i>
+                                        </a>
                             `);
 
                             // 3. Determinar acciones según el estado de la fila actual
@@ -969,26 +970,6 @@
 
 
         }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

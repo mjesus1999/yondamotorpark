@@ -1,10 +1,5 @@
 
-
-
-
-
 USE motorpark2;
-
 
 -- La moneda y precio de compra están definidos en el proceso de COMPRA
 CREATE TABLE vehiculos (
@@ -337,7 +332,7 @@ SELECT
     END AS habilitar_contrato
 FROM cotizaciones cot
 LEFT JOIN pagos p ON p.idcotizacion = cot.idcotizacion
-WHERE cot.idcotizacion = 41
+WHERE cot.idcotizacion = 46
 GROUP BY cot.idcotizacion, cot.inicial, cot.estadocotizacion;
 
 
@@ -364,3 +359,22 @@ DELETE FROM contratos;
 
 
 SELECT * FROM cronogramas;
+
+SELECT * FROM conceptospago;
+SELECT * FROM contratos;
+
+
+
+
+
+
+
+
+
+SELECT * FROM locales;
+SELECT * FROM distritos;
+SELECT * FROM provincias;
+
+UPDATE contratos SET estado = 'ACT';
+
+SELECT * FROM cotizaciones;
