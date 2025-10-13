@@ -366,15 +366,15 @@
                 ],
 
                 styles: {
-                    fecha: { fontSize: 12, color: '#333' },
-                    titulo: { fontSize: 15, bold: true, color: '#000' },
-                    normal: { fontSize: 12, lineHeight: 1.3, color: '#000' },
-                    detalleLabel: { fontSize: 12, bold: true, color: '#000' },
-                    detalleSeparador: { fontSize: 12, bold: true, color: '#000', alignment: 'center' },
-                    detalleValue: { fontSize: 12, bold: true, color: '#000' },
-                    firma: { fontSize: 12, bold: true, color: '#000' },
-                    cargo: { fontSize: 12, bold: true, color: '#000' },
-                    contactInfo: { fontSize: 12, color: '#333333', lineHeight: 1.2 }
+                    fecha: { fontSize: 11, color: '#333' },
+                    titulo: { fontSize: 14, bold: true, color: '#000' },
+                    normal: { fontSize: 11, lineHeight: 1.3, color: '#000' },
+                    detalleLabel: { fontSize: 11, bold: true, color: '#000' },
+                    detalleSeparador: { fontSize: 11, bold: true, color: '#000', alignment: 'center' },
+                    detalleValue: { fontSize: 11, bold: true, color: '#000' },
+                    firma: { fontSize: 11, bold: true, color: '#000' },
+                    cargo: { fontSize: 11, bold: true, color: '#000' },
+                    contactInfo: { fontSize: 11, color: '#333333', lineHeight: 1.2 }
                 }
             };
         }

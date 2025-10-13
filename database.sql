@@ -471,7 +471,7 @@ CREATE TABLE cotizaciones (
     numcuotas SMALLINT NOT NULL,
     gastosadministrativos DECIMAL(9,2) NOT NULL DEFAULT 0.00 COMMENT 'Gastos administrativos de la cotización',
     valorcuota DECIMAL(9, 2) NOT NULL, -- Se usara en la tabla de cronogramas
-    estadocotizacion ENUM('P', 'O', 'A', 'C', 'R','CONT') NOT NULL DEFAULT 'P' COMMENT 'Pendiente | OBSERVADA  | Aprobada | Cancelada (cliente) | Rechazada (Analista crédito) | CONTRATO',
+    estadocotizacion ENUM('P', 'S','O', 'A', 'C', 'R','CONT') NOT NULL DEFAULT 'P' COMMENT 'Pendiente | Separada ( Ya se realizo un pago )| OBSERVADA  | Aprobada | Cancelada (cliente) | Rechazada (Analista crédito) | CONTRATO',
     comentarios TEXT,
     fechaseguimiento DATETIME NULL,
     creado DATETIME NOT NULL DEFAULT NOW(),
@@ -482,6 +482,7 @@ CREATE TABLE cotizaciones (
     CONSTRAINT fk_idvehiculo_cot FOREIGN KEY (idvehiculo) REFERENCES  (idvehiculo),
     CONSTRAINT fk_idcolventa_cot FOREIGN KEY (idasesor) REFERENCES colaboradores (idcolaborador)
 ) ENGINE = INNODB;
+
 USE motorpark;
 
  ALTER TABLE cotizaciones MODIFY COLUMN estadocotizacion ENUM('P', 'O', 'A', 'C', 'R','CONT') NOT NULL DEFAULT 'P' COMMENT 'Pendiente | OBSERVADA | Aprobada |  Rechazada (Analista crédito) | CONTRATO';
@@ -515,6 +516,16 @@ SELECT * FROM fichasolicitud;
 USE motorpark;
 -- ALTER TABLE fichasolicitud CHANGE COLUMN fechavisista  fechavisita   DATE NOT NULL;
 
+CREATE TABLE conceptospago (
+    idconcepto INT PRIMARY KEY AUTO_INCREMENT,
+    idcolregistra INT NOT NULL,
+    idcolactualiza INT NULL,
+    concepto VARCHAR(150) NOT NULL,
+    descripcion TEXT NULL,
+    montosugerido DECIMAL(10,2) NULL,
+    fecharegistro DATETIME NOT NULL DEFAULT NOW(),
+    fechamodificacion DATETIME NULL
+) ENGINE=InnoDB;
 
 
 CREATE TABLE contratos (
@@ -563,12 +574,12 @@ CREATE TABLE cronogramas (
 -- ALTER TABLE cronogramas
 -- MODIFY COLUMN penalidad DECIMAL(10, 2) NULL DEFAULT 0;
 
-ALTER TABLE cronogramas
-MODIFY COLUMN estado ENUM(
-    'Pendiente',
-    'Pagado',
-    'Vencido'
-) DEFAULT 'Pendiente';
+-- ALTER TABLE cronogramas
+-- MODIFY COLUMN estado ENUM(
+--     'Pendiente',
+--     'Pagado',
+--     'Vencido'
+-- ) DEFAULT 'Pendiente';
 
 -- ALTER TABLE cronogramas MODIFY COLUMN interes DECIMAL(10, 2) NOT NULL;
 
@@ -579,7 +590,12 @@ MODIFY COLUMN estado ENUM(
 
 CREATE TABLE pagos (
     idpago INT AUTO_INCREMENT PRIMARY KEY,
-    idcronograma INT NOT NULL,
+    idcotizacion INT NULL COMMENT 'SOLO TENDRÁ UN VALOR CUANDO EL PAGO SEA EN CONCEPTO "INICIAL DE UNA COTIZACION"',
+    idcliente INT NULL COMMENT 'CUANDO SE REALIZA UN PAGO AL CONTADO SE IDENTIFICA QUE CLIENTE REALIZO EL PAGO',
+    idconcepto  INT NULL COMMENT 'CONCEPTO DE PAGO',
+    idvehiculo  INT NULL COMMENT 'TENDRÁ UN VALOR CUANDO EL CONCEPTO DE PAGO SEA INICIAL O CONTADO',
+    idasesorvendedor INT NULL COMMENT 'TENDRÁ UN VALOR CUANDO EL CONCEPTO DE PAGO SEA CONTADO',
+    idcronograma INT NULL,
     idcuentapago INT NULL,
     idcolcaja INT NULL,
     mediopago ENUM(
@@ -597,10 +613,14 @@ CREATE TABLE pagos (
     observacion VARCHAR(300) NULL,
     facturado ENUM('S', 'N') DEFAULT 'S',
     declarado ENUM('S', 'N') DEFAULT 'N',
-    tipo        ENUM('Cuota','Penalidad') NOT NULL DEFAULT 'Cuota',
+    tipo        ENUM('Cuota','Penalidad', 'Otro') NOT NULL DEFAULT 'Cuota',
     CONSTRAINT fk_idcronograma_pagos FOREIGN KEY (idcronograma) REFERENCES cronogramas (idcronograma),
     CONSTRAINT fk_idcuentapago_pagos FOREIGN KEY (idcuentapago) REFERENCES cuentaspago (idcuentapago),
-    CONSTRAINT fk_idcolcaja_pagos FOREIGN KEY (idcolcaja) REFERENCES colaboradores (idcolaborador)
+    CONSTRAINT fk_idcolcaja_pagos FOREIGN KEY (idcolcaja) REFERENCES colaboradores (idcolaborador),
+    CONSTRAINT fk_idconcepto_pagos FOREIGN KEY(idconcepto) REFERENCES conceptospago(idconcepto),
+    CONSTRAINT fk_idvehiculo_pagos FOREIGN KEY(idvehiculo) REFERENCES vehiculos(idvehiculo),
+    CONSTRAINT fk_idasesorvendedor_pagos FOREIGN KEY(idasesorvendedor) REFERENCES colaboradores(idcolaborador),
+    CONSTRAINT fk_idcliente_pagos  FOREIGN KEY(idcliente) REFERENCES clientes(idcliente)
 ) ENGINE = InnoDB;
 
 

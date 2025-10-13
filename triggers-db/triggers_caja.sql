@@ -1,5 +1,34 @@
 
 USE motorpark2;
+-- DELIMITER $$
+
+-- CREATE TRIGGER tr_calcular_saldorestante_before_insert
+-- BEFORE INSERT ON pagos
+-- FOR EACH ROW
+-- BEGIN
+--     DECLARE v_valorcuota DECIMAL(10,2);
+--     DECLARE v_penalidad DECIMAL(10,2);
+--     DECLARE v_amortizado_anterior DECIMAL(10,2);
+
+--     -- Obtener cuota y penalidad del cronograma correspondiente
+--     SELECT coti.valorcuota, cro.penalidad INTO v_valorcuota, v_penalidad
+--     FROM cronogramas cro
+--     JOIN contratos cont ON cro.idcontrato = cont.idcontrato
+--     JOIN cotizaciones coti ON cont.idcotizacion = coti.idcotizacion
+--     WHERE cro.idcronograma = NEW.idcronograma;
+
+--     -- Sumar amortizaciones anteriores
+--     SELECT COALESCE(SUM(amortizacion), 0) INTO v_amortizado_anterior
+--     FROM pagos
+--     WHERE idcronograma = NEW.idcronograma;
+
+--     -- Calcular el nuevo saldo restante
+--     SET NEW.saldorestante = (v_valorcuota + v_penalidad) - (v_amortizado_anterior + NEW.amortizacion);
+-- END$$
+
+-- DELIMITER ;
+
+DROP TRIGGER tr_calcular_saldorestante_before_insert;
 DELIMITER $$
 
 CREATE TRIGGER tr_calcular_saldorestante_before_insert
@@ -10,23 +39,26 @@ BEGIN
     DECLARE v_penalidad DECIMAL(10,2);
     DECLARE v_amortizado_anterior DECIMAL(10,2);
 
-    -- Obtener cuota y penalidad del cronograma correspondiente
-    SELECT coti.valorcuota, cro.penalidad INTO v_valorcuota, v_penalidad
-    FROM cronogramas cro
-    JOIN contratos cont ON cro.idcontrato = cont.idcontrato
-    JOIN cotizaciones coti ON cont.idcotizacion = coti.idcotizacion
-    WHERE cro.idcronograma = NEW.idcronograma;
+    IF NEW.idcronograma IS NOT NULL THEN
+        -- Obtener cuota y penalidad del cronograma correspondiente
+        SELECT coti.valorcuota, cro.penalidad INTO v_valorcuota, v_penalidad
+        FROM cronogramas cro
+        JOIN contratos cont ON cro.idcontrato = cont.idcontrato
+        JOIN cotizaciones coti ON cont.idcotizacion = coti.idcotizacion
+        WHERE cro.idcronograma = NEW.idcronograma;
 
-    -- Sumar amortizaciones anteriores
-    SELECT COALESCE(SUM(amortizacion), 0) INTO v_amortizado_anterior
-    FROM pagos
-    WHERE idcronograma = NEW.idcronograma;
+        -- Sumar amortizaciones anteriores
+        SELECT COALESCE(SUM(amortizacion), 0) INTO v_amortizado_anterior
+        FROM pagos
+        WHERE idcronograma = NEW.idcronograma;
 
-    -- Calcular el nuevo saldo restante
-    SET NEW.saldorestante = (v_valorcuota + v_penalidad) - (v_amortizado_anterior + NEW.amortizacion);
+        -- Calcular el nuevo saldo restante
+        SET NEW.saldorestante = (v_valorcuota + v_penalidad) - (v_amortizado_anterior + NEW.amortizacion);
+    END IF;
 END$$
 
 DELIMITER ;
+
 
 
 

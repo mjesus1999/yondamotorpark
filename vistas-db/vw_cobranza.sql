@@ -37,10 +37,16 @@ BEGIN
         END) AS contratos_con_vencidos,
         
         IFNULL(SUM(CASE 
-            WHEN estado IN ('Pendiente','Vencido') 
+            WHEN estado IN ('Pendiente','Vencido')
+            AND fechapago < CURDATE()
             THEN monto_cuota 
             ELSE 0 
         END), 0) AS total_por_cobrar
+        /*IFNULL(SUM(CASE 
+            WHEN estado IN ('Pendiente','Vencido') 
+            THEN monto_cuota 
+            ELSE 0 
+        END), 0) AS total_por_cobrar*/
     FROM estadisticas;
 END$$
 DELIMITER ;

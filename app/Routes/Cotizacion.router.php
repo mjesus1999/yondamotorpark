@@ -3,6 +3,7 @@
 $router->add('GET', '/cotizacion', 'CotizacionController', 'index');
 
 $router->add('GET', '/cotizacion/([A-Za-z])', 'CotizacionController', 'index');
+$router->add('GET', '/cotizacion/pagoInicial/{id}','CotizacionController', 'indexPagoInicial');
 
 $router->add('POST', '/cotizacion/aprobar/{id}', 'CotizacionController', 'aprobarCotizacion');
 
@@ -20,6 +21,9 @@ $router->add('POST', '/api/limpiar-ultimo-cliente', 'CotizacionController', 'lim
 
 $router->add('GET', '/cotizaciones/requisitos/(\d+)', 'CotizacionController', 'requisitos');
 $router->add('POST', '/cotizaciones', 'CotizacionController', 'store');
+
+$router->add('POST', '/cotizaciones/storePagoInicial', 'CotizacionController', 'storePagoInicial');
+
 
 // TIPO DE CAMBIO SEGUN LA MONEDA (NOTITA
 $router->add('GET', '/cotizacion/buscarCliente', 'CotizacionController', 'buscarCliente');
