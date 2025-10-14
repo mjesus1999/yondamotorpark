@@ -982,6 +982,7 @@ DELIMITER ;
 */    
         
 -- PRUEBAS
+
 -- CALL sp_get_datos_reporte_recojo_vehicular_pdf(7);
 -- CALL sp_get_datos_reporte_notificacion_pdf(7);
 -- CALL sp_get_estadisticas_cobranza();
