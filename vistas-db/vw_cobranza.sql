@@ -858,6 +858,8 @@ BEGIN
 END$$
 DELIMITER ;
 
+
+
 /*
 DROP PROCEDURE IF EXISTS sp_get_datos_reporte_recojo_vehicular_pdf;
 DELIMITER $$

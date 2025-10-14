@@ -305,8 +305,33 @@ INSERT INTO cargos (idarea, cargo) VALUES
 (4, 'Especialista en Marketing'),
 (5, 'Jefe de Ventas'),
 (6, 'Jefe de Caja');
-
+-- COBRANZA
+INSERT INTO cargos (idarea, cargo) VALUES
+(7, 'Jefe de Cobranza');
 SELECT * FROM cargos;
+
+-- consulta para ver cuantas personas estan en ese cargo
+SELECT COUNT(DISTINCT cl.idpersona) AS total_personas_cobranza
+FROM contratoslaborales cl
+JOIN cargos c ON cl.idcargo = c.idcargo
+JOIN areas a ON c.idarea = a.idarea
+WHERE a.area = 'Cobranza';
+
+-- Consulta para ver quiénes son esas personas:
+SELECT 
+	p.idpersona, 
+	CONCAT(p.apellidos, ', ', p.nombres) AS nombre_completo, c.cargo, a.area,
+    p.telprimario
+FROM contratoslaborales cl
+JOIN cargos c ON cl.idcargo = c.idcargo
+JOIN areas a ON c.idarea = a.idarea
+JOIN personas p ON cl.idpersona = p.idpersona
+WHERE a.area = 'Cobranza';
+UPDATE personas
+SET telprimario = '919629135'
+WHERE idpersona = 11;
+SELECT * FROM personas;
+
 -- PERMISOS (ACCESOS A LOS MODULOS)
 
 -- Jefe de logistica (ID = 8) Acceso a todos los modulos

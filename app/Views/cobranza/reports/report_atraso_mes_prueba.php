@@ -9,9 +9,8 @@
         body {
             font-family: Arial, sans-serif;
             margin: 0;
-            padding: 0;
+            padding: 20px;
             background: white;
-            overflow: hidden;
         }
 
         #loading-indicator {
@@ -50,18 +49,29 @@
             }
         }
 
-        #pdf-container {
-            width: 100vw;
-            height: 100vh;
-            margin: 0;
-            padding: 0;
+        .modal {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            text-align: center;
+            max-width: 350px;
+            width: 90%;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
         }
 
-        #pdf-frame {
-            width: 100%;
-            height: 100%;
-            border: none;
-            display: none;
+        .modal button {
+            background: white;
+            color: black;
+            border: 1px solid #ccc;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 0 5px;
+            border-radius: 4px;
+        }
+
+        .modal button:hover {
+            background: #f5f5f5;
         }
     </style>
 </head>
@@ -72,16 +82,13 @@
         <div style="font-size:14px;color:#666;">Por favor espere...</div>
     </div>
 
-    <div id="pdf-container">
-        <iframe id="pdf-frame"></iframe>
-    </div>
-
     <!-- PDFMake -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
+        const isPreview = urlParams.get('preview') === '1';
         let globalPdfBlob = null;
         let globalFilename = '';
 
@@ -94,29 +101,79 @@
             return `Chincha Alta, ${day} de ${month} del ${year}`;
         }
 
+        function downloadPdfFromBlob(blob, filename) {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function showDownloadModal(filename) {
+            const modalOverlay = document.createElement('div');
+            modalOverlay.id = 'download-modal-overlay';
+            modalOverlay.innerHTML = `
+                <div class="modal">
+                    <p style="margin:0 0 20px 0;font-size:14px;">PDF generado correctamente. ¿Desea descargarlo?</p>
+                    <div>
+                        <button id="btn-download-pdf">Descargar</button>
+                        <button id="btn-cancel-download">Cancelar</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modalOverlay);
+            const btnDownload = modalOverlay.querySelector('#btn-download-pdf');
+            const btnCancel = modalOverlay.querySelector('#btn-cancel-download');
+            function closeModal() {
+                if (modalOverlay && modalOverlay.parentNode) modalOverlay.parentNode.removeChild(modalOverlay);
+            }
+            btnDownload.addEventListener('click', () => { try { if (globalPdfBlob) { downloadPdfFromBlob(globalPdfBlob, filename); closeModal(); setTimeout(() => { try { window.close(); } catch (e) { } }, 1000); } } catch (e) { console.error(e); alert('Error al descargar el PDF'); } });
+            btnCancel.addEventListener('click', () => { closeModal(); setTimeout(() => { try { window.close(); } catch (e) { } }, 100); });
+            document.addEventListener('keydown', function escHandler(e) { if (e.key === 'Escape') { closeModal(); document.removeEventListener('keydown', escHandler); setTimeout(() => { try { window.close(); } catch (e) { } }, 100); } });
+            modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay) { closeModal(); setTimeout(() => { try { window.close(); } catch (e) { } }, 100); } });
+            setTimeout(() => btnDownload.focus(), 100);
+        }
+
         function showPDFPreview(filename) {
+            const previewHTML = `
+                <div style="position: fixed; top:0; left:0; width:100%; height:100%; background:#f5f5f5; z-index:9999;">
+                    <div style="height:60px; background:white; border-bottom:1px solid #ddd; display:flex; align-items:center; justify-content:space-between; padding:0 20px; box-shadow:0 2px 4px rgba(0,0,0,0.1);">
+                        <h3 style="margin:0;color:#333;font-size:18px;">Vista Previa - ${filename}</h3>
+                        <div>
+                            <button id="btn-download-preview" style="background:#d32f2f;color:white;border:none;padding:10px 20px;margin-right:10px;border-radius:4px;cursor:pointer;font-weight:bold;">Descargar PDF</button>
+                            <button id="btn-close-preview" style="background:#6c757d;color:white;border:none;padding:10px 20px;border-radius:4px;cursor:pointer;">Cerrar</button>
+                        </div>
+                    </div>
+                    <div id="pdf-preview-container" style="height:calc(100% - 60px); overflow:auto; padding:20px;">
+                        <div id="pdf-loading" style="text-align:center; padding:50px; color:#666;">
+                            <div style="display:inline-block;width:40px;height:40px;border:4px solid #f3f3f3;border-top:4px solid #d32f2f;border-radius:50%;animation:spin 1s linear infinite;margin-bottom:15px;"></div>
+                            <div>Generando vista previa...</div>
+                        </div>
+                        <iframe id="pdf-frame" style="width:100%; height:100%; border:none; background:white; border-radius:8px; box-shadow:0 4px 20px rgba(0,0,0,0.1); display:none;"></iframe>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', previewHTML);
+            const btnDownload = document.getElementById('btn-download-preview');
+            const btnClose = document.getElementById('btn-close-preview');
+            const previewContainer = document.querySelector('[style*="position: fixed"]');
             const pdfFrame = document.getElementById('pdf-frame');
-            const loadingIndicator = document.getElementById('loading-indicator');
-            
+            const pdfLoading = document.getElementById('pdf-loading');
             if (globalPdfBlob) {
-                const file = new File([globalPdfBlob], filename, { type: 'application/pdf' });
-                const url = URL.createObjectURL(file);
-                
+                const url = URL.createObjectURL(globalPdfBlob);
                 pdfFrame.src = url;
                 pdfFrame.style.display = 'block';
-                
-                if (loadingIndicator) {
-                    loadingIndicator.style.display = 'none';
-                }
-                
-                // Actualizar el título de la página
-                document.title = filename;
-                
-                // Cleanup al cerrar
-                window.addEventListener('beforeunload', () => {
-                    URL.revokeObjectURL(url);
-                });
+                pdfLoading.style.display = 'none';
+                function cleanup() { URL.revokeObjectURL(url); }
+                btnClose.addEventListener('click', cleanup);
+                window.addEventListener('beforeunload', cleanup);
             }
+            btnDownload.addEventListener('click', () => { try { if (globalPdfBlob) { downloadPdfFromBlob(globalPdfBlob, filename); previewContainer.remove(); setTimeout(() => { try { window.close(); } catch (e) { } }, 500); } } catch (e) { console.error(e); alert('Error al descargar el PDF'); } });
+            btnClose.addEventListener('click', () => { previewContainer.remove(); setTimeout(() => { try { window.close(); } catch (e) { } }, 100); });
+            document.addEventListener('keydown', function escHandler(e) { if (e.key === 'Escape') { previewContainer.remove(); document.removeEventListener('keydown', escHandler); setTimeout(() => { try { window.close(); } catch (e) { } }, 100); } });
         }
 
         async function convertImageToBase64(imagePath) {
@@ -179,15 +236,22 @@
             if (!detalleStr) return '';
 
             const parts = detalleStr.split(' || ').map(s => {
+
                 let texto = s.replace(/MES:(\d+)/g, (match, num) => formatMesEspanol(num));
+
                 texto = texto.replace(/MONTO:/g, 'DE S/ ');
                 return texto;
             });
 
             return parts.join(', ');
+            /* const parts = detalleStr.split(' || ').map(s => s.trim()).filter(Boolean);
+            if (parts.length === 0) return '';
+                const joined = parts.map(s => s.toUpperCase()).join(', ');
+            return joined; */
         }
 
         function createNotificacionPDF(headerImageBase64, datos) {
+            // valores seguros (sin formatear números)
             const nombre = rawValueAsString(datos.nombre_cliente || '');
             const tipo_doc = rawValueAsString(datos.tipo_documento || '');
             const nro_doc = rawValueAsString(datos.numero_documento || '');
@@ -195,9 +259,13 @@
             const marca = rawValueAsString(datos.marca || '');
             const modelo = rawValueAsString(datos.modelo || '');
             const anio = rawValueAsString(datos.vehiculo_anio || '');
+            /* const color = rawValueAsString(datos.color || ''); */
             const color = (datos.color === null || datos.color === undefined || String(datos.color).trim() === '') ? 'N/A' : rawValueAsString(datos.color);
+            /* const placa = rawValueAsString(datos.placa || ''); */
             const placa = (datos.placa === null || datos.placa === undefined || String(datos.placa).trim() === '') ? 'N/A' : rawValueAsString(datos.placa);
+            /* const chasis = rawValueAsString(datos.numero_chasis || ''); */
             const chasis = (datos.numero_chasis === null || datos.numero_chasis === undefined || String(datos.numero_chasis).trim() === '') ? 'N/A' : rawValueAsString(datos.numero_chasis);
+            /* const motor = rawValueAsString(datos.numero_motor || ''); */
             const motor = (datos.numero_motor === null || datos.numero_motor === undefined || String(datos.numero_motor).trim() === '') ? 'N/A' : rawValueAsString(datos.numero_motor);
             const moneda = rawValueAsString(datos.moneda || 'PEN');
 
@@ -207,6 +275,8 @@
             const fechaPrimera = rawValueAsString(datos.fecha_primera_vencida || '');
             const diasAtraso = rawValueAsString(datos.dias_atraso !== undefined ? datos.dias_atraso : '');
 
+            /* const fechaContrato = formatDateDdMmYyyy(datos.fecha_contrato); */
+
             const detalleParrafo = detalleToParrafo(datos.detalle_cuotas_vencidas || '');
 
             const parrafoIncumplimiento = [
@@ -215,6 +285,7 @@
                 { text: detalleParrafo ? (` ${detalleParrafo} `) : '', bold: true },
                 { text: `CUYO MONTO TOTAL A PAGAR ES DE S/ ${totalDeuda} `, bold: true },
                 'y habiendo Ud. comprometido según el contrato notarial firmado el ',
+                /* { text: fechaContrato || '05/10/2023', bold: true }, */
                 ' ',
                 { text: '(CADA NOTIFICACIÓN LLEGADA AL DOMICILIO SE HARÁ EL COBRO ADICIONAL DE S/50 SOLES).', bold: true }
             ];
@@ -244,6 +315,10 @@
                     { text: formatDateSpanish(), style: 'fecha', alignment: 'right', margin: [0, 0, 0, 20] },
                     { text: 'NOTIFICACIÓN DE COBRANZA', style: 'titulo', alignment: 'center', margin: [0, 0, 0, 15] },
 
+                    // DATOS CLIENTE
+                    /* { text: [{ text: 'Señor(a): ', style: 'normal', bold: true }, { text: nombre, style: 'normal' }], margin: [0, 0, 0, 5] },
+                    { text: [{ text: `${tipo_doc}: `, style: 'normal', bold: true }, { text: nro_doc, style: 'normal' }], margin: [0, 0, 0, 5] },
+                    { text: [{ text: 'Dirección: ', style: 'normal', bold: true }, { text: direccion, style: 'normal' }], margin: [0, 0, 0, 15] }, */
                     {
                         table: {
                             widths: [80, 15, '*'],
@@ -275,7 +350,20 @@
                         },
                         margin: [0, 0, 0, 15]
                     },
+                    /* { text: [{ text: 'Fecha de contrato: ', style: 'normal', bold: true }, { text: fechaContrato || '', style: 'normal' }], margin: [0, 0, 0, 10] } */
                     { text: ['Mediante el presente: YHON KENNIDEY MENDOZA HUARACA. Representante General de', { text: ' YONDA & GRUPO HUARACA E.I.R.L', bold: true }, ' hace de su conocimiento que', { text: ' TIENE DEUDA PENDIENTE CON NUESTRA EMPRESA DEL VEHÍCULO CON LAS SIGUIENTES CARACTERÍSTICAS:', bold: true }], style: 'normal', alignment: 'justify', margin: [0, 0, 0, 10] },
+                    /* {
+                        table: {
+                            widths: [70, 15, '*'], body: [
+                                [{ text: 'Marca', style: 'detalleLabel' }, { text: ':', style: 'detalleSeparador' }, { text: `${marca}`, style: 'detalleValue' }],
+                                [{ text: 'Modelo', style: 'detalleLabel' }, { text: ':', style: 'detalleSeparador' }, { text: `${modelo} ${anio}`, style: 'detalleValue' }],
+                                [{ text: 'Chasis', style: 'detalleLabel' }, { text: ':', style: 'detalleSeparador' }, { text: (chasis), style: 'detalleValue' }],
+                                [{ text: 'Motor', style: 'detalleLabel' }, { text: ':', style: 'detalleSeparador' }, { text: motor, style: 'detalleValue' }],
+                                [{ text: 'Color', style: 'detalleLabel' }, { text: ':', style: 'detalleSeparador' }, { text: color, style: 'detalleValue' }],
+                                [{ text: 'Placa', style: 'detalleLabel' }, { text: ':', style: 'detalleSeparador' }, { text: placa, style: 'detalleValue' }]
+                            ]
+                        }, layout: { hLineWidth: () => 0, vLineWidth: () => 0, paddingLeft: () => 0, paddingRight: () => 0, paddingTop: () => 2, paddingBottom: () => 2 }, margin: [0, 0, 0, 15]
+                    }, */
                     {
                         table: {
                             widths: [70, 15, '*'],
@@ -296,10 +384,26 @@
                             paddingTop: () => 2,
                             paddingBottom: () => 2
                         },
-                        margin: [10, 0, 0, 15]
+                        margin: [10, 0, 0, 15]  //[40, 0, 0, 15]
                     },
                     { text: parrafoIncumplimiento, style: 'normal', alignment: 'justify', margin: [0, 0, 0, 15] },
                     { text: 'A su vez se procederá a realizar la denuncia correspondiente mediante instancias legales y judiciales que amerita el caso.', style: 'normal', alignment: 'justify', margin: [0, 0, 0, 15] },
+
+                    // Totales (tal cual vienen del SP / sin formatear)
+                    /* {
+                        columns: [
+                            { width: '*', text: '' },
+                            {
+                                width: 'auto', table: {
+                                    body: [
+                                        [{ text: 'Total cuotas vencidas:', bold: true }, { text: totalCuotas, alignment: 'right' }],
+                                        [{ text: 'Total penalidades:', bold: true }, { text: totalPenal, alignment: 'right' }],
+                                        [{ text: 'TOTAL ADEUDADO:', bold: true }, { text: totalDeuda, alignment: 'right' }]
+                                    ]
+                                }, layout: 'noBorders'
+                            }
+                        ], margin: [0, 10, 0, 20]
+                    }, */
 
                     { text: 'Atte: Gerencia', bold: true, style: 'normal', alignment: 'left', margin: [0, 0, 0, 40] },
                     {
@@ -347,7 +451,9 @@
 
                 pdfDocGenerator.getBlob((blob) => {
                     globalPdfBlob = blob;
-                    showPDFPreview(globalFilename);
+                    if (loadingIndicator) loadingIndicator.style.display = 'none';
+                    if (isPreview || !urlParams.has('preview')) showPDFPreview(globalFilename);
+                    else showDownloadModal(globalFilename);
                 });
 
             } catch (error) {
