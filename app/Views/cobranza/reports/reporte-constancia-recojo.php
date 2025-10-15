@@ -338,13 +338,37 @@
                 },
 
                 footer: function () {
+                    // Datos del colaborador
+                    const colaboradorArea = datos.colaborador_area || 'Área de cobranza';
+                    const colaboradorNombre = datos.colaborador_nombre || '';
+                    const colaboradorTelefono = datos.colaborador_telefono || '987454555';
+
+                    return {
+                        stack: [
+                            {
+                                text: ['Aréa de ', `${colaboradorArea}: ${colaboradorNombre}\n`, `${colaboradorTelefono}\n`, 'cobranza@yondaperu.com'],
+                                style: 'contactInfo',
+                                alignment: 'right',
+                                margin: [0, 0, 40, 10]
+                            },
+                            {
+                                canvas: [
+                                    { type: 'line', x1: 0, y1: 0, x2: 525, y2: 0, lineWidth: 4, lineColor: '#ff6600' }
+                                ],
+                                alignment: 'center'
+                            }
+                        ]
+                    };
+                },
+
+                /* footer: function () {
                     return {
                         stack: [
                             { text: ['Contacto: Área de cobranza\n', '987454555\n', 'cobranza@yondaperu.com'], style: 'contactInfo', alignment: 'right', margin: [0, 0, 40, 10] },
                             { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 525, y2: 0, lineWidth: 4, lineColor: '#ff6600' }], alignment: 'center' }
                         ]
                     };
-                },
+                }, */
 
                 content: [
                     { text: formatDateSpanish(), style: 'fecha', alignment: 'right', margin: [0, 0, 0, 20] },

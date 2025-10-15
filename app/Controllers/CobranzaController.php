@@ -4,16 +4,19 @@ namespace App\Controllers;
 
 use App\Core\Controller;
 use App\Models\Cobranza;
+use App\Models\Usuario;
 use Exception;
 use PDOException;
 
 class CobranzaController extends Controller
 {
     private Cobranza $cobranzaModel;
+    private Usuario $usuarioModel;
 
     public function __construct()
     {
         $this->cobranzaModel = new Cobranza();
+        $this->usuarioModel = new Usuario();
     }
 
     public function index(): void
@@ -172,6 +175,32 @@ class CobranzaController extends Controller
         }
     }
 
+    public function getVencidos(): void
+    {
+        $this->authRequired();
+        header('Content-Type: application/json; charset=utf-8');
+
+        try {
+            $vencidos = $this->cobranzaModel->getCuotasVencidas();
+
+            // Asegurarnos de enviar un array 
+            if (!is_array($vencidos)) {
+                $vencidos = $vencidos ? (array) $vencidos : [];
+            }
+
+            echo json_encode([
+                'success' => true,
+                'data' => $vencidos
+            ]);
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Error al obtener vencidos: ' . $e->getMessage()
+            ]);
+        }
+    }
+    
     public function indexNotificar()
     {
         $this->authRequired();
@@ -187,34 +216,6 @@ class CobranzaController extends Controller
     }
 
     //AVANCE DE LOS REPORTES
-    /* public function reporteCobranzaAtrasado()
-    {
-        $this->authRequired();
-
-        // Obtener el idcontrato del parámetro GET
-        $idContrato = $_GET['contrato'] ?? null;
-
-        if (!$idContrato) {
-            // Si no hay contrato, redirigir o mostrar error
-            header('Location: /Cobranza/vencidos');
-            exit;
-        }
-
-        // Obtener los datos del reporte
-        $datosReporte = $this->cobranzaModel->getReporteNotificar($idContrato);
-
-        if (empty($datosReporte)) {
-            // Manejar caso donde no se encuentran datos
-            echo "No se encontraron datos para el contrato especificado.";
-            exit;
-        }
-
-        // Pasar los datos a la vista
-        $this->view('cobranza/reports.reporte_atraso_01_mes', [
-            'datos' => $datosReporte
-        ]);
-    } */
-
     public function reporteCobranzaAtrasado()
     {
         $this->authRequired();
@@ -328,6 +329,52 @@ class CobranzaController extends Controller
                 throw new Exception('No se encontraron datos para el contrato');
             }
 
+            //datos del usuario
+            $currentUser = $_SESSION['user'] ?? null;
+            if ($currentUser) {
+                $usuarioModel = new Usuario();
+                $usr = null;
+
+                if (!empty($currentUser['id'])) {
+                    $usr = $usuarioModel->getById((int) $currentUser['id']);
+                }
+
+                // preferimos datos frescos ($usr) si existen, si no usamos la sesión
+                $source = $usr ?: $currentUser;
+
+                // area
+                if (!empty($source['area'])) {
+                    $datos['colaborador_area'] = $source['area'];
+                }
+
+                // primer nombre + primer apellido
+                $primerNombre = '';
+                $primerApellido = '';
+
+                if (!empty($source['nombres'])) {
+                    $n = trim($source['nombres']);
+                    $partsN = preg_split('/\s+/', $n);
+                    $primerNombre = $partsN[0] ?? '';
+                }
+                if (!empty($source['apellidos'])) {
+                    $a = trim($source['apellidos']);
+                    $partsA = preg_split('/\s+/', $a);
+                    $primerApellido = $partsA[0] ?? '';
+                }
+                // si no hay nombres/apellidos en $source, intentar con usernick
+                /* if ($primerNombre === '' && !empty($source['usernick'])) {
+                    $primerNombre = $source['usernick'];
+                } */
+                $datos['colaborador_nombre'] = trim($primerNombre . ' ' . $primerApellido);
+
+                // telefono (probar telprimario o telefono)
+                if (!empty($source['telprimario'])) {
+                    $datos['colaborador_telefono'] = $source['telprimario'];
+                } elseif (!empty($source['telefono'])) {
+                    $datos['colaborador_telefono'] = $source['telefono'];
+                }
+            }
+
             echo json_encode([
                 'success' => true,
                 'data' => $datos
@@ -359,6 +406,47 @@ class CobranzaController extends Controller
                 throw new Exception('No se encontraron datos para el contrato');
             }
 
+            //datos del usuario 
+            $currentUser = $_SESSION['user'] ?? null;
+            if ($currentUser) {
+                $usuarioModel = new Usuario();
+                $usr = null;
+
+                if (!empty($currentUser['id'])) {
+                    $usr = $usuarioModel->getById((int) $currentUser['id']);
+                }
+
+                $source = $usr ?: $currentUser;
+
+                if (!empty($source['area'])) {
+                    $datos['colaborador_area'] = $source['area'];
+                }
+
+                $primerNombre = '';
+                $primerApellido = '';
+
+                if (!empty($source['nombres'])) {
+                    $n = trim($source['nombres']);
+                    $partsN = preg_split('/\s+/', $n);
+                    $primerNombre = $partsN[0] ?? '';
+                }
+                if (!empty($source['apellidos'])) {
+                    $a = trim($source['apellidos']);
+                    $partsA = preg_split('/\s+/', $a);
+                    $primerApellido = $partsA[0] ?? '';
+                }
+                /* if ($primerNombre === '' && !empty($source['usernick'])) {
+                    $primerNombre = $source['usernick'];
+                } */
+                $datos['colaborador_nombre'] = trim($primerNombre . ' ' . $primerApellido);
+
+                if (!empty($source['telprimario'])) {
+                    $datos['colaborador_telefono'] = $source['telprimario'];
+                } elseif (!empty($source['telefono'])) {
+                    $datos['colaborador_telefono'] = $source['telefono'];
+                }
+            }
+
             echo json_encode([
                 'success' => true,
                 'data' => $datos
@@ -371,5 +459,6 @@ class CobranzaController extends Controller
             ]);
         }
     }
+
 
 }

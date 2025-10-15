@@ -5,6 +5,8 @@ $router->add('GET', '/Cobranza', 'CobranzaController', 'index');
 $router->add('GET', '/Cobranza/getEstadisticas', 'CobranzaController', 'getEstadisticas');
 $router->add('GET', '/Cobranza/getTarjetas', 'CobranzaController', 'getTarjetas');
 $router->add('GET', '/Cobranza/getClientesNotificar', 'CobranzaController', 'getClientesNotificar');
+$router->add('GET', '/Cobranza/getVencidos', 'CobranzaController', 'getVencidos');
+
 
 // RUTAS PARA OBTENER RESULTADO EN EL MODAL DE DETALLE EN TARJETAS
 $router->add('GET', '/Cobranza/getInfoCliente/{id}', 'CobranzaController', 'getInfoCliente');
@@ -23,6 +25,7 @@ $router->add('POST', '/Cobranza/actualizarTelefono', 'CobranzaController', 'actu
 $router->add('GET', '/Recordatorios', 'CobranzaController', 'indexNotificar');
 $router->add('GET', '/Vencidos', 'CobranzaController', 'indexVencidos');
 
+
 //REPORTES PDF NOTIFICACION DE COBRANZA ATRASADO
 /* $router->add('GET', '/reportes', 'CobranzaController', 'reporteCobranza'); */
 $router->add('GET', '/reportesAtrasado', 'CobranzaController', 'reporteCobranzaAtrasado');
@@ -33,5 +36,5 @@ $router->add('GET', '/Cobranza/getDatosReporteNotificacion', 'CobranzaController
 $router->add('GET', '/reportesRecojo', 'CobranzaController', 'reporteRecojoVehicular');
 $router->add('GET', '/Cobranza/getDatosReporteRecojoVehicular', 'CobranzaController', 'getDatosReporteRecojoVehicular');
 
-//EJEMPLO ESTATICO
+//EJEMPLO PDF ESTATICO
 $router->add('GET', '/reportesAtrasado2', 'CobranzaController', 'reporteCobranzaAtrasado2');

@@ -521,8 +521,19 @@ CREATE TABLE cotizacion_financiamiento (
 ) ENGINE=INNODB;
 -- ALTER TABLE cotizacion_financiamiento ADD COLUMN activo TINYINT(1) NOT NULL DEFAULT 1;
 
-SELECT * FROM cotizacion_financiamiento;
+CREATE TABLE conceptospago (
+    idconcepto INT PRIMARY KEY AUTO_INCREMENT,
+    idcolregistra INT NOT NULL,
+    idcolactualiza INT NULL,
+    concepto VARCHAR(150) NOT NULL,
+    descripcion TEXT NULL,
+    montosugerido DECIMAL(10,2) NULL,
+    fecharegistro DATETIME NOT NULL DEFAULT NOW(),
+    fechamodificacion DATETIME NULL
+) ENGINE=InnoDB;
+
+-- SELECT * FROM cotizacion_financiamiento;
 
 
-USE motorpark;
-SELECT * FROM cotizaciones;
+-- USE motorpark;
+-- SELECT * FROM cotizaciones;
