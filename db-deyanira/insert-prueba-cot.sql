@@ -1,10 +1,12 @@
+
+USE motorpark;
 SELECT * FROM PERSONAS;
 
 -- Verificar si Miguel Angel ya es cliente
 SELECT c.idcliente, c.tipocliente, p.nombres, p.apellidos 
 FROM clientes c
 INNER JOIN personas p ON c.idpersona = p.idpersona
-WHERE p.idpersona = 21;
+WHERE p.idpersona = 19;
 
 -- Consulta corregida para ver la cotización 57
 SELECT 
@@ -28,7 +30,7 @@ INNER JOIN vehiculos v ON cot.idvehiculo = v.idvehiculo
 INNER JOIN modelos mo ON v.idmodelo = mo.idmodelo
 INNER JOIN marcas m ON mo.idmarca = m.idmarca
 INNER JOIN tipovehiculos tv ON mo.idtipovehiculo = tv.idtipovehiculo
-WHERE cot.idcotizacion = 57;
+WHERE cot.idcotizacion = 58;
 
 -- 1. Ver locales disponibles
 SELECT idlocal, tienda, responsable FROM locales LIMIT 5;
@@ -45,12 +47,12 @@ INSERT INTO contratos (
     estado
 ) VALUES (
     1,                      -- Ajusta este ID según tu local
-    57,                     
-    '2025-10-01',           
+    58,                     
+    '2025-07-16',           
     15,                     
     'S',                    
     0.10,                   
-    'Contrato de prueba X2',
+    'Contrato de prueba X4',
     'ACT'
 );
 
@@ -70,11 +72,11 @@ INNER JOIN cotizaciones cot ON con.idcotizacion = cot.idcotizacion
 INNER JOIN clientes cl ON cot.idcliente = cl.idcliente
 INNER JOIN personas p ON cl.idpersona = p.idpersona
 INNER JOIN locales l ON con.idlocal = l.idlocal
-WHERE con.idcotizacion = 57;
+WHERE con.idcotizacion = 58;
 
 SELECT COUNT(*) as total_cuotas 
 FROM cronogramas 
-WHERE idcontrato = 8;
+WHERE idcontrato = 9;
 
 SELECT 
     numcuota,
@@ -86,24 +88,24 @@ SELECT
     saldocapital,
     estado
 FROM cronogramas
-WHERE idcontrato = 8
+WHERE idcontrato = 9
 ORDER BY numcuota;
 
 -- Probar el SP de cronograma de cobranza con el nuevo contrato
-CALL sp_get_cronograma_pagos_cobranza(8);
+CALL sp_get_cronograma_pagos_cobranza(9);
 
-
+CALL generar_cronograma(9, 4.263224089);
 
 -- 1. Actualizar la fecha de inicio del contrato
 UPDATE contratos 
 SET fechainicio = '2025-07-15'
-WHERE idcontrato = 8;
+WHERE idcontrato = 9;
 
 -- 2. Eliminar el cronograma actual
-DELETE FROM cronogramas WHERE idcontrato = 8;
+DELETE FROM cronogramas WHERE idcontrato = 9;
 
 -- 3. Regenerar el cronograma con la nueva fecha
-CALL generar_cronograma(8, 4.263224089);
+CALL generar_cronograma(9, 4.263224089);
 
 -- 4. Verificar que ahora comienza en 15/10/2025 (primer mes después del inicio)
 SELECT 
@@ -114,7 +116,7 @@ SELECT
     ROUND(abonocapital + interes, 2) as cuota,
     ROUND(saldocapital, 2) as saldo
 FROM cronogramas
-WHERE idcontrato = 8
+WHERE idcontrato = 9
 ORDER BY numcuota;
 
 DELETE FROM pagos 

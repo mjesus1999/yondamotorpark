@@ -9,9 +9,8 @@
         body {
             font-family: Arial, sans-serif;
             margin: 0;
-            padding: 0;
+            padding: 20px;
             background: white;
-            overflow: hidden;
         }
 
         #loading-indicator {
@@ -50,18 +49,42 @@
             }
         }
 
-        #pdf-container {
-            width: 100vw;
-            height: 100vh;
-            margin: 0;
-            padding: 0;
-        }
-
-        #pdf-frame {
+        #download-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
-            border: none;
-            display: none;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            text-align: center;
+            max-width: 350px;
+            width: 90%;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal button {
+            background: white;
+            color: black;
+            border: 1px solid #ccc;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 0 5px;
+            border-radius: 4px;
+        }
+
+        .modal button:hover {
+            background: #f5f5f5;
         }
     </style>
 </head>
@@ -73,10 +96,6 @@
             Generando PDF...
         </div>
         <div style="font-size: 14px; color: #666;">Por favor espere...</div>
-    </div>
-
-    <div id="pdf-container">
-        <iframe id="pdf-frame"></iframe>
     </div>
 
     <!-- PDFMake -->
@@ -182,28 +201,85 @@
         }
 
         function showPDFPreview(filename) {
+            const previewHTML = `
+                <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f5f5f5; z-index: 9999;">
+                    <div style="height: 60px; background: white; border-bottom: 1px solid #ddd; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        <h3 style="margin: 0; color: #333; font-size: 18px;">Vista Previa - ${filename}</h3>
+                        <div>
+                            <button id="btn-download-preview" style="background: #d32f2f; color: white; border: none; padding: 10px 20px; margin-right: 10px; border-radius: 4px; cursor: pointer; font-weight: bold;">
+                                Descargar PDF
+                            </button>
+                            <button id="btn-close-preview" style="background: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer;">
+                                Cerrar
+                            </button>
+                        </div>
+                    </div>
+                    <div id="pdf-preview-container" style="height: calc(100% - 60px); overflow: auto; padding: 20px;">
+                        <div id="pdf-loading" style="text-align: center; padding: 50px; color: #666;">
+                            <div style="display: inline-block; width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #d32f2f; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px;"></div>
+                            <div>Generando vista previa...</div>
+                        </div>
+                        <iframe id="pdf-frame" style="width: 100%; height: 100%; border: none; background: white; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); display: none;"></iframe>
+                    </div>
+                </div>
+            `;
+
+            document.body.insertAdjacentHTML('beforeend', previewHTML);
+
+            const btnDownload = document.getElementById('btn-download-preview');
+            const btnClose = document.getElementById('btn-close-preview');
+            const previewContainer = document.querySelector('[style*="position: fixed"]');
             const pdfFrame = document.getElementById('pdf-frame');
-            const loadingIndicator = document.getElementById('loading-indicator');
+            const pdfLoading = document.getElementById('pdf-loading');
 
+            // Usar el blob global para la vista previa
             if (globalPdfBlob) {
-                const file = new File([globalPdfBlob], filename, { type: 'application/pdf' });
-                const url = URL.createObjectURL(file);
-
+                const url = URL.createObjectURL(globalPdfBlob);
                 pdfFrame.src = url;
                 pdfFrame.style.display = 'block';
+                pdfLoading.style.display = 'none';
 
-                if (loadingIndicator) {
-                    loadingIndicator.style.display = 'none';
+                function cleanup() {
+                    URL.revokeObjectURL(url);
                 }
 
-                // Actualizar el título de la página
-                document.title = filename;
-
-                // Cleanup al cerrar
-                window.addEventListener('beforeunload', () => {
-                    URL.revokeObjectURL(url);
-                });
+                btnClose.addEventListener('click', cleanup);
+                window.addEventListener('beforeunload', cleanup);
             }
+
+            // El botón de descarga usa el mismo blob global y cierra la preview
+            btnDownload.addEventListener('click', () => {
+                try {
+                    if (globalPdfBlob) {
+                        downloadPdfFromBlob(globalPdfBlob, filename);
+                        // Cerrar la vista previa después de descargar
+                        previewContainer.remove();
+                        setTimeout(() => {
+                            try { window.close(); } catch (e) { }
+                        }, 500);
+                    }
+                } catch (error) {
+                    console.error('Error al descargar:', error);
+                    alert('Error al descargar el PDF');
+                }
+            });
+
+            btnClose.addEventListener('click', () => {
+                previewContainer.remove();
+                setTimeout(() => {
+                    try { window.close(); } catch (e) { }
+                }, 100);
+            });
+
+            document.addEventListener('keydown', function escHandler(e) {
+                if (e.key === 'Escape') {
+                    previewContainer.remove();
+                    document.removeEventListener('keydown', escHandler);
+                    setTimeout(() => {
+                        try { window.close(); } catch (e) { }
+                    }, 100);
+                }
+            });
         }
 
         async function convertImageToBase64(imagePath) {
@@ -338,37 +414,13 @@
                 },
 
                 footer: function () {
-                    // Datos del colaborador
-                    const colaboradorArea = datos.colaborador_area || 'Área de cobranza';
-                    const colaboradorNombre = datos.colaborador_nombre || '';
-                    const colaboradorTelefono = datos.colaborador_telefono || '987454555';
-
-                    return {
-                        stack: [
-                            {
-                                text: ['Aréa de ', `${colaboradorArea}: ${colaboradorNombre}\n`, `${colaboradorTelefono}\n`, 'cobranza@yondaperu.com'],
-                                style: 'contactInfo',
-                                alignment: 'right',
-                                margin: [0, 0, 40, 10]
-                            },
-                            {
-                                canvas: [
-                                    { type: 'line', x1: 0, y1: 0, x2: 525, y2: 0, lineWidth: 4, lineColor: '#ff6600' }
-                                ],
-                                alignment: 'center'
-                            }
-                        ]
-                    };
-                },
-
-                /* footer: function () {
                     return {
                         stack: [
                             { text: ['Contacto: Área de cobranza\n', '987454555\n', 'cobranza@yondaperu.com'], style: 'contactInfo', alignment: 'right', margin: [0, 0, 40, 10] },
                             { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 525, y2: 0, lineWidth: 4, lineColor: '#ff6600' }], alignment: 'center' }
                         ]
                     };
-                }, */
+                },
 
                 content: [
                     { text: formatDateSpanish(), style: 'fecha', alignment: 'right', margin: [0, 0, 0, 20] },
@@ -471,7 +523,7 @@
 
                 styles: {
                     fecha: { fontSize: 11, color: '#333' },
-                    titulo: { fontSize: 14, bold: true, color: '#000' },
+                    titulo: { fontSize: 15, bold: true, color: '#000' },
                     normal: { fontSize: 11, lineHeight: 1.3, color: '#000' },
                     detalleLabel: { fontSize: 11, bold: true, color: '#000' },
                     detalleSeparador: { fontSize: 11, bold: true, color: '#000', alignment: 'center' },
