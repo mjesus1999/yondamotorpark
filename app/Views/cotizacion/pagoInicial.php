@@ -1,6 +1,5 @@
 <?php include __DIR__ . '/../layout/header.php'; ?>
 
-
 <style>
     :root {
         --color-primary: #2563eb;
@@ -516,11 +515,6 @@
                 </div>
             </div>
         </div>
-
-
-
-
-
 
 
         <!-- Pestaña Registrar Pago -->

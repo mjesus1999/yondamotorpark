@@ -175,6 +175,12 @@ $allModules = [
             </a>
           </li>
 
+             <li class="sidebar-item">
+            <a href="/vehiculosAlContado" class="sidebar-link">
+             <i class="fa-solid fa-car-side pe-2"></i> Vehículos al contado
+            </a>
+          </li>
+
 
           <!-- Modulos de Gestión de Usuarios -->
           <li class="sidebar-item">

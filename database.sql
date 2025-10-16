@@ -605,9 +605,12 @@ CREATE TABLE pagos (
         'Efectivo'
     ) NOT NULL,
     numerotransaccion VARCHAR(30) NULL,
+    moneda ENUM('USD', 'PEN')  NULL,
     fechapago DATE NOT NULL,
     fecharegistro DATETIME NOT NULL DEFAULT NOW(),
     amortizacion DECIMAL(10, 2) NOT NULL,
+    montomonedaoriginal DECIMAL(10,2) NULL,
+    tipocambioaplicado DECIMAL(10, 4) ,
     saldorestante DECIMAL(10, 2) NULL,
     comprobante VARCHAR(200) NULL,
     observacion VARCHAR(300) NULL,
@@ -623,7 +626,9 @@ CREATE TABLE pagos (
     CONSTRAINT fk_idcliente_pagos  FOREIGN KEY(idcliente) REFERENCES clientes(idcliente)
 ) ENGINE = InnoDB;
 
-
+ALTER TABLE pagos ADD COLUMN  moneda ENUM('USD', 'PEN')  NULL AFTER saldorestante;
+ALTER TABLE pagos ADD COLUMN montomonedaoriginal DECIMAL(10,2) NULL AFTER amortizacion;
+ALTER TABLE pagos ADD COLUMN tipocambioaplicado DECIMAL(10, 4) NULL AFTER montomonedaoriginal;
 
 -- ALTER TABLE pagos MODIFY COLUMN comprobante VARCHAR(200) NULL;
 -- ALTER TABLE pagos MODIFY COLUMN numerotransaccion VARCHAR(30) NULL;
@@ -643,13 +648,15 @@ CREATE TABLE pagos (
 CREATE TABLE cuentaspago (
     idcuentapago INT AUTO_INCREMENT PRIMARY KEY,
     identidadpago INT NOT NULL,
-    moneda ENUM('Soles', 'Dolares') NOT NULL,
+    moneda ENUM('Soles', 'Dólares') NOT NULL,
     numcuenta VARCHAR(35) NOT NULL,
     CONSTRAINT fk_identipago_cuentas FOREIGN KEY (identidadpago) REFERENCES entidadespago (identidadpago)
 ) ENGINE = InnoDb;
 
 -- ALTER TABLE cuentaspago
 -- CHANGE COLUMN monedad moneda ENUM('Soles', 'Dolares') NOT NULL;
+
+-- ALTER TABLE cuentaspago  MODIFY COLUMN moneda ENUM('Soles', 'Dólares') NOT NULL;
 
 CREATE TABLE entidadespago (
     identidadpago INT AUTO_INCREMENT PRIMARY KEY,

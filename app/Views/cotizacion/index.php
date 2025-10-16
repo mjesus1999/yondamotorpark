@@ -2,410 +2,8 @@
 
 <link href="https://unpkg.com/tabulator-tables@5.5.2/dist/css/tabulator_simple.min.css" rel="stylesheet">
 <link rel="stylesheet" href="/assets/css/tabulator.css">
+<link rel="stylesheet" href="/assets/css/contrato-modal.css">
 
-<style>
-    :root {
-        --font-size: 16px;
-        --background: #ffffff;
-        --foreground: oklch(0.145 0 0);
-        --card: #ffffff;
-        --card-foreground: oklch(0.145 0 0);
-        --popover: oklch(1 0 0);
-        --popover-foreground: oklch(0.145 0 0);
-        --primary: #030213;
-        --primary-foreground: oklch(1 0 0);
-        --secondary: oklch(0.95 0.0058 264.53);
-        --secondary-foreground: #030213;
-        --muted: #ececf0;
-        --muted-foreground: #717182;
-        --accent: #e9ebef;
-        --accent-foreground: #030213;
-        --destructive: #d4183d;
-        --destructive-foreground: #ffffff;
-        --border: rgba(0, 0, 0, 0.1);
-        --input: transparent;
-        --input-background: #f3f3f5;
-        --switch-background: #cbced4;
-        --font-weight-medium: 500;
-        --font-weight-normal: 400;
-        --ring: oklch(0.708 0 0);
-        --chart-1: oklch(0.646 0.222 41.116);
-        --chart-2: oklch(0.6 0.118 184.704);
-        --chart-3: oklch(0.398 0.07 227.392);
-        --chart-4: oklch(0.828 0.189 84.429);
-        --chart-5: oklch(0.769 0.188 70.08);
-        --radius: 0.625rem;
-        --sidebar: oklch(0.985 0 0);
-        --sidebar-foreground: oklch(0.145 0 0);
-        --sidebar-primary: #030213;
-        --sidebar-primary-foreground: oklch(0.985 0 0);
-        --sidebar-accent: oklch(0.97 0 0);
-        --sidebar-accent-foreground: oklch(0.205 0 0);
-        --sidebar-border: oklch(0.922 0 0);
-        --sidebar-ring: oklch(0.708 0 0);
-    }
-
-
-    :root {
-        --contrato-gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        --contrato-gradient-info: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-        --contrato-gradient-success: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-        --contrato-gradient-warning: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        --contrato-info-card-bg: linear-gradient(135deg, #f8f9ff 0%, #e8eeff 100%);
-        --contrato-info-card-border: #e0e7ff;
-        --contrato-section-bg: #ffffff;
-        --contrato-section-border: #e2e8f0;
-        --contrato-section-hover-border: #667eea;
-        --contrato-text-primary: #2d3748;
-        --contrato-text-muted: #718096;
-        --contrato-icon-accent: #667eea;
-    }
-
-
-    /* Modal Content */
-    #contratoModal .modal-content {
-        border: none;
-        border-radius: 20px;
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-        overflow: hidden;
-        background: var(--background);
-    }
-
-    /* Modal Header */
-    #contratoModal .modal-header {
-        background: var(--contrato-gradient-primary);
-        color: white;
-        border: none;
-        padding: 1.5rem 2rem;
-        position: relative;
-    }
-
-    #contratoModal .modal-header::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: radial-gradient(circle at top right, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
-        pointer-events: none;
-    }
-
-    #contratoModal .modal-header .btn-close {
-        filter: brightness(0) invert(1);
-        opacity: 0.9;
-        transition: all 0.3s ease;
-    }
-
-    #contratoModal .modal-header .btn-close:hover {
-        opacity: 1;
-        transform: rotate(90deg);
-    }
-
-    #contratoModal .modal-title {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        font-weight: 600;
-        position: relative;
-        z-index: 1;
-    }
-
-    /* Info Card - Cotización seleccionada */
-    #contratoModal .info-card {
-        border: 2px solid var(--contrato-info-card-border);
-        border-radius: 15px;
-        padding: 1.5rem;
-        margin-bottom: 1.5rem;
-        background: var(--contrato-info-card-bg);
-        transition: all 0.3s ease;
-        position: relative;
-        overflow: hidden;
-    }
-
-    #contratoModal .info-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 4px;
-        height: 100%;
-        background: var(--contrato-gradient-primary);
-    }
-
-    #contratoModal .info-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.15);
-    }
-
-
-    #contratoModal .info-card .bi-file-text {
-        color: var(--contrato-icon-accent);
-        font-size: 1.5rem;
-    }
-
-    #contratoModal .info-card p {
-        margin: 0;
-    }
-
-    #contratoModal .info-card .text-muted {
-        color: var(--contrato-text-muted);
-        font-size: 0.875rem;
-    }
-
-    #contratoModal .info-card p:not(.text-muted) {
-        font-weight: 600;
-        color: var(--contrato-text-primary);
-    }
-
-    /* Card Sections */
-    #contratoModal .card-section {
-        border: 2px solid var(--contrato-section-border);
-        border-radius: 15px;
-        padding: 1.5rem;
-        margin-bottom: 1.5rem;
-        transition: all 0.3s ease;
-        background: var(--contrato-section-bg);
-        position: relative;
-        overflow: hidden;
-    }
-
-    #contratoModal .card-section::after {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 3px;
-        background: var(--contrato-gradient-primary);
-        transform: scaleX(0);
-        transform-origin: left;
-        transition: transform 0.3s ease;
-    }
-
-    #contratoModal .card-section:hover {
-        border-color: var(--contrato-section-hover-border);
-        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.12);
-        transform: translateY(-2px);
-    }
-
-
-    #contratoModal .card-section:hover::after {
-        transform: scaleX(1);
-    }
-
-    #contratoModal .card-section-title {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        margin-bottom: 1.25rem;
-        font-weight: 600;
-        color: var(--contrato-text-primary);
-    }
-
-    /* Iconos en las secciones */
-    #contratoModal .card-section-title i {
-        width: 42px;
-        height: 42px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 12px;
-        font-size: 1.25rem;
-        transition: all 0.3s ease;
-    }
-
-    #contratoModal .card-section:hover .card-section-title i {
-        transform: scale(1.1) rotate(5deg);
-    }
-
-    #contratoModal .icon-primary {
-        background: var(--contrato-gradient-primary);
-        color: white;
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-    }
-
-
-
-    #contratoModal .icon-info {
-        background: var(--contrato-gradient-info);
-        color: white;
-        box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
-    }
-
-
-
-    #contratoModal .icon-success {
-        background: var(--contrato-gradient-success);
-        color: white;
-        box-shadow: 0 4px 15px rgba(67, 233, 123, 0.3);
-    }
-
-
-
-    #contratoModal .icon-warning {
-        background: var(--contrato-gradient-warning);
-        color: white;
-        box-shadow: 0 4px 15px rgba(240, 147, 251, 0.3);
-    }
-
-
-    /* Form Labels */
-    #contratoModal .form-label {
-        font-weight: 600;
-        color: var(--contrato-text-primary);
-        margin-bottom: 0.5rem;
-        display: block;
-    }
-
-    #contratoModal .form-label .required {
-        color: #f43f5e;
-        margin-left: 2px;
-    }
-
-    /* Form Controls */
-    #contratoModal .form-control,
-    #contratoModal .form-select {
-        border: 2px solid var(--contrato-section-border);
-        border-radius: 10px;
-        padding: 0.75rem 1rem;
-        transition: all 0.3s ease;
-        background: var(--background);
-        color: var(--foreground);
-    }
-
-    #contratoModal .form-control:focus,
-    #contratoModal .form-select:focus {
-        border-color: var(--contrato-section-hover-border);
-        box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.15);
-        outline: none;
-    }
-
-
-    #contratoModal .form-control::placeholder {
-        color: var(--contrato-text-muted);
-    }
-
-    /* Form Text */
-    #contratoModal .form-text {
-        color: var(--contrato-text-muted);
-        font-size: 0.875rem;
-        margin-top: 0.25rem;
-        display: block;
-    }
-
-    /* Modal Footer */
-    #contratoModal .modal-footer {
-        border: none;
-        padding: 1.5rem 2rem;
-        background: var(--background);
-    }
-
-    /* Botones */
-    #contratoModal .btn-gradient-primary {
-        background: var(--contrato-gradient-primary);
-        border: none;
-        color: white;
-        padding: 0.75rem 1.5rem;
-        border-radius: 10px;
-        font-weight: 600;
-        transition: all 0.3s ease;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-    }
-
-
-
-    #contratoModal .btn-gradient-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-        color: white;
-    }
-
-
-
-    #contratoModal .btn-outline-custom {
-        border: 2px solid var(--contrato-section-hover-border);
-        color: var(--contrato-section-hover-border);
-        background: transparent;
-        padding: 0.75rem 1.5rem;
-        border-radius: 10px;
-        font-weight: 600;
-        transition: all 0.3s ease;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    #contratoModal .btn-outline-custom:hover {
-        background: var(--contrato-section-hover-border);
-        color: white;
-        transform: translateY(-2px);
-    }
-
-    /* Animación Sparkle */
-    #contratoModal .sparkle {
-        display: inline-block;
-        animation: sparkle 2s ease-in-out infinite;
-    }
-
-    @keyframes sparkle {
-
-        0%,
-        100% {
-            transform: scale(1) rotate(0deg);
-            opacity: 1;
-        }
-
-        50% {
-            transform: scale(1.3) rotate(180deg);
-            opacity: 0.7;
-        }
-    }
-
-    /* Animación Fade In Up */
-    #contratoModal .fade-in-up {
-        animation: fadeInUp 0.5s ease-out;
-    }
-
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(20px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-
-
-    /* Responsive */
-    @media (max-width: 768px) {
-        #contratoModal .modal-header {
-            padding: 1.25rem 1.5rem;
-        }
-
-        #contratoModal .modal-body {
-            padding: 1.25rem !important;
-        }
-
-        #contratoModal .card-section,
-        #contratoModal .info-card {
-            padding: 1.25rem;
-        }
-
-        #contratoModal .card-section-title i {
-            width: 36px;
-            height: 36px;
-            font-size: 1.1rem;
-        }
-    }
-</style>
 
 <div class="container-fluid">
 
@@ -692,7 +290,7 @@
     document.addEventListener('DOMContentLoaded', async () => {
 
 
-        const aprobarModalElement = document.getElementById('aprobarModal');
+     
         const cotizacionAprobarIdInput = document.getElementById('cotizacion-aprobar-id');
         const clienteAprobarNombreStrong = document.getElementById('cliente-aprobar-nombre');
         const confirmarAprobarBtn = document.getElementById('confirmarAprobarBtn');
@@ -700,16 +298,6 @@
         const fechaInicio = document.getElementById('fechainicio');
 
         const selectLocal = document.getElementById('idlocal');
-
-
-
-
-
-
-
-
-
-
 
         window.APP_DATA_TABLE = <?php echo json_encode($cotizaciones); ?>;
 
@@ -802,6 +390,7 @@
                                 idcotizacion: id,
                                 estadocotizacion: estado,
                                 nombrecliente,
+                                valorcuota,
                                 numcuotas,
                                 habilitar_contrato,
                                 existe_reserva,
@@ -821,7 +410,7 @@
 
                             // Acción de PDF (siempre presente)
                             acciones.push(`
-                                         <a type="button" class="btn btn-sm btn-download-pdf" data-id="${id}" 
+                                         <a class="btn-download-pdf px-1" data-id="${id}" 
                                             data-cliente="${nombrecliente}" title="PDF Cotización">
                                             <i class="bi bi-filetype-pdf text-danger fs-5"></i>
                                         </a>
@@ -836,12 +425,12 @@
                                         <span class="px-1" style="cursor: pointer;" onclick="mostrarModalReserva('${contrato_cliente_nombre}', 'contrato')" title="Vehículo ya vendido">
                                             <i class="bi bi-currency-dollar fs-5 text-muted"></i>
                                         </span>`);
-                                                        } else if (vehiculoReservadoPorOtro) {
-                                                            acciones.push(`
+                                    } else if (vehiculoReservadoPorOtro) {
+                                        acciones.push(`
                                         <span class="px-1" style="cursor: pointer;" onclick="mostrarModalReserva('${reserva_cliente_nombre}', 'reservado')" title="Vehículo separado">
                                             <i class="bi bi-currency-dollar fs-5 text-muted"></i>
                                         </span>`);
-                                                        } else {
+                                    } else {
                                         acciones.push(`
                                     <a class="px-1" href="/cotizacion/pagoInicial/${id}" title="Registrar Primer Pago">
                                         <i class="bi bi-currency-dollar fs-5 text-success"></i>
@@ -875,7 +464,7 @@
                                         } else {
                                             acciones.push(`
                                                 <a class="px-1 text-info fw-bold btnCrearContrato" title="Crear Contrato"
-                                                data-id="${id}" data-cliente="${nombrecliente}" data-numcuotas="${numcuotas}"
+                                                data-id="${id}" data-cliente="${nombrecliente}" data-numcuotas="${numcuotas}" data-valorCuota="${valorcuota}"
                                                 data-bs-toggle="modal" data-bs-target="#contratoModal">
                                                 <i class="bi bi-file-earmark-text fs-5"></i>
                                                 </a>`);
@@ -1008,9 +597,10 @@
             const idCotizacion = btn.dataset.id;
             const cliente = btn.dataset.cliente;
             const numCuotas = btn.dataset.numcuotas;
+            const valorCuota = btn.dataset.valorcuota;
 
             inputIdCotizacion.value = idCotizacion;
-            displayIdCotizacion.textContent = `${idCotizacion} - ${cliente} (${numCuotas} cuotas)`;
+            displayIdCotizacion.textContent = `${idCotizacion} - ${cliente} (${numCuotas} cuotas) - (S/ ${valorCuota} valor de cuota)`;
         });
 
         fechaInicio.addEventListener('change', (e) => {
@@ -1035,8 +625,6 @@
             try {
 
                 const result = await ask('¿Crear contrato?', 'Confirmar');
-
-
                 if (!result) return;
 
                 const req = await fetch('/contrato/store', {
@@ -1061,10 +649,6 @@
                 btnContrato.disabled = false;
             }
         });
-
-
-
-
 
     });
 </script>

@@ -32,6 +32,29 @@ class Cliente
     }
 
 
+    public function searchClienteDB(string $dni): array
+    {
+        $query = "SELECT c.idcliente,
+                        CONCAT(p.apellidos, ' ' ,p.nombres) AS cliente,
+                        p.nrodoc,
+                        p.telprimario 
+                FROM clientes c
+                INNER JOIN personas p ON p.idpersona = c.idpersona
+                WHERE p.nrodoc = :dni AND c.tipocliente = 'P'
+                LIMIT 1;";
+        try {
+            $stmt = $this->db->prepare($query);
+            $stmt->bindParam(':dni', $dni, PDO::PARAM_STR);
+            $stmt->execute();
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $result ? $result : [];
+        } catch (PDOException $e) {
+            error_log($e->getMessage());
+            return [];
+        }
+    }
+
+
     public function create($params = []): int
     {
         $query = "INSERT INTO clientes(idpersona, idempresa, idcolregistra, idcolactualiza, tipocliente)

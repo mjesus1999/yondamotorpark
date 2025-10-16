@@ -4,7 +4,7 @@
 function obtenerTipoCambio(): float 
 {
     $cacheFile = __DIR__ . '/tipo_cambio_cache.json'; 
-    $TTL = 10 * 60; 
+    $TTL = 720 * 60;  // Cada 12 horas
 
     // Validar si existe cache y si está vigente
     if (file_exists($cacheFile)) {
@@ -52,5 +52,5 @@ function obtenerTipoCambio(): float
 
     return 0;
 } 
-/* echo obtenerTipoCambio(); */
+//  echo obtenerTipoCambio(); 
 ?>

@@ -44,214 +44,65 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
 <?php include __DIR__ . '/../layout/footer.php'; ?>
 <script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.5.2/dist/js/tabulator.min.js"></script>
-
 <script>
     document.addEventListener("DOMContentLoaded", () => {
         const table = new Tabulator("#tabla-contratos", {
-            ajaxURL: "/api/contratos",
-            ajaxConfig: "GET",
-            ajaxContentType: "json",
-            layout: "fitColumns", // Ajusta el ancho al contenedor
-            responsiveLayout: "collapse", // Oculta columnas no críticas en pantallas pequeñas
-            pagination: "local",
-            paginationSize: 15,
-            paginationSizeSelector: [5, 10, 25, 50],
-            placeholder: "No hay contratos disponibles.",
-            movableColumns: true,
+        ajaxURL: "/api/contratos",
+        ajaxConfig:'GET',
+        ajaxContentType:"json",
+        //  progressiveLoad:"load",
+        progressiveLoadScrollMargin:300 ,
+        layout: "fitColumns",
+        responsiveLayout: "collapse",
+        pagination: "local",
+        paginationSize: 15,
+        index: "idcontrato", // El identificador de cada fila
+        placeholder: "No hay contratos disponibles.",
+        movableColumns: true,
 
-            locale: "es-es",
-            langs: {
-                "es-es": {
-                    "pagination": {
-                        "page_size": "Filas por página",
-                        "first": "<<",
-                        "prev": "<",
-                        "next": ">",
-                        "last": ">>",
-                        "counter": {
-                            "showing": "Mostrando",
-                            "of": "de",
-                            "rows": "filas"
-                        }
-                    },
-                    "headerFilters": {
-                        "default": "Filtrar..."
-                    }
+        
+
+        columns: [
+            {title: "#", formatter: "rownum", hozAlign: "center", width: 40, responsive: 10},
+            {title: "Inicio", field: "fechainicio", hozAlign: "center", minWidth: 110, responsive:10},
+            {title: "Día Pago", field: "diapago", hozAlign: "center", width: 70, responsive:10},
+            {title: "Tienda", field: "tienda", headerHozAlign: "left", widthGrow: 4, responsive:5},
+            {title: "Vehículo", field: "vehiculo", headerHozAlign: "left", widthGrow: 4, responsive:1},
+            {title: "Cliente", field: "cliente", headerHozAlign: "center", widthGrow: 6, responsive:2},
+            {title: "Documento", field: "doc_cliente", hozAlign: "center", widthGrow: 2, responsive:10},
+            {title: "Asesor", field: "asesor", headerHozAlign: "center", widthGrow: 3, responsive:10},
+            {title: "Precio Venta", field: "precioventa", hozAlign: "right", formatter: "money", formatterParams:{symbol:"S/ ",thousand:",",precision:2}, minWidth:100},
+            {title: 'Acciones', hozAlign: 'center', responsive:0,
+                formatter: (cell) => {
+                    const id = cell.getRow().getData().idcontrato;
+                    return `<button class="btn btn-sm btn-eliminar" data-id="${id}" data-action="delete">
+                                <i class="bi bi-trash text-danger"></i>
+                            </button>`;
                 }
-            },
-            index: "idcontrato",
+            }
+        ],
 
-            columns: [
-                //  Contrato
-                {
-                    title: "#",
-                    formatter: "rownum",
-                    hozAlign: "center",
-                    width: 40,
-                    responsive: 0
-                },
-                {
-                    title: "Inicio",
-                    field: "fechainicio",
-                    hozAlign: "center",
-                    minWidth: 110
-                },
-                {
-                    title: "Día Pago",
-                    field: "diapago",
-                    hozAlign: "center",
-                    width: 70
-                },
+        ajaxResponse:(url,params,response) => {
+            if(response.success) {
+                 return response.data;
+            }
+            // console.log(" Datos cargados correctamente desde:", url);
+            // console.log(" Total de registros:", response.length);
+            // console.log(" Datos:", response);
+            // console.info(" Carga de contratos exitosa");
+            // Devolver para que tabulator lo renderice en la tabla.
+       
+        },
+         ajaxError: function(error) {
+            console.error(" Error al cargar los contratos:", error);
+            console.warn("Verifica el endpoint o la respuesta del servidor");
+        },
 
-                //  Ubicación
-                {
-                    title: "Tienda",
-                    field: "tienda",
-                    headerHozAlign: "left",
-                    widthGrow: 4,
-                    tooltip: true,
-                },
-
-                //  Vehículo
-                {
-                    title: "Vehículo",
-                    field: "vehiculo",
-                    headerHozAlign: "left",
-                    widthGrow: 4,
-                    tooltip: true,
-                },
-
-                //  Cliente
-                {
-                    title: "Cliente",
-                    field: "cliente",
-                    headerHozAlign: "center",
-                    widthGrow: 6,
-                    tooltip: true,
-                },
-                {
-                    title: "Documento",
-                    field: "doc_cliente",
-                    hozAlign: "center",
-                    // headerFilter: "input",
-                    widthGrow: 2,
-                    tooltip: true
-                },
-
-                //  Asesor
-                {
-                    title: "Asesor",
-                    field: "asesor",
-                    headerHozAlign: "center",
-                    tooltip: true,
-                    widthGrow: 3
-                },
-
-                //  Detalles Financieros
-                {
-                    title: "Moneda",
-                    field: "moneda",
-                    hozAlign: "left",
-                    width: 80
-                },
-                {
-                    title: "Precio Venta",
-                    field: "precioventa",
-                    hozAlign: "right",
-                    formatter: "money",
-                    formatterParams: {
-                        symbol: "S/ ",
-                        thousand: ",",
-                        precision: 2
-                    },
-                    minWidth: 100
-                },
-                {
-                    title: "Inicial",
-                    field: "inicial",
-                    hozAlign: "right",
-                    formatter: "money",
-                    formatterParams: {
-                        symbol: "S/ ",
-                        thousand: ",",
-                        precision: 2
-                    },
-                    minWidth: 120
-                },
-                {
-                    title: "Cuota",
-                    field: "valorcuota",
-                    editor: "input",
-                    hozAlign: "right",
-                    formatter: "money",
-                    formatterParams: {
-                        symbol: "S/ ",
-                        thousand: ",",
-                        precision: 2
-                    },
-                    minWidth: 80,
-                },
-                {
-                    title: "N° cuota",
-                    field: "numcuotas",
-                    hozAlign: "center",
-                    width: 90
-                },
-
-                {
-                    title: 'Acciones',
-                    hozAlign: 'center',
-                    responsive: 0,
-                    formatter: (cell) => {
-                        const id = cell.getRow().getData().idcontrato
-
-                        return `
-                         <button class="btn bytn-sm btn-eliminar " data-id="${id}" data-action="delete" title="Eliminar">
-                               <i class="bi bi-trash text-danger"></i>
-                             </button>
-                           
-                        `;
-                    },
-                    // cellClick: async (e, cell) => {
-                    //     const id = cell.getRow().getData().idcontrato;
-                    //     if (e.target.closest('.btn-eliminar')) {
-                    //         if (await ask('¿Eliminar contrato?', 'Confirmar')) {
-                    //             deleteContrato(id);
-                    //         }
-
-                    //         console.log('Eliminar contrato con id: ', id)
-                    //     }
-
-
-                    // }
-                }
-
-
-            ],
-
-            ajaxResponse: (url, params, response) => {
-                console.log("Datos cargados desde API:", response);
-                return response;
-            },
-            ajaxError: (xhr, textStatus, errorThrown) => {
-                console.error("Error al cargar datos:", errorThrown);
-            },
-
-
-        });
+ 
+      
+    });
 
 
         const searchInput = document.getElementById("busqueda-global");

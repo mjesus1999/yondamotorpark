@@ -100,7 +100,7 @@ class ContratoController extends Controller
         $contratos = $this->contratoModel->getAll();
 
         if ($contratos) {
-            echo json_encode($contratos);
+            echo json_encode(['success' => true, 'data' =>$contratos]);
         } else {
             echo json_encode([]);
         }

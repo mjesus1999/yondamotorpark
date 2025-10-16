@@ -1,3 +1,5 @@
+
+USE motorpark;
 SELECT * FROM PERSONAS;
 
 -- Verificar si Miguel Angel ya es cliente

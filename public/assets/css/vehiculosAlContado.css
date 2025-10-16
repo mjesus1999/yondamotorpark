@@ -1,0 +1,544 @@
+
+    .ts-dropdown {
+        z-index: 1060 !important;
+    }
+
+    .form-section {
+        padding: 2px;
+        background: var(--gradient-primary);
+        border-radius: 12px;
+        margin-top: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 8px 25px rgba(33, 73, 255, 0.2);
+    }
+
+    .form-section>.row {
+        background-color: var(--bs-body-bg);
+        padding: 1.5rem;
+        border-radius: 10px;
+        margin: 0;
+    }
+
+    .modal-final {
+        color: #ffffffff;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #1056acff 0%, #5076cfff 50%, #6193d4ff 100%);
+    }
+
+    [data-bs-theme="dark"] .form-section>.row {
+        background-color: #1a1a2e;
+    }
+
+    :root {
+        --gradient-primary: linear-gradient(135deg, #2149ffff 0%, #3b74eeff 50%, #667eea 100%);
+        --gradient-success: linear-gradient(135deg, #10b981 0%, #14b8a6 100%);
+        --transition-speed: 0.3s;
+    }
+
+    #nombre-archivo {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .summary-card-gradient {
+        background: var(--gradient-primary);
+        color: white;
+        border-radius: 1rem;
+        border: none;
+        box-shadow: 0 10px 25px rgba(33, 73, 255, 0.4);
+    }
+
+
+    .summary-card-gradient hr {
+        border-top: 2px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .summary-card-gradient small {
+        opacity: 0.8;
+        font-weight: bold;
+    }
+
+    input:disabled,
+    select:disabled {
+        background-color: #949b9cff !important;
+    }
+
+    [data-bs-theme="dark"] {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        color: #e9ecef;
+    }
+
+    [data-bs-theme="dark"] .text-muted {
+        color: #adb5bd !important;
+    }
+
+    [data-bs-theme="dark"] .card {
+        background: #1a1a2e;
+        border-color: rgba(255, 255, 255, 0.1);
+        color: #e9ecef;
+    }
+
+    [data-bs-theme="dark"] .form-control,
+    [data-bs-theme="dark"] .form-select {
+        background: #16213e;
+        border-color: rgba(255, 255, 255, 0.1);
+        color: #e9ecef;
+    }
+
+    [data-bs-theme="dark"] .form-control:focus,
+    [data-bs-theme="dark"] .form-select:focus {
+        background: #16213e;
+        border-color: #667eea;
+        color: #e9ecef;
+    }
+
+    /* ============================================== */
+    /* === MEJORA DE HOVER AVANZADO PARA TOM-SELECT === */
+    /* ============================================== */
+
+    .ts-dropdown .option {
+        transition: all 0.2s ease-in-out;
+        border-left: 3px solid transparent;
+    }
+
+
+    .ts-dropdown .option:hover,
+    .ts-dropdown .option.active {
+
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.15));
+        border-left-color: #667eea;
+        transform: translateX(5px);
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+        color: var(--bs-body-color);
+    }
+
+
+    .ts-dropdown .option:hover .fw-bold,
+    .ts-dropdown .option.active .fw-bold {
+        color: #312e81;
+
+    }
+
+    [data-bs-theme="dark"] .ts-dropdown .option:hover .small,
+    [data-bs-theme="dark"] .ts-dropdown .option.active .small {
+        color: #a5b4fc !important;
+    }
+
+    /* --------------------------------------------------- */
+
+    .header-main {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        transition: background var(--transition-speed);
+    }
+
+    [data-bs-theme="dark"] .header-main {
+        background: rgba(26, 26, 46, 0.9);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+    }
+
+    .logo-box {
+        width: 45px;
+        height: 45px;
+        background: var(--gradient-primary);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* ========== MODALES ========== */
+    .modal-backdrop.show {
+        backdrop-filter: blur(4px);
+    }
+
+    .modal-content {
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        animation: modalFadeIn 0.4s ease-out;
+        overflow: hidden;
+    }
+
+    [data-bs-theme="dark"] .modal-content {
+        background: #1a1a2e;
+        color: #e9ecef;
+    }
+
+    @keyframes modalFadeIn {
+        from {
+            opacity: 0;
+            transform: scale(0.9) translateY(-20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+    }
+
+    .modal-header-gradient {
+        background: var(--gradient-primary);
+        padding: 2rem;
+        border: none;
+        color: white;
+    }
+
+    .modal-header-success {
+        background: var(--gradient-success);
+        padding: 2rem;
+        border: none;
+        color: white;
+    }
+
+    .progress-steps {
+        display: flex;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-top: 1.5rem;
+    }
+
+    .step-indicator {
+        height: 8px;
+        width: 100px;
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 10px;
+        transition: all var(--transition-speed);
+    }
+
+    .step-indicator.active {
+        background: white;
+    }
+
+    .step-indicator.completed {
+        background: rgba(255, 255, 255, 0.7);
+    }
+
+    /* ========== TARJETAS PERSONALIZADAS ========== */
+    .card-custom {
+        border-radius: 15px;
+        border: 2px solid rgba(0, 0, 0, 0.1);
+        transition: all var(--transition-speed);
+    }
+
+    .card-success {
+        background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+        border-color: #4caf50 !important;
+    }
+
+    [data-bs-theme="dark"] .card-success {
+        background: linear-gradient(135deg, #1b3a1d 0%, #2d5f30 100%);
+        border-color: #4caf50 !important;
+    }
+
+    /* --- Tarjeta de Resumen de Vehículo --- */
+    .vehicle-summary-card {
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 1rem;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+    }
+
+    [data-bs-theme="dark"] .vehicle-summary-card {
+        background-color: #2c3034;
+        border-color: #495057;
+    }
+
+    .vehicle-summary-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+    }
+
+    .detail-item {
+        text-align: center;
+    }
+
+    .detail-icon {
+        font-size: 1.5rem;
+        color: #0d6efd;
+        margin-bottom: 0.5rem;
+    }
+
+    .detail-item small {
+        display: block;
+        font-size: 0.75rem;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .detail-item strong {
+        font-size: 1.1rem;
+        color: var(--bs-body-color);
+    }
+
+    .price-section {
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #e9ecef;
+        text-align: center;
+    }
+
+    [data-bs-theme="dark"] .price-section {
+        border-top-color: #495057;
+    }
+
+    .price-tag {
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        background-color: #ffc107;
+        color: #212529;
+        border-radius: 50rem;
+        font-size: 1rem;
+        font-weight: 500;
+        box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+        transition: all 0.3s ease;
+    }
+
+    .price-tag:hover {
+        transform: scale(1.05);
+        box-shadow: 0 6px 20px rgba(255, 193, 7, 0.4);
+    }
+
+    .price-tag strong {
+        font-weight: 700;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .fade-in-up {
+        animation: fadeInUp 0.5s ease-out forwards;
+    }
+
+    /* ========== SELECTOR DE MONEDA ========== */
+    .radio-card {
+        cursor: pointer;
+        padding: 1.5rem;
+        border: 2px solid rgba(0, 0, 0, 0.1);
+        border-radius: 12px;
+        transition: all var(--transition-speed);
+    }
+
+    [data-bs-theme="dark"] .radio-card {
+        background: #16213e;
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .radio-card:hover {
+        border-color: #667eea;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+    }
+
+    .radio-card.selected {
+        background: linear-gradient(135deg, #e8eaf6 0%, #c5cae9 100%);
+        border-color: #667eea !important;
+    }
+
+    [data-bs-theme="dark"] .radio-card.selected {
+        background: linear-gradient(135deg, #2d3561 0%, #3d4a7a 100%);
+        border-color: #667eea !important;
+    }
+
+    /* ========== BOTONES ========== */
+    .btn-gradient {
+        background: var(--gradient-primary);
+        border: none;
+        color: white;
+        transition: all var(--transition-speed);
+    }
+
+    .btn-gradient:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        color: white;
+    }
+
+    .btn-gradient:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+
+    .btn-success-gradient {
+        background: linear-gradient(135deg, #10b981 0%, #14b8a6 100%);
+        border: none;
+        color: white;
+    }
+
+    .btn-success-gradient:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        color: white;
+    }
+
+    /* ========== PRECIO FINAL ========== */
+    .precio-final-display {
+        color: #fff !important;
+        background: linear-gradient(135deg, #447e47ff 0%, #2d5f30 100%);
+        border: 2px solid #a5d6a7;
+        border-radius: 15px;
+        padding: 1.5rem;
+        text-align: center;
+    }
+
+    [data-bs-theme="dark"] .precio-final-display {
+        background: linear-gradient(135deg, #1b3a1d 0%, #2d5f30 100%);
+        border-color: #4caf50;
+    }
+
+    .precio-final-amount {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #e8fde9ff;
+        margin: 0;
+    }
+
+    [data-bs-theme="dark"] .precio-final-amount {
+        color: #a5d6a7;
+    }
+
+    /* ========== FORMULARIOS ========== */
+    .form-control,
+    .form-select {
+        border-radius: 10px;
+        border: 2px solid rgba(0, 0, 0, 0.1);
+        padding: 0.75rem 1rem;
+        transition: all var(--transition-speed);
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.15);
+    }
+
+    /* ========== ICONOS CIRCULARES ========== */
+    .icon-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+    }
+
+    .icon-success {
+        background: #c8e6c9;
+        color: #2e7d32;
+    }
+
+    [data-bs-theme="dark"] .icon-success {
+        background: #2d5f30;
+        color: #81c784;
+    }
+
+    /* ========== TAG DE PRECIO ========== */
+    .vehicle-price-tag {
+        background: linear-gradient(135deg, #ffd54f 0%, #ffb300 100%);
+        color: #000;
+        padding: 4px 8px;
+        border-radius: 8px;
+        font-weight: bold;
+        display: inline-block;
+    }
+
+    [data-bs-theme="dark"] .vehicle-price-tag {
+        background: linear-gradient(135deg, #f9a825 0%, #f57f17 100%);
+        color: #fff;
+    }
+
+    /* ========== SECCIONES DEL MODAL DE CLIENTE ========== */
+    .section-header {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid;
+        margin-bottom: 1rem;
+    }
+
+    .section-header.green {
+        border-color: #10b981;
+        color: #10b981;
+    }
+
+    .section-header.blue {
+        border-color: #3b82f6;
+        color: #3b82f6;
+    }
+
+    .section-header.purple {
+        border-color: #a855f7;
+        color: #a855f7;
+    }
+
+    /* ========== HERO CARDS ========== */
+    .hero-card {
+        background: white;
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        transition: all var(--transition-speed);
+        border: 2px solid transparent;
+    }
+
+    [data-bs-theme="dark"] .hero-card {
+        background: #1a1a2e;
+        border-color: rgba(255, 255, 255, 0.05);
+    }
+
+    .hero-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    /* ========== ANIMACIONES ========== */
+    .fade-in {
+        animation: fadeIn 0.5s ease-in;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* ========== ALERT WARNING ========== */
+    [data-bs-theme="dark"] .alert-warning {
+        background: rgba(255, 193, 7, 0.2);
+        border-color: #ffc107;
+        color: #ffc107;
+    }
+
+    /* ========== RESPONSIVE ========== */
+    @media (max-width: 768px) {
+        .modal-dialog {
+            margin: 0.5rem;
+        }
+
+        .precio-final-amount {
+            font-size: 2rem;
+        }
+    }

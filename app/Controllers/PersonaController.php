@@ -31,11 +31,18 @@ class PersonaController extends Controller
         $this->view('clientes.create');
     }
 
-    public function storePersonaClient(): int
+    public function storePersonaClient(): void
     {
+        // Detectar si la petición es AJAX
+        $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
+
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            $this->redirect('/clientes/create');
-            return 0;
+            if ($isAjax) {
+                $this->jsonResponse(['success' => false, 'message' => 'Método no permitido'], 405);
+            } else {
+                $this->redirect('/clientes/create');
+            }
+            return;
         }
 
         $data = array_map([Validador::class, 'limpiar'], $_POST);
@@ -46,24 +53,24 @@ class PersonaController extends Controller
             'tipodoc' => $data['tipodocumento'] ?? '',
             'nrodoc' => $data['nrodoc'] ?? '',
             'genero' => $data['genero'] ?? '',
-            // 'fechanac' => $data['fechanac'] ?? '',
-            // 'estadocivil' => $data['estadocivil'] ?? '',
-            // 'email' => $data['email'] ?? null,
             'iddistrito' => !empty($data['distrito']) ? (int) $data['distrito'] : null,
-            'direccion' => $data['direccion']  == '' ? null : $data['direccion'],
-            'referencia' => $data['referencia']  == '' ? null : $data['referencia'],
-            'telprimario' => $data['telprimario']  == '' ? null : $data['telprimario'],
-            'telalternativo' => $data['telalternativo']  == '' ? null : $data['telalternativo'],
-            'latitud' => $data['latitud']  == '' ? null : $data['latitud'],
-            'longitud' => $data['longitud']  == '' ? null : $data['longitud'],
+            'direccion' => empty($data['direccion']) ? null :$data['direccion'],
+            'referencia' => $data['referencia'] ?? null,
+            'telprimario' => $data['telprimario'] ?? null,
+            'telalternativo' => empty($data['telalternativo']) ? null : $data['telalternativo'],
+            'latitud' => $data['latitud'] ?? null,
+            'longitud' => $data['longitud'] ?? null,
         ];
 
         $errores = Validador::validarPersonaCrear($registroPersona);
 
-
         if (!empty($errores)) {
-            $this->view('clientes.create', ['error' => implode("<br>", $errores), 'data' => $registroPersona]);
-            return -1;
+            if ($isAjax) {
+                $this->jsonResponse(['success' => false, 'message' => implode("\n", $errores)], 422);
+            } else {
+                $this->view('clientes.create', ['error' => implode("<br>", $errores), 'data' => $registroPersona]);
+            }
+            return;
         }
 
         $idPersona = $this->personaModel->create($registroPersona);
@@ -72,7 +79,6 @@ class PersonaController extends Controller
             $registroCliente = [
                 'idpersona' => $idPersona,
                 'idempresa' => null,
-                // 'idcolregistra'  => null,
                 'idcolactualiza' => null,
                 'tipocliente' => 'P',
             ];
@@ -80,11 +86,7 @@ class PersonaController extends Controller
             $idCliente = $this->clienteModel->create($registroCliente);
 
             if ($idCliente > 0) {
-                /* $_SESSION['success'] = '¡Cliente creado exitosamente!';
-                $this->redirect('/clientes');
-                return $idCliente; */
-                
-                //Nuevo para llevar el DNI de la ultima persona en cliente
+
                 $_SESSION['ultimo_cliente_registrado'] = [
                     'idcliente' => $idCliente,
                     'nrodoc' => $registroPersona['nrodoc'],
@@ -94,30 +96,48 @@ class PersonaController extends Controller
                     'telprimario' => $registroPersona['telprimario'],
                     'telalternativo' => $registroPersona['telalternativo'],
                     'direccion'      => $registroPersona['direccion'] ?? '',
-                    /* 'referencia'     => $registroPersona['referencia'] ?? '', */
-                    'timestamp' => time() // Para verificar si es reciente
+                    'timestamp' => time()
+                ];
+            
+
+                // Preparamos los datos para la respuesta
+                $nuevoCliente = [
+                    'idcliente' => $idCliente,
+                    'cliente' => $registroPersona['nombres'] . ' ' . $registroPersona['apellidos'],
+                    'nrodoc' => $registroPersona['nrodoc'],
+                    'telprimario' => $registroPersona['telprimario'],
                 ];
 
-                $_SESSION['success'] = '¡Cliente creado exitosamente!';
-
-                // Verificar si viene desde cotización
-                $returnTo = $_GET['return_to'] ?? '/clientes';
-                if ($returnTo === 'cotizacion') {
-                    $this->redirect('/cotizacion/create');
+                if ($isAjax) {
+                    // Si es AJAX, devolvemos la respuesta JSON
+                    $this->jsonResponse(['success' => true, 'message' => '¡Cliente creado exitosamente!', 'cliente' => $nuevoCliente]);
                 } else {
-                    $this->redirect('/clientes');
+                    // Si es un formulario normal, aplicamos la lógica de redirección original
+                    $_SESSION['success'] = '¡Cliente creado exitosamente!';
+                    $returnTo = $_GET['return_to'] ?? '/clientes';
+                    $this->redirect($returnTo === 'cotizacion' ? '/cotizacion/create' : '/clientes');
                 }
-
-                return $idCliente;
-            } else {
-                $this->view('clientes.create', ['error' => 'Error al crear el cliente.']);
+                return;
             }
-        } else {
-            $this->view('clientes.create', ['error' => 'Error al crear la persona.']);
         }
 
-        return -1;
+
+        $errorMsg = 'Error al guardar en la base de datos.';
+        if ($isAjax) {
+            $this->jsonResponse(['success' => false, 'message' => $errorMsg], 500);
+        } else {
+            $this->view('clientes.create', ['error' => $errorMsg]);
+        }
     }
+
+    protected function jsonResponse(array $data, int $statusCode = 200): void
+    {
+        http_response_code($statusCode);
+        header('Content-Type: application/json');
+        echo json_encode($data);
+        exit;
+    }
+
 
     public function edit(int $id): void
     {
@@ -355,7 +375,6 @@ class PersonaController extends Controller
                     'message' => $responseData['message'] ?? 'No se encontró la persona'
                 ]);
             }
-
         } catch (PDOException $e) {
             error_log('Error en búsqueda por API DNI: ' . $e->getMessage());
             echo json_encode([
@@ -363,7 +382,6 @@ class PersonaController extends Controller
                 'message' => 'Error interno del servidor'
             ]);
         }
-
     }
 
     /**
@@ -389,5 +407,4 @@ class PersonaController extends Controller
         }
         echo json_encode($response);
     }
-
 }
