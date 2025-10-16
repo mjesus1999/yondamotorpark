@@ -27,17 +27,23 @@
 
     <!-- TARJETA PRINCIPAL -->
     <div class="card">
+        <div class="card-header d-none d-md-flex justify-content-end">
+            <button class="btn btn-primary btn-sm" id="btnNotificarTodos">
+                <i class="fas fa-paper-plane me-1"></i> Notificar Todos
+            </button>
+        </div>
+
         <div class="card-body">
 
             <!-- BUSCADOR Y BOTÓN (solo escritorio) -->
             <div class="d-none d-md-flex justify-content-between align-items-center mb-3">
-                <div class="input-group w-50">
+                <div class="input-group w-100">
                     <span class="input-group-text"><i class="bi bi-search"></i></span>
                     <input type="text" id="busqueda-global" class="form-control" placeholder="Buscar...">
                 </div>
-                <button class="btn btn-primary btn-sm" id="btnNotificarTodos">
+                <!-- <button class="btn btn-primary btn-sm" id="btnNotificarTodos">
                     <i class="fas fa-paper-plane me-1"></i> Notificar Todos
-                </button>
+                </button> -->
             </div>
 
             <!-- TABULATOR (escritorio) -->
@@ -53,7 +59,7 @@
             <div id="acordeonClientes" class="d-block d-md-none"></div>
 
             <!-- MENSAJE VACÍO -->
-            <div id="mensaje-vacio" class="alert alert-warning d-none mt-3">No hay clientes para notificar.</div>
+            <div id="mensaje-vacio" class="alert alert-warning d-none mt-1">No hay clientes para notificar.</div>
         </div>
     </div>
 </div>
@@ -164,7 +170,7 @@
 
             if (!Array.isArray(datos) || datos.length === 0) {
                 mensajeVacio.classList.remove('d-none');
-                acordeon.innerHTML = '<div class="text-center py-3">No hay datos para mostrar.</div>';
+                /* acordeon.innerHTML = '<div class="text-center py-3">No hay datos para mostrar.</div>'; */
                 return;
             }
 
@@ -313,6 +319,59 @@
                 const btn = this;
                 btn.disabled = true;
                 btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Enviando...';
+                
+                let exitosos = 0;
+                let fallidos = 0;
+                
+                // Obtener todas las filas visibles de la tabla
+                const rows = tabla.getRows();
+                
+                for (let i = 0; i < datos.length; i++) {
+                    const c = datos[i];
+                    const result = await enviarSms(c);
+                    
+                    // Buscar la fila correspondiente por idcontrato
+                    const row = rows.find(r => r.getData().idcontrato === c.idcontrato);
+                    
+                    if (row) {
+                        // Obtener el elemento DOM de la celda de acciones
+                        const cells = row.getCells();
+                        const accionCell = cells[cells.length - 1]; // La última celda es "Acciones"
+                        const btnSms = accionCell.getElement().querySelector('.btn-sms');
+                        
+                        if (btnSms) {
+                            btnSms.className = `btn btn-sm ${result.success ? 'btn-success' : 'btn-danger'} btn-sms`;
+                            btnSms.innerHTML = `<i class="fas fa-${result.success ? 'check' : 'times'}"></i>`;
+                            btnSms.title = result.message || '';
+                        }
+                    }
+                    
+                    // Contadores
+                    if (result.success) {
+                        exitosos++;
+                    } else {
+                        fallidos++;
+                    }
+                    
+                    await new Promise(r => setTimeout(r, 1000));
+                }
+                
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-paper-plane me-1"></i>Notificar Todos';
+                
+                // Mostrar resultado con showToast
+                if (fallidos === 0) {
+                    showToast(`Proceso completado: ${exitosos} notificaciones enviadas exitosamente`, 'SUCCESS');
+                } else if (exitosos === 0) {
+                    showToast(`Proceso completado: ${fallidos} notificaciones fallaron`, 'ERROR');
+                } else {
+                    showToast(`Proceso completado: ${exitosos} exitosas, ${fallidos} fallidas`, 'WARNING');
+                }
+            });
+            /* document.getElementById('btnNotificarTodos').addEventListener('click', async function () {
+                const btn = this;
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Enviando...';
                 for (const c of datos) {
                     await enviarSms(c);
                     await new Promise(r => setTimeout(r, 1000));
@@ -320,10 +379,84 @@
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fas fa-paper-plane me-1"></i>Notificar Todos';
                 mostrarToast('Proceso completado', 'success');
-            });
+            }); */
 
             //Guardar telefono
             document.getElementById('btnGuardarTelefono').addEventListener('click', async () => {
+                const id = document.getElementById('idcontratoModal').value;
+                const telNuevo = document.getElementById('telefonoNuevo').value.trim();
+                const telActual = document.getElementById('telefonoActual').value.trim();
+                const btnGuardar = document.getElementById('btnGuardarTelefono');
+
+                // Validar teléfono
+                if (!validarTelefono(telNuevo)) {
+                    document.getElementById('telefonoNuevo').classList.add('is-invalid');
+                    showToast('El teléfono debe tener entre 9 y 15 dígitos', 'WARNING');
+                    return;
+                }
+
+                // Remover clase de error si habia
+                document.getElementById('telefonoNuevo').classList.remove('is-invalid');
+
+                let confirmado = true;
+                if (typeof ask === 'function') {
+                    confirmado = await ask(
+                        `¿Desea actualizar el teléfono de ${telActual} a ${telNuevo}?`,
+                        'Confirmar actualización'
+                    );
+                } else {
+                    confirmado = confirm(`¿Desea actualizar el teléfono de ${telActual} a ${telNuevo}?`);
+                }
+
+                if (!confirmado) return;
+
+                // Deshabilitar boton durante la actualizacion
+                btnGuardar.disabled = true;
+                btnGuardar.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Guardando...';
+
+                try {
+                    const res = await fetch('/Cobranza/actualizarTelefono', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            idcontrato: id,
+                            telefono_actual: telActual,
+                            telefono_nuevo: telNuevo
+                        })
+                    });
+
+                    const result = await res.json();
+
+                    if (result.success) {
+                        modalEditarTelefono.hide();
+
+                        showToast('Teléfono actualizado correctamente', 'SUCCESS');
+
+                        // Actualizar la tabla
+                        const datos = await cargarClientes();
+                        tabla.setData(datos);
+
+                        // Restaurar boton
+                        btnGuardar.disabled = false;
+                        btnGuardar.innerHTML = 'Guardar Cambios';
+                    } else {
+                        showToast(result.message || 'Error al actualizar el teléfono', 'ERROR');
+
+                        // Restaurar boton
+                        btnGuardar.disabled = false;
+                        btnGuardar.innerHTML = 'Guardar Cambios';
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    showToast('Error de conexión al actualizar el teléfono', 'ERROR');
+
+                    // Restaurar boton
+                    btnGuardar.disabled = false;
+                    btnGuardar.innerHTML = 'Guardar Cambios';
+                }
+            });
+
+            /* document.getElementById('btnGuardarTelefono').addEventListener('click', async () => {
                 const id = document.getElementById('idcontratoModal').value;
                 const telNuevo = document.getElementById('telefonoNuevo').value.trim();
                 const telActual = document.getElementById('telefonoActual').value.trim();
@@ -345,7 +478,7 @@
                     mostrarToast('Teléfono actualizado correctamente', 'success');
                     location.reload();
                 } else mostrarToast(result.message || 'Error al actualizar', 'danger');
-            });
+            }); */
 
         } catch (err) {
             console.error(err);

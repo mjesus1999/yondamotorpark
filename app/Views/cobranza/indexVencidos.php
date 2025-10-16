@@ -137,7 +137,7 @@
             if (!Array.isArray(datos) || datos.length === 0) {
                 mensajeVacio.classList.remove('d-none');
                 //acordeón en móvil vacío
-                acordeon.innerHTML = '<div class="text-center py-3">No hay datos para mostrar.</div>';
+                /* acordeon.innerHTML = '<div class="text-center py-3">No hay datos para mostrar.</div>'; */
                 totalDeudaEl.textContent = formatMoneda(0);
                 return;
             }
@@ -221,7 +221,23 @@
                 });
             }
 
-            // Delegación de eventos para botones dentro de Tabulator (Reportes)
+            contTabla.addEventListener('click', function (e) {
+                const atrasadoBtn = e.target.closest('.btn-pdf-atrasado');
+                const recojoBtn = e.target.closest('.btn-pdf-recojo');
+
+                if (atrasadoBtn) {
+                    const contrato = atrasadoBtn.dataset.contrato;
+                    // CAMBIO: URL limpia sin parámetros query
+                    window.open(`/reportesAtrasado/${contrato}`, '_blank');
+                }
+
+                if (recojoBtn) {
+                    const contrato = recojoBtn.dataset.contrato;
+                    // CAMBIO: URL limpia sin parámetros query
+                    window.open(`/reportesRecojo/${contrato}`, '_blank');
+                }
+            });
+            /* // Delegación de eventos para botones dentro de Tabulator (Reportes)
             contTabla.addEventListener('click', function (e) {
                 const atrasadoBtn = e.target.closest('.btn-pdf-atrasado');
                 const recojoBtn = e.target.closest('.btn-pdf-recojo');
@@ -235,7 +251,7 @@
                     const contrato = recojoBtn.dataset.contrato;
                     window.open('/reportesRecojo?contrato=' + encodeURIComponent(contrato), '_blank');
                 }
-            });
+            }); */
 
             //Construir acordeón para móvil
             const gruposHtml = [];
@@ -254,6 +270,7 @@
                                 <ul class="list-group list-group-flush">
                                     <li class="list-group-item"><strong>#:</strong> ${contador++}</li>
                                     <li class="list-group-item"><strong>Telefono:</strong> ${escapeHtml(row.telefono)}</li>
+                                    <li class="list-group-item"><strong>N° Documento:</strong> ${escapeHtml(row.documento)}</li>
                                     <li class="list-group-item"><strong>Vehículo:</strong> ${escapeHtml(row.vehiculo)}</li>
                                     <li class="list-group-item"><strong>Tienda:</strong> <span class="badge bg-primary">${escapeHtml(row.tienda)}</span></li>
                                     <li class="list-group-item"><strong>Cuotas T.:</strong> ${escapeHtml(row.cuotas_totales)}</li>
@@ -273,7 +290,24 @@
             });
             acordeon.innerHTML = `<div class="accordion" id="acordeonVencidos">${gruposHtml.join('')}</div>`;
 
-            // Delegación para botones móviles:
+            acordeon.addEventListener('click', function (e) {
+                const atrasadoBtn = e.target.closest('.btn-pdf-atrasado');
+                const recojoBtn = e.target.closest('.btn-pdf-recojo');
+                
+                if (atrasadoBtn) {
+                    const contrato = atrasadoBtn.dataset.contrato;
+                    // CAMBIO: URL limpia sin parámetros query
+                    window.open(`/reportesAtrasado/${contrato}`, '_blank');
+                }
+                
+                if (recojoBtn) {
+                    const contrato = recojoBtn.dataset.contrato;
+                    // CAMBIO: URL limpia sin parámetros query
+                    window.open(`/reportesRecojo/${contrato}`, '_blank');
+                }
+            });
+
+            /* // Delegación para botones móviles:
             acordeon.addEventListener('click', function (e) {
                 const atrasadoBtn = e.target.closest('.btn-pdf-atrasado');
                 const recojoBtn = e.target.closest('.btn-pdf-recojo');
@@ -285,7 +319,7 @@
                     const contrato = recojoBtn.dataset.contrato;
                     window.open('/reportesRecojo?contrato=' + encodeURIComponent(contrato), '_blank');
                 }
-            });
+            }); */
 
         } catch (err) {
             console.error('Error al cargar vencidos:', err);

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reporte de Cobranza Atrasado - PDF</title>
+    <title>Reporte de recojo - PDF</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -68,30 +68,117 @@
 
 <body>
     <div id="loading-indicator">
-        <div style="color:#d32f2f;font-weight:bold;margin-bottom:15px;font-size:18px;">Generando PDF...</div>
-        <div style="font-size:14px;color:#666;">Por favor espere...</div>
+        <div style="color: #d32f2f; font-weight: bold; margin-bottom: 15px; font-size: 18px;">
+            Generando PDF...
+        </div>
+        <div style="font-size: 14px; color: #666;">Por favor espere...</div>
     </div>
 
     <div id="pdf-container">
         <iframe id="pdf-frame"></iframe>
     </div>
 
-    <!-- PDFMake -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
+        const isPreview = urlParams.get('preview') === '1';
+
         let globalPdfBlob = null;
         let globalFilename = '';
 
+        const MESES_MINUSCULAS = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'setiembre', 'octubre', 'noviembre', 'diciembre'];
+        const MESES_MAYUSCULAS = ['ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO', 'JULIO', 'AGOSTO', 'SETIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'];
+
         function formatDateSpanish() {
-            const months = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'setiembre', 'octubre', 'noviembre', 'diciembre'];
             const dt = new Date();
             const day = dt.getDate();
-            const month = months[dt.getMonth()];
+            const month = MESES_MINUSCULAS[dt.getMonth()];
             const year = dt.getFullYear();
             return `Chincha Alta, ${day} de ${month} del ${year}`;
+        }
+
+        function formatDateDdMmYyyy(dateStr) {
+            if (!dateStr) return '';
+            const s = String(dateStr).trim();
+            const datePart = s.split(' ')[0];
+            const m = datePart.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+            if (m) {
+                return `${m[3]}/${m[2]}/${m[1]}`;
+            }
+            return s;
+        }
+
+        function downloadPdfFromBlob(blob, filename) {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function showDownloadModal(filename) {
+            const modalOverlay = document.createElement('div');
+            modalOverlay.id = 'download-modal-overlay';
+            modalOverlay.innerHTML = `
+                <div class="modal">
+                    <p style="margin: 0 0 20px 0; font-size: 14px;">PDF generado correctamente. ¿Desea descargarlo?</p>
+                    <div>
+                        <button id="btn-download-pdf">Descargar</button>
+                        <button id="btn-cancel-download">Cancelar</button>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(modalOverlay);
+
+            const btnDownload = modalOverlay.querySelector('#btn-download-pdf');
+            const btnCancel = modalOverlay.querySelector('#btn-cancel-download');
+
+            function closeModal() {
+                if (modalOverlay && modalOverlay.parentNode) {
+                    modalOverlay.parentNode.removeChild(modalOverlay);
+                }
+            }
+
+            btnDownload.addEventListener('click', () => {
+                try {
+                    if (globalPdfBlob) {
+                        downloadPdfFromBlob(globalPdfBlob, filename);
+                        closeModal();
+                        setTimeout(() => { try { window.close(); } catch (e) { } }, 1000);
+                    }
+                } catch (error) {
+                    console.error('Error al descargar:', error);
+                    alert('Error al descargar el PDF');
+                }
+            });
+
+            btnCancel.addEventListener('click', () => {
+                closeModal();
+                setTimeout(() => { try { window.close(); } catch (e) { } }, 100);
+            });
+
+            document.addEventListener('keydown', function escHandler(e) {
+                if (e.key === 'Escape') {
+                    closeModal();
+                    document.removeEventListener('keydown', escHandler);
+                    setTimeout(() => { try { window.close(); } catch (e) { } }, 100);
+                }
+            });
+
+            modalOverlay.addEventListener('click', (e) => {
+                if (e.target === modalOverlay) {
+                    closeModal();
+                    setTimeout(() => { try { window.close(); } catch (e) { } }, 100);
+                }
+            });
+
+            setTimeout(() => btnDownload.focus(), 100);
         }
 
         function showPDFPreview(filename) {
@@ -109,10 +196,8 @@
                     loadingIndicator.style.display = 'none';
                 }
 
-                // Actualizar el título de la página
                 document.title = filename;
 
-                // Cleanup al cerrar
                 window.addEventListener('beforeunload', () => {
                     URL.revokeObjectURL(url);
                 });
@@ -123,17 +208,74 @@
             return new Promise((resolve, reject) => {
                 const img = new Image();
                 img.crossOrigin = 'anonymous';
+
                 img.onload = function () {
                     const canvas = document.createElement('canvas');
                     const ctx = canvas.getContext('2d');
+
                     canvas.width = img.naturalWidth;
                     canvas.height = img.naturalHeight;
+
                     ctx.drawImage(img, 0, 0);
-                    try { resolve(canvas.toDataURL('image/jpeg', 0.85)); } catch (error) { reject(error); }
+
+                    try {
+                        const dataURL = canvas.toDataURL('image/jpeg', 0.85);
+                        resolve(dataURL);
+                    } catch (error) {
+                        reject(error);
+                    }
                 };
-                img.onerror = function () { console.warn(`No se pudo cargar la imagen: ${imagePath}`); resolve(null); };
+
+                img.onerror = function () {
+                    console.warn(`No se pudo cargar la imagen: ${imagePath}`);
+                    resolve(null);
+                };
+
                 img.src = imagePath;
             });
+        }
+
+        function formatMesEspanol(numeroMes) {
+            return MESES_MAYUSCULAS[parseInt(numeroMes) - 1] || '';
+        }
+
+        function formatMontoConComas(monto) {
+            const num = parseFloat(monto);
+            if (isNaN(num)) return '0.00';
+            const parts = num.toFixed(2).split('.');
+            parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+            return parts.join('.');
+        }
+
+        function detalleToParrafoDetallado(detalleStr) {
+            if (!detalleStr) return '';
+
+            const parts = detalleStr.split(' || ').map(s => {
+                const mesMatch = s.match(/MES:(\d+)/);
+                const montoMatch = s.match(/MONTO:([\d.]+)/);
+
+                if (mesMatch && montoMatch) {
+                    const mes = formatMesEspanol(mesMatch[1]);
+                    const monto = formatMontoConComas(montoMatch[1]);
+
+                    if (s.includes('MORA')) {
+                        return `MORA DE ${mes} DE S/ ${monto}`;
+                    } else if (s.includes('CON MORA')) {
+                        return `CUOTA DE ${mes} CON MORA DE S/ ${monto}`;
+                    } else {
+                        return `CUOTA DE ${mes} DE S/ ${monto}`;
+                    }
+                }
+                return s;
+            });
+
+            if (parts.length === 0) return '';
+            if (parts.length === 1) return parts[0];
+
+            const ultimoElemento = parts[parts.length - 1];
+            const elementosAnteriores = parts.slice(0, -1);
+
+            return elementosAnteriores.join(', ') + ', ' + ultimoElemento;
         }
 
         function rawValueAsString(value) {
@@ -143,20 +285,9 @@
             return String(value);
         }
 
-        function formatDateDdMmYyyy(value) {
-            if (!value) return '';
-            const s = String(value).trim();
-            const datePart = s.split(' ')[0];
-            const m = datePart.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-            if (m) {
-                return `${m[3]}/${m[2]}/${m[1]}`;
-            }
-            return s;
-        }
-
-        async function getDatosReporteNotificacion(idContrato) {
+        async function getDatosReporteRecojoVehicular(idContrato) {
             try {
-                const resp = await fetch(`/Cobranza/getDatosReporteNotificacion?contrato=${encodeURIComponent(idContrato)}`);
+                const resp = await fetch(`/Cobranza/getDatosReporteRecojoVehicular?contrato=${encodeURIComponent(idContrato)}`);
                 const json = await resp.json();
                 if (!resp.ok || !json.success) {
                     const msg = json && json.message ? json.message : `Error HTTP ${resp.status}`;
@@ -170,28 +301,12 @@
             }
         }
 
-        function formatMesEspanol(numeroMes) {
-            const meses = ['ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO', 'JULIO', 'AGOSTO', 'SETIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'];
-            return meses[parseInt(numeroMes) - 1] || '';
-        }
-
-        function detalleToParrafo(detalleStr) {
-            if (!detalleStr) return '';
-
-            const parts = detalleStr.split(' || ').map(s => {
-                let texto = s.replace(/MES:(\d+)/g, (match, num) => formatMesEspanol(num));
-                texto = texto.replace(/MONTO:/g, 'DE S/ ');
-                return texto;
-            });
-
-            return parts.join(', ');
-        }
-
         function createNotificacionPDF(headerImageBase64, datos) {
             const nombre = rawValueAsString(datos.nombre_cliente || '');
             const tipo_doc = rawValueAsString(datos.tipo_documento || '');
             const nro_doc = rawValueAsString(datos.numero_documento || '');
             const direccion = rawValueAsString(datos.direccion_completa || '');
+            const telefono = rawValueAsString(datos.telefono || '');
             const marca = rawValueAsString(datos.marca || '');
             const modelo = rawValueAsString(datos.modelo || '');
             const anio = rawValueAsString(datos.vehiculo_anio || '');
@@ -199,23 +314,20 @@
             const placa = (datos.placa === null || datos.placa === undefined || String(datos.placa).trim() === '') ? 'N/A' : rawValueAsString(datos.placa);
             const chasis = (datos.numero_chasis === null || datos.numero_chasis === undefined || String(datos.numero_chasis).trim() === '') ? 'N/A' : rawValueAsString(datos.numero_chasis);
             const motor = (datos.numero_motor === null || datos.numero_motor === undefined || String(datos.numero_motor).trim() === '') ? 'N/A' : rawValueAsString(datos.numero_motor);
-            const moneda = rawValueAsString(datos.moneda || 'PEN');
 
-            const totalCuotas = rawValueAsString(datos.total_cuotas_vencidas);
-            const totalPenal = rawValueAsString(datos.total_penalidades_vencidas);
-            const totalDeuda = rawValueAsString(datos.total_deuda_vencida);
-            const fechaPrimera = rawValueAsString(datos.fecha_primera_vencida || '');
-            const diasAtraso = rawValueAsString(datos.dias_atraso !== undefined ? datos.dias_atraso : '');
-
-            const detalleParrafo = detalleToParrafo(datos.detalle_cuotas_vencidas || '');
+            const fechaContrato = formatDateDdMmYyyy(datos.fecha_contrato);
+            const diaPago = datos.dia_pago_mensual ? Math.floor(Number(datos.dia_pago_mensual)) : '';
+            const totalDeudaFormateado = formatMontoConComas(datos.total_deuda_vencida);
+            const detalleParrafo = detalleToParrafoDetallado(datos.detalle_cuotas_vencidas || '');
 
             const parrafoIncumplimiento = [
-                { text: 'Por Incumplimiento de pago', bold: true },
-                ' ya que según registros de cobranza de nuestra empresa Ud. adeuda, ',
-                { text: detalleParrafo ? (` ${detalleParrafo} `) : '', bold: true },
-                { text: `CUYO MONTO TOTAL A PAGAR ES DE S/ ${totalDeuda} `, bold: true },
-                'y habiendo Ud. comprometido según el contrato notarial firmado el ',
-                ' ',
+                { text: 'Por Incumplimiento de pago ', bold: true },
+                'ya que según registros de cobranza de nuestra empresa Usted adeuda, ',
+                { text: detalleParrafo ? `${detalleParrafo}, ` : '', bold: true },
+                { text: `SIENDO ASÍ SU DEUDA TOTAL EL MONTO DE S/ ${totalDeudaFormateado} SOLES. `, bold: true },
+                { text: fechaContrato ? `Y HABIENDO USTED COMPROMETIDO SEGÚN EL CONTRATO NOTARIAL FIRMADO EL ${fechaContrato}. ` : '', bold: true },
+                { text: `TODOS LOS ${diaPago} DE CADA MES `, bold: true },
+                'Y NO CUMPLIÉNDOLO CON SU CRONOGRAMA DE PAGO. ',
                 { text: '(CADA NOTIFICACIÓN LLEGADA AL DOMICILIO SE HARÁ EL COBRO ADICIONAL DE S/50 SOLES).', bold: true }
             ];
 
@@ -232,8 +344,7 @@
                 },
 
                 footer: function () {
-                    // Datos del colaborador
-                    const colaboradorArea = datos.colaborador_area || 'Área de cobranza';
+                    const colaboradorArea = datos.colaborador_area || 'Cobranza';
                     const colaboradorNombre = datos.colaborador_nombre || '';
                     const colaboradorTelefono = datos.colaborador_telefono || '987454555';
 
@@ -255,18 +366,9 @@
                     };
                 },
 
-                /* footer: function () {
-                    return {
-                        stack: [
-                            { text: ['Contacto: Área de cobranza\n', '987454555\n', 'cobranza@yondaperu.com'], style: 'contactInfo', alignment: 'right', margin: [0, 0, 40, 10] },
-                            { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 525, y2: 0, lineWidth: 4, lineColor: '#ff6600' }], alignment: 'center' }
-                        ]
-                    };
-                }, */
-
                 content: [
                     { text: formatDateSpanish(), style: 'fecha', alignment: 'right', margin: [0, 0, 0, 20] },
-                    { text: 'NOTIFICACIÓN DE COBRANZA', style: 'titulo', alignment: 'center', margin: [0, 0, 0, 15] },
+                    { text: 'CONSTANCIA DE RECOJO VEHICULAR', style: 'titulo', alignment: 'center', margin: [0, 0, 0, 15] },
 
                     {
                         table: {
@@ -286,6 +388,11 @@
                                     { text: 'Dirección', style: 'normal', bold: true, border: [false, false, false, false] },
                                     { text: ':', style: 'normal', bold: true, alignment: 'center', border: [false, false, false, false] },
                                     { text: direccion, style: 'normal', border: [false, false, false, false] }
+                                ],
+                                [
+                                    { text: 'Celular', style: 'normal', bold: true, border: [false, false, false, false] },
+                                    { text: ':', style: 'normal', bold: true, alignment: 'center', border: [false, false, false, false] },
+                                    { text: telefono, style: 'normal', border: [false, false, false, false] }
                                 ]
                             ]
                         },
@@ -299,7 +406,9 @@
                         },
                         margin: [0, 0, 0, 15]
                     },
-                    { text: ['Mediante el presente: YHON KENNIDEY MENDOZA HUARACA. Representante General de', { text: ' YONDA & GRUPO HUARACA E.I.R.L', bold: true }, ' hace de su conocimiento que', { text: ' TIENE DEUDA PENDIENTE CON NUESTRA EMPRESA DEL VEHÍCULO CON LAS SIGUIENTES CARACTERÍSTICAS:', bold: true }], style: 'normal', alignment: 'justify', margin: [0, 0, 0, 10] },
+
+                    { text: ['Mediante el presente: YHON KENNIDEY MENDOZA HUARACA. Representante General de', { text: ' YONDA & GRUPO HUARACA E.I.R.L', bold: true }, ' hace de su conocimiento', { text: ' EL RECOJO DEL VEHÍCULO CON LAS SIGUIENTES CARACTERÍSTICAS:', bold: true }], style: 'normal', alignment: 'justify', margin: [0, 0, 0, 10] },
+
                     {
                         table: {
                             widths: [70, 15, '*'],
@@ -322,6 +431,7 @@
                         },
                         margin: [10, 0, 0, 15]
                     },
+
                     { text: parrafoIncumplimiento, style: 'normal', alignment: 'justify', margin: [0, 0, 0, 15] },
                     { text: 'A su vez se procederá a realizar la denuncia correspondiente mediante instancias legales y judiciales que amerita el caso.', style: 'normal', alignment: 'justify', margin: [0, 0, 0, 15] },
 
@@ -335,7 +445,6 @@
                             ]
                         }, layout: 'noBorders', margin: [0, 0, 0, 0]
                     }
-
                 ],
 
                 styles: {
@@ -355,10 +464,11 @@
         async function generatePDFNotificacion() {
             const loadingIndicator = document.getElementById('loading-indicator');
             try {
-                const idContrato = new URLSearchParams(window.location.search).get('contrato');
-                if (!idContrato) throw new Error("Falta el parámetro 'contrato' en la URL. Ej: ?contrato=8");
+                const idContrato = '<?php echo $idcontrato ?? ''; ?>';
+                /* const idContrato = new URLSearchParams(window.location.search).get('contrato'); */
+                /* if (!idContrato) throw new Error("Falta el parámetro 'contrato' en la URL. Ej: ?contrato=8"); */
 
-                const datos = await getDatosReporteNotificacion(idContrato);
+                const datos = await getDatosReporteRecojoVehicular(idContrato);
                 if (!datos) throw new Error("No se encontraron datos para el contrato especificado.");
 
                 const headerImageBase64 = await convertImageToBase64('/assets/images/logos/cabecera-yondaa.png').catch(() => null);
@@ -367,11 +477,13 @@
                 const pdfDocGenerator = pdfMake.createPdf(docDefinition);
 
                 const safeName = (datos.nombre_cliente || 'cliente').replace(/\s+/g, '-').replace(/[^a-zA-Z0-9\-]/g, '').toLowerCase();
-                globalFilename = `notificacion-cobranza-${safeName}-${idContrato}.pdf`;
+                globalFilename = `constancia-recojo-${safeName}-${idContrato}.pdf`;
 
                 pdfDocGenerator.getBlob((blob) => {
                     globalPdfBlob = blob;
-                    showPDFPreview(globalFilename);
+                    if (loadingIndicator) loadingIndicator.style.display = 'none';
+                    if (isPreview || !urlParams.has('preview')) showPDFPreview(globalFilename);
+                    else showDownloadModal(globalFilename);
                 });
 
             } catch (error) {
@@ -386,6 +498,7 @@
             setTimeout(() => generatePDFNotificacion(), 100);
         });
     </script>
+
 </body>
 
 </html>

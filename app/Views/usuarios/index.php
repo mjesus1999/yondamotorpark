@@ -1,4 +1,6 @@
 <?php include __DIR__ . '/../layout/header.php'; ?>
+<link href="https://unpkg.com/tabulator-tables@5.5.2/dist/css/tabulator_simple.min.css" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/tabulator.css">
 
 <div class="container-fluid">
 
@@ -29,120 +31,39 @@
         </nav>
       </div>
       <div class="col-md-6 text-end">
-        <a href="/usuarios/create" class="btn btn-outline-primary btn-sm">
-          <!-- <i class="bi bi-plus"></i> -->Registrar
-        </a>
+        <a href="/usuarios/create" class="btn btn-outline-primary btn-sm">Registrar</a>
       </div>
     </div>
   </div>
-  <!-- <div class="alert alert-info mt-2" role="alert">
-    <div class="row">
-      <div class="col-md-6 d-flex">
 
-        <ol class="breadcrumb mb-0">
-          <li class="breadcrumb-item"><a href="#">Usuarios</a></li>
-          <li class="breadcrumb-item active" aria-current="page">Listar</li>
-        </ol>
-
-      </div>
-      <div class="col-md-6 text-end">
-        <a href="/usuarios/create" class="">[ Registrar ]</a>
-        <a href="/usuarios/create" class="btn btn-outline-primary btn-sm">
-          <i class="bi bi-plus"></i>Registrar
-        </a>
-      </div>
-    </div>
-  </div> -->
-
-  <div class="row">
-    <div class="col-md-12">
-      <div class="card">
-        <div class="card-body">
-          <table class="table table-sm table-hover table-hover-yonda" id="tabla-usuarios">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Apellidos</th>
-                <th>Nombres</th>
-                <th>Aréa</th>
-                <th>Cargo</th>
-                <th>Fecha Inicio</th>
-                <th>Fecha Fin</th>
-                <th>Usuario</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              <?php foreach ($Usuarios as $u): ?>
-                <tr>
-                  <td><?= htmlspecialchars($u['idcolaborador']) ?></td>
-                  <td><?= htmlspecialchars($u['apellidos']) ?></td>
-                  <td><?= htmlspecialchars($u['nombres']) ?></td>
-                  <td><?= htmlspecialchars($u['area']) ?></td>
-                  <td><?= htmlspecialchars($u['cargo']) ?></td>
-                  <td><?= htmlspecialchars($u['fecha_inicio']) ?></td>
-                  <td><?= htmlspecialchars($u['fecha_fin']) ?></td>
-
-                  <!-- Usuario con restricción horaria -->
-                  <td>
-                    <?= htmlspecialchars($u['usuario']) ?>
-                    <?php if (!empty($u['restriccionhoraria']) && $u['restriccionhoraria'] === 'S'): ?>
-                      <span class="clock-emoji" role="img" aria-label="Usuario con restricción horaria"
-                        data-bs-toggle="tooltip" data-bs-title="Restricción horaria">
-                        🕜
-                      </span>
-                    <?php endif; ?>
-                  </td>
-
-                  <td class="text-center">
-                    <!-- Editar -->
-                    <a href="/usuarios/edit/<?= $u['idcolaborador'] ?>" class="btn btn-sm btn-outline-primary"
-                      title="Editar">
-                      <i class="fa-solid fa-pen"></i>
-                    </a>
-
-                    <!-- Cambiar contraseña -->
-                    <button type="button" class="btn btn-sm btn-outline-warning mx-1 btn-cambiar-clave"
-                      title="Cambiar contraseña" data-bs-toggle="modal" data-bs-target="#modalCambiarClave"
-                      data-idcolab="<?= $u['idcolaborador'] ?>" data-usuario="<?= htmlspecialchars($u['usuario']) ?>">
-                      <i class="fa-solid fa-key"></i>
-                    </button>
-
-                    <!-- Eliminar -->
-                    <button type="button" class="btn btn-sm btn-outline-danger btn-borrar" title="Eliminar"
-                      data-idcolab="<?= $u['idcolaborador'] ?>">
-                      <i class="fa-solid fa-trash"></i>
-                    </button>
-
-                    <!-- Restricción horaria  -->
-                    <form method="POST" action="/usuarios/toggleRestriccion" class="d-inline-block toggle-restr-form">
-                      <input type="hidden" name="idcolaborador" value="<?= (int) $u['idcolaborador'] ?>">
-                      <?php $isRestr = (!empty($u['restriccionhoraria']) && strtoupper($u['restriccionhoraria']) === 'S'); ?>
-                      <button type="submit"
-                        class="btn btn-sm <?= $isRestr ? 'btn-outline-secondary' : 'btn-outline-info' ?>"
-                        title="<?= $isRestr ? 'Quitar restricción horaria' : 'Poner restricción horaria' ?>"
-                        data-idcolab="<?= $u['idcolaborador'] ?>">
-                        <?php if ($isRestr): ?>
-                          <i class="fa-solid fa-clock"></i>
-                        <?php else: ?>
-                          <i class="fa-regular fa-clock"></i>
-                        <?php endif; ?>
-                      </button>
-                    </form>
-
-                  </td>
-                </tr>
-              <?php endforeach; ?>
-            </tbody>
-          </table>
+  <div class="card">
+    <div class="card-body">
+      <!-- BUSCADOR -->
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="input-group w-100">
+          <span class="input-group-text"><i class="bi bi-search"></i></span>
+          <input type="text" id="busqueda-global" class="form-control" placeholder="Buscar...">
         </div>
       </div>
+
+      <!-- TABULATOR -->
+      <div id="tabla-usuarios-tabulator" class="table-responsive">
+        <div class="text-center py-5" id="spinner-usuarios">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Cargando...</span>
+          </div>
+          <p class="mt-2">Cargando usuarios...</p>
+        </div>
+      </div>
+
+      <!-- MENSAJE VACÍO -->
+      <div id="mensaje-vacio" class="alert alert-warning d-none mt-1">No hay usuarios para mostrar.</div>
     </div>
   </div>
 
 </div>
 
-<!-- CAMBIO DE PASSWORD MODAL -->
+<!-- MODAL CAMBIO DE PASSWORD -->
 <div class="modal fade" id="modalCambiarClave" tabindex="-1" aria-labelledby="modalCambiarClaveLabel"
   aria-hidden="true">
   <div class="modal-dialog modal-sm">
@@ -180,138 +101,242 @@
   </div>
 </div>
 
-<script>
-
-  function attachCambiarClaveConfirm() {
-    const btnAceptar = document.getElementById('btnAceptarCambiarClave');
-    if (!btnAceptar) return;
-
-    btnAceptar.addEventListener('click', async (e) => {
-      e.preventDefault();
-
-      let confirmado;
-      if (typeof ask === 'function') {
-        confirmado = await ask('¿Desea confirmar el cambio de contraseña?', '¿Cambiar contraseña?');
-      } else {
-        confirmado = confirm('¿Desea confirmar el cambio de contraseña?');
-      }
-
-      if (!confirmado) return;
-
-      const form = document.getElementById('formCambiarClave');
-      const formData = new FormData(form);
-
-      // Deshabilitar botón durante el proceso
-      btnAceptar.disabled = true;
-      btnAceptar.innerHTML = 'Cambiando...';
-
-      try {
-        const res = await fetch('/api/usuarios/changePassword', {
-          method: 'POST',
-          body: formData
-        });
-
-        const json = await res.json();
-
-        // Cerrar modal
-        const modalEl = document.getElementById('modalCambiarClave');
-        bootstrap.Modal.getInstance(modalEl).hide();
-        form.reset();
-
-        window.location.reload();
-      } catch (err) {
-        console.error(err);
-        alert('Error de conexión.');
-
-        // Restaurar botón
-        btnAceptar.disabled = false;
-        btnAceptar.innerHTML = 'Aceptar';
-      }
-    });
-  }
-
-  function attachEliminarUsuarioConfirm() {
-    document.querySelectorAll('.btn-borrar').forEach(btn => {
-      btn.addEventListener('click', async (e) => {
-        e.preventDefault();
-        const id = btn.getAttribute('data-idcolab');
-
-        let confirmado;
-        if (typeof ask === 'function') {
-          confirmado = await ask('¿Desea confirmar la eliminación de este usuario?', '¿Eliminar usuario?');
-        } else {
-          confirmado = confirm('¿Desea confirmar la eliminación de este usuario?');
-        }
-
-        if (!confirmado) return;
-
-        // Deshabilitar botón durante el proceso
-        btn.disabled = true;
-        const originalHTML = btn.innerHTML;
-        btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
-
-        // Enviar formulario POST
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = `/usuarios/disabled/${id}`;
-        document.body.appendChild(form);
-        form.submit();
-      });
-    });
-  }
-
-  function attachRestriccionHorariaConfirm() {
-    document.querySelectorAll('.toggle-restr-form').forEach(form => {
-      form.addEventListener('submit', async function (e) {
-        e.preventDefault();
-        const btn = form.querySelector('button[type="submit"]');
-        const id = btn.getAttribute('data-idcolab');
-        const isActive = btn.classList.contains('btn-outline-secondary');
-
-        const mensaje = isActive
-          ? '¿Desea confirmar quitar la restricción horaria de este usuario?'
-          : '¿Desea confirmar poner restricción horaria a este usuario?';
-        const titulo = isActive ? '¿Quitar restricción?' : '¿Poner restricción?';
-
-        let confirmado;
-        if (typeof ask === 'function') {
-          confirmado = await ask(mensaje, titulo);
-        } else {
-          confirmado = confirm(mensaje);
-        }
-
-        if (!confirmado) return;
-
-        // Deshabilitar botón durante el proceso
-        btn.disabled = true;
-        const originalHTML = btn.innerHTML;
-        btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
-
-        form.submit();
-      });
-    });
-  }
-
-  document.addEventListener('DOMContentLoaded', () => {
-    // Configurar modal cambiar clave
-    document.querySelectorAll('.btn-cambiar-clave').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const idColab = btn.getAttribute('data-idcolab');
-        const usuario = btn.getAttribute('data-usuario');
-
-        document.getElementById('cc-idcolaborador').value = idColab;
-        document.getElementById('cc-usuario').value = usuario;
-
-        bootstrap.Modal.getOrCreateInstance('#modalCambiarClave').show();
-      });
-    });
-
-    // Adjuntar confirmaciones
-    attachCambiarClaveConfirm();
-    attachEliminarUsuarioConfirm();
-    attachRestriccionHorariaConfirm();
-  });
-
-</script>
-
 <?php include __DIR__ . '/../layout/footer.php'; ?>
+<script src="https://unpkg.com/tabulator-tables@5.5.2/dist/js/tabulator.min.js"></script>
+
+<script>
+  let modalCambiarClave;
+
+  // Funciones auxiliares
+  function escapeHtml(t) {
+    return t ? t.replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m])) : '';
+  }
+
+  function mostrarToast(mensaje, tipo = 'info') {
+    const nt = document.createElement('div');
+    nt.className = `alert alert-${tipo === 'success' ? 'success' : tipo === 'warning' ? 'warning' : 'danger'} position-fixed`;
+    nt.style.cssText = `top:20px; right:20px; z-index:9999; min-width:260px;`;
+    nt.innerHTML = `<div class="d-flex align-items-center"><i class="fas fa-${tipo === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i><div>${mensaje}</div><button type="button" class="btn-close ms-auto" onclick="this.parentElement.parentElement.remove()"></button></div>`;
+    document.body.appendChild(nt);
+    setTimeout(() => nt.remove(), 5000);
+  }
+
+  // Preparar datos para Tabulator
+  const usuariosData = <?= json_encode($Usuarios) ?>;
+
+  // Inicializar vista
+  document.addEventListener('DOMContentLoaded', () => {
+    const spinner = document.getElementById('spinner-usuarios');
+    const mensajeVacio = document.getElementById('mensaje-vacio');
+
+    modalCambiarClave = new bootstrap.Modal(document.getElementById('modalCambiarClave'));
+
+    try {
+      if (spinner) spinner.remove();
+
+      if (!Array.isArray(usuariosData) || usuariosData.length === 0) {
+        mensajeVacio.classList.remove('d-none');
+        return;
+      }
+
+      // TABULATOR
+      const tabla = new Tabulator("#tabla-usuarios-tabulator", {
+        data: usuariosData,
+        layout: "fitDataStretch",
+        pagination: "local",
+        paginationSize: 15,
+        paginationSizeSelector: [10, 15, 25, 50],
+        columns: [
+          { title: "#", field: "idcolaborador", width: 70, hozAlign: "center" },
+          { title: "Apellidos", field: "apellidos", width: 220, widthGrow: 3 },
+          { title: "Nombres", field: "nombres", width: 220, widthGrow: 3 },
+          { title: "Área", field: "area", width: 130, widthGrow: 2 },
+          { title: "Cargo", field: "cargo", width: 200, widthGrow: 2 },
+          { title: "Fecha Inicio", field: "fecha_inicio", width: 150, widthGrow: 2 },
+          { title: "Fecha Fin", field: "fecha_fin", width: 150, widthGrow: 2 },
+          {
+            title: "Usuario",
+            field: "usuario",
+            width: 160,
+            widthGrow: 2,
+            formatter: (cell) => {
+              const data = cell.getRow().getData();
+              const usuario = escapeHtml(cell.getValue());
+              const restriccion = data.restriccionhoraria === 'S'
+                ? '<span class="ms-1" title="Restricción horaria">🕜</span>'
+                : '';
+              return usuario + restriccion;
+            }
+          },
+          {
+            title: "Acciones",
+            headerSort: false,
+            hozAlign: "center",
+            widthGrow: 2,
+            formatter: (cell) => {
+              const data = cell.getRow().getData();
+              const isRestr = data.restriccionhoraria === 'S';
+              return `
+                <div class="acciones-btns gap-2 mt-1">
+                  <a href="/usuarios/edit/${data.idcolaborador}" class="btn btn-sm btn-outline-primary" title="Editar">
+                    <i class="fa-solid fa-pen"></i>
+                  </a>
+                  <button class="btn btn-sm btn-outline-warning btn-cambiar-clave" title="Cambiar contraseña"
+                    data-idcolab="${data.idcolaborador}" data-usuario="${escapeHtml(data.usuario)}">
+                    <i class="fa-solid fa-key"></i>
+                  </button>
+                  <button class="btn btn-sm btn-outline-danger btn-borrar" title="Eliminar"
+                    data-idcolab="${data.idcolaborador}">
+                    <i class="fa-solid fa-trash"></i>
+                  </button>
+                  <button class="btn btn-sm ${isRestr ? 'btn-outline-secondary' : 'btn-outline-info'} btn-restriccion"
+                    title="${isRestr ? 'Quitar restricción horaria' : 'Poner restricción horaria'}"
+                    data-idcolab="${data.idcolaborador}" data-restriccion="${isRestr ? 'S' : 'N'}">
+                    <i class="fa-${isRestr ? 'solid' : 'regular'} fa-clock"></i>
+                  </button>
+                </div>
+              `;
+            }
+          }
+        ]
+      });
+
+      // Filtro de búsqueda
+      const searchInput = document.getElementById("busqueda-global");
+      if (searchInput) {
+        searchInput.addEventListener("keyup", function (e) {
+          const val = e.target.value.trim();
+          if (!val) {
+            tabla.clearFilter();
+          } else {
+            tabla.setFilter([
+              [
+                { field: "apellidos", type: "like", value: val },
+                { field: "nombres", type: "like", value: val },
+                { field: "area", type: "like", value: val },
+                { field: "cargo", type: "like", value: val },
+                { field: "usuario", type: "like", value: val }
+              ]
+            ]);
+          }
+        });
+      }
+
+      // Eventos dentro de la tabla
+      document.getElementById('tabla-usuarios-tabulator').addEventListener('click', async (e) => {
+        const btnClave = e.target.closest('.btn-cambiar-clave');
+        const btnBorrar = e.target.closest('.btn-borrar');
+        const btnRestriccion = e.target.closest('.btn-restriccion');
+
+        if (btnClave) {
+          const idColab = btnClave.dataset.idcolab;
+          const usuario = btnClave.dataset.usuario;
+          document.getElementById('cc-idcolaborador').value = idColab;
+          document.getElementById('cc-usuario').value = usuario;
+          modalCambiarClave.show();
+        }
+
+        if (btnBorrar) {
+          e.preventDefault();
+          const id = btnBorrar.dataset.idcolab;
+
+          let confirmado;
+          if (typeof ask === 'function') {
+            confirmado = await ask('¿Desea confirmar la eliminación de este usuario?', '¿Eliminar usuario?');
+          } else {
+            confirmado = confirm('¿Desea confirmar la eliminación de este usuario?');
+          }
+
+          if (!confirmado) return;
+
+          btnBorrar.disabled = true;
+          btnBorrar.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
+
+          const form = document.createElement('form');
+          form.method = 'POST';
+          form.action = `/usuarios/disabled/${id}`;
+          document.body.appendChild(form);
+          form.submit();
+        }
+
+        if (btnRestriccion) {
+          e.preventDefault();
+          const id = btnRestriccion.dataset.idcolab;
+          const isActive = btnRestriccion.dataset.restriccion === 'S';
+
+          const mensaje = isActive
+            ? '¿Desea confirmar quitar la restricción horaria de este usuario?'
+            : '¿Desea confirmar poner restricción horaria a este usuario?';
+          const titulo = isActive ? '¿Quitar restricción?' : '¿Poner restricción?';
+
+          let confirmado;
+          if (typeof ask === 'function') {
+            confirmado = await ask(mensaje, titulo);
+          } else {
+            confirmado = confirm(mensaje);
+          }
+
+          if (!confirmado) return;
+
+          btnRestriccion.disabled = true;
+          btnRestriccion.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
+
+          const form = document.createElement('form');
+          form.method = 'POST';
+          form.action = '/usuarios/toggleRestriccion';
+          const input = document.createElement('input');
+          input.type = 'hidden';
+          input.name = 'idcolaborador';
+          input.value = id;
+          form.appendChild(input);
+          document.body.appendChild(form);
+          form.submit();
+        }
+      });
+
+      // Cambiar contraseña
+      document.getElementById('btnAceptarCambiarClave').addEventListener('click', async (e) => {
+        e.preventDefault();
+
+        let confirmado;
+        if (typeof ask === 'function') {
+          confirmado = await ask('¿Desea confirmar el cambio de contraseña?', '¿Cambiar contraseña?');
+        } else {
+          confirmado = confirm('¿Desea confirmar el cambio de contraseña?');
+        }
+
+        if (!confirmado) return;
+
+        const form = document.getElementById('formCambiarClave');
+        const formData = new FormData(form);
+
+        const btnAceptar = e.target;
+        btnAceptar.disabled = true;
+        btnAceptar.innerHTML = 'Cambiando...';
+
+        try {
+          const res = await fetch('/api/usuarios/changePassword', {
+            method: 'POST',
+            body: formData
+          });
+
+          const json = await res.json();
+          modalCambiarClave.hide();
+          form.reset();
+          window.location.reload();
+        } catch (err) {
+          console.error(err);
+          alert('Error de conexión.');
+          btnAceptar.disabled = false;
+          btnAceptar.innerHTML = 'Guardar';
+        }
+      });
+
+    } catch (err) {
+      console.error(err);
+      if (spinner) spinner.remove();
+      mensajeVacio.classList.remove('d-none');
+      mostrarToast('Error al cargar usuarios', 'danger');
+    }
+  });
+</script>
