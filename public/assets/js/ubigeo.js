@@ -85,6 +85,7 @@
         departamentosSelect.addEventListener('change', (event) => {
             const iddepartamento = event.target.value;
             getProvinciasByDepartamento(iddepartamento);
+           
         });
 
         provinciasSelect.addEventListener('change', (event) => {

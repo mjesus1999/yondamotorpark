@@ -18,6 +18,13 @@ $router->add('POST', '/personaCliente/update/{id}', 'PersonaController', 'update
 $router->add('POST','/personaCliente/delete/{id}','ClienteController','delete');
 
 
+$router->add('GET','/api/clientes/{dni}','ClienteController','searchCliente');
+
+
+
+
+
+
 
 
 // RUTAS PARA LOS CLIENTES EMPRESAS:

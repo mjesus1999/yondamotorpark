@@ -32,7 +32,39 @@ class Vehiculo
     }
   }
 
-  
+// Cambia el tipo de retorno para incluir 'false'
+public function getVehiculosVendidosAlContado(): array|false 
+{
+    $query = "CALL sp_vehiculosVendidoAlContado();";
+    try {
+        $stmt = $this->db->prepare($query);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC); 
+
+    } catch (PDOException $error) {
+        error_log("Error en getVehiculosVendidosAlContado: " . $error->getMessage());
+        return false; 
+    }
+}
+
+
+  public function searchvehiculos(string $busqueda = ''): array
+  {
+    $query = "CALL sp_buscar_vehiculos(:busqueda)";
+
+    try {
+      $stmt = $this->db->prepare($query);
+      $stmt->bindValue(":busqueda", trim($busqueda), PDO::PARAM_STR);
+      $stmt->execute();
+      $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+      return $result;
+    } catch (PDOException $error) {
+      error_log($error->getMessage());
+      return [];
+    }
+  }
+
+
   public function getAllDatosRecepcion(int $idcompra): array
   {
 
@@ -44,7 +76,7 @@ class Vehiculo
       $stmt->execute();
 
       $infoCompra = $stmt->fetch(PDO::FETCH_ASSOC);
-       error_log("INFO_COMPRA: " . print_r($infoCompra, true));
+      error_log("INFO_COMPRA: " . print_r($infoCompra, true));
 
       $stmt->nextRowset();
       $vehiculos = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -60,6 +92,10 @@ class Vehiculo
       return [];
     }
   }
+
+
+
+
 
 
   // Se creará los vehículos para una orden de compra - Se mandará
@@ -172,6 +208,47 @@ class Vehiculo
 
     $idvehiculo = $stmt->fetchColumn();
     return (int) $idvehiculo;
+  }
+
+
+  public function createPagoAlContado(array $params = []): int
+  {
+
+    $query = "CALL sp_registrarVentaContado(
+        :idcliente, :idconcepto, :idvehiculo, :idasesorvendedor, :idcuentapago, 
+        :mediopago, :numerotransaccion, :fechapago, :amortizacion, 
+        :montomonedaoriginal, :tipocambioaplicado, :moneda, :comprobante, :observacion)";
+
+    try {
+
+      $idUsuario = $_SESSION['user']['id'] ?? null;
+      $stmt = $this->db->prepare($query);
+
+
+      $stmt->bindValue(':idcliente', $params['idcliente']);
+      $stmt->bindValue(':idconcepto', $params['idconcepto']);
+      $stmt->bindValue(':idvehiculo', $params['idvehiculo']);
+      $stmt->bindValue(':idasesorvendedor', $idUsuario);
+      $stmt->bindValue(':idcuentapago', $params['idcuentapago']);
+      $stmt->bindValue(':mediopago', $params['mediopago']);
+      $stmt->bindValue(':numerotransaccion', $params['numerotransaccion']);
+      $stmt->bindValue(':fechapago', $params['fechapago']);
+      $stmt->bindValue(':amortizacion', $params['amortizacion']);
+      $stmt->bindValue(':montomonedaoriginal', $params['montomonedaoriginal']);
+      $stmt->bindValue(':tipocambioaplicado', $params['tipocambioaplicado']);
+      $stmt->bindValue(':moneda', $params['moneda']);
+      $stmt->bindValue(':comprobante', $params['comprobante']);
+      $stmt->bindValue(':observacion', $params['observacion']);
+      $stmt->execute();
+
+      $idPago = (int) $stmt->fetchColumn();
+      $stmt->closeCursor();
+
+      return $idPago > 0 ? $idPago : 0;
+    } catch (PDOException $e) {
+      error_log('Error en sp_registrarVentaContado: ' . $e->getMessage());
+      return 0;
+    }
   }
 
   public function delete(int $id): int

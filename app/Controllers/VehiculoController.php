@@ -9,6 +9,7 @@ use App\Models\Vehiculo;
 use App\Models\Usuario;
 use App\Models\Local;
 use App\Models\Modelo;
+use App\Config\ConceptosPago;
 
 //use App\Models\Product;
 
@@ -46,6 +47,15 @@ class VehiculoController extends Controller
       ]
     );
   }
+
+  public function indexVehiculosAlContado()
+  {
+    $this->authRequired();
+    $this->view('vehiculos.vehiculosAlContado');
+  }
+
+
+
 
   /**
    * Método que muestra la vista para recepcionar los vehículos provenientes de una Orden de Compra (OC).
@@ -204,6 +214,116 @@ class VehiculoController extends Controller
     }
   }
 
+  public function storePagoALContado()
+  {
+    
+    $this->authRequired();
+    header('Content-Type: application/json; charset=utf-8');
+
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+      http_response_code(405);
+      echo json_encode(['success' => false, 'message' => 'Método no permitido']);
+      exit;
+    }
+
+    $data = array_map([Validador::class, 'limpiar'], $_POST);
+
+    $registro = [
+      'idcliente'           => $data['idcliente'] ?? null,
+      'idconcepto'          => ConceptosPago::CONTADO_ID,
+      'idvehiculo'          => $data['idvehiculo'] ?? null,
+      'idcuentapago'        => empty($data['idcuentapago']) ? null : $data['idcuentapago'],
+      'mediopago'           => $data['mediopago'] ?? null,
+      'numerotransaccion'   => empty($data['numerotransaccion']) ? null : $data['numerotransaccion'],
+      'fechapago'           => $data['fechapago'] ?? null,
+      'amortizacion'        => $data['amortizacion'] ?? null,
+      'montomonedaoriginal' => $data['montomonedaoriginal'] ?? null,
+      'tipocambioaplicado'  => $data['tipocambioaplicado'] ?? null,
+      'moneda'              => $data['moneda'] ?? null,
+      'observacion'         => empty($data['observacion']) ? null : $data['observacion'],
+      'comprobante'         => null 
+    ];
+
+    //  Validaciones de campos obligatorios
+    $errores = [];
+    $errores[] = Validador::campoObligatorio($registro['idcliente'], 'Cliente');
+    $errores[] = Validador::campoObligatorio($registro['idconcepto'], 'Concepto de pago');
+    $errores[] = Validador::campoObligatorio($registro['idvehiculo'], 'Vehículo');
+    $errores[] = Validador::campoObligatorio($registro['mediopago'], 'Medio de pago');
+    $errores[] = Validador::campoObligatorio($registro['fechapago'], 'Fecha de pago');
+    $errores[] = Validador::campoObligatorio($registro['amortizacion'], 'Amortización');
+    $errores = array_filter($errores);
+
+    if (!empty($errores)) {
+      http_response_code(422); 
+      echo json_encode([
+        'success' => false,
+        'message' => implode('<br>', $errores),
+      ]);
+      exit;
+    }
+
+    $rutaCompletaArchivo = null;
+
+    try {
+      //  Procesar la subida del comprobante (si existe)
+      if (isset($_FILES['comprobante']) && $_FILES['comprobante']['error'] === UPLOAD_ERR_OK) {
+
+        $subdirectorio = 'comprobantes';
+        $nombreArchivo = uniqid('pago_') . '_' . basename($_FILES['comprobante']['name']);
+        $directorioDestino = __DIR__ . '/../../storage/' . $subdirectorio . '/';
+
+        if (!is_dir($directorioDestino)) {
+          mkdir($directorioDestino, 0777, true);
+        }
+
+        $rutaCompletaArchivo = $directorioDestino . $nombreArchivo;
+
+        $extension = strtolower(pathinfo($_FILES['comprobante']['name'], PATHINFO_EXTENSION));
+        $extensionesPermitidas = ['pdf', 'jpg', 'jpeg', 'png','webp'];
+        if (!in_array($extension, $extensionesPermitidas)) {
+          throw new \Exception('El tipo de archivo del comprobante no es válido.');
+        }
+
+        if (!move_uploaded_file($_FILES['comprobante']['tmp_name'], $rutaCompletaArchivo)) {
+          throw new \Exception('No se pudo guardar el archivo del comprobante.');
+        }
+
+    
+        $registro['comprobante'] = $subdirectorio . '/' . $nombreArchivo;
+      }
+
+
+      $idPago = $this->vehiculoModel->createPagoAlContado($registro);
+
+      if ($idPago > 0) {
+        echo json_encode([
+          'success' => true,
+          'message' => '¡Venta al contado registrada exitosamente!',
+          'id' => $idPago
+        ]);
+      } else {
+        throw new \Exception('No se pudo registrar el pago. Verifique los datos o la disponibilidad del vehículo.');
+      }
+    } catch (\Exception $e) {
+      // Si algo falla, borra el archivo subido
+      if ($rutaCompletaArchivo && file_exists($rutaCompletaArchivo)) {
+        @unlink($rutaCompletaArchivo);
+      }
+      http_response_code(500);
+      echo json_encode([
+        'success' => false,
+        'message' => 'Error: ' . $e->getMessage()
+      ]);
+    }
+  }
+
+
+
+
+
+
+
   public function delete(): void
   {
     $this->authRequired();
@@ -321,7 +441,7 @@ class VehiculoController extends Controller
 
 
 
- 
+
   public function updateVehiculoRecepcionOC()
   {
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -382,4 +502,50 @@ class VehiculoController extends Controller
       exit;
     }
   }
+
+
+  public function searchVehiculo()
+  {
+    header('Content-Type: application/json');
+
+    $search = $_GET['q'] ?? '';
+    $vehiculos = $this->vehiculoModel->searchvehiculos($search);
+
+    if (!empty($vehiculos)) {
+      echo json_encode([
+        'success' => true,
+        'total' => count($vehiculos),
+        'data' => $vehiculos
+      ]);
+    } else {
+      echo json_encode([
+        'success' => false,
+        'message' => 'No se encontraron vehículos disponibles.'
+      ]);
+    }
+  }
+
+ public function getVehiculosVendidosAlContado() 
+{
+    header('Content-Type: application/json; charset=utf-8');
+
+    $vehiculos = $this->vehiculoModel->getVehiculosVendidosAlContado();
+    if ($vehiculos === false) {
+        http_response_code(500); 
+        echo json_encode([
+            'success' => false,
+            'message' => 'Ocurrió un error al consultar la base de datos.'
+        ]);
+        return; 
+    }
+    echo json_encode([
+        'success'   => true, 
+        'vehiculos' => $vehiculos 
+    ]);
+}
+
+
+
+
+
 }

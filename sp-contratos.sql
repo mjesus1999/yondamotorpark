@@ -1,5 +1,5 @@
 
-USE motorpark2;
+USE motorpark;
 
 -- La moneda y precio de compra están definidos en el proceso de COMPRA
 CREATE TABLE vehiculos (
