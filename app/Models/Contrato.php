@@ -139,8 +139,7 @@ class Contrato
 
     public function updateVehiculoEstadoVendido(int $idcotizacion): void
     {
-        // Usamos una subconsulta para encontrar el idvehiculo
-        // y actualizar su estado en una sola operación.
+        
         $sql = "UPDATE vehiculos
                 SET disponibilidad = 'vendido', modificado = NOW()
                 WHERE idvehiculo = (

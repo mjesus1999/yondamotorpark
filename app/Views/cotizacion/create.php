@@ -1738,7 +1738,7 @@
         moneda
     }) {
         const valorPlaca = (placa || '').trim() || 'N/A';
-        const valorPlacaRotativa = (placarotativa || '').replace(/<[^>]+>/g, '').trim() || 'N/A';
+        const valorPlacaRotativa = (String(placarotativa) || '').replace(/<[^>]+>/g, '').trim() || 'N/A';
         const precio = parseFloat(precioventa);
         const valorPrecio = isNaN(precio) ? '0.00' : precio.toFixed(2);
 

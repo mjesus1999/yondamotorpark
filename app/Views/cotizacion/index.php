@@ -807,8 +807,6 @@
 
 
 
-
-
         document.getElementById('tabla-cotizacion').addEventListener('click', function(e) {
             const btn = e.target.closest('[data-action]');
             const id = btn.dataset.id;
