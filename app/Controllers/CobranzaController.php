@@ -1,12 +1,13 @@
 <?php
 //app/controllers/CobranzaController.php
+
 namespace App\Controllers;
 
 use App\Core\Controller;
 use App\Models\Cobranza;
 use App\Models\Usuario;
 use Exception;
-use PDOException;
+/* use PDOException; */
 
 class CobranzaController extends Controller
 {
@@ -24,7 +25,6 @@ class CobranzaController extends Controller
         $this->authRequired();
         $this->view('cobranza.index');
     }
-
 
     /* OBTENER ESTADISTICAS */
     public function getEstadisticas(): void
@@ -121,23 +121,6 @@ class CobranzaController extends Controller
         }
     }
 
-    /* OBTENER RESUMEN FINANCIERO */
-    /* public function getResumenFinanciero($idContrato): void
-    {
-        $this->authRequired();
-        header('Content-Type: application/json');
-
-        try {
-            $this->cobranzaModel->getResumenFinanciero($idContrato);
-        } catch (\Exception $e) {
-            http_response_code(500);
-            echo json_encode([
-                'success' => false,
-                'message' => 'Error al obtener resumen financiero'
-            ]);
-        }
-    } */
-
     /* OBTENER HISTORIAL DE PAGOS */
     public function getHistorialPagos($idContrato, $limite = 5): void
     {
@@ -216,24 +199,46 @@ class CobranzaController extends Controller
     }
 
     //AVANCE DE LOS REPORTES
-    public function reporteCobranzaAtrasado()
+    public function reporteCobranzaAtrasado($id)
+    {
+        $this->authRequired();
+        
+        // Validar que el ID sea válido
+        if (!$id || !is_numeric($id)) {
+            http_response_code(400);
+            die('ID de contrato inválido');
+        }
+        
+        // Pasar el idcontrato a la vista
+        $this->view('cobranza/reports.notificacion_reporte_atraso_mes', [
+            'idcontrato' => (int) $id
+        ]);
+    }
+    /* public function reporteCobranzaAtrasado()
     {
         $this->authRequired();
 
-        $this->view('cobranza/reports.reporte_atraso_mes');
-    }
+        $this->view('cobranza/reports.notificacion_reporte_atraso_mes');
+    } */
 
-    public function reporteCobranzaAtrasado2()
+    public function reporteRecojoVehicular($id)
     {
         $this->authRequired();
-        $this->view('cobranza/reports.reporte_atraso_01_mes2');
+        
+        if (!$id || !is_numeric($id)) {
+            http_response_code(400);
+            die('ID de contrato inválido');
+        }
+        
+        $this->view('cobranza/reports.notificacion_reporte-constancia-recojo', [
+            'idcontrato' => (int) $id
+        ]);
     }
-
-    public function reporteRecojoVehicular()
+    /* public function reporteRecojoVehicular()
     {
         $this->authRequired();
-        $this->view('cobranza/reports.reporte-constancia-recojo');
-    }
+        $this->view('cobranza/reports.notificacion_reporte-constancia-recojo');
+    } */
 
     public function enviarSmsNotificacion()
     {
@@ -310,7 +315,7 @@ class CobranzaController extends Controller
         }
     }
 
-    //AVANCE DE LOS REPORTES DE ATRASO
+    //REPORTES DE NOTIFICACION
     public function getDatosReporteNotificacion(): void
     {
         $this->authRequired();
@@ -387,7 +392,6 @@ class CobranzaController extends Controller
             ]);
         }
     }
-
     public function getDatosReporteRecojoVehicular()
     {
         $this->authRequired();

@@ -147,26 +147,6 @@ class Cobranza
         }
     }
 
-    /* OBTIENE RESUMEN FINANCIERO */
-    /* public function getResumenFinanciero($idContrato)
-    {
-        try {
-            $stmt = $this->db->prepare("CALL sp_get_resumen_financiero_cobranza(?)");
-            $stmt->execute([$idContrato]);
-            $data = $stmt->fetch(PDO::FETCH_ASSOC);
-
-            $this->sendJSON([
-                'success' => true,
-                'data' => $data
-            ]);
-        } catch (PDOException $e) {
-            $this->sendJSON([
-                'success' => false,
-                'message' => 'Error al obtener resumen financiero: ' . $e->getMessage()
-            ]);
-        }
-    } */
-
     /* OBTIENE EL HISTORIAL DE PAGOS */
     public function getHistorialPagos($idContrato, $limite = 5)
     {
@@ -228,6 +208,31 @@ class Cobranza
     /* API PARA MANDAR NOTIFICACION (SMS) */
     public function enviarSmsNotificacion($idContrato, $telefono, $nombreCliente, $montoCuota, $fechaVencimiento): array
     {
+        try {
+            // Formatear el monto con comas y 2 decimales
+            $montoFormateado = 'S/. ' . number_format((float) $montoCuota, 2, '.', ',');
+
+            $mensaje = "Estimado(a) {$nombreCliente}, le recordamos que su cuota de {$montoFormateado} vence el {$fechaVencimiento}, le agradece Motorpark";
+
+            /* $mensaje = iconv('UTF-8', 'ISO-8859-1//TRANSLIT', $mensaje); */
+
+            $resultado = $this->apiSms->sendMessage($telefono, $mensaje);
+
+            return [
+                'success' => $resultado,
+                'message' => $resultado ? 'SMS enviado con éxito' : 'Error al enviar SMS'
+            ];
+        } catch (PDOException $e) {
+            error_log("Error al enviar SMS: " . $e->getMessage());
+            return [
+                'success' => false,
+                'message' => 'Error al enviar: ' . $e->getMessage()
+            ];
+        }
+    }
+
+    /* public function enviarSmsNotificacion($idContrato, $telefono, $nombreCliente, $montoCuota, $fechaVencimiento): array
+    {
 
         try {
             $mensaje = "Estimado(a) {$nombreCliente}, le recordamos que su cuota de {$montoCuota} vence el {$fechaVencimiento} :D";
@@ -245,7 +250,7 @@ class Cobranza
                 'message' => 'Error al enviar: ' . $e->getMessage()
             ];
         }
-    }
+    } */
 
     public function actualizarTelefonoCliente($idContrato, $telefonoActual, $telefonoNuevo): array
     {

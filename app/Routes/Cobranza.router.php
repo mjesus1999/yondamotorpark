@@ -27,14 +27,25 @@ $router->add('GET', '/Vencidos', 'CobranzaController', 'indexVencidos');
 
 
 //REPORTES PDF NOTIFICACION DE COBRANZA ATRASADO
-/* $router->add('GET', '/reportes', 'CobranzaController', 'reporteCobranza'); */
-$router->add('GET', '/reportesAtrasado', 'CobranzaController', 'reporteCobranzaAtrasado');
-//CARGAR DATOS AL PDF
+$router->add('GET', '/reportesAtrasado/(\d+)', 'CobranzaController', 'reporteCobranzaAtrasado');
 $router->add('GET', '/Cobranza/getDatosReporteNotificacion', 'CobranzaController', 'getDatosReporteNotificacion');
 
-//REPORTE PDF RECOJO VEHICULAFR
-$router->add('GET', '/reportesRecojo', 'CobranzaController', 'reporteRecojoVehicular');
+//REPORTES PDF NOTIFICACION DE RECOJO VEHICULAR
+$router->add('GET', '/reportesRecojo/(\d+)', 'CobranzaController', 'reporteRecojoVehicular');
 $router->add('GET', '/Cobranza/getDatosReporteRecojoVehicular', 'CobranzaController', 'getDatosReporteRecojoVehicular');
 
+/* $router->add('GET', '/reportes', 'CobranzaController', 'reporteCobranza'); */
+/* $router->add('GET', '/reportesAtrasado', 'CobranzaController', 'reporteCobranzaAtrasado'); */
+
+
+//CARGAR DATOS AL PDF
+/* $router->add('GET', '/Cobranza/getDatosReporteNotificacion', 'CobranzaController', 'getDatosReporteNotificacion'); */
+
+
+
+//REPORTE PDF RECOJO VEHICULAFR
+/* $router->add('GET', '/reportesRecojo', 'CobranzaController', 'reporteRecojoVehicular'); */
+/* $router->add('GET', '/Cobranza/getDatosReporteRecojoVehicular', 'CobranzaController', 'getDatosReporteRecojoVehicular'); */
+
 //EJEMPLO PDF ESTATICO
-$router->add('GET', '/reportesAtrasado2', 'CobranzaController', 'reporteCobranzaAtrasado2');
+/* $router->add('GET', '/reportesAtrasado2', 'CobranzaController', 'reporteCobranzaAtrasado2'); */
