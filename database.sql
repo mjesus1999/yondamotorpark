@@ -1,5 +1,4 @@
 CREATE DATABASE motorpark;
-
 USE motorpark;
 
 -- Necesitaremos de una función que calcula la hora actual, esto será

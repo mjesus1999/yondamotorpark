@@ -44,3 +44,4 @@ $router->add('POST', '/update/vehiculoRecepcionado', 'VehiculoController', 'upda
 
 $router->add('GET', '/api/vehiculo/searchVehiculo','VehiculoController', 'searchVehiculo');
 $router->add('GET', '/vehiculosVendidosAlContado','VehiculoController','getVehiculosVendidosAlContado');
+$router->add('GET', '/api/getDataVehiculo/{id}','VehiculoController','getDataVehiculoAlContado');

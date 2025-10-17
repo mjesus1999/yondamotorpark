@@ -56,6 +56,7 @@ class ContratoController extends Controller
             $idcontrato = $this->contratoModel->createContratoYCronograma($contractData, $dataCotizacion);
 
             if ($idcontrato > 0) {
+                $this->contratoModel->updateVehiculoEstadoVendido($idcotizacion);
                 echo json_encode([
                     "success" => true,
                     "idcontrato" => $idcontrato,

@@ -267,20 +267,33 @@
 <script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.5.2/dist/js/tabulator.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+<script src="/assets/js/logoBase64.js"></script>
 <script src="/assets/js/cotizacionPDF.js"></script>
 
 <script>
-
-    
     function mostrarModalReserva(cliente, motivo) {
         const mensajeEl = document.getElementById('reservaMensaje');
         const modalEl = document.getElementById('reservaModal');
         if (!mensajeEl || !modalEl) return;
 
-        const textoMotivo = motivo === 'contrato' ?
-            'Este vehículo ya ha sido vendido (tiene un contrato asociado) por el cliente:' :
-            'Este vehículo ya está separado por el cliente:';
+        let textoMotivo = '';
 
+        switch (motivo) {
+            case 'contrato':
+                textoMotivo = 'Este vehículo ya tiene un contrato asociado con el cliente:';
+                break;
+            case 'reservado':
+                textoMotivo = 'Este vehículo ya está separado por otra cotización del cliente:';
+                break;
+            case 'contado':
+                textoMotivo = 'Este vehículo ya fue vendido al contado al cliente:';
+                break;
+            default:
+                textoMotivo = 'Este vehículo no está disponible. Pertenece a:';
+                break;
+        }
+
+        // El resto de la función sigue igual
         mensajeEl.innerHTML = `<p class="mb-0">${textoMotivo}<br><strong class="text-primary">${cliente || 'No disponible'}</strong></p>`;
 
         const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
@@ -289,16 +302,12 @@
 
     document.addEventListener('DOMContentLoaded', async () => {
 
-
-     
         const cotizacionAprobarIdInput = document.getElementById('cotizacion-aprobar-id');
         const clienteAprobarNombreStrong = document.getElementById('cliente-aprobar-nombre');
         const confirmarAprobarBtn = document.getElementById('confirmarAprobarBtn');
         const diaPago = document.getElementById('diapago');
         const fechaInicio = document.getElementById('fechainicio');
-
         const selectLocal = document.getElementById('idlocal');
-
         window.APP_DATA_TABLE = <?php echo json_encode($cotizaciones); ?>;
 
         window.APP_CONFIG = {
@@ -337,14 +346,14 @@
                         field: "nombrecliente",
                         hozAlign: "left",
                         widthGrow: 2,
-                        responsive: 2 ,// OCULTAR DESPUES _> '0' ES NO MOSTRARA,
-                        tooltip:true
+                        responsive: 2, // OCULTAR DESPUES _> '0' ES NO MOSTRARA,
+                        tooltip: true
                     },
                     {
                         title: "Vehículo",
                         field: "vehiculo",
                         hozAlign: "left",
-                        tooltip:true,
+                        tooltip: true,
                         responsive: 1
                     },
                     {
@@ -360,7 +369,7 @@
                         },
                         minWidth: 50,
                         responsive: 1,
-                        tooltip:true
+                        tooltip: true
                     },
                     {
                         title: "Documento",
@@ -368,7 +377,7 @@
                         hozAlign: "center",
                         minWidth: 120,
                         responsive: 0,
-                        tooltip:true
+                        tooltip: true
                     },
                     {
                         title: "Asesor",
@@ -376,7 +385,7 @@
                         hozAlign: "left",
                         minWidth: 150,
                         responsive: 0,
-                        tooltip:true
+                        tooltip: true
                     },
                     {
                         title: "Acciones",
@@ -385,7 +394,6 @@
                         minWidth: 120,
                         responsive: 0,
                         formatter: function(cell) {
-                            // 1. Extraer todos los datos necesarios de la fila
                             const {
                                 idcotizacion: id,
                                 estadocotizacion: estado,
@@ -397,89 +405,58 @@
                                 idcotizacion_reserva,
                                 reserva_cliente_nombre,
                                 contrato_cliente_nombre,
-                                vehiculo_en_contrato
+                                vehiculo_en_contrato,
+                                vehiculo_vendido_contado,
+                                contado_cliente_nombre
                             } = cell.getRow().getData();
 
-                            // 2. Definir estados clave para una lógica más clara
                             const inicialCompleta = Number(habilitar_contrato) === 1;
                             const esMiReserva = Number(idcotizacion_reserva) === Number(id);
-                            const vehiculoYaVendido = Number(vehiculo_en_contrato) === 1 && !esMiReserva;
+                            const vehiculoYaVendidoPorContrato = Number(vehiculo_en_contrato) === 1 && !esMiReserva;
                             const vehiculoReservadoPorOtro = Number(existe_reserva) === 1 && !esMiReserva;
+                            const vehiculoVendidoAlContado = Number(vehiculo_vendido_contado) === 1;
 
                             const acciones = [];
 
-                            // Acción de PDF (siempre presente)
-                            acciones.push(`
-                                         <a class="btn-download-pdf px-1" data-id="${id}" 
-                                            data-cliente="${nombrecliente}" title="PDF Cotización">
-                                            <i class="bi bi-filetype-pdf text-danger fs-5"></i>
-                                        </a>
-                            `);
 
-                            // 3. Determinar acciones según el estado de la fila actual
-                            switch (estado) {
+                            if (vehiculoVendidoAlContado) {
 
-                                case 'P': // PENDIENTE
-                                    if (vehiculoYaVendido) {
-                                        acciones.push(`
-                                        <span class="px-1" style="cursor: pointer;" onclick="mostrarModalReserva('${contrato_cliente_nombre}', 'contrato')" title="Vehículo ya vendido">
-                                            <i class="bi bi-currency-dollar fs-5 text-muted"></i>
-                                        </span>`);
-                                    } else if (vehiculoReservadoPorOtro) {
-                                        acciones.push(`
-                                        <span class="px-1" style="cursor: pointer;" onclick="mostrarModalReserva('${reserva_cliente_nombre}', 'reservado')" title="Vehículo separado">
-                                            <i class="bi bi-currency-dollar fs-5 text-muted"></i>
-                                        </span>`);
-                                    } else {
-                                        acciones.push(`
-                                    <a class="px-1" href="/cotizacion/pagoInicial/${id}" title="Registrar Primer Pago">
-                                        <i class="bi bi-currency-dollar fs-5 text-success"></i>
-                                    </a>`);
-                                    }
-                                    break;
-
-                                case 'S': // SEPARADO
-                                    acciones.push(`
-                                <a class="px-1" href="/fichasolicitud/${id}" title="Adjuntar Ficha de Solicitud">
-                                    <i class="bi bi-file-earmark-plus fs-5 text-warning fw-bold"></i>
-                                </a>`);
-
-                                    if (!inicialCompleta) {
-                                        acciones.push(`
-                                    <a class="px-1" href="/cotizacion/pagoInicial/${id}" title="Continuar Pagando Inicial">
-                                        <i class="bi bi-currency-dollar fs-5 text-success"></i>
-                                    </a>`);
-                                    } else {
-                                        acciones.push(`<span class="px-1" title="Inicial completa"><i class="bi bi-currency-dollar fs-5 text-muted"></i></span>`);
-                                    }
-                                    break;
-
-                                case 'A': // APROBADO
-                                    if (inicialCompleta) {
-                                        if (vehiculoYaVendido) {
-                                            acciones.push(`
-                                                <span class="px-1" style="cursor: pointer;" onclick="mostrarModalReserva('${reserva_cliente_nombre}', 'contrato')" title="Vehículo ya tiene contrato">
-                                                    <i class="bi bi-file-earmark-text fs-5 text-muted"></i>
-                                                </span>`);
+                                acciones.push(`<span class="px-1" style="cursor: pointer;" onclick="mostrarModalReserva('${contado_cliente_nombre}', 'contado')" title="Vehículo vendido al contado"><i class="bi bi-cash-coin fs-5 text-muted"></i></span>`);
+                            } else {
+                                switch (estado) {
+                                    case 'P':
+                                        acciones.push(`<a class="btn-download-pdf px-1" style="cursor: pointer;" data-id="${id}" data-cliente="${nombrecliente}" title="PDF Cotización"><i class="bi bi-filetype-pdf text-danger fs-5"></i></a>`);
+                                        if (vehiculoYaVendidoPorContrato) {
+                                            acciones.push(`<span class="px-1" style="cursor: pointer;" onclick="mostrarModalReserva('${contrato_cliente_nombre}', 'contrato')" title="Vehículo ya vendido"><i class="bi bi-currency-dollar fs-5 text-muted"></i></span>`);
+                                        } else if (vehiculoReservadoPorOtro) {
+                                            acciones.push(`<span class="px-1" style="cursor: pointer;" onclick="mostrarModalReserva('${reserva_cliente_nombre}', 'reservado')" title="Vehículo separado"><i class="bi bi-currency-dollar fs-5 text-muted"></i></span>`);
                                         } else {
-                                            acciones.push(`
-                                                <a class="px-1 text-info fw-bold btnCrearContrato" title="Crear Contrato"
-                                                data-id="${id}" data-cliente="${nombrecliente}" data-numcuotas="${numcuotas}" data-valorCuota="${valorcuota}"
-                                                data-bs-toggle="modal" data-bs-target="#contratoModal">
-                                                <i class="bi bi-file-earmark-text fs-5"></i>
-                                                </a>`);
+                                            acciones.push(`<a class="px-1" href="/cotizacion/pagoInicial/${id}" title="Registrar Primer Pago"><i class="bi bi-currency-dollar fs-5 text-success"></i></a>`);
                                         }
-                                        acciones.push(`<span class="px-1" title="Inicial Pagada"><i class="bi bi-currency-dollar fs-5 text-muted"></i></span>`);
-                                    } else {
-                                        acciones.push(`
-                                                <a class="px-1" href="/cotizacion/pagoInicial/${id}" title="Completar Pago de Inicial">
-                                                    <i class="bi bi-currency-dollar fs-5 text-success"></i>
-                                                </a>`);
-                                    }
-                                    break;
+                                        break;
+                                    case 'S':
+                                        acciones.push(`<a class="px-1" style="cursor: pointer;" data-id="${id}" title="Acta de separación vehicular" data-action="verActa"><i class="bi bi-file-earmark-pdf fs-5"></i></a>`);
+                                        acciones.push(`<a class="px-1" href="/fichasolicitud/${id}" title="Adjuntar Ficha de Solicitud"><i class="bi bi-file-earmark-plus fs-5 text-warning fw-bold"></i></a>`);
+                                        if (!inicialCompleta) {
+                                            acciones.push(`<a class="px-1" href="/cotizacion/pagoInicial/${id}" title="Continuar Pagando Inicial"><i class="bi bi-currency-dollar fs-5 text-success"></i></a>`);
+                                        } else {
+                                            acciones.push(`<span class="px-1" title="Inicial completa"><i class="bi bi-currency-dollar fs-5 text-muted"></i></span>`);
+                                        }
+                                        break;
+                                    case 'A':
+                                        if (inicialCompleta) {
+                                            if (vehiculoYaVendidoPorContrato) {
+                                                acciones.push(`<span class="px-1" style="cursor: pointer;" onclick="mostrarModalReserva('${reserva_cliente_nombre}', 'contrato')" title="Vehículo ya tiene contrato"><i class="bi bi-file-earmark-text fs-5 text-muted"></i></span>`);
+                                            } else {
+                                                acciones.push(`<a class="px-1 text-info fw-bold btnCrearContrato" title="Crear Contrato" data-id="${id}" data-cliente="${nombrecliente}" data-numcuotas="${numcuotas}" data-valorCuota="${valorcuota}" data-bs-toggle="modal" data-bs-target="#contratoModal"><i class="bi bi-file-earmark-text fs-5"></i></a>`);
+                                            }
+                                            acciones.push(`<span class="px-1" title="Inicial Pagada"><i class="bi bi-currency-dollar fs-5 text-muted"></i></span>`);
+                                        } else {
+                                            acciones.push(`<a class="px-1" href="/cotizacion/pagoInicial/${id}" title="Completar Pago de Inicial"><i class="bi bi-currency-dollar fs-5 text-success"></i></a>`);
+                                        }
+                                        break;
+                                }
                             }
-
-                            // 4. Unir y devolver todas las acciones
                             return acciones.join('');
                         },
 
@@ -649,6 +626,205 @@
                 btnContrato.disabled = false;
             }
         });
+
+
+        async function getDataActaSeparacion(idcotizacion) {
+            try {
+                const req = await fetch(`/api/actaSeparacion/${idcotizacion}`, {
+                    method: 'GET',
+                });
+
+                if (!req.ok) {
+                    throw new Error('Error en la solicitud');
+                }
+                const res = await req.json();
+                if (res.success && res.data) {
+                    generarPDFActaSeparacion(res.data);
+
+                } else {
+                    return null;
+                }
+
+
+            } catch (error) {
+                console.error('Error al obtener datos del acta de separación:', error);
+                return null;
+            }
+        }
+
+    function generarPDFActaSeparacion(data) {
+
+    if (!data) {
+        showToast('No se encontraron datos para el acta de separación.', 'ERROR', 2000);
+        return;
+    }
+
+    const fechaObj = new Date();
+    const dia = fechaObj.getDate();
+    const anio = fechaObj.getFullYear();
+    const mes = fechaObj.toLocaleString('es-ES', { month: 'long' });
+    const fechaFormateada = `Chincha, ${dia} de ${mes} del ${anio}`;
+
+    let textoPago = '';
+    if (data.mediopago === 'Efectivo') {
+        textoPago = `EFECTIVO`;
+    } else if (data.mediopago === 'Yape' || data.mediopago === 'Plin') {
+        textoPago = `pago por ${data.mediopago} con N° de operación ${data.numerotransaccion || 'S/N'}`;
+    } else if (data.mediopago === 'Transferencia Bancaria') {
+        textoPago = `pago por ${data.mediopago} a la cuenta de ${data.entidad || 'N/D'} con N° de operación ${data.numerotransaccion || 'S/N'}`;
+    }
+
+    const docDefinition = {
+        pageSize: 'A4',
+        pageOrientation: 'portrait',
+        pageMargins: [70, 100, 70, 40],
+        defaultStyle: {
+            fontSize: 9.3,
+            lineHeight: 1.15,
+            color: '#333333'
+            
+        },
+        header: {
+            image: window.cabeceraYonda,
+            width: 595,
+            alignment: 'center',
+            margin: [0, 25, 0, 0]
+        },
+        
+        styles: {
+            subheader: { bold: true, margin: [0, 10, 0, 3] },
+            bodyText: { alignment: 'justify', lineHeight: 1.2 },
+            firma: { alignment: 'center', margin: [0, 2, 0, 0],bold: true },
+            datosEmpresa: { bold: true, margin: [0, 0, 0, 2] },
+            infoContacto: { margin: [0, 0, 0, 2] },
+            notaImportante: { bold: true, fontSize: 8, margin: [0, 10, 0, 5] },
+            textoPequeno: { alignment: 'justify',  }
+        },
+
+        content: [
+            { text: fechaFormateada, alignment: 'right', margin: [0, 10, 0, 20], fontSize: 10 },
+            { text: 'CONSTANCIA DE SEPARACIÓN DE VEHÍCULO', bold: true, alignment: 'center', margin: [0, 0, 0, 15], fontSize: 12, decoration: 'underline' },
+            {
+                stack: [
+                    { text: window.nombreEmpresa, style: 'datosEmpresa' },
+                    { text: `RUC: ${window.rucEmpresa}`, style: 'infoContacto' },
+                    { text: 'Dirección: Carretera Panamericana km 201 – Chincha', style: 'infoContacto' },
+                    { text: 'Teléfonos: 927 676 338 / 971 027 612', style: 'infoContacto' }
+                ],
+                margin: [0, 0, 0, 10]
+            },
+            {
+                text: [
+                    'Conste por el presente documento que la empresa ',
+                    { text: window.nombreEmpresa, bold: true },
+                    ', ha recibido del Sr. ',
+                    { text: data.cliente.toUpperCase(), bold: true }, ', identificado con DNI N.º ',
+                    { text: data.nrodoc, bold: true }, ', con domicilio en ',
+                    { text: `${data.direccion || 'N/D'}, distrito de ${data.distrito}, provincia de ${data.provincia}, departamento de ${data.departamento}`.toUpperCase()},
+                    ', y número de celular ', { text: data.telprimario, bold: true },
+                    ', la suma de S/ ', { text: parseFloat(data.amortizacion).toFixed(2), bold: true }, // Corregido: data.amortizacion
+                    ', mediante ', { text: textoPago, bold: true }, ' con fecha ', { text: data.fechapago, bold: true }, '.'
+                ],
+                style: 'bodyText',
+                margin: [0, 0, 0, 10]
+            },
+            { text: 'Este monto corresponde a la cuota inicial por concepto de separación del siguiente vehículo:', style: 'bodyText', margin: [0, 0, 0, 10] },
+            
+            {
+                
+                table: {
+                    headerRows: 1,
+                    widths: ['auto', 250],
+                    body: [
+                        [{ text: 'CONCEPTO', bold: true, fillColor: '#eeeeee'}, { text: 'DETALLE',alignment: 'center', bold: true, fillColor: '#eeeeee' }],
+                      
+                        [{ text: 'Marca', bold: true }, { text: data.marca.toUpperCase(),  }],
+                        [{ text: 'Modelo', bold: true,  }, { text: data.modelo.toUpperCase(),  }],
+                        [{ text: 'Color', bold: true,  }, { text: data.color.toUpperCase(),  }],
+                        [{ text: 'Año Modelo', bold: true,  }, { text: data.anio,  }],
+                        [{ text: 'Combustible', bold: true,  }, { text: data.combustible.toUpperCase(),  }]
+                    ]
+                },
+                margin: [50, 0, 0, 10]
+            },
+
+            { text: 'NOTA IMPORTANTE:', style: 'notaImportante' },
+            {
+                text: [
+                    'En caso de desistimiento por parte del cliente respecto a la compra del vehículo separado, la ',
+                    { text: 'empresa aplicará una penalidad de $ 1,000.00 (mil dólares americanos)', bold: true },
+                    ' por vehículos de 4 ruedas y $ 500.00 (quinientos dólares americanos) por vehículos de 2 o 3 ruedas, correspondiente a gastos administrativos, traslado y costos logísticos, los serán descontados del monto abonado; en el caso los vehículos de 2 o 3 ruedas superen el costo de S/ 25,000.00 soles, la penalidad será la misma que se aplica a los vehículos de 4 ruedas.'
+                ],
+                style: 'textoPequeno',
+                margin: [0, 0, 0, 10]
+            },
+            {
+                text: [
+                    'Asimismo, el cliente declara conocer y aceptar que, una vez efectuada la separación de la unidad, no podrá acogerse a promociones o campañas de descuentos posteriores. ',
+                    'En señal de conformidad y aceptación de las condiciones, ambas partes suscriben la presente constancia en dos ejemplares de igual valor legal, quedando una copia en poder del cliente y otra en los archivos de la empresa.'
+                ],
+                style: 'textoPequeno'
+            },
+            
+        
+            {
+                columns: [
+                    { 
+                        stack: [
+                            { text: '____________________________________________', style: 'firma', margin: [0, 50, 0, 0] },
+                            { text: window.nombreEmpresa, style: ['firma', 'datosEmpresa'] },
+                            { text: `RUC: ${window.rucEmpresa}`, style: 'firma' }
+                        ],
+                        width: '*' 
+                    },
+                    { 
+                        stack: [
+                            { text: '______________________________________________', style: 'firma', margin: [0, 50, 0, 0] }, 
+                            { text: data.cliente.toUpperCase(), style: 'firma' },
+                            { text: `DNI: ${data.nrodoc}`, style: 'firma' }
+                        ],
+                        width: '*' 
+                    }
+                ],
+                margin: [0, 20, 0, 0] 
+            }
+        ],
+
+        footer: function() {
+                return {
+                    columns: [{
+                        image: window.footerYonda,
+                        width: 600,
+                        alignment: 'center',
+                    }]
+                };
+            }
+    };
+    
+    
+    pdfMake.createPdf(docDefinition).open();
+}
+
+
+
+
+
+        document.getElementById('tabla-cotizacion').addEventListener('click', function(e) {
+            const btn = e.target.closest('[data-action]');
+            const id = btn.dataset.id;
+            const action = btn.dataset.action;
+            if (!btn) return;
+
+            switch (action) {
+                case 'verActa':
+                    getDataActaSeparacion(id);
+                    break;
+            }
+
+        });
+
+
+
 
     });
 </script>

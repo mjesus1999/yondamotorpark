@@ -162,7 +162,7 @@ class CotizacionController extends Controller
             $errores = [];
 
             $registro = [
-                'idconcepto'        => ConceptosPago::INICIAL_ID, //$data['idconcepto'] ?? null SOLOS E LE MANDA EL ID DEL CONCPETO(INICIAL),
+                'idconcepto'        => ConceptosPago::INICIAL_ID,
                 'idcotizacion'      => $data['idcotizacion'] ?? null,
                 'idvehiculo'        => $data['idvehiculo'] ?? null,
                 'idcuentapago'      => empty($data['idcuentapago']) ? null : $data['idcuentapago'],
@@ -173,9 +173,12 @@ class CotizacionController extends Controller
                 'saldorestante'     => $data['saldorestante'] ?? null,
                 'comprobante'       => null,
                 'observacion'       => empty($data['observacion']) ? null : $data['observacion'],
+                'moneda'            => $data['moneda'] ?? null,
+                'montomonedaoriginal' => $data['montomonedaoriginal'] ?? null,
+                'tipocambioaplicado'  => empty($data['tipocambioaplicado']) ? null : $data['tipocambioaplicado']
             ];
 
-            // Validaciones
+
             $errores[] = Validador::campoObligatorio($registro['idconcepto'], 'Concepto');
             $errores[] = Validador::campoObligatorio($registro['idvehiculo'], 'Identificador del vehículo');
             $errores[] = Validador::campoObligatorio($registro['mediopago'], 'Medio de pago');
@@ -183,9 +186,19 @@ class CotizacionController extends Controller
             $errores[] = Validador::campoObligatorio($registro['amortizacion'], 'Amortización');
             $errores[] = Validador::campoObligatorio($registro['saldorestante'], 'Saldo restante');
 
+
+            if ($data['mediopago'] !== 'Efectivo') {
+                // Se valida directamente el array $_FILES, no la variable $registro['comprobante']
+                if (!isset($_FILES['comprobante']) || $_FILES['comprobante']['error'] !== UPLOAD_ERR_OK) {
+                    $errores[] = 'El archivo del comprobante es obligatorio para este medio de pago.';
+                }
+            }
+
+
             $errores = array_filter($errores);
 
             if (count($errores) > 0) {
+                http_response_code(422);
                 echo json_encode(['success' => false, 'message' => implode('<br>', $errores)]);
                 return;
             }
@@ -218,43 +231,34 @@ class CotizacionController extends Controller
                     'id' => $idPago
                 ]);
             } else {
-                echo json_encode([
-                    'success' => false,
-                    'message' => 'No se pudo registrar el pago de inicial'
-                ]);
+
+                throw new Exception('No se pudo registrar el pago de inicial.');
             }
         } catch (PDOException $e) {
-            // Si el SP lanza el error del vehículo ya separado
-            if (strpos($e->getMessage(), 'El vehículo ya fue separado') !== false) {
+
+            if ($rutaArchivoGuardado && file_exists($rutaArchivoGuardado)) @unlink($rutaArchivoGuardado);
+
+            if (strpos($e->getMessage(), 'El vehículo ya fue separado') !== false || strpos($e->getMessage(), 'vendido al contado') !== false) {
+                http_response_code(409);
                 echo json_encode([
                     'success' => false,
-                    'message' => 'Este vehículo ya fue separado por otra cotización',
-                    'id' => 0
+                    'message' => $e->getMessage()
                 ]);
-                return;
+            } else {
+                http_response_code(500);
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Error de base de datos: ' . $e->getMessage()
+                ]);
             }
-
-            // Si se había guardado un archivo, lo eliminamos
-            if ($rutaArchivoGuardado && file_exists($rutaArchivoGuardado)) {
-                @unlink($rutaArchivoGuardado);
-            }
-
-            http_response_code(500);
-            echo json_encode([
-                'success' => false,
-                'message' => 'Error interno del servidor: ' . $e->getMessage(),
-                'id' => 0
-            ]);
         } catch (Exception $e) {
-            if ($rutaArchivoGuardado && file_exists($rutaArchivoGuardado)) {
-                @unlink($rutaArchivoGuardado);
-            }
+
+            if ($rutaArchivoGuardado && file_exists($rutaArchivoGuardado)) @unlink($rutaArchivoGuardado);
 
             http_response_code(500);
             echo json_encode([
                 'success' => false,
-                'message' => 'Error interno del servidor: ' . $e->getMessage(),
-                'id' => 0
+                'message' => 'Error: ' . $e->getMessage()
             ]);
         }
     }
@@ -710,4 +714,25 @@ class CotizacionController extends Controller
     }
 
 
+    public function getDataSeparacionVehicular(int $idcotizacion): void
+    {
+
+        header('Content-Type: application/json; charset=utf-8');
+
+
+        $data = $this->cotizacionModel->getDataActaSeparacionByIdCotizacion($idcotizacion);
+        if ($data === false) {
+            http_response_code(500);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Ocurrió un error al consultar la base de datos.'
+            ]);
+            return;
+        }
+
+        echo json_encode([
+            'success' => true,
+            'data' => $data
+        ]);
+    }
 }

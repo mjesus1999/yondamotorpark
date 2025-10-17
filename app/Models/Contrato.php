@@ -137,6 +137,23 @@ class Contrato
         $stmt->execute();
     }
 
+    public function updateVehiculoEstadoVendido(int $idcotizacion): void
+    {
+        // Usamos una subconsulta para encontrar el idvehiculo
+        // y actualizar su estado en una sola operación.
+        $sql = "UPDATE vehiculos
+                SET disponibilidad = 'vendido', modificado = NOW()
+                WHERE idvehiculo = (
+                    SELECT idvehiculo 
+                    FROM cotizaciones 
+                    WHERE idcotizacion = :idcotizacion
+                )";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':idcotizacion', $idcotizacion, PDO::PARAM_INT);
+        $stmt->execute();
+    }
+
 
     public function createContratoYCronograma(array $contractData, array $cotizacionData): int
     {

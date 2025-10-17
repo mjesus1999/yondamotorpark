@@ -2,8 +2,6 @@
 <link href="https://unpkg.com/tabulator-tables@5.5.2/dist/css/tabulator_simple.min.css" rel="stylesheet">
 <link rel="stylesheet" href="/assets/css/tabulator.css">
 
-
-
 <div class="container-fluid">
 
     <div class="alert alert-info mt-2 mb-5" role="alert">
@@ -62,24 +60,27 @@
         placeholder: "No hay contratos disponibles.",
         movableColumns: true,
 
-        
-
         columns: [
             {title: "#", formatter: "rownum", hozAlign: "center", width: 40, responsive: 10},
-            {title: "Inicio", field: "fechainicio", hozAlign: "center", minWidth: 110, responsive:10},
-            {title: "Día Pago", field: "diapago", hozAlign: "center", width: 70, responsive:10},
-            {title: "Tienda", field: "tienda", headerHozAlign: "left", widthGrow: 4, responsive:5},
-            {title: "Vehículo", field: "vehiculo", headerHozAlign: "left", widthGrow: 4, responsive:1},
-            {title: "Cliente", field: "cliente", headerHozAlign: "center", widthGrow: 6, responsive:2},
-            {title: "Documento", field: "doc_cliente", hozAlign: "center", widthGrow: 2, responsive:10},
-            {title: "Asesor", field: "asesor", headerHozAlign: "center", widthGrow: 3, responsive:10},
-            {title: "Precio Venta", field: "precioventa", hozAlign: "right", formatter: "money", formatterParams:{symbol:"S/ ",thousand:",",precision:2}, minWidth:100},
-            {title: 'Acciones', hozAlign: 'center', responsive:0,
+            {title: "Inicio", field: "fechainicio", hozAlign: "center", minWidth: 110, responsive:10, tooltip:true},
+            {title: "Día Pago", field: "diapago", hozAlign: "center", width: 70, responsive:10,tooltip:true},
+            {title: "Tienda", field: "tienda", headerHozAlign: "left", width:200, responsive:5,tooltip:true},
+            {title: "Vehículo", field: "vehiculo", headerHozAlign: "left",width:200,  responsive:1,tooltip:true},
+            {title: "Cliente", field: "cliente", headerHozAlign: "center", width:250, responsive:2,tooltip:true},
+            {title: "Documento", field: "doc_cliente", hozAlign: "center", responsive:10,tooltip:true},
+            {title: "Asesor", field: "asesor", headerHozAlign: "left", responsive:10,tooltip:true},
+            {title: "Precio Venta", field: "precioventa", hozAlign: "right", formatter: "money", formatterParams:{symbol:"S/ ",thousand:",",precision:2}, minWidth:100,tooltip:true},
+            {title: 'Acciones', hozAlign: 'left', responsive:0,
                 formatter: (cell) => {
                     const id = cell.getRow().getData().idcontrato;
-                    return `<button class="btn btn-sm btn-eliminar" data-id="${id}" data-action="delete">
-                                <i class="bi bi-trash text-danger"></i>
-                            </button>`;
+                    return `
+                        <button class="btn btn-sm btn-verPDF fs-5"><i class="bi bi-filetype-pdf text-danger" data-id="${id}" data-action="verPDF"></i></button>
+                        <button class="btn btn-sm btn-eliminar" data-id="${id}" data-action="delete">
+                                <i class="bi bi-trash text-danger fs-5"></i>
+                        </button>
+                            
+                            `;
+                        
                 }
             }
         ],

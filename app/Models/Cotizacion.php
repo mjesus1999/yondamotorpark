@@ -185,7 +185,7 @@ class Cotizacion
 
     public function addPagoInicial($params = [])
     {
-        $query = "CALL sp_pagoInicial(:idconcepto, :idcotizacion, :idvehiculo, :idcuentapago, :idcolcaja, :mediopago, :numerotransaccion, :fechapago, :amortizacion, :saldorestante, :comprobante, :observacion)";
+        $query = "CALL sp_pagoInicial(:idconcepto, :idcotizacion, :idvehiculo, :idcuentapago, :idcolcaja, :mediopago, :numerotransaccion, :fechapago, :amortizacion, :saldorestante, :comprobante, :observacion,:moneda,:montomonedaoriginal,:tipocambioaplicado)";
         $stmt = $this->db->prepare($query);
         $stmt->execute([
             ':idconcepto' => $params['idconcepto'],
@@ -199,11 +199,30 @@ class Cotizacion
             ':amortizacion' => $params['amortizacion'],
             ':saldorestante' => $params['saldorestante'],
             ':comprobante' => $params['comprobante'],
-            ':observacion' => $params['observacion']
+            ':observacion' => $params['observacion'],
+            ':moneda' => $params['moneda'],
+            ':montomonedaoriginal'=> $params['montomonedaoriginal'],
+            ':tipocambioaplicado'=> $params['tipocambioaplicado'],
         ]);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
         $stmt->closeCursor();
         return (int)($result['idpago'] ?? 0);
+    }
+
+    public function getDataActaSeparacionByIdCotizacion(int $idcotizacion): ?array
+    {
+        $query = 'CALL sp_getActaSeparacionByIdCotizacion(:idcotizacion)';
+        try {
+            $stmt = $this->db->prepare($query);
+            $stmt->bindParam(":idcotizacion", $idcotizacion, PDO::PARAM_INT);
+            $stmt->execute();
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $result !== false ? $result : null;
+        } catch (PDOException $e) {
+            error_log($e->getMessage());
+            return null;
+        }
+       
     }
 
 

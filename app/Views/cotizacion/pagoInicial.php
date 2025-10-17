@@ -1,276 +1,7 @@
 <?php include __DIR__ . '/../layout/header.php'; ?>
+<link rel="stylesheet" href="/assets/css/pago-inicial.css">
+<!-- <?php var_dump($cotizacion)?> -->
 
-<style>
-    :root {
-        --color-primary: #2563eb;
-        --color-primary-dark: #1e40af;
-        --color-secondary: #7c3aed;
-        --color-success: #10b981;
-        --color-warning: #f59e0b;
-        --color-danger: #ef4444;
-    }
-
-    body {
-        background: linear-gradient(135deg, #e0e7ff 0%, #ddd6fe 100%);
-        min-height: 100vh;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-
-    .encabezado-principal {
-        background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
-        border-radius: 1rem;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-        color: white;
-        padding: 2rem;
-        margin-bottom: 2rem;
-    }
-
-    .tarjeta-icono {
-        background: rgba(255, 255, 255, 0.2);
-        backdrop-filter: blur(10px);
-        border-radius: 0.75rem;
-        padding: 0.75rem;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .tarjeta-resumen {
-        background: rgba(255, 255, 255, 0.15);
-        backdrop-filter: blur(10px);
-        border-radius: 0.75rem;
-        padding: 1rem;
-        transition: transform 0.2s;
-    }
-
-    .tarjeta-resumen:hover {
-        transform: translateY(-2px);
-    }
-
-    .nav-pills .nav-link {
-        border-radius: 0.75rem;
-        padding: 0.75rem 1.5rem;
-        font-weight: 500;
-        color: #64748b;
-        transition: all 0.3s;
-    }
-
-    .nav-pills .nav-link:hover {
-        background-color: #f1f5f9;
-        color: var(--color-primary);
-    }
-
-    .nav-pills .nav-link.active {
-        background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
-        color: white;
-        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-    }
-
-    .card {
-        border: none;
-        border-radius: 1rem;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-        overflow: hidden;
-        transition: transform 0.2s, box-shadow 0.2s;
-    }
-
-    .card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-    }
-
-    .card-header {
-        border-bottom: 2px solid #f1f5f9;
-        font-weight: 600;
-        padding: 1.25rem 1.5rem;
-    }
-
-    .info-item {
-        background: #f1f5f9;
-        border-radius: 0.75rem;
-        padding: 1rem;
-        color: #475569;
-        margin-bottom: 1rem;
-        display: flex;
-        align-items: flex-start;
-        gap: 0.75rem;
-        transition: background 0.2s;
-    }
-
-    .info-item:hover {
-        background: #f1f5f9;
-    }
-
-    .info-icono {
-        width: 40px;
-        height: 40px;
-        border-radius: 0.5rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.25rem;
-        flex-shrink: 0;
-    }
-
-    .info-icono.azul {
-        background: #dbeafe;
-        color: var(--color-primary);
-    }
-
-    .info-icono.morado {
-        background: #ede9fe;
-        color: var(--color-secondary);
-    }
-
-    .info-icono.verde {
-        background: #d1fae5;
-        color: var(--color-success);
-    }
-
-    .form-control,
-    .form-select {
-        border-radius: 0.5rem;
-        border: 2px solid #e2e8f0;
-        padding: 0.75rem 1rem;
-        transition: all 0.2s;
-    }
-
-    .form-control:focus,
-    .form-select:focus {
-        border-color: var(--color-primary);
-        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-    }
-
-    .btn {
-        border-radius: 0.5rem;
-        padding: 0.75rem 1.5rem;
-        font-weight: 500;
-        transition: all 0.3s;
-    }
-
-    .btn-gradient {
-        background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
-        border: none;
-        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-    }
-
-    .btn-gradient:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
-    }
-
-    .alerta-saldo {
-        background: linear-gradient(135deg, #cca404ff 0%, #fed7aa 100%);
-        border: 2px solid #f1d58cff;
-        border-radius: 0.75rem;
-        padding: 1.25rem;
-        margin-bottom: 1.5rem;
-    }
-
-    .alerta-exito {
-        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
-        border: 2px solid #10b981;
-        border-radius: 0.75rem;
-        padding: 1.25rem;
-        margin-bottom: 1.5rem;
-    }
-
-    .alerta-error {
-        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-        border: 2px solid #ef4444;
-        border-radius: 0.75rem;
-        padding: 1.25rem;
-        margin-bottom: 1.5rem;
-    }
-
-    .table {
-        margin-bottom: 0;
-    }
-
-    .table thead {
-        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-    }
-
-    .table tbody tr {
-        transition: background 0.2s;
-    }
-
-    .table tbody tr:hover {
-        background-color: #dbeafe;
-    }
-
-    .badge {
-        padding: 0.4rem 0.75rem;
-        border-radius: 0.5rem;
-        font-weight: 500;
-    }
-
-    .badge-numero {
-        background: #dbeafe;
-        color: var(--color-primary);
-    }
-
-    .resumen-historial {
-        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
-        border: 2px solid #10b981;
-        border-radius: 0.75rem;
-        padding: 1.25rem;
-        margin-bottom: 1.5rem;
-    }
-
-
-
-    .sin-datos {
-        text-align: center;
-        padding: 3rem 1rem;
-        color: #64748b;
-    }
-
-    .sin-datos i {
-        font-size: 3rem;
-        color: #cbd5e1;
-        margin-bottom: 1rem;
-    }
-
-    @media (max-width: 768px) {
-        .encabezado-principal {
-            padding: 1.5rem;
-        }
-
-        .tarjeta-resumen {
-            margin-bottom: 0.75rem;
-        }
-
-        .table-responsive {
-            font-size: 0.875rem;
-        }
-    }
-
-    .fade-in {
-        animation: fadeIn 0.3s ease-in;
-    }
-
-    @keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(10px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    .codigo-transaccion {
-        background: #f1f5f9;
-        padding: 0.25rem 0.5rem;
-        border-radius: 0.25rem;
-        font-family: 'Courier New', monospace;
-        font-size: 0.85rem;
-        color: #475569;
-    }
-</style>
 
 <div class="container-fluid">
 
@@ -291,8 +22,6 @@
             </div>
         </div>
     </div>
-
-
 
     <!-- Encabezado Principal -->
     <div class="encabezado-principal">
@@ -317,7 +46,7 @@
             <div class="col-6 col-lg-3">
                 <div class="tarjeta-resumen">
                     <small class="d-block opacity-75">Total Pagado</small>
-                    <strong class="fs-5" id="totalPagado">PEN <?= number_format(htmlspecialchars($montosInfo['totalpagado']), 2, '.') ?></strong>
+                    <strong class="fs-5" id="totalPagado">S/ <?= number_format(htmlspecialchars($montosInfo['totalpagado']), 2, '.') ?></strong>
                 </div>
             </div>
             <div class="col-6 col-lg-3">
@@ -331,7 +60,21 @@
                     <small class="d-block opacity-75">Estado</small>
                     <span class="badge bg-white mt-1 text-success fw-bold">
                         <span class="badge rounded-circle bg-warning p-1"></span>
-                        Aprobada
+                        <?php 
+                            switch ($cotizacion['estadocotizacion']) {
+                                case 'P':
+                                    echo 'Pendiente';
+                                    break;
+                                case 'S':
+                                    echo 'Serparada';
+                                    break;
+                                case 'A':
+                                    echo 'Aprobada';
+                                    break;
+                                
+                            }
+                        
+                        ?>
                     </span>
                 </div>
             </div>
@@ -557,20 +300,20 @@
                     <div class="alerta-saldo">
                         <div class="row g-3">
                             <div class="col-md-4">
-                                <small class="text-warning-emphasis  fw-bold d-block">Saldo Pendiente Actual</small>
-                                <strong class="text-warning-emphasis fs-5"
+                                <small class=" fw-bold d-block">Saldo Pendiente Actual</small>
+                                <strong class="fs-5"
                                     id="saldoActualForm"
                                     data-valor="<?= htmlspecialchars($montosInfo['saldorestante']) ?>">
                                     S/ <?= number_format(htmlspecialchars($montosInfo['saldorestante']), 2, '.', ',') ?>
                                 </strong>
                             </div>
                             <div class="col-md-4" id="montoAPagarContainer" style="display: none;">
-                                <small class="text-warning-emphasis d-block">Monto a Pagar</small>
-                                <strong class="text-warning-emphasis fs-5" id="montoAPagar">PEN 0.00</strong>
+                                <small class="d-block">Monto a Pagar</small>
+                                <strong class="fs-5" id="montoAPagar">PEN 0.00</strong>
                             </div>
                             <div class="col-md-4" id="saldoRestanteContainer" style="display: none;">
-                                <small class="text-warning-emphasis d-block">Saldo Restante</small>
-                                <strong class="text-warning-emphasis fs-5" id="saldoRestanteForm">PEN 0.00</strong>
+                                <small class="d-block">Saldo Restante</small>
+                                <strong class="fs-5" id="saldoRestanteForm">PEN 0.00</strong>
                             </div>
                         </div>
                     </div>
@@ -580,27 +323,21 @@
 
                         <input type="hidden" value="<?= htmlspecialchars($cotizacion['idvehiculo']) ?>" id="idvehiculo" name="idvehiculo">
                         <input type="hidden" value="<?= htmlspecialchars($cotizacion['idcotizacion']) ?>" id="idcotizacion" name="idcotizacion">
+
+                        <input type="hidden" id="amortizacionFinalPEN" name="amortizacion">
+                        <input type="hidden" id="tipoCambio" name="tipocambioaplicado">
+
                         <div class="row g-4">
 
-                            <div class="col-md-5">
-                                <label for="fechapago" class="form-label">Fecha de Pago <span class="text-danger fgw-bold">*</span></label>
+                            <div class="col-md-4">
+                                <label for="fechapago" class="form-label">Fecha de Pago <span class="text-danger fw-bold">*</span></label>
                                 <input type="date" class="form-control" id="fechapago" name="fechapago" required>
                             </div>
 
-                            <!-- Concepto
                             <div class="col-md-4">
-                                <label for="idconcepto" class="form-label">Concepto de Pago <span class="text-danger fgw-bold">*</span></label>
-                                <select class="form-select" id="idconcepto" required name="idconcepto">
-                                    <option value="">Seleccione un concepto</option>
-                                </select>
-                            </div> -->
-
-
-
-                            <div class="col-md-4">
-                                <label for="mediopago" class="form-label">Medio de Pago <span class="text-danger fgw-bold">*</span></label>
+                                <label for="mediopago" class="form-label">Medio de Pago <span class="text-danger fw-bold">*</span></label>
                                 <select class="form-select" id="mediopago" name="mediopago" required>
-                                    <option value="">Seleccione un medio de pago</option>
+                                    <option value="">Seleccione un medio</option>
                                     <option value="Efectivo">Efectivo</option>
                                     <option value="Yape">Yape</option>
                                     <option value="Transferencia Bancaria">Transferencia Bancaria</option>
@@ -608,55 +345,73 @@
                                 </select>
                             </div>
 
-                            <!-- Cuenta de Pago -->
-                            <div class="col-md-3">
-                                <label for="idcuentapago" class="form-label">Cuenta de Pago </label>
+                            <div class="col-md-4">
+                                 <label for="montoOriginal" class="form-label mb-0">Monto a Pagar <span class="text-danger fw-bold">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text" id="simboloMoneda">S/</span>
+                                    <input type="number" class="form-control" id="montoOriginal" step="0.01" min="0.01" placeholder="0.00" name="montomonedaoriginal" required>
+                                </div>
+
+                                <div class="d-flex mt-2 gap-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="moneda" id="monedaPEN" value="PEN" checked>
+                                            <label class="form-check-label" for="monedaPEN">Soles (S/)</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="moneda" id="monedaUSD" value="USD">
+                                            <label class="form-check-label" for="monedaUSD">Dólares ($)</label>
+                                        </div>
+                                    </div>
+                            </div>
+
+                             <!-- <div class="col-md-2">
+                                    <div class="d-flex gap-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="moneda" id="monedaPEN" value="PEN" checked>
+                                            <label class="form-check-label" for="monedaPEN">Soles (S/)</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="moneda" id="monedaUSD" value="USD">
+                                            <label class="form-check-label" for="monedaUSD">Dólares ($)</label>
+                                        </div>
+                                    </div>
+                                </div> -->
+
+                            <div class="col-md-4">
+                                <label for="idcuentapago" class="form-label">Cuenta de Destino</label>
                                 <select class="form-select" id="idcuentapago" name="idcuentapago">
                                     <option value="">Seleccione la cuenta</option>
                                 </select>
                             </div>
 
-
-                            <!-- Amortización -->
-                            <div class="col-md-3">
-                                <label for="amortizacion" class="form-label">Monto a Amortizar (PEN) <span class="text-danger fgw-bold">*</span></label>
-                                <input type="number" class="form-control" id="amortizacion" step="0.01" min="0.01" placeholder="0.00" name="amortizacion" required>
-                            </div>
-                            <!-- Número de Transacción -->
                             <div class="col-md-4">
-                                <label for="numerotransaccion" class="form-label">Número de Transacción </label>
-                                <input type="text" class="form-control" id="numerotransaccion" name="numerotransaccion" placeholder="Ej: TRF-2025-001234">
+                                <label for="numerotransaccion" class="form-label">Número de Transacción</label>
+                                <input type="text" class="form-control" id="numerotransaccion" name="numerotransaccion" placeholder="Opcional, ej: TRF-12345">
                             </div>
 
-                            <!-- Comprobante -->
-                            <div class="col-md-5">
-                                <label for="comprobante" class="form-label">Comprobante</label>
+                            <div class="col-md-4">
+                                <label for="comprobante" class="form-label">Comprobante de Pago</label>
                                 <input type="file" class="form-control" id="comprobante" name="comprobante">
                             </div>
 
-                            <!-- Observación -->
                             <div class="col-12">
                                 <label for="observacion" class="form-label">Observaciones</label>
-                                <textarea class="form-control" id="observacion" rows="4" placeholder="Ingrese observaciones adicionales sobre el pago..." name="observacion"></textarea>
+                                <textarea class="form-control" id="observacion" rows="3" placeholder="Añadir notas adicionales sobre el pago..." name="observacion"></textarea>
                             </div>
 
-
-                            <!-- Botones -->
-                            <div class="d-flex justify-content-end gap-2 mt-3">
+                            <div class="d-flex justify-content-end gap-2 mt-3 col-12">
                                 <button type="button" class="btn btn-outline-secondary" onclick="limpiarFormulario()">
                                     <i class="bi bi-arrow-counterclockwise me-2"></i>Cancelar
                                 </button>
-
-                                <?php if ($completoInicial === 0): ?>
+                                <?php if ($completoInicial === 0) : ?>
                                     <button type="submit" class="btn btn-gradient text-white">
                                         <i class="bi bi-check-circle me-2"></i>Registrar Pago
                                     </button>
-                                <?php else: ?>
-                                    <span class="text-success fw-bold">
-                                        <i class="bi bi-check2-circle me-2"></i>Inicial completo
+                                <?php else : ?>
+                                    <span class="btn btn-success pe-none">
+                                        <i class="bi bi-check2-circle me-2"></i>Inicial Completo
                                     </span>
                                 <?php endif; ?>
-
                             </div>
 
                         </div>
@@ -790,98 +545,146 @@
         </div>
     </div>
 </div>
-
-
+<?php include __DIR__ . '/../layout/footer.php'; ?>
 <script>
-    const selectConcepto = document.getElementById('idconcepto');
+    const formularioPago = document.getElementById('formularioPago');
+    const fechaPago = document.getElementById('fechapago');
+    const modalComprobante = document.getElementById('modalComprobante');
     const selectCuentaPago = document.getElementById('idcuentapago');
     const selectMedioPago = document.getElementById('mediopago');
     const inputNumeroTransaccion = document.getElementById('numerotransaccion');
-    const inputAmortizacion = document.getElementById('amortizacion');
     const inputComprobante = document.getElementById('comprobante');
-    const formularioPago = document.getElementById('formularioPago');
-    const fechaPago = document.getElementById('fechapago');
 
-    const fechaActualISO = new Date().toISOString().slice(0, 10);
-
-    // console.log(fechaActualISO);
-
-    // Asignar el valor al input
-    fechaPago.value = fechaActualISO;
-    const modalComprobante = document.getElementById('modalComprobante');
+    // Elementos para la lógica de moneda
+    const radioButtonsMoneda = document.querySelectorAll('input[name="moneda"]');
+    const inputMontoOriginal = document.getElementById('montoOriginal');
+    const inputTipoCambio = document.getElementById('tipoCambio');
+    const simboloMoneda = document.getElementById('simboloMoneda');
+    const inputAmortizacionFinalPEN = document.getElementById('amortizacionFinalPEN');
+    const saldoPendienteActual = parseFloat(document.getElementById('saldoActualForm').dataset.valor);
 
 
-    modalComprobante.addEventListener('show.bs.modal', function(event) {
-        // 'event.relatedTarget' es el botón en el que se hizo clic
-        const boton = event.relatedTarget;
-        const rutaImagen = boton.getAttribute('data-src');
-        const imagenEnModal = document.getElementById('imagenComprobante');
-        imagenEnModal.src = rutaImagen;
+    async function fetchTipoCambio() {
+        try {
+
+            const response = await fetch('/cotizacion/tipo-cambio');
+            if (!response.ok) throw new Error('No se pudo obtener el tipo de cambio.');
+
+            const data = await response.json();
+            inputTipoCambio.value = data.tipo_cambio;
+            calcularYActualizar();
+        } catch (error) {
+            console.error('Error al obtener tipo de cambio:', error);
+            mostrarAlerta('error', 'No se pudo obtener el tipo de cambio. Intente de nuevo.');
+            inputTipoCambio.value = '0.00';
+        }
+    }
+
+    /**
+     * Calcula la amortización en SOLES y actualiza la UI.
+     */
+    function calcularYActualizar() {
+        const montoOriginal = parseFloat(inputMontoOriginal.value) || 0;
+        const monedaSeleccionada = document.querySelector('input[name="moneda"]:checked').value;
+
+        let amortizacionCalculadaPEN = 0;
+
+        if (monedaSeleccionada === 'USD') {
+            const tipoCambio = parseFloat(inputTipoCambio.value) || 0;
+            // console.log(tipoCambio)
+            amortizacionCalculadaPEN = montoOriginal * tipoCambio;
+        } else {
+            amortizacionCalculadaPEN = montoOriginal;
+        }
+
+        inputAmortizacionFinalPEN.value = amortizacionCalculadaPEN.toFixed(2);
+
+        const nuevoSaldoRestante = saldoPendienteActual - amortizacionCalculadaPEN;
+
+        const formatoNumero = {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        };
+
+        if (montoOriginal > 0) {
+            document.getElementById('montoAPagarContainer').style.display = 'block';
+            document.getElementById('saldoRestanteContainer').style.display = 'block';
+            document.getElementById('montoAPagar').textContent = 'S/ ' + amortizacionCalculadaPEN.toLocaleString('es-PE', formatoNumero);
+            document.getElementById('saldoRestanteForm').textContent = 'S/ ' + nuevoSaldoRestante.toLocaleString('es-PE', formatoNumero);
+        } else {
+            document.getElementById('montoAPagarContainer').style.display = 'none';
+            document.getElementById('saldoRestanteContainer').style.display = 'none';
+        }
+    }
+
+
+
+
+    // --- EVENT LISTENERS ---
+
+    document.addEventListener('DOMContentLoaded', () => {
+        fechaPago.value = new Date().toISOString().slice(0, 10);
+        cargarCuentasBancarias();
     });
 
+    radioButtonsMoneda.forEach(radio => {
+        radio.addEventListener('change', function() {
+            if (this.value === 'USD') {
+                simboloMoneda.textContent = '$';
+                fetchTipoCambio();
+            } else {
+                simboloMoneda.textContent = 'S/';
+                inputTipoCambio.value = '';
+                calcularYActualizar();
+            }
+        });
+    });
+
+    inputMontoOriginal.addEventListener('input', calcularYActualizar);
 
     selectMedioPago.addEventListener('change', (e) => {
         inputNumeroTransaccion.disabled = false;
         selectCuentaPago.disabled = false;
+        inputComprobante.disabled = false;
 
         switch (e.target.value) {
             case 'Efectivo':
                 inputNumeroTransaccion.disabled = true;
                 selectCuentaPago.disabled = true;
                 inputComprobante.disabled = true;
-
                 break;
             case 'Yape':
             case 'Plin':
-
                 selectCuentaPago.disabled = true;
-                inputComprobante.disabled = false;
                 break;
-
             case 'Transferencia Bancaria':
-                selectCuentaPago.disabled = false;
-                inputComprobante.disabled = false;
+                // Todos habilitados
                 break;
         }
     });
 
-    // Calcula y muestra el saldo restante en tiempo real mientras se escribe
-    inputAmortizacion.addEventListener('input', function() {
-        const monto = parseFloat(this.value) || 0;
-        const saldoPendienteActual = parseFloat(document.getElementById('saldoActualForm').dataset.valor);
-        const nuevoSaldoRestante = saldoPendienteActual - monto;
+    modalComprobante.addEventListener('show.bs.modal', function(event) {
+        const boton = event.relatedTarget;
+        const rutaImagen = boton.getAttribute('data-src');
+        document.getElementById('imagenComprobante').src = rutaImagen;
+    });
 
-        if (monto > 0) {
-            document.getElementById('montoAPagarContainer').style.display = 'block';
-            document.getElementById('saldoRestanteContainer').style.display = 'block';
-            document.getElementById('montoAPagar').textContent = 'S/ ' + monto.toFixed(2);
-            document.getElementById('saldoRestanteForm').textContent = 'S/ ' + nuevoSaldoRestante.toFixed(2);
-        } else {
-            document.getElementById('montoAPagarContainer').style.display = 'none';
-            document.getElementById('saldoRestanteContainer').style.display = 'none';
+    formularioPago.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        if (await ask('¿Confirmar pago de inicial?', 'Confirmar')) {
+            validarYRegistrarPago();
         }
     });
 
 
-
-
-    // async function getConceptos() {
-    //     try {
-    //         const response = await fetch('/api/conceptospagos');
-    //         const data = await response.json();
-    //         data.forEach(el => {
-    //             selectConcepto.innerHTML += `<option value="${el.idconcepto}">${el.concepto}</option>`;
-    //         });
-    //     } catch (error) {
-    //         console.error('Error al cargar conceptos:', error);
-    //         mostrarAlerta('error', 'No se pudieron cargar los conceptos de pago.');
-    //     }
-    // }
 
     async function cargarCuentasBancarias() {
         try {
             const res = await fetch('/api/numcuentaspagos');
             const data = await res.json();
+
+            selectCuentaPago.innerHTML = '<option value="">Seleccione la cuenta</option>';
             data.forEach(cuenta => {
                 selectCuentaPago.innerHTML += `<option value="${cuenta.idcuentapago}">${cuenta.nombrecuenta}</option>`;
             });
@@ -891,61 +694,56 @@
         }
     }
 
-
-
-    /**
-     * Valida los datos del formulario antes de enviarlos.
-     * Las reglas cambian según el medio de pago.
-     * @returns {string|null} - Devuelve un mensaje de error o null si todo es válido.
-     */
     function validarFormulario() {
         const datos = new FormData(formularioPago);
         const medioPago = datos.get('mediopago');
-        const amortizacion = parseFloat(datos.get('amortizacion'));
-        const saldoPendienteActual = parseFloat(document.getElementById('saldoActualForm').dataset.valor);
+        const moneda = datos.get('moneda');
+        const tipoCambio = datos.get('tipocambioaplicado');
+        const montoOriginal = parseFloat(datos.get('montomonedaoriginal'));
+        const amortizacionFinal = parseFloat(inputAmortizacionFinalPEN.value);
 
         if (!datos.get('fechapago')) return 'Debe seleccionar la fecha de pago.';
         if (!medioPago) return 'Debe seleccionar un medio de pago.';
+        if (!montoOriginal || montoOriginal <= 0) return 'El monto a pagar debe ser mayor a cero.';
 
-        // Reglas específicas según el medio de pago
+        if (moneda === 'USD' && (!tipoCambio || parseFloat(tipoCambio) <= 0)) {
+            return 'No se pudo obtener un tipo de cambio válido.';
+        }
+
+        if (amortizacionFinal > saldoPendienteActual + 0.01) {
+            return 'El monto a pagar (convertido a S/) no puede ser mayor al saldo pendiente.';
+        }
+
         if (medioPago === 'Transferencia Bancaria') {
-            if (!datos.get('idcuentapago')) return 'Debe seleccionar una cuenta de pago para la transferencia.';
+            if (!datos.get('idcuentapago')) return 'Debe seleccionar una cuenta para la transferencia.';
+            const comprobanteFile = datos.get('comprobante');
+            if (!comprobanteFile || comprobanteFile.name === '') {
+                return 'Debe subir el comprobante para Transferencia';
+            }
             if (!datos.get('numerotransaccion').trim()) return 'Debe ingresar el número de transacción.';
         }
-
         if (medioPago === 'Yape' || medioPago === 'Plin') {
-            if (!datos.get('numerotransaccion').trim()) return 'Debe ingresar el número de operación de Yape/Plin.';
+            if (!datos.get('numerotransaccion').trim()) return 'Debe ingresar el número de operación.';
+            const comprobanteFile = datos.get('comprobante');
+            if (!comprobanteFile || comprobanteFile.name === '') {
+                return 'Debe subir el comprobante para pagos con Yape o Plin.';
+            }
         }
 
-        if (!amortizacion || amortizacion <= 0) return 'El monto a pagar debe ser mayor a cero.';
-        if (amortizacion > saldoPendienteActual) return 'El monto a pagar no puede ser mayor al saldo pendiente.';
-
-        return null;
+        return null; // Si todo está bien
     }
 
-    /**
-     * Función principal que valida y luego registra el pago.
-     */
-
     async function validarYRegistrarPago() {
-        event.preventDefault();
-
-        // Primero, validamos los datos
         const error = validarFormulario();
         if (error) {
             mostrarAlerta('error', error);
             return;
         }
 
-
         const formData = new FormData(formularioPago);
-
-        // Calculamos y añadimos el saldo restante al FormData
         const monto = parseFloat(formData.get('amortizacion'));
-        const saldoPendienteActual = parseFloat(document.getElementById('saldoActualForm').dataset.valor);
         const nuevoSaldoRestante = saldoPendienteActual - monto;
         formData.append('saldorestante', nuevoSaldoRestante.toFixed(2));
-
 
         try {
             const request = await fetch('/cotizaciones/storePagoInicial', {
@@ -956,9 +754,7 @@
 
             if (response.success) {
                 mostrarAlerta('exito', response.message);
-                setTimeout(() => {
-                    window.location.reload();
-                }, 1500);
+                setTimeout(() => window.location.reload(), 1500);
             } else {
                 mostrarAlerta('error', response.message || 'Ocurrió un error inesperado.');
             }
@@ -968,19 +764,10 @@
         }
     }
 
-
-    formularioPago.addEventListener('submit', async (e) => {
-
-        e.preventDefault();
-
-        if (await ask('¿Confirmar pago de inicial?', 'Confirmar')) {
-            validarYRegistrarPago();
-        }
-    });
-
-
     function limpiarFormulario() {
         formularioPago.reset();
+        document.getElementById('monedaPEN').checked = true; // Reinicia a PEN
+        simboloMoneda.textContent = 'S/';
         document.getElementById('montoAPagarContainer').style.display = 'none';
         document.getElementById('saldoRestanteContainer').style.display = 'none';
         ocultarAlertas();
@@ -988,12 +775,15 @@
 
     function mostrarAlerta(tipo, mensaje) {
         ocultarAlertas();
+        const alertaExito = document.getElementById('alertaExito');
+        const alertaError = document.getElementById('alertaError');
+
         if (tipo === 'exito') {
-            document.querySelector('#alertaExito .text-success-emphasis').textContent = mensaje;
-            document.getElementById('alertaExito').classList.remove('d-none');
+            alertaExito.querySelector('.text-success-emphasis').textContent = mensaje;
+            alertaExito.classList.remove('d-none');
         } else if (tipo === 'error') {
-            document.getElementById('mensajeError').textContent = mensaje;
-            document.getElementById('alertaError').classList.remove('d-none');
+            alertaError.querySelector('#mensajeError').textContent = mensaje;
+            alertaError.classList.remove('d-none');
         }
     }
 
@@ -1001,13 +791,4 @@
         document.getElementById('alertaExito').classList.add('d-none');
         document.getElementById('alertaError').classList.add('d-none');
     }
-
-
-    document.addEventListener('DOMContentLoaded', () => {
-
-        // getConceptos();
-        cargarCuentasBancarias();
-    });
 </script>
-
-<?php include __DIR__ . '/../layout/footer.php'; ?>

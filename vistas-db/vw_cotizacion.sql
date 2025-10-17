@@ -2,7 +2,7 @@
 -- VISTAS DE COTIZACION.PHP
 */
 
-USE motorpark2;
+USE motorpark;
 
 -- OBTENER TODAS LAS COTIZACIONES REALIZADAS / getAll 
 /*
@@ -48,6 +48,9 @@ SELECT
     info_reserva.nombrecliente AS reserva_cliente_nombre,
     info_contrato.nombrecliente AS contrato_cliente_nombre, 
     CASE WHEN info_contrato.idvehiculo IS NOT NULL THEN 1 ELSE 0 END AS vehiculo_en_contrato,
+
+    info_contado.nombrecliente AS contado_cliente_nombre,
+    CASE WHEN info_contado.idvehiculo IS NOT NULL THEN 1 ELSE 0 END AS vehiculo_vendido_contado,
     CASE 
         WHEN (
             SELECT COALESCE(SUM(p_sum.amortizacion), 0)
@@ -72,11 +75,8 @@ LEFT JOIN cargos cg ON cl_ase.idcargo = cg.idcargo
 LEFT JOIN (
     WITH RankedReserva AS (
         SELECT
-            c_res.idvehiculo,
-            c_res.idcotizacion,
-            COALESCE(
-                CASE WHEN cl_res.tipocliente = 'P' THEN CONCAT(p_res.apellidos, ', ', p_res.nombres) ELSE e_res.razonsocial END
-            ) AS nombrecliente,
+            c_res.idvehiculo, c_res.idcotizacion,
+            COALESCE(CASE WHEN cl_res.tipocliente = 'P' THEN CONCAT(p_res.apellidos, ', ', p_res.nombres) ELSE e_res.razonsocial END) AS nombrecliente,
             ROW_NUMBER() OVER(PARTITION BY c_res.idvehiculo ORDER BY c_res.creado DESC) as rn
         FROM cotizaciones c_res
         JOIN clientes cl_res ON c_res.idcliente = cl_res.idcliente
@@ -90,9 +90,7 @@ LEFT JOIN (
     WITH RankedContracts AS (
         SELECT
             c_cont.idvehiculo,
-            COALESCE(
-                CASE WHEN cl_cont.tipocliente = 'P' THEN CONCAT(p_cont.apellidos, ', ', p_cont.nombres) ELSE e_cont.razonsocial END
-            ) AS nombrecliente,
+            COALESCE(CASE WHEN cl_cont.tipocliente = 'P' THEN CONCAT(p_cont.apellidos, ', ', p_cont.nombres) ELSE e_cont.razonsocial END) AS nombrecliente,
             ROW_NUMBER() OVER(PARTITION BY c_cont.idvehiculo ORDER BY co.idcontrato DESC) as rn
         FROM contratos co
         JOIN cotizaciones c_cont ON co.idcotizacion = c_cont.idcotizacion
@@ -107,6 +105,20 @@ LEFT JOIN (
     FROM pagos
     GROUP BY idcotizacion
 ) AS pagos_sum ON pagos_sum.idcotizacion = c.idcotizacion
+LEFT JOIN (
+    WITH RankedContado AS (
+        SELECT
+            p_cont.idvehiculo,
+            COALESCE(CASE WHEN cl_cont.tipocliente = 'P' THEN CONCAT(per_cont.apellidos, ', ', per_cont.nombres) ELSE e_cont.razonsocial END) AS nombrecliente,
+            ROW_NUMBER() OVER(PARTITION BY p_cont.idvehiculo ORDER BY p_cont.idpago DESC) as rn
+        FROM pagos p_cont
+        JOIN clientes cl_cont ON p_cont.idcliente = cl_cont.idcliente
+        LEFT JOIN personas per_cont ON cl_cont.idpersona = per_cont.idpersona
+        LEFT JOIN empresas e_cont ON cl_cont.idempresa = e_cont.idempresa
+        WHERE p_cont.idconcepto = 1 -- ID para 'Contado'
+    )
+    SELECT idvehiculo, nombrecliente FROM RankedContado WHERE rn = 1
+) AS info_contado ON info_contado.idvehiculo = v.idvehiculo
 
 WHERE 
 (

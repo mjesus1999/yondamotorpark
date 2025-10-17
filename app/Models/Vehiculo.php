@@ -32,20 +32,19 @@ class Vehiculo
     }
   }
 
-// Cambia el tipo de retorno para incluir 'false'
-public function getVehiculosVendidosAlContado(): array|false 
-{
+  // Cambia el tipo de retorno para incluir 'false'
+  public function getVehiculosVendidosAlContado(): array|false
+  {
     $query = "CALL sp_vehiculosVendidoAlContado();";
     try {
-        $stmt = $this->db->prepare($query);
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC); 
-
+      $stmt = $this->db->prepare($query);
+      $stmt->execute();
+      return $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $error) {
-        error_log("Error en getVehiculosVendidosAlContado: " . $error->getMessage());
-        return false; 
+      error_log("Error en getVehiculosVendidosAlContado: " . $error->getMessage());
+      return false;
     }
-}
+  }
 
 
   public function searchvehiculos(string $busqueda = ''): array
@@ -209,6 +208,42 @@ public function getVehiculosVendidosAlContado(): array|false
     $idvehiculo = $stmt->fetchColumn();
     return (int) $idvehiculo;
   }
+
+  public function getPrecioVehiculoAlContado(int $idvehiculo): ?float
+  {
+    $sql = "SELECT precioventa FROM vehiculos WHERE idvehiculo = :idvehiculo LIMIT 1";
+
+    try {
+      $stmt = $this->db->prepare($sql);
+      $stmt->bindValue(':idvehiculo', $idvehiculo, PDO::PARAM_INT);
+      $stmt->execute();
+
+      $precio = $stmt->fetchColumn(); // solo el valor de la primera columna
+
+      return $precio !== false ? (float)$precio : null;
+    } catch (PDOException $e) {
+      error_log("Error en getPrecioVehiculoAlContado: " . $e->getMessage());
+      return null;
+    }
+  }
+
+  public function getDataVehiculoAlContado(int $idvehiculo): ?array
+  {
+    $query = "CALL sp_getDataVentaVehiculoContado(:idvehiculo);";
+
+    try {
+      $stmt = $this->db->prepare($query);
+      $stmt->bindValue(':idvehiculo', $idvehiculo, PDO::PARAM_INT);
+      $stmt->execute();
+      $venta = $stmt->fetch(PDO::FETCH_ASSOC);
+      return $venta !== false ? $venta : null;
+    } catch (PDOException $e) {
+      error_log("Error en getVentaVehiculoAlContado: " . $e->getMessage());
+      return null;
+    }
+  }
+
+
 
 
   public function createPagoAlContado(array $params = []): int

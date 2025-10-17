@@ -216,7 +216,6 @@ class VehiculoController extends Controller
 
   public function storePagoALContado()
   {
-    
     $this->authRequired();
     header('Content-Type: application/json; charset=utf-8');
 
@@ -228,34 +227,22 @@ class VehiculoController extends Controller
 
     $data = array_map([Validador::class, 'limpiar'], $_POST);
 
-    $registro = [
-      'idcliente'           => $data['idcliente'] ?? null,
-      'idconcepto'          => ConceptosPago::CONTADO_ID,
-      'idvehiculo'          => $data['idvehiculo'] ?? null,
-      'idcuentapago'        => empty($data['idcuentapago']) ? null : $data['idcuentapago'],
-      'mediopago'           => $data['mediopago'] ?? null,
-      'numerotransaccion'   => empty($data['numerotransaccion']) ? null : $data['numerotransaccion'],
-      'fechapago'           => $data['fechapago'] ?? null,
-      'amortizacion'        => $data['amortizacion'] ?? null,
-      'montomonedaoriginal' => $data['montomonedaoriginal'] ?? null,
-      'tipocambioaplicado'  => $data['tipocambioaplicado'] ?? null,
-      'moneda'              => $data['moneda'] ?? null,
-      'observacion'         => empty($data['observacion']) ? null : $data['observacion'],
-      'comprobante'         => null 
-    ];
-
-    //  Validaciones de campos obligatorios
+    // Validaciones de campos obligatorios iniciales
     $errores = [];
-    $errores[] = Validador::campoObligatorio($registro['idcliente'], 'Cliente');
-    $errores[] = Validador::campoObligatorio($registro['idconcepto'], 'Concepto de pago');
-    $errores[] = Validador::campoObligatorio($registro['idvehiculo'], 'Vehículo');
-    $errores[] = Validador::campoObligatorio($registro['mediopago'], 'Medio de pago');
-    $errores[] = Validador::campoObligatorio($registro['fechapago'], 'Fecha de pago');
-    $errores[] = Validador::campoObligatorio($registro['amortizacion'], 'Amortización');
+    $errores[] = Validador::campoObligatorio($data['idcliente'] ?? null, 'Cliente');
+    $errores[] = Validador::campoObligatorio($data['idvehiculo'] ?? null, 'Vehículo');
+    $errores[] = Validador::campoObligatorio($data['mediopago'] ?? null, 'Medio de pago');
+    $errores[] = Validador::campoObligatorio($data['fechapago'] ?? null, 'Fecha de pago');
+    $errores[] = Validador::campoObligatorio($data['amortizacion'] ?? null, 'Amortización');
+    $errores[] = Validador::campoObligatorio($data['moneda'] ?? null, 'Moneda');
+    if (($data['moneda'] ?? '') === 'PEN') {
+      $errores[] = Validador::campoObligatorio($data['tipocambioaplicado'] ?? null, 'Tipo de cambio');
+    }
+
     $errores = array_filter($errores);
 
     if (!empty($errores)) {
-      http_response_code(422); 
+      http_response_code(422);
       echo json_encode([
         'success' => false,
         'message' => implode('<br>', $errores),
@@ -266,9 +253,70 @@ class VehiculoController extends Controller
     $rutaCompletaArchivo = null;
 
     try {
-      //  Procesar la subida del comprobante (si existe)
-      if (isset($_FILES['comprobante']) && $_FILES['comprobante']['error'] === UPLOAD_ERR_OK) {
+      $idvehiculo = intval($data['idvehiculo']);
+      $monedaPago = $data['moneda']; // 'USD' o 'PEN'
+      $montoRecibido = floatval($data['amortizacion']);
+      $tipoCambioAplicado = floatval($data['tipocambioaplicado'] ?? 1.0);
 
+      // OBTENER EL PRECIO REAL DESDE LA BASE DE DATOS
+      $precioVehiculoEnUSD = $this->vehiculoModel->getPrecioVehiculoAlContado($idvehiculo);
+
+      if (!$precioVehiculoEnUSD) {
+        throw new \Exception('El vehículo no existe o no tiene un precio asignado.');
+      }
+      $precioVehiculoEnUSD = floatval($precioVehiculoEnUSD);
+
+      // CALCULAR CUÁNTO DEBERÍA HABER PAGADO EL CLIENTE
+      $montoEsperado = 0;
+      if ($monedaPago === 'USD') {
+        $montoEsperado = $precioVehiculoEnUSD;
+      } elseif ($monedaPago === 'PEN') {
+        if ($tipoCambioAplicado <= 0) {
+          throw new \Exception('El tipo de cambio debe ser un valor positivo.');
+        }
+        $montoEsperado = $precioVehiculoEnUSD * $tipoCambioAplicado;
+      } else {
+        throw new \Exception('La moneda de pago no es válida.');
+      }
+
+      // COMPARAR EL MONTO RECIBIDO CON EL MONTO ESPERADO
+
+      $epsilon = 0.01;
+      if (abs($montoRecibido - $montoEsperado) > $epsilon) {
+        $mensajeError = sprintf(
+          "Inconsistencia en el monto del pago. Se esperaba %.2f %s pero se recibió %.2f %s.",
+          $montoEsperado,
+          $monedaPago,
+          $montoRecibido,
+          $monedaPago
+        );
+        throw new \Exception($mensajeError);
+      }
+
+      // La amortización final siempre se guarda en SOLES
+      $amortizacionParaGuardar = $precioVehiculoEnUSD * $tipoCambioAplicado;
+
+      $registro = [
+        'idcliente'           => $data['idcliente'],
+        'idconcepto'          => ConceptosPago::CONTADO_ID,
+        'idvehiculo'          => $idvehiculo,
+        'idcuentapago'        => empty($data['idcuentapago']) ? null : $data['idcuentapago'],
+        'mediopago'           => $data['mediopago'],
+        'numerotransaccion'   => empty($data['numerotransaccion']) ? null : $data['numerotransaccion'],
+        'fechapago'           => $data['fechapago'],
+        'amortizacion'        => $amortizacionParaGuardar,
+        'montomonedaoriginal' => $precioVehiculoEnUSD,
+        'tipocambioaplicado'  => $tipoCambioAplicado,
+        'moneda'              => $monedaPago,
+        'observacion'         => empty($data['observacion']) ? null : $data['observacion'],
+        'comprobante'         => null
+      ];
+
+
+
+      $rutaCompletaArchivo = null; // Para que no me de error.
+      // Procesar la subida del comprobante (si existe)
+      if (isset($_FILES['comprobante']) && $_FILES['comprobante']['error'] === UPLOAD_ERR_OK) {
         $subdirectorio = 'comprobantes';
         $nombreArchivo = uniqid('pago_') . '_' . basename($_FILES['comprobante']['name']);
         $directorioDestino = __DIR__ . '/../../storage/' . $subdirectorio . '/';
@@ -276,11 +324,10 @@ class VehiculoController extends Controller
         if (!is_dir($directorioDestino)) {
           mkdir($directorioDestino, 0777, true);
         }
-
         $rutaCompletaArchivo = $directorioDestino . $nombreArchivo;
 
         $extension = strtolower(pathinfo($_FILES['comprobante']['name'], PATHINFO_EXTENSION));
-        $extensionesPermitidas = ['pdf', 'jpg', 'jpeg', 'png','webp'];
+        $extensionesPermitidas = ['pdf', 'jpg', 'jpeg', 'png', 'webp'];
         if (!in_array($extension, $extensionesPermitidas)) {
           throw new \Exception('El tipo de archivo del comprobante no es válido.');
         }
@@ -288,11 +335,8 @@ class VehiculoController extends Controller
         if (!move_uploaded_file($_FILES['comprobante']['tmp_name'], $rutaCompletaArchivo)) {
           throw new \Exception('No se pudo guardar el archivo del comprobante.');
         }
-
-    
         $registro['comprobante'] = $subdirectorio . '/' . $nombreArchivo;
       }
-
 
       $idPago = $this->vehiculoModel->createPagoAlContado($registro);
 
@@ -317,8 +361,6 @@ class VehiculoController extends Controller
       ]);
     }
   }
-
-
 
 
 
@@ -525,27 +567,43 @@ class VehiculoController extends Controller
     }
   }
 
- public function getVehiculosVendidosAlContado() 
-{
+  public function getVehiculosVendidosAlContado()
+  {
     header('Content-Type: application/json; charset=utf-8');
 
     $vehiculos = $this->vehiculoModel->getVehiculosVendidosAlContado();
     if ($vehiculos === false) {
-        http_response_code(500); 
-        echo json_encode([
-            'success' => false,
-            'message' => 'Ocurrió un error al consultar la base de datos.'
-        ]);
-        return; 
+      http_response_code(500);
+      echo json_encode([
+        'success' => false,
+        'message' => 'Ocurrió un error al consultar la base de datos.'
+      ]);
+      return;
     }
     echo json_encode([
-        'success'   => true, 
-        'vehiculos' => $vehiculos 
+      'success'   => true,
+      'vehiculos' => $vehiculos
     ]);
-}
+  }
 
 
+  public function getDataVehiculoAlContado(int $idvehiculo)
+  {
+    header('Content-Type: application/json; charset=utf-8');
 
+    $vehiculo = $this->vehiculoModel->getDataVehiculoAlContado($idvehiculo);
+    if ($vehiculo === false) {
+      http_response_code(500);
+      echo json_encode([
+        'success' => false,
+        'message' => 'Ocurrió un error al consultar la base de datos.'
+      ]);
+      return;
+    }
 
-
+    echo json_encode([
+      'success' => true,
+      'data' => $vehiculo
+    ]);
+  }
 }

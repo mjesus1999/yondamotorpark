@@ -202,7 +202,7 @@
                                     </div>
                                 </div>
                                 <div class="col-md-6">
-                                    <label for="comprobante" class="form-label fw-bold">Comprobante</label>
+                                    <label for="" class="form-label fw-bold">Comprobante</label>
                                     <div class="input-group">
                                         <input type="file" id="comprobante" class="d-none">
                                         <span id="nombre-archivo" class="form-control">Ningún archivo seleccionado...</span>
@@ -323,6 +323,9 @@
 <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
 <script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.5.2/dist/js/tabulator.min.js"></script>
 <script src="/assets/js/ubigeo.js" defer></script>
+<script src="/assets/js/logoBase64.js"></script>
+<script src=" https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
 
 
 <script>
@@ -330,7 +333,7 @@
     let clienteSeleccionado = null;
     let vehiculoSeleccionado = null;
     let monedaSeleccionada = "USD";
-    let fueClienteGuardado = false; 
+    let fueClienteGuardado = false;
 
     let tomSelectVehiculo;
     let tipoCambio = document.getElementById('tipoCambio');
@@ -338,77 +341,134 @@
 
     document.addEventListener('DOMContentLoaded', () => {
 
-    table = new Tabulator('#tabla-vehiculos', {
-        ajaxURL: 'vehiculosVendidosAlContado',
-        ajaxConfig: 'GET',
-        ajaxContentType: "json",
-        progressiveLoadScrollMargin: 300,
-        layout: "fitColumns",
-        responsiveLayout: "collapse",
-        pagination: "local",
-        paginationSize: 15,
-        index: "idvehiculo",
-        placeholder: "No hay vehículos vendidos al contado.",
-        movableColumns: true,
-        locale: 'es-es', 
-        langs: {
-            "es-es": { 
-                "ajax": {
-                    "loading": "Cargando...", 
-                    "error": "Error al Cargar", 
-                },
-                "pagination": {
-                    "first": "<<",
-                    "first_title": "Primera Página",
-                    "last": ">>",
-                    "last_title": "Última Página",
-                    "prev": "<",
-                    "prev_title": "Página Anterior",
-                    "next": ">",
-                    "next_title": "Página Siguiente",
-                },
-            }
-        },
-  
-
-        columns: [
-            {formatter: "responsiveCollapse", width: 40, minWidth: 30, hozAlign: "center", resizable: false, headerSort: false},
-            {title: "#", formatter: "rownum", hozAlign: "center", width: 50},
-            {
-                title: 'Amortización',
-                field: 'amortizacion',
-                hozAlign: 'right',
-                headerHozAlign: 'left',
-                width: 130,
-                tooltip: true,
-                formatter: function(cell) {
-                    const rowData = cell.getRow().getData();
-                    const monto = parseFloat(cell.getValue());
-                    const simbolo = rowData.moneda === 'USD' ? '$' : 'S/';
-                    return simbolo + ' ' + monto.toLocaleString('es-PE', {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2
-                    });
+        table = new Tabulator('#tabla-vehiculos', {
+            ajaxURL: 'vehiculosVendidosAlContado',
+            ajaxConfig: 'GET',
+            ajaxContentType: "json",
+            progressiveLoadScrollMargin: 300,
+            layout: "fitColumns",
+            responsiveLayout: "collapse",
+            pagination: "local",
+            paginationSize: 15,
+            index: "idvehiculo",
+            placeholder: "No hay vehículos vendidos al contado.",
+            movableColumns: true,
+            locale: 'es-es',
+            langs: {
+                "es-es": {
+                    "ajax": {
+                        "loading": "Cargando...",
+                        "error": "Error al Cargar",
+                    },
+                    "pagination": {
+                        "first": "<<",
+                        "first_title": "Primera Página",
+                        "last": ">>",
+                        "last_title": "Última Página",
+                        "prev": "<",
+                        "prev_title": "Página Anterior",
+                        "next": ">",
+                        "next_title": "Página Siguiente",
+                    },
                 }
             },
-            {title: 'Vehículo', field: 'vehiculo', headerHozAlign: "left", minWidth: 250, responsive: 4, tooltip: true},
-            {title: 'Cliente', field: 'cliente', headerHozAlign: 'left', minWidth: 180, responsive: 3, tooltip: true},
-            {title: 'Teléfono', field: 'telprimario', width: 80, tooltip: true},
-            {title: 'Dirección', field: 'direccion', headerHozAlign: 'left', minWidth: 150, responsive: 1, tooltip: true},
-            {title: 'Ubicación', field: 'ubicacion', headerHozAlign: 'left', minWidth: 150, responsive: 2, tooltip: true},
-        ],
 
-        ajaxResponse: (url, params, response) => {
-            if (response.success) {
-                return response.vehiculos;
+
+            columns: [{
+                    formatter: "responsiveCollapse",
+                    width: 40,
+                    minWidth: 30,
+                    hozAlign: "center",
+                    resizable: false,
+                    headerSort: false
+                }, // Columna en movil para manejar el accordion
+                {
+                    title: "#",
+                    formatter: "rownum",
+                    hozAlign: "center",
+                    width: 50
+                },
+                {
+                    title: 'Amortización',
+                    field: 'amortizacion',
+                    hozAlign: 'right',
+                    headerHozAlign: 'left',
+                    width: 130,
+                    tooltip: true,
+                    formatter: function(cell) {
+                        const rowData = cell.getRow().getData();
+                        const monto = parseFloat(cell.getValue());
+                        const simbolo = rowData.moneda === 'USD' ? '$' : 'S/';
+                        return simbolo + ' ' + monto.toLocaleString('es-PE', {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2
+                        });
+                    }
+                },
+                {
+                    title: 'Vehículo',
+                    field: 'vehiculo',
+                    headerHozAlign: "left",
+                    minWidth: 400,
+                    responsive: 4,
+                    tooltip: true
+                },
+                {
+                    title: 'Cliente',
+                    field: 'cliente',
+                    headerHozAlign: 'left',
+                    minWidth: 280,
+                    responsive: 3,
+                    tooltip: true
+                },
+                {
+                    title: 'Teléfono',
+                    field: 'telprimario',
+                    width: 80,
+                    tooltip: true
+                },
+                {
+                    title: 'Dirección',
+                    field: 'direccion',
+                    headerHozAlign: 'left',
+                    minWidth: 300,
+                    responsive: 1,
+                    tooltip: true
+                },
+                {
+                    title: 'Ubicación',
+                    field: 'ubicacion',
+                    headerHozAlign: 'left',
+                    minWidth: 250,
+                    responsive: 2,
+                    tooltip: true
+                },
+                {
+                    title: 'Acciones',
+                    headerHozAlign: 'left',
+                    formatter: (cell) => {
+                        const id = cell.getRow().getData().idvehiculo;
+                        return `
+                             <button class="btn btn-sm btn-VerPDF" data-id="${id}" data-action="verPDF">
+                               <i class="bi bi-filetype-pdf text-danger fs-5" data-id="${id}" data-action="verPDF"></i>
+                             </button>
+                    
+                    `;
+                    },
+                    responsive: 0
+                }
+            ],
+
+            ajaxResponse: (url, params, response) => {
+                if (response.success) {
+                    return response.vehiculos;
+                }
+            },
+            ajaxError: (error) => {
+                console.error("Error al cargar los datos:", error);
             }
-        },
-        ajaxError: (error) => {
-            console.error("Error al cargar los datos:", error);
-        }
-    });
+        });
 
-        cargarCuentasBancarias();
         getAllDepartamentos();
 
         document.getElementById('fechaPago').valueAsDate = new Date();
@@ -420,7 +480,7 @@
             // Siempre se ejecuta para arreglar el fondo del modal principal
             if (document.getElementById('ventaModal').classList.contains('show')) {
                 document.body.classList.add('modal-open');
-                document.body.style.overflow = 'hidden'; 
+                document.body.style.overflow = 'hidden';
             }
 
             // Si el cliente se guardó, mostramos la alerta de éxito
@@ -439,7 +499,7 @@
                 // Muestra el nombre del primer archivo en el span
                 nombreArchivoSpan.textContent = this.files[0].name;
             } else {
-                // Si el usuario cancela, vuelve al texto original
+
                 nombreArchivoSpan.textContent = 'Ningún archivo seleccionado...';
             }
         });
@@ -780,30 +840,42 @@
     }
 
     // Verificar medio de pagos:
+    const numeroTransaccion = document.getElementById('numeroTransaccion');
+    const cuentaDestino = document.getElementById('cuentaDestino');
+    const comprobante = document.getElementById('comprobante');
+    const labelComprobante = document.querySelector('label[for="comprobante"]');
+    const nombreArchivo = document.getElementById('nombre-archivo');
+
     document.getElementById('medioPago').addEventListener('change', (e) => {
-        document.getElementById('numeroTransaccion').disabled = false;
-        document.getElementById('cuentaDestino').disabled = false;
+        const metodo = e.target.value;
 
-        switch (e.target.value) {
+
+        numeroTransaccion.disabled = false;
+        cuentaDestino.disabled = false;
+        comprobante.disabled = false;
+        labelComprobante.classList.remove('disabled-label');
+        nombreArchivo.classList.remove('disabled-label');
+
+        switch (metodo) {
             case 'Efectivo':
-                document.getElementById('numeroTransaccion').disabled = true;
-                document.getElementById('cuentaDestino').disabled = true;
-                document.getElementById('comprobante').disabled = true;
-
+                numeroTransaccion.disabled = true;
+                cuentaDestino.disabled = true;
+                comprobante.disabled = true;
+                labelComprobante.classList.add('disabled-label');
+                nombreArchivo.classList.add('disabled-label');
                 break;
+
             case 'Yape':
             case 'Plin':
-
-                document.getElementById('cuentaDestino').disabled = true;
-                document.getElementById('comprobante').disabled = false;
+                cuentaDestino.disabled = true;
                 break;
 
             case 'Transferencia Bancaria':
-                document.getElementById('cuentaDestino').disabled = false;
-                document.getElementById('comprobante').disabled = false;
+                // Todo habilitado, no se necesita hacer nada
                 break;
         }
     });
+
 
 
 
@@ -848,13 +920,14 @@
         const tipoCambioActual = parseFloat(document.getElementById('tipoCambio').value);
         const precioBaseUSD = vehiculoSeleccionado.precioUSD;
 
-        //  Calcular SIEMPRE el equivalente en SOLES para la amortización
-        const montoEnSoles = precioBaseUSD * tipoCambioActual;
+        // Obtenemos el monto final que el usuario está viendo y va a pagar.
+        const montoFinalPagado = parseFloat(document.getElementById('montoPagado').value);
 
         formData.append('moneda', monedaSeleccionada);
         formData.append('tipocambioaplicado', tipoCambioActual);
         formData.append('montomonedaoriginal', precioBaseUSD.toFixed(2));
-        formData.append('amortizacion', montoEnSoles.toFixed(2));
+        // Enviamos el monto exacto que el usuario pagó en la moneda seleccionada.
+        formData.append('amortizacion', montoFinalPagado.toFixed(2));
         // Archivo de comprobante (si existe)
         const comprobanteFile = document.getElementById('comprobante').files[0];
         if (comprobanteFile) {
@@ -915,23 +988,50 @@
         clienteModal.show();
     }
 
-
     function resetearFormularioVenta() {
         currentStepVenta = 1;
         clienteSeleccionado = null;
         vehiculoSeleccionado = null;
+
+        // --- PASO 1 ---
         document.getElementById('dniBusqueda').value = '';
         document.getElementById('dniBusqueda').disabled = false;
         document.getElementById('btnBuscarCliente').disabled = false;
         document.getElementById('clienteResultado').innerHTML = '';
         document.getElementById('vehiculoResultado').innerHTML = '';
-        getTipoCambio();
-        seleccionarMoneda('USD');
-        mostrarPasoVenta(1);
+
         // Limpiar el select de TomSelect si ya fue inicializado
         if (tomSelectVehiculo) {
             tomSelectVehiculo.clear();
         }
+
+        // --- PASO 3 (DATOS DE PAGO) ---
+        document.getElementById('fechaPago').valueAsDate = new Date(); // AÑADIDO: Resetea la fecha al día actual
+        document.getElementById('montoPagado').value = ''; // AÑADIDO: Limpia el monto
+        document.getElementById('medioPago').value = ''; // AÑADIDO: Resetea el medio de pago
+        document.getElementById('cuentaDestino').value = ''; // AÑADIDO: Resetea la cuenta de destino
+        document.getElementById('numeroTransaccion').value = '';
+        document.getElementById('observaciones').value = ''; // AÑADIDO: Limpia el campo de observaciones
+
+        // AÑADIDO: Lógica correcta para resetear el input de archivo
+        const inputComprobante = document.getElementById('comprobante');
+        const nombreArchivoSpan = document.getElementById('nombre-archivo');
+        inputComprobante.value = ''; // Esto es crucial para limpiar el archivo
+        nombreArchivoSpan.textContent = 'Ningún archivo seleccionado...';
+
+        // Habilita todos los campos que pudieron ser deshabilitados por la lógica del medio de pago
+        document.getElementById('numeroTransaccion').disabled = false;
+        document.getElementById('cuentaDestino').disabled = false;
+        document.getElementById('comprobante').disabled = false;
+        document.querySelector('label[for="comprobante"]').classList.remove('disabled-label');
+        document.getElementById('nombre-archivo').classList.remove('disabled-label');
+
+
+        // --- LÓGICA GENERAL DEL MODAL ---
+        cargarCuentasBancarias();
+        getTipoCambio();
+        seleccionarMoneda('USD'); // Vuelve a seleccionar Dólares por defecto
+        mostrarPasoVenta(1); // Muestra el primer paso
     }
 
 
@@ -1024,12 +1124,366 @@
             resetearFormularioCliente();
 
         } catch (error) {
-            showToast(error.message,'ERROR',1400);
-            
+            showToast(error.message, 'ERROR', 1400);
+
 
         } finally {
             guardarBtn.disabled = false;
             guardarBtn.innerHTML = '<i class="bi bi-save me-2"></i>Registrar Cliente';
         }
     }
+
+    async function getDataActaEntrega(idvehiculo) {
+        try {
+            const req = await fetch(`/api/getDataVehiculo/${idvehiculo}`);
+            const res = await req.json();
+            if (res.data && res.success) {
+                generarActaEntrega(res.data);
+                return res;
+            } else {
+                return null;
+            }
+
+        } catch (error) {
+            console.log(error);
+            return null;
+        }
+    }
+
+    function generarActaEntrega(data) {
+        if (!data) {
+            console.error("No se recibieron datos para generar el acta.");
+            showToast('Error: No se encontraron datos del vehículo.', 'ERROR', 1500);
+            return;
+        }
+
+        const nombreEmpresa = window.nombreEmpresa;
+        const rucEmpresa = window.rucEmpresa;
+        const representanteEmpresa = window.representanteEmpresa;
+        const direccionEmpresa = 'Carretera Panamericana km 201 – Chincha';
+        const telefonoEmpresa = '927676338 / 971027612';
+        const imgCabecera = window.cabeceraYonda;
+        const footer = window.footerYonda;
+
+        const fechaObj = new Date();
+        const dia = fechaObj.getDate();
+        const anio = fechaObj.getFullYear();
+        const mes = fechaObj.toLocaleString('es-ES', {
+            month: 'long'
+        });
+        const fechaFormateada = `Chincha, ${dia} de ${mes} del ${anio}`;
+
+
+        const docDefinition = {
+            pageSize: 'A4',
+            pageOrientation: 'portrait',
+            pageMargins: [70, 25, 70, 25],
+            defaultStyle: {
+            fontSize: 8.3,
+            lineHeight: 1.15,
+            color: '#333333'
+            
+        },
+        
+            header: {
+                image: imgCabecera,
+                width: 610,
+                alignment: 'center',
+                margin: [0, 25, 0, 0]
+            },
+
+            styles: {
+
+                subheader: {
+                    bold: true,
+                    margin: [0, 10, 0, 3] // izqquierda, arriba, derecha, abajo
+                },
+                bodyText: {
+
+                    alignment: 'justify',
+                    lineHeight: 1.3
+                },
+                firma: {
+
+                    alignment: 'center',
+                    margin: [0, 2, 0, 0]
+                },
+                datosEmpresa: {
+
+                    bold: true,
+                    margin: [0, 0, 0, 2]
+                },
+                infoContacto: {
+                    margin: [0, 0, 0, 2]
+                },
+            },
+
+            // Contenido del documento
+            content: [
+
+                // {alignment: 'left',
+                //     image: imgCabecera, 
+                //     width: 610,
+                //     margin: [-85, 0, 0, 3] 
+                // },
+                {
+                    stack: [{
+                            text: fechaFormateada,
+                            alignment: 'right',
+                            margin: [0, 70, 0, 0]
+                        },
+
+                        {
+                            text: 'ACTA DE ENTREGA DE VEHÍCULO',
+                            alignment: 'center',
+                            fontSize: 11,
+                            bold: true,
+                            margin: [0, 10, 0, 0],
+                            decoration: 'underline'
+                        }
+                    ],
+
+                },
+
+                // DATOS DE LA EMPRESA - stack -> Crea texto pero uno debajo del otro en el mismo bloque
+                {
+                    stack: [{
+                            text: nombreEmpresa,
+                            style: 'datosEmpresa'
+                        },
+                        {
+                            text: `RUC: ${rucEmpresa}`,
+                            style: 'infoContacto'
+                        },
+                        {
+                            text: `Dirección: ${direccionEmpresa}`,
+                            style: 'infoContacto'
+                        },
+                        {
+                            text: `Teléfonos: ${telefonoEmpresa}`,
+                            style: 'infoContacto'
+                        },
+                        {
+                            text: `Representante Legal: ${representanteEmpresa}`,
+                            style: 'infoContacto'
+                        }
+                    ],
+                    margin: [0, 15, 0, 15] // Margen arriba y abajo
+                },
+
+                //  PÁRRAFO DE ENTREGA 
+                {
+                    text: [
+                        'Conste por la presente que a la fecha, la empresa antes mencionada hace entrega formal del vehículo que se detalla a continuación a la Sra. ',
+                        {
+                            text: data.cliente || 'CLIENTE NO ESPECIFICADO',
+                            bold: true
+                        },
+                        ', identificada con DNI N.º ',
+                        {
+                            text: data.nrodoc || 'XXXXXXXX',
+                            bold: true
+                        },
+                        ', domiciliada en ',
+                        {
+                            text: data.ubicacion || 'dirección no especificada',
+                            bold: true
+                        },
+                        ', con número de celular ',
+                        {
+                            text: data.telprimario || '999999999',
+                            bold: true
+                        },
+                        ', a quien en adelante se le denominará "la compradora".'
+                    ],
+                    style: 'bodyText'
+                },
+
+
+                {
+                    margin: [50, 10, 0, 10],
+                    table: {
+
+                        widths: ['auto', 250],
+                        body: [
+                            [{
+                                text: 'DETALLE DEL VEHÍCULO ENTREGADO',
+                                alignment: 'left',
+                                colSpan: 2,
+                                bold: true
+                            }, {}],
+                            [{
+                                text: 'Marca',
+                                bold: true
+                            }, data.marca || ''],
+                            [{
+                                text: 'Modelo',
+                                bold: true
+                            }, data.modelo || ''],
+                            [{
+                                text: 'Número de Chasis',
+                                bold: true
+                            }, data.chasis || ''],
+                            [{
+                                text: 'Número de Motor',
+                                bold: true
+                            }, data.seriemotor || ''],
+                            [{
+                                text: 'Año de fabricación',
+                                bold: true
+                            }, data.anio || ''],
+                            [{
+                                text: 'Color',
+                                bold: true
+                            }, data.color || ''],
+                            [{
+                                text: 'Año',
+                                bold: true
+                            }, anio.toString()]
+                        ]
+                    }
+                },
+
+                // CONDICIÓN DE ENTREGA 
+                {
+                    text: 'CONDICIÓN DE ENTREGA:',
+                    style: 'subheader'
+                },
+                {
+                    text: 'El vehículo es entregado en perfectas condiciones mecánicas, estéticas y operativas, con todos sus accesorios completos y funcionando, no teniendo la compradora nada que reclamar a posterioridad por concepto de estado físico o funcionamiento del mismo.',
+                    style: 'bodyText'
+                },
+
+                // ACCESORIOS ENTREGADOS 
+                {
+                    text: 'ACCESORIOS ENTREGADOS:',
+                    style: 'subheader'
+                },
+                {
+                    ul: [
+                        '1 llave de contacto',
+                        'Juego de pisos',
+                        'Manual de garantía y manual del usuario',
+                        'Llanta de repuesto y llave de rueda',
+                        'Pisos delanteros y posteriores',
+                        {
+                            text: 'Placa vehicular: EN TRÁMITE',
+                            bold: true
+                        }
+                    ],
+                    style: 'bodyText',
+                    margin: [10, 0, 0, 0],
+
+                },
+
+                //  NOTA 
+                {
+                    text: 'NOTA:',
+                    style: 'subheader'
+                },
+                {
+                    text: 'La entrega de la tarjeta de propiedad y la placa vehicular definitiva se realizará en un plazo estimado de 25 a 30 días hábiles, contados a partir de la presente fecha.',
+                    style: 'bodyText'
+                },
+
+                //  PÁRRAFO DE CONFORMIDAD
+                {
+                    text: 'Ambas partes manifiestan su total conformidad con los términos descritos en el presente documento, firmando en señal de aceptación y recepción de lo indicado.',
+                    style: 'bodyText',
+                    margin: [0, 20, 0, 0]
+                },
+
+                // FIRMAS 
+                {
+                    columns: [{
+                            stack: [{
+                                    text: '________________________________________',
+                                    style: 'firma',
+                                    margin: [0, 20, 0, 0]
+                                },
+                                {
+                                    text: nombreEmpresa,
+                                    style: 'firma',
+                                    bold: true
+                                },
+                                {
+                                    text: `RUC: ${rucEmpresa}`,
+                                    style: 'firma'
+                                }
+                            ],
+                            width: '*'
+                        },
+                        {
+                            stack: [{
+                                    text: '________________________________________',
+                                    style: 'firma',
+                                    margin: [0, 20, 0, 0]
+                                },
+                                {
+                                    text: data.cliente || 'COMPRADOR',
+                                    style: 'firma',
+                                    bold: true
+                                },
+                                {
+                                    text: `DNI: ${data.nrodoc || 'XXXXXXXX'}`,
+                                    style: 'firma'
+                                }
+                            ],
+                            width: '*'
+                        }
+                    ],
+                    columnGap: 20
+                },
+                {
+                    stack: [{
+                            text: '_______________________________________',
+                            style: 'firma',
+                            margin: [0, 30, 0, 0]
+                        },
+                        {
+                            text: 'LIZ MARTINEZ',
+                            style: 'firma',
+                            bold: true
+                        },
+                        {
+                            text: 'Ejecutivo de ventas',
+                            style: 'firma',
+                            bold: true
+                        }
+                    ]
+                },
+            ],
+            footer: function() {
+                return {
+                    columns: [{
+                        image: footer,
+                        width: 600,
+                        alignment: 'center',
+                    }]
+                };
+            }
+
+        };
+        pdfMake.createPdf(docDefinition).open();
+    }
+
+
+    document.getElementById('tabla-vehiculos').addEventListener('click', (e) => {
+        const button = e.target.closest("button[data-action]");
+        if (!button) return;
+
+        const action = button.dataset.action;
+        const id = button.dataset.id;
+
+        switch (action) {
+            case 'verPDF':
+                getDataActaEntrega(id);
+                break;
+        }
+
+
+
+
+    });
+
 </script>
