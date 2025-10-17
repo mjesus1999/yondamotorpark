@@ -7,6 +7,8 @@ use App\Models\Usuario;
 use App\Models\ContratoLaboral;
 use App\Models\Colaborador;
 use App\Helpers\Validation;
+use App\Models\Local;
+
 
 class UsuarioController extends Controller
 {
@@ -14,6 +16,7 @@ class UsuarioController extends Controller
   private ContratoLaboral $contratoModel;
   private Colaborador $colaboradorModel;
   private Validation $validator;
+  private Local $localModel;
 
   public function __construct()
   {
@@ -22,6 +25,7 @@ class UsuarioController extends Controller
     $this->contratoModel = new ContratoLaboral();
     $this->colaboradorModel = new Colaborador();
     $this->validator = new Validation();
+    $this->localModel = new Local();
   }
 
   public function index(): void
@@ -34,7 +38,13 @@ class UsuarioController extends Controller
   public function create(): void
   {
     $areas = $this->usuarioModel->getAllAreas();
-    $this->view('usuarios.create', ['areas' => $areas]);
+    /* $locales = $this->usuarioModel->getAllLocales(); */
+    $locales = $this->localModel->getAllLocales();
+
+    $this->view('usuarios.create', [
+      'areas' => $areas,
+      'locales' => $locales
+    ]);
   }
 
   public function getCargosByArea(): void
@@ -55,6 +65,7 @@ class UsuarioController extends Controller
     //obtener datos del formulario
     $idPersona = (int) ($_POST['idpersona'] ?? 0);
     $idCargo = (int) ($_POST['idcargo'] ?? 0);
+    $idLocal = !empty($_POST['idlocal']) ? (int) $_POST['idlocal'] : null;
     $fechaInicio = trim($_POST['fecha_inicio'] ?? '');
     $fechaFin = isset($_POST['sin_fecha_fin']) ? null : trim($_POST['fecha_fin'] ?? null);
     $usernick = trim($_POST['usuario'] ?? '');
@@ -110,7 +121,7 @@ class UsuarioController extends Controller
     try {
       $passwordHash = password_hash($pass1, PASSWORD_DEFAULT);
       $restr = 'S';
-      $idColab = $this->colaboradorModel->create($idContrato, $usernick, $passwordHash, $restr);
+      $idColab = $this->colaboradorModel->create($idContrato, $usernick, $passwordHash, $restr, $idLocal);
 
       if (empty($idColab) || $idColab <= 0) {
         // rollback contrato si existe método delete
@@ -274,12 +285,17 @@ class UsuarioController extends Controller
   public function showCreateFromContracts(): void
   {
     $contracts = $this->usuarioModel->getContractsWithoutColaborador();
+    /* $locales = $this->usuarioModel->getAllLocales(); */
+
+    // Obtener locales desde Local::getAllLocales()
+    $locales = $this->localModel->getAllLocales();
 
     $success = $_SESSION['success_message'] ?? null;
     unset($_SESSION['success_message']);
 
     $this->view('usuarios.createAccount', [
       'contracts' => $contracts,
+      'locales' => $locales,
       'success' => $success
     ]);
   }
@@ -292,6 +308,7 @@ class UsuarioController extends Controller
     $prevUser = $_SESSION['user'] ?? null;
 
     $idContrato = (int) ($_POST['idcontrato'] ?? 0);
+    $idLocal = !empty($_POST['idlocal']) ? (int) $_POST['idlocal'] : null;
     $usernick = trim($_POST['usernick'] ?? '');
     $p1 = $_POST['password1'] ?? '';
     $p2 = $_POST['password2'] ?? '';
@@ -320,7 +337,7 @@ class UsuarioController extends Controller
     //crear colaborador
     try {
       $passwordHash = password_hash($p1, PASSWORD_DEFAULT);
-      $idColab = $this->colaboradorModel->create($idContrato, $usernick, $passwordHash, $restr);
+      $idColab = $this->colaboradorModel->create($idContrato, $usernick, $passwordHash, $restr, $idLocal);
       if ($idColab <= 0)
         throw new \RuntimeException('No se pudo crear colaborador.');
 
@@ -421,10 +438,13 @@ class UsuarioController extends Controller
     $idAreaUsuario = isset($usuario['idarea']) ? (int) $usuario['idarea'] : 0;
     $cargos = $this->usuarioModel->getCargosByArea($idAreaUsuario);
 
+    $locales = $this->localModel->getAllLocales();
+
     $this->view('usuarios.edit', [
       'usuario' => $usuario,
       'areas' => $areas,
-      'cargos' => $cargos
+      'cargos' => $cargos,
+      'locales' => $locales
     ]);
   }
 
@@ -439,6 +459,7 @@ class UsuarioController extends Controller
     }
 
     $idColab = (int) ($_POST['idcolaborador'] ?? 0);
+    $idLocal = !empty($_POST['idlocal']) ? (int) $_POST['idlocal'] : null;
     $nombres = trim($_POST['nombres'] ?? '');
     $apellidos = trim($_POST['apellidos'] ?? '');
     $idArea = (int) ($_POST['idarea'] ?? 0);
@@ -464,7 +485,7 @@ class UsuarioController extends Controller
     }
 
     // ejecutar actualización
-    $ok = $this->usuarioModel->update($idColab, $nombres, $apellidos, $idArea, $idCargo, $nrodoc, $fechainicio);
+    $ok = $this->usuarioModel->update($idColab, $nombres, $apellidos, $idArea, $idCargo, $nrodoc, $fechainicio, $idLocal);
 
     if ($ok) {
       $_SESSION['success_message'] = 'Datos actualizados de' . ' ' . $nombres . ' ' . $apellidos . ' ' . 'correctamente.';

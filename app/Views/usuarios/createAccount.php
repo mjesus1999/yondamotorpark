@@ -33,6 +33,9 @@
                 </ol>
 
             </div>
+            <div class="col-md-6 text-end">
+                <span>Desde este módulo se podrá gestionar cuentas de contratos / Contratos con cuentas desactivadas</span>
+            </div>
             <!-- <div class="col-md-6 text-end">
                 <a href="/usuarios" class="">[ Mostrar lista ]</a>
             </div> -->
@@ -151,7 +154,7 @@
                             <hr>
 
                             <!-- NOMBRE DE USUARIO -->
-                            <div class="col-md-12">
+                            <div class="col-md-6">
                                 <div class="form-floating">
                                     <input name="usernick" id="usernick" class="form-control"
                                         placeholder="Nombre de Usuario" value="<?= $old['usernick'] ?? '' ?>" required>
@@ -159,6 +162,20 @@
                                             class="text-danger">*</span></label>
                                     <div class="form-text small text-muted">Sugerencia: pulsa el nombre en la lista para
                                         autocompletar.</div>
+                                </div>
+                            </div>
+
+                            <!-- Locales -->
+                            <div class="col-md-6 mb-2">
+                                <div class="form-floating">
+                                    <select name="idlocal" id="local" class="form-select">
+                                        <option value="">Sin asignar</option>
+                                        <?php foreach ($locales as $loc): ?>
+                                            <option value="<?= $loc['idlocal'] ?>"><?= htmlspecialchars($loc['local']) ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                    <label for="local">Local Asignado <span class="text-danger">*</span></label>
                                 </div>
                             </div>
 
@@ -336,20 +353,32 @@
             }
 
             // también permitir que el navegador muestre errores 'required' si existen
-            if (!formCreate.checkValidity()) {
+            /* if (!formCreate.checkValidity()) {
                 formCreate.reportValidity();
                 return;
-            }
+            } */
 
-            const { isConfirmed } = await Swal.fire({
-                title: '¿Crear cuenta?',
-                text: '¿Deseas crear la cuenta para este contrato?',
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonText: 'Sí, crear',
-                cancelButtonText: 'Cancelar',
-                reverseButtons: true
-            });
+            let isConfirmed = false;
+
+            if (typeof ask === 'function') {
+                try {
+                    // ask(mensaje, titulo) — debe devolver true/false
+                    isConfirmed = await ask('¿Desea crear la cuenta para este contrato?', '¿Crear cuenta?');
+                } catch (err) {
+                    isConfirmed = false;
+                }
+            } else {
+                const swalRes = await Swal.fire({
+                    title: '¿Crear cuenta?',
+                    text: '¿Deseas crear la cuenta para este contrato?',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sí, crear',
+                    cancelButtonText: 'Cancelar',
+                    reverseButtons: true
+                });
+                isConfirmed = !!swalRes.isConfirmed;
+            }
 
             if (!isConfirmed) return;
 

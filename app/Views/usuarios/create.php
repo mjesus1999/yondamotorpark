@@ -36,22 +36,6 @@
     </div>
   </div>
 
-  <!-- <div class="alert alert-info mt-2" role="alert">
-    <div class="row">
-      <div class="col-md-6 d-flex">
-
-        <ol class="breadcrumb mb-0">
-          <li class="breadcrumb-item"><a href="#">Usuario</a></li>
-          <li class="breadcrumb-item active" aria-current="page">Registrar</li>
-        </ol>
-
-      </div>
-      <div class="col-md-6 text-end">
-        <a href="/usuarios" class="">[ Mostrar lista ]</a>
-      </div>
-    </div>
-  </div> -->
-
   <!-- Campos -->
   <div class="mb-2">
     <form action="/usuarios/store" id="formRegisterFull" method="POST" autocomplete="off">
@@ -152,7 +136,18 @@
                 </label>
               </div>
             </div>
-
+            <!-- locales -->
+            <div class="col-md-12 mb-2">
+              <div class="form-floating">
+                <select name="idlocal" id="local" class="form-select">
+                  <option value="">Sin asignar</option>
+                  <?php foreach ($locales as $loc): ?>
+                    <option value="<?= $loc['idlocal'] ?>"><?= htmlspecialchars($loc['local']) ?></option>
+                  <?php endforeach; ?>
+                </select>
+                <label for="local">Local Asignado <span class="text-danger">*</span></label>
+              </div>
+            </div>
           </div>
         </div> <!-- ./card-body -->
       </div><!-- ./card -->
@@ -226,9 +221,24 @@
               </select>
               <label for="modal-tipodoc">Tipo Doc <span class="text-danger">*</span></label>
             </div>
-            <div class="col-md-2 form-floating">
+
+            <!-- <div class="col-md-2 form-floating">
               <input type="text" class="form-control" id="modal-nrodoc" name="nrodoc" required>
               <label for="modal-nrodoc">N° Documento <span class="text-danger">*</span></label>
+            </div> -->
+
+            <div class="col-md-2">
+              <div class="input-group">
+                <div class="form-floating flex-grow-1">
+                  <input type="text" name="nrodoc" id="ndocumento" class="form-control" placeholder="Ingrese el número"
+                    maxlength="12" required>
+                  <label for="ndocumento">N° Documento <span class="text-danger">*</span></label>
+                </div>
+                <button type="button" id="btnBuscarCliente" class="btn btn-success px-3"
+                  title="Buscar en RENIEC/Base de datos">
+                  <i class="bi bi-search"></i>
+                </button>
+              </div>
             </div>
 
             <!-- Apellidos / Nombres -->
@@ -439,6 +449,135 @@
     const idPersonaIn = document.getElementById('idpersona');
     const apellidosIn = document.getElementById('apellidos');
     const nombresIn = document.getElementById('nombres');
+    const personaModalEl = document.getElementById('modalRegistrarPersona'); // modal
+    const modalDniInput = document.getElementById('ndocumento');
+
+    if (dniInput) {
+      dniInput.addEventListener('blur', () => {
+        const dni = dniInput.value.trim();
+        if (!dni) return;
+
+        if (!/^\d{8}$/.test(dni)) {
+          showToast('DNI inválido. Debe ser 8 dígitos.', 'warning');
+          return;
+        }
+
+        // Llamada a la API local (usa backticks / string)
+        fetch(`/api/persona/searchByDNI?dni=${encodeURIComponent(dni)}`, {
+          method: 'GET',
+          headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
+        })
+          .then(res => {
+            if (!res.ok) throw new Error('Error en la respuesta del servidor: ' + res.status);
+            return res.json();
+          })
+          .then(json => {
+            if (json.success) {
+              // Si existe en local -> rellenar campos principales
+              if (idPersonaIn && json.idpersona) idPersonaIn.value = json.idpersona;
+              if (apellidosIn) apellidosIn.value = json.apellidos || '';
+              if (nombresIn) nombresIn.value = json.nombres || '';
+              if (dniInput && json.nrodoc) dniInput.value = json.nrodoc;
+              showToast('Persona encontrada en la base de datos local', 'success');
+            } else {
+              // No existe: limpiar campos principales y abrir modal para registrar
+              if (idPersonaIn) idPersonaIn.value = '';
+              if (apellidosIn) apellidosIn.value = '';
+              if (nombresIn) nombresIn.value = '';
+
+              showToast('DNI no encontrado. Abra el modal para registrar.', 'warning');
+
+              if (modalDniInput) modalDniInput.value = dni;
+
+              const bsModal = bootstrap.Modal.getOrCreateInstance(personaModalEl) || new bootstrap.Modal(personaModalEl);
+              bsModal.show();
+
+              // Enfocar el campo de apellidos del modal para agilizar el registro
+              const modalApellidos = document.getElementById('modal-apellidos');
+              setTimeout(() => {
+                if (modalApellidos) modalApellidos.focus();
+              }, 300);
+            }
+          })
+          .catch(err => {
+            console.error('Error buscando DNI (blur):', err);
+            showToast('Error al buscar el DNI. Revisa la consola.', 'error');
+          });
+      });
+    }
+
+    (() => {
+      const btnBuscarClienteModal = document.getElementById('btnBuscarCliente');
+      const modalNroInput = document.getElementById('ndocumento'); // input del modal
+      const modalApellidos = document.getElementById('modal-apellidos');
+      const modalNombres = document.getElementById('modal-nombres');
+
+      if (!btnBuscarClienteModal || !modalNroInput) return;
+
+      btnBuscarClienteModal.addEventListener('click', async () => {
+        const dni = modalNroInput.value.trim();
+
+        if (!/^\d{8}$/.test(dni)) {
+          showToast('Ingrese un DNI válido de 8 dígitos.', 'warning');
+          modalNroInput.focus();
+          return;
+        }
+
+        // Spinner / bloqueo del botón
+        btnBuscarClienteModal.disabled = true;
+        const originalHtml = btnBuscarClienteModal.innerHTML;
+        btnBuscarClienteModal.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+
+        try {
+          const res = await fetch(`/persona/searchByDNIApi?dni=${encodeURIComponent(dni)}`, {
+            method: 'GET',
+            headers: {
+              'X-Requested-With': 'XMLHttpRequest',
+              'Accept': 'application/json'
+            }
+          });
+
+          // Restaurar en cuanto tengamos respuesta HTTP
+          btnBuscarClienteModal.disabled = false;
+          btnBuscarClienteModal.innerHTML = originalHtml;
+
+          if (!res.ok) {
+            showToast('Error en el servidor al consultar RENIEC.', 'error');
+            console.error('Respuesta HTTP:', res.status, await res.text());
+            return;
+          }
+
+          const json = await res.json();
+
+          if (json.success) {
+            modalApellidos.value = json.apellidos || '';
+            modalNombres.value = json.nombres || '';
+            showToast('Datos obtenidos desde RENIEC/API', 'success');
+
+            const siguiente = document.getElementById('modal-genero') || document.getElementById('modal-fechanac') || modalApellidos;
+            siguiente.focus();
+          } else {
+            const msg = json.message || 'No se encontró la persona en RENIEC';
+            showToast(msg, 'warning');
+
+            modalApellidos.value = '';
+            modalNombres.value = '';
+            modalNroInput.focus();
+          }
+
+        } catch (err) {
+          console.error('Error buscando DNI en modal:', err);
+          btnBuscarClienteModal.disabled = false;
+          btnBuscarClienteModal.innerHTML = originalHtml;
+          showToast('Error de conexión con el servicio RENIEC. Intente más tarde.', 'error');
+        }
+      });
+    })();
+
+    /* const dniInput = document.getElementById('dni');
+    const idPersonaIn = document.getElementById('idpersona');
+    const apellidosIn = document.getElementById('apellidos');
+    const nombresIn = document.getElementById('nombres');
     const personaModalEl = document.getElementById('modalRegistrarPersona');
     const modalDniInput = document.getElementById('modal-nrodoc'); // DNI del modal
 
@@ -477,7 +616,7 @@
           console.error('Error buscando DNI:', err);
           showToast('Error al buscar el DNI. Intente nuevamente.', 'error');
         });
-    });
+    }); */
 
     // Función para mostrar toast
     function showToast(message, type = 'info') {
@@ -491,7 +630,6 @@
         document.body.appendChild(toastContainer);
       }
 
-      // Determinar la clase CSS según el tipo
       let toastClass = 'bg-primary';
       let iconClass = 'fa-info-circle';
 

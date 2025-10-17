@@ -46,13 +46,27 @@
         </div>
       </div>
 
-      <!-- TABULATOR -->
-      <div id="tabla-usuarios-tabulator" class="table-responsive">
-        <div class="text-center py-5" id="spinner-usuarios">
-          <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Cargando...</span>
+      <!-- TABULATOR SOLO ESCRITORIO -->
+      <div class="table-responsive d-none d-md-block">
+        <div id="tabla-usuarios-tabulator">
+          <div class="text-center py-5" id="spinner-usuarios">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Cargando...</span>
+            </div>
+            <p class="mt-2">Cargando usuarios...</p>
           </div>
-          <p class="mt-2">Cargando usuarios...</p>
+        </div>
+      </div>
+
+      <!-- ACORDEÓN SOLO MÓVIL -->
+      <div class="d-block d-md-none">
+        <div id="acordeon-usuarios-mobile">
+          <div class="text-center py-5" id="spinner-usuarios-mobile">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Cargando...</span>
+            </div>
+            <p class="mt-2">Cargando usuarios...</p>
+          </div>
         </div>
       </div>
 
@@ -106,10 +120,11 @@
 
 <script>
   let modalCambiarClave;
+  let tablaTabulator;
 
-  // Funciones auxiliares
   function escapeHtml(t) {
-    return t ? t.replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m])) : '';
+    if (!t) return '';
+    return String(t).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m]));
   }
 
   function mostrarToast(mensaje, tipo = 'info') {
@@ -121,39 +136,166 @@
     setTimeout(() => nt.remove(), 5000);
   }
 
-  // Preparar datos para Tabulator
   const usuariosData = <?= json_encode($Usuarios) ?>;
 
-  // Inicializar vista
+  function renderizarAcordeonMobile(usuarios) {
+    const contenedor = document.getElementById('acordeon-usuarios-mobile');
+    if (!contenedor) return;
+
+    const spinner = document.getElementById('spinner-usuarios-mobile');
+    if (spinner) spinner.remove();
+
+    if (!usuarios || usuarios.length === 0) {
+      contenedor.innerHTML = '<div class="text-center text-muted py-4">No hay usuarios para mostrar.</div>';
+      return;
+    }
+
+    const acordeonHTML = `
+      <div class="accordion" id="acordeonUsuarios">
+        ${usuarios.map((user) => {
+      const isRestr = user.restriccionhoraria === 'S';
+      const nombreCompleto = escapeHtml((user.apellidos || '') + ' ' + (user.nombres || ''));
+      return `
+            <div class="accordion-item mb-2 shadow-sm">
+              <h2 class="accordion-header" id="heading-${user.idcolaborador}">
+                <button class="accordion-button collapsed" type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#collapse${user.idcolaborador}"
+                  aria-expanded="false"
+                  aria-controls="collapse${user.idcolaborador}">
+                  <span>
+                    <i class="bi bi-person-circle me-2 text-primary fw-bold"></i>
+                    ${nombreCompleto}
+                  </span>
+                </button>
+              </h2>
+              <div id="collapse${user.idcolaborador}"
+                class="accordion-collapse collapse"
+                aria-labelledby="heading-${user.idcolaborador}"
+                data-bs-parent="#acordeonUsuarios">
+                <div class="accordion-body">
+                  <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><strong>ID:</strong> ${escapeHtml(user.idcolaborador || '')}</li>
+                    <li class="list-group-item"><strong>Apellidos:</strong> ${escapeHtml(user.apellidos || '')}</li>
+                    <li class="list-group-item"><strong>Nombres:</strong> ${escapeHtml(user.nombres || '')}</li>
+                    <li class="list-group-item"><strong>Ubicación:</strong> <span class="badge bg-info">${escapeHtml(user.ubicacion || 'Sin Asignar')}</span></li>
+                    <li class="list-group-item"><strong>Área:</strong> <span class="badge bg-primary">${escapeHtml(user.area || '')}</span></li>
+                    <li class="list-group-item"><strong>Cargo:</strong> ${escapeHtml(user.cargo || '')}</li>
+                    <li class="list-group-item"><strong>Fecha Inicio:</strong> ${escapeHtml(user.fecha_inicio || '')}</li>
+                    <li class="list-group-item"><strong>Fecha Fin:</strong> ${escapeHtml(user.fecha_fin || '')}</li>
+                    <li class="list-group-item">
+                      <strong>Usuario:</strong> ${escapeHtml(user.usuario || '')}
+                      ${isRestr ? '<span class="ms-1" title="Restricción horaria">🕜</span>' : ''}
+                    </li>
+                    <li class="list-group-item">
+                      <strong>Acciones:</strong>
+                      <div class="d-flex gap-2 mt-2 flex-wrap">
+                        <a href="/usuarios/edit/${user.idcolaborador}" class="btn btn-sm btn-outline-primary" title="Editar">
+                          <i class="fa-solid fa-pen"></i> Editar
+                        </a>
+                        <button class="btn btn-sm btn-outline-warning btn-cambiar-clave" title="Cambiar contraseña"
+                          data-idcolab="${user.idcolaborador}" data-usuario="${escapeHtml(user.usuario || '')}">
+                          <i class="fa-solid fa-key"></i> Cambiar clave
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger btn-borrar" title="Eliminar"
+                          data-idcolab="${user.idcolaborador}">
+                          <i class="fa-solid fa-trash"></i> Eliminar
+                        </button>
+                        <button class="btn btn-sm ${isRestr ? 'btn-outline-secondary' : 'btn-outline-info'} btn-restriccion"
+                          title="${isRestr ? 'Quitar restricción horaria' : 'Poner restricción horaria'}"
+                          data-idcolab="${user.idcolaborador}" data-restriccion="${isRestr ? 'S' : 'N'}">
+                          <i class="fa-${isRestr ? 'solid' : 'regular'} fa-clock"></i>
+                          ${isRestr ? 'Quitar' : 'Poner'} restricción
+                        </button>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          `;
+    }).join('')}
+      </div>
+    `;
+
+    contenedor.innerHTML = acordeonHTML;
+  }
+
+  function filtrarAcordeonMobile(termino) {
+    const acordeon = document.getElementById('acordeonUsuarios');
+    if (!acordeon) return;
+
+    const items = acordeon.querySelectorAll('.accordion-item');
+    let hayResultados = false;
+
+    items.forEach(item => {
+      const texto = item.textContent.toLowerCase();
+      if (texto.includes(termino.toLowerCase())) {
+        item.style.display = '';
+        hayResultados = true;
+      } else {
+        item.style.display = 'none';
+      }
+    });
+
+    const contenedor = document.getElementById('acordeon-usuarios-mobile');
+    const noResultsExistente = document.getElementById('no-results-mobile');
+
+    if (!hayResultados && termino.trim() !== '') {
+      if (!noResultsExistente) {
+        const noResults = document.createElement('div');
+        noResults.id = 'no-results-mobile';
+        noResults.className = 'alert alert-warning text-center mt-3';
+        noResults.textContent = 'No se encontraron usuarios que coincidan con la búsqueda.';
+        contenedor.appendChild(noResults);
+      }
+    } else {
+      if (noResultsExistente) noResultsExistente.remove();
+    }
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
     const spinner = document.getElementById('spinner-usuarios');
+    const spinnerMobile = document.getElementById('spinner-usuarios-mobile');
     const mensajeVacio = document.getElementById('mensaje-vacio');
 
     modalCambiarClave = new bootstrap.Modal(document.getElementById('modalCambiarClave'));
 
     try {
-      if (spinner) spinner.remove();
+      console.log('Datos recibidos:', usuariosData);
 
       if (!Array.isArray(usuariosData) || usuariosData.length === 0) {
+        if (spinner) spinner.remove();
+        if (spinnerMobile) spinnerMobile.remove();
         mensajeVacio.classList.remove('d-none');
         return;
       }
 
-      // TABULATOR
-      const tabla = new Tabulator("#tabla-usuarios-tabulator", {
+      // Renderizar vista móvil
+      renderizarAcordeonMobile(usuariosData);
+
+      // TABULATOR para escritorio
+      if (spinner) spinner.remove();
+
+      tablaTabulator = new Tabulator("#tabla-usuarios-tabulator", {
         data: usuariosData,
         layout: "fitDataStretch",
         pagination: "local",
         paginationSize: 15,
         paginationSizeSelector: [10, 15, 25, 50],
         columns: [
-          { title: "#", field: "idcolaborador", width: 70, hozAlign: "center" },
+          { title: "#", field: "idcolaborador", width: 50, hozAlign: "center" },
           { title: "Apellidos", field: "apellidos", width: 220, widthGrow: 3 },
           { title: "Nombres", field: "nombres", width: 220, widthGrow: 3 },
+          {
+            title: "Ubicación", field: "ubicacion", width: 200, widthGrow: 2, formatter: (cell) => {
+              return escapeHtml(cell.getValue() || 'Sin Asignar');
+            }
+          },
           { title: "Área", field: "area", width: 130, widthGrow: 2 },
-          { title: "Cargo", field: "cargo", width: 200, widthGrow: 2 },
-          { title: "Fecha Inicio", field: "fecha_inicio", width: 150, widthGrow: 2 },
-          { title: "Fecha Fin", field: "fecha_fin", width: 150, widthGrow: 2 },
+          { title: "Cargo", field: "cargo", width: 140, widthGrow: 2 },
+          { title: "Fecha Inicio", field: "fecha_inicio", width: 130, widthGrow: 2 },
+          { title: "Fecha Fin", field: "fecha_fin", width: 130, widthGrow: 2 },
           {
             title: "Usuario",
             field: "usuario",
@@ -206,29 +348,38 @@
       if (searchInput) {
         searchInput.addEventListener("keyup", function (e) {
           const val = e.target.value.trim();
-          if (!val) {
-            tabla.clearFilter();
-          } else {
-            tabla.setFilter([
-              [
-                { field: "apellidos", type: "like", value: val },
-                { field: "nombres", type: "like", value: val },
-                { field: "area", type: "like", value: val },
-                { field: "cargo", type: "like", value: val },
-                { field: "usuario", type: "like", value: val }
-              ]
-            ]);
+
+          // Filtrar tabla desktop
+          if (tablaTabulator) {
+            if (!val) {
+              tablaTabulator.clearFilter();
+            } else {
+              tablaTabulator.setFilter([
+                [
+                  { field: "apellidos", type: "like", value: val },
+                  { field: "nombres", type: "like", value: val },
+                  { field: "area", type: "like", value: val },
+                  { field: "cargo", type: "like", value: val },
+                  { field: "usuario", type: "like", value: val },
+                  { field: "ubicacion", type: "like", value: val }
+                ]
+              ]);
+            }
           }
+
+          // Filtrar acordeón mobile
+          filtrarAcordeonMobile(val);
         });
       }
 
-      // Eventos dentro de la tabla
-      document.getElementById('tabla-usuarios-tabulator').addEventListener('click', async (e) => {
+      // Eventos globales (funcionan tanto en tabla como en acordeón)
+      document.body.addEventListener('click', async (e) => {
         const btnClave = e.target.closest('.btn-cambiar-clave');
         const btnBorrar = e.target.closest('.btn-borrar');
         const btnRestriccion = e.target.closest('.btn-restriccion');
 
         if (btnClave) {
+          e.preventDefault();
           const idColab = btnClave.dataset.idcolab;
           const usuario = btnClave.dataset.usuario;
           document.getElementById('cc-idcolaborador').value = idColab;
@@ -333,10 +484,11 @@
       });
 
     } catch (err) {
-      console.error(err);
+      console.error('Error completo:', err);
       if (spinner) spinner.remove();
+      if (spinnerMobile) spinnerMobile.remove();
       mensajeVacio.classList.remove('d-none');
-      mostrarToast('Error al cargar usuarios', 'danger');
+      mostrarToast('Error al cargar usuarios: ' + err.message, 'danger');
     }
   });
 </script>

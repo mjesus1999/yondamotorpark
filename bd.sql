@@ -116,6 +116,7 @@ CREATE TABLE colaboradores (
     CONSTRAINT fk_idcontratolaboral_col FOREIGN KEY (idcontratolaboral) REFERENCES contratoslaborales (idcontratolaboral),
     CONSTRAINT uk_usernick_col UNIQUE (usernick)
 ) ENGINE = INNODB;
+-- ALTER TABLE colaboradores ADD COLUMN idlocal INT NULL AFTER idcontratolaboral, ADD CONSTRAINT fk_idlocal_col FOREIGN KEY (idlocal) REFERENCES locales(idlocal);
 
 CREATE TABLE clientes (
     idcliente INT PRIMARY KEY AUTO_INCREMENT,

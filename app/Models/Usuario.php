@@ -42,6 +42,27 @@ class Usuario
     }
   }
 
+  /* public function getAllLocales()
+  {
+    $query = "SELECT 
+                loc.idlocal,
+                CONCAT(loc.tienda, ' - ', pro.provincia, ' (', dep.departamento, ')') AS local
+              FROM locales loc
+              INNER JOIN distritos dis ON loc.iddistrito = dis.iddistrito
+              INNER JOIN provincias pro ON dis.idprovincia = pro.idprovincia
+              INNER JOIN departamentos dep ON pro.iddepartamento = dep.iddepartamento
+              ORDER BY loc.tienda";
+
+    try {
+      $stmt = $this->db->prepare($query);
+      $stmt->execute();
+      return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (Exception $e) {
+      error_log($e->getMessage());
+      return [];
+    }
+  } */
+
   public function getCargosByArea(int $idArea): array
   {
     $query = "SELECT idcargo, cargo FROM cargos WHERE idarea = :idarea ORDER BY cargo";
@@ -72,7 +93,12 @@ class Usuario
 
   public function disabled(int $id): bool
   {
-    $query = "UPDATE colaboradores SET habilitado = 'N' WHERE idcolaborador = :id";
+    $query = "UPDATE colaboradores
+              SET habilitado = 'N',
+                  usernick = CONCAT('deleted_', idcolaborador, '_', DATE_FORMAT(NOW(), '%Y%m%d%H%i%s')),
+                  userpassword = CONCAT('deleted_', UUID()),
+                  modificado = NOW()
+              WHERE idcolaborador = :id";
     try {
       $stmt = $this->db->prepare($query);
       $stmt->bindValue(':id', $id, PDO::PARAM_INT);
@@ -82,6 +108,19 @@ class Usuario
       return false;
     }
   }
+
+  /* public function disabled(int $id): bool
+  {
+    $query = "UPDATE colaboradores SET habilitado = 'N' WHERE idcolaborador = :id";
+    try {
+      $stmt = $this->db->prepare($query);
+      $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+      return $stmt->execute();
+    } catch (Exception $e) {
+      // log $e->getMessage()
+      return false;
+    }
+  } */
 
   // CONSULTAS PARA EL LOGIN
   public function searchByUsernick(string $usernick): ?array
@@ -216,7 +255,7 @@ class Usuario
   }
 
   //ACTUALIZAR DATOS DE LA PERSONA Y CONTRATO
-  public function update(int $idColaborador, string $nombres, string $apellidos, int $idArea, int $idCargo, string $nrodoc, string $fechaInicio): bool
+  public function update(int $idColaborador, string $nombres, string $apellidos, int $idArea, int $idCargo, string $nrodoc, string $fechaInicio, ?int $idLocal = null): bool
   {
     try {
       $this->db->beginTransaction();
@@ -240,10 +279,10 @@ class Usuario
       $idPersona = $stmt->fetchColumn();
       if ($idPersona === false) {
         $this->db->rollBack();
-        return false; // contrato sin persona (raro)
+        return false; // contrato sin persona => no
       }
 
-      // 3) validar que el cargo pertenezca al area (opcional pero recomendable)
+      // 3) validar que el cargo pertenezca al area
       $sql = "SELECT COUNT(1) FROM cargos WHERE idcargo = :idcargo AND idarea = :idarea";
       $stmt = $this->db->prepare($sql);
       $stmt->bindValue(':idcargo', $idCargo, PDO::PARAM_INT);
@@ -255,7 +294,7 @@ class Usuario
         return false; // cargo no pertenece al area indicada
       }
 
-      // 4) actualizar tabla personas (nombres, apellidos, nrodoc)
+      // 4) actualizar tabla personas
       $sql = "UPDATE personas SET nombres = :nombres, apellidos = :apellidos, nrodoc = :nrodoc WHERE idpersona = :idpersona";
       $stmt = $this->db->prepare($sql);
       $stmt->bindValue(':nombres', $nombres, PDO::PARAM_STR);
@@ -272,19 +311,38 @@ class Usuario
       $stmt->bindValue(':idcontrato', (int) $idContrato, PDO::PARAM_INT);
       $stmt->execute();
 
+      // 6) actualizar colaboradores.idlocal si se pasó (dentro de la misma transacción)
+      if ($idLocal !== null) {
+        $sql = "SELECT COUNT(1) FROM locales WHERE idlocal = :idlocal";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':idlocal', $idLocal, PDO::PARAM_INT);
+        $stmt->execute();
+        $exists = (bool) $stmt->fetchColumn();
+        if (!$exists) {
+          $this->db->rollBack();
+          return false; // idlocal inválido
+        }
+
+        $sql = "UPDATE colaboradores SET idlocal = :idlocal, modificado = NOW() WHERE idcolaborador = :idcolab";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':idlocal', $idLocal, PDO::PARAM_INT);
+        $stmt->bindValue(':idcolab', $idColaborador, PDO::PARAM_INT);
+        $stmt->execute();
+      }
+
       $this->db->commit();
       return true;
     } catch (\Throwable $e) {
-      // log $e->getMessage() si tienes logger
       if ($this->db->inTransaction()) {
         $this->db->rollBack();
       }
+      // log $e->getMessage()
       return false;
     }
   }
 
   //EJEMPLO PARA BUSCAR EL EMAIL Y EL TELEFONO => PRUEBA
-  public function findByEmailOrPhoneOrUsernick(string $identifier): ?array
+  /* public function findByEmailOrPhoneOrUsernick(string $identifier): ?array
   {
     try {
       $id = trim($identifier);
@@ -368,6 +426,6 @@ class Usuario
       error_log('[Usuario::findByEmailOrPhoneOrUsernick] Exception: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
       return null;
     }
-  }
+  } */
 
 }
