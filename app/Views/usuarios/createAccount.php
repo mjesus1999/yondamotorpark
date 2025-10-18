@@ -34,7 +34,8 @@
 
             </div>
             <div class="col-md-6 text-end">
-                <span>Desde este módulo se podrá gestionar cuentas de contratos / Contratos con cuentas desactivadas</span>
+                <span>Desde este módulo se podrá gestionar cuentas de contratos / Contratos con cuentas
+                    desactivadas</span>
             </div>
             <!-- <div class="col-md-6 text-end">
                 <a href="/usuarios" class="">[ Mostrar lista ]</a>
@@ -243,7 +244,6 @@
             row.setAttribute('role', 'button');
             row.tabIndex = 0; // permite foco con TAB
 
-            //llenar los campos 
             row.addEventListener('click', function () {
                 // remover seleccion previa
                 document.querySelectorAll('.contracts-table tbody tr.table-active').forEach(r => r.classList.remove('table-active'));

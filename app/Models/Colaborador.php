@@ -27,7 +27,7 @@ class Colaborador
             $stmt = $this->db->prepare($sql);
             $stmt->execute([
                 ':idcontrato' => $idContrato,
-                ':idlocal'      => $idlocal,
+                ':idlocal' => $idlocal,
                 ':usernick' => $usernick,
                 ':userpassword' => $passwordHash,
                 ':restr' => $restr,

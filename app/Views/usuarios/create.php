@@ -680,6 +680,13 @@
       });
     }
 
+    function generarUserNick(nombres, apellidos) {
+      const nombreStr = (nombres || '').trim();
+      const apellidoStr = (apellidos || '').trim();
+
+      //COMPLETAR
+    }
+
     const sinFinCheckbox = document.getElementById('sin-fecha-fin');
     const fechaFinInput = document.getElementById('fecha-fin');
 
