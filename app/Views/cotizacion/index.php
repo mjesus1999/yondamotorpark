@@ -332,8 +332,16 @@
                 pagination: true,
                 paginationSize: 15,
                 paginationCounter: "rows",
-
+                responsiveLayoutCollapseStartOpen: false, // Inicia colapsado
                 columns: [{
+                    formatter: "responsiveCollapse",
+                    width: 40,
+                    minWidth: 30,
+                    hozAlign: "center",
+                    resizable: false,
+                    headerSort: false,
+                    responsive: 0 // Siempre visible
+                },{
                         title: "#",
                         formatter: "rownum",
                         headerSort: false,

@@ -12,12 +12,14 @@ class ArqueoCajaController extends Controller
 
     public function __construct()
     {
+        $this->authRequired();
         $this->arqueoCajaModel = new ArqueoCaja();
     }
 
 
     public function index(string $entregado = 'N'): void
     {
+        $this->authRequired();
 
         $datosArqueoBase = $this->arqueoCajaModel->obtenerDatosUltimoArqueo();
         $saldoInicialParaArqueo = $datosArqueoBase['saldo_inicial_para_hoy'];
@@ -57,6 +59,7 @@ class ArqueoCajaController extends Controller
 
     public function store(): void
     {
+        $this->authRequired();
         header('Content-Type: application/json');
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -113,6 +116,7 @@ class ArqueoCajaController extends Controller
 
     public function entregar(): void
     {
+        $this->authRequired();
         header('Content-Type: application/json');
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -164,6 +168,7 @@ class ArqueoCajaController extends Controller
 
     public function destinos(string $tipo)
     {
+        $this->authRequired();
         header('Content-Type: application/json');
 
         if ($tipo === 'Gerente') {
@@ -181,6 +186,7 @@ class ArqueoCajaController extends Controller
 
     public function reportePorSede()
     {
+        $this->authRequired();
         header('Content-Type: application/json');
 
         $ids_arqueo = $_GET['ids_arqueo'] ?? '';
@@ -204,6 +210,7 @@ class ArqueoCajaController extends Controller
 
     public function getReporteArqueoPorCiclo(string $ids_arqueo): void
     {
+        $this->authRequired();
         header('Content-Type: application/json');
 
 

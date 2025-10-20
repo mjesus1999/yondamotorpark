@@ -107,7 +107,7 @@
                                                 aria-controls="collapseLocal<?= $local['idlocal'] ?>">
                                                 <div class="d-flex flex-column align-items-start text-start w-100">
                                                     <span class="fw-bold mb-1"><i class="bi bi-shop me-2 text-primary"></i><?= htmlspecialchars($local['tienda']) ?></span>
-                                                    <span class="badge bg-secondary text-white text-truncate w-100">
+                                                    <span class="badge bg-secondary text-white text-truncate w-100 mt-2">
                                                         <i class="bi bi-geo-alt me-1"></i>
                                                         <?= htmlspecialchars($local['departamento'] . "/" . $local['provincia'] . '/' . $local['distrito']) ?>
                                                     </span>
@@ -206,7 +206,7 @@
 <script src="https://unpkg.com/tabulator-tables@5.5.2/dist/js/tabulator.min.js"></script>
 <script>
     const localesData = <?= json_encode($locales, JSON_UNESCAPED_UNICODE) ?>;
-    console.log(localesData)
+
     const tablaLocales = new Tabulator("#tabla-locales", {
         data: localesData,
         layout: "fitColumns",
@@ -285,10 +285,10 @@
             "es-es": {
                 "pagination": {
                     "page_size": "Registros por página",
-                    "first": "Primero",
-                    "last": "Último",
-                    "prev": "Anterior",
-                    "next": "Siguiente",
+                    "first": "<<",
+                    "last": ">>",
+                    "prev": "<",
+                    "next": ">",
                 }
             }
         }
@@ -344,7 +344,7 @@
 
             const formData = new FormData(formularioLocales);
 
-            if (confirm("¿Desea actualizar este local?")) {
+            if (await ask("¿Desea actualizar este local?",'Locales')) {
                 try {
                     const response = await fetch(`/locales/update/${parsedIdlocal}`, {
                         method: 'POST',

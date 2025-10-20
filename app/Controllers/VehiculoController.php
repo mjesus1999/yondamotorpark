@@ -64,6 +64,7 @@ class VehiculoController extends Controller
    */
   public function indexRecepcionVehiculos()
   {
+    $this->authRequired();
     $data = $this->vehiculoModel->getAllOCompras();
     $this->view('vehiculos.recepcion', ['data' => $data]);
   }
@@ -75,6 +76,7 @@ class VehiculoController extends Controller
    */
   public function recepcionEdit($idcompra)
   {
+    $this->authRequired();  
     $idcompra = (int)$idcompra;
     $datosRecepcion = $this->vehiculoModel->getAllDatosRecepcion($idcompra);
     $infoCompra = $datosRecepcion['info_compra'];
@@ -91,6 +93,7 @@ class VehiculoController extends Controller
 
   public function storeVehiculoOC(): int
   {
+    $this->authRequired();
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
       http_response_code(405);
       echo json_encode(['success' => false, 'message' => 'Método no permitido']);

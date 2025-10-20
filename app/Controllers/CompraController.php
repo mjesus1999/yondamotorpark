@@ -26,10 +26,12 @@ class CompraController extends Controller
 
     public function create(): void
     {
+        $this->authRequired();
         $this->view('compras.create');
     }
     public function store(): void
     {
+        $this->authRequired();
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             http_response_code(405);
             echo json_encode(['success' => false, 'message' => 'Método no permitido']);
@@ -145,6 +147,7 @@ class CompraController extends Controller
     // APIS
     public function searchDetOCByConcesionario($id)
     {
+        $this->authRequired();
         header('Content-Type: application/json');
         $datos = $this->compraModel->getDetOCByConcesionario($id);
 
@@ -181,6 +184,7 @@ class CompraController extends Controller
     // Traerá los Concesioanrios con OC Activas('Proceso','Pagado').
     public function searchConcesionarioOCActiva(): void
     {
+        $this->authRequired();
         header('Content-Type: application/json');
         $concesionarios = $this->compraModel->getConcesionariosConOCEnProcesoOPagado();
 

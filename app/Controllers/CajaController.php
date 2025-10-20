@@ -20,30 +20,32 @@ class CajaController extends Controller
     // Me enlistara todos los contratos
     public function index(): void
     {
-        $tiempoInicio = microtime(true);
+        // $tiempoInicio = microtime(true);
         $datos = $this->cajaModel->getAllContratosDatos();
 
         $this->authRequired();
         $this->view('caja.index', ['contratos' => $datos]);
 
-        $tiempoFin = microtime(true);
-        $tiempoEjecucion = $tiempoFin - $tiempoInicio;
+        // $tiempoFin = microtime(true);
+        // $tiempoEjecucion = $tiempoFin - $tiempoInicio;
 
-        error_log("Tiempo de ejecución de CAJA/Contratos: " . number_format($tiempoEjecucion, 2) . " segundos.");
+        // error_log("Tiempo de ejecución de CAJA/Contratos: " . number_format($tiempoEjecucion, 2) . " segundos.");
     }
 
     // MEOTOD QUE ME MEUSTRA LA VISTA DE REPORTES POR FECHA:
 
     public function indexReporteByFecha()
     {
+        $this->authRequired();
         $this->view('caja.reporte-by-fechas');
     }
 
 
     public function cronogramaByContrato(int $id): void
     {
+        $this->authRequired();
         // Iniciar el cronómetro para medir el rendimiento
-        $tiempoInicio = microtime(true);
+        // $tiempoInicio = microtime(true);
 
         // Definir la ruta del archivo de caché y el tiempo de vida (TTL)
         $cacheFile = __DIR__ . "/../../storage/cache/cronograma-contratos/cronograma-contrato{$id}.json";
@@ -55,7 +57,7 @@ class CajaController extends Controller
         if (file_exists($cacheFile) && (filemtime($cacheFile) + $ttl > time())) {
             // El archivo de caché existe y no ha expirado
             $datos = json_decode(file_get_contents($cacheFile), true);
-            error_log("Datos de CAJA/CRONOGRAMA cargados desde la caché para ID: {$id}");
+            // error_log("Datos de CAJA/CRONOGRAMA cargados desde la caché para ID: {$id}");
         } else {
             // Si no hay caché, ejecutar la consulta a la base de datos
             $datos = $this->cajaModel->getCronogramaByIdContrato($id);
@@ -65,24 +67,25 @@ class CajaController extends Controller
                 mkdir(dirname($cacheFile), 0777, true);
             }
             file_put_contents($cacheFile, json_encode($datos));
-            error_log("Datos de CAJA/CRONOGRAMA obtenidos de la BD y guardados en caché para ID: {$id}");
+            // error_log("Datos de CAJA/CRONOGRAMA obtenidos de la BD y guardados en caché para ID: {$id}");
         }
 
         // Renderizar la vista con los datos
         $this->view('caja.cronograma', ['cronograma' => $datos]);
 
         // Detener el cronómetro y calcular el tiempo
-        $tiempoFin = microtime(true);
-        $tiempoEjecucion = $tiempoFin - $tiempoInicio;
+        // $tiempoFin = microtime(true);
+        // $tiempoEjecucion = $tiempoFin - $tiempoInicio;
 
         // Registrar el tiempo de ejecución en el log
-        error_log("Tiempo de ejecución de CAJA/CRONOGRAMA: " . number_format($tiempoEjecucion, 4) . " segundos.");
+        // error_log("Tiempo de ejecución de CAJA/CRONOGRAMA: " . number_format($tiempoEjecucion, 4) . " segundos.");
     }
 
 
 
     public function getReporteIngresosCajaHoy()
     {
+        $this->authRequired();
         header('Content-Type: application/json');
         $transacciones = $this->cajaModel->getReporteIngresosHoy();
 
@@ -119,23 +122,24 @@ class CajaController extends Controller
 
         exit();
     }
-    
+
 
     public function reportePagosByFecha()
     {
+        $this->authRequired();
         header('Content-Type: application/json');
 
         $fechaInicio = $_GET['fecha_inicio'] ?? null;
         $fechaFin = $_GET['fecha_fin'] ?? null;
 
-    
+
         if (!$fechaInicio || !$fechaFin) {
-            http_response_code(400); 
+            http_response_code(400);
             echo json_encode(['error' => 'Fechas de inicio y fin son requeridas.']);
             exit();
         }
 
-        
+
         $datos = $this->cajaModel->getReporteByFecha($fechaInicio, $fechaFin);
 
         if ($datos) {
@@ -144,8 +148,8 @@ class CajaController extends Controller
                 'data' => $datos
             ]);
         } else {
-            
-            http_response_code(404); 
+
+            http_response_code(404);
             echo json_encode([
                 'success' => false,
                 'data' => [],

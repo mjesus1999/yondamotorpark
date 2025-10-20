@@ -28,11 +28,13 @@ class EmpresaController extends Controller
 
     public function createEmpresaClient(): void
     {
+        $this->authRequired();
         $this->view('/clientes/empresas.create');
     }
 
     public function storeEmpresaClient(): int
     {
+        $this->authRequired();
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->redirect('/clientes/createempresaclient');
             return 0; // Error en el método
@@ -109,7 +111,6 @@ class EmpresaController extends Controller
             $cliente = [
                 'idpersona' => null,
                 'idempresa' => $idEmpresa,
-                // 'idcolregistra' => null,
                 'idcolactualiza' => null,
                 'tipocliente' => 'E'
             ];
@@ -133,6 +134,7 @@ class EmpresaController extends Controller
 
     public function edit(int $id): void
     {
+        $this->authRequired();
         $empresa = $this->empresaModel->getById($id);
         if ($empresa) {
             $this->view('clientes/empresas.edit', ['empresaCliente' => $empresa]);
@@ -143,6 +145,7 @@ class EmpresaController extends Controller
     }
     public function update(int $id): void
     {
+        $this->authRequired();
         if ($_SERVER['REQUEST_METHOD'] !== 'POST')
             return;
 
@@ -224,6 +227,7 @@ class EmpresaController extends Controller
      */
     public function searchByRUCApi(): void
     {
+        $this->authRequired();
         header('Content-Type: application/json; charset=utf-8');
 
         if (!in_array($_SERVER['REQUEST_METHOD'], ['GET', 'POST'])) {

@@ -40,7 +40,7 @@ class EgresoController extends Controller
 
     public function indexReporteByFecha(): void
     {
-
+        $this->authRequired();
         $this->view('egresos.reporteByFecha');
     }
 
@@ -48,6 +48,7 @@ class EgresoController extends Controller
 
     public function indexAjuntarComprobante(): void
     {
+        $this->authRequired();
         $this->view('egresos.adjuntarComprobante');
     }
 
@@ -62,6 +63,7 @@ class EgresoController extends Controller
 
     public function store(): void
     {
+        $this->authRequired();
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             http_response_code(405);
             echo json_encode(['success' => false, 'message' => 'Método no permitido.']);
@@ -199,6 +201,7 @@ class EgresoController extends Controller
 
     public function validarComprobante($id): void
     {
+        $this->authRequired();
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             http_response_code(405);
             echo json_encode(['success' => false, 'message' => 'Método no permitido.']);
@@ -228,6 +231,7 @@ class EgresoController extends Controller
 
     public function getConceptosEgreso(): void
     {
+        
         header('Content-Type: application/json');
         $this->authRequired();
         $data = $this->egresoModel->getConceptosEgreso();

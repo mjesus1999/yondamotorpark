@@ -273,10 +273,10 @@
                 "es-es": {
                     "pagination": {
                         "page_size": "Registros por página",
-                        "first": "Primero",
-                        "last": "Último",
-                        "prev": "Anterior",
-                        "next": "Siguiente",
+                        "first": "<<",
+                        "last": ">>",
+                        "prev": "<",
+                        "next": ">",
                     }
                 }
             },

@@ -21,7 +21,7 @@
     <button id="btnExportPDF">Exportar PDF</button>
  -->
 
-    <div class="input-group mb-2">
+    <div class="input-group mb-4">
         <span class="input-group-text">
             <i class="bi bi-search"></i>
         </span>
@@ -62,6 +62,7 @@
         movableColumns: true,
 
         columns: [
+            {formatter: "responsiveCollapse",width: 40,minWidth: 30,hozAlign: "center",resizable: false,headerSort: false},
             {title: "#", formatter: "rownum", hozAlign: "center", width: 40, responsive: 10},
             {title: "Inicio", field: "fechainicio", hozAlign: "center", minWidth: 110, responsive:10, tooltip:true},
             {title: "Día Pago", field: "diapago", hozAlign: "center", width: 70, responsive:10,tooltip:true},

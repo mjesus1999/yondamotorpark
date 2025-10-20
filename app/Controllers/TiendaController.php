@@ -18,6 +18,7 @@ class TiendaController extends Controller
 
     public function store(): int
     {
+        $this->authRequired();
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             http_response_code(405);
             echo json_encode(['success' => false, 'message' => 'Método no permitido']);
@@ -80,6 +81,7 @@ class TiendaController extends Controller
 
     public function edit(int $id) : void {
 
+        $this->authRequired();
         header('Content-Type: application/json');
 
         $tienda =$this->tiendaModel->getTiendasById($id);
@@ -94,7 +96,7 @@ class TiendaController extends Controller
 
     // Enviar los datos 
     public function update($id):int {
-        
+        $this->authRequired();
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             http_response_code(405);
             echo json_encode(['success' => false, 'message' => 'Método no permitido']);
@@ -171,6 +173,7 @@ class TiendaController extends Controller
 
 
     public function delete($id): void {
+        $this->authRequired();
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           if ($this->tiendaModel->delete($id) > 0) {
                         echo json_encode(["success" => true, "message" => "Tienda eliminada"]);
@@ -188,6 +191,7 @@ class TiendaController extends Controller
     // BUSCAR LAS TIENDAS DE UN CONCESIONARIO POR ID.
     public function searchTiendaByConcesionario($id): void
     {
+        $this->authRequired();
 
         header('Content-Type: application/json');
 

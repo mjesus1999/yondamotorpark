@@ -28,11 +28,13 @@ class PersonaController extends Controller
 
     public function createPersonClient(): void
     {
+        $this->authRequired();
         $this->view('clientes.create');
     }
 
     public function storePersonaClient(): void
     {
+        $this->authRequired();
         // Detectar si la petición es AJAX
         $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
 
@@ -141,6 +143,7 @@ class PersonaController extends Controller
 
     public function edit(int $id): void
     {
+        $this->authRequired();
         $personaCliente = $this->personaModel->getById($id);
         if ($personaCliente) {
             $this->view('clientes.edit', ['personaCliente' => $personaCliente]);
@@ -152,6 +155,7 @@ class PersonaController extends Controller
 
     public function update(int $id): void
     {
+        $this->authRequired();
         if ($_SERVER['REQUEST_METHOD'] !== 'POST')
             return;
 
@@ -202,6 +206,7 @@ class PersonaController extends Controller
 
     public function store(): void
     {
+        $this->authRequired();
         // Solo aceptamos POST
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->redirect('/usuarios/create');
@@ -316,6 +321,7 @@ class PersonaController extends Controller
      */
     public function searchByDNIApi(): void
     {
+        $this->authRequired();
         header('Content-Type: application/json; charset=utf-8');
 
         // Verificar que sea una petición GET o POST
@@ -390,6 +396,7 @@ class PersonaController extends Controller
      */
     public function searchByDNI(): void
     {
+        $this->authRequired();
         header('Content-Type: application/json; charset=utf-8');
         $dni = trim($_GET['dni'] ?? '');
         if ($dni === '') {

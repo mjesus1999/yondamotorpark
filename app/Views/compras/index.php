@@ -23,6 +23,19 @@
     <div id="lista-oc">
         <div class="card">
             <div class="card-body">
+                <div class="input-group mb-4">
+                    <span class="input-group-text">
+                        <i class="bi bi-search"></i>
+                    </span>
+                    <input
+
+                        type="text"
+                        id="busqueda-global"
+                        class="form-control"
+                        placeholder="Buscar ....">
+                </div>
+
+
                 <!-- Aquí Tabulator dibuja la tabla -->
                 <div id="tabla-compras"></div>
             </div>
@@ -96,6 +109,15 @@
             paginationSize: 10,
             paginationSizeSelector: [10, 25, 50, 100],
             columns: [{
+                    formatter: "responsiveCollapse",
+                    width: 40,
+                    minWidth: 30,
+                    hozAlign: "center",
+                    resizable: false,
+                    headerSort: false,
+                    responsive: 0 // Siempre visible
+                },
+                {
                     title: "#",
                     formatter: 'rownum',
                     width: 60,
@@ -108,8 +130,8 @@
                     field: "razon_concesionario",
                     minWidth: 150,
                     responsive: 0, // Siempre visible
-                    headerFilter: "input",
-                    headerFilterPlaceholder: "Buscar..."
+                    // headerFilter: "input",
+                    // headerFilterPlaceholder: "Buscar..."
                 },
                 {
                     title: "Fecha entrega",
@@ -187,13 +209,13 @@
                 "es-es": {
                     "pagination": {
                         "page_size": "Registros por página",
-                        "first": "Primero",
+                        "first": "<<",
                         "first_title": "Primera página",
-                        "last": "Último",
+                        "last": ">>",
                         "last_title": "Última página",
-                        "prev": "Anterior",
+                        "prev": "<",
                         "prev_title": "Página anterior",
-                        "next": "Siguiente",
+                        "next": ">",
                         "next_title": "Página siguiente",
                         "all": "Todos",
                         "counter": {
@@ -221,6 +243,28 @@
                 row.getElement().style.cursor = "pointer";
             }
         });
+
+        
+        const searchInput = document.getElementById("busqueda-global");
+        if (searchInput) {
+            searchInput.addEventListener("keyup", function(e) {
+                const value = e.target.value;
+                if (value === "") {
+                    tablaCompras.clearFilter();
+                } else {
+                    tablaCompras.setFilter([
+                        [{
+                                field: "razon_concesionario",
+                                type: "like",
+                                value: value
+                            }
+                        
+
+                        ]
+                    ]);
+                }
+            });
+        }
 
 
         document.addEventListener("click", (e) => {

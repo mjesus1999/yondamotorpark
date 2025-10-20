@@ -186,7 +186,7 @@ include __DIR__ . '/../layout/header.php';
     document.addEventListener("DOMContentLoaded", () => {
 
         const datos = <?= json_encode($personClientes) ?>;
-        console.log('PERSONAS: ', datos)
+
 
         const tabla = new Tabulator("#tabla-clientes-personas", {
             data: datos,
@@ -260,10 +260,10 @@ include __DIR__ . '/../layout/header.php';
                 "es-es": {
                     "pagination": {
                         "page_size": "Registros por página",
-                        "first": "Primero",
-                        "last": "Último",
-                        "prev": "Anterior",
-                        "next": "Siguiente",
+                        "first": "<<",
+                        "last": ">>",
+                        "prev": "<",
+                        "next": ">",
                     }
                 }
             },

@@ -172,7 +172,7 @@
 
         formularioClienteEmpresa.addEventListener('submit', async (event) => {
             event.preventDefault();
-            if (await ask("¿Desea actualizar este cliente?", "Actualizar cliente")) {
+            if (await ask("¿Desea actualizar este cliente?", "Clientes empresas")) {
 
                 event.target.submit();
 

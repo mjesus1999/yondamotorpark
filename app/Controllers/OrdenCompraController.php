@@ -32,6 +32,7 @@ class OrdenCompraController extends Controller
     // METODO QUE LLEVARA A LA VISTA PARA REGISTRAR LOS PAGOS
     public function indexPagos($idorden): void
     {
+        $this->authRequired();
         $idorden = (int)$idorden;
 
 
@@ -68,11 +69,13 @@ class OrdenCompraController extends Controller
     // Me llevará a la vista de crear
     public function create(): void
     {
+        $this->authRequired();
         $this->view('oc.create');
     }
 
     public function store(): int
     {
+        $this->authRequired();
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             http_response_code(405);
             echo json_encode(['success' => false, 'message' => 'Método no permitido']);
@@ -127,6 +130,7 @@ class OrdenCompraController extends Controller
     // METODO PARA CAMBIAR EL ESTADO  EN LA TABAL OC  = 'PROCESO,ANULADO'
     public function setEstado($estado, $idOC): void
     {
+        $this->authRequired();
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             http_response_code(405);
             echo json_encode(['success' => false, 'message' => 'Método no permitido']);
@@ -157,6 +161,7 @@ class OrdenCompraController extends Controller
     // ACTUALIZA SI ES CORRECTO 
     public function update($idOC): int
     {
+        $this->authRequired();
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             http_response_code(405);
             echo json_encode(['success' => false, 'message' => 'Método no permitido']);
@@ -206,6 +211,7 @@ class OrdenCompraController extends Controller
 
     public function searchtDetOCByIdOc($idOC): void
     {
+        $this->authRequired();
         header('Content-Type: application/json');
         $ocDet = $this->ordenCompraModel->getDetOCByIdOC($idOC);
 
@@ -273,6 +279,7 @@ class OrdenCompraController extends Controller
 
     public function searchInfoAutos($idOC)
     {
+        $this->authRequired();
         header('Content-Type: application/json');
         $infoAuto = $this->ordenCompraModel->getInfoAutosOC($idOC);
 
@@ -287,6 +294,7 @@ class OrdenCompraController extends Controller
 
     public function getReporteOCProceso(): void
     {
+        $this->authRequired();  
         header('Content-Type: application/json');
         try {
             $data = $this->ordenCompraModel->getReporteOCProceso();

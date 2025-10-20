@@ -2,7 +2,18 @@
 
 <link href="https://unpkg.com/tabulator-tables@5.5.2/dist/css/tabulator_simple.min.css" rel="stylesheet">
 <link rel="stylesheet" href="/assets/css/tabulator.css">
+<style>
+    #tabla-vehiculos-recepcion {
+  padding: 0 !important;
+  margin: 0 !important;
+}
 
+#tabla-vehiculos-recepcion .tabulator {
+  border: none !important;
+  width: 100% !important;
+}
+
+</style>
 <div class="container-fluid">
     <div class="alert alert-info mt-2" role="alert">
         <div class="row">
@@ -17,56 +28,8 @@
         </div>
     </div>
 
-    <div class="row d-none d-md-block">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-sm table-hover" id="tabla-vehiculos-recepcion">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Concesionario</th>
-                                    <th>Dirección Conces.</th>
-                                    <th>Emisión OC</th>
-                                    <th>Serie OC</th>
-                                    <th>Fecha compra</th>
-                                    <th>Cant. Pendientes</th>
-                                    <th>Por / Liberar</th>
-                                    <th>Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php if (empty($data)): ?>
-                                    <tr>
-                                        <td colspan="9" class="text-center">No hay datos registrados.</td>
-                                    </tr>
-                                <?php else: ?>
-                                    <?php $numeroFila = 1; ?>
-                                    <?php foreach ($data as $compras): ?>
-                                        <tr>
-                                            <td><?= htmlspecialchars($numeroFila++) ?></td>
-                                            <td><?= htmlspecialchars($compras['nombrecomercial']) ?></td>
-                                            <td><?= htmlspecialchars($compras['direccion_completa_concesionario']) ?></td>
-                                            <td><?= htmlspecialchars($compras['fecha_emision_oc']) ?></td>
-                                            <td><?= htmlspecialchars($compras['serie_oc']) ?></td>
-                                            <td><?= htmlspecialchars($compras['fechacompra']) ?></td>
-                                            <td><span class="badge bg-danger text-white"><?= htmlspecialchars($compras['vehiculos_pendientes']) ?></span></td>
-                                            <td><span class="badge bg-info text-white"><?= htmlspecialchars($compras['listos_para_liberar']) ?></span></td>
-                                            <td>
-                                                <a href="/recepcionVehiculos/edit/<?= htmlspecialchars($compras['idcompra']) ?>" title="Llevará a la vista de recepción de vehículos">
-                                                    <i class="fa-solid fa-book fs-5" style="color: #40cbf5ff;"></i>
-                                                </a>
-                                            </td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                <?php endif; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <div class="row d-none d-md-block mt-5">
+       <div id="tabla-vehiculos-recepcion"></div>
     </div>
 
     <div class="row d-md-none">
@@ -118,82 +81,46 @@
 <?php include __DIR__ . '/../layout/footer.php'; ?>
 <script src="https://unpkg.com/tabulator-tables@5.5.2/dist/js/tabulator.min.js"></script>
 
-
 <script>
-    const tablaVehiculos = new Tabulator("#tabla-vehiculos-recepcion", {
-        layout: "fitColumns",
-        pagination: "local",
-        paginationSize: 10,
-        responsiveLayout: "collapse",
-        paginationSizeSelector: [5, 10, 20],
-        columns: [{
-                title: "#",
-                field: "#",
-                width:20
-            },
-            {
-                title: "Concesionario",
-                field: "Concesionario",
-             minWidth:180,
-             tooltip:true,
-            },
-            {
-                title: "Dirección Conces.",
-                field: "direccion_completa_concesionario",
-                      minWidth:350,
-                      tooltip:true,
-            },
-            {
-                title: "Emisión OC",
-                field: "Emisión OC",
-                width:150,
-                tooltip:true,
-            },
-            {
-                title: "Serie OC",
-                field: "Serie OC",
-                  width:150,
-                  tooltip:true,
-            },
-            {
-                title: "Fecha compra",
-                field: "Fecha compra",
-                  width:150,
-                  tooltip:true,
-            },
-            {
-                title: "Cant. Pendientes",
-                field: "vehiculos_pendientes'",
-                formatter: "html",
-                   width:150,
-                   tooltip:true,
-            },
-            {
-                title: "Por / Liberar",
-                field: "listos_por_liberar",
-                formatter: "html",
-                   width:150,
-                   tooltip:true,
-            },
-            {
-                title: "Acciones",
-                field: "Acciones",
-                formatter: "html",
-                minWidth:150,
-                  
-            }
-        ],
-        locale: "es-es",
-        langs: {
-            "es-es": {
-                "pagination": {
-                    "page_size": "Registros por página",
-                    "first": "Primero",
-                    "last": "Último",
-                    "prev": "Anterior",
-                    "next": "Siguiente",
-                }
-            }
-        }
-    });
+  const data = <?= json_encode($data) ?>;
+
+  const tablaVehiculos = new Tabulator("#tabla-vehiculos-recepcion", {
+    data,
+    layout: "fitColumns",
+    pagination: "local",
+    paginationSize: 10,
+    paginationSizeSelector: [5, 10, 20],
+    responsiveLayout: "collapse",
+    columns: [
+      { title: "#", field: "numero", width: 50 },
+      { title: "Concesionario", field: "nombrecomercial" },
+      { title: "Dirección Conces.", field: "direccion_completa_concesionario", minWidth: 300 },
+      { title: "Emisión OC", field: "fecha_emision_oc" },
+      { title: "Serie OC", field: "serie_oc" },
+      { title: "Fecha compra", field: "fechacompra" },
+      { title: "Cant. Pendientes", field: "vehiculos_pendientes", formatter: "html" },
+      { title: "Por / Liberar", field: "listos_para_liberar", formatter: "html" },
+      { title: "Acciones", field: "acciones", formatter: (cell) => {
+          const data = cell.getRow().getData();
+          return `<a href="/recepcionVehiculos/edit/${data.idcompra}" title="Llevará a la vista de recepción de vehículos">
+                    <i class="fa-solid fa-book fs-5" style="color: #40cbf5ff;"></i>
+                    
+                  </a>`;
+
+        
+      }},
+    ],
+    locale: "es-es",
+    langs: {
+      "es-es": {
+        pagination: {
+          page_size: "Registros por página",
+          first: "<<",
+          last: ">>",
+          prev: "<",
+          next: ">",
+        },
+      },
+    },
+  });
 </script>

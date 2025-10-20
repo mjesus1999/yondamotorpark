@@ -30,6 +30,7 @@ class LocalController extends Controller
 
     public function store(): int
     {
+        $this->authRequired();
         // 1. Validar que la petición sea POST
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             return 0; // Errror en el método
@@ -91,6 +92,7 @@ class LocalController extends Controller
 
     public function edit(int $id): void
     {
+        $this->authRequired();
         header('Content-Type: application/json');
         $local = $this->localModel->getById($id);
         if ($local) {
@@ -104,6 +106,7 @@ class LocalController extends Controller
 
     public function update(int $id): void
     {
+        $this->authRequired();
         header('Content-Type: application/json');
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $responsable = trim($_POST['responsable'] ?? '');
@@ -148,6 +151,7 @@ class LocalController extends Controller
 
     public function delete(int $id): void
     {
+        $this->authRequired();
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($this->localModel->disable($id) > 0) {
                 $this->redirect('/locales');
@@ -178,6 +182,7 @@ class LocalController extends Controller
      */
     public function apiGetLocales()
     {
+        $this->authRequired();
         header('Content-Type: application/json');
         $locales = $this->localModel->getAllLocales();
 

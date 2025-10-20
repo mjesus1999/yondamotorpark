@@ -17,11 +17,13 @@ class ContratoController extends Controller
 
     public function index()
     {
+        $this->authRequired();
         $this->view("contratos.index");
     }
 
     public function store()
     {
+        $this->authRequired();
         header("Content-Type: application/json");
 
         try {
@@ -78,6 +80,7 @@ class ContratoController extends Controller
 
     public function disabledContrato()
     {
+        $this->authRequired();
         header("Content-Type: application/json");
         $idcontrato = $_POST["idcontrato"] ?? null;
 
@@ -96,6 +99,7 @@ class ContratoController extends Controller
 
     public function apiGetContratos()
     {
+        $this->authRequired();
         header("Content-Type: application/json");
 
         $contratos = $this->contratoModel->getAll();

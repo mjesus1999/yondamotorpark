@@ -19,6 +19,7 @@ class EntregaDineroController extends Controller
     public function index(): void
     {
         try {
+            $this->authRequired();
 
             $entregas = $this->entregaDineroModel->listarResumen();
 
@@ -26,7 +27,7 @@ class EntregaDineroController extends Controller
             $this->view('arqueo-caja.entregas', ['entregas' => $entregas]);
         } catch (Exception $e) {
 
-            error_log($e->getMessage());
+            // error_log($e->getMessage());
             $this->view('errors.404', ['message' => 'Error al cargar el reporte de entregas.']);
         }
     }
@@ -34,6 +35,7 @@ class EntregaDineroController extends Controller
     public function detalle(int $identrega): void
     {
 
+        $this->authRequired();
         header('Content-Type: application/json');
 
         try {

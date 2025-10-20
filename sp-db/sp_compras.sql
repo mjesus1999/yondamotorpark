@@ -70,4 +70,4 @@ END //
 DELIMITER ;
 
 
-CALL sp_detalle_oc_por_concesionario(7);
+CALL sp_detalle_oc_por_concesionario(1);

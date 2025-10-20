@@ -450,7 +450,7 @@
                         const id = cell.getRow().getData().idvehiculo;
                         return `
                              <button class="btn btn-sm btn-VerPDF" data-id="${id}" data-action="verPDF">
-                               <i class="bi bi-filetype-pdf text-danger fs-5" data-id="${id}" data-action="verPDF"></i>
+                               <i class="bi bi-filetype-pdf text-danger fs-5" data-id="${id}" data-action="verPDF" title="Generar PDF"></i>
                              </button>
                     
                     `;

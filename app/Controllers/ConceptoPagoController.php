@@ -20,6 +20,7 @@ class ConceptoPagoController extends Controller
 
     public function getConceptosPago(): void
     {
+        $this->authRequired();
         header('Content-Type: application/json');
 
         $conceptos = $this->conceptoPagoModel->getConceptos();

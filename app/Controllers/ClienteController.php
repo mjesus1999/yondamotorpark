@@ -20,6 +20,7 @@ class ClienteController extends Controller
 
     public function delete($id): void
     {
+        $this->authRequired();
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $result = $this->clienteModel->disabled($id);
@@ -41,6 +42,7 @@ class ClienteController extends Controller
 
     public function searchCliente($id): void
     {
+        $this->authRequired();
 
         header('Content-Type: application/json; charset=utf-8');
 

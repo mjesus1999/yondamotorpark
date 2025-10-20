@@ -1,6 +1,5 @@
 <?php include __DIR__ . '/../layout/header.php'; ?>
 
-
 <style>
     .highlight-row {
         background: #ffeaa7 !important;

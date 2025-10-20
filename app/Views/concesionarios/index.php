@@ -1,4 +1,6 @@
 <?php include __DIR__ . '/../layout/header.php'; ?>
+<link href="https://unpkg.com/tabulator-tables@5.5.2/dist/css/tabulator_simple.min.css" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/tabulator.css">
 
 <div class="container-fluid">
   <div class="alert alert-info mt-2" role="alert">
@@ -25,54 +27,7 @@
 
           <!-- Vista de escritorio -->
           <div class="table-responsive d-none d-md-block">
-            <table class="table table-sm table-bordered table-hover" id="tabla-concesionarios">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Nombre comercial</th>
-                  <th>Razón social</th>
-                  <th>RUC</th>
-                  <th>Acciones</th>
-                </tr>
-              </thead>
-              <tbody class="table-group-divider">
-                <?php if (empty($concesionarios)): ?>
-                  <tr>
-                    <td colspan="5" class="text-center">No hay concesionarios registrados.</td>
-                  </tr>
-                <?php else: ?>
-                  <?php $numeroFila = 1; ?>
-                  <?php foreach ($concesionarios as $concesionario): ?>
-                    <tr>
-                      <td><?= htmlspecialchars($numeroFila++) ?></td>
-                      <td><?= htmlspecialchars($concesionario['nombrecomercial']) ?></td>
-                      <td><?= htmlspecialchars($concesionario['razonsocial']) ?></td>
-                      <td><?= htmlspecialchars($concesionario['ruc']) ?></td>
-                      <td>
-                        <div class="d-flex gap-1">
-                          <a href="#" title="Editar nombre comercial"
-                            data-idconcesionario="<?= htmlspecialchars($concesionario['idconcesionario']) ?>"
-                            data-nombrecomercial="<?= htmlspecialchars($concesionario['nombrecomercial']) ?>"
-                            class="btn btn-sm btn-outline-primary edit">
-                            <i class="fa-solid fa-pen"></i>
-                          </a>
-                          <a href="#" title="Eliminar"
-                            data-idconcesionario="<?= htmlspecialchars($concesionario['idconcesionario']) ?>"
-                            class="btn btn-sm btn-outline-danger delete">
-                            <i class="fa-solid fa-trash"></i>
-                          </a>
-                          <a href="/concesionarios/gestionar/<?= htmlspecialchars($concesionario['ruc']) ?>"
-                            title="Ver tiendas"
-                            class="btn btn-sm btn-outline-secondary">
-                            <i class="fa-solid fa-shop"></i>
-                          </a>
-                        </div>
-                      </td>
-                    </tr>
-                  <?php endforeach; ?>
-                <?php endif; ?>
-              </tbody>
-            </table>
+            <div id="tabla-concesionarios"></div>
           </div>
 
           <!-- Vista móvil (acordeón) -->
@@ -158,26 +113,63 @@
   </div>
   <?php include __DIR__ . '/../layout/footer.php'; ?>
   <script src="https://cdn.jsdelivr.net/npm/simple-datatables@9.0.3"></script>
+  <script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.5.2/dist/js/tabulator.min.js"></script>
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      const tablaConcesionarios = document.querySelector('#tabla-concesionarios');
+      const data = <?php echo json_encode($concesionarios); ?>;
+     
       const cardBody = document.querySelector('.card-body');
       const modalConcesionario = new bootstrap.Modal(document.getElementById('modal-concesionario'));
       const formulario = document.querySelector('#formulario-concesionario');
       const inputNombreComercial = document.querySelector('#nombre-comercial');
 
-      let datatable = new DataTable(tablaConcesionarios, {
-        language: {
-          search: "Buscar:",
-          lengthMenu: "Mostrar _MENU_ registros por página",
-          info: "Mostrando página _PAGE_ de _PAGES_",
-          infoEmpty: "No hay registros disponibles",
-          infoFiltered: "(filtrado de _MAX_ registros totales)",
-          emptyTable: "No hay datos disponibles en la tabla",
-          zeroRecords: "No se encontraron resultados"
-        }
+
+      const tablaConcesionarios = new Tabulator("#tabla-concesionarios", {
+        data: data,
+        layout: "fitColumns",
+        columns: [
+          { title: "#", formatter: 'rownum',width: 60, responsive: 0, headerSort: false, hozAlign: "center" },
+          { title: "Nombre comercial", field: "nombrecomercial", headerFilter: "input" },
+          { title: "Razón social", field: "razonsocial", headerFilter: "input" },
+          { title: "RUC", field: "ruc", headerFilter: "input" },
+          {
+            title: "Acciones",
+            field: "acciones",
+            hozAlign: "center",
+            formatter: function(cell, formatterParams) {
+              const id = cell.getRow().getData().idconcesionario;
+              const nombrecomercial = cell.getRow().getData().nombrecomercial;
+              return `
+                <div class="d-flex gap-1 justify-content-center">
+                  <a href="#" title="Editar nombre comercial"
+                    data-idconcesionario="${id}"
+                    data-nombrecomercial="${nombrecomercial}"
+                    class="btn btn-sm btn-outline-primary edit">
+                    <i class="fa-solid fa-pen"></i>
+                  </a>
+                  <a href="#" title="Eliminar"
+                    data-idconcesionario="${id}"
+                    class="btn btn-sm btn-outline-danger delete">
+                    <i class="fa-solid fa-trash"></i>
+                  </a>
+                  <a href="/concesionarios/gestionar/${cell.getRow().getData().ruc}"
+                    title="Ver tiendas"
+                    class="btn btn-sm btn-outline-secondary">
+                    <i class="fa-solid fa-shop"></i>
+                  </a>
+                </div>
+              `;
+            }, width: 200, hozAlign: "center", headerSort: false
+          }
+        ],
+
       });
+
+
+
+   
+
 
 
       let idActual = null;
@@ -223,8 +215,9 @@
 
       // Eliminar concesionario
       const eliminarConcesionario = async (id) => {
-        if (!confirm("¿Seguro que desea eliminar este concesionario?")) return;
 
+        if(!await ask('¿Está seguro de que desea eliminar este concesionario?')) return;
+   
         try {
           const res = await fetch(`/concesionarios/delete/${id}`, {
             method: 'POST'

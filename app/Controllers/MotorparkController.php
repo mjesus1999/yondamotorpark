@@ -8,35 +8,34 @@ use App\Models\Motorpark;
 
 class MotorparkController extends Controller
 {
-    private Motorpark $motorParkModel;
+  private Motorpark $motorParkModel;
 
-    public function __construct()
-    {
-        $this->motorParkModel = new Motorpark();
-    }
+  public function __construct()
+  {
+    $this->motorParkModel = new Motorpark();
+  }
 
-    public function index(): void
-    {
-        // $locales = $this->motorParkModel->getMotorPark();
-        // $this->view('locales.index', ['locales' => $locales]);
-    }
+  public function index(): void
+  {
+    // $locales = $this->motorParkModel->getMotorPark();
+    // $this->view('locales.index', ['locales' => $locales]);
+  }
 
 
-    // SE USARA PARA API:
+  // SE USARA PARA API:
 
-    public function getMotorPark(): void{
+  public function getMotorPark(): void
+  {
     header('Content-Type: application/json');
     $this->authRequired();
     $motorpark = $this->motorParkModel->getMotorPark();
 
-    if ($motorpark){
+    if ($motorpark) {
       echo json_encode(['success' => true, 'motorpark' => $motorpark]);
-    }else{
+    } else {
       http_response_code(404);
       echo json_encode(['success' => false, 'message' => 'No se encontro motorpark']);
     }
     exit();
   }
-
-
 }

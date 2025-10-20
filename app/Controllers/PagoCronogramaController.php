@@ -37,6 +37,7 @@ class PagoCronogramaController extends Controller
 
     private function esCuotaHabilitadaParaPago(int $idContrato, int $idCronograma): bool
     {
+        $this->authRequired();
         $cronograma = $this->cajaModel->getCronogramaByIdContrato($idContrato);
         $primeraCuotaPendienteId = null;
         foreach ($cronograma as $cuota) {
@@ -57,7 +58,7 @@ class PagoCronogramaController extends Controller
 
     private function guardarComprobante(array $archivo): ?string
     {
-
+        $this->authRequired();
         if (!isset($archivo['error']) || is_array($archivo['error'])) {
             return null;
         }
@@ -86,6 +87,7 @@ class PagoCronogramaController extends Controller
 
     public function store(): void
     {
+        $this->authRequired();
         header('Content-Type: application/json');
 
         try {
@@ -303,6 +305,7 @@ class PagoCronogramaController extends Controller
     // TRAER LOS NUMEROS DE CUENTAS
     public function searchNumCuentasPagos(): void
     {
+        $this->authRequired();
         header('Content-Type: application/json');
         $numCuentas = $this->pagoCronogramaModel->getNumCuentasPagos();
 

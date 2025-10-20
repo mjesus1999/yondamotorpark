@@ -20,6 +20,7 @@ class PagosOCController extends Controller
 
     public function store(): void
     {
+        $this->authRequired();
         header('Content-Type: application/json');
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {

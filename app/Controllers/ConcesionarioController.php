@@ -24,11 +24,13 @@ class ConcesionarioController extends Controller
 
     public function create(): void
     {
+        $this->authRequired();
         $this->view('concesionarios.create');
     }
 
     public function store(): int
     {
+        $this->authRequired();
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             http_response_code(405);
             echo json_encode(['success' => false, 'message' => 'Método no permitido']);
@@ -81,6 +83,7 @@ class ConcesionarioController extends Controller
 
     public function update($id): int
     {
+        $this->authRequired();
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             http_response_code(405);
             echo json_encode(['success' => false, 'message' => 'Método no permitido']);
@@ -127,6 +130,7 @@ class ConcesionarioController extends Controller
     // Metodo que me permite ver las tiendas del concesionario.
     public function gestionar($ruc): void
     {
+        $this->authRequired();
         $concesionario = $this->concesionarioModel->getConcesionarioByRUC($ruc);
 
         if (!$concesionario || count($concesionario) === 0) {
@@ -140,6 +144,7 @@ class ConcesionarioController extends Controller
 
     public function delete($id)
     {
+        $this->authRequired();
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header('Content-Type: application/json');
 
@@ -183,6 +188,7 @@ class ConcesionarioController extends Controller
     // Retorna los datos de un Concesionario buscado mediante la api de Sunat
     public function searchRucSunat($ruc): void
     {
+        $this->authRequired();
         if (strlen($ruc) != 11) {
             http_response_code(400);
             echo json_encode(['error' => 'RUC inválido']);
@@ -214,6 +220,7 @@ class ConcesionarioController extends Controller
 
     public function searchRucDB($ruc): void
     {
+        $this->authRequired();
         header('Content-Type: application/json');
         $concesionario = $this->concesionarioModel->getConcesionarioByRUC($ruc);
 
@@ -230,6 +237,7 @@ class ConcesionarioController extends Controller
 
     public function getConcesionariosDB(): void
     {
+        $this->authRequired();
         header('Content-Type: application/json');
         $concesionarios = $this->concesionarioModel->getAll();
 
@@ -244,6 +252,7 @@ class ConcesionarioController extends Controller
 
     public function getConcesionariosWhitOCProceso(): void
     {
+        $this->authRequired();
         header('Content-Type: application/json');
         $concesionarios = $this->concesionarioModel->getConcesionariosWhitOCProceso();
         error_log('Concesionarios con OC en proceso: ' . print_r($concesionarios, true));
@@ -259,6 +268,7 @@ class ConcesionarioController extends Controller
 
     public function getReporteByConcesionario(INT $id): void
     {
+        $this->authRequired();
         header('Content-Type: application/json');
 
         $datos = $this->concesionarioModel->getReporteConcesionarioDetallado($id);

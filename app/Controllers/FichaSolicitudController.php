@@ -19,6 +19,7 @@ class FichaSolicitudController extends Controller
 
     public function index($id)
     {
+        $this->authRequired();
         $datosCotizacion = $this->fichaSolicitudModel->getDatosCotizacion($id);
         $this->view('cotizacion.ficha', ['infoFicha' => $datosCotizacion]);
     }
@@ -26,6 +27,7 @@ class FichaSolicitudController extends Controller
 
     public function storePersona()
     {
+        $this->authRequired();
         header('Content-Type: application/json; charset=utf-8');
         $data = array_map([Validador::class, 'limpiar'], $_POST);
 
@@ -66,6 +68,7 @@ class FichaSolicitudController extends Controller
 
     public function storeFicha()
     {
+        $this->authRequired();
         header('Content-Type: application/json; charset=utf-8');
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -146,7 +149,7 @@ class FichaSolicitudController extends Controller
                     'id' => $idFicha
                 ]);
 
-                error_log('DATOOS DE LA COTIZACION: ' .$registro['estado'].$idFicha);
+                // error_log('DATOOS DE LA COTIZACION: ' .$registro['estado'].$idFicha);
 
                 switch (strtolower(trim($registro['estado']))) {
                     case 'aprobado':
@@ -201,6 +204,7 @@ class FichaSolicitudController extends Controller
 
     public function searchPersonaByDNI(string $dni)
     {
+        $this->authRequired();
         header('Content-Type: application/json; charset=utf-8');
 
         $persona = $this->fichaSolicitudModel->searchPersonaByDNI($dni);
@@ -214,6 +218,8 @@ class FichaSolicitudController extends Controller
 
     public function searchPersonaByReniec(string $dni): void
     {
+        $this->authRequired();
+   
         try {
             require_once __DIR__ . '/../Helpers/Api_dni.php';
             // Capturar la salida de la función
