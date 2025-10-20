@@ -4,7 +4,7 @@
  * @param {string} modulo Módulo de la aplicación desde donde se genera (créditos, clientes, ventas, etc.)
  * @returns {boolean} Retorna un valor lógico basado en una promesa
  */
-async function ask(pregunta = ``, modulo = `Yonda`){
+async function ask(pregunta = ``, modulo = `Yonda`) {
   const respuesta = await Swal.fire({
     title: pregunta,
     text: modulo,
@@ -14,8 +14,12 @@ async function ask(pregunta = ``, modulo = `Yonda`){
     cancelButtonText: 'Cancelar',
     confirmButtonColor: '#3498db',
     footer: 'Motorpark Yonda Perú App Ver. 1.0',
-    width:'24em',
-    height:'15em'
+    width: '18em',
+    height: '3em',
+    customClass: {
+      popup: 'swal-personalizado'
+    }
+
   });
 
   return respuesta.isConfirmed;
@@ -31,12 +35,12 @@ document.querySelector("#btn1").addEventListener("click", async () => {
 */
 
 //Puede ser de 4 tipos: INFO, WARNING, ERROR, SUCCESS
-function showToast(message = ``, type = `INFO`, duration = 2500, url = null){
+function showToast(message = ``, type = `INFO`, duration = 2500, url = null) {
   const bgColor = {
-    'INFO'    : '#22a6b3',
-    'WARNING' : '#f39c12',
-    'SUCCESS' : '#6ab04c',
-    'ERROR'   : '#eb4d4b'
+    'INFO': '#22a6b3',
+    'WARNING': '#f39c12',
+    'SUCCESS': '#6ab04c',
+    'ERROR': '#eb4d4b'
   };
 
   Swal.fire({
@@ -51,7 +55,7 @@ function showToast(message = ``, type = `INFO`, duration = 2500, url = null){
     showConfirmButton: false,
     background: bgColor[type]
   }).then(() => {
-    if (url != null){
+    if (url != null) {
       window.location.href = url;
     }
   });
@@ -111,7 +115,7 @@ async function confirmDelete(message = '¿Estás seguro de que quieres eliminar 
     confirmButtonText: 'Sí, eliminar',
     cancelButtonText: 'Cancelar'
   });
-  
+
   return result.isConfirmed;
 }
 
@@ -132,7 +136,7 @@ async function confirmUpdate(message = '¿Deseas actualizar este elemento?', tit
     confirmButtonText: 'Sí, actualizar',
     cancelButtonText: 'Cancelar'
   });
-  
+
   return result.isConfirmed;
 }
 

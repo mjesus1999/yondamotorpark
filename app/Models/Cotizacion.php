@@ -32,6 +32,23 @@ class Cotizacion
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function getPrecioVehiculoAlContado(int $idvehiculo): ?float
+    {
+        $sql = "SELECT precioventa FROM vehiculos WHERE idvehiculo = :idvehiculo LIMIT 1";
+
+        try {
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindValue(':idvehiculo', $idvehiculo, PDO::PARAM_INT);
+            $stmt->execute();
+
+            $precio = $stmt->fetchColumn(); 
+
+            return $precio !== false ? (float)$precio : null;
+        } catch (PDOException $e) {
+            error_log("Error en getPrecioVehiculoAlContado: " . $e->getMessage());
+            return null;
+        }
+    }
     public function getAllByAsesor(int $idasesor, string $estado): array
     {
         $query = "SELECT * FROM vwGetAllCotizacion 
@@ -201,8 +218,8 @@ class Cotizacion
             ':comprobante' => $params['comprobante'],
             ':observacion' => $params['observacion'],
             ':moneda' => $params['moneda'],
-            ':montomonedaoriginal'=> $params['montomonedaoriginal'],
-            ':tipocambioaplicado'=> $params['tipocambioaplicado'],
+            ':montomonedaoriginal' => $params['montomonedaoriginal'],
+            ':tipocambioaplicado' => $params['tipocambioaplicado'],
         ]);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
         $stmt->closeCursor();
@@ -222,7 +239,6 @@ class Cotizacion
             error_log($e->getMessage());
             return null;
         }
-       
     }
 
 

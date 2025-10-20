@@ -32,7 +32,7 @@ class Vehiculo
     }
   }
 
-  // Cambia el tipo de retorno para incluir 'false'
+
   public function getVehiculosVendidosAlContado(): array|false
   {
     $query = "CALL sp_vehiculosVendidoAlContado();";

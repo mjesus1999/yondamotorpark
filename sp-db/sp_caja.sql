@@ -1,7 +1,8 @@
 
 USE motorpark;
-
+    
 SELECT * FROM vehiculos;
+DROP PROCEDURE IF EXISTS sp_getAll_contratos_caja;
 DELIMITER $$
 CREATE PROCEDURE sp_getAll_contratos_caja()
 BEGIN 
@@ -47,11 +48,13 @@ BEGIN
 				JOIN distritos AS d ON l.iddistrito = d.iddistrito
                 JOIN provincias AS pro ON d.idprovincia = pro.idprovincia
                 JOIN departamentos AS dep ON pro.iddepartamento = dep.iddepartamento
-                WHERE con.estado  = 'ACT';
+                WHERE con.estado  = 'ACT'
+                ORDER BY con.idcontrato DESC;
                     
 END $$
-DELIMITER;
+DELIMITER ;
 
+CALL sp_getAll_contratos_caja();
 
 DROP PROCEDURE IF EXISTS sp_get_cronogramas_by_idcontrato;
 
@@ -167,6 +170,9 @@ BEGIN
 END$$
 
 DELIMITER;
+
+
+
 
 
 DELIMITER $$

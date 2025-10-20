@@ -45,7 +45,8 @@
 <?php include __DIR__ . '/../layout/footer.php'; ?>
 <script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.5.2/dist/js/tabulator.min.js"></script>
 <script>
-    document.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener("DOMContentLoaded", async () => {
+
         const table = new Tabulator("#tabla-contratos", {
         ajaxURL: "/api/contratos",
         ajaxConfig:'GET',
@@ -173,32 +174,25 @@
 
                 }
             }
-
-
         }
 
         // DELEGACIÓN DE EVENTOS
         document.getElementById("tabla-contratos").addEventListener("click", async (e) => {
             // Buscamos el botón más cercano al que se le hizo clic
             const button = e.target.closest("button[data-action]");
-
             if (!button) return;
-
             const id = button.dataset.id;
             const action = button.dataset.action;
 
 
             switch (action) {
                 case 'delete':
-                    if (await ask('¿Desactivar este contrato?', 'Confirmar')) {
+                    if (await ask('¿Desactivar este contrato?', 'Contratos')) {
                         deleteContrato(id);
                     }
                     break;
             }
         });
-
-
-
 
 
 

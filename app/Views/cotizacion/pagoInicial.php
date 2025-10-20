@@ -1,8 +1,5 @@
 <?php include __DIR__ . '/../layout/header.php'; ?>
 <link rel="stylesheet" href="/assets/css/pago-inicial.css">
-<!-- <?php var_dump($cotizacion)?> -->
-
-
 <div class="container-fluid">
 
     <div class="alert alert-info mt-2" role="alert">

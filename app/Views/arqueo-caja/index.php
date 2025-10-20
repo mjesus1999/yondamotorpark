@@ -1220,6 +1220,7 @@
 
 
                         function generatePdfArqueoSede(dataApi) {
+                           
                             if (!dataApi.success || !dataApi.reporte || !dataApi.reporte.resumen || dataApi.reporte.resumen.length === 0) {
                                 alert('No se encontraron datos válidos para la sede seleccionada.');
                                 return;

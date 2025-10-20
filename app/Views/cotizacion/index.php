@@ -702,7 +702,7 @@
         },
 
         content: [
-            { text: fechaFormateada, alignment: 'right', margin: [0, 10, 0, 20], fontSize: 10 },
+            { text: fechaFormateada, alignment: 'right', margin: [0, 2, 0, 20], fontSize: 10 },
             { text: 'CONSTANCIA DE SEPARACIÓN DE VEHÍCULO', bold: true, alignment: 'center', margin: [0, 0, 0, 15], fontSize: 12, decoration: 'underline' },
             {
                 stack: [

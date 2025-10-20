@@ -89,12 +89,10 @@ class CotizacionController extends Controller
     {
         $datos = $this->cotizacionModel->getDatosCotizacion($idCotizacion);
         $completoIncial = $this->cotizacionModel->completoInicial($idCotizacion);
-        // error_log('IDCLIENTE' . print_r($datos, true));
         $montosInfo = $this->cotizacionModel->getTotalPagadoYSaldoPendiente($idCotizacion);
         $historialPagos = $this->cotizacionModel->getHistorialPagosInicial($idCotizacion);
         $this->view('cotizacion.pagoInicial', ['cotizacion' => $datos, 'montosInfo' => $montosInfo, 'historialPagos' => $historialPagos, 'completoInicial' => $completoIncial]);
     }
-
 
 
 
@@ -188,7 +186,7 @@ class CotizacionController extends Controller
 
 
             if ($data['mediopago'] !== 'Efectivo') {
-                // Se valida directamente el array $_FILES, no la variable $registro['comprobante']
+              
                 if (!isset($_FILES['comprobante']) || $_FILES['comprobante']['error'] !== UPLOAD_ERR_OK) {
                     $errores[] = 'El archivo del comprobante es obligatorio para este medio de pago.';
                 }

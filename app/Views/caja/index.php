@@ -173,8 +173,11 @@ include __DIR__ . '/../layout/header.php';
     const btnExcel = document.querySelector('#btn-excel');
     const datos = <?= json_encode($contratos) ?>
 
-    document.addEventListener('DOMContentLoaded', async () => {
 
+
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      
         const tabla = new Tabulator('#tabla-contratos', {
             data: datos,
             pagination: "local",
@@ -859,20 +862,20 @@ include __DIR__ . '/../layout/header.php';
             const notificacion = document.createElement('div');
             notificacion.className = `alert alert-${tipo === 'success' ? 'success' : 'danger'} position-fixed`;
             notificacion.style.cssText = `
-        top: 20px;
-        right: 20px;
-        z-index: 9999;
-        min-width: 300px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    `;
+                                top: 20px;
+                                right: 20px;
+                                z-index: 9999;
+                                min-width: 300px;
+                                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                            `;
             const icono = tipo === 'success' ? 'check-circle' : 'exclamation-triangle';
             notificacion.innerHTML = `
-        <div class="d-flex align-items-center">
-            <i class="fas fa-${icono} me-2"></i>
-            <span>${mensaje}</span>
-            <button type="button" class="btn-close ms-auto" onclick="this.parentElement.parentElement.remove()"></button>
-        </div>
-    `;
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-${icono} me-2"></i>
+                        <span>${mensaje}</span>
+                        <button type="button" class="btn-close ms-auto" onclick="this.parentElement.parentElement.remove()"></button>
+                    </div>
+                `;
             document.body.appendChild(notificacion);
             setTimeout(() => {
                 if (notificacion.parentNode) {
