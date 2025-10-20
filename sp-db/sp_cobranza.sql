@@ -494,6 +494,7 @@ DELIMITER ;
 
 
 -- 9) ACTUALIZAR TELEFONO
+
 DELIMITER $$
 
 DROP PROCEDURE IF EXISTS sp_actualizar_telefono_cliente$$
@@ -600,7 +601,102 @@ DELIMITER ;
 
 
 -- 10) REPORTE PDF NOTIFICACIÓN
+DROP PROCEDURE IF EXISTS sp_get_datos_reporte_notificacion_pdf;
+DELIMITER $$
+CREATE PROCEDURE sp_get_datos_reporte_notificacion_pdf(IN p_idcontrato INT)
+BEGIN
+    SELECT 
+        -- Datos del cliente
+        CASE 
+            WHEN cl.tipocliente = 'P' THEN CONCAT(pe.apellidos, ' ', pe.nombres)
+            ELSE e.razonsocial
+        END AS nombre_cliente,
+        CASE WHEN cl.tipocliente = 'P' THEN pe.tipodoc ELSE 'RUC' END AS tipo_documento,
+        CASE WHEN cl.tipocliente = 'P' THEN pe.nrodoc ELSE e.ruc END AS numero_documento,
+        CASE 
+            WHEN cl.tipocliente = 'P' THEN CONCAT(pe.direccion, ', ', dp.distrito, ', ', pp.provincia)
+            ELSE CONCAT(e.direccion, ', ', de.distrito, ', ', peprov.provincia)
+        END AS direccion_completa,
+        
+        -- Datos del vehículo
+        ma.marca,
+        mo.modelo,
+        mo.anio AS vehiculo_anio,
+        v.color,
+        v.placa,
+        v.chasis AS numero_chasis,
+        v.seriemotor AS numero_motor,
+        
+        -- Datos del contrato
+        cnt.idcontrato,
+        cnt.fechainicio AS fecha_contrato,
+        cnt.penalidadbase AS porcentaje_penalidad,
+        cot.moneda,
+        cot.valorcuota,
+        
+        -- Datos del colaborador
+        ar.area AS colaborador_area,
+        CONCAT(SUBSTRING_INDEX(pcolab.nombres, ' ', 1), ' ', 
+               SUBSTRING_INDEX(pcolab.apellidos, ' ', 1)) AS colaborador_nombre,
+        pcolab.telprimario AS colaborador_telefono,
+        
+        -- Detalle de cuotas vencidas
+        GROUP_CONCAT(
+            DISTINCT
+            CASE
+                -- Solo tiene penalidad pendiente
+                WHEN ROUND(cr.abonocapital + cr.interes, 2) = 0 
+                     AND ROUND(IFNULL(cr.penalidad, 0), 2) > 0
+                THEN CONCAT('MORA:', MONTH(cr.fechapago), ':', 
+                           FORMAT(cr.penalidad, 2))
+                
+                -- Tiene cuota pendiente (con o sin mora)
+                WHEN ROUND(cr.abonocapital + cr.interes, 2) > 0
+                THEN CONCAT('CUOTA:', MONTH(cr.fechapago), ':', 
+                           FORMAT(cr.abonocapital + cr.interes + IFNULL(cr.penalidad, 0), 2))
+                
+                ELSE NULL
+            END
+            ORDER BY cr.fechapago
+            SEPARATOR ' || '
+        ) AS detalle_cuotas_vencidas,
+        
+        -- Estadísticas
+        COUNT(DISTINCT cr.idcronograma) AS cantidad_cuotas_vencidas,
+        ROUND(SUM(cr.abonocapital + cr.interes), 2) AS total_cuotas_vencidas,
+        ROUND(SUM(IFNULL(cr.penalidad, 0)), 2) AS total_penalidades_vencidas,
+        ROUND(SUM(cr.abonocapital + cr.interes + IFNULL(cr.penalidad, 0)), 2) AS total_deuda_vencida,
+        MIN(cr.fechapago) AS fecha_primera_vencida,
+        DATEDIFF(CURDATE(), MIN(cr.fechapago)) AS dias_atraso
+        
+    FROM contratos cnt
+    INNER JOIN cotizaciones cot ON cnt.idcotizacion = cot.idcotizacion
+    INNER JOIN clientes cl ON cot.idcliente = cl.idcliente
+    LEFT JOIN personas pe ON cl.idpersona = pe.idpersona
+    LEFT JOIN empresas e ON cl.idempresa = e.idempresa
+    LEFT JOIN distritos dp ON pe.iddistrito = dp.iddistrito
+    LEFT JOIN provincias pp ON dp.idprovincia = pp.idprovincia
+    LEFT JOIN distritos de ON e.iddistrito = de.iddistrito
+    LEFT JOIN provincias peprov ON de.idprovincia = peprov.idprovincia
+    INNER JOIN vehiculos v ON cot.idvehiculo = v.idvehiculo
+    INNER JOIN modelos mo ON v.idmodelo = mo.idmodelo
+    INNER JOIN marcas ma ON mo.idmarca = ma.idmarca
+    LEFT JOIN colaboradores colab ON cnt.idlogistica = colab.idcolaborador
+    LEFT JOIN contratoslaborales cl_colab ON colab.idcontratolaboral = cl_colab.idcontratolaboral
+    LEFT JOIN personas pcolab ON cl_colab.idpersona = pcolab.idpersona
+    LEFT JOIN cargos cg ON cl_colab.idcargo = cg.idcargo
+    LEFT JOIN areas ar ON cg.idarea = ar.idarea
+    INNER JOIN cronogramas cr ON cr.idcontrato = cnt.idcontrato
+    
+    WHERE cnt.idcontrato = p_idcontrato
+      AND cr.estado IN ('Pendiente', 'Vencido')
+      AND cr.fechapago < CURDATE()
+    
+    GROUP BY cnt.idcontrato, cl.tipocliente, pe.nrodoc, e.ruc;
+END$$
+DELIMITER ;
 
+/*
 DROP PROCEDURE IF EXISTS sp_get_datos_reporte_notificacion_pdf;
 DELIMITER $$
 CREATE PROCEDURE sp_get_datos_reporte_notificacion_pdf(IN p_idcontrato INT)
@@ -640,7 +736,8 @@ BEGIN
                SUBSTRING_INDEX(pcolab.apellidos, ' ', 1)) AS colaborador_nombre,
         pcolab.telprimario AS colaborador_telefono,
         
-        -- Detalle de cuotas vencidas (simplificado)
+        -- Detalle de cuotas vencidas
+        
         GROUP_CONCAT(
             DISTINCT CONCAT('Cuota ', cr.numcuota, ': S/', 
                 FORMAT((cr.abonocapital + cr.interes + IFNULL(cr.penalidad, 0)), 2))
@@ -682,10 +779,113 @@ BEGIN
     GROUP BY cnt.idcontrato, cl.tipocliente, pe.nrodoc, e.ruc;
 END$$
 DELIMITER ;
+*/
 
+-- CALL sp_get_datos_reporte_notificacion_pdf(8);
 
 -- 11) REPORTE PDF RECOJO VEHICULAR
 
+DROP PROCEDURE IF EXISTS sp_get_datos_reporte_recojo_vehicular_pdf;
+DELIMITER $$
+CREATE PROCEDURE sp_get_datos_reporte_recojo_vehicular_pdf(IN p_idcontrato INT)
+BEGIN
+    SELECT 
+        -- Datos del cliente
+        CASE 
+            WHEN cl.tipocliente = 'P' THEN CONCAT(pe.apellidos, ' ', pe.nombres)
+            ELSE e.razonsocial
+        END AS nombre_cliente,
+        CASE WHEN cl.tipocliente = 'P' THEN pe.tipodoc ELSE 'RUC' END AS tipo_documento,
+        CASE WHEN cl.tipocliente = 'P' THEN pe.nrodoc ELSE e.ruc END AS numero_documento,
+        CASE 
+            WHEN cl.tipocliente = 'P' THEN CONCAT(pe.direccion, ', ', dp.distrito, ', ', pp.provincia)
+            ELSE CONCAT(e.direccion, ', ', de.distrito, ', ', peprov.provincia)
+        END AS direccion_completa,
+        CASE 
+            WHEN cl.tipocliente = 'P' THEN pe.telprimario
+            ELSE e.telprimario
+        END AS telefono,
+        
+        -- Datos del vehículo
+        ma.marca,
+        mo.modelo,
+        mo.anio AS vehiculo_anio,
+        v.color,
+        v.placa,
+        v.chasis AS numero_chasis,
+        v.seriemotor AS numero_motor,
+        
+        -- Datos del contrato
+        cnt.idcontrato,
+        cnt.fechainicio AS fecha_contrato,
+        cnt.diapago AS dia_pago_mensual,
+        cnt.penalidadbase AS porcentaje_penalidad,
+        cot.moneda,
+        cot.valorcuota,
+        
+        -- Datos del colaborador
+        ar.area AS colaborador_area,
+        CONCAT(SUBSTRING_INDEX(pcolab.nombres, ' ', 1), ' ', 
+               SUBSTRING_INDEX(pcolab.apellidos, ' ', 1)) AS colaborador_nombre,
+        pcolab.telprimario AS colaborador_telefono,
+        
+        -- Detalle de cuotas vencidas
+        GROUP_CONCAT(
+            DISTINCT
+            CASE
+                -- Solo tiene penalidad pendiente
+                WHEN ROUND(cr.abonocapital + cr.interes, 2) = 0 
+                     AND ROUND(IFNULL(cr.penalidad, 0), 2) > 0
+                THEN CONCAT('MORA:', MONTH(cr.fechapago), ':', 
+                           FORMAT(cr.penalidad, 2))
+                
+                -- Tiene cuota pendiente (con o sin mora)
+                WHEN ROUND(cr.abonocapital + cr.interes, 2) > 0
+                THEN CONCAT('CUOTA:', MONTH(cr.fechapago), ':', 
+                           FORMAT(cr.abonocapital + cr.interes + IFNULL(cr.penalidad, 0), 2))
+				
+                ELSE NULL
+            END
+            ORDER BY cr.fechapago
+            SEPARATOR ' || '
+        ) AS detalle_cuotas_vencidas,
+        
+        -- Estadísticas
+        COUNT(DISTINCT cr.idcronograma) AS cantidad_cuotas_vencidas,
+        ROUND(SUM(cr.abonocapital + cr.interes), 2) AS total_cuotas_vencidas,
+        ROUND(SUM(IFNULL(cr.penalidad, 0)), 2) AS total_penalidades_vencidas,
+        ROUND(SUM(cr.abonocapital + cr.interes + IFNULL(cr.penalidad, 0)), 2) AS total_deuda_vencida,
+        MIN(cr.fechapago) AS fecha_primera_vencida,
+        DATEDIFF(CURDATE(), MIN(cr.fechapago)) AS dias_atraso
+        
+    FROM contratos cnt
+    INNER JOIN cotizaciones cot ON cnt.idcotizacion = cot.idcotizacion
+    INNER JOIN clientes cl ON cot.idcliente = cl.idcliente
+    LEFT JOIN personas pe ON cl.idpersona = pe.idpersona
+    LEFT JOIN empresas e ON cl.idempresa = e.idempresa
+    LEFT JOIN distritos dp ON pe.iddistrito = dp.iddistrito
+    LEFT JOIN provincias pp ON dp.idprovincia = pp.idprovincia
+    LEFT JOIN distritos de ON e.iddistrito = de.iddistrito
+    LEFT JOIN provincias peprov ON de.idprovincia = peprov.idprovincia
+    INNER JOIN vehiculos v ON cot.idvehiculo = v.idvehiculo
+    INNER JOIN modelos mo ON v.idmodelo = mo.idmodelo
+    INNER JOIN marcas ma ON mo.idmarca = ma.idmarca
+    LEFT JOIN colaboradores colab ON cnt.idlogistica = colab.idcolaborador
+    LEFT JOIN contratoslaborales cl_colab ON colab.idcontratolaboral = cl_colab.idcontratolaboral
+    LEFT JOIN personas pcolab ON cl_colab.idpersona = pcolab.idpersona
+    LEFT JOIN cargos cg ON cl_colab.idcargo = cg.idcargo
+    LEFT JOIN areas ar ON cg.idarea = ar.idarea
+    INNER JOIN cronogramas cr ON cr.idcontrato = cnt.idcontrato
+    
+    WHERE cnt.idcontrato = p_idcontrato
+      AND cr.estado IN ('Pendiente', 'Vencido')
+      AND cr.fechapago < CURDATE()
+    
+    GROUP BY cnt.idcontrato, cl.tipocliente, pe.nrodoc, e.ruc;
+END$$
+DELIMITER ;
+
+/*
 DROP PROCEDURE IF EXISTS sp_get_datos_reporte_recojo_vehicular_pdf;
 DELIMITER $$
 CREATE PROCEDURE sp_get_datos_reporte_recojo_vehicular_pdf(IN p_idcontrato INT)
@@ -772,7 +972,7 @@ BEGIN
     GROUP BY cnt.idcontrato, cl.tipocliente, pe.nrodoc, e.ruc;
 END$$
 DELIMITER ;
-
+*/
 
 /*
 -- ÍNDICES NECESARIOS (ejecutar primero)

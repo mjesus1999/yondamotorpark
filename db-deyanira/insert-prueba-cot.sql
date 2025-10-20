@@ -102,10 +102,10 @@ SET fechainicio = '2025-07-15'
 WHERE idcontrato = 9;
 
 -- 2. Eliminar el cronograma actual
-DELETE FROM cronogramas WHERE idcontrato = 9;
+DELETE FROM cronogramas WHERE idcontrato = 7;
 
 -- 3. Regenerar el cronograma con la nueva fecha
-CALL generar_cronograma(9, 4.263224089);
+CALL generar_cronograma(7, 4.263224089);
 
 -- 4. Verificar que ahora comienza en 15/10/2025 (primer mes después del inicio)
 SELECT 

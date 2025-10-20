@@ -47,6 +47,25 @@ $morososClasificados = [
     '1-mes' => []
 ];
 
+/* if (!empty($morososRaw)) {
+    if (isset($morososRaw['5-dias']) || isset($morososRaw['2-semanas']) || isset($morososRaw['1-mes'])) {
+        $morososClasificados['5-dias'] = $morososRaw['5-dias'] ?? [];
+        $morososClasificados['2-semanas'] = $morososRaw['2-semanas'] ?? [];
+        $morososClasificados['1-mes'] = $morososRaw['1-mes'] ?? [];
+    } else {
+        foreach ($morososRaw as $m) {
+            $dias = (int) ($m['dias_atraso'] ?? $m['dias_max_vencido'] ?? 0);
+            if ($dias >= 1 && $dias <= 5) {
+                $morososClasificados['5-dias'][] = $m;
+            } elseif ($dias >= 6 && $dias <= 14) {
+                $morososClasificados['2-semanas'][] = $m;
+            } elseif ($dias >= 15) {
+                $morososClasificados['1-mes'][] = $m;
+            }
+        }
+    }
+} */
+
 if (!empty($morososRaw)) {
     if (isset($morososRaw['5-dias']) || isset($morososRaw['2-semanas']) || isset($morososRaw['1-mes'])) {
         $morososClasificados['5-dias'] = $morososRaw['5-dias'] ?? [];
@@ -147,7 +166,8 @@ function fmtMoney($val)
                     </label>
 
                     <input type="radio" class="btn-check" name="filtroMorosidad" id="filtro2semanas" autocomplete="off">
-                    <label class="btn btn-sm btn-outline-warning" for="filtro2semanas" onclick="filtrarPor('2-semanas')">
+                    <label class="btn btn-sm btn-outline-warning" for="filtro2semanas"
+                        onclick="filtrarPor('2-semanas')">
                         <i class="fas fa-calendar-week me-1"></i>2 Semanas
                         <span class="badge bg-warning text-dark ms-1"><?= $counts['2-semanas'] ?></span>
                     </label>

@@ -192,7 +192,37 @@
             return MESES_MAYUSCULAS[parseInt(numeroMes) - 1] || '';
         }
 
+        function formatMontoConComas(monto) {
+            const num = parseFloat(monto);
+            if (isNaN(num)) return '0.00';
+            const parts = num.toFixed(2).split('.');
+            parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+            return parts.join('.');
+        }
+
         function detalleToParrafo(detalleStr) {
+            if (!detalleStr) return '';
+
+            const parts = detalleStr.split('||').map(s => s.trim()).filter(Boolean);
+            const resultado = [];
+
+            parts.forEach(item => {
+                const [tipo, mes, monto] = item.split(':');
+                const mesNombre = formatMesEspanol(mes);
+
+                // Mantener el monto tal cual viene (con comas)
+
+                if (tipo === 'MORA') {
+                    resultado.push(`POR LA MORA DE ${mesNombre} DE S/ ${monto} SOLES`);
+                } else if (tipo === 'CUOTA') {
+                    resultado.push(`DE LA CUOTA DE ${mesNombre} CON MORA DE S/ ${monto}`);
+                }
+            });
+
+            return resultado.join(', ');
+        }
+
+        /* function detalleToParrafo(detalleStr) {
             if (!detalleStr) return '';
 
             const parts = detalleStr.split(' || ').map(s => {
@@ -202,7 +232,7 @@
             });
 
             return parts.join(', ');
-        }
+        } */
 
         function createNotificacionPDF(headerImageBase64, datos) {
             const nombre = rawValueAsString(datos.nombre_cliente || '');
@@ -220,7 +250,7 @@
 
             const totalCuotas = rawValueAsString(datos.total_cuotas_vencidas);
             const totalPenal = rawValueAsString(datos.total_penalidades_vencidas);
-            const totalDeuda = rawValueAsString(datos.total_deuda_vencida);
+            const totalDeuda = formatMontoConComas(datos.total_deuda_vencida);
             const fechaPrimera = rawValueAsString(datos.fecha_primera_vencida || '');
             const diasAtraso = rawValueAsString(datos.dias_atraso !== undefined ? datos.dias_atraso : '');
             const fechaContrato = formatDateContract(datos.fecha_contrato);

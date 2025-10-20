@@ -250,6 +250,33 @@
         function detalleToParrafoDetallado(detalleStr) {
             if (!detalleStr) return '';
 
+            const parts = detalleStr.split('||').map(s => s.trim()).filter(Boolean);
+            const resultado = [];
+
+            parts.forEach(item => {
+                const [tipo, mes, monto] = item.split(':');
+                const mesNombre = formatMesEspanol(mes);
+
+                if (tipo === 'MORA') {
+                    resultado.push(`LA MORA DE ${mesNombre} DE S/ ${monto} SOLES`);
+                } else if (tipo === 'CUOTA') {
+                    resultado.push(`LA CUOTA DE ${mesNombre} DE S/ ${monto}`);
+                }
+            });
+
+            // Formatear con comas y "Y" antes del último elemento
+            if (resultado.length === 0) return '';
+            if (resultado.length === 1) return resultado[0];
+
+            const ultimoElemento = resultado[resultado.length - 1];
+            const elementosAnteriores = resultado.slice(0, -1);
+
+            return elementosAnteriores.join(', ') + ' Y ' + ultimoElemento;
+        }
+
+        /* function detalleToParrafoDetallado(detalleStr) {
+            if (!detalleStr) return '';
+
             const parts = detalleStr.split(' || ').map(s => {
                 const mesMatch = s.match(/MES:(\d+)/);
                 const montoMatch = s.match(/MONTO:([\d.]+)/);
@@ -276,7 +303,7 @@
             const elementosAnteriores = parts.slice(0, -1);
 
             return elementosAnteriores.join(', ') + ', ' + ultimoElemento;
-        }
+        } */
 
         function rawValueAsString(value) {
             if (value === null || value === undefined) return '0.00';
