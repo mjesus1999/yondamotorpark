@@ -28,23 +28,6 @@
         </div>
     </div>
 
-    <!-- <div class="alert alert-info mt-2" role="alert">
-        <div class="row">
-            <div class="col-md-6 d-flex">
-                <nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='%236c757d'/%3E%3C/svg%3E&#34;);"
-                    aria-label="breadcrumb">
-                    <ol class="breadcrumb mb-0">
-                        <li class="breadcrumb-item"><a href="#">Usuario</a></li>
-                        <li class="breadcrumb-item active" aria-current="page">Registrar</li>
-                    </ol>
-                </nav>
-            </div>
-            <div class="col-md-6 text-end">
-                <a href="/usuarios" class="">[ Mostrar lista ]</a>
-            </div>
-        </div>
-    </div> -->
-
     <!-- Campos -->
     <div class="mb-2">
         <!-- <?php
@@ -141,6 +124,21 @@
                                 <label for="fechainicio">Fecha inicio</label>
                             </div>
                         </div>
+                        <!-- LOCAL -->
+
+                        <div class="col-md-12 mb-2">
+                            <div class="form-floating">
+                                <select name="idlocal" id="idlocal" class="form-select">
+                                    <option value="">Sin asignar</option>
+                                    <?php foreach ($locales as $l): ?>
+                                        <option value="<?= (int) $l['idlocal'] ?>" <?= (isset($usuario['idlocal']) && (int) $usuario['idlocal'] === (int) $l['idlocal']) ? 'selected' : '' ?>>
+                                            <?= htmlspecialchars($l['local']) ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <label for="idlocal">Local</label>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -161,7 +159,6 @@
         const areaSel = document.getElementById('idarea');
         const cargoSel = document.getElementById('idcargo');
 
-        // valor de cargo actual (cuando estás en edición)
         const currentCargo = <?= isset($usuario['idcargo']) ? (int) $usuario['idcargo'] : 0 ?>;
 
         if (!areaSel || !cargoSel) return;
@@ -169,7 +166,6 @@
         areaSel.addEventListener('change', async () => {
             const idArea = areaSel.value;
 
-            // si no hay area, limpiar cargos
             if (!idArea) {
                 cargoSel.innerHTML = '<option value="">Seleccione un área primero</option>';
                 cargoSel.disabled = true;
@@ -184,7 +180,6 @@
                 if (!res.ok) throw new Error('HTTP ' + res.status);
                 const data = await res.json();
 
-                // reconstruir opciones
                 cargoSel.innerHTML = '<option value="">Seleccione</option>';
                 data.forEach(c => {
                     const opt = document.createElement('option');
@@ -193,11 +188,10 @@
                     cargoSel.appendChild(opt);
                 });
 
-                // Si estamos en EDIT y el cargo actual pertenece a esta área, seleccionarlo
                 if (currentCargo) {
                     const exists = Array.from(cargoSel.options).some(o => parseInt(o.value) === currentCargo);
                     if (exists) cargoSel.value = currentCargo;
-                    else cargoSel.value = ''; // dejar vacío para que el usuario elija
+                    else cargoSel.value = '';
                 }
 
                 cargoSel.disabled = false;
@@ -208,8 +202,6 @@
             }
         });
 
-        // Si la página se abrió en modo EDIT y ya hay un área seleccionada,
-        // disparar el evento para recargar cargos y preseleccionar 
         (function initOnLoad() {
             const initialArea = areaSel.value;
             if (initialArea) {

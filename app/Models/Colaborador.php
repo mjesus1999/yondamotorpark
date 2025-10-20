@@ -14,19 +14,20 @@ class Colaborador
         $this->db = Database::getInstance();
     }
 
-    public function create(int $idContrato, string $usernick, string $passwordHash, string $restr = 'S'): int
+    public function create(int $idContrato, string $usernick, string $passwordHash, string $restr = 'S', ?int $idlocal = null): int
     {
         //Forzar el valor de entrar en restriccion Horaria
         $restr = (strtoupper($restr) === 'N') ? 'N' : 'S';
 
         $sql = "INSERT INTO colaboradores
-              (idcontratolaboral, usernick, userpassword, restriccionhoraria, creado)
+              (idcontratolaboral, idlocal, usernick, userpassword, restriccionhoraria, creado)
             VALUES
-              (:idcontrato, :usernick, :userpassword, :restr, NOW())";
+              (:idcontrato, :idlocal, :usernick, :userpassword, :restr, NOW())";
         try {
             $stmt = $this->db->prepare($sql);
             $stmt->execute([
                 ':idcontrato' => $idContrato,
+                ':idlocal' => $idlocal,
                 ':usernick' => $usernick,
                 ':userpassword' => $passwordHash,
                 ':restr' => $restr,

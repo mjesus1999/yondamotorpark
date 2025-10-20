@@ -362,13 +362,32 @@
                                                 <label class="info-label">Email</label>
                                                 <p class="info-value"><?= htmlspecialchars($usuario['email'] ?? '—') ?></p>
                                             </div>
+
+                                            <div class="info-item">
+                                                <label class="info-label">Local</label>
+                                                <p class="info-value">
+                                                    <?= htmlspecialchars(!empty($usuario['local_ubicacion']) ? $usuario['local_ubicacion'] : 'Sin Asignar') ?>
+                                                </p>
+                                            </div>
+
+                                            <!-- <div class="info-item">
+                                                <label class="info-label">Local asignado</label>
+                                                <p class="info-value">
+                                                    <?php if (!empty($usuario['idlocal'])): ?>
+                                                        <?= htmlspecialchars($usuario['local_ubicacion'] ?? 'Sin información') ?>
+                                                    <?php else: ?>
+                                                        <span>Sin asignar</span>
+                                                    <?php endif; ?>
+                                                </p>
+                                            </div> -->
                                         </div>
 
                                         <div class="col-md-6">
                                             <div class="info-item">
                                                 <label class="info-label">Distrito</label>
                                                 <p class="info-value">
-                                                    <?= htmlspecialchars($usuario['nombre_distrito'] ?? '—') ?></p>
+                                                    <?= htmlspecialchars($usuario['nombre_distrito'] ?? '—') ?>
+                                                </p>
                                             </div>
 
                                             <div class="info-item">
@@ -391,7 +410,8 @@
                                             <div class="info-item">
                                                 <label class="info-label">Teléfono alt.</label>
                                                 <p class="info-value">
-                                                    <?= htmlspecialchars($usuario['telalternativo'] ?? '—') ?></p>
+                                                    <?= htmlspecialchars($usuario['telalternativo'] ?? '—') ?>
+                                                </p>
                                             </div>
 
                                             <div class="info-item">
@@ -408,7 +428,8 @@
                                             <div class="info-item">
                                                 <label class="info-label">Cargo / Área</label>
                                                 <p class="info-value">
-                                                    <?= htmlspecialchars("{$usuario['cargo']} / {$usuario['area']}") ?></p>
+                                                    <?= htmlspecialchars("{$usuario['cargo']} / {$usuario['area']}") ?>
+                                                </p>
                                             </div>
                                         </div>
                                     </div>
@@ -431,9 +452,7 @@
         <div class="modal-content border-0">
             <div class="text-center mt-1">
                 <img src="<?= htmlspecialchars($usuario['avatar'] ?? '/assets/images/profile.jpg') ?>"
-                    alt="Avatar Grande"
-                    class="img-fluid rounded"
-                    style="max-height: 80vh; max-width: 100%;">
+                    alt="Avatar Grande" class="img-fluid rounded" style="max-height: 80vh; max-width: 100%;">
             </div>
         </div>
     </div>

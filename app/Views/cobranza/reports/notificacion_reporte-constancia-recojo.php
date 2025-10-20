@@ -338,7 +338,7 @@
 
                 header: function () {
                     if (headerImageBase64) {
-                        return { image: headerImageBase64, width: 500, alignment: 'center', margin: [0, 20, 0, 0] };
+                        return { image: headerImageBase64, width: 475, alignment: 'center', margin: [60, 20, 0, 0] };
                     }
                     return null;
                 },
@@ -354,11 +354,11 @@
                                 text: ['Aréa de ', `${colaboradorArea}: ${colaboradorNombre}\n`, `${colaboradorTelefono}\n`, 'cobranza@yondaperu.com'],
                                 style: 'contactInfo',
                                 alignment: 'right',
-                                margin: [0, 0, 40, 10]
+                                margin: [60, 0, 60, 10]
                             },
                             {
                                 canvas: [
-                                    { type: 'line', x1: 0, y1: 0, x2: 525, y2: 0, lineWidth: 4, lineColor: '#ff6600' }
+                                    { type: 'line', x1: 0, y1: 0, x2: 475, y2: 0, lineWidth: 4, lineColor: '#ff6600' }
                                 ],
                                 alignment: 'center'
                             }
@@ -401,8 +401,8 @@
                             vLineWidth: () => 0,
                             paddingLeft: () => 0,
                             paddingRight: () => 0,
-                            paddingTop: () => 2,
-                            paddingBottom: () => 2
+                            paddingTop: () => 0.5,
+                            paddingBottom: () => 0.5
                         },
                         margin: [0, 0, 0, 15]
                     },
@@ -471,7 +471,7 @@
                 const datos = await getDatosReporteRecojoVehicular(idContrato);
                 if (!datos) throw new Error("No se encontraron datos para el contrato especificado.");
 
-                const headerImageBase64 = await convertImageToBase64('/assets/images/logos/cabecera-yondaa.png').catch(() => null);
+                const headerImageBase64 = await convertImageToBase64('/assets/images/logos/cabecera-yonda-t.png').catch(() => null);
 
                 const docDefinition = createNotificacionPDF(headerImageBase64, datos);
                 const pdfDocGenerator = pdfMake.createPdf(docDefinition);

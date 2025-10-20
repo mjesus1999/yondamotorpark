@@ -400,6 +400,9 @@ INSERT INTO accesos (idcargo, modulo, permisos) VALUES
 (16, 'usuarios', 1),
 (16, 'auth', 1);
 
+-- Jefe de cobranza (ID = 19) - todo
+INSERT INTO accesos (idcargo, modulo, permisos) VALUES
+(19, 'auth', 1);
 
 -- VEHICULOS INSERT (disponibilidad)
 INSERT INTO vehiculos (
