@@ -44,6 +44,10 @@
 
 <?php include __DIR__ . '/../layout/footer.php'; ?>
 <script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.5.2/dist/js/tabulator.min.js"></script>
+<script src=" https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+<script src="/assets/js/logoBase64.js" defer></script>
+<script type="module" src="/assets/js/pdf-contrato/main.js" defer></script>
 <script>
     document.addEventListener("DOMContentLoaded", async () => {
 
@@ -76,7 +80,7 @@
                 formatter: (cell) => {
                     const id = cell.getRow().getData().idcontrato;
                     return `
-                        <button class="btn btn-sm btn-verPDF fs-5"><i class="bi bi-filetype-pdf text-danger" data-id="${id}" data-action="verPDF"></i></button>
+                        <button class="btn btn-sm btn-verPDF fs-5" data-id="${id}" data-action="verPDF"><i class="bi bi-filetype-pdf text-danger"></i></button>
                         <button class="btn btn-sm btn-eliminar" data-id="${id}" data-action="delete">
                                 <i class="bi bi-trash text-danger fs-5"></i>
                         </button>
@@ -177,6 +181,30 @@
             }
         }
 
+        async function getDataContratoPDF(idcontrato) {
+            try {
+                const req = await fetch(`/api/contrato/pdf/${idcontrato}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                const res = await req.json();
+
+                if (res.success) {
+                    // console.log(res.data);
+                   generarPDFContrato(res.data);
+                } else {
+                    showToast(res.message, 'ERROR', 1250);
+                }
+
+            } catch (error) {
+                showToast(error, 'ERROR', 1300);
+                console.log(error);
+
+            }
+        }
+
         // DELEGACIÓN DE EVENTOS
         document.getElementById("tabla-contratos").addEventListener("click", async (e) => {
             // Buscamos el botón más cercano al que se le hizo clic
@@ -191,6 +219,9 @@
                     if (await ask('¿Desactivar este contrato?', 'Contratos')) {
                         deleteContrato(id);
                     }
+                    break;
+                case 'verPDF':
+                    getDataContratoPDF(id);
                     break;
             }
         });

@@ -105,9 +105,111 @@ class ContratoController extends Controller
         $contratos = $this->contratoModel->getAll();
 
         if ($contratos) {
-            echo json_encode(['success' => true, 'data' =>$contratos]);
+            echo json_encode(['success' => true, 'data' => $contratos]);
         } else {
             echo json_encode([]);
         }
+    }
+
+    public function apiGetPDFContrato(int $idcontrato)
+    {
+        // $this->authRequired();
+        $data = $this->contratoModel->getDataPDFContrato($idcontrato);
+
+        if ($data === false) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'No se ha podido establecer la conexión'
+            ]);
+            return;
+        }
+
+        if (empty($data)) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'No se han encontrado datos para el contrato solicitado'
+            ]);
+            return;
+        }
+
+   
+        $row = $data[0];
+
+        $response = [
+            'success' => true,
+            'data' => [
+                'idcontrato' => $row['idcontrato'],
+                'codigo_contrato' => $row['codigo_contrato'] ?? ('N° ' . str_pad($row['idcontrato'], 5, '0', STR_PAD_LEFT)),
+                'sede' => $row['sede'],
+
+                'cliente' => [
+                    'nombre' => $row['cliente'],
+                    'documento' => $row['documentoCliente'],
+                    'direccion' => $row['direccionCliente'],
+                    'distrito' => $row['distritoCliente'],
+                    'provincia' => $row['provinciaCliente'],
+                    'departamento' => $row['departamentoCliente'],
+                    'email' => $row['emailCliente'],
+                    'telefono' => $row['telCliente']
+                ],
+
+                'conyuge' => [
+                    'nombre' => $row['conyuge'],
+                    'documento' => $row['documentoConyuge'],
+                    'direccion' => $row['direccionConyuge'],
+                    'distrito' => $row['distritoConyuge'],
+                    'provincia' => $row['provinciaConyuge'],
+                    'departamento' => $row['departamentoConyuge'],
+                    'email' => $row['emailConyuge'],
+                    'telefono' => $row['telConyuge']
+                ],
+
+                'aval' => [
+                    'nombre' => $row['aval'],
+                    'documento' => $row['documentoAval'],
+                    'direccion' => $row['direccionAval'],
+                    'distrito' => $row['distritoAval'],
+                    'provincia' => $row['provinciaAval'],
+                    'departamento' => $row['departamentoAval'],
+                    'email' => $row['emailAval'],
+                    'telefono' => $row['telAval'],
+                    'conyuge' => [
+                        'nombre' => $row['avalConyuge'],
+                        'documento' => $row['documentoAvalConyuge'],
+                        'direccion' => $row['direccionAvalConyuge'],
+                        'distrito' => $row['distritoAvalConyuge'],
+                        'provincia' => $row['provinciaAvalConyuge'],
+                        'departamento' => $row['departamentoAvalConyuge'],
+                        'email' => $row['emailAvalConyuge'],
+                        'telefono' => $row['telAvalConyuge']
+                    ]
+                ],
+              
+
+                'vehiculo' => [
+                    'marca' => $row['marca'],
+                    'modelo' => $row['modelo'],
+                    'anio' => $row['anio'],
+                    'color' => $row['color'],
+                    'placa' => $row['placa'],
+                    'serie_motor' => $row['seriemotor'],
+                    'chasis' => $row['chasis']
+                ],
+
+                'financiamiento' => [
+                    'montoFinanciado' => $row['financiado'],
+                    'moneda' => $row['moneda'],
+                    'diaPago' => $row['diapago'],
+                    'totalPagar' => $row['totalPagar'],
+                    'penalidadBase' => $row['penalidadbase'],
+                    'cuotaInicial' => $row['cuotainicial'],
+                    'numCuotas' => $row['numcuotas'],
+                    'valorCuota' => $row['valorcuota'],
+               
+                ]
+            ]
+        ];
+
+        echo json_encode($response, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
     }
 }

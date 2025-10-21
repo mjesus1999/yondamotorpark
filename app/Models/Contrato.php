@@ -71,6 +71,28 @@ class Contrato
         }
     }
 
+public function getDataPDFContrato(int $idcontrato): array|false {
+    $query = "CALL sp_contrato_pdf(:idcontrato)";
+    try {
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':idcontrato', $idcontrato, PDO::PARAM_INT);
+        $stmt->execute();
+
+        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Si no hay filas, devolver array vacío (no error)
+        return $result ?: [];
+    } catch (PDOException $e) {
+        error_log("Error en getDataPDFContrato: " . $e->getMessage());
+        return false; 
+    }
+}
+
+
+
+
+
+
     public function disabledContrato(int $id): int
     {
         try {
