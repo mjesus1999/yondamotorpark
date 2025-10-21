@@ -30,75 +30,44 @@
         font-size: 0.85rem;
         color: #6c757d;
     }
+
+    /* Estilos para el skeleton loader */
+    .skeleton {
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: loading 1.5s infinite;
+        border-radius: 4px;
+    }
+
+    @keyframes loading {
+        0% {
+            background-position: 200% 0;
+        }
+
+        100% {
+            background-position: -200% 0;
+        }
+    }
+
+    .skeleton-text {
+        height: 20px;
+        margin-bottom: 10px;
+    }
+
+    .skeleton-title {
+        height: 30px;
+        width: 60%;
+        margin-bottom: 15px;
+    }
+
+    .spinner-border-sm {
+        width: 1.5rem;
+        height: 1.5rem;
+    }
 </style>
 
-<?php
-$estadisticas = $estadisticas ?? [
-    'total_morosos' => 0,
-    'deuda_total' => 0,
-    'seguimientos_hoy' => 0,
-    'dias_promedio' => 0
-];
-$morososRaw = $morosos ?? [];
-
-$morososClasificados = [
-    '5-dias' => [],
-    '2-semanas' => [],
-    '1-mes' => []
-];
-
-/* if (!empty($morososRaw)) {
-    if (isset($morososRaw['5-dias']) || isset($morososRaw['2-semanas']) || isset($morososRaw['1-mes'])) {
-        $morososClasificados['5-dias'] = $morososRaw['5-dias'] ?? [];
-        $morososClasificados['2-semanas'] = $morososRaw['2-semanas'] ?? [];
-        $morososClasificados['1-mes'] = $morososRaw['1-mes'] ?? [];
-    } else {
-        foreach ($morososRaw as $m) {
-            $dias = (int) ($m['dias_atraso'] ?? $m['dias_max_vencido'] ?? 0);
-            if ($dias >= 1 && $dias <= 5) {
-                $morososClasificados['5-dias'][] = $m;
-            } elseif ($dias >= 6 && $dias <= 14) {
-                $morososClasificados['2-semanas'][] = $m;
-            } elseif ($dias >= 15) {
-                $morososClasificados['1-mes'][] = $m;
-            }
-        }
-    }
-} */
-
-if (!empty($morososRaw)) {
-    if (isset($morososRaw['5-dias']) || isset($morososRaw['2-semanas']) || isset($morososRaw['1-mes'])) {
-        $morososClasificados['5-dias'] = $morososRaw['5-dias'] ?? [];
-        $morososClasificados['2-semanas'] = $morososRaw['2-semanas'] ?? [];
-        $morososClasificados['1-mes'] = $morososRaw['1-mes'] ?? [];
-    } else {
-        foreach ($morososRaw as $m) {
-            $dias = (int) ($m['dias_atraso'] ?? $m['dias_max_vencido'] ?? 0);
-            if ($dias <= 5) {
-                $morososClasificados['5-dias'][] = $m;
-            } elseif ($dias <= 14) {
-                $morososClasificados['2-semanas'][] = $m;
-            } else {
-                $morososClasificados['1-mes'][] = $m;
-            }
-        }
-    }
-}
-
-$counts = [
-    '5-dias' => count($morososClasificados['5-dias']),
-    '2-semanas' => count($morososClasificados['2-semanas']),
-    '1-mes' => count($morososClasificados['1-mes'])
-];
-
-function fmtMoney($val)
-{
-    return 'S/. ' . number_format((float) $val, 2, ',', '.');
-}
-?>
-
 <div class="container-fluid">
-    <!-- Encabezado-->
+    <!-- Encabezado -->
     <div class="alert alert-info mt-2" role="alert">
         <div class="row">
             <div class="col-md-6 d-flex align-items-center justify-content-start">
@@ -113,47 +82,57 @@ function fmtMoney($val)
         </div>
     </div>
 
-    <div class="row mb-2">
+    <!-- Tarjetas de estadísticas con loader -->
+    <div class="row mb-2" id="estadisticasContainer">
+        <!-- Skeleton loaders iniciales -->
         <div class="col-md-3 mb-3">
             <div class="card h-100">
                 <div class="card-body text-center">
-                    <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
-                    <h3 class="card-title"><?= (int) $estadisticas['total_morosos'] ?></h3>
+                    <div class="spinner-border text-primary mb-2" role="status">
+                        <span class="visually-hidden">Cargando...</span>
+                    </div>
+                    <div class="skeleton skeleton-text mx-auto" style="width: 80px;"></div>
                     <p class="card-text mb-0">Total Morosos</p>
                 </div>
             </div>
         </div>
         <div class="col-md-3 mb-3">
-            <div class="card  h-100">
+            <div class="card h-100">
                 <div class="card-body text-center">
-                    <i class="fas fa-dollar-sign fa-2x mb-2"></i>
-                    <h3 class="card-title"><?= fmtMoney($estadisticas['deuda_total']) ?></h3>
+                    <div class="spinner-border text-success mb-2" role="status">
+                        <span class="visually-hidden">Cargando...</span>
+                    </div>
+                    <div class="skeleton skeleton-text mx-auto" style="width: 120px;"></div>
                     <p class="card-text mb-0">Deuda Total</p>
                 </div>
             </div>
         </div>
         <div class="col-md-3 mb-3">
-            <div class="card  h-100">
+            <div class="card h-100">
                 <div class="card-body text-center">
-                    <i class="fas fa-clock fa-2x mb-2"></i>
-                    <h3 class="card-title"><?= (int) $estadisticas['seguimientos_hoy'] ?></h3>
+                    <div class="spinner-border text-info mb-2" role="status">
+                        <span class="visually-hidden">Cargando...</span>
+                    </div>
+                    <div class="skeleton skeleton-text mx-auto" style="width: 60px;"></div>
                     <p class="card-text mb-0">Seguimientos Hoy</p>
                 </div>
             </div>
         </div>
         <div class="col-md-3 mb-3">
-            <div class="card  h-100">
+            <div class="card h-100">
                 <div class="card-body text-center">
-                    <i class="fas fa-calendar fa-2x mb-2"></i>
-                    <h3 class="card-title"><?= round($estadisticas['dias_promedio'], 1) ?></h3>
+                    <div class="spinner-border text-warning mb-2" role="status">
+                        <span class="visually-hidden">Cargando...</span>
+                    </div>
+                    <div class="skeleton skeleton-text mx-auto" style="width: 80px;"></div>
                     <p class="card-text mb-0">Días Promedio</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Panel de clasificación -->
-    <div class="card mb-3">
+    <!-- Panel de clasificación con loader -->
+    <div class="card mb-3" id="clasificacionPanel" style="display: none;">
         <div class="card-header">
             <div class="d-flex justify-content-between align-items-center">
                 <h6 class="mb-0"><i class="fas fa-users me-2"></i>Clasificación por Morosidad</h6>
@@ -162,24 +141,24 @@ function fmtMoney($val)
                         checked>
                     <label class="btn btn-sm btn-outline-warning" for="filtro5dias" onclick="filtrarPor('5-dias')">
                         <i class="fas fa-clock me-1"></i>5 Días
-                        <span class="badge bg-warning text-dark ms-1"><?= $counts['5-dias'] ?></span>
+                        <span class="badge bg-warning text-dark ms-1" id="count5dias">0</span>
                     </label>
 
                     <input type="radio" class="btn-check" name="filtroMorosidad" id="filtro2semanas" autocomplete="off">
                     <label class="btn btn-sm btn-outline-warning" for="filtro2semanas"
                         onclick="filtrarPor('2-semanas')">
                         <i class="fas fa-calendar-week me-1"></i>2 Semanas
-                        <span class="badge bg-warning text-dark ms-1"><?= $counts['2-semanas'] ?></span>
+                        <span class="badge bg-warning text-dark ms-1" id="count2semanas">0</span>
                     </label>
 
                     <input type="radio" class="btn-check" name="filtroMorosidad" id="filtro1mes" autocomplete="off">
                     <label class="btn btn-sm btn-outline-danger" for="filtro1mes" onclick="filtrarPor('1-mes')">
                         <i class="fas fa-calendar-times me-1"></i>+1 Mes
-                        <span class="badge bg-danger ms-1"><?= $counts['1-mes'] ?></span>
+                        <span class="badge bg-danger ms-1" id="count1mes">0</span>
                     </label>
 
                     <input type="radio" class="btn-check" name="filtroMorosidad" id="filtroTodos" autocomplete="off">
-                    <label class="btn btn-sm     btn-outline-primary" for="filtroTodos" onclick="filtrarPor('todos')">
+                    <label class="btn btn-sm btn-outline-primary" for="filtroTodos" onclick="filtrarPor('todos')">
                         <i class="fas fa-list me-1"></i>Ver Todos
                     </label>
                 </div>
@@ -187,100 +166,18 @@ function fmtMoney($val)
         </div>
     </div>
 
-    <!-- Lista de morosos -->
-    <div class="row" id="listaMoresos">
-        <?php
-        $map = [
-            '5-dias' => ['badge' => 'bg-warning text-dark', 'border' => 'border-warning'],
-            '2-semanas' => ['badge' => 'bg-warning text-dark', 'border' => 'border-4'],
-            '1-mes' => ['badge' => 'bg-danger', 'border' => 'border-danger']
-        ];
-
-        foreach (['5-dias', '2-semanas', '1-mes'] as $categoria):
-            $morososCategoria = $morososClasificados[$categoria] ?? [];
-            $noMorososDisplay = empty($morososCategoria) ? 'block' : 'none';
-            ?>
-            <div class="col-12 no-morosos" id="noMorosos-<?= $categoria ?>" data-categoria="<?= $categoria ?>"
-                style="display: <?= $noMorososDisplay ?>;">
-                <div class="alert alert-secondary text-center mb-0">
-                    <strong>No hay morosos en la categoría <?= ucfirst(str_replace('-', ' ', $categoria)) ?>.</strong>
-                </div>
+    <!-- Loader para la lista de morosos -->
+    <div class="row" id="morososLoader">
+        <div class="col-12 text-center py-5">
+            <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+                <span class="visually-hidden">Cargando morosos...</span>
             </div>
-
-            <?php if (!empty($morososCategoria)): ?>
-                <?php foreach ($morososCategoria as $m):
-                    $idcontrato = (int) ($m['idcontrato'] ?? 0);
-                    $cliente = htmlspecialchars($m['cliente'] ?? 'Sin nombre');
-                    $ndoc = htmlspecialchars($m['ndocumento'] ?? ($m['nrodoc'] ?? ''));
-                    $telefono = htmlspecialchars($m['telefono'] ?? $m['telprimario'] ?? '');
-                    $dias = (int) ($m['dias_atraso'] ?? $m['dias_max_vencido'] ?? 0);
-                    $deuda = $m['saldo_pendiente'] ?? $m['deuda_total'] ?? 0;
-                    $fecha_venc = $m['fecha_vencimiento'] ?? ($m['fechapago'] ?? '');
-                    $direccion_persona = htmlspecialchars($m['direccion_persona'] ?? 'Sin dirección');
-                    $direccion_local = htmlspecialchars($m['direccion'] ?? ($m['direccion_completa'] ?? $m['direccion_local'] ?? 'Sin dirección del local'));
-                    /* $direccion = htmlspecialchars($m['direccion'] ?? ($m['direccion_completa'] ?? '')); */
-                    $deudaFmt = fmtMoney($deuda);
-                    ?>
-                    <div class="col-md-6 mb-3 moroso-item" data-categoria="<?= $categoria ?>" id="cliente-<?= $idcontrato ?>">
-                        <div class="card border-start <?= $map[$categoria]['border'] ?> h-100">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-start mb-3">
-                                    <div>
-                                        <h6 class="card-title mb-1"><i class="fas fa-user me-2"></i><?= $cliente ?></h6>
-                                        <p class="text-muted small mb-1"><strong>DNI:</strong> <?= $ndoc ?></p>
-                                        <?php if ($telefono): ?>
-                                            <p class="text-muted small mb-0"><strong>Teléfono:</strong> <?= $telefono ?></p>
-                                        <?php endif; ?>
-                                        <p class="direccion-info mb-0">
-                                            <!-- <i class="fas fa-home me-1"></i> --><strong>Dirección:</strong>
-                                            <?= $direccion_persona ?>
-                                        </p>
-                                    </div>
-                                    <span class="badge <?= $map[$categoria]['badge'] ?>"><?= $dias ?> días</span>
-                                </div>
-                                <div class="mb-3">
-                                    <p class="mb-1"><strong class="text-danger">Deuda: <?= $deudaFmt ?></strong></p>
-                                    <?php if ($fecha_venc): ?>
-                                        <p class="text-muted small mb-1"><strong>Vencimiento:</strong>
-                                            <?= htmlspecialchars($fecha_venc) ?></p>
-                                    <?php endif; ?>
-                                    <p class="text-muted small mb-0">
-                                        <i class="fas fa-store me-1"></i><strong>Local:</strong> <?= $direccion_local ?>
-                                    </p>
-                                    <!-- <?php if ($direccion): ?>
-                                        <p class="text-muted small mb-0"><strong>Dirección:</strong> <?= $direccion ?></p>
-                                    <?php endif; ?> -->
-                                </div>
-                                <div class="d-flex gap-2 flex-wrap">
-                                    <button class="btn btn-success btn-sm flex-grow-1"
-                                        onclick="iniciarSeguimiento(<?= $idcontrato ?>, '<?= addslashes($cliente) ?>', '<?= number_format((float) $deuda, 2, '.', '') ?>')">
-                                        <i class="fas fa-camera me-1"></i>Hacer Seguimiento
-                                    </button>
-                                    <button class="btn btn-outline-info btn-sm" onclick="verHistorial(<?= $idcontrato ?>)"
-                                        title="Ver historial">
-                                        <i class="fas fa-history"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
-            <?php endif; ?>
-
-        <?php endforeach; ?>
-
-        <!-- Si no hay morosos en ninguna categoría mostramos mensaje general -->
-        <?php if ($counts['5-dias'] + $counts['2-semanas'] + $counts['1-mes'] === 0): ?>
-            <div class="col-12" id="noMorososTodosGlobal">
-                <div class="alert alert-secondary text-center">No hay morosos para mostrar.</div>
-            </div>
-        <?php else: ?>
-            <div class="col-12" id="noMorososTodosGlobal" style="display:none;">
-                <div class="alert alert-secondary text-center">No hay morosos para mostrar.</div>
-            </div>
-        <?php endif; ?>
+            <p class="mt-3 text-muted">Cargando lista de morosos...</p>
+        </div>
     </div>
 
+    <!-- Lista de morosos (se llenará dinámicamente) -->
+    <div class="row" id="listaMoresos" style="display: none;"></div>
 </div>
 
 <!-- Modal para seguimiento -->
@@ -297,7 +194,7 @@ function fmtMoney($val)
             <div class="modal-body">
                 <form id="formSeguimiento" method="POST" action="/creditos/seguimiento" enctype="multipart/form-data">
                     <input type="hidden" name="idcontrato" id="hiddenIdContrato" value="">
-                    <!-- Información del cliente -->
+
                     <div class="alert alert-info">
                         <div class="row">
                             <div class="col-md-4">
@@ -318,7 +215,6 @@ function fmtMoney($val)
                         </div>
                     </div>
 
-                    <!-- Tipo de seguimiento -->
                     <div class="mb-4">
                         <label class="form-label fw-bold">
                             <i class="fas fa-clipboard-check me-2"></i>Tipo de Seguimiento:
@@ -358,7 +254,6 @@ function fmtMoney($val)
                         </div>
                     </div>
 
-                    <!-- Observaciones -->
                     <div class="mb-3">
                         <label for="observaciones" class="form-label fw-bold">
                             <i class="fas fa-sticky-note me-2"></i>Observaciones del Seguimiento
@@ -367,7 +262,6 @@ function fmtMoney($val)
                             placeholder="Describe detalladamente lo ocurrido durante la visita"></textarea>
                     </div>
 
-                    <!-- Subir evidencia -->
                     <div class="mb-4">
                         <label class="form-label fw-bold">
                             <i class="fas fa-cloud-upload-alt me-2"></i>Subir Evidencia
@@ -398,7 +292,6 @@ function fmtMoney($val)
                         </div>
                     </div>
 
-                    <!-- Botones de acción -->
                     <div class="d-flex justify-content-end gap-2 pt-3 border-top">
                         <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">
                             <i class="fas fa-times me-2"></i>Cancelar
@@ -422,15 +315,254 @@ function fmtMoney($val)
             </strong>
             <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
         </div>
-        <div class="toast-body" id="toastMessage">
-            Seguimiento registrado correctamente
-        </div>
+        <div class="toast-body" id="toastMessage">Seguimiento registrado correctamente</div>
     </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 <script>
-    // Función para filtrar morosos por categoría
+
+    // VARIABLES GLOBALES
+    let morososData = {
+        '5-dias': [],
+        '2-semanas': [],
+        '1-mes': []
+    };
+
+    // FUNCIONES DE FORMATO
+    function fmtMoney(val) {
+        return 'S/. ' + parseFloat(val).toLocaleString('es-PE', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // CARGAR ESTADÍSTICAS CON PROMESAS
+    async function cargarEstadisticas() {
+        try {
+            const response = await fetch('/api/creditos/estadisticas', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Error al cargar estadísticas');
+            }
+
+            const data = await response.json();
+            renderizarEstadisticas(data);
+        } catch (error) {
+            console.error('Error:', error);
+            renderizarEstadisticasError();
+        }
+    }
+
+    function renderizarEstadisticas(stats) {
+        const container = document.getElementById('estadisticasContainer');
+        container.innerHTML = `
+            <div class="col-md-3 mb-3">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-exclamation-triangle fa-2x mb-2 text-warning"></i>
+                        <h3 class="card-title">${stats.total_morosos || 0}</h3>
+                        <p class="card-text mb-0">Total Morosos</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-dollar-sign fa-2x mb-2 text-success"></i>
+                        <h3 class="card-title">${fmtMoney(stats.deuda_total || 0)}</h3>
+                        <p class="card-text mb-0">Deuda Total</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-clock fa-2x mb-2 text-info"></i>
+                        <h3 class="card-title">${stats.seguimientos_hoy || 0}</h3>
+                        <p class="card-text mb-0">Seguimientos Hoy</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-calendar fa-2x mb-2 text-primary"></i>
+                        <h3 class="card-title">${Math.round(stats.dias_promedio || 0)}</h3>
+                        <p class="card-text mb-0">Días Promedio</p>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    function renderizarEstadisticasError() {
+        const container = document.getElementById('estadisticasContainer');
+        container.innerHTML = `
+            <div class="col-12">
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Error al cargar estadísticas. Por favor, recarga la página.
+                </div>
+            </div>
+        `;
+    }
+
+    // CARGAR MOROSOS CON PROMESAS
+    async function cargarMorosos() {
+        try {
+            const response = await fetch('/api/creditos/morosos', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Error al cargar morosos');
+            }
+
+            const data = await response.json();
+            morososData = data;
+
+            // Actualizar contadores
+            document.getElementById('count5dias').textContent = data['5-dias'].length;
+            document.getElementById('count2semanas').textContent = data['2-semanas'].length;
+            document.getElementById('count1mes').textContent = data['1-mes'].length;
+
+            // Mostrar panel de clasificación
+            document.getElementById('clasificacionPanel').style.display = 'block';
+
+            // Renderizar morosos CON FILTRO INICIAL APLICADO
+            renderizarMorosos('5-dias');
+
+            // Ocultar loader y mostrar lista
+            document.getElementById('morososLoader').style.display = 'none';
+            document.getElementById('listaMoresos').style.display = 'flex';
+
+        } catch (error) {
+            console.error('Error:', error);
+            renderizarMorososError();
+        }
+    }
+
+    function renderizarMorosos(filtroInicial = null) {
+        const container = document.getElementById('listaMoresos');
+        const map = {
+            '5-dias': { badge: 'bg-warning text-dark', border: 'border-warning' },
+            '2-semanas': { badge: 'bg-warning text-dark', border: 'border-warning border-4' },
+            '1-mes': { badge: 'bg-danger', border: 'border-danger' }
+        };
+
+        let html = '';
+
+        // Generar alertas de "no morosos" por categoría
+        ['5-dias', '2-semanas', '1-mes'].forEach(categoria => {
+            const morososCategoria = morososData[categoria] || [];
+            const display = morososCategoria.length === 0 ? 'block' : 'none';
+
+            // Si hay filtro inicial, solo mostrar la alerta correspondiente
+            const visibilidad = filtroInicial ? (filtroInicial === categoria ? display : 'none') : display;
+
+            html += `
+                <div class="col-12 no-morosos" id="noMorosos-${categoria}" data-categoria="${categoria}" style="display: ${visibilidad};">
+                    <div class="alert alert-secondary text-center mb-0">
+                        <strong>No hay morosos en la categoría ${categoria.replace('-', ' ')}.</strong>
+                    </div>
+                </div>
+            `;
+
+            // Renderizar cada moroso
+            morososCategoria.forEach(m => {
+                const idcontrato = m.idcontrato || 0;
+                const cliente = escapeHtml(m.cliente || 'Sin nombre');
+                const ndoc = escapeHtml(m.ndocumento || m.nrodoc || '');
+                const telefono = escapeHtml(m.telefono || m.telprimario || '');
+                const dias = parseInt(m.dias_atraso || m.dias_max_vencido || 0);
+                const deuda = m.saldo_pendiente || m.deuda_total || 0;
+                const fecha_venc = m.fecha_vencimiento || m.fechapago || '';
+                const direccion_persona = escapeHtml(m.direccion_persona || 'Sin dirección');
+                const direccion_local = escapeHtml(m.direccion_local || 'Sin dirección del local');
+                const deudaFmt = fmtMoney(deuda);
+                const deudaNum = parseFloat(deuda).toFixed(2);
+
+                // Si hay filtro inicial, aplicar display desde el renderizado
+                const displayItem = filtroInicial ? (filtroInicial === categoria ? 'block' : 'none') : 'block';
+
+                html += `
+                    <div class="col-md-6 mb-3 moroso-item" data-categoria="${categoria}" id="cliente-${idcontrato}" style="display: ${displayItem};">
+                        <div class="card border-start ${map[categoria].border} h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <div>
+                                        <h6 class="card-title mb-1"><i class="fas fa-user me-2"></i>${cliente}</h6>
+                                        <p class="text-muted small mb-1"><strong>DNI:</strong> ${ndoc}</p>
+                                        ${telefono ? `<p class="text-muted small mb-0"><strong>Teléfono:</strong> ${telefono}</p>` : ''}
+                                        <p class="direccion-info mb-0"><strong>Dirección:</strong> ${direccion_persona}</p>
+                                    </div>
+                                    <span class="badge ${map[categoria].badge}">${dias} días</span>
+                                </div>
+                                <div class="mb-3">
+                                    <p class="mb-1"><strong class="text-danger">Deuda: ${deudaFmt}</strong></p>
+                                    ${fecha_venc ? `<p class="text-muted small mb-1"><strong>Vencimiento:</strong> ${fecha_venc}</p>` : ''}
+                                    <p class="text-muted small mb-0">
+                                        <i class="fas fa-store me-1"></i><strong>Local:</strong> ${direccion_local}
+                                    </p>
+                                </div>
+                                <div class="d-flex gap-2 flex-wrap">
+                                    <button class="btn btn-success btn-sm flex-grow-1"
+                                        onclick="iniciarSeguimiento(${idcontrato}, '${cliente.replace(/'/g, "\\'")}', '${deudaNum}')">
+                                        <i class="fas fa-camera me-1"></i>Hacer Seguimiento
+                                    </button>
+                                    <button class="btn btn-outline-info btn-sm" onclick="verHistorial(${idcontrato})" title="Ver historial">
+                                        <i class="fas fa-history"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        });
+
+        // Mensaje si no hay morosos en ninguna categoría
+        const totalMorosos = morososData['5-dias'].length + morososData['2-semanas'].length + morososData['1-mes'].length;
+        const displayGlobal = totalMorosos === 0 ? 'block' : 'none';
+
+        html += `
+            <div class="col-12" id="noMorososTodosGlobal" style="display:${displayGlobal};">
+                <div class="alert alert-secondary text-center">No hay morosos para mostrar.</div>
+            </div>
+        `;
+
+        container.innerHTML = html;
+    }
+
+    function renderizarMorososError() {
+        document.getElementById('morososLoader').innerHTML = `
+            <div class="col-12">
+                <div class="alert alert-danger text-center">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Error al cargar morosos. Por favor, recarga la página.
+                </div>
+            </div>
+        `;
+    }
+
+    // FILTRAR MOROSOS POR CATEGORÍA
     function filtrarPor(categoria) {
         const items = document.querySelectorAll('.moroso-item');
         const noMorososAlerts = document.querySelectorAll('.no-morosos');
@@ -459,6 +591,7 @@ function fmtMoney($val)
         if (globalNo) globalNo.style.display = 'none';
     }
 
+    // FUNCIONES DEL MODAL
     function iniciarSeguimiento(id, nombre, deuda) {
         document.getElementById('clienteNombre').textContent = nombre;
         document.getElementById('clienteDeuda').textContent = 'S/. ' + deuda;
@@ -467,16 +600,16 @@ function fmtMoney($val)
         document.getElementById('uploadDefault').style.display = 'block';
         document.getElementById('uploadSuccess').style.display = 'none';
         document.getElementById('evidenciaFile').value = '';
+        document.getElementById('observaciones').value = '';
 
         const modal = new bootstrap.Modal(document.getElementById('modalSeguimiento'));
         modal.show();
     }
 
-    // Función para mostrar archivo seleccionado
     function mostrarArchivo(input) {
         if (input.files && input.files[0]) {
             const archivo = input.files[0];
-            const tamaño = (archivo.size / 1024 / 1024).toFixed(2); // MB
+            const tamaño = (archivo.size / 1024 / 1024).toFixed(2);
 
             if (tamaño > 5) {
                 alert('El archivo es demasiado grande. Máximo 5MB.');
@@ -517,44 +650,40 @@ function fmtMoney($val)
         toast.show();
     }
 
+    // VALIDACIÓN Y ENVÍO DEL FORMULARIO
     document.getElementById('formSeguimiento').addEventListener('submit', function (e) {
-
         const observaciones = document.getElementById('observaciones').value;
         const evidencia = document.getElementById('evidenciaFile').files[0];
 
         if (!observaciones.trim()) {
             e.preventDefault();
-            alert('Por favor, ingresa las observaciones del seguimiento.');
+            showToast('Por favor, ingresa las observaciones del seguimiento.', 'warning');
             return;
         }
 
         if (!evidencia) {
             e.preventDefault();
-            alert('Por favor, sube la evidencia del seguimiento.');
+            showToast('Por favor, sube la evidencia del seguimiento.', 'warning');
             return;
         }
 
         showToast('Guardando seguimiento...', 'info');
     });
 
+    // INICIALIZACIÓN AL CARGAR LA PÁGINA
     document.addEventListener('DOMContentLoaded', function () {
-        filtrarPor('5-dias');
-    });
-
-    window.addEventListener('load', function () {
-        const cards = document.querySelectorAll('.moroso-item');
-        cards.forEach((card, index) => {
-            setTimeout(() => {
-                card.style.opacity = '0';
-                card.style.transform = 'translateY(20px)';
-                card.style.transition = 'all 0.5s ease';
-
-                setTimeout(() => {
-                    card.style.opacity = '1';
-                    card.style.transform = 'translateY(0)';
-                }, 100);
-            }, index * 100);
-        });
+        // Cargar todo con promesas en paralelo
+        Promise.all([
+            cargarEstadisticas(),
+            cargarMorosos()
+        ])
+            .then(() => {
+                console.log('Datos cargados exitosamente');
+            })
+            .catch(error => {
+                console.error('Error al cargar datos:', error);
+                showToast('Error al cargar algunos datos. Por favor, recarga la página.', 'warning');
+            });
     });
 </script>
 

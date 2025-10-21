@@ -15,28 +15,74 @@ class CreditoController extends Controller
         $this->creditoModel = new Credito();
     }
 
+    /**
+     * Vista principal
+     */
     public function index(): void
     {
-        $tiempoInicio = microtime(true);
-
         $this->authRequired();
-
-        // Obtener estadísticas de morosos
-        $estadisticas = $this->creditoModel->getEstadisticasMorosos();
-
-        // Obtener morosos clasificados por días de atraso
-        $morosos = $this->creditoModel->getMorososClasificados();
-
-        $this->view('creditos.index', [
-            'estadisticas' => $estadisticas,
-            'morosos' => $morosos
-        ]);
-
-        $tiempoFin = microtime(true);
-        $tiempoEjecucion = $tiempoFin - $tiempoInicio;
-        error_log("Tiempo de ejecución de CREDITO/index: " . number_format($tiempoEjecucion, 4) . " segundos.");
+        $this->view('creditos.index', []);
     }
 
+    /**
+     * API: Obtener estadísticas
+     */
+    public function getEstadisticas(): void
+    {
+        $this->authRequired();
+        header('Content-Type: application/json');
+
+        try {
+            $estadisticas = $this->creditoModel->getEstadisticasMorosos();
+
+            echo json_encode([
+                'success' => true,
+                'total_morosos' => (int) $estadisticas['total_morosos'],
+                'deuda_total' => (float) $estadisticas['deuda_total'],
+                'seguimientos_hoy' => (int) $estadisticas['seguimientos_hoy'],
+                'dias_promedio' => (float) $estadisticas['dias_promedio']
+            ]);
+        } catch (\Exception $e) {
+            http_response_code(500);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Error al obtener estadísticas'
+            ]);
+        }
+    }
+
+    /**
+     * API: Obtener morosos clasificados
+     */
+    public function getMorosos(): void
+    {
+        $this->authRequired();
+        header('Content-Type: application/json');
+
+        try {
+            $morosos = $this->creditoModel->getMorososClasificados();
+
+            echo json_encode([
+                'success' => true,
+                '5-dias' => $morosos['5-dias'] ?? [],
+                '2-semanas' => $morosos['2-semanas'] ?? [],
+                '1-mes' => $morosos['1-mes'] ?? []
+            ]);
+        } catch (\Exception $e) {
+            http_response_code(500);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Error al obtener morosos',
+                '5-dias' => [],
+                '2-semanas' => [],
+                '1-mes' => []
+            ]);
+        }
+    }
+
+    /**
+     * Registrar seguimiento
+     */
     public function registrarSeguimiento(): void
     {
         // Asegurar sesión
@@ -137,7 +183,6 @@ class CreditoController extends Controller
                     ]);
                     return;
                 } else {
-                    // flash y redirect al index
                     $_SESSION['flash'] = ['type' => 'success', 'message' => 'Seguimiento registrado correctamente'];
                     header('Location: /creditos');
                     exit;
@@ -167,6 +212,9 @@ class CreditoController extends Controller
         }
     }
 
+    /**
+     * Ver historial de seguimientos
+     */
     public function verHistorial(int $idContrato): void
     {
         $this->authRequired();
@@ -181,6 +229,9 @@ class CreditoController extends Controller
         ]);
     }
 
+    /**
+     * Guardar evidencia
+     */
     private function guardarEvidencia(array $archivo): ?string
     {
         $extensionesPermitidas = ['jpg', 'jpeg', 'png', 'pdf'];

@@ -48,7 +48,7 @@
         <div class="col-md-3 mb-3">
             <div class="card estadistica-card h-100">
                 <div class="card-body text-center">
-                    <i class="fas fa-users fa-2x mb-2"></i>
+                    <i class="fas fa-users text-primary fa-2x mb-2"></i>
                     <h3 class="card-title" id="stat-deudores">
                         <span class="spinner-border spinner-border-sm"></span>
                     </h3>
@@ -61,7 +61,7 @@
         <div class="col-md-3 mb-3">
             <div class="card estadistica-card h-100">
                 <div class="card-body text-center">
-                    <i class="fas fa-clock fa-2x mb-2"></i>
+                    <i class="fas fa-clock fa-2x text-info mb-2"></i>
                     <h3 class="card-title" id="stat-por-vencer">
                         <span class="spinner-border spinner-border-sm"></span>
                     </h3>
@@ -74,7 +74,7 @@
         <div class="col-md-3 mb-3">
             <div class="card estadistica-card h-100">
                 <div class="card-body text-center">
-                    <i class="fas fa-times-circle fa-2x mb-2"></i>
+                    <i class="fas fa-times-circle text-danger fa-2x mb-2"></i>
                     <h3 class="card-title" id="stat-vencidos">
                         <span class="spinner-border spinner-border-sm"></span>
                     </h3>
@@ -87,7 +87,7 @@
         <div class="col-md-3 mb-3">
             <div class="card estadistica-card h-100">
                 <div class="card-body text-center">
-                    <i class="fas fa-dollar-sign fa-2x mb-2"></i>
+                    <i class="fas fa-dollar-sign text-success fa-2x mb-2"></i>
                     <h3 class="card-title" id="stat-total-cobrar">
                         <span class="spinner-border spinner-border-sm"></span>
                     </h3>

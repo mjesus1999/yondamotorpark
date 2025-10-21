@@ -16,33 +16,19 @@ class Credito
         $this->db = Database::getInstance();
     }
 
-    /**
-     * Obtener estadísticas base de morosos
-     * Ahora usa 2 SPs separados y combina los resultados
-     */
     public function getEstadisticasMorosos(): array
     {
+        $query = "CALL sp_get_estadisticas_morosos()";
         try {
-            // 1) Llamar al primer SP: estadísticas base
-            $stmt1 = $this->db->prepare("CALL sp_get_estadisticas_morosos_base()");
-            $stmt1->execute();
-            $estadisticas = $stmt1->fetch(PDO::FETCH_ASSOC);
-            $stmt1->closeCursor(); // ⚠️ IMPORTANTE: cerrar cursor antes del siguiente SP
-
-            // 2) Llamar al segundo SP: seguimientos de hoy
-            $stmt2 = $this->db->prepare("CALL sp_get_seguimientos_hoy()");
-            $stmt2->execute();
-            $seguimientos = $stmt2->fetch(PDO::FETCH_ASSOC);
-            $stmt2->closeCursor();
-
-            // 3) Combinar resultados
-            return [
-                'total_morosos' => (int) ($estadisticas['total_morosos'] ?? 0),
-                'deuda_total' => (float) ($estadisticas['deuda_total'] ?? 0),
-                'dias_promedio' => (float) ($estadisticas['dias_promedio'] ?? 0),
-                'seguimientos_hoy' => (int) ($seguimientos['seguimientos_hoy'] ?? 0)
+            $stmt = $this->db->prepare($query);
+            $stmt->execute();
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $result ?: [
+                'total_morosos' => 0,
+                'deuda_total' => 0,
+                'seguimientos_hoy' => 0,
+                'dias_promedio' => 0
             ];
-
         } catch (PDOException $error) {
             error_log("Error en estadísticas morosos: " . $error->getMessage());
             return [
@@ -54,27 +40,14 @@ class Credito
         }
     }
 
-    /**
-     * Obtener morosos clasificados por días de atraso
-     * Ahora PRIMERO actualiza las cuotas vencidas, LUEGO consulta
-     */
     public function getMorososClasificados(): array
     {
+        $query = "CALL sp_get_morosos_clasificados()";
         try {
-            // 1) PRIMERO: Actualizar cuotas vencidas
-            $stmtUpdate = $this->db->prepare("CALL sp_actualizar_cuotas_vencidas()");
-            $stmtUpdate->execute();
-            $stmtUpdate->closeCursor(); // Cerrar cursor
-
-            // 2) LUEGO: Obtener lista de morosos actualizada
-            $stmtSelect = $this->db->prepare("CALL sp_get_morosos_clasificados()");
-            $stmtSelect->execute();
-            $results = $stmtSelect->fetchAll(PDO::FETCH_ASSOC);
-            $stmtSelect->closeCursor();
-
-            // 3) Clasificar por días de atraso
+            $stmt = $this->db->prepare($query);
+            $stmt->execute();
+            $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
             return $this->clasificarMorosos($results);
-
         } catch (PDOException $error) {
             error_log("Error en morosos clasificados: " . $error->getMessage());
             return [
@@ -85,9 +58,6 @@ class Credito
         }
     }
 
-    /**
-     * Clasificar morosos según días de atraso
-     */
     private function clasificarMorosos(array $morosos): array
     {
         $clasificados = [
@@ -99,29 +69,18 @@ class Credito
         foreach ($morosos as $moroso) {
             $diasAtraso = (int) $moroso['dias_atraso'];
 
-            if ($diasAtraso >= 1 && $diasAtraso <= 5) {
-                $clasificados['5-dias'][] = $moroso;
-            } elseif ($diasAtraso >= 6 && $diasAtraso <= 14) {
-                $clasificados['2-semanas'][] = $moroso;
-            } elseif ($diasAtraso >= 15) {
-                $clasificados['1-mes'][] = $moroso;
-            }
-
-            /* if ($diasAtraso <= 7) {
+            if ($diasAtraso <= 7) {
                 $clasificados['5-dias'][] = $moroso;
             } elseif ($diasAtraso <= 30) {
                 $clasificados['2-semanas'][] = $moroso;
             } else {
                 $clasificados['1-mes'][] = $moroso;
-            } */
+            }
         }
 
         return $clasificados;
     }
 
-    /**
-     * Registrar seguimiento de moroso
-     */
     public function registrarSeguimiento(array $data): int
     {
         $query = "CALL sp_registrar_seguimiento_moroso(:idcontrato, :tipo, :observaciones, :evidencia, :fecha_seguimiento, :usuario_registro)";
@@ -138,8 +97,6 @@ class Credito
             ]);
 
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
-            $stmt->closeCursor();
-
             return (int) ($result['last_insert_id'] ?? 0);
         } catch (PDOException $error) {
             error_log("Error al registrar seguimiento: " . $error->getMessage());
@@ -147,9 +104,6 @@ class Credito
         }
     }
 
-    /**
-     * Obtener historial de seguimientos por contrato
-     */
     public function getHistorialSeguimientos(int $idContrato): array
     {
         try {
@@ -165,29 +119,39 @@ class Credito
         }
     }
 
-    /**
-     * Obtener información del cliente por contrato
-     */
+    /* public function getHistorialSeguimientos(int $idContrato): array
+    {
+        $query = "CALL sp_get_historial_seguimientos(:idcontrato)";
+
+        try {
+            $stmt = $this->db->prepare($query);
+            $stmt->execute([':idcontrato' => $idContrato]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $error) {
+            error_log("Error en historial seguimientos: " . $error->getMessage());
+            return [];
+        }
+    } */
+
     public function getClienteByContrato(int $idContrato): ?array
     {
         $query = "SELECT 
                     con.idcontrato,
                     CONCAT(p.apellidos, ' ', p.nombres) AS cliente,
                     p.nrodoc,
-                    p.telprimario AS celular,
+                    p.celular,
                     cot.valorcuota,
                     con.estado
                   FROM contratos con
                   JOIN cotizaciones cot ON con.idcotizacion = cot.idcotizacion
                   JOIN clientes cli ON cot.idcliente = cli.idcliente
                   JOIN personas p ON cli.idpersona = p.idpersona
-                  WHERE con.idcontrato = :idcontrato";
+                  WHERE con.idcontrato = :idcontrato
+                ";
         try {
             $stmt = $this->db->prepare($query);
             $stmt->execute([':idcontrato' => $idContrato]);
-            $result = $stmt->fetch(PDO::FETCH_ASSOC);
-            $stmt->closeCursor();
-            return $result ?: null;
+            return $stmt->fetch(PDO::FETCH_ASSOC);
         } catch (PDOException $error) {
             error_log("Error al obtener cliente: " . $error->getMessage());
             return null;
