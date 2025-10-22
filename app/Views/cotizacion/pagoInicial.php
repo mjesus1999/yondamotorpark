@@ -1,5 +1,10 @@
 <?php include __DIR__ . '/../layout/header.php'; ?>
 <link rel="stylesheet" href="/assets/css/pago-inicial.css">
+
+<?php var_dump($cotizacion);
+var_dump($completoInicial);
+
+?>
 <div class="container-fluid">
 
     <div class="alert alert-info mt-2" role="alert">
@@ -43,13 +48,13 @@
             <div class="col-6 col-lg-3">
                 <div class="tarjeta-resumen">
                     <small class="d-block opacity-75">Total Pagado</small>
-                    <strong class="fs-5" id="totalPagado">S/ <?= number_format(htmlspecialchars($montosInfo['totalpagado']), 2, '.') ?></strong>
+                    <strong class="fs-5" id="totalPagado"> <?= $cotizacion['moneda'] == 'PEN' ? 'S/' : '$/ ' ?> <?= number_format(htmlspecialchars($montosInfo['totalpagado']), 2, '.') ?></strong>
                 </div>
             </div>
             <div class="col-6 col-lg-3">
                 <div class="tarjeta-resumen">
                     <small class="d-block opacity-75">Saldo Pendiente</small>
-                    <strong class="fs-5" id="saldoPendiente">S/ <?= number_format(htmlspecialchars($montosInfo['saldorestante']), 2, '.') ?></strong>
+                    <strong class="fs-5" id="saldoPendiente"><?= $cotizacion['moneda'] == 'PEN' ? 'S/' : '$/ ' ?><?= number_format(htmlspecialchars($montosInfo['saldorestante']), 2, '.') ?></strong>
                 </div>
             </div>
             <div class="col-6 col-lg-3">
@@ -57,20 +62,19 @@
                     <small class="d-block opacity-75">Estado</small>
                     <span class="badge bg-white mt-1 text-success fw-bold">
                         <span class="badge rounded-circle bg-warning p-1"></span>
-                        <?php 
-                            switch ($cotizacion['estadocotizacion']) {
-                                case 'P':
-                                    echo 'Pendiente';
-                                    break;
-                                case 'S':
-                                    echo 'Serparada';
-                                    break;
-                                case 'A':
-                                    echo 'Aprobada';
-                                    break;
-                                
-                            }
-                        
+                        <?php
+                        switch ($cotizacion['estadocotizacion']) {
+                            case 'P':
+                                echo 'Pendiente';
+                                break;
+                            case 'S':
+                                echo 'Serparada';
+                                break;
+                            case 'A':
+                                echo 'Aprobada';
+                                break;
+                        }
+
                         ?>
                     </span>
                 </div>
@@ -187,7 +191,7 @@
                                 </div>
                                 <div>
                                     <small class=" d-block">Precio de Venta</small>
-                                    <strong id="precioVenta">PEN <?= number_format(htmlspecialchars($cotizacion['precioventa']), 2, '.') ?></strong>
+                                    <strong id="precioVenta"><?= $cotizacion['moneda'] == 'PEN' ? 'S/' : '$/ ' ?> <?= number_format(htmlspecialchars($cotizacion['precioventa']), 2, '.') ?></strong>
                                 </div>
                             </div>
 
@@ -235,7 +239,7 @@
                                         <tr>
                                             <td>Monto a Financiar</td>
                                             <td>-</td>
-                                            <td class="text-end" id="tablaFinanciar">S/ <?= number_format(htmlspecialchars($cotizacion['precioventa'] - $cotizacion['inicial']), 2, '.') ?></td>
+                                            <td class="text-end" id="tablaFinanciar"><?= $cotizacion['moneda'] == 'PEN' ? 'S/' : '$/ ' ?> <?= number_format(htmlspecialchars($cotizacion['precioventa'] - $cotizacion['inicial']), 2, '.') ?></td>
                                         </tr>
                                         <tr>
                                             <td>Número de Cuotas</td>
@@ -245,7 +249,7 @@
                                         <tr class="table-success">
                                             <td><strong>Valor de Cuota Mensual</strong></td>
                                             <td>-</td>
-                                            <td class="text-end"><strong id="tablaValorCuota">S/ <?= number_format(htmlspecialchars($cotizacion['valorcuota']), 2, '.') ?></strong></td>
+                                            <td class="text-end"><strong id="tablaValorCuota"> <?= $cotizacion['moneda'] == 'PEN' ? 'S/' : '$/ ' ?> <?= number_format(htmlspecialchars($cotizacion['valorcuota']), 2, '.') ?></strong></td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -343,25 +347,25 @@
                             </div>
 
                             <div class="col-md-4">
-                                 <label for="montoOriginal" class="form-label mb-0">Monto a Pagar <span class="text-danger fw-bold">*</span></label>
+                                <label for="montoOriginal" class="form-label mb-0">Monto a Pagar <span class="text-danger fw-bold">*</span></label>
                                 <div class="input-group">
                                     <span class="input-group-text" id="simboloMoneda">S/</span>
                                     <input type="number" class="form-control" id="montoOriginal" step="0.01" min="0.01" placeholder="0.00" name="montomonedaoriginal" required>
                                 </div>
 
                                 <div class="d-flex mt-2 gap-3">
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="moneda" id="monedaPEN" value="PEN" checked>
-                                            <label class="form-check-label" for="monedaPEN">Soles (S/)</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="moneda" id="monedaUSD" value="USD">
-                                            <label class="form-check-label" for="monedaUSD">Dólares ($)</label>
-                                        </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="moneda" id="monedaPEN" value="PEN" checked>
+                                        <label class="form-check-label" for="monedaPEN">Soles (S/)</label>
                                     </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="moneda" id="monedaUSD" value="USD">
+                                        <label class="form-check-label" for="monedaUSD">Dólares ($)</label>
+                                    </div>
+                                </div>
                             </div>
 
-                             <!-- <div class="col-md-2">
+                            <!-- <div class="col-md-2">
                                     <div class="d-flex gap-3">
                                         <div class="form-check">
                                             <input class="form-check-input" type="radio" name="moneda" id="monedaPEN" value="PEN" checked>
@@ -443,15 +447,16 @@
                     <div id="contenedorHistorial">
                         <?php if (empty($historialPagos)) : ?>
                             <div class="sin-datos">
-                                <i class="bi bi-clock-history"></i>
-                                <p class="mb-2">No hay pagos registrados</p>
-                                <small class="text-muted">Los pagos que registre aparecerán aquí</small>
                             </div>
                         <?php else: ?>
                             <?php
                             $totalPagado = 0;
+                            $simboloMoneda = 'S/'; 
+
                             foreach ($historialPagos as $pago) {
-                                $totalPagado += (float)$pago['amortizacion'];
+                                $totalPagado += (float)$pago['monto_pago'];
+                     
+                                $simboloMoneda = $pago['moneda_simbolo'];
                             }
                             ?>
                             <div class="resumen-historial mb-3">
@@ -459,8 +464,7 @@
                                     <div class="col-md-6">
                                         <small class="text-success-emphasis d-block">Total Pagado</small>
                                         <strong class="text-success fs-5">
-
-                                            S/ <?= number_format($totalPagado, 2, '.', ',') ?>
+                                            <?= htmlspecialchars($simboloMoneda) ?> <?= number_format($totalPagado, 2, '.', ',') ?>
                                         </strong>
                                     </div>
                                     <div class="col-md-6">
@@ -495,19 +499,20 @@
                                                 <td><?= htmlspecialchars($pago['mediopago']) ?></td>
                                                 <td><code class="codigo-transaccion"><?= htmlspecialchars($pago['numerotransaccion'] ?? '-') ?></code></td>
                                                 <td><?= htmlspecialchars($pago['fechapago']) ?></td>
+
                                                 <td class="text-end text-success">
-
-                                                    <?= number_format((float)$pago['amortizacion'], 2, '.', ',') ?>
+                                                    <?= htmlspecialchars($pago['moneda_simbolo']) ?> <?= number_format((float)$pago['monto_pago'], 2, '.', ',') ?>
                                                 </td>
+
                                                 <td class="text-end text-warning">
-
-                                                    <?= number_format((float)$pago['saldorestante'], 2, '.', ',') ?>
+                                                    <?= htmlspecialchars($pago['moneda_simbolo']) ?> <?= number_format((float)$pago['saldorestante'], 2, '.', ',') ?>
                                                 </td>
+
                                                 <td>
                                                     <?php if (!empty($pago['comprobante'])): ?>
                                                         <button data-bs-toggle="modal"
                                                             data-bs-target="#modalComprobante"
-                                                            data-src="/archivos/<?= htmlspecialchars($pago['comprobante']) ?>" data-bs-toggle="modal" data-bs-target="#modalComprobante" class="badge bg-light text-dark ver-comprobante">Ver</button>
+                                                            data-src="/archivos/<?= htmlspecialchars($pago['comprobante']) ?>" class="badge bg-light text-dark ver-comprobante">Ver</button>
                                                     <?php else: ?>
                                                         <span class="badge bg-secondary">N/A</span>
                                                     <?php endif; ?>
@@ -519,7 +524,6 @@
                                 </table>
                             </div>
                         <?php endif; ?>
-
                     </div>
                 </div>
             </div>
@@ -544,36 +548,71 @@
 </div>
 <?php include __DIR__ . '/../layout/footer.php'; ?>
 <script>
-    const formularioPago = document.getElementById('formularioPago');
-    const fechaPago = document.getElementById('fechapago');
-    const modalComprobante = document.getElementById('modalComprobante');
-    const selectCuentaPago = document.getElementById('idcuentapago');
-    const selectMedioPago = document.getElementById('mediopago');
-    const inputNumeroTransaccion = document.getElementById('numerotransaccion');
-    const inputComprobante = document.getElementById('comprobante');
+   
+    const estadoFinanciero = {
+        monedaCotizacion: '<?= htmlspecialchars($cotizacion['moneda']) ?>',
+        simboloCotizacion: '<?= $cotizacion['moneda'] == 'PEN' ? 'S/' : '$' ?>',
+        inicialRequerido: <?= (float)htmlspecialchars($cotizacion['inicial']) ?>,
+        totalPagado: <?= (float)htmlspecialchars($montosInfo['totalpagado']) ?>,
+        saldoPendiente: <?= (float)htmlspecialchars($montosInfo['saldorestante']) ?>,
+        tipoCambio: 0.00
+    };
 
-    // Elementos para la lógica de moneda
-    const radioButtonsMoneda = document.querySelectorAll('input[name="moneda"]');
-    const inputMontoOriginal = document.getElementById('montoOriginal');
-    const inputTipoCambio = document.getElementById('tipoCambio');
-    const simboloMoneda = document.getElementById('simboloMoneda');
-    const inputAmortizacionFinalPEN = document.getElementById('amortizacionFinalPEN');
-    const saldoPendienteActual = parseFloat(document.getElementById('saldoActualForm').dataset.valor);
+    
+    const els = {
+        formularioPago: document.getElementById('formularioPago'),
+        fechaPago: document.getElementById('fechapago'),
+        modalComprobante: document.getElementById('modalComprobante'),
+        selectCuentaPago: document.getElementById('idcuentapago'),
+        selectMedioPago: document.getElementById('mediopago'),
+        inputNumeroTransaccion: document.getElementById('numerotransaccion'),
+        inputComprobante: document.getElementById('comprobante'),
+        radioButtonsMoneda: document.querySelectorAll('input[name="moneda"]'),
+        inputMontoOriginal: document.getElementById('montoOriginal'),
+        inputTipoCambio: document.getElementById('tipoCambio'),
+        simboloMonedaPago: document.getElementById('simboloMoneda'), 
+        inputAmortizacionFinalPEN: document.getElementById('amortizacionFinalPEN'),
 
+        uiSaldoActualForm: document.getElementById('saldoActualForm'),
+        uiMontoAPagarContainer: document.getElementById('montoAPagarContainer'),
+        uiSaldoRestanteContainer: document.getElementById('saldoRestanteContainer'),
+        uiMontoAPagar: document.getElementById('montoAPagar'),
+        uiSaldoRestanteForm: document.getElementById('saldoRestanteForm'),
+        alertaExito: document.getElementById('alertaExito'),
+        alertaError: document.getElementById('alertaError'),
+        mensajeError: document.getElementById('mensajeError'),
+    };
 
-    async function fetchTipoCambio() {
+ 
+
+    /**
+     * Obtiene el tipo de cambio del servidor y actualiza el estado.
+     */
+    async function fetchTipoCambio(forzarRecarga = false) {
+        if (estadoFinanciero.tipoCambio > 0 && !forzarRecarga) {
+            return estadoFinanciero.tipoCambio;
+        }
+
         try {
-
             const response = await fetch('/cotizacion/tipo-cambio');
             if (!response.ok) throw new Error('No se pudo obtener el tipo de cambio.');
 
             const data = await response.json();
-            inputTipoCambio.value = data.tipo_cambio;
-            calcularYActualizar();
+            const tc = parseFloat(data.tipo_cambio);
+            console.log('TIPO DE CAMBIO: ', tc);
+
+            if (isNaN(tc) || tc <= 0) {
+                throw new Error('Tipo de cambio inválido recibido.');
+            }
+
+            estadoFinanciero.tipoCambio = tc;
+            els.inputTipoCambio.value = tc.toFixed(4); 
+            return tc;
         } catch (error) {
             console.error('Error al obtener tipo de cambio:', error);
             mostrarAlerta('error', 'No se pudo obtener el tipo de cambio. Intente de nuevo.');
-            inputTipoCambio.value = '0.00';
+            els.inputTipoCambio.value = '0.00';
+            return 0;
         }
     }
 
@@ -581,109 +620,69 @@
      * Calcula la amortización en SOLES y actualiza la UI.
      */
     function calcularYActualizar() {
-        const montoOriginal = parseFloat(inputMontoOriginal.value) || 0;
-        const monedaSeleccionada = document.querySelector('input[name="moneda"]:checked').value;
+        const montoOriginal = parseFloat(els.inputMontoOriginal.value) || 0;
+        const monedaPago = document.querySelector('input[name="moneda"]:checked').value; 
+        const tipoCambio = estadoFinanciero.tipoCambio;
 
         let amortizacionCalculadaPEN = 0;
 
-        if (monedaSeleccionada === 'USD') {
-            const tipoCambio = parseFloat(inputTipoCambio.value) || 0;
-            // console.log(tipoCambio)
+    
+        if (monedaPago === 'USD') {
+            if (tipoCambio <= 0) {
+                mostrarAlerta('error', 'El tipo de cambio no está disponible. No se puede calcular el monto en Soles.');
+                return; 
+            }
             amortizacionCalculadaPEN = montoOriginal * tipoCambio;
-        } else {
+        } else { 
             amortizacionCalculadaPEN = montoOriginal;
         }
 
-        inputAmortizacionFinalPEN.value = amortizacionCalculadaPEN.toFixed(2);
+        // Guardar el valor final en SOLES en el input hidden
+        els.inputAmortizacionFinalPEN.value = amortizacionCalculadaPEN.toFixed(2);
 
-        const nuevoSaldoRestante = saldoPendienteActual - amortizacionCalculadaPEN;
+        // Calcular el nuevo saldo pendiente 
+        let saldoPendienteBase = estadoFinanciero.saldoPendiente;
+        let amortizacionConvertidaACotizacion = 0;
 
-        const formatoNumero = {
+        if (estadoFinanciero.monedaCotizacion === 'USD') {
+            if (tipoCambio <= 0) return; 
+            amortizacionConvertidaACotizacion = amortizacionCalculadaPEN / tipoCambio;
+        } else { 
+            amortizacionConvertidaACotizacion = amortizacionCalculadaPEN;
+        }
+
+        const nuevoSaldoRestante = saldoPendienteBase - amortizacionConvertidaACotizacion;
+
+     
+        const formato = {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         };
+        const simbolo = estadoFinanciero.simboloCotizacion; 
 
         if (montoOriginal > 0) {
-            document.getElementById('montoAPagarContainer').style.display = 'block';
-            document.getElementById('saldoRestanteContainer').style.display = 'block';
-            document.getElementById('montoAPagar').textContent = 'S/ ' + amortizacionCalculadaPEN.toLocaleString('es-PE', formatoNumero);
-            document.getElementById('saldoRestanteForm').textContent = 'S/ ' + nuevoSaldoRestante.toLocaleString('es-PE', formatoNumero);
+            els.uiMontoAPagarContainer.style.display = 'block';
+            els.uiSaldoRestanteContainer.style.display = 'block';
+            // Monto a Pagar siempre se muestra en su equivalente en SOLES 
+            els.uiMontoAPagar.textContent = 'S/ ' + amortizacionCalculadaPEN.toLocaleString('es-PE', formato);
+            // Saldo Restante se muestra en la moneda de la COTIZACIÓN
+            els.uiSaldoRestanteForm.textContent = `${simbolo} ${nuevoSaldoRestante.toLocaleString('es-PE', formato)}`;
         } else {
-            document.getElementById('montoAPagarContainer').style.display = 'none';
-            document.getElementById('saldoRestanteContainer').style.display = 'none';
+            els.uiMontoAPagarContainer.style.display = 'none';
+            els.uiSaldoRestanteContainer.style.display = 'none';
         }
     }
 
-
-
-
-    // --- EVENT LISTENERS ---
-
-    document.addEventListener('DOMContentLoaded', () => {
-        fechaPago.value = new Date().toISOString().slice(0, 10);
-        cargarCuentasBancarias();
-    });
-
-    radioButtonsMoneda.forEach(radio => {
-        radio.addEventListener('change', function() {
-            if (this.value === 'USD') {
-                simboloMoneda.textContent = '$';
-                fetchTipoCambio();
-            } else {
-                simboloMoneda.textContent = 'S/';
-                inputTipoCambio.value = '';
-                calcularYActualizar();
-            }
-        });
-    });
-
-    inputMontoOriginal.addEventListener('input', calcularYActualizar);
-
-    selectMedioPago.addEventListener('change', (e) => {
-        inputNumeroTransaccion.disabled = false;
-        selectCuentaPago.disabled = false;
-        inputComprobante.disabled = false;
-
-        switch (e.target.value) {
-            case 'Efectivo':
-                inputNumeroTransaccion.disabled = true;
-                selectCuentaPago.disabled = true;
-                inputComprobante.disabled = true;
-                break;
-            case 'Yape':
-            case 'Plin':
-                selectCuentaPago.disabled = true;
-                break;
-            case 'Transferencia Bancaria':
-                // Todos habilitados
-                break;
-        }
-    });
-
-    modalComprobante.addEventListener('show.bs.modal', function(event) {
-        const boton = event.relatedTarget;
-        const rutaImagen = boton.getAttribute('data-src');
-        document.getElementById('imagenComprobante').src = rutaImagen;
-    });
-
-    formularioPago.addEventListener('submit', async (e) => {
-        e.preventDefault();
-
-        if (await ask('¿Confirmar pago de inicial?', 'Confirmar')) {
-            validarYRegistrarPago();
-        }
-    });
-
-
-
+    /**
+     * Carga las cuentas bancarias
+     */
     async function cargarCuentasBancarias() {
         try {
             const res = await fetch('/api/numcuentaspagos');
             const data = await res.json();
-
-            selectCuentaPago.innerHTML = '<option value="">Seleccione la cuenta</option>';
+            els.selectCuentaPago.innerHTML = '<option value="">Seleccione la cuenta</option>';
             data.forEach(cuenta => {
-                selectCuentaPago.innerHTML += `<option value="${cuenta.idcuentapago}">${cuenta.nombrecuenta}</option>`;
+                els.selectCuentaPago.innerHTML += `<option value="${cuenta.idcuentapago}">${cuenta.nombrecuenta}</option>`;
             });
         } catch (error) {
             console.error('Error al cargar cuentas:', error);
@@ -691,45 +690,51 @@
         }
     }
 
+    /**
+     * Valida el formulario antes de enviarlo.
+     */
     function validarFormulario() {
-        const datos = new FormData(formularioPago);
+        const datos = new FormData(els.formularioPago);
         const medioPago = datos.get('mediopago');
         const moneda = datos.get('moneda');
-        const tipoCambio = datos.get('tipocambioaplicado');
         const montoOriginal = parseFloat(datos.get('montomonedaoriginal'));
-        const amortizacionFinal = parseFloat(inputAmortizacionFinalPEN.value);
+        const amortizacionFinal = parseFloat(els.inputAmortizacionFinalPEN.value);
 
+        //  el saldo pendiente en la moneda de la cotización para la comparación
+        const saldoPendienteBase = estadoFinanciero.saldoPendiente;
+
+        let amortizacionConvertidaACotizacion = 0;
+        if (estadoFinanciero.monedaCotizacion === 'USD') {
+            if (estadoFinanciero.tipoCambio <= 0) return 'Tipo de cambio no válido. Recargue la página.';
+            amortizacionConvertidaACotizacion = amortizacionFinal / estadoFinanciero.tipoCambio;
+        } else {
+            amortizacionConvertidaACotizacion = amortizacionFinal;
+        }
+
+        // Validaciones
         if (!datos.get('fechapago')) return 'Debe seleccionar la fecha de pago.';
         if (!medioPago) return 'Debe seleccionar un medio de pago.';
         if (!montoOriginal || montoOriginal <= 0) return 'El monto a pagar debe ser mayor a cero.';
+        if (moneda === 'USD' && estadoFinanciero.tipoCambio <= 0) return 'No se pudo obtener un tipo de cambio válido.';
 
-        if (moneda === 'USD' && (!tipoCambio || parseFloat(tipoCambio) <= 0)) {
-            return 'No se pudo obtener un tipo de cambio válido.';
+        // Compara con una pequeña tolerancia
+        if (amortizacionConvertidaACotizacion > (saldoPendienteBase + 0.01)) {
+            return 'El monto a pagar no puede ser mayor al saldo pendiente.';
         }
 
-        if (amortizacionFinal > saldoPendienteActual + 0.01) {
-            return 'El monto a pagar (convertido a S/) no puede ser mayor al saldo pendiente.';
-        }
-
-        if (medioPago === 'Transferencia Bancaria') {
-            if (!datos.get('idcuentapago')) return 'Debe seleccionar una cuenta para la transferencia.';
+        if (medioPago !== 'Efectivo') {
             const comprobanteFile = datos.get('comprobante');
-            if (!comprobanteFile || comprobanteFile.name === '') {
-                return 'Debe subir el comprobante para Transferencia';
-            }
-            if (!datos.get('numerotransaccion').trim()) return 'Debe ingresar el número de transacción.';
-        }
-        if (medioPago === 'Yape' || medioPago === 'Plin') {
-            if (!datos.get('numerotransaccion').trim()) return 'Debe ingresar el número de operación.';
-            const comprobanteFile = datos.get('comprobante');
-            if (!comprobanteFile || comprobanteFile.name === '') {
-                return 'Debe subir el comprobante para pagos con Yape o Plin.';
-            }
+            if (!comprobanteFile || comprobanteFile.name === '') return 'Debe subir el comprobante para este medio de pago.';
+            if (medioPago === 'Transferencia Bancaria' && !datos.get('idcuentapago')) return 'Debe seleccionar una cuenta para la transferencia.';
+            if (medioPago !== 'Transferencia Bancaria' && !datos.get('numerotransaccion').trim()) return 'Debe ingresar el número de operación.';
         }
 
-        return null; // Si todo está bien
+        return null; 
     }
 
+    /**
+     * Envía el formulario
+     */
     async function validarYRegistrarPago() {
         const error = validarFormulario();
         if (error) {
@@ -737,10 +742,26 @@
             return;
         }
 
-        const formData = new FormData(formularioPago);
-        const monto = parseFloat(formData.get('amortizacion'));
-        const nuevoSaldoRestante = saldoPendienteActual - monto;
+        const formData = new FormData(els.formularioPago);
+        const amortizacionFinal = parseFloat(els.inputAmortizacionFinalPEN.value);
+
+        
+        let amortizacionConvertidaACotizacion = 0;
+        if (estadoFinanciero.monedaCotizacion === 'USD') {
+            amortizacionConvertidaACotizacion = amortizacionFinal / estadoFinanciero.tipoCambio;
+        } else {
+            amortizacionConvertidaACotizacion = amortizacionFinal;
+        }
+        const nuevoSaldoRestante = estadoFinanciero.saldoPendiente - amortizacionConvertidaACotizacion;
+
+    
         formData.append('saldorestante', nuevoSaldoRestante.toFixed(2));
+   
+        formData.set('amortizacion', amortizacionFinal.toFixed(2));
+
+        const registrarBtn = els.formularioPago.querySelector('button[type="submit"]');
+        registrarBtn.disabled = true;
+        registrarBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Registrando...';
 
         try {
             const request = await fetch('/cotizaciones/storePagoInicial', {
@@ -754,38 +775,97 @@
                 setTimeout(() => window.location.reload(), 1500);
             } else {
                 mostrarAlerta('error', response.message || 'Ocurrió un error inesperado.');
+                registrarBtn.disabled = false;
+                registrarBtn.innerHTML = '<i class="bi bi-check-circle me-2"></i>Registrar Pago';
             }
         } catch (fetchError) {
             console.error('Error en el fetch:', fetchError);
             mostrarAlerta('error', 'No se pudo conectar con el servidor.');
+            registrarBtn.disabled = false;
+            registrarBtn.innerHTML = '<i class="bi bi-check-circle me-2"></i>Registrar Pago';
         }
     }
 
+  
     function limpiarFormulario() {
-        formularioPago.reset();
-        document.getElementById('monedaPEN').checked = true; // Reinicia a PEN
-        simboloMoneda.textContent = 'S/';
-        document.getElementById('montoAPagarContainer').style.display = 'none';
-        document.getElementById('saldoRestanteContainer').style.display = 'none';
+        els.formularioPago.reset();
+        document.getElementById('monedaPEN').checked = true;
+        els.simboloMonedaPago.textContent = 'S/';
+        els.uiMontoAPagarContainer.style.display = 'none';
+        els.uiSaldoRestanteContainer.style.display = 'none';
         ocultarAlertas();
+        // Habilita los campos que pudieron ser deshabilitados
+        els.selectMedioPago.dispatchEvent(new Event('change'));
+        // Actualiza el estado del botón de pago (si existe)
+        const btnPago = els.formularioPago.querySelector('button[type="submit"]');
+        if (btnPago) btnPago.disabled = false;
     }
 
     function mostrarAlerta(tipo, mensaje) {
         ocultarAlertas();
-        const alertaExito = document.getElementById('alertaExito');
-        const alertaError = document.getElementById('alertaError');
-
         if (tipo === 'exito') {
-            alertaExito.querySelector('.text-success-emphasis').textContent = mensaje;
-            alertaExito.classList.remove('d-none');
+            els.alertaExito.querySelector('.text-success-emphasis').textContent = mensaje;
+            els.alertaExito.classList.remove('d-none');
         } else if (tipo === 'error') {
-            alertaError.querySelector('#mensajeError').textContent = mensaje;
-            alertaError.classList.remove('d-none');
+            els.mensajeError.textContent = mensaje;
+            els.alertaError.classList.remove('d-none');
         }
     }
 
     function ocultarAlertas() {
-        document.getElementById('alertaExito').classList.add('d-none');
-        document.getElementById('alertaError').classList.add('d-none');
+        els.alertaExito.classList.add('d-none');
+        els.alertaError.classList.add('d-none');
     }
+
+
+    els.fechaPago.value = new Date().toISOString().slice(0, 10);
+    cargarCuentasBancarias();
+
+    // Actualiza los símbolos de la UI según la moneda de la cotización
+    els.uiSaldoActualForm.textContent = `${estadoFinanciero.simboloCotizacion} ${estadoFinanciero.saldoPendiente.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+    els.radioButtonsMoneda.forEach(radio => {
+        radio.addEventListener('change', async function() {
+            if (this.value === 'USD') {
+                els.simboloMonedaPago.textContent = '$';
+                await fetchTipoCambio(true); 
+            } else {
+                els.simboloMonedaPago.textContent = 'S/';
+                els.inputTipoCambio.value = '';
+            }
+            calcularYActualizar();
+        });
+    });
+
+    els.inputMontoOriginal.addEventListener('input', calcularYActualizar);
+
+    els.selectMedioPago.addEventListener('change', (e) => {
+        const metodo = e.target.value;
+        const isEfectivo = metodo === 'Efectivo';
+        const isYapePlin = ['Yape', 'Plin'].includes(metodo);
+
+        els.inputNumeroTransaccion.disabled = isEfectivo;
+        els.selectCuentaPago.disabled = isEfectivo || isYapePlin;
+        els.inputComprobante.disabled = isEfectivo;
+
+        // Estilo visual para el input de archivo
+        const labelComprobante = document.querySelector('label[for="comprobante"]');
+        if (labelComprobante) labelComprobante.classList.toggle('disabled-label', isEfectivo);
+    });
+
+    els.modalComprobante.addEventListener('show.bs.modal', function(event) {
+        const boton = event.relatedTarget;
+        const rutaImagen = boton.getAttribute('data-src');
+        document.getElementById('imagenComprobante').src = rutaImagen;
+    });
+
+    els.formularioPago.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (await ask('¿Confirmar pago de inicial?', 'Confirmar')) {
+            validarYRegistrarPago();
+        }
+    });
+
+    
+    fetchTipoCambio();
 </script>

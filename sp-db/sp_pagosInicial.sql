@@ -99,56 +99,62 @@ DELIMITER ;
 
 
 DROP PROCEDURE sp_getActaSeparacionByIdCotizacion;
-DELIMITER //
+
+DELIMITER $$
+
 CREATE PROCEDURE sp_getActaSeparacionByIdCotizacion(IN idcotizacion_ INT)
 BEGIN
 	SELECT
-    cot.idcotizacion,
-    cot.estadocotizacion,
-    CONCAT(per.apellidos, ' ', per.nombres) AS cliente,
-    per.nrodoc,
-    per.direccion,
-    dist.distrito,
-    pro.provincia,
-    dep.departamento,
-    per.telprimario,
-    p.amortizacion,
-    p.numerotransaccion,    
-    p.mediopago,
-    DATE_FORMAT(p.fechapago, '%d/%m/%Y') AS fechapago,
-    ent.entidad,  
-    p.numerotransaccion,
-    mar.marca,
-    mode.modelo,
-    v.color,
-    mode.anio,
-    comb.combustible
-FROM cotizaciones cot
-    INNER JOIN pagos p ON p.idcotizacion = cot.idcotizacion
-    INNER JOIN vehiculos v ON p.idvehiculo = v.idvehiculo
-    INNER JOIN modelos mode ON v.idmodelo = mode.idmodelo
-    INNER JOIN marcas mar ON mode.idmarca = mar.idmarca
-    LEFT JOIN cuentaspago cup ON p.idcuentapago = cup.idcuentapago  
-    LEFT JOIN entidadespago ent ON cup.identidadpago = ent.identidadpago    
-    INNER JOIN combustibles comb ON v.idcombustible = comb.idcombustible
-    INNER JOIN conceptospago cp ON p.idconcepto = cp.idconcepto
-    INNER JOIN clientes cl ON cot.idcliente = cl.idcliente
-    INNER JOIN personas per ON cl.idpersona = per.idpersona
-    INNER JOIN distritos dist ON per.iddistrito = dist.iddistrito
-    INNER JOIN provincias pro ON dist.idprovincia = pro.idprovincia
-    INNER JOIN departamentos dep ON pro.iddepartamento = dep.iddepartamento
-WHERE 
-	 cot.idcotizacion = idcotizacion_
-    AND cp.concepto = 'Inicial' 
-    AND COT.estadocotizacion = 'S'
-    AND p.idpago = (
-        SELECT MIN(p2.idpago)
-        FROM pagos p2
-        WHERE p2.idcotizacion = cot.idcotizacion
-          AND p2.idconcepto = p.idconcepto
-    )
-ORDER BY p.fecharegistro ASC;
-END
+		cot.idcotizacion,
+		cot.estadocotizacion,
+		CONCAT(per.apellidos, ' ', per.nombres) AS cliente,
+		per.nrodoc,
+		per.direccion,
+		dist.distrito,
+		pro.provincia,
+		dep.departamento,
+		per.telprimario,
+		p.moneda,
+		CASE
+			WHEN p.moneda = 'USD' THEN p.montomonedaoriginal
+			ELSE p.amortizacion
+		END AS amortizacion,
+		p.numerotransaccion,    
+		p.mediopago,
+		DATE_FORMAT(p.fechapago, '%d/%m/%Y') AS fechapago,
+		ent.entidad,  
+		mar.marca,
+		mode.modelo,
+		v.color,
+		mode.anio,
+		comb.combustible
+	FROM cotizaciones cot
+		INNER JOIN pagos p ON p.idcotizacion = cot.idcotizacion
+		INNER JOIN vehiculos v ON p.idvehiculo = v.idvehiculo
+		INNER JOIN modelos mode ON v.idmodelo = mode.idmodelo
+		INNER JOIN marcas mar ON mode.idmarca = mar.idmarca
+		LEFT JOIN cuentaspago cup ON p.idcuentapago = cup.idcuentapago  
+		LEFT JOIN entidadespago ent ON cup.identidadpago = ent.identidadpago    
+		INNER JOIN combustibles comb ON v.idcombustible = comb.idcombustible
+		INNER JOIN conceptospago cp ON p.idconcepto = cp.idconcepto
+		INNER JOIN clientes cl ON cot.idcliente = cl.idcliente
+		INNER JOIN personas per ON cl.idpersona = per.idpersona
+		INNER JOIN distritos dist ON per.iddistrito = dist.iddistrito
+		INNER JOIN provincias pro ON dist.idprovincia = pro.idprovincia
+		INNER JOIN departamentos dep ON pro.iddepartamento = dep.iddepartamento
+	WHERE 
+		cot.idcotizacion = idcotizacion_
+		AND cp.concepto = 'Inicial' 
+		AND cot.estadocotizacion = 'S'
+		AND p.idpago = (
+			SELECT MIN(p2.idpago)
+			FROM pagos p2
+			WHERE p2.idcotizacion = cot.idcotizacion
+			  AND p2.idconcepto = p.idconcepto
+		)
+	ORDER BY p.fecharegistro ASC;
+END$$
+
 DELIMITER ;
 
 

@@ -3,11 +3,23 @@
 */
 
 USE motorpark;
-
--- OBTENER TODAS LAS COTIZACIONES REALIZADAS / getAll 
-/*
--- (solo mostrando los que esten en los dias de vigenicas se mostrara)*/
 CREATE OR REPLACE VIEW vwGetAllCotizacion AS
+WITH PagosCalculados AS (
+    SELECT 
+        c.idcotizacion,
+        COALESCE(SUM(
+            CASE
+                WHEN c.moneda = 'PEN' THEN p.amortizacion
+                WHEN c.moneda = 'USD' THEN
+                    IF(p.moneda = 'USD', p.montomonedaoriginal, (p.amortizacion / p.tipocambioaplicado))
+                ELSE 0
+            END
+        ), 0) AS totalpagado_calculado
+    FROM cotizaciones c
+    LEFT JOIN pagos p ON p.idcotizacion = c.idcotizacion
+        AND p.idconcepto = (SELECT idconcepto FROM conceptospago WHERE concepto = 'Inicial' LIMIT 1)
+    GROUP BY c.idcotizacion, c.moneda
+)
 SELECT
     c.idcotizacion,
     c.idformato,
@@ -48,18 +60,14 @@ SELECT
     info_reserva.nombrecliente AS reserva_cliente_nombre,
     info_contrato.nombrecliente AS contrato_cliente_nombre, 
     CASE WHEN info_contrato.idvehiculo IS NOT NULL THEN 1 ELSE 0 END AS vehiculo_en_contrato,
-
     info_contado.nombrecliente AS contado_cliente_nombre,
     CASE WHEN info_contado.idvehiculo IS NOT NULL THEN 1 ELSE 0 END AS vehiculo_vendido_contado,
     CASE 
-        WHEN (
-            SELECT COALESCE(SUM(p_sum.amortizacion), 0)
-            FROM pagos p_sum
-            WHERE p_sum.idcotizacion = c.idcotizacion AND p_sum.idconcepto = (SELECT idconcepto FROM conceptospago WHERE concepto = 'Inicial' LIMIT 1)
-        ) >= c.inicial
-        THEN 1 ELSE 0
+        WHEN c.estadocotizacion IN ('A', 'S') 
+             AND pc.totalpagado_calculado >= c.inicial
+        THEN 1 
+        ELSE 0
     END AS habilitar_contrato
-
 FROM cotizaciones c
 JOIN clientes cl ON c.idcliente = cl.idcliente
 LEFT JOIN personas p ON cl.idpersona = p.idpersona
@@ -68,6 +76,7 @@ JOIN vehiculos v ON c.idvehiculo = v.idvehiculo
 JOIN modelos mo ON v.idmodelo = mo.idmodelo
 JOIN marcas ma ON mo.idmarca = ma.idmarca
 JOIN formatocotizacion fc ON c.idformato = fc.idformato
+LEFT JOIN PagosCalculados pc ON c.idcotizacion = pc.idcotizacion
 LEFT JOIN colaboradores col ON c.idasesor = col.idcolaborador
 LEFT JOIN contratoslaborales cl_ase ON col.idcontratolaboral = cl_ase.idcontratolaboral
 LEFT JOIN personas pase ON cl_ase.idpersona = pase.idpersona
@@ -103,6 +112,7 @@ LEFT JOIN (
 LEFT JOIN (
     SELECT idcotizacion, SUM(amortizacion) AS total_pagado
     FROM pagos
+    WHERE idconcepto = (SELECT idconcepto FROM conceptospago WHERE concepto = 'Inicial' LIMIT 1)
     GROUP BY idcotizacion
 ) AS pagos_sum ON pagos_sum.idcotizacion = c.idcotizacion
 LEFT JOIN (

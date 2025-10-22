@@ -711,7 +711,7 @@
                             const personFound = document.getElementById('personFound');
                             if (personFound) personFound.classList.add('d-none');
                             showToast('No se encontró en registros locales, pero sí en RENIEC', 'INFO', 1800);
-                            console.log('PERSONA EN RENIEC: ', data);
+                            // console.log('PERSONA EN RENIEC: ', data);
                         } else {
 
                             showToast('No se encontró la persona en ningún registro', 'WARNING', 1800);
@@ -890,7 +890,7 @@
 
                 if (data.success) {
 
-                    showToast('Persona registrada correctamente', 'SUCCESS', 1200);
+                    // showToast('Persona registrada correctamente', 'SUCCESS', 1200);
                     // Asignar el ID real de BD
                     newPerson.idpersona = data.lastId;
                     selectPerson(newPerson);

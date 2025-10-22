@@ -549,6 +549,8 @@ class CotizacionController extends Controller
         exit();
     }
 
+    
+
     //NUEVAS FUNCIONES (BUSCA EL DNI DEL ULTIMO CLIENTE (GET) Y LLEVA A UNA COTIZACION (POST))
     /**
      * API para obtener el último cliente registrado

@@ -41,7 +41,7 @@ class Cotizacion
             $stmt->bindValue(':idvehiculo', $idvehiculo, PDO::PARAM_INT);
             $stmt->execute();
 
-            $precio = $stmt->fetchColumn(); 
+            $precio = $stmt->fetchColumn();
 
             return $precio !== false ? (float)$precio : null;
         } catch (PDOException $e) {
@@ -62,31 +62,56 @@ class Cotizacion
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
-
     public function completoInicial(int $idcotizacion): int
     {
-        $query = "SELECT 
-                cot.idcotizacion,
-                cot.inicial,
-                COALESCE(SUM(p.amortizacion),0) AS total_pagado,
+        $query = "
+                SELECT 
+                c.*,
                 CASE 
-                    WHEN cot.estadocotizacion = 'A' 
-                        AND COALESCE(SUM(p.amortizacion),0) >= cot.inicial
+                    WHEN c.estadocotizacion IN('A','S') 
+                        AND c.totalpagado >= c.inicial
                     THEN 1 ELSE 0 
                 END AS habilitar_contrato
-            FROM cotizaciones cot
-            LEFT JOIN pagos p ON p.idcotizacion = cot.idcotizacion
-            WHERE cot.idcotizacion = :idcotizacion
-            GROUP BY cot.idcotizacion, cot.inicial, cot.estadocotizacion;";
+            FROM (
+                SELECT 
+                    cot.idcotizacion,
+                    cot.inicial,
+                    cot.moneda,
+                    cot.estadocotizacion,
+                    COALESCE(SUM(
+                        CASE
+                            WHEN cot.moneda = 'PEN' THEN p.amortizacion
+                            WHEN cot.moneda = 'USD' THEN
+                                CASE
+                                    WHEN p.moneda = 'USD' THEN p.montomonedaoriginal
+                                    WHEN p.moneda = 'PEN' THEN (p.amortizacion / p.tipocambioaplicado)
+                                    ELSE 0
+                                END
+                            ELSE 0
+                        END
+                    ), 0) AS totalpagado
+                FROM cotizaciones cot
+                LEFT JOIN pagos p 
+                    ON p.idcotizacion = cot.idcotizacion
+                    AND p.idconcepto IN (
+                        SELECT idconcepto FROM conceptospago WHERE concepto = 'Inicial'
+                    )
+                WHERE cot.idcotizacion = :idcotizacion
+                GROUP BY cot.idcotizacion, cot.inicial, cot.moneda, cot.estadocotizacion
+            ) AS c
+            LIMIT 1;
+
+    ";
+
         try {
             $stmt = $this->db->prepare($query);
             $stmt->bindParam(":idcotizacion", $idcotizacion, PDO::PARAM_INT);
             $stmt->execute();
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            return intval($result["habilitar_contrato"]);
+            return $result ? intval($result["habilitar_contrato"]) : 0;
         } catch (PDOException $e) {
-            error_log($e->getMessage());
+            error_log("Error en completoInicial: " . $e->getMessage());
             return -1;
         }
     }
@@ -124,31 +149,44 @@ class Cotizacion
     public function getTotalPagadoYSaldoPendiente($idcotizacion): array
     {
         $query = "
-                    SELECT 
-                        c.idcotizacion,
-                        v.idvehiculo,
-                        c.inicial AS monto_inicial,
-                        COALESCE(SUM(p.amortizacion), 0) AS totalpagado,
-                        COALESCE(
-                            (
-                                SELECT pp.saldorestante
-                                FROM pagos pp
-                                WHERE pp.idcotizacion = c.idcotizacion
-                                AND pp.idconcepto = (SELECT idconcepto FROM conceptospago WHERE concepto = 'Inicial' LIMIT 1)
-                                ORDER BY pp.fechapago DESC, pp.idpago DESC
-                                LIMIT 1
-                            ),
-                            c.inicial
-                        ) AS saldorestante
-                    FROM cotizaciones c
-                    INNER JOIN vehiculos v 
-                        ON v.idvehiculo = c.idvehiculo
-                    LEFT JOIN pagos p 
-                        ON p.idcotizacion = c.idcotizacion
-                        AND p.idconcepto = (SELECT idconcepto FROM conceptospago WHERE concepto = 'Inicial' LIMIT 1)
-                    WHERE c.idcotizacion = :idcotizacion
-                    GROUP BY v.idvehiculo, c.idcotizacion, c.inicial;
-    ";
+            SELECT 
+                c.idcotizacion,
+                v.idvehiculo,
+                c.moneda AS moneda_cotizacion, -- Moneda de la cotización (PEN o USD)
+                c.inicial AS monto_inicial,
+                COALESCE(SUM(
+                    CASE
+                        WHEN c.moneda = 'PEN' THEN p.amortizacion
+                        WHEN c.moneda = 'USD' THEN
+                            
+                            IF(p.moneda = 'USD', p.montomonedaoriginal, 
+                            
+                               (p.amortizacion / p.tipocambioaplicado)
+                            )
+                        ELSE 0
+                    END
+                ), 0) AS totalpagado,
+                COALESCE(
+                    (
+                        SELECT pp.saldorestante
+                        FROM pagos pp
+                        WHERE pp.idcotizacion = c.idcotizacion
+                        AND pp.idconcepto = (SELECT idconcepto FROM conceptospago WHERE concepto = 'Inicial' LIMIT 1)
+                        ORDER BY pp.fechapago DESC, pp.idpago DESC
+                        LIMIT 1
+                    ),
+                    c.inicial
+                ) AS saldorestante
+                
+            FROM cotizaciones c
+            INNER JOIN vehiculos v 
+                ON v.idvehiculo = c.idvehiculo
+            LEFT JOIN pagos p 
+                ON p.idcotizacion = c.idcotizacion
+                AND p.idconcepto = (SELECT idconcepto FROM conceptospago WHERE concepto = 'Inicial' LIMIT 1)
+            WHERE c.idcotizacion = :idcotizacion
+            GROUP BY v.idvehiculo, c.idcotizacion, c.inicial, c.moneda;
+        ";
 
         try {
             $stmt = $this->db->prepare($query);
@@ -161,20 +199,30 @@ class Cotizacion
         }
     }
 
-    public function getHistorialPagosInicial($idcotizacion): array
+   public function getHistorialPagosInicial($idcotizacion): array
     {
         $query = "
         SELECT 
             DATE_FORMAT(p.fechapago,'%d-%m-%Y') AS fechapago,
             e.entidad AS entidadbancaria,
             cp.numcuenta,
-            cp.moneda,
             p.mediopago,
             p.numerotransaccion,
-            p.amortizacion,
+            CASE
+                WHEN c.moneda = 'PEN' THEN p.amortizacion
+                WHEN c.moneda = 'USD' THEN
+                    IF(p.moneda = 'USD', p.montomonedaoriginal, (p.amortizacion / p.tipocambioaplicado))
+                ELSE p.amortizacion 
+            END AS monto_pago,
             p.saldorestante,
+            CASE 
+                WHEN c.moneda = 'PEN' THEN 'S/'
+                WHEN c.moneda = 'USD' THEN '$'
+                ELSE 'S/'
+            END AS moneda_simbolo,
             p.comprobante,
             p.observacion
+            
         FROM pagos p
         INNER JOIN cotizaciones c 
             ON c.idcotizacion = p.idcotizacion
@@ -185,7 +233,7 @@ class Cotizacion
         WHERE c.idcotizacion = :idcotizacion
           AND p.idconcepto = (SELECT idconcepto FROM conceptospago WHERE concepto = 'Inicial' LIMIT 1)
         ORDER BY p.fechapago ASC, p.idpago ASC;
-    ";
+        ";
 
         try {
             $stmt = $this->db->prepare($query);
@@ -197,7 +245,6 @@ class Cotizacion
             return [];
         }
     }
-
 
 
     public function addPagoInicial($params = [])
