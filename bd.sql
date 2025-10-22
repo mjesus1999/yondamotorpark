@@ -509,6 +509,8 @@ CREATE TABLE seguimientos_morosos (
     CONSTRAINT fk_seguimiento_colaborador FOREIGN KEY (usuario_registro) REFERENCES colaboradores(idcolaborador) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE = INNODB;
 
+
+
 CREATE TABLE cotizacion_financiamiento (
     idfinanciamiento INT AUTO_INCREMENT PRIMARY KEY,
     idcotizacion INT NOT NULL,
@@ -521,6 +523,33 @@ CREATE TABLE cotizacion_financiamiento (
     CONSTRAINT fk_cotfin_cot FOREIGN KEY (idcotizacion) REFERENCES cotizaciones (idcotizacion) ON DELETE CASCADE
 ) ENGINE=INNODB;
 -- ALTER TABLE cotizacion_financiamiento ADD COLUMN activo TINYINT(1) NOT NULL DEFAULT 1;
+
+CREATE TABLE cotizaciones (
+    idcotizacion INT AUTO_INCREMENT PRIMARY KEY,
+    idformato INT NOT NULL,
+    idcliente INT NULL,
+    idasesor INT NOT NULL COMMENT 'Colaborador del área de VENTA', -- 
+    idvehiculo INT NOT NULL,
+    moneda ENUM('PEN', 'USD') NOT NULL,
+    precioventa DECIMAL(9, 2) NOT NULL,
+    vigenciadias TINYINT NOT NULL COMMENT 'Días válidos de la cotización' DEFAULT 7,
+    inicial DECIMAL(9, 2) NOT NULL,
+    numcuotas SMALLINT NOT NULL,
+    valorcuota DECIMAL(9, 2) NOT NULL, -- Se usara en la tabla de cronogramas
+    gastosadministrativos DECIMAL(9,2) NOT NULL DEFAULT 0.00 COMMENT 'Gastos administrativos de la cotización',
+    estadocotizacion ENUM('P', 'E', 'A', 'C', 'R') NOT NULL DEFAULT 'P' COMMENT 'Pendiente | Evaluación | Aprobada | Cancelada (cliente) | Rechazada (Analista crédito)',
+    comentarios TEXT,
+    fechaseguimiento DATETIME NULL,
+    creado DATETIME NOT NULL DEFAULT NOW(),
+    modificado DATETIME NULL,
+    fechareactivacion DATETIME NULL,
+    CONSTRAINT fk_idformato_cot FOREIGN KEY (idformato) REFERENCES formatocotizacion (idformato),
+    CONSTRAINT fk_idcliente_cot FOREIGN KEY (idcliente) REFERENCES clientes (idcliente),
+    CONSTRAINT fk_idvehiculo_cot FOREIGN KEY (idvehiculo) REFERENCES vehiculos (idvehiculo),
+    CONSTRAINT fk_idcolventa_cot FOREIGN KEY (idasesor) REFERENCES colaboradores (idcolaborador)
+) ENGINE = INNODB;
+
+
 
 CREATE TABLE conceptospago (
     idconcepto INT PRIMARY KEY AUTO_INCREMENT,

@@ -1,3 +1,4 @@
+USE motorpark;
 SELECT * FROM fichasolicitud;
 SELECT * FROM personas;
 SELECT * FROM vehiculos;
@@ -34,6 +35,7 @@ JOIN departamentos dep ON p.iddepartamento = dep.iddepartamento;
 
 
 DROP PROCEDURE sp_contrato_pdf;
+
 
 
 DELIMITER //
@@ -185,3 +187,8 @@ CREATE UNIQUE INDEX idx_contratos_idcontrato_estado ON contratos (idcontrato, es
 
 
 
+
+SHOW COLUMNS FROM ordenescompra;
+SHOW COLUMNS FROM vehiculos;
+SHOW COLUMNS FROM cotizaciones;
+SHOW COLUMNS FROM contratos;

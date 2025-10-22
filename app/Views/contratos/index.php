@@ -75,7 +75,17 @@
             {title: "Cliente", field: "cliente", headerHozAlign: "center", width:250, responsive:2,tooltip:true},
             {title: "Documento", field: "doc_cliente", hozAlign: "center", responsive:10,tooltip:true},
             {title: "Asesor", field: "asesor", headerHozAlign: "left", responsive:10,tooltip:true},
-            {title: "Precio Venta", field: "precioventa", hozAlign: "right", formatter: "money", formatterParams:{symbol:"S/ ",thousand:",",precision:2}, minWidth:100,tooltip:true},
+          { title: "Precio Venta",field: "precioventa",hozAlign: "right",
+    formatter: (cell) => {
+        const data = cell.getData();
+        const simbolo = data.moneda === "USD" ? "$" : "S/ ";
+        const valor = parseFloat(data.precioventa) || 0;
+        return simbolo + valor.toLocaleString("en-US", { minimumFractionDigits: 2 });
+    },
+    minWidth: 100,
+    tooltip: true
+},
+
             {title: 'Acciones', hozAlign: 'left', responsive:0,
                 formatter: (cell) => {
                     const id = cell.getRow().getData().idcontrato;

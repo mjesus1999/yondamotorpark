@@ -33,6 +33,8 @@ btnPDF.addEventListener('click', () => {
     const cuotaMensual = formatNumber(document.getElementById('cuotaMensual').value || '0.00');
     const numCuotas = document.getElementById('numcuotas').value || '0';
     const cuotaDiaria = formatNumber((parseFloat(cuotaMensual.replace(/,/g, '') || 0) / 30));
+    const tasaMensual = ((1 + parseFloat(tasaAnual) / 100) ** (1 / 12) - 1) * 100;// Si la tasa es TEA (Tasa Efectiva Anual)
+
 
     const tabla = $('#tablaCronograma').DataTable();
     const data = tabla.rows({ search: 'applied' }).data().toArray();
@@ -138,7 +140,7 @@ btnPDF.addEventListener('click', () => {
                         [{ text: 'PRECIO EN SOLES', bold: true }, { text: `S/ ${precioSoles}`, alignment: 'right' }, { text: 'INICIAL', bold: true, fillColor: '#fbe23b' }, { text: `S/ ${inicial}`, fillColor: '#fbe23b', alignment: 'right' }],
                         [{ text: 'MONTO A FINANCIAR', bold: true }, { text: `S/ ${montoFinanciar}`, alignment: 'right' }, { text: 'CUOTA', bold: true, fillColor: '#b7e4a4' }, { text: `S/ ${cuotaMensual}`, fillColor: '#b7e4a4', alignment: 'right' }],
                         [{ text: 'TASA ANUAL', bold: true }, { text: `${tasaAnual}%`, alignment: 'right' }, { text: 'N° DE CUOTAS', bold: true }, { text: numCuotas, alignment: 'right' }],
-                        [{ text: 'TASA MENSUAL', bold: true }, { text: `${(parseFloat(tasaAnual) / 12).toFixed(2)}%`, alignment: 'right' }, { text: 'CUOTA DIARIA', bold: true }, { text: `S/ ${cuotaDiaria}`, alignment: 'right' }]
+                        [{ text: 'TASA MENSUAL', bold: true }, { text: `${(parseFloat(tasaMensual)).toFixed(2)}%`, alignment: 'right' }, { text: 'CUOTA DIARIA', bold: true }, { text: `S/ ${cuotaDiaria}`, alignment: 'right' }]
                     ]
                 },
                 margin: [0, 0, 0, 5]

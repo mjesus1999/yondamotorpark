@@ -136,6 +136,7 @@ export function getPagina8(data) {
             text: 'La tasa de gastos administrativos por mora se aplica sobre el importe de la cuota vencida, desde el primer día de atraso.',
             style: 'parrafo',
             fontSize: 8,
+            bol:true,
             margin: [0, 15, 0, 10]
         },
         {

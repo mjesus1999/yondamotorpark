@@ -3,6 +3,7 @@
 */
 
 USE motorpark;
+
 CREATE OR REPLACE VIEW vwGetAllCotizacion AS
 WITH PagosCalculados AS (
     SELECT 

@@ -20,7 +20,7 @@ class Cotizacion
 
 
     public function getAll(string $estado): array
-    {
+    {   
 
         $query = "SELECT * FROM vwGetAllCotizacion WHERE estadocotizacion = :estado 
               ORDER BY fechaRegistro DESC";

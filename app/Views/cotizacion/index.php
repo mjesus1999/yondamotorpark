@@ -3,7 +3,6 @@
 <link href="https://unpkg.com/tabulator-tables@5.5.2/dist/css/tabulator_simple.min.css" rel="stylesheet">
 <link rel="stylesheet" href="/assets/css/tabulator.css">
 <link rel="stylesheet" href="/assets/css/contrato-modal.css">
-<?php var_dump($cotizaciones[1]) ?>
 
 <div class="container-fluid">
 
@@ -546,11 +545,6 @@
 
 
         }
-
-
-
-
-
 
 
 

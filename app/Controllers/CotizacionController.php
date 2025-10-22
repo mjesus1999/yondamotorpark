@@ -10,6 +10,7 @@ use App\Models\FormatoCotizacion;
 use App\Helpers\Validador;
 use App\Config\ConceptosPago;
 use Exception;
+use JsonException;
 use PDOException;
 
 class CotizacionController extends Controller
