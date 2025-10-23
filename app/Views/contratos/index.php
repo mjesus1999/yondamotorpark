@@ -237,8 +237,6 @@
         });
 
 
-
-
         // document.getElementById('btnExportCSV').addEventListener('click', () => {
         //     table.download('csv', 'contratos');
         // });

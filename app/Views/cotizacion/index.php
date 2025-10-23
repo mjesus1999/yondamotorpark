@@ -292,7 +292,7 @@
                 break;
         }
 
-  
+
         mensajeEl.innerHTML = `<p class="mb-0">${textoMotivo}<br><strong class="text-primary">${cliente || 'No disponible'}</strong></p>`;
 
         const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
@@ -333,6 +333,13 @@
                 paginationSize: 15,
                 paginationCounter: "rows",
                 responsiveLayoutCollapseStartOpen: false, // Inicia colapsado
+                groupBy: 'documento',
+                groupHeader: function(value, count, data, group) {
+                    const nombreCliente = data[0].nombrecliente || 'Cliente Desconocido';
+                    return `${nombreCliente} (${value}) <span class='badge bg-info ms-2'>${count} cotizaciones</span>`;
+                },
+                groupStartOpen: false,
+                groupToggleElement: "header",
                 columns: [{
                         formatter: "responsiveCollapse",
                         width: 40,
@@ -368,16 +375,38 @@
                         title: "Inicial",
                         field: "inicial",
                         hozAlign: "right",
-                        formatter: "money",
-                        formatterParams: {
-                            decimal: ".",
-                            thousand: ",",
-                            symbol: "S/ ",
-                            precision: 2
+                        formatter: function(cell) {
+                            const data = cell.getRow().getData();
+                            const moneda = data.moneda || "PEN";
+                            const symbol = moneda === "USD" ? "$ " : "S/ ";
+
+                            const value = parseFloat(cell.getValue() || 0).toFixed(2);
+                            return `${symbol}${value}`;
                         },
-                        minWidth: 50,
-                        responsive: 1,
-                        tooltip: true
+                        tooltip: true,
+                        minWidth: 80,
+                        responsive: 1
+                    },
+                    {
+                        title: "N° Cuotas",
+                        field: "numcuotas",
+                        tooltip: true,
+                        hozAlign: "center",
+                    },
+                    {
+                        title: "Valor Cuota",
+                        field: "valorcuota",
+                        hozAlign: "right",
+                        formatter: function(cell) {
+                            const data = cell.getRow().getData();
+                            const moneda = data.moneda || "PEN";
+                            const symbol = moneda === "USD" ? "$ " : "S/ ";
+
+                            const value = parseFloat(cell.getValue() || 0).toFixed(2);
+                            return `${symbol}${value}`;
+                        },
+                        tooltip: true,
+                        minWidth: 90
                     },
                     {
                         title: "Documento",
@@ -955,10 +984,6 @@
             }
 
         });
-
-
-
-
     });
 </script>
 

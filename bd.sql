@@ -399,8 +399,8 @@ USE motorpark;
 -- no = ALTER TABLE cotizaciones ADD COLUMN fechareactivacion DATETIME NULL COMMENT 'Fecha de reactivación de la cotización vencida' AFTER fechaseguimiento;
 
 
--- Agregar campo de gastos administrativos a la tabla cotizaciones - POR AHORA NO
--- ALTER TABLE cotizaciones ADD COLUMN gastosadministrativos DECIMAL(9, 2) NOT NULL DEFAULT 0.00 COMMENT 'Gastos administrativos según tipo de vehículo' AFTER valorcuota;
+-- Agregar otizacionampo de gastos administrativos a la tabla ttizaciones - POR AHORA NO
+-- ALTER TABLE izacioizaciones ADD COLUMN gastosadministrativos DECIMAL(9, 2) NOT NULL DEFAULT 0.00 COMMENT 'Gastos administrativos según tipo de vehículo' AFTER valorcuota;
 -- ALTER TABLE cotizaciones ADD COLUMN fechareactivacion DATETIME NULL AFTER modificado;
 
 CREATE TABLE contratos (
@@ -549,7 +549,8 @@ CREATE TABLE cotizaciones (
     CONSTRAINT fk_idcolventa_cot FOREIGN KEY (idasesor) REFERENCES colaboradores (idcolaborador)
 ) ENGINE = INNODB;
 
-
+USE motorpark;
+SHOW COLUMNS FROM cotizaciones;
 
 CREATE TABLE conceptospago (
     idconcepto INT PRIMARY KEY AUTO_INCREMENT,

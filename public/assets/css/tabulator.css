@@ -29,6 +29,45 @@
         color: #f8f9fa !important;
     }
 
+
+    .tabulator .tabulator-row.tabulator-group {
+        background: #f8f9fa;
+      
+        color: #495057;
+   
+        border-bottom: 1px solid #dee2e6;
+     
+        cursor: pointer;
+    }
+
+    
+    .tabulator .tabulator-row.tabulator-group.tabulator-group-open {
+        background-color: #007bff !important;
+        /* Color azul fuerte cuando está expandido */
+        color: white !important;
+ 
+        font-weight: bold;
+     
+    }
+
+    
+    .tabulator .tabulator-row.tabulator-group:hover {
+   
+        background-color: #d1ecf1;
+      
+        color: #0c5460;
+       
+    }
+
+
+    .tabulator .tabulator-row.tabulator-group.tabulator-group-open:hover {
+        background-color: #0069d9;
+    
+    }
+
+
+
+
     .tabulator .tabulator-header .tabulator-col .tabulator-header-filter {
         padding: 2px;
     }

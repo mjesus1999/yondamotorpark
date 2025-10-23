@@ -1533,7 +1533,7 @@
             if (!docValue) return alert('Ingresa un número de documento válido.');
             const res = await fetch(`/cotizacion/buscarCliente?tipo=${tipoValue}&doc=${encodeURIComponent(docValue)}`);
             const data = await res.json();
-            console.log('DATA DE DNI: ', data);
+     
             if (data.notFound) {
                 const confirmRedirect = confirm('Cliente no encontrado. ¿Desea ir a registrarlo ahora?');
                 if (confirmRedirect) {
