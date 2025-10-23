@@ -33,7 +33,7 @@ export function getPagina8(data) {
 
     const symbol = getMonedaSymbol(f.moneda);
     const monedaNombre = (f.moneda === 'PEN') ? 'SOLES' : 'DOLARES';
-
+    const tipoDoc = data.cliente.tipocliente == 'P' ? 'DNI':'RUC';
     // --- Estilos para las celdas 
     const headerStyle = 'resumenHeader';
     const cellStyle = 'resumenCell';
@@ -152,7 +152,7 @@ export function getPagina8(data) {
 
     const bloquesDeFirmas = [];
     bloquesDeFirmas.push(
-        crearBloqueFirma('FIRMA DEL TITULAR', data.cliente.nombre, `DNI: ${data.cliente.documento}`)
+        crearBloqueFirma('FIRMA DEL TITULAR', data.cliente.nombre, `${tipoDoc}: ${data.cliente.documento}`)
     );
     if (data.conyuge && data.conyuge.nombre) {
         bloquesDeFirmas.push(

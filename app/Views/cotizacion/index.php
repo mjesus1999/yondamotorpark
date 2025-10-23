@@ -690,6 +690,7 @@
             });
             const fechaFormateada = `Chincha, ${dia} de ${mes} del ${anio}`;
             const simboloMoneda = data.moneda == 'PEN' ? 'S/' : '$/';
+            const tipoDoc = data.tipocliente == 'P' ?'DNI' :'RUC';
 
             let textoPago = '';
             if (data.mediopago === 'Efectivo') {
@@ -793,7 +794,7 @@
                             {
                                 text: data.cliente.toUpperCase(),
                                 bold: true
-                            }, ', identificado con DNI N.º ',
+                            }, `, identificado con ${tipoDoc} N.º `,
                             {
                                 text: data.nrodoc,
                                 bold: true
@@ -932,7 +933,7 @@
                                         style: 'firma'
                                     },
                                     {
-                                        text: `DNI: ${data.nrodoc}`,
+                                        text: `${tipoDoc}: ${data.nrodoc}`,
                                         style: 'firma'
                                     }
                                 ],

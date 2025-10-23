@@ -12,6 +12,7 @@ function getFechaActual() {
 
 
 export function getPagina7(data) {
+    const tipoDoc = data.cliente.tipocliente == 'P' ? 'DNI':'RUC';
 
     const contenido = [
         // --- Textos Legales ---
@@ -91,7 +92,7 @@ export function getPagina7(data) {
         crearBloqueFirma(
             'FIRMA DEL TITULAR',
             data.cliente.nombre,
-            `DNI: ${data.cliente.documento}`
+            `${tipoDoc}: ${data.cliente.documento}`
         )
     );
 

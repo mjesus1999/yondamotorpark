@@ -330,7 +330,7 @@ class Cotizacion
             SELECT c.idcliente,
                     e.razonsocial AS apellidos,
                     e.nombrecomercial AS nombres,
-                    e.telprimario, e.telalternativo, e.email
+                    e.telprimario, e.telsecundario,e.direccion, e.email
                 FROM clientes c
                 JOIN empresas e ON e.idempresa = c.idempresa
             WHERE e.ruc = :doc
@@ -433,32 +433,7 @@ class Cotizacion
         return (int) $this->db->lastInsertId();
     }
 
-    /* public function create(array $d): int
-    {
-        $sql = "INSERT INTO cotizaciones
-        (idformato, idcliente, idvehiculo, moneda, precioventa,
-        vigenciadias, inicial, numcuotas, valorcuota, gastosadministrativos, idasesor)
-        VALUES
-        (:idformato, :idcliente, :idvehiculo, :moneda, :precioventa,
-        :vigenciadias, :inicial, :numcuotas, :valorcuota, :gastosadministrativos, :idasesor)";
-
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute([
-            ':idformato' => $d['idformato'],
-            ':idcliente' => $d['idcliente'],
-            ':idvehiculo' => $d['idvehiculo'],
-            ':moneda' => $d['moneda'],
-            ':precioventa' => $d['precioventa'],
-            ':vigenciadias' => $d['vigenciadias'],
-            ':inicial' => $d['inicial'],
-            ':numcuotas' => $d['numcuotas'],
-            ':valorcuota' => $d['valorcuota'],
-            ':gastosadministrativos' => isset($d['gastosadministrativos']) ? (float) $d['gastosadministrativos'] : 0.00,
-            ':idasesor' => $d['idasesor']
-        ]);
-        return (int) $this->db->lastInsertId();
-    } */
-
+   
     public function createFinanciamiento(int $idcotizacion, int $numcuotas, float $inicial, float $valorcuota, string $moneda, float $precioventa): int
     {
         $sql = "INSERT INTO cotizacion_financiamiento

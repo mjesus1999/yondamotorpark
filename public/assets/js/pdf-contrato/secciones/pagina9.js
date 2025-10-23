@@ -2,6 +2,7 @@
 import { crearBloqueFirma } from "./helpers.js";
 
 export function getPagina9(data) {
+    const tipoDoc = data.cliente.tipocliente == 'P' ? 'DNI':'RUC'
 
     const contenido = [
        
@@ -93,7 +94,7 @@ export function getPagina9(data) {
         crearBloqueFirma(
             'FIRMA DEL TITULAR',
             data.cliente.nombre,
-            `DNI: ${data.cliente.documento}`
+            `${tipoDoc}: ${data.cliente.documento}`
         )
     );
 

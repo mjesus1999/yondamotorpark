@@ -100,20 +100,50 @@ DELIMITER ;
 
 DROP PROCEDURE sp_getActaSeparacionByIdCotizacion;
 
-DELIMITER $$
 
+
+DELIMITER //
 CREATE PROCEDURE sp_getActaSeparacionByIdCotizacion(IN idcotizacion_ INT)
 BEGIN
 	SELECT
 		cot.idcotizacion,
 		cot.estadocotizacion,
-		CONCAT(per.apellidos, ' ', per.nombres) AS cliente,
-		per.nrodoc,
-		per.direccion,
-		dist.distrito,
-		pro.provincia,
-		dep.departamento,
-		per.telprimario,
+		cl.tipocliente,
+		CASE 
+			WHEN cl.tipocliente = 'P' THEN CONCAT(per.apellidos, ' ', per.nombres)
+			WHEN cl.tipocliente = 'E' THEN emp.razonsocial
+		END AS cliente,
+
+		CASE  
+			WHEN cl.tipocliente = 'P' THEN per.nrodoc
+			WHEN cl.tipocliente = 'E' THEN emp.ruc
+		END AS nrodoc,
+
+		CASE 
+			WHEN cl.tipocliente = 'P' THEN per.direccion
+			WHEN cl.tipocliente = 'E' THEN emp.direccion
+		END AS direccion,
+
+		CASE 
+			WHEN cl.tipocliente = 'P' THEN dist.distrito
+			WHEN cl.tipocliente = 'E' THEN distemp.distrito
+		END AS distrito,
+
+		CASE 
+			WHEN cl.tipocliente = 'P' THEN pro.provincia
+			WHEN cl.tipocliente = 'E' THEN proemp.provincia
+		END AS provincia,
+
+		CASE 
+			WHEN cl.tipocliente = 'P' THEN dep.departamento
+			WHEN cl.tipocliente = 'E' THEN depemp.departamento
+		END AS departamento,
+
+		CASE 
+			WHEN cl.tipocliente = 'P' THEN per.telprimario
+			WHEN cl.tipocliente = 'E' THEN emp.telprimario
+		END AS telprimario,
+
 		p.moneda,
 		CASE
 			WHEN p.moneda = 'USD' THEN p.montomonedaoriginal
@@ -128,6 +158,7 @@ BEGIN
 		v.color,
 		mode.anio,
 		comb.combustible
+
 	FROM cotizaciones cot
 		INNER JOIN pagos p ON p.idcotizacion = cot.idcotizacion
 		INNER JOIN vehiculos v ON p.idvehiculo = v.idvehiculo
@@ -138,10 +169,21 @@ BEGIN
 		INNER JOIN combustibles comb ON v.idcombustible = comb.idcombustible
 		INNER JOIN conceptospago cp ON p.idconcepto = cp.idconcepto
 		INNER JOIN clientes cl ON cot.idcliente = cl.idcliente
-		INNER JOIN personas per ON cl.idpersona = per.idpersona
-		INNER JOIN distritos dist ON per.iddistrito = dist.iddistrito
-		INNER JOIN provincias pro ON dist.idprovincia = pro.idprovincia
-		INNER JOIN departamentos dep ON pro.iddepartamento = dep.iddepartamento
+
+		-- JOINS PERSONA / EMPRESA
+		LEFT JOIN personas per ON cl.idpersona = per.idpersona
+		LEFT JOIN empresas emp ON cl.idempresa = emp.idempresa
+
+		-- UBIGEO PERSONA
+		LEFT JOIN distritos dist ON per.iddistrito = dist.iddistrito
+		LEFT JOIN provincias pro ON dist.idprovincia = pro.idprovincia
+		LEFT JOIN departamentos dep ON pro.iddepartamento = dep.iddepartamento
+
+		-- UBIGEO EMPRESA
+		LEFT JOIN distritos distemp ON emp.iddistrito = distemp.iddistrito
+		LEFT JOIN provincias proemp ON distemp.idprovincia = proemp.idprovincia
+		LEFT JOIN departamentos depemp ON proemp.iddepartamento = depemp.iddepartamento
+
 	WHERE 
 		cot.idcotizacion = idcotizacion_
 		AND cp.concepto = 'Inicial' 
@@ -153,9 +195,11 @@ BEGIN
 			  AND p2.idconcepto = p.idconcepto
 		)
 	ORDER BY p.fecharegistro ASC;
-END$$
+END //
 
 DELIMITER ;
 
 
-CALL sp_getActaSeparacionByIdCotizacion(60);
+CALL sp_getActaSeparacionByIdCotizacion(92);
+
+select * from cotizaciones;
