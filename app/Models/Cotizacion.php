@@ -20,7 +20,7 @@ class Cotizacion
 
 
     public function getAll(string $estado): array
-    {   
+    {
 
         $query = "SELECT * FROM vwGetAllCotizacion WHERE estadocotizacion = :estado 
               ORDER BY fechaRegistro DESC";
@@ -43,7 +43,7 @@ class Cotizacion
 
             $precio = $stmt->fetchColumn();
 
-            return $precio !== false ? (float)$precio : null;
+            return $precio !== false ? (float) $precio : null;
         } catch (PDOException $e) {
             error_log("Error en getPrecioVehiculoAlContado: " . $e->getMessage());
             return null;
@@ -199,7 +199,7 @@ class Cotizacion
         }
     }
 
-   public function getHistorialPagosInicial($idcotizacion): array
+    public function getHistorialPagosInicial($idcotizacion): array
     {
         $query = "
         SELECT 
@@ -246,7 +246,6 @@ class Cotizacion
         }
     }
 
-
     public function addPagoInicial($params = [])
     {
         $query = "CALL sp_pagoInicial(:idconcepto, :idcotizacion, :idvehiculo, :idcuentapago, :idcolcaja, :mediopago, :numerotransaccion, :fechapago, :amortizacion, :saldorestante, :comprobante, :observacion,:moneda,:montomonedaoriginal,:tipocambioaplicado)";
@@ -270,7 +269,7 @@ class Cotizacion
         ]);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
         $stmt->closeCursor();
-        return (int)($result['idpago'] ?? 0);
+        return (int) ($result['idpago'] ?? 0);
     }
 
     public function getDataActaSeparacionByIdCotizacion(int $idcotizacion): ?array
@@ -287,14 +286,6 @@ class Cotizacion
             return null;
         }
     }
-
-
-
-
-
-
-
-
 
     public function aprobarCotizacion(int $id): int
     {
@@ -373,6 +364,7 @@ class Cotizacion
         return $cuota;
     }
 
+    // AQUI EL 0.65 ESTA COMO VALOR POR DEFECTO PERO SI SE CAMBIA EN EL INPUT DE TASA ANUAL RECIBE EL NUEVO VALOR :)
     public function generarCronograma(float $importeTotal, float $inicial, int $meses, float $tasaAnual = 0.65): array
     {
         $tasaMensual = pow((1 + $tasaAnual), (1 / 12)) - 1;
@@ -414,6 +406,36 @@ class Cotizacion
     public function create(array $d): int
     {
         $sql = "INSERT INTO cotizaciones
+            (idformato, idcliente, idvehiculo, moneda, precioventa,
+            vigenciadias, inicial, numcuotas, valorcuota, gastosadministrativos, 
+            tasaanual, tasamensual, idasesor)
+            VALUES
+            (:idformato, :idcliente, :idvehiculo, :moneda, :precioventa,
+            :vigenciadias, :inicial, :numcuotas, :valorcuota, :gastosadministrativos,
+            :tasaanual, :tasamensual, :idasesor)";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([
+            ':idformato' => $d['idformato'],
+            ':idcliente' => $d['idcliente'],
+            ':idvehiculo' => $d['idvehiculo'],
+            ':moneda' => $d['moneda'],
+            ':precioventa' => $d['precioventa'],
+            ':vigenciadias' => $d['vigenciadias'],
+            ':inicial' => $d['inicial'],
+            ':numcuotas' => $d['numcuotas'],
+            ':valorcuota' => $d['valorcuota'],
+            ':gastosadministrativos' => isset($d['gastosadministrativos']) ? (float) $d['gastosadministrativos'] : 0.00,
+            ':tasaanual' => isset($d['tasaanual']) ? (float) $d['tasaanual'] : 65.00,
+            ':tasamensual' => isset($d['tasamensual']) ? (float) $d['tasamensual'] : 0.00,
+            ':idasesor' => $d['idasesor']
+        ]);
+        return (int) $this->db->lastInsertId();
+    }
+
+    /* public function create(array $d): int
+    {
+        $sql = "INSERT INTO cotizaciones
         (idformato, idcliente, idvehiculo, moneda, precioventa,
         vigenciadias, inicial, numcuotas, valorcuota, gastosadministrativos, idasesor)
         VALUES
@@ -435,7 +457,7 @@ class Cotizacion
             ':idasesor' => $d['idasesor']
         ]);
         return (int) $this->db->lastInsertId();
-    }
+    } */
 
     public function createFinanciamiento(int $idcotizacion, int $numcuotas, float $inicial, float $valorcuota, string $moneda, float $precioventa): int
     {

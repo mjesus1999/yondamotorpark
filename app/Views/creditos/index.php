@@ -176,15 +176,16 @@
         </div>
     </div>
 
-    <!-- Lista de morosos (se llenará dinámicamente) -->
+    <!-- Lista de morosos-->
     <div class="row" id="listaMoresos" style="display: none;"></div>
 </div>
 
 <!-- Modal para seguimiento -->
-<div class="modal fade" id="modalSeguimiento" tabindex="-1" aria-labelledby="modalSeguimientoLabel" aria-hidden="true">
+<div class="modal fade" id="modalSeguimiento" tabindex="-1" aria-labelledby="modalSeguimientoLabel" aria-hidden="true"
+    data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
+            <div class="modal-header bg-yonda text-white">
                 <h5 class="modal-title" id="modalSeguimientoLabel">
                     <i class="fas fa-user-check me-2"></i>Registrar Seguimiento de Cobranza
                 </h5>
@@ -197,17 +198,17 @@
 
                     <div class="alert alert-info">
                         <div class="row">
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <label class="form-label"><strong><i
                                             class="fas fa-user me-1"></i>Cliente:</strong></label>
                                 <p id="clienteNombre" class="mb-0 text-primary fw-bold"></p>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <label class="form-label"><strong><i
                                             class="fas fa-dollar-sign me-1"></i>Deuda:</strong></label>
                                 <p id="clienteDeuda" class="mb-0 text-danger fw-bold"></p>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <label class="form-label"><strong><i class="fas fa-clock me-1"></i>Fecha y
                                         Hora:</strong></label>
                                 <p id="fechaHora" class="mb-0"></p>
@@ -215,12 +216,12 @@
                         </div>
                     </div>
 
-                    <div class="mb-4">
+                    <div class="mb-1 mt-4">
                         <label class="form-label fw-bold">
                             <i class="fas fa-clipboard-check me-2"></i>Tipo de Seguimiento:
                         </label>
-                        <div class="row mt-2">
-                            <div class="col-md-6 mb-3">
+                        <div class="row">
+                            <div class="col-md-6 mb-2">
                                 <div class="card border-success">
                                     <div class="card-body text-center">
                                         <div class="form-check">
@@ -236,7 +237,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-6 mb-2">
                                 <div class="card border-warning">
                                     <div class="card-body text-center">
                                         <div class="form-check">
@@ -258,11 +259,11 @@
                         <label for="observaciones" class="form-label fw-bold">
                             <i class="fas fa-sticky-note me-2"></i>Observaciones del Seguimiento
                         </label>
-                        <textarea class="form-control" id="observaciones" name="observaciones" rows="4"
+                        <textarea class="form-control" id="observaciones" name="observaciones" rows="2"
                             placeholder="Describe detalladamente lo ocurrido durante la visita"></textarea>
                     </div>
 
-                    <div class="mb-4">
+                    <div class="mb-2">
                         <label class="form-label fw-bold">
                             <i class="fas fa-cloud-upload-alt me-2"></i>Subir Evidencia
                         </label>
@@ -463,7 +464,7 @@
         const container = document.getElementById('listaMoresos');
         const map = {
             '5-dias': { badge: 'bg-warning text-dark', border: 'border-warning' },
-            '2-semanas': { badge: 'bg-warning text-dark', border: 'border-warning border-4' },
+            '2-semanas': { badge: 'bg-warning text-dark', border: 'border-warning border-2' },
             '1-mes': { badge: 'bg-danger', border: 'border-danger' }
         };
 
@@ -503,8 +504,8 @@
                 const displayItem = filtroInicial ? (filtroInicial === categoria ? 'block' : 'none') : 'block';
 
                 html += `
-                    <div class="col-md-6 mb-3 moroso-item" data-categoria="${categoria}" id="cliente-${idcontrato}" style="display: ${displayItem};">
-                        <div class="card border-start ${map[categoria].border} h-100">
+                    <div class="col-lg-4 mb-2 moroso-item" data-categoria="${categoria}" id="cliente-${idcontrato}" style="display: ${displayItem};">
+                        <div class="card border-start ${map[categoria].border}">
                             <div class="card-body">
                                 <div class="d-flex justify-content-between align-items-start mb-3">
                                     <div>

@@ -22,6 +22,17 @@
         transform: translateY(-5px);
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     }
+
+    input[type="radio"]:checked + label {
+        background-color: #0d6efd !important;
+        color: white !important;
+        border-color: #0d6efd !important;
+    }
+    
+    input[type="radio"]:checked + label .badge {
+        background-color: white !important;
+        color: #0d6efd !important;
+    }
 </style>
 
 <div class="container-fluid">
@@ -105,6 +116,7 @@
                 <h6 class="mb-0"><i class="fas fa-filter me-2"></i> Opciones </h6>
 
                 <div class="btn-group" role="group">
+
                     <!-- VER TODOS -->
                     <input type="radio" id="btnTodos" name="filtro" class="d-none" checked>
                     <label for="btnTodos" class="btn btn-sm btn-outline-primary me-2">
@@ -123,6 +135,7 @@
                         <i class="fas fa-times-circle me-1"></i>Vencidos
                         <span class="badge bg-danger ms-1" id="badge-vencidos"></span>
                     </a>
+
                 </div>
             </div>
         </div>
@@ -144,6 +157,7 @@
 <div class="modal fade" id="modalDetalleContrato" tabindex="-1" aria-labelledby="modalDetalleLabel" aria-hidden="true">
     <div class="modal-dialog modal-fullscreen">
         <div class="modal-content">
+
             <!-- Header del Modal -->
             <div class="modal-header bg-yonda">
                 <h5 class="modal-title" id="modalDetalleLabel">
@@ -165,7 +179,6 @@
 
             <!-- Body del Modal -->
             <div class="modal-body">
-                <!-- Loader mientras carga la información -->
                 <div id="modal-loader" class="text-center py-5">
                     <div class="spinner-border text-primary" role="status">
                         <span class="visually-hidden">Cargando...</span>
@@ -173,7 +186,7 @@
                     <p class="mt-2">Cargando información del contrato...</p>
                 </div>
 
-                <!-- Contenido del Modal (oculto inicialmente) -->
+                <!-- Contenido del Modal -->
                 <div id="modal-contenido" style="display: none;">
 
                     <!-- Tabs de navegación -->
@@ -214,7 +227,7 @@
                     <div class="tab-content" id="tabsDetalleContratoContent">
 
 
-                        <!-- TAB 2: INFORMACIÓN DEL CLIENTE -->
+                        <!-- 2: INFORMACIÓN DEL CLIENTE -->
                         <div class="tab-pane fade show active" id="contenido-cliente" role="tabpanel">
                             <div class="card">
                                 <div class="card-body" id="info-cliente-contenido">
@@ -223,7 +236,7 @@
                             </div>
                         </div>
 
-                        <!-- TAB 3: INFORMACIÓN DEL CONTRATO -->
+                        <!-- 3: INFORMACIÓN DEL CONTRATO -->
                         <div class="tab-pane fade" id="contenido-contrato" role="tabpanel">
                             <div class="card">
                                 <div class="card-body" id="info-contrato-contenido">
@@ -232,7 +245,7 @@
                             </div>
                         </div>
 
-                        <!-- TAB 4: CRONOGRAMA DE PAGOS -->
+                        <!-- 4: CRONOGRAMA DE PAGOS -->
                         <div class="tab-pane fade" id="contenido-cronograma" role="tabpanel">
                             <div class="table-responsive">
                                 <table class="table table-sm table-hover" id="tabla-cronograma">
@@ -256,7 +269,7 @@
                             </div>
                         </div>
 
-                        <!-- TAB 5: HISTORIAL DE PAGOS -->
+                        <!-- 5: HISTORIAL DE PAGOS -->
                         <div class="tab-pane fade" id="contenido-historial" role="tabpanel">
                             <div class="card">
                                 <div class="card-header bg-success text-white">
@@ -285,8 +298,8 @@
                             </div>
                         </div>
 
-                    </div> <!-- Fin tab-content -->
-                </div> <!-- Fin modal-contenido -->
+                    </div>
+                </div>
             </div>
 
             <!-- Footer del Modal -->
