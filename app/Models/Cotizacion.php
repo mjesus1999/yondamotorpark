@@ -364,6 +364,7 @@ class Cotizacion
         return $cuota;
     }
 
+    // AQUI EL 0.65 ESTA COMO VALOR POR DEFECTO PERO SI SE CAMBIA EN EL INPUT DE TASA ANUAL RECIBE EL NUEVO VALOR :)
     public function generarCronograma(float $importeTotal, float $inicial, int $meses, float $tasaAnual = 0.65): array
     {
         $tasaMensual = pow((1 + $tasaAnual), (1 / 12)) - 1;
