@@ -330,7 +330,7 @@ class Cotizacion
             SELECT c.idcliente,
                     e.razonsocial AS apellidos,
                     e.nombrecomercial AS nombres,
-                    e.telprimario, e.telalternativo, e.email
+                    e.telprimario, e.telsecundario,e.direccion, e.email
                 FROM clientes c
                 JOIN empresas e ON e.idempresa = c.idempresa
             WHERE e.ruc = :doc
@@ -433,32 +433,7 @@ class Cotizacion
         return (int) $this->db->lastInsertId();
     }
 
-    /* public function create(array $d): int
-    {
-        $sql = "INSERT INTO cotizaciones
-        (idformato, idcliente, idvehiculo, moneda, precioventa,
-        vigenciadias, inicial, numcuotas, valorcuota, gastosadministrativos, idasesor)
-        VALUES
-        (:idformato, :idcliente, :idvehiculo, :moneda, :precioventa,
-        :vigenciadias, :inicial, :numcuotas, :valorcuota, :gastosadministrativos, :idasesor)";
-
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute([
-            ':idformato' => $d['idformato'],
-            ':idcliente' => $d['idcliente'],
-            ':idvehiculo' => $d['idvehiculo'],
-            ':moneda' => $d['moneda'],
-            ':precioventa' => $d['precioventa'],
-            ':vigenciadias' => $d['vigenciadias'],
-            ':inicial' => $d['inicial'],
-            ':numcuotas' => $d['numcuotas'],
-            ':valorcuota' => $d['valorcuota'],
-            ':gastosadministrativos' => isset($d['gastosadministrativos']) ? (float) $d['gastosadministrativos'] : 0.00,
-            ':idasesor' => $d['idasesor']
-        ]);
-        return (int) $this->db->lastInsertId();
-    } */
-
+   
     public function createFinanciamiento(int $idcotizacion, int $numcuotas, float $inicial, float $valorcuota, string $moneda, float $precioventa): int
     {
         $sql = "INSERT INTO cotizacion_financiamiento
@@ -478,14 +453,47 @@ class Cotizacion
 
     public function getFinanciamientos(int $idcotizacion): array
     {
-        $sql = "SELECT idfinanciamiento, idcotizacion, numcuotas, inicial, valorcuota, moneda, precioventa, creado
-            FROM cotizacion_financiamiento
-            WHERE idcotizacion = :idcotizacion
-            ORDER BY numcuotas ASC";
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute([':idcotizacion' => $idcotizacion]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        //Obtener la marca de tiempo de la cotización principal, el vehículo Y EL CLIENTE.
+        $sqlBase = "SELECT idcliente, idvehiculo, creado, moneda, precioventa, gastosadministrativos 
+                FROM cotizaciones 
+                WHERE idcotizacion = :idcotizacion LIMIT 1";
+        $stmtBase = $this->db->prepare($sqlBase);
+        $stmtBase->execute([':idcotizacion' => $idcotizacion]);
+        $baseData = $stmtBase->fetch(PDO::FETCH_ASSOC);
+
+        if (!$baseData) {
+            return [];
+        }
+
+        $idcliente = $baseData['idcliente'];
+        $idvehiculo = $baseData['idvehiculo'];
+        $fechaBase = $baseData['creado'];
+        $sqlOpciones = "
+        SELECT 
+            c.idcotizacion, 
+            c.numcuotas, 
+            c.inicial, 
+            c.valorcuota, 
+            c.moneda, 
+            c.precioventa
+        FROM cotizaciones c
+        WHERE c.idcliente = :idcliente                
+          AND c.idvehiculo = :idvehiculo
+          AND DATE_FORMAT(c.creado, '%Y-%m-%d %H:%i') = DATE_FORMAT(:fecha_base, '%Y-%m-%d %H:%i')
+        ORDER BY c.numcuotas ASC
+    ";
+
+        $stmtOpciones = $this->db->prepare($sqlOpciones);
+        $stmtOpciones->execute([
+            ':idcliente' => $idcliente, 
+            ':idvehiculo' => $idvehiculo,
+            ':fecha_base' => $fechaBase
+        ]);
+
+      
+        return $stmtOpciones->fetchAll(PDO::FETCH_ASSOC);
     }
+
 
     public function getById(int $idcotizacion): ?array
     {

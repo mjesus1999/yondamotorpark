@@ -95,6 +95,9 @@ class CotizacionController extends Controller
         $this->view('cotizacion.pagoInicial', ['cotizacion' => $datos, 'montosInfo' => $montosInfo, 'historialPagos' => $historialPagos, 'completoInicial' => $completoIncial]);
     }
 
+
+
+
     public function html2pdfReport($id): void
     {
         $this->authRequired();
@@ -158,20 +161,20 @@ class CotizacionController extends Controller
             $errores = [];
 
             $registro = [
-                'idconcepto' => ConceptosPago::INICIAL_ID,
-                'idcotizacion' => $data['idcotizacion'] ?? null,
-                'idvehiculo' => $data['idvehiculo'] ?? null,
-                'idcuentapago' => empty($data['idcuentapago']) ? null : $data['idcuentapago'],
-                'mediopago' => $data['mediopago'] ?? null,
+                'idconcepto'        => ConceptosPago::INICIAL_ID,
+                'idcotizacion'      => $data['idcotizacion'] ?? null,
+                'idvehiculo'        => $data['idvehiculo'] ?? null,
+                'idcuentapago'      => empty($data['idcuentapago']) ? null : $data['idcuentapago'],
+                'mediopago'         => $data['mediopago'] ?? null,
                 'numerotransaccion' => empty($data['numerotransaccion']) ? null : $data['numerotransaccion'],
-                'fechapago' => $data['fechapago'] ?? null,
-                'amortizacion' => $data['amortizacion'] ?? null,
-                'saldorestante' => $data['saldorestante'] ?? null,
-                'comprobante' => null,
-                'observacion' => empty($data['observacion']) ? null : $data['observacion'],
-                'moneda' => $data['moneda'] ?? null,
+                'fechapago'         => $data['fechapago'] ?? null,
+                'amortizacion'      => $data['amortizacion'] ?? null,
+                'saldorestante'     => $data['saldorestante'] ?? null,
+                'comprobante'       => null,
+                'observacion'       => empty($data['observacion']) ? null : $data['observacion'],
+                'moneda'            => $data['moneda'] ?? null,
                 'montomonedaoriginal' => $data['montomonedaoriginal'] ?? null,
-                'tipocambioaplicado' => empty($data['tipocambioaplicado']) ? null : $data['tipocambioaplicado']
+                'tipocambioaplicado'  => empty($data['tipocambioaplicado']) ? null : $data['tipocambioaplicado']
             ];
 
 
@@ -232,8 +235,7 @@ class CotizacionController extends Controller
             }
         } catch (PDOException $e) {
 
-            if ($rutaArchivoGuardado && file_exists($rutaArchivoGuardado))
-                @unlink($rutaArchivoGuardado);
+            if ($rutaArchivoGuardado && file_exists($rutaArchivoGuardado)) @unlink($rutaArchivoGuardado);
 
             if (strpos($e->getMessage(), 'El vehículo ya fue separado') !== false || strpos($e->getMessage(), 'vendido al contado') !== false) {
                 http_response_code(409);
@@ -250,8 +252,7 @@ class CotizacionController extends Controller
             }
         } catch (Exception $e) {
 
-            if ($rutaArchivoGuardado && file_exists($rutaArchivoGuardado))
-                @unlink($rutaArchivoGuardado);
+            if ($rutaArchivoGuardado && file_exists($rutaArchivoGuardado)) @unlink($rutaArchivoGuardado);
 
             http_response_code(500);
             echo json_encode([
@@ -261,6 +262,18 @@ class CotizacionController extends Controller
         }
     }
 
+
+
+
+
+
+
+
+
+
+
+
+    // En CotizacionController.php - Método apiShow actualizado
     public function apiShow(int $idcotizacion): void
     {
         header('Content-Type: application/json; charset=utf-8');
@@ -412,7 +425,6 @@ class CotizacionController extends Controller
         }
         exit;
     }
-
     public function store(): void
     {
         $this->authRequired();
@@ -424,78 +436,69 @@ class CotizacionController extends Controller
             exit;
         }
 
-        // Opciones de financiamiento
+        // Opciones de financiamiento (las opciones que vienen del formulario)
         $opcionesJson = $_POST['opciones_financiamiento'] ?? '[]';
         $opciones = json_decode($opcionesJson, true);
-        if (!is_array($opciones))
-            $opciones = [];
-
-        $inicialPrincipal = 0;
-        if (!empty($opciones)) {
-            $inicialPrincipal = (float) ($opciones[0]['inicial'] ?? 0);
-        }
-
-        $numcuotasResumen = 0;
-        $valorcuotaResumen = 0.00;
-        $tasaAnualResumen = 65.00;    //valor por defecto SI NO TIENE NUEVO VALOR EN EL INPUT DE TASA ANUAL
-        $tasaMensualResumen = 0.00;   //valor por defecto
-
-        if (!empty($opciones)) {
-            usort($opciones, function ($a, $b) {
-                return (int) ($a['numcuotas'] ?? 0) <=> (int) ($b['numcuotas'] ?? 0);
-            });
-            $opcionPrincipal = $opciones[0];
-            $numcuotasResumen = (int) ($opcionPrincipal['numcuotas'] ?? 0);
-            $valorcuotaResumen = (float) ($opcionPrincipal['valorcuota'] ?? 0);
-            $tasaAnualResumen = (float) ($opcionPrincipal['tasaanual'] ?? 65.00);      // TASA ANUAL
-            $tasaMensualResumen = (float) ($opcionPrincipal['tasamensual'] ?? 0.00);   // TASA MENSUAL
-        }
-
-        $input = [
-            'idformato' => $_POST['modalidad'] ?? null,
-            'idcliente' => $_POST['idcliente'] ?? null,
-            'idvehiculo' => $_POST['idvehiculo'] ?? null,
-            'moneda' => $_POST['moneda'] ?? 'PEN',
-            'precioventa' => $_POST['precioventa'] ?? 0,
-            'vigenciadias' => $_POST['vigenciadias'] ?? 7,
-            'inicial' => $inicialPrincipal,
-            'numcuotas' => $numcuotasResumen,
-            'valorcuota' => $valorcuotaResumen,
-            'gastosadministrativos' => (float) ($_POST['gastosadministrativos'] ?? 0.00),
-            'tasaanual' => $tasaAnualResumen,         
-            'tasamensual' => $tasaMensualResumen,     
-            'idasesor' => $idasesor,
-        ];
-
-        if (!$input['idcliente'] || !$input['idvehiculo'] || !$input['idformato']) {
-            $_SESSION['error'] = "Faltan datos obligatorios.";
+        if (!is_array($opciones) || empty($opciones)) {
+            $_SESSION['error'] = "Debe haber al menos una opción de financiamiento.";
             header('Location: /cotizacion/create');
             exit;
         }
 
+        // Ordenar por número de cuotas
+        usort($opciones, function ($a, $b) {
+            return (int) ($a['numcuotas'] ?? 0) <=> (int) ($b['numcuotas'] ?? 0);
+        });
+
+        $idsCotizacionesCreadas = [];
+
         try {
-            $idcot = $this->cotizacionModel->create($input);
+            // CREAR UNA COTIZACIÓN POR CADA OPCIÓN
+            foreach ($opciones as $opcion) {
 
-            foreach ($opciones as $opt) {
-                $numcuotas = (int) ($opt['numcuotas'] ?? 0);
-                $valorcuota = (float) ($opt['valorcuota'] ?? 0);
-                $inicial = (float) ($opt['inicial'] ?? $input['inicial']);
-                $moneda = $input['moneda'];
-                $precioventa = (float) ($opt['precioventa'] ?? $input['precioventa']);
+                $numcuotas = (int) ($opcion['numcuotas'] ?? 0);
+                $valorcuota = (float) ($opcion['valorcuota'] ?? 0.00);
+                $inicial = (float) ($opcion['inicial'] ?? 0.00);
+                $precioventa = (float) ($opcion['precioventa'] ?? ($_POST['precioventa'] ?? 0));
+                $tasaanual = (float) ($opcion['tasaanual'] ?? 65.00);
+                $tasamensual = (float) ($opcion['tasamensual'] ?? 0.00);
 
-                if ($numcuotas > 0 && $valorcuota >= 0) {
-                    $this->cotizacionModel->createFinanciamiento(
-                        $idcot,
-                        $numcuotas,
-                        $inicial,
-                        $valorcuota,
-                        $moneda,
-                        $precioventa
-                    );
+                if ($numcuotas <= 0) continue;
+
+                $input = [
+                    'idformato' => $_POST['modalidad'] ?? null,
+                    'idcliente' => $_POST['idcliente'] ?? null,
+                    'idvehiculo' => $_POST['idvehiculo'] ?? null,
+                    'moneda' => $_POST['moneda'] ?? 'PEN',
+                    'precioventa' => $precioventa,
+                    'vigenciadias' => $_POST['vigenciadias'] ?? 7,
+                    'inicial' => $inicial,
+                    'numcuotas' => $numcuotas,
+                    'valorcuota' => $valorcuota,
+                    'tasaanual' => $tasaanual,
+                    'tasamensual' => $tasamensual,
+                    'gastosadministrativos' => (float) ($_POST['gastosadministrativos'] ?? 0.00),
+                    'idasesor' => $idasesor,
+                ];
+
+                if (!$input['idcliente'] || !$input['idvehiculo'] || !$input['idformato']) {
+                    throw new Exception('Faltan datos obligatorios para crear la cotización.');
                 }
-            }
 
-            $_SESSION['success_message'] = "Cotización registrada correctamente.";
+                
+                $idcot = $this->cotizacionModel->create($input);
+                $idsCotizacionesCreadas[] = $idcot;
+
+                $this->cotizacionModel->createFinanciamiento(
+                    $idcot, 
+                    $numcuotas,
+                    $inicial,
+                    $valorcuota,
+                    $_POST['moneda'] ?? 'PEN',
+                    $precioventa
+                );
+            }
+            $_SESSION['success_message'] = "Cotizaciones registradas correctamente. Total: " . count($idsCotizacionesCreadas);
             header('Location: /cotizacion');
             exit;
         } catch (Exception $e) {
@@ -505,97 +508,7 @@ class CotizacionController extends Controller
         }
     }
 
-    /*  public function store(): void
-     {
-         $this->authRequired();
 
-         $idasesor = $_SESSION['user']['id'] ?? null;
-         if (!$idasesor) {
-             $_SESSION['error'] = "No se encontro al usuario.";
-             header('Location: /cotizacion/create');
-             exit;
-         }
-
-         // Opciones de financiamiento
-         $opcionesJson = $_POST['opciones_financiamiento'] ?? '[]';
-         $opciones = json_decode($opcionesJson, true);
-         if (!is_array($opciones))
-             $opciones = [];
-
-         // 1) Inicial principal
-         $inicialPrincipal = 0;
-         if (!empty($opciones)) {
-             $inicialPrincipal = (float) ($opciones[0]['inicial'] ?? 0);
-         }
-
-         // 2) Opción principal para llenar "resumen" en cotizaciones:
-         $numcuotasResumen = 0;
-         $valorcuotaResumen = 0.00;
-         if (!empty($opciones)) {
-             usort($opciones, function ($a, $b) {
-                 return (int) ($a['numcuotas'] ?? 0) <=> (int) ($b['numcuotas'] ?? 0);
-             });
-             $opcionPrincipal = $opciones[0];
-             $numcuotasResumen = (int) ($opcionPrincipal['numcuotas'] ?? 0);
-             $valorcuotaResumen = (float) ($opcionPrincipal['valorcuota'] ?? 0);
-         }
-
-         $input = [
-             'idformato' => $_POST['modalidad'] ?? null,
-             'idcliente' => $_POST['idcliente'] ?? null,
-             'idvehiculo' => $_POST['idvehiculo'] ?? null,
-             'moneda' => $_POST['moneda'] ?? 'PEN',
-             'precioventa' => $_POST['precioventa'] ?? 0,
-             'vigenciadias' => $_POST['vigenciadias'] ?? 7,
-             'inicial' => $inicialPrincipal,
-             'numcuotas' => $numcuotasResumen,
-             'valorcuota' => $valorcuotaResumen,
-
-             // CAMPO GASTOS ADMINISTRATIVOS
-             'gastosadministrativos' => (float) ($_POST['gastosadministrativos'] ?? 0.00),
-
-             'idasesor' => $idasesor,
-         ];
-
-         if (!$input['idcliente'] || !$input['idvehiculo'] || !$input['idformato']) {
-             $_SESSION['error'] = "Faltan datos obligatorios.";
-             header('Location: /cotizacion/create');
-             exit;
-         }
-
-         try {
-             // Insert cotizacion y obtener id
-             $idcot = $this->cotizacionModel->create($input);
-
-             // Insertar cada opción en cotizacion_financiamiento
-             foreach ($opciones as $opt) {
-                 $numcuotas = (int) ($opt['numcuotas'] ?? 0);
-                 $valorcuota = (float) ($opt['valorcuota'] ?? 0);
-                 $inicial = (float) ($opt['inicial'] ?? $input['inicial']);
-                 $moneda = $input['moneda'];
-                 $precioventa = (float) ($opt['precioventa'] ?? $input['precioventa']);
-
-                 if ($numcuotas > 0 && $valorcuota >= 0) {
-                     $this->cotizacionModel->createFinanciamiento(
-                         $idcot,
-                         $numcuotas,
-                         $inicial,
-                         $valorcuota,
-                         $moneda,
-                         $precioventa
-                     );
-                 }
-             }
-
-             $_SESSION['success_message'] = "Cotización registrada correctamente.";
-             header('Location: /cotizacion');
-             exit;
-         } catch (Exception $e) {
-             $_SESSION['error_message'] = "Error al registrar cotización: " . $e->getMessage();
-             header('Location: /cotizacion/create');
-             exit;
-         }
-     } */
 
     public function tipoCambio(): void
     {

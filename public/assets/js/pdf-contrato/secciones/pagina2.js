@@ -195,7 +195,7 @@ export function getPagina2(data) {
                     // Fila 2: Modelo y N° Serie
                     [
                         crearCeldaVehiculo('MODELO:', v.modelo),
-                        crearCeldaVehiculo('N° SERIE:', v.chasis)
+                        crearCeldaVehiculo('N° SERIE:', v.serie_motor)
                     ],
                     // Fila 3: Color y Año
                     [

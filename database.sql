@@ -468,9 +468,9 @@ CREATE TABLE cotizaciones (
     vigenciadias TINYINT NOT NULL COMMENT 'Días válidos de la cotización' DEFAULT 7,
     inicial DECIMAL(9, 2) NOT NULL,
     numcuotas SMALLINT NOT NULL,
-    gastosadministrativos DECIMAL(9,2) NOT NULL DEFAULT 0.00 COMMENT 'Gastos administrativos de la cotización',
     valorcuota DECIMAL(9, 2) NOT NULL, -- Se usara en la tabla de cronogramas
-    estadocotizacion ENUM('P', 'S','O', 'A', 'C', 'R','CONT') NOT NULL DEFAULT 'P' COMMENT 'Pendiente | Separada ( Ya se realizo un pago )| OBSERVADA  | Aprobada | Cancelada (cliente) | Rechazada (Analista crédito) | CONTRATO',
+    gastosadministrativos DECIMAL(9,2) NOT NULL DEFAULT 0.00 COMMENT 'Gastos administrativos de la cotización',
+    estadocotizacion ENUM('P', 'E', 'A', 'C', 'R') NOT NULL DEFAULT 'P' COMMENT 'Pendiente | Evaluación | Aprobada | Cancelada (cliente) | Rechazada (Analista crédito)',
     comentarios TEXT,
     fechaseguimiento DATETIME NULL,
     creado DATETIME NOT NULL DEFAULT NOW(),
@@ -478,7 +478,7 @@ CREATE TABLE cotizaciones (
     fechareactivacion DATETIME NULL,
     CONSTRAINT fk_idformato_cot FOREIGN KEY (idformato) REFERENCES formatocotizacion (idformato),
     CONSTRAINT fk_idcliente_cot FOREIGN KEY (idcliente) REFERENCES clientes (idcliente),
-    CONSTRAINT fk_idvehiculo_cot FOREIGN KEY (idvehiculo) REFERENCES  (idvehiculo),
+    CONSTRAINT fk_idvehiculo_cot FOREIGN KEY (idvehiculo) REFERENCES vehiculos (idvehiculo),
     CONSTRAINT fk_idcolventa_cot FOREIGN KEY (idasesor) REFERENCES colaboradores (idcolaborador)
 ) ENGINE = INNODB;
 

@@ -518,8 +518,8 @@
                             <!-- tasa mensual -->
                             <div class="col-md-2">
                                 <div class="form-floating">
-                                    <input type="number" class="form-control fin-tasaMensual" placeholder="Tasa Mensual"
-                                        step="0.01" min="0" value="0" id="tasaMensual">
+                                    <input type="text" class="form-control fin-tasaMensual" placeholder="Tasa Mensual"
+                                       id="tasaMensual">
                                     <label>Tasa menual (%)</label>
                                 </div>
                             </div>
@@ -1758,7 +1758,7 @@
             if (!docValue) return alert('Ingresa un número de documento válido.');
             const res = await fetch(`/cotizacion/buscarCliente?tipo=${tipoValue}&doc=${encodeURIComponent(docValue)}`);
             const data = await res.json();
-            console.log('DATA DE DNI: ', data);
+     
             if (data.notFound) {
                 const confirmRedirect = confirm('Cliente no encontrado. ¿Desea ir a registrarlo ahora?');
                 if (confirmRedirect) {

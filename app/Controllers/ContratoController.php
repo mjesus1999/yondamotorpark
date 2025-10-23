@@ -150,7 +150,8 @@ class ContratoController extends Controller
                     'provincia' => $row['provinciaCliente'],
                     'departamento' => $row['departamentoCliente'],
                     'email' => $row['emailCliente'],
-                    'telefono' => $row['telCliente']
+                    'telefono' => $row['telCliente'],
+                    'tipocliente' => $row['tipocliente']
                 ],
 
                 'conyuge' => [
@@ -205,6 +206,8 @@ class ContratoController extends Controller
                     'cuotaInicial' => $row['cuotainicial'],
                     'numCuotas' => $row['numcuotas'],
                     'valorCuota' => $row['valorcuota'],
+                    'tasaAnual' => $row['tasaanual'],
+                    'tasaMensual'=> $row['tasamensual'],
                
                 ]
             ]
