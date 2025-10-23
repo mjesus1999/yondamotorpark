@@ -30,6 +30,7 @@ const tablaLayout = {
 export function getPagina8(data) {
     
     const f = data.financiamiento;
+
     const symbol = getMonedaSymbol(f.moneda);
     const monedaNombre = (f.moneda === 'PEN') ? 'SOLES' : 'DOLARES';
 
@@ -62,12 +63,12 @@ export function getPagina8(data) {
                     ],
                     // --- Fila 2: T.A. / Monto ---
                     [
-                        { text: 'T.A. POR G.A.', style: cellStyle }, { text: '80%', ...cellStyleRight },
+                        { text: 'T.A. POR G.A.', style: cellStyle }, { text: `${f.tasaAnual}%`, ...cellStyleRight },
                         { text: 'Monto financiado', style: cellStyle }, { text: `${symbol} ${formatNumber(f.montoFinanciado)}`, ...cellStyleRight }
                     ],
                     // --- Fila 3: T.M. / Moneda ---
                     [
-                        { text: 'T.M. POR G.A.', style: cellStyle }, { text: '5.02%', ...cellStyleRight },
+                        { text: 'T.M. POR G.A.', style: cellStyle }, { text: `${f.tasaMensual}%`, ...cellStyleRight },
                         { text: 'Moneda', style: cellStyle }, { text: monedaNombre, ...cellStyleRight }
                     ],
                     // --- Fila 4: Celda Vacía Izq / Número de cuotas ---

@@ -76,15 +76,15 @@
             {title: "Documento", field: "doc_cliente", hozAlign: "center", responsive:10,tooltip:true},
             {title: "Asesor", field: "asesor", headerHozAlign: "left", responsive:10,tooltip:true},
           { title: "Precio Venta",field: "precioventa",hozAlign: "right",
-    formatter: (cell) => {
-        const data = cell.getData();
-        const simbolo = data.moneda === "USD" ? "$" : "S/ ";
-        const valor = parseFloat(data.precioventa) || 0;
-        return simbolo + valor.toLocaleString("en-US", { minimumFractionDigits: 2 });
-    },
-    minWidth: 100,
-    tooltip: true
-},
+                formatter: (cell) => {
+                    const data = cell.getData();
+                    const simbolo = data.moneda === "USD" ? "$" : "S/ ";
+                    const valor = parseFloat(data.precioventa) || 0;
+                    return simbolo + valor.toLocaleString("en-US", { minimumFractionDigits: 2 });
+                },
+                minWidth: 100,
+                tooltip: true
+            },
 
             {title: 'Acciones', hozAlign: 'left', responsive:0,
                 formatter: (cell) => {
@@ -216,7 +216,7 @@
         }
 
         // DELEGACIÓN DE EVENTOS
-        document.getElementById("tabla-contratos").addEventListener("click", async (e) => {
+        document.addEventListener("click", async (e) => {
             // Buscamos el botón más cercano al que se le hizo clic
             const button = e.target.closest("button[data-action]");
             if (!button) return;

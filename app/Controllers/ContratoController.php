@@ -205,6 +205,8 @@ class ContratoController extends Controller
                     'cuotaInicial' => $row['cuotainicial'],
                     'numCuotas' => $row['numcuotas'],
                     'valorCuota' => $row['valorcuota'],
+                    'tasaAnual' => $row['tasaanual'],
+                    'tasaMensual'=> $row['tasamensual'],
                
                 ]
             ]

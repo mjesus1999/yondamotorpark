@@ -1,4 +1,6 @@
+
 USE motorpark;
+
 SELECT * FROM fichasolicitud;
 SELECT * FROM personas;
 SELECT * FROM vehiculos;
@@ -98,6 +100,7 @@ BEGIN
         v.chasis,
         mode.anio,
 
+
         -- DETALLES DEL CONTRATO
         (cot.precioventa - cot.inicial) AS financiado,
         cot.moneda,
@@ -107,7 +110,9 @@ BEGIN
         cot.inicial AS cuotainicial,
         cot.numcuotas,
         cot.valorcuota,
-        cot.moneda
+        cot.moneda,
+        cot.tasaanual,
+        cot.tasamensual
 
     FROM contratos con
     INNER JOIN cotizaciones cot ON con.idcotizacion = cot.idcotizacion
@@ -149,7 +154,7 @@ DELIMITER ;
 
 
 
-CALL sp_contrato_pdf(19);
+CALL sp_contrato_pdf(34);
 
 
 
@@ -192,3 +197,13 @@ SHOW COLUMNS FROM ordenescompra;
 SHOW COLUMNS FROM vehiculos;
 SHOW COLUMNS FROM cotizaciones;
 SHOW COLUMNS FROM contratos;
+
+
+CREATE INDEX idx_cotizacion_estado ON cotizaciones(estadocotizacion);
+CREATE INDEX idx_cotizacion_cliente ON cotizaciones(idcliente);
+CREATE INDEX idx_pagos_cotizacion ON pagos(idcotizacion);
+CREATE INDEX idx_pagos_concepto ON pagos(idconcepto);
+CREATE INDEX idx_contratos_cotizacion ON contratos(idcotizacion);
+CREATE INDEX idx_vehiculos_id ON vehiculos(idvehiculo);
+CREATE INDEX idx_clientes_tipo ON clientes(tipocliente);
+CREATE INDEX idx_modelos_marca ON modelos(idmarca);

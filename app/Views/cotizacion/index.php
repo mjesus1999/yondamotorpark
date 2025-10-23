@@ -1,5 +1,4 @@
 <?php include __DIR__ . '/../layout/header.php'; ?>
-
 <link href="https://unpkg.com/tabulator-tables@5.5.2/dist/css/tabulator_simple.min.css" rel="stylesheet">
 <link rel="stylesheet" href="/assets/css/tabulator.css">
 <link rel="stylesheet" href="/assets/css/contrato-modal.css">
@@ -322,258 +321,248 @@
 
         const config = window.APP_CONFIG || {};
 
-        if (cotizaciones.length > 0) {
-            const tabla = new Tabulator("#tabla-cotizacion", {
-                data: cotizaciones,
-                theme: "simple",
-                layout: "fitDataStrech",
-                layout: "fitColumns",
-                responsiveLayout: "collapse", //hace que colapse columnas en móvil
-                pagination: true,
-                paginationSize: 15,
-                paginationCounter: "rows",
-                responsiveLayoutCollapseStartOpen: false, // Inicia colapsado
-                groupBy: 'documento',
-                groupHeader: function(value, count, data, group) {
-                    const nombreCliente = data[0].nombrecliente || 'Cliente Desconocido';
-                    return `${nombreCliente} (${value}) <span class='badge bg-info ms-2'>${count} cotizaciones</span>`;
+
+        const tabla = new Tabulator("#tabla-cotizacion", {
+            data: cotizaciones,
+            theme: "simple",
+            layout: "fitDataStrech",
+            layout: "fitColumns",
+            responsiveLayout: "collapse", //hace que colapse columnas en móvil
+            pagination: true,
+            paginationSize: 15,
+            paginationCounter: "rows",
+            responsiveLayoutCollapseStartOpen: false, // Inicia colapsado
+            groupBy: 'documento',
+            groupHeader: function(value, count, data, group) {
+                const nombreCliente = data[0].nombrecliente || 'Cliente Desconocido';
+                return `${nombreCliente} (${value}) <span class='badge bg-info ms-2'>${count} cotizaciones</span>`;
+            },
+            groupStartOpen: false,
+            groupToggleElement: "header",
+            columns: [{
+                    formatter: "responsiveCollapse",
+                    width: 40,
+                    minWidth: 30,
+                    hozAlign: "center",
+                    resizable: false,
+                    headerSort: false,
+                    responsive: 0 // Siempre visible
+                }, {
+                    title: "#",
+                    formatter: "rownum",
+                    headerSort: false,
+                    hozAlign: "center",
+                    width: 30,
+                    responsive: 1
                 },
-                groupStartOpen: false,
-                groupToggleElement: "header",
-                columns: [{
-                        formatter: "responsiveCollapse",
-                        width: 40,
-                        minWidth: 30,
-                        hozAlign: "center",
-                        resizable: false,
-                        headerSort: false,
-                        responsive: 0 // Siempre visible
-                    }, {
-                        title: "#",
-                        formatter: "rownum",
-                        headerSort: false,
-                        hozAlign: "center",
-                        width: 30,
-                        responsive: 1
-                    },
-                    {
-                        title: "Cliente",
-                        field: "nombrecliente",
-                        hozAlign: "left",
-                        widthGrow: 2,
-                        responsive: 2, // OCULTAR DESPUES _> '0' ES NO MOSTRARA,
-                        tooltip: true
-                    },
-                    {
-                        title: "Vehículo",
-                        field: "vehiculo",
-                        hozAlign: "left",
-                        tooltip: true,
-                        responsive: 1
-                    },
-                    {
-                        title: "Inicial",
-                        field: "inicial",
-                        hozAlign: "right",
-                        formatter: function(cell) {
-                            const data = cell.getRow().getData();
-                            const moneda = data.moneda || "PEN";
-                            const symbol = moneda === "USD" ? "$ " : "S/ ";
+                {
+                    title: "Cliente",
+                    field: "nombrecliente",
+                    hozAlign: "left",
+                    widthGrow: 2,
+                    responsive: 2, // OCULTAR DESPUES _> '0' ES NO MOSTRARA,
+                    tooltip: true
+                },
+                {
+                    title: "Vehículo",
+                    field: "vehiculo",
+                    hozAlign: "left",
+                    tooltip: true,
+                    responsive: 1
+                },
+                {
+                    title: "Inicial",
+                    field: "inicial",
+                    hozAlign: "right",
+                    formatter: function(cell) {
+                        const data = cell.getRow().getData();
+                        const moneda = data.moneda || "PEN";
+                        const symbol = moneda === "USD" ? "$ " : "S/ ";
 
-                            const value = parseFloat(cell.getValue() || 0).toFixed(2);
-                            return `${symbol}${value}`;
-                        },
-                        tooltip: true,
-                        minWidth: 80,
-                        responsive: 1
+                        const value = parseFloat(cell.getValue() || 0).toFixed(2);
+                        return `${symbol}${value}`;
                     },
-                    {
-                        title: "N° Cuotas",
-                        field: "numcuotas",
-                        tooltip: true,
-                        hozAlign: "center",
-                    },
-                    {
-                        title: "Valor Cuota",
-                        field: "valorcuota",
-                        hozAlign: "right",
-                        formatter: function(cell) {
-                            const data = cell.getRow().getData();
-                            const moneda = data.moneda || "PEN";
-                            const symbol = moneda === "USD" ? "$ " : "S/ ";
+                    tooltip: true,
+                    minWidth: 80,
+                    responsive: 1
+                },
+                {
+                    title: "N° Cuotas",
+                    field: "numcuotas",
+                    tooltip: true,
+                    hozAlign: "center",
+                },
+                {
+                    title: "Valor Cuota",
+                    field: "valorcuota",
+                    hozAlign: "right",
+                    formatter: function(cell) {
+                        const data = cell.getRow().getData();
+                        const moneda = data.moneda || "PEN";
+                        const symbol = moneda === "USD" ? "$ " : "S/ ";
 
-                            const value = parseFloat(cell.getValue() || 0).toFixed(2);
-                            return `${symbol}${value}`;
-                        },
-                        tooltip: true,
-                        minWidth: 90
+                        const value = parseFloat(cell.getValue() || 0).toFixed(2);
+                        return `${symbol}${value}`;
                     },
-                    {
-                        title: "Documento",
-                        field: "documento",
-                        hozAlign: "center",
-                        minWidth: 120,
-                        responsive: 0,
-                        tooltip: true
-                    },
-                    {
-                        title: "Asesor",
-                        field: "asesor_nombre",
-                        hozAlign: "left",
-                        minWidth: 150,
-                        responsive: 0,
-                        tooltip: true
-                    },
-                    {
-                        title: "Acciones",
-                        field: "idcotizacion",
-                        headerSort: false,
-                        minWidth: 120,
-                        responsive: 0,
-                        formatter: function(cell) {
-                            const {
-                                idcotizacion: id,
-                                estadocotizacion: estado,
-                                nombrecliente,
-                                valorcuota,
-                                moneda,
-                                numcuotas,
-                                habilitar_contrato,
-                                existe_reserva,
-                                idcotizacion_reserva,
-                                reserva_cliente_nombre,
-                                contrato_cliente_nombre,
-                                vehiculo_en_contrato,
-                                vehiculo_vendido_contado,
-                                contado_cliente_nombre
-                            } = cell.getRow().getData();
+                    tooltip: true,
+                    minWidth: 90
+                },
+                {
+                    title: "Documento",
+                    field: "documento",
+                    hozAlign: "center",
+                    minWidth: 120,
+                    responsive: 0,
+                    tooltip: true
+                },
+                {
+                    title: "Asesor",
+                    field: "asesor_nombre",
+                    hozAlign: "left",
+                    minWidth: 150,
+                    responsive: 0,
+                    tooltip: true
+                },
+                {
+                    title: "Acciones",
+                    field: "idcotizacion",
+                    headerSort: false,
+                    minWidth: 120,
+                    responsive: 0,
+                    formatter: function(cell) {
+                        const {
+                            idcotizacion: id,
+                            estadocotizacion: estado,
+                            nombrecliente,
+                            valorcuota,
+                            moneda,
+                            numcuotas,
+                            habilitar_contrato,
+                            existe_reserva,
+                            idcotizacion_reserva,
+                            reserva_cliente_nombre,
+                            contrato_cliente_nombre,
+                            vehiculo_en_contrato,
+                            vehiculo_vendido_contado,
+                            contado_cliente_nombre
+                        } = cell.getRow().getData();
 
-                            const inicialCompleta = Number(habilitar_contrato) === 1;
-                            const esMiReserva = Number(idcotizacion_reserva) === Number(id);
-                            const vehiculoYaVendidoPorContrato = Number(vehiculo_en_contrato) === 1 && !esMiReserva;
-                            const vehiculoReservadoPorOtro = Number(existe_reserva) === 1 && !esMiReserva;
-                            const vehiculoVendidoAlContado = Number(vehiculo_vendido_contado) === 1;
+                        const inicialCompleta = Number(habilitar_contrato) === 1;
+                        const esMiReserva = Number(idcotizacion_reserva) === Number(id);
+                        const vehiculoYaVendidoPorContrato = Number(vehiculo_en_contrato) === 1 && !esMiReserva;
+                        const vehiculoReservadoPorOtro = Number(existe_reserva) === 1 && !esMiReserva;
+                        const vehiculoVendidoAlContado = Number(vehiculo_vendido_contado) === 1;
 
-                            const acciones = [];
+                        const acciones = [];
 
 
-                            if (vehiculoVendidoAlContado) {
+                        if (vehiculoVendidoAlContado) {
 
-                                acciones.push(`<span class="px-1" style="cursor: pointer;" onclick="mostrarModalReserva('${contado_cliente_nombre}', 'contado')" title="Vehículo vendido al contado"><i class="bi bi-cash-coin fs-5 text-muted"></i></span>`);
-                            } else {
-                                switch (estado) {
-                                    case 'P':
-                                        acciones.push(`<a class="btn-download-pdf px-1" style="cursor: pointer;" data-id="${id}" data-cliente="${nombrecliente}" title="PDF Cotización"><i class="bi bi-filetype-pdf text-danger fs-5"></i></a>`);
+                            acciones.push(`<span class="px-1" style="cursor: pointer;" onclick="mostrarModalReserva('${contado_cliente_nombre}', 'contado')" title="Vehículo vendido al contado"><i class="bi bi-cash-coin fs-5 text-muted"></i></span>`);
+                        } else {
+                            switch (estado) {
+                                case 'P':
+                                    acciones.push(`<a class="btn-download-pdf px-1" style="cursor: pointer;" data-id="${id}" data-cliente="${nombrecliente}" title="PDF Cotización"><i class="bi bi-filetype-pdf text-danger fs-5"></i></a>`);
+                                    if (vehiculoYaVendidoPorContrato) {
+                                        acciones.push(`<span class="px-1" style="cursor: pointer;" onclick="mostrarModalReserva('${contrato_cliente_nombre}', 'contrato')" title="Vehículo ya vendido"><i class="bi bi-currency-dollar fs-5 text-muted"></i></span>`);
+                                    } else if (vehiculoReservadoPorOtro) {
+                                        acciones.push(`<span class="px-1" style="cursor: pointer;" onclick="mostrarModalReserva('${reserva_cliente_nombre}', 'reservado')" title="Vehículo separado"><i class="bi bi-currency-dollar fs-5 text-muted"></i></span>`);
+                                    } else {
+                                        acciones.push(`<a class="px-1" href="/cotizacion/pagoInicial/${id}" title="Registrar Primer Pago"><i class="bi bi-currency-dollar fs-5 text-success"></i></a>`);
+                                    }
+                                    break;
+                                case 'S':
+                                    acciones.push(`<a class="px-1" style="cursor: pointer;" data-id="${id}" title="Acta de separación vehicular" data-action="verActa"><i class="bi bi-file-earmark-pdf fs-5"></i></a>`);
+                                    acciones.push(`<a class="px-1" href="/fichasolicitud/${id}" title="Adjuntar Ficha de Solicitud"><i class="bi bi-file-earmark-plus fs-5 text-warning fw-bold"></i></a>`);
+                                    if (!inicialCompleta) {
+                                        acciones.push(`<a class="px-1" href="/cotizacion/pagoInicial/${id}" title="Continuar Pagando Inicial"><i class="bi bi-currency-dollar fs-5 text-success"></i></a>`);
+                                    } else {
+                                        acciones.push(`<span class="px-1" title="Inicial completa"><i class="bi bi-currency-dollar fs-5 text-muted"></i></span>`);
+                                    }
+                                    break;
+                                case 'A':
+                                    if (inicialCompleta) {
                                         if (vehiculoYaVendidoPorContrato) {
-                                            acciones.push(`<span class="px-1" style="cursor: pointer;" onclick="mostrarModalReserva('${contrato_cliente_nombre}', 'contrato')" title="Vehículo ya vendido"><i class="bi bi-currency-dollar fs-5 text-muted"></i></span>`);
-                                        } else if (vehiculoReservadoPorOtro) {
-                                            acciones.push(`<span class="px-1" style="cursor: pointer;" onclick="mostrarModalReserva('${reserva_cliente_nombre}', 'reservado')" title="Vehículo separado"><i class="bi bi-currency-dollar fs-5 text-muted"></i></span>`);
+                                            acciones.push(`<span class="px-1" style="cursor: pointer;" onclick="mostrarModalReserva('${reserva_cliente_nombre}', 'contrato')" title="Vehículo ya tiene contrato"><i class="bi bi-file-earmark-text fs-5 text-muted"></i></span>`);
                                         } else {
-                                            acciones.push(`<a class="px-1" href="/cotizacion/pagoInicial/${id}" title="Registrar Primer Pago"><i class="bi bi-currency-dollar fs-5 text-success"></i></a>`);
+                                            acciones.push(`<a class="px-1 text-info fw-bold btnCrearContrato" title="Crear Contrato" data-id="${id}" data-cliente="${nombrecliente}" data-numcuotas="${numcuotas}" data-valorCuota="${valorcuota}"  data-moneda="${moneda}"data-bs-toggle="modal" data-bs-target="#contratoModal"><i class="bi bi-file-earmark-text fs-5"></i></a>`);
                                         }
-                                        break;
-                                    case 'S':
-                                        acciones.push(`<a class="px-1" style="cursor: pointer;" data-id="${id}" title="Acta de separación vehicular" data-action="verActa"><i class="bi bi-file-earmark-pdf fs-5"></i></a>`);
-                                        acciones.push(`<a class="px-1" href="/fichasolicitud/${id}" title="Adjuntar Ficha de Solicitud"><i class="bi bi-file-earmark-plus fs-5 text-warning fw-bold"></i></a>`);
-                                        if (!inicialCompleta) {
-                                            acciones.push(`<a class="px-1" href="/cotizacion/pagoInicial/${id}" title="Continuar Pagando Inicial"><i class="bi bi-currency-dollar fs-5 text-success"></i></a>`);
-                                        } else {
-                                            acciones.push(`<span class="px-1" title="Inicial completa"><i class="bi bi-currency-dollar fs-5 text-muted"></i></span>`);
-                                        }
-                                        break;
-                                    case 'A':
-                                        if (inicialCompleta) {
-                                            if (vehiculoYaVendidoPorContrato) {
-                                                acciones.push(`<span class="px-1" style="cursor: pointer;" onclick="mostrarModalReserva('${reserva_cliente_nombre}', 'contrato')" title="Vehículo ya tiene contrato"><i class="bi bi-file-earmark-text fs-5 text-muted"></i></span>`);
-                                            } else {
-                                                acciones.push(`<a class="px-1 text-info fw-bold btnCrearContrato" title="Crear Contrato" data-id="${id}" data-cliente="${nombrecliente}" data-numcuotas="${numcuotas}" data-valorCuota="${valorcuota}"  data-moneda="${moneda}"data-bs-toggle="modal" data-bs-target="#contratoModal"><i class="bi bi-file-earmark-text fs-5"></i></a>`);
-                                            }
-                                            acciones.push(`<span class="px-1" title="Inicial Pagada"><i class="bi bi-currency-dollar fs-5 text-muted"></i></span>`);
-                                        } else {
-                                            acciones.push(`<a class="px-1" href="/cotizacion/pagoInicial/${id}" title="Completar Pago de Inicial"><i class="bi bi-currency-dollar fs-5 text-success"></i></a>`);
-                                        }
-                                        break;
-                                }
+                                        acciones.push(`<span class="px-1" title="Inicial Pagada"><i class="bi bi-currency-dollar fs-5 text-muted"></i></span>`);
+                                    } else {
+                                        acciones.push(`<a class="px-1" href="/cotizacion/pagoInicial/${id}" title="Completar Pago de Inicial"><i class="bi bi-currency-dollar fs-5 text-success"></i></a>`);
+                                    }
+                                    break;
                             }
-                            return acciones.join('');
+                        }
+                        return acciones.join('');
+                    },
+
+                    cellClick: function(e, cell) {
+                        const row = cell.getRow().getData();
+                        const id = row.idcotizacion;
+                        const idReserva = row.idcotizacion_reserva ? Number(row.idcotizacion_reserva) : null;
+
+                        if (row.existe_reserva && idReserva !== id) {
+                            const motivo = row.reserva_tipo === 'PAGO' ? 'Pago inicial' :
+                                (row.reserva_tipo === 'APROBADA' ? 'Cotización aprobada' : 'Reserva');
+
+                            mostrarReserva(
+                                row.reserva_cliente_nombre || "N/D",
+                                row.reserva_documento || "N/D",
+                                motivo
+                            );
+                        }
+                    }
+                }
+
+
+            ],
+
+            langs: {
+                "es-es": {
+                    "pagination": {
+                        "page_size": "Registros por página",
+                        "first": "<<",
+                        "last": ">>",
+                        "prev": "<",
+                        "next": ">",
+                        "counter": {
+                            "showing": "Mostrando",
+                            "of": "de",
+                            "rows": "registros"
+                        }
+                    }
+                }
+            },
+            locale: "es-es"
+        });
+
+
+        const searchInput = document.getElementById("busqueda-global");
+        searchInput.addEventListener("input", function(e) {
+            const value = e.target.value.trim();
+
+            if (value === "") {
+                tabla.clearFilter(true);
+                tabla.setData(cotizaciones); 
+                tabla.redraw(true); 
+            } else {
+                tabla.setFilter([
+                    [{
+                            field: "nombrecliente",
+                            type: "like",
+                            value
                         },
-
-                        cellClick: function(e, cell) {
-                            const row = cell.getRow().getData();
-                            const id = row.idcotizacion;
-                            const idReserva = row.idcotizacion_reserva ? Number(row.idcotizacion_reserva) : null;
-
-                            if (row.existe_reserva && idReserva !== id) {
-                                const motivo = row.reserva_tipo === 'PAGO' ? 'Pago inicial' :
-                                    (row.reserva_tipo === 'APROBADA' ? 'Cotización aprobada' : 'Reserva');
-
-                                mostrarReserva(
-                                    row.reserva_cliente_nombre || "N/D",
-                                    row.reserva_documento || "N/D",
-                                    motivo
-                                );
-                            }
+                        {
+                            field: "documento",
+                            type: "like",
+                            value
                         }
-                    }
-
-
-                ],
-
-                langs: {
-                    "es-es": {
-                        "pagination": {
-                            "page_size": "Registros por página",
-                            "first": "<<",
-                            "last": ">>",
-                            "prev": "<",
-                            "next": ">",
-                            "counter": {
-                                "showing": "Mostrando",
-                                "of": "de",
-                                "rows": "registros"
-                            }
-                        }
-                    }
-                },
-                locale: "es-es"
-            });
-
-            const searchInput = document.getElementById("busqueda-global");
-            if (searchInput) {
-                searchInput.addEventListener("keyup", function(e) {
-                    const value = e.target.value;
-                    if (value === "") {
-                        tabla.clearFilter();
-                    } else {
-                        tabla.setFilter([
-                            [{
-                                    field: "nombrecliente",
-                                    type: "like",
-                                    value: value
-                                },
-                                {
-                                    field: "vehiculo",
-                                    type: "like",
-                                    value: value
-                                },
-                                {
-                                    field: "documento",
-                                    type: "like",
-                                    value: value
-                                },
-                                {
-                                    field: "asesor_nombre",
-                                    type: "like",
-                                    value: value
-                                }
-                            ]
-                        ]);
-                    }
-                });
+                    ]
+                ]);
             }
+        });
 
-
-        }
 
 
 
@@ -973,9 +962,9 @@
 
         document.getElementById('tabla-cotizacion').addEventListener('click', function(e) {
             const btn = e.target.closest('[data-action]');
+            if (!btn) return;
             const id = btn.dataset.id;
             const action = btn.dataset.action;
-            if (!btn) return;
 
             switch (action) {
                 case 'verActa':
