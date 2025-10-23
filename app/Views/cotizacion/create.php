@@ -498,7 +498,7 @@
                                 </div>
                             </div>
 
-                            <div class="col-md-2">
+                            <div class="col-md-1">
                                 <div class="form-floating">
                                     <input type="number" class="form-control fin-numcuotas" placeholder="Meses" step="3"
                                         min="3" id="numcuotas">
@@ -506,11 +506,21 @@
                                 </div>
                             </div>
 
+                            <!-- tasa anual -->
                             <div class="col-md-2">
                                 <div class="form-floating">
                                     <input type="number" class="form-control fin-tasaAnual" placeholder="Tasa anual"
                                         step="0.01" min="0" value="65" id="tasaAnual">
                                     <label>Tasa anual (%)</label>
+                                </div>
+                            </div>
+
+                            <!-- tasa mensual -->
+                            <div class="col-md-2">
+                                <div class="form-floating">
+                                    <input type="number" class="form-control fin-tasaMensual" placeholder="Tasa Mensual"
+                                        step="0.01" min="0" value="0" id="tasaMensual">
+                                    <label>Tasa menual (%)</label>
                                 </div>
                             </div>
 
@@ -524,7 +534,7 @@
 
                             <!-- Mantener tamaño original del botón Cronograma -->
 
-                            <div class="col-md-2">
+                            <div class="col-md-1">
                                 <div class="form-floating h-100">
                                     <button class="btn btn-outline-primary w-100 h-100 fin-btn-cronograma"
                                         type="button">Cronograma</button>
@@ -727,60 +737,6 @@
     </div>
 </div>
 
-<!-- <div class="modal fade" id="modalCronograma" tabindex="-1" aria-labelledby="modalCronogramaLabel" aria-hidden="true"
-    data-bs-backdrop="static" data-bs-keyboard="false">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalCronogramaLabel">Cronograma de Pagos</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-            </div>
-            <div class="modal-body">
-                <div class="d-flex justify-content-end mb-2">
-                    <button class="btn btn-sm btn-outline-danger me-2" id="btn-pdf" title="Generar cronograma en PDF">
-                        <i class="bi bi-filetype-pdf"></i>
-                        PDF
-                    </button>
-                    <button class="btn btn-sm btn-outline-success" id="btn-excel" title="Generar cronograma en EXCEL">
-                        <i class="bi bi-file-earmark-excel"></i>
-                        Excel
-                    </button>
-                </div>
-                <div class="table-responsive p-2">
-                    <table class="table table-sm table-bordered table-striped mt-2" id="tablaCronograma">
-                        <thead>
-                            <tr>
-                                <th>ITEM</th>
-                                <th>FECHA DE PAGO</th>
-                                <th>INTERÉS DEL PERIODO</th>
-                                <th>ABONO A CAPITAL</th>
-                                <th>VALOR CUOTA</th>
-                                <th>SALDO CAPITAL</th>
-                            </tr>
-                        </thead>
-                        <tbody id="cuerpoTablaCronograma">
-                        </tbody>
-                        <tfoot>
-                            <tr id="filaTotales">
-                                <td colspan="2" class="text-end fw-bold">TOTALES</td>
-                                <td class="fw-bold" id="totalInteres"></td>
-                                <td class="fw-bold" id="totalAbono"></td>
-                                <td class="fw-bold" id="totalCuota"></td>
-                                <td></td>
-                            </tr>
-                        </tfoot>
-                    </table>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">
-                    Cerrar
-                </button>
-            </div>
-        </div>
-    </div>
-</div> -->
-
 <?php include __DIR__ . '/../layout/footer.php'; ?>
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js" defer></script>
 <!-- PDFMAKE MAS RECOMENDADO PARA PDF -->
@@ -818,7 +774,72 @@
             return 0;
         }
     }
+
     async function generarYMostrarCronograma(importeTotal, inicial, meses, tasaPercent) {
+        try {
+            const res = await fetch(
+                `/api/cotizacion/generar-cronograma/${encodeURIComponent(importeTotal)}/${encodeURIComponent(inicial)}/${encodeURIComponent(meses)}?tasa=${encodeURIComponent(tasaPercent)}`
+            );
+
+            if (!res.ok) throw new Error('Error generando cronograma');
+            const cronograma = await res.json();
+
+            const tablaCronograma = document.getElementById('tablaCronograma');
+            if (!tablaCronograma) {
+                throw new Error('Tabla de cronograma no encontrada');
+            }
+
+            if ($.fn.DataTable.isDataTable('#tablaCronograma')) {
+                $('#tablaCronograma').DataTable().clear().destroy();
+            }
+
+            const tbody = document.getElementById('cuerpoTablaCronograma');
+            if (tbody) {
+                tbody.innerHTML = '';
+
+                let totalInteres = 0, totalAbono = 0, totalCuota = 0;
+
+                cronograma.forEach(pago => {
+                    const row = tbody.insertRow();
+                    row.insertCell(0).innerText = pago.item;
+                    row.insertCell(1).innerText = pago.fecha_pago;
+                    row.insertCell(2).innerText = `S/ ${Number(pago.interes).toFixed(2)}`;
+                    row.insertCell(3).innerText = `S/ ${Number(pago.abono_capital).toFixed(2)}`;
+                    row.insertCell(4).innerText = `S/ ${Number(pago.valor_cuota).toFixed(2)}`;
+                    row.insertCell(5).innerText = `S/ ${Number(pago.saldo_capital).toFixed(2)}`;
+
+                    totalInteres += Number(pago.interes);
+                    totalAbono += Number(pago.abono_capital);
+                    totalCuota += Number(pago.valor_cuota);
+                });
+
+                const totalInteresEl = document.getElementById('totalInteres');
+                const totalAbonoEl = document.getElementById('totalAbono');
+                const totalCuotaEl = document.getElementById('totalCuota');
+
+                if (totalInteresEl) totalInteresEl.innerText = `S/ ${totalInteres.toFixed(2)}`;
+                if (totalAbonoEl) totalAbonoEl.innerText = `S/ ${totalAbono.toFixed(2)}`;
+                if (totalCuotaEl) totalCuotaEl.innerText = `S/ ${totalCuota.toFixed(2)}`;
+            }
+
+            const modalCronograma = new bootstrap.Modal(document.getElementById('modalCronograma'));
+            modalCronograma.show();
+
+            setTimeout(() => {
+                initTableModalVehiculo();
+            }, 300);
+
+        } catch (err) {
+            console.error('Error cronograma:', err);
+            if (typeof showToast === 'function') {
+                showToast('Error al generar cronograma', 'ERROR', 1500);
+            } else {
+                alert('Error al generar cronograma');
+            }
+        }
+    }
+
+    /* async function generarYMostrarCronograma(importeTotal, inicial, meses, tasaPercent) {
         try {
             const res = await fetch(`/api/cotizacion/generar-cronograma/${encodeURIComponent(importeTotal)}/${encodeURIComponent(inicial)}/${encodeURIComponent(meses)}?tasa=${encodeURIComponent(tasaPercent)}`);
             if (!res.ok) throw new Error('Error generando cronograma');
@@ -877,7 +898,7 @@
                 alert('Error al generar cronograma');
             }
         }
-    }
+    } */
 
     let finCounter = 0;
     const cardsContainer = document.getElementById('cardsFinanciamiento');
@@ -1017,6 +1038,178 @@
         const inicialEl = card.querySelector('.fin-inicial');
         const valorFinEl = card.querySelector('.fin-valorFinanciar');
         const numEl = card.querySelector('.fin-numcuotas');
+        const tasaAnualEl = card.querySelector('.fin-tasaAnual');      // tasaAnual
+        const tasaMensualEl = card.querySelector('.fin-tasaMensual');  // tasaMensual
+        const cuotaEl = card.querySelector('.fin-cuotaMensual');
+        const btnCrono = card.querySelector('.fin-btn-cronograma');
+        const btnRemove = card.querySelector('.fin-remove-btn');
+        const titleEl = card.querySelector('.fin-title');
+
+        function obtenerInicialReferencia() {
+            const primeraCard = cardsContainer.querySelector('.card-fin .fin-inicial');
+            if (primeraCard && primeraCard.value && primeraCard.value !== '0') {
+                return primeraCard.value;
+            }
+            return '0';
+        }
+
+        const inicialReferencia = obtenerInicialReferencia();
+        if (inicialEl) {
+            inicialEl.value = (typeof data.inicial !== 'undefined') ? data.inicial : inicialReferencia;
+            setupZeroValueClearing(inicialEl);
+        }
+        if (numEl) {
+            const valorInicial = (typeof data.numcuotas !== 'undefined') ? data.numcuotas : '3';
+            numEl.value = valorInicial;
+            setupMesesValueClearing(numEl);
+        }
+
+        // NUEVO: Configurar valores de tasas
+        if (tasaAnualEl) {
+            tasaAnualEl.value = (typeof data.tasaanual !== 'undefined') ? data.tasaanual : 65;
+            setupZeroValueClearing(tasaAnualEl);
+
+            // Listener para actualizar cuando cambie
+            tasaAnualEl.addEventListener('input', function () {
+                calcularYSetCuota();
+            });
+        }
+
+        if (tasaMensualEl) {
+            tasaMensualEl.value = (typeof data.tasamensual !== 'undefined') ? data.tasamensual : 0;
+            setupZeroValueClearing(tasaMensualEl);
+
+            // Listener para actualizar cuando cambie
+            tasaMensualEl.addEventListener('input', function () {
+                actualizarHiddenOpciones();
+            });
+        }
+
+        if (cuotaEl) cuotaEl.value = data.valorcuota ? Number(data.valorcuota).toFixed(2) : '';
+
+        function actualizarValorFinanciar() {
+            const precioFinal = parseFloat(document.getElementById('inputValorConvertido')?.value || document.getElementById('valor')?.value || 0) || 0;
+            const inicial = parseFloat(inicialEl?.value || 0);
+            const vf = Math.max(0, precioFinal - inicial);
+            if (valorFinEl) valorFinEl.value = vf.toFixed(2);
+        }
+
+        const calcularYSetCuota = debounce(async function () {
+            const precioFinal = parseFloat(document.getElementById('inputValorConvertido')?.value || document.getElementById('valor')?.value || 0) || 0;
+            const inicial = parseFloat(inicialEl?.value || 0);
+            const meses = parseInt(numEl?.value || 0, 10) || 0;
+            const tasaPercent = parseFloat(tasaAnualEl?.value || 65);  // MODIFICADO: usar el valor del input
+
+            actualizarValorFinanciar();
+
+            if (!meses || precioFinal <= 0) {
+                if (cuotaEl) cuotaEl.value = '';
+                actualizarHiddenOpciones();
+                return;
+            }
+
+            const cuota = await calcularCuotaAPI(precioFinal, inicial, meses, tasaPercent);
+
+            if (cuotaEl) cuotaEl.value = cuota ? Number(cuota).toFixed(2) : '';
+            actualizarHiddenOpciones();
+        }, 250);
+
+        if (inicialEl) {
+            inicialEl.addEventListener('input', function () {
+                const nuevaInicial = this.value;
+
+                cardsContainer.querySelectorAll('.card-fin .fin-inicial').forEach(otroInput => {
+                    if (otroInput !== this) {
+                        otroInput.value = nuevaInicial;
+                        const otherCard = otroInput.closest('.card-fin');
+                        const otroNumEl = otherCard?.querySelector('.fin-numcuotas');
+                        if (otroNumEl && otroNumEl.value && otroNumEl.value !== '0') {
+                            const ev = new Event('input');
+                            otroNumEl.dispatchEvent(ev);
+                        }
+                    }
+                });
+
+                calcularYSetCuota();
+            });
+        }
+
+        if (numEl) numEl.addEventListener('input', calcularYSetCuota);
+
+        if (btnCrono) {
+            btnCrono.addEventListener('click', (e) => {
+                e.preventDefault();
+                const precioFinal = parseFloat(document.getElementById('inputValorConvertido')?.value || document.getElementById('valor')?.value || 0) || 0;
+                const inicial = parseFloat(inicialEl?.value || 0);
+                const meses = parseInt(numEl?.value || 0, 10) || 0;
+                const tasaPercent = parseFloat(tasaAnualEl?.value || 65);  // para calcular con el valor ingresado en el input sino 0.65 por defecto
+
+                if (meses <= 0 || (precioFinal - inicial) <= 0) {
+                    if (typeof showToast === 'function') {
+                        showToast('Ingresa valores válidos para cronograma', 'ERROR', 1200);
+                    } else {
+                        alert('Ingresa valores válidos para cronograma');
+                    }
+                    return;
+                }
+                generarYMostrarCronograma(precioFinal, inicial, meses, tasaPercent); //pasamos tasaPercent
+            });
+        }
+
+        /* if (btnCrono) {
+            btnCrono.addEventListener('click', (e) => {
+                e.preventDefault();
+                const precioFinal = parseFloat(document.getElementById('inputValorConvertido')?.value || document.getElementById('valor')?.value || 0) || 0;
+                const inicial = parseFloat(inicialEl?.value || 0);
+                const meses = parseInt(numEl?.value || 0, 10) || 0;
+                const tasaPercent = parseFloat(tasaAnualEl?.value || 65);  // MODIFICADO
+
+                if (meses <= 0 || (precioFinal - inicial) <= 0) {
+                    if (typeof showToast === 'function') {
+                        showToast('Ingresa valores válidos para cronograma', 'ERROR', 1200);
+                    } else {
+                        alert('Ingresa valores válidos para cronograma');
+                    }
+                    return;
+                }
+                generarYMostrarCronograma(precioFinal, inicial, meses, tasaPercent);
+            });
+        } */
+
+        if (btnRemove) {
+            btnRemove.addEventListener('click', () => {
+                card.remove();
+                actualizarHiddenOpciones();
+                actualizarEstadoBotonAgregar();
+            });
+        }
+
+        const updateTitle = () => {
+            const meses = numEl?.value && numEl.value !== '0' ? `${numEl.value} meses` : 'Meses';
+            if (titleEl) titleEl.textContent = meses;
+        };
+        if (numEl) numEl.addEventListener('input', updateTitle);
+
+        cardsContainer.appendChild(card);
+        calcularYSetCuota();
+        updateTitle();
+        return card;
+    }
+
+    /* function crearTarjetaFin(data = {}) {
+        if (!cardsContainer || !templateCard) {
+            console.error('Missing required elements for financing cards');
+            return null;
+        }
+
+        finCounter++;
+        const clone = templateCard.content.cloneNode(true);
+        const card = clone.querySelector('.card-fin');
+        card.dataset.finId = 'fin_' + finCounter;
+
+        const inicialEl = card.querySelector('.fin-inicial');
+        const valorFinEl = card.querySelector('.fin-valorFinanciar');
+        const numEl = card.querySelector('.fin-numcuotas');
         const tasaEl = card.querySelector('.fin-tasaAnual');
         const cuotaEl = card.querySelector('.fin-cuotaMensual');
         const btnCrono = card.querySelector('.fin-btn-cronograma');
@@ -1135,9 +1328,37 @@
         calcularYSetCuota();
         updateTitle();
         return card;
-    }
+    } */
 
     function actualizarHiddenOpciones() {
+        const cards = cardsContainer?.querySelectorAll('.card-fin') || [];
+        const opciones = [];
+        cards.forEach(card => {
+            const inicial = parseFloat(card.querySelector('.fin-inicial')?.value || 0);
+            const numcuotas = parseInt(card.querySelector('.fin-numcuotas')?.value || 0, 10) || 0;
+            const valorcuota = parseFloat((card.querySelector('.fin-cuotaMensual')?.value || '').replace(/,/g, '')) || 0;
+            const precioventa = parseFloat(document.getElementById('inputValorConvertido')?.value || document.getElementById('valor')?.value || 0) || 0;
+
+            // NUEVO: Capturar las tasas
+            const tasaAnual = parseFloat(card.querySelector('.fin-tasaAnual')?.value || 65);
+            const tasaMensual = parseFloat(card.querySelector('.fin-tasaMensual')?.value || 0);
+
+            if (numcuotas > 0 && (valorcuota > 0 || inicial >= 0)) {
+                opciones.push({
+                    numcuotas,
+                    inicial: Number(inicial.toFixed(2)),
+                    valorcuota: Number(valorcuota.toFixed(2)),
+                    precioventa: Number(precioventa.toFixed(2)),
+                    tasaanual: Number(tasaAnual.toFixed(2)),      // NUEVO
+                    tasamensual: Number(tasaMensual.toFixed(2))   // NUEVO
+                });
+            }
+        });
+        const hiddenInput = document.getElementById('opciones_financiamiento');
+        if (hiddenInput) hiddenInput.value = JSON.stringify(opciones);
+    }
+
+    /* function actualizarHiddenOpciones() {
         const cards = cardsContainer?.querySelectorAll('.card-fin') || [];
         const opciones = [];
         cards.forEach(card => {
@@ -1156,7 +1377,7 @@
         });
         const hiddenInput = document.getElementById('opciones_financiamiento');
         if (hiddenInput) hiddenInput.value = JSON.stringify(opciones);
-    }
+    } */
 
     function initFinancingEvents() {
         // Solo crear la tarjeta inicial - el listener del botón se maneja en aplicarPoliticaFinanciamientoPorTipo()
