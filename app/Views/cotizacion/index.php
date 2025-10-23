@@ -678,6 +678,7 @@
         function generarPDFActaSeparacion(data) {
 
             if (!data) {
+                
                 showToast('No se encontraron datos para el acta de separación.', 'ERROR', 2000);
                 return;
             }

@@ -34,14 +34,14 @@ export function getPagina8(data) {
     const symbol = getMonedaSymbol(f.moneda);
     const monedaNombre = (f.moneda === 'PEN') ? 'SOLES' : 'DOLARES';
     const tipoDoc = data.cliente.tipocliente == 'P' ? 'DNI':'RUC';
-    // --- Estilos para las celdas 
+
     const headerStyle = 'resumenHeader';
     const cellStyle = 'resumenCell';
     const cellStyleRight = { style: 'resumenCell', alignment: 'right' };
     const emptyCell = { text: '' }; 
 
     const contenido = [
-        // --- TÍTULO ---
+     
         {
             text: 'HOJA DE RESUMEN',
             style: 'tituloContrato',
@@ -50,78 +50,78 @@ export function getPagina8(data) {
             margin: [0, 25, 0, 15]
         },
 
-        // --- INICIO DE LA TABLA ÚNICA ---
+        
         {
             table: {
             
                 widths: ['*', '*', '*', '*'],
                 body: [
-                    // --- Fila 1: Headers (TASAS / PRESTAMO) ---
+              
                     [
                         { text: 'TASAS POR GASTO ADMINISTRATIVO', colSpan: 2, style: headerStyle, alignment: 'center' }, {},
                         { text: 'PRESTAMO', colSpan: 2, style: headerStyle, alignment: 'center' }, {}
                     ],
-                    // --- Fila 2: T.A. / Monto ---
+                    
                     [
                         { text: 'T.A. POR G.A.', style: cellStyle }, { text: `${f.tasaAnual}%`, ...cellStyleRight },
                         { text: 'Monto financiado', style: cellStyle }, { text: `${symbol} ${formatNumber(f.montoFinanciado)}`, ...cellStyleRight }
                     ],
-                    // --- Fila 3: T.M. / Moneda ---
+                 
                     [
                         { text: 'T.M. POR G.A.', style: cellStyle }, { text: `${f.tasaMensual}%`, ...cellStyleRight },
                         { text: 'Moneda', style: cellStyle }, { text: monedaNombre, ...cellStyleRight }
                     ],
-                    // --- Fila 4: Celda Vacía Izq / Número de cuotas ---
+               
                     [
                         emptyCell, emptyCell,
                         { text: 'Número de cuotas', style: cellStyle }, { text: f.numCuotas, ...cellStyleRight }
                     ],
-                    // --- Fila 5: Celda Vacía Izq / Fecha de pago ---
+                    
                     [
                         emptyCell, emptyCell,
                         { text: 'Fecha de pago de cuotas', style: cellStyle }, { text: f.diaPago, ...cellStyleRight }
                     ],
-                    // --- Fila 6: Celda Vacía Izq / Cantidad total ---
+              
                     [
                         emptyCell, emptyCell,
                         { text: 'Cantidad total a pagar', style: cellStyle }, { text: `${symbol} ${formatNumber(f.totalPagar)}`, ...cellStyleRight }
                     ],
-                    // --- Fila 7: Headers (PENALIDADES / GASTOS) ---
+                  
                     [
                         { text: 'PENALIDADES POR INCUMPLIMIENTO', colSpan: 2, style: headerStyle, alignment: 'center' }, {},
                         { text: 'GASTOS', colSpan: 2, style: headerStyle, alignment: 'center' }, {}
                     ],
-                    // --- Fila 8: Interés / Servicio ---
+                  
                     [
                         { text: 'Interés moratorio mensual', style: cellStyle }, { text: '10% de la cuota mensual', ...cellStyleRight },
                         { text: 'Servicio de toma de firmas y Delivery de Documentos', style: cellStyle }, { text: 'Según tarifario', ...cellStyleRight }
                     ],
-                    // --- Fila 9: Gastos Jud. / Gastos Not. ---
+                  
                     [
                         { text: 'Gastos Judiciales y/o Conciliatorios', style: cellStyle }, { text: 'Según tarifario', ...cellStyleRight },
                         { text: 'Gastos Notariales', style: cellStyle }, { text: 'Según tarifario', ...cellStyleRight }
                     ],
-                    // --- Fila 10: Notificación / Celda Vacía Der ---
+                
                     [
                         { text: 'Gastos de Notificación', style: cellStyle }, { text: 'S/. 50.00', ...cellStyleRight },
                         emptyCell, emptyCell
                     ],
-                    // --- Fila 11: Recojo Chincha / Celda Vacía Der ---
+                 
                     [
                         { text: 'Gastos de recojo del vehículo Chincha', style: cellStyle }, { text: 'S/. 350.00', ...cellStyleRight },
                         emptyCell, emptyCell
                     ],
-                    // --- Fila 12: Recojo Prov. / Celda Vacía Der ---
+                  
                     [
                         { text: 'Gastos de recojo del vehículo Otras provincias (dependiendo la zona)', style: cellStyle }, { text: 'S/. 400.00 a S/. 650.00', ...cellStyleRight },
                         emptyCell, emptyCell
                     ],
-                    // --- Fila 13: Headers (OTROS / GPS) ---
+                  
                     [
                         { text: 'OTROS', colSpan: 2, style: headerStyle, alignment: 'center' }, {},
                         { text: 'GPS', colSpan: 2, style: headerStyle, alignment: 'center' }, {}
                     ],
-                    // --- Fila 14: Duplicado / GPS Cuota ---
+                  
                     [
                         { text: 'Duplicado de contrato/ tarjeta de propiedad/ llaves', style: cellStyle }, { text: 'Según tarifario', ...cellStyleRight },
                         { text: 'GPS cuota mensual', style: cellStyle }, { text: 'S/. 10.00', ...cellStyleRight }
@@ -132,7 +132,7 @@ export function getPagina8(data) {
         },
       
 
-        // --- Textos Legales Inferiores ---
+      
         {
             text: 'La tasa de gastos administrativos por mora se aplica sobre el importe de la cuota vencida, desde el primer día de atraso.',
             style: 'parrafo',

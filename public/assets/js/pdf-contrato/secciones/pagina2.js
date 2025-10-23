@@ -182,27 +182,27 @@ export function getPagina2(data) {
             margin: [0, 15, 0, 10]
         },
 
-        // --- Tabla de Vehículo ---
+      
         {
             table: {
                 widths: ['*', '*'], 
                 body: [
-                    // Fila 1: Marca y N° Motor
+                   
                     [
                         crearCeldaVehiculo('MARCA:', v.marca),
                         crearCeldaVehiculo('N° MOTOR:', v.serie_motor)
                     ],
-                    // Fila 2: Modelo y N° Serie
+                    
                     [
                         crearCeldaVehiculo('MODELO:', v.modelo),
                         crearCeldaVehiculo('N° SERIE:', v.serie_motor)
                     ],
-                    // Fila 3: Color y Año
+                 
                     [
                         crearCeldaVehiculo('COLOR:', v.color),
                         crearCeldaVehiculo('AÑO DE MODELO:', v.anio)
                     ],
-                    // Fila 4: Placa
+                
                     [
                         crearCeldaVehiculo('PLACA:', v.placa || 'EN TRAMITE'),
                         crearCeldaVehiculo('', '')

@@ -21,19 +21,19 @@ function crearBloquePersona(persona) {
         table: {
             widths: ['*', '*', '*'], 
             body: [
-                // Fila 1: Nombre
+              
                 [{ text: 'NOMBRE / RAZON SOCIAL: ' + p.nombre.toUpperCase(), colSpan: 3, style: 'cellText', border: [true, true, true, true] }, {}, {}],
-                // Fila 2: Documento
+              
                 [{ text: 'DOC. DE IDENTIDAD / RUC: ' + p.documento, colSpan: 3, style: 'cellText', border: [true, true, true, true] }, {}, {}],
-                // Fila 3: Dirección
+            
                 [{ text: 'DIRECCIÓN: ' + p.direccion.toUpperCase(), colSpan: 3, style: 'cellText', border: [true, true, true, true] }, {}, {}],
-                // Fila 4: Ubigeo
+               
                 [
                     { text: 'DIST.: ' + p.distrito.toUpperCase(), style: 'cellText', border: [true, true, true, true] },
                     { text: 'PROV.: ' + p.provincia.toUpperCase(), style: 'cellText', border: [true, true, true, true] },
                     { text: 'DPTO.: ' + p.departamento.toUpperCase(), style: 'cellText', border: [true, true, true, true] }
                 ],
-                // Fila 5: Contacto
+              
                 [
                     { text: 'E-MAIL: ' + p.email.toUpperCase(), colSpan: 2, style: 'cellText', border: [true, true, true, true] },
                     {},
@@ -60,7 +60,7 @@ export function getPagina1(data) {
   
     const contenido = [];
 
-    // --- TÍTULO DEL CONTRATO ---
+
     contenido.push({
         table: {
             widths: ['*'],
@@ -78,7 +78,7 @@ export function getPagina1(data) {
         margin: [0, 20, 0, 10] 
     });
 
-    // --- PÁRRAFO DE INTRODUCCIÓN ---
+    
     contenido.push({
         text: [
             'Conste por el presente documento privado con firmas notarialmente legalizadas que suscriben de una parte, ',

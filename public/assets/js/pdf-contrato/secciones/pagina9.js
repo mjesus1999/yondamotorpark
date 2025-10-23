@@ -13,7 +13,7 @@ export function getPagina9(data) {
             margin: [0, 25, 0, 15]
         },
 
-        // --- Párrafo 1 ---
+
         {
             text: [
                 'Los pagos se podrán realizar en las agencias del Banco de Crédito del Perú, Banco Continental, Banco Scotiabank o Interbank. Asimismo, en la oficina de ',
@@ -24,7 +24,7 @@ export function getPagina9(data) {
             margin: [0, 0, 0, 10]
         },
 
-        // --- IMAGEN DE BANCOS ---
+      
         {
             image: window.bancosYonda, 
             width: 300, 
@@ -44,7 +44,6 @@ export function getPagina9(data) {
             margin: [0, 0, 0, 15]
         },
 
-        // --- LISTA DE PUNTOS ---
         {
             
             ul: [
@@ -89,7 +88,7 @@ export function getPagina9(data) {
 
     const bloquesDeFirmas = [];
 
-    // FIRMA 1: TITULAR (Siempre)
+
     bloquesDeFirmas.push(
         crearBloqueFirma(
             'FIRMA DEL TITULAR',
@@ -98,7 +97,7 @@ export function getPagina9(data) {
         )
     );
 
-    // FIRMA 2: CÓNYUGE (Condicional)
+
     if (data.conyuge && data.conyuge.nombre) {
         bloquesDeFirmas.push(
             crearBloqueFirma(
@@ -109,8 +108,9 @@ export function getPagina9(data) {
         );
     }
 
-    // FIRMA 3: AVAL (Condicional)
-    if (data.aval && data.aval.nombre) {
+
+     
+       if (data.aval && data.aval.nombre) {
         bloquesDeFirmas.push(
             crearBloqueFirma(
                 'FIRMA DEL AVAL',
@@ -120,7 +120,7 @@ export function getPagina9(data) {
         );
     }
 
-    // FIRMA 4: CÓNYUGE DEL AVAL (Condicional)
+   
     if (data.aval && data.aval.conyuge && data.aval.conyuge.nombre) {
         bloquesDeFirmas.push(
             crearBloqueFirma(
