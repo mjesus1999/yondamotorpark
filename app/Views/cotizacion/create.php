@@ -1076,6 +1076,10 @@
         }
 
         if (tasaMensualEl) {
+            /* Calcular automáticamente la mensual basada en la anual
+                const tasaAnualVal = parseFloat(tasaAnualEl?.value || 65);
+                const tasaMensualCalculada = (tasaAnualVal / 12).toFixed(2);
+                tasaMensualEl.value = (typeof data.tasamensual !== 'undefined') ? data.tasamensual : tasaMensualCalculada; */
             tasaMensualEl.value = (typeof data.tasamensual !== 'undefined') ? data.tasamensual : 0;
             setupZeroValueClearing(tasaMensualEl);
 

@@ -132,7 +132,7 @@ function esc($s)
 </div>
 
 <!-- Modal para visualizar evidencia (imagen o PDF) -->
-<div class="modal fade" id="modalEvidencia" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="modalEvidencia" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
@@ -151,12 +151,13 @@ function esc($s)
                 </div>
             </div>
             <div class="modal-footer">
-                <a id="descargarEvidencia" href="#" class="btn btn-sm btn-primary" download>
-                    <i class="fas fa-download me-1"></i> Descargar
-                </a>
                 <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">
                     <i class="fas fa-times me-1"></i> Cerrar
                 </button>
+                <a id="descargarEvidencia" href="#" class="btn btn-sm btn-primary" download>
+                    <i class="fas fa-download me-1"></i> Descargar
+                </a>
+                
             </div>
         </div>
     </div>
