@@ -549,6 +549,12 @@ CREATE TABLE cotizaciones (
     CONSTRAINT fk_idcolventa_cot FOREIGN KEY (idasesor) REFERENCES colaboradores (idcolaborador)
 ) ENGINE = INNODB;
 
+/*
+ALTER TABLE cotizaciones
+ADD COLUMN tasaanual DECIMAL(5,2) NOT NULL DEFAULT 65.00 COMMENT 'Tasa de interés anual (%) aplicada a la cotización',
+ADD COLUMN tasamensual DECIMAL(5,2) NOT NULL DEFAULT 0.00 COMMENT 'Tasa de interés mensual (%) aplicada a la cotización';
+*/
+
 
 
 CREATE TABLE conceptospago (
