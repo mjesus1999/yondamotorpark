@@ -45,6 +45,7 @@ export function getPagina8(data) {
         {
             text: 'HOJA DE RESUMEN',
             style: 'tituloContrato',
+            fontSize:12,
             alignment: 'center',
             decoration:'underline',
             margin: [0, 25, 0, 15]

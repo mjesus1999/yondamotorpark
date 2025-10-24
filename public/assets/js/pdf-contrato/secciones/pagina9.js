@@ -7,7 +7,7 @@ export function getPagina9(data) {
     const contenido = [
        
         {
-            text: 'INFORMACION IMPORTANTE',
+            text: 'INFORMACIÓN IMPORTANTE',
             style: 'tituloImportante', 
             alignment: 'center',
             margin: [0, 25, 0, 15]
@@ -17,7 +17,7 @@ export function getPagina9(data) {
         {
             text: [
                 'Los pagos se podrán realizar en las agencias del Banco de Crédito del Perú, Banco Continental, Banco Scotiabank o Interbank. Asimismo, en la oficina de ',
-                { text: 'Yonda Motors.', bold: true }
+                { text: 'Yonda Perú.', bold: true }
             ],
             style: 'parrafo',
             alignment: 'center',

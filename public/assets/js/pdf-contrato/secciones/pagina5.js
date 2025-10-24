@@ -7,7 +7,7 @@ export function getPagina5(data) {
         // --- Cláusula DECIMO PRIMERA ---
         {
             text: [
-                { text: 'DECIMO PRIMERA: ', bold: true },
+                { text: 'DÉCIMO PRIMERA: ', bold: true },
                 'El ',
                 { text: 'CLIENTE', bold: true },
                 ' declara tener conocimiento de la instalación de un dispositivo de seguridad, como es el GPS (Sistema Global de Navegación por Satélite), el cual cuenta con el respectivo servicio de monitoreo, rastreo, ubicación y apagado remoto del vehículo; los cuales se mantendrán operativos hasta la total cancelación del crédito y obligaciones del presente Contrato. El ',
@@ -22,13 +22,13 @@ export function getPagina5(data) {
             ],
             style: 'parrafo',
        
-            margin: [0, 40, 0, 10] 
+            margin: [0, 25, 0, 10] 
         },
 
         // --- Cláusula DECIMO SEGUNDA ---
         {
             text: [
-                { text: 'DECIMO SEGUNDA: ', bold: true },
+                { text: 'DÉCIMO SEGUNDA: ', bold: true },
                 'Del mismo modo, con la misma finalidad de lograr la toma de posesión del BIEN, ',
                 { text: 'YONDA & GRUPO HUARACA', bold: true },
                 ' queda facultado a mantener en su poder, una copia de las llaves del BIEN, con las que queda expresamente facultado a tomar la posesión del BIEN. Estas medidas podrán ser adoptadas por ',
@@ -52,7 +52,7 @@ export function getPagina5(data) {
         // --- Cláusula DECIMO TERCERA ---
         {
             text: [
-                { text: 'DECIMO TERCERA: ', bold: true },
+                { text: 'DÉCIMO TERCERA: ', bold: true },
                 { text: 'YONDA & GRUPO HUARACA', bold: true },
                 ' podrá ceder su posición contractual, así como cualquiera de sus derechos y/u obligaciones, en este Contrato a cualquier tercero, prestando el ',
                 { text: 'CLIENTE', bold: true },
@@ -69,7 +69,7 @@ export function getPagina5(data) {
         // --- Cláusula DECIMO CUARTA ---
         {
             text: [
-                { text: 'DECIMO CUARTA: ', bold: true },
+                { text: 'DÉCIMO CUARTA: ', bold: true },
                 'Queda expresamente entendido que, en caso de incumplimiento, el ',
                 { text: 'CLIENTE', bold: true },
                 ' incurrirá en mora en forma automática, sin necesidad de requerimiento o notificación alguna por parte de ',

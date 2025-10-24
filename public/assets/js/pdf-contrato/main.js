@@ -13,13 +13,14 @@ async function generarPDFContrato(data) {
         // console.log('Datos del contrato para PDF:', data);
 
         const docDefinition = {
-              pageSize: 'A4',
+            pageSize: 'A4',
             pageOrientation: 'portrait',
             header: {
                 image: window.cabeceraYonda,
-                width: 700,
-                alignment: 'center',
-                margin: [0, 25, 0, 20]
+                width: 620,
+                height:40,
+                alignment: 'left',
+                margin: [-23, 25, 0, 20]
             },
             content: [
                 ...getPagina1(data),
@@ -80,7 +81,7 @@ async function generarPDFContrato(data) {
                     lineHeight: 1.3
                 },
                 cellText: {
-                    bold:true,
+                 
                     fontSize: 7.5,
                     margin: [2, 2, 2, 2] 
                 },
@@ -121,7 +122,7 @@ async function generarPDFContrato(data) {
             },
 
             defaultStyle: { fontSize: 8,    color: '#333333' },
-            pageMargins: [40, 80, 40,30],
+            pageMargins: [57, 80, 40,30],
     
           
         };

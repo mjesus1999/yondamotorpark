@@ -19,10 +19,13 @@ function getMonedaSymbol(monedaCode) {
 
 
 function crearCeldaVehiculo(label, value) {
-    return {
-        text: `${label} ${value || ''}`, 
-        style: 'cellText'
-        
+   return {
+        // Usa un array de texto para formatear
+        text: [
+            { text: `${label} `, bold: false }, // La etiqueta en texto normal
+            { text: (value || '').toUpperCase(), bold: true }  // El valor en negrita
+        ],
+        style:'cellText' // Aplica el estilo base (sin negrita)
     };
 }
 
@@ -159,7 +162,7 @@ export function getPagina2(data) {
         {
             text: 'Que suscriben y que forman parte de este Contrato; bajo los términos y condiciones que se indican en las cláusulas siguientes:',
             style: 'parrafo',
-            margin: [0, 50, 0, 10] 
+            margin: [0, 25, 0, 10] 
         },
 
         {

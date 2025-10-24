@@ -19,7 +19,7 @@ export function getPagina7(data) {
         {
             text: 'Ley de Títulos Valores, Ley N° 27287.',
             style: 'parrafoLegal',
-            margin: [0, 35, 0, 0] 
+            margin: [0, 25, 0, 0] 
         },
         {
             text: 'Circular N° G-0090-2001 de la SBS (Título valor emitido en forma incompleta)',

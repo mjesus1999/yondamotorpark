@@ -12,7 +12,7 @@ export function getPagina4() {
             ],
             style: 'parrafo',
            
-            margin: [0, 40, 0, 10] 
+            margin: [0, 25, 0, 10] 
         },
 
         // --- Cláusula SEPTIMA ---
@@ -85,7 +85,7 @@ export function getPagina4() {
         // --- Cláusula DECIMA ---
         {
             text: [
-                { text: 'DECIMA: ', bold: true },
+                { text: 'DÉCIMA: ', bold: true },
                 'El ',
                 { text: 'CLIENTE', bold: true },
                 ' se obliga a mantener asegurado el Vehículo por todos los riesgos propios de la naturaleza del bien financiado y por los que pueda señalar ',

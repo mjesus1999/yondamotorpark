@@ -7,7 +7,7 @@ export function getPagina6() {
         // --- Cláusula DECIMO QUINTA ---
         {
             text: [
-                { text: 'DECIMO QUINTA: ', bold: true },
+                { text: 'DÉCIMO QUINTA: ', bold: true },
                 'La Cuota a pagar de cargo del ',
                 { text: 'CLIENTE', bold: true },
                 ', constituido por los intereses, comisiones, gastos y tributos y demás cargos señalados en la Hoja Resumen, serán cancelados por el ',
@@ -30,7 +30,7 @@ export function getPagina6() {
         // --- Cláusula DECIMO SEXTA ---
         {
             text: [
-                { text: 'DECIMO SEXTA: ', bold: true },
+                { text: 'DÉCIMO SEXTA: ', bold: true },
                 'Queda expresamente convenido por ',
                 { text: 'YONDA & GRUPO HUARACA', bold: true },
                 ' y el ',
@@ -58,7 +58,7 @@ export function getPagina6() {
         // --- Cláusula DECIMO SEPTIMA ---
         {
             text: [
-                { text: 'DECIMO SEPTIMA: ', bold: true },
+                { text: 'DÉCIMO SEPTIMA: ', bold: true },
                 'En caso que una o más de las cláusulas del presente documento fueren declaradas nulas o no válidas en virtud de la Ley Aplicable, dicho efecto se restringirá únicamente a las referidas cláusulas siempre que sean separables, de modo que las demás estipulaciones serán aplicables en toda la extensión que sea admisible, manteniéndose el espíritu y el sentido originalmente buscado al incluirse las cláusulas anuladas o dejadas sin efecto.'
             ],
             style: 'parrafo',
@@ -68,7 +68,7 @@ export function getPagina6() {
         // --- Cláusula DECIMO OCTAVA ---
         {
             text: [
-                { text: 'DECIMO OCTAVA: ', bold: true },
+                { text: 'DÉCIMO OCTAVA: ', bold: true },
                 'Para todos los efectos de este contrato, ',
                 { text: 'YONDA & GRUPO HUARACA', bold: true },
                 ' y el ',
@@ -86,7 +86,7 @@ export function getPagina6() {
         },
         {
             text:[
-                    { text: 'DECIMO NOVENA: ', bold: true },
+                    { text: 'DÉCIMO NOVENA: ', bold: true },
                     'El presente Contrato y sus Anexos se rigen por las leyes de la República del Perú (la "Ley Aplicable"), lo cual incluye, sin que dicha lista sea limitativa, a las siguientes normas, así como aquellas que las modifiquen o las sustituyan:'
             ],
             style:'parrafo',

@@ -4,8 +4,11 @@
 /**
  * Función auxiliar para crear la caja de datos de una persona (cliente, conyuge, etc.)
  */
+/**
+ * Función auxiliar para crear la caja de datos de una persona (cliente, conyuge, etc.)
+ */
 function crearBloquePersona(persona) {
- 
+
     const p = {
         nombre: persona.nombre || '',
         documento: persona.documento || '',
@@ -17,31 +20,101 @@ function crearBloquePersona(persona) {
         telefono: persona.telefono || ''
     };
 
+    // Define un estilo base para las celdas, sin negrita
+    const cellStyle = {
+        fontSize: 7.5,
+        margin: [2, 2, 2, 2]
+    };
+
     return {
         table: {
             widths: ['*', '*', '*'], 
             body: [
-              
-                [{ text: 'NOMBRE / RAZON SOCIAL: ' + p.nombre.toUpperCase(), colSpan: 3, style: 'cellText', border: [true, true, true, true] }, {}, {}],
-              
-                [{ text: 'DOC. DE IDENTIDAD / RUC: ' + p.documento, colSpan: 3, style: 'cellText', border: [true, true, true, true] }, {}, {}],
-            
-                [{ text: 'DIRECCIÓN: ' + p.direccion.toUpperCase(), colSpan: 3, style: 'cellText', border: [true, true, true, true] }, {}, {}],
-               
+       
+                [{ 
+                    text: [
+                        { text: 'NOMBRE / RAZON SOCIAL: ' },
+                        { text: p.nombre.toUpperCase(), bold: true } 
+                    ],
+                    colSpan: 3, 
+                    style: cellStyle, 
+                    border: [true, true, true, true] 
+                }, {}, {}],
+                
+           
+                [{ 
+                    text: [
+                        { text: 'DOC. DE IDENTIDAD / RUC: ' },
+                        { text: p.documento, bold: true }
+                    ],
+                    colSpan: 3, 
+                    style: cellStyle, 
+                    border: [true, true, true, true] 
+                }, {}, {}],
+                
+             
+                [{ 
+                    text: [
+                        { text: 'DIRECCIÓN: ' },
+                        { text: p.direccion.toUpperCase(), bold: true }
+                    ],
+                    colSpan: 3, 
+                    style: cellStyle, 
+                    border: [true, true, true, true] 
+                }, {}, {}],
+                
+             
                 [
-                    { text: 'DIST.: ' + p.distrito.toUpperCase(), style: 'cellText', border: [true, true, true, true] },
-                    { text: 'PROV.: ' + p.provincia.toUpperCase(), style: 'cellText', border: [true, true, true, true] },
-                    { text: 'DPTO.: ' + p.departamento.toUpperCase(), style: 'cellText', border: [true, true, true, true] }
+                    { 
+                        text: [
+                            { text: 'DIST.: ' },
+                            { text: p.distrito.toUpperCase(), bold: true }
+                        ],
+                        style: cellStyle, 
+                        border: [true, true, true, true] 
+                    },
+                    { 
+                        text: [
+                            { text: 'PROV.: ' },
+                            { text: p.provincia.toUpperCase(), bold: true }
+                        ],
+                        style: cellStyle, 
+                        border: [true, true, true, true] 
+                    },
+                    { 
+                        text: [
+                            { text: 'DPTO.: ' },
+                            { text: p.departamento.toUpperCase(), bold: true }
+                        ],
+                        style: cellStyle, 
+                        border: [true, true, true, true] 
+                    }
                 ],
-              
+                
+            
                 [
-                    { text: 'E-MAIL: ' + p.email.toUpperCase(), colSpan: 2, style: 'cellText', border: [true, true, true, true] },
+                    { 
+                        text: [
+                            { text: 'E-MAIL: ' },
+                            { text: p.email.toUpperCase(), bold: true }
+                        ],
+                        colSpan: 2, 
+                        style: cellStyle, 
+                        border: [true, true, true, true] 
+                    },
                     {},
-                    { text: 'CEL.: ' + p.telefono.toUpperCase(), style: 'cellText', border: [true, true, true, true] }
+                    { 
+                        text: [
+                            { text: 'CEL.: ' },
+                            { text: p.telefono.toUpperCase(), bold: true }
+                        ],
+                        style: cellStyle, 
+                        border: [true, true, true, true] 
+                    }
                 ]
             ]
         },
-        // Layout para que todas las celdas tengan bordes
+      
         layout: {
             hLineWidth: (i, node) => (i === 0 || i === node.table.body.length) ? 1 : 1,
             vLineWidth: (i, node) => (i === 0 || i === node.table.widths.length) ? 1 : 1,
@@ -50,7 +123,6 @@ function crearBloquePersona(persona) {
         }
     };
 }
-
 
 /**
  * Función principal que construye el array de contenido para la página 1

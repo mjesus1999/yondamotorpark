@@ -14,7 +14,7 @@ export function getPagina3() {
             ],
             style: 'parrafo',
 
-            margin: [0, 40, 0, 10] 
+            margin: [0, 25, 0, 10] 
         },
 
         // --- Cláusula CUARTA ---
