@@ -1,5 +1,16 @@
 <?php
-// app/Models/Usuario.php
+/**
+ * Modelo de Usuario
+ * app/Models/Usuario.php
+ * 
+ * Gestiona todas las operaciones de base de datos relacionadas con:
+ * - Usuarios
+ * - Colaboradores
+ * - Areas
+ * - Cargos
+ * - Autenticacion del sistema
+ * 
+ */
 
 namespace App\Models;
 
@@ -7,15 +18,44 @@ use App\Core\Database;
 use Exception;
 use PDO;
 
+/**
+ * Clase Usuario
+ * 
+ * Modelo principal para la gestion de usuarios del sistema.
+ * Proporciona metodos para CRUD de:
+ * - Usuarios
+ * - Autenticacion
+ * - Perfiles
+ * - Restriccion horaria
+ * - Relaciones con contratos laborales
+ */
+
 class Usuario
 {
+
+  /**
+   * Instancia de conexion a la base de datos
+   * @var PDO
+   */
   private PDO $db;
 
+  /**
+   * Constructor del modelo
+   * 
+   * Inicializa la conexion a la base de datos.
+   */
   public function __construct()
   {
     $this->db = Database::getInstance();
   }
 
+  /**
+   * Obtiene todos los usuarios del sistema
+   * 
+   * Retorna un listado completo de usuarios la vista vwGetAllUser, ordenados por ID descendente con limite de 1000 registros.
+   * 
+   * @return array Array asociativo con los datos de todos los usuarios
+   */
   public function getAll(): array
   {
     $query = "SELECT * FROM vwGetAllUser ORDER BY idcolaborador DESC LIMIT 1000";
@@ -29,6 +69,13 @@ class Usuario
     }
   }
 
+  /**
+   * Obtiene todas las areas disponibles
+   * 
+   * Retorna el listado de areas organizacionales ordenadas alfabeticamente.
+   * 
+   * @return array Array asociativo con idarea y nombre del area
+   */
   public function getAllAreas(): array
   {
     $query = "SELECT idarea, area FROM areas ORDER BY area";
@@ -42,27 +89,14 @@ class Usuario
     }
   }
 
-  /* public function getAllLocales()
-  {
-    $query = "SELECT 
-                loc.idlocal,
-                CONCAT(loc.tienda, ' - ', pro.provincia, ' (', dep.departamento, ')') AS local
-              FROM locales loc
-              INNER JOIN distritos dis ON loc.iddistrito = dis.iddistrito
-              INNER JOIN provincias pro ON dis.idprovincia = pro.idprovincia
-              INNER JOIN departamentos dep ON pro.iddepartamento = dep.iddepartamento
-              ORDER BY loc.tienda";
-
-    try {
-      $stmt = $this->db->prepare($query);
-      $stmt->execute();
-      return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    } catch (Exception $e) {
-      error_log($e->getMessage());
-      return [];
-    }
-  } */
-
+  /**
+   * Obtiene los cargos filtrados por area
+   * 
+   * Retorna los cargos disponibles para un area organizacial especifica
+   * 
+   * @param int $idArea ID del area a consultar
+   * @return array Array asociativo con idcargo y nombre del cargo
+   */
   public function getCargosByArea(int $idArea): array
   {
     $query = "SELECT idcargo, cargo FROM cargos WHERE idarea = :idarea ORDER BY cargo";
@@ -77,6 +111,15 @@ class Usuario
     }
   }
 
+  /**
+   * Actualiza la contraseña de un colaborador
+   * 
+   * Actualiza el hash de la contraseña en la base de datos para el colaborador especifico.
+   * 
+   * @param int $idColaborador ID del colaborador
+   * @param string $newHash Hash de la nueva contraseña
+   * @return bool True si se actualizo correctamente, false en caso contrario
+   */
   public function updatePassword(int $idColaborador, string $newHash): bool
   {
     $query = "UPDATE colaboradores SET userpassword = :userpassword WHERE idcolaborador = :idcolaborador";
@@ -91,6 +134,15 @@ class Usuario
     }
   }
 
+  /**
+   * Deshabilita un usuario del sistema
+   * 
+   * Marca el usuario como deshabilitado, ofuscando su nombre de usuario y contraseña para evitar reutilizacion.
+   * No elimina el registro fisicamente
+   * 
+   * @param int $id ID del colaborador a deshabilitar
+   * @return bool True si se deshabilito correctamente, false en caso contrario
+   */
   public function disabled(int $id): bool
   {
     $query = "UPDATE colaboradores
@@ -109,20 +161,15 @@ class Usuario
     }
   }
 
-  /* public function disabled(int $id): bool
-  {
-    $query = "UPDATE colaboradores SET habilitado = 'N' WHERE idcolaborador = :id";
-    try {
-      $stmt = $this->db->prepare($query);
-      $stmt->bindValue(':id', $id, PDO::PARAM_INT);
-      return $stmt->execute();
-    } catch (Exception $e) {
-      // log $e->getMessage()
-      return false;
-    }
-  } */
-
-  // CONSULTAS PARA EL LOGIN
+  /**
+   * Busca un usuario por su nombre de usuario
+   * 
+   * Realiza una busqueda sensible a mayusculas/minusculas del nombre de usuario.
+   * Utilizado principalmente en el proceso de autenticacion.
+   * 
+   * @param string $usernick Nombre de usuario a buscar
+   * @return array|null Array con los datos del usuario o null si no se encuentra
+   */
   public function searchByUsernick(string $usernick): ?array
   {
     $query = "SELECT * FROM vwSearchUsernick WHERE BINARY usernick = :usernick LIMIT 1";
@@ -138,7 +185,14 @@ class Usuario
     }
   }
 
-  // mostrar el usuario por id
+  /**
+   * Obtiene un usuario por su ID
+   * 
+   * Retorna los datos detallados de un colaborador especifico mediante la vista vwGetUserDetails
+   * 
+   * @param int $idColab ID del colaborador
+   * @return array|null Array con los datos del usuario o null si no existe
+   */
   public function getById(int $idColab): ?array
   {
     $query = "SELECT * FROM vwGetUserDetail WHERE idcolaborador = :id";
@@ -153,7 +207,15 @@ class Usuario
     }
   }
 
-  // Actualiza el campo ultimoacceso a NOW()
+  /**
+   * Actualiza la fecha del ultimo acceso del usuario
+   * 
+   * Registra la fecha y hora actual en el campo ultimo acceso del colaborador.
+   * Util para auditoria y control de sesiones.
+   * 
+   * @param int $idColab ID del colaborador
+   * @return bool True si se actualizo correctamente, false en caso contrario
+   */
   public function updateLastAccess(int $idColab): bool
   {
     $query = "UPDATE colaboradores SET ultimoacceso = NOW() WHERE idcolaborador = :id";
@@ -167,7 +229,15 @@ class Usuario
     }
   }
 
-  // actualizar avatar
+  /**
+   * Actualiza el avatar del usuario
+   * 
+   * Guarda la url del avatar en la base de datos y actualiza la fecha de modificacion del registro.
+   * 
+   * @param int $idColab ID del colaborador
+   * @param string $url URL del nuevo avatar
+   * @return bool True si se actualizo correctamente, false en caso contrario
+   */
   public function updateAvatar(int $idColab, string $url): bool
   {
     $query = "UPDATE colaboradores SET avatar = :url, modificado = NOW() WHERE idcolaborador = :id";
@@ -182,7 +252,15 @@ class Usuario
     }
   }
 
-  // IDLOGISTICA:
+  /**
+   * Verifica si un colaborador pertenece al area de Logistica
+   * 
+   * Comprueba si el colaborador esta asignado al area de Logistica (ID->9 temporal)
+   * Util para permisos y restricciones especificas del area
+   * 
+   * @param int $idcolaborador ID del colaborador e verificar
+   * @return bool True si pertenece a Logistica, false en caso contrario
+   */
   public function esDeLogistica(int $idcolaborador): bool
   {
     $query = "
@@ -208,7 +286,13 @@ class Usuario
     }
   }
 
-  // Obtener CONTRATO SIN COLABORADOR (Sin usuario registrado)
+  /**
+   * Obtiene contratos laborales sin colaborador asginado
+   * 
+   * Retorna los contratos que no tienen un Usuario/Colaborador asociado, util para la creacion de cuentas desde contratos existentes.
+   * 
+   * @return array Array asociativo con los contratos sin colaborador
+   */
   public function getContractsWithoutColaborador(): array
   {
     $query = "SELECT * FROM vwContractsWithoutColaborador ORDER BY fechainicio DESC LIMIT 0,1000";
@@ -222,7 +306,14 @@ class Usuario
     }
   }
 
-  // RESTRICCION HORARIA "SI" o "NO"
+  /**
+   * Obtiene el estado de restriccion horaria de un colaborador
+   * 
+   * Consulta si el colaborador tiene restriccion horaria activa.
+   * 
+   * @param int $idcolaborador ID del colaborador 
+   * @return string|null 'S' si tiene restriccion, 'N' si no, null en caso de error
+   */
   public function getRestriccionHoraria(int $idcolaborador): ?string
   {
     $sql = "SELECT restriccionhoraria FROM colaboradores WHERE idcolaborador = :id LIMIT 1";
@@ -238,7 +329,17 @@ class Usuario
     }
   }
 
-  //Actualizar restriccionhoraria a 'S' o 'N'.
+  /**
+   * Establece el estado de restriccion horaria
+   * 
+   * Actualiza el valor de restriccion horaria a 
+   * 'S' (con restriccion) o 'N' (sin restriccion) 
+   * para un colaborador especifico.
+   * 
+   * @param int $idcolaborador ID del colaborador
+   * @param string $valor Valor de restriccion: 'S' o 'N'
+   * @return bool True si se actualizo correctamente, false en caso contrario
+   */
   public function setRestriccionHoraria(int $idcolaborador, string $valor): bool
   {
     $valor = strtoupper($valor) === 'S' ? 'S' : 'N';
@@ -254,7 +355,23 @@ class Usuario
     }
   }
 
-  //ACTUALIZAR DATOS DE LA PERSONA Y CONTRATO
+  /**
+   * Actualiza los datos completos de un usuario
+   * 
+   * Actualiza informacion personal, laboral y de ubicacion del colaborador.
+   * Realiza validaciones cruzadas y ejecuta todas las operaciones dentro de una transaccion
+   * para garantizar la integridad de los datos.
+   * 
+   * @param int $idColaborador    ID del colaborador a actualizar
+   * @param string $nombres       Nombres de la persona
+   * @param string $apellidos     Apellidos de la persona
+   * @param int $idArea           ID del area organizacional
+   * @param int $idCargo          ID del cargo
+   * @param string $nrodoc        Numero de documento de identidad
+   * @param string $fechaInicio   Fecha de inicio del contrato
+   * @param int|null $idLocal        ID del local asignado
+   * @return bool True si se actualizo correctamente, false en caso contrario
+   */
   public function update(int $idColaborador, string $nombres, string $apellidos, int $idArea, int $idCargo, string $nrodoc, string $fechaInicio, ?int $idLocal = null): bool
   {
     try {
@@ -311,7 +428,7 @@ class Usuario
       $stmt->bindValue(':idcontrato', (int) $idContrato, PDO::PARAM_INT);
       $stmt->execute();
 
-      // 6) actualizar colaboradores.idlocal si se pasó (dentro de la misma transacción)
+      // 6) actualizar colaboradores.idlocal si se paso
       if ($idLocal !== null) {
         $sql = "SELECT COUNT(1) FROM locales WHERE idlocal = :idlocal";
         $stmt = $this->db->prepare($sql);
@@ -340,92 +457,5 @@ class Usuario
       return false;
     }
   }
-
-  //EJEMPLO PARA BUSCAR EL EMAIL Y EL TELEFONO => PRUEBA
-  /* public function findByEmailOrPhoneOrUsernick(string $identifier): ?array
-  {
-    try {
-      $id = trim($identifier);
-
-      if (strpos($id, ':') !== false) {
-        $parts = explode(':', $id);
-        $id = trim($parts[0]);
-      }
-
-      $idLower = mb_strtolower($id);
-      $digits = preg_replace('/\D+/', '', $id);
-
-      // 1) usernick exacto
-      $stmt = $this->db->prepare("
-          SELECT col.idcolaborador, col.usernick, col.userpassword, col.habilitado,
-                  p.email, p.telprimario, p.telalternativo, p.apellidos, p.nombres
-          FROM colaboradores col
-          JOIN contratoslaborales cl ON cl.idcontratolaboral = col.idcontratolaboral
-          JOIN personas p ON p.idpersona = cl.idpersona
-          WHERE BINARY col.usernick = :usernick
-          LIMIT 1
-        ");
-      $stmt->bindValue(':usernick', $id);
-      $stmt->execute();
-      $row = $stmt->fetch(PDO::FETCH_ASSOC);
-      if ($row)
-        return $row;
-
-      // 2) email (case-insensitive)
-      $stmt = $this->db->prepare("
-          SELECT col.idcolaborador, col.usernick, col.userpassword, col.habilitado,
-                  p.email, p.telprimario, p.telalternativo, p.apellidos, p.nombres
-          FROM colaboradores col
-          JOIN contratoslaborales cl ON cl.idcontratolaboral = col.idcontratolaboral
-          JOIN personas p ON p.idpersona = cl.idpersona
-          WHERE LOWER(p.email) = :email
-          LIMIT 1
-        ");
-      $stmt->bindValue(':email', $idLower);
-      $stmt->execute();
-      $row = $stmt->fetch(PDO::FETCH_ASSOC);
-      if ($row)
-        return $row;
-
-      // 3) teléfono: buscar candidatos con LIKE y comparar últimos N dígitos
-      if ($digits !== '') {
-        $like = '%' . $digits . '%';
-
-        // Usamos nombres de parámetros diferentes (:like1 y :like2) para evitar problemas con parámetros repetidos
-        $stmt = $this->db->prepare("
-            SELECT col.idcolaborador, col.usernick, col.userpassword, col.habilitado,
-                    p.email, p.telprimario, p.telalternativo, p.apellidos, p.nombres
-            FROM colaboradores col
-            JOIN contratoslaborales cl ON cl.idcontratolaboral = col.idcontratolaboral
-            JOIN personas p ON p.idpersona = cl.idpersona
-            WHERE REPLACE(REPLACE(REPLACE(p.telprimario,' ',''),'+',''),'-','') LIKE :like1
-                OR REPLACE(REPLACE(REPLACE(p.telalternativo,' ',''),'+',''),'-','') LIKE :like2
-            LIMIT 20
-          ");
-        $stmt->bindValue(':like1', $like);
-        $stmt->bindValue(':like2', $like);
-        $stmt->execute();
-        $cands = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        if ($cands) {
-          $lastN = 9; // comparar últimos 9 dígitos (ajusta si es necesario)
-          $needle = substr($digits, -$lastN);
-          foreach ($cands as $c) {
-            $t1 = preg_replace('/\D+/', '', $c['telprimario'] ?? '');
-            $t2 = preg_replace('/\D+/', '', $c['telalternativo'] ?? '');
-            if ($t1 !== '' && substr($t1, -$lastN) === $needle)
-              return $c;
-            if ($t2 !== '' && substr($t2, -$lastN) === $needle)
-              return $c;
-          }
-        }
-      }
-
-      return null;
-    } catch (\Throwable $e) {
-      error_log('[Usuario::findByEmailOrPhoneOrUsernick] Exception: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
-      return null;
-    }
-  } */
 
 }

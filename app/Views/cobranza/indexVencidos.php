@@ -18,6 +18,7 @@
                 </nav>
             </div>
             <div class="col-md-6 text-end">
+                <a href="#" class="btn btn-sm btn-outline-success">Actualizar</a>
                 <a href="/Cobranza" class="btn btn-sm btn-outline-primary">Volver</a>
             </div>
         </div>
@@ -159,6 +160,7 @@
                 columns: [
                     { title: "#", formatter: "rownum", width: 50 },
                     { title: "Cliente", field: "cliente", widthGrow: 8, tooltip: true },
+                    { title: "Direccion", field: "ubicacion_cliente", widthGrow: 8, tooltip: true },
                     { title: "Telefono", field: "telefono", widthGrow: 3, tooltip: true },
                     { title: "N° Doc", field: "documento", widthGrow: 3, tooltip: true },
                     { title: "Vehículo", field: "vehiculo", widthGrow: 6, tooltip: true },
@@ -216,6 +218,7 @@
                             { field: "telefono", type: "like", value: value },
                             { field: "vehiculo", type: "like", value: value },
                             { field: "tienda", type: "like", value: value }
+                            /* { field: "ubicacion_cliente", type: "like", value: value } */
                         ]
                     ]);
                 });
