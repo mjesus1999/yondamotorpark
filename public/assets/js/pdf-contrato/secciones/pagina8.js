@@ -34,6 +34,8 @@ export function getPagina8(data) {
     const symbol = getMonedaSymbol(f.moneda);
     const monedaNombre = (f.moneda === 'PEN') ? 'SOLES' : 'DOLARES';
     const tipoDoc = data.cliente.tipocliente == 'P' ? 'DNI':'RUC';
+    const tasaAnual = f.tasaAnual ? `${f.tasaAnual}%` :'No especificado';
+    const tasaMensual = f.tasaMensual ? `${f.tasaMensual}%` : 'No especificado';
 
     const headerStyle = 'resumenHeader';
     const cellStyle = 'resumenCell';
@@ -64,12 +66,12 @@ export function getPagina8(data) {
                     ],
                     
                     [
-                        { text: 'T.A. POR G.A.', style: cellStyle }, { text: `${f.tasaAnual}%`, ...cellStyleRight },
+                        { text: 'T.A. POR G.A.', style: cellStyle }, { text: `${tasaAnual}`, ...cellStyleRight },
                         { text: 'Monto financiado', style: cellStyle }, { text: `${symbol} ${formatNumber(f.montoFinanciado)}`, ...cellStyleRight }
                     ],
                  
                     [
-                        { text: 'T.M. POR G.A.', style: cellStyle }, { text: `${f.tasaMensual}%`, ...cellStyleRight },
+                        { text: 'T.M. POR G.A.', style: cellStyle }, { text: `${tasaMensual}`, ...cellStyleRight },
                         { text: 'Moneda', style: cellStyle }, { text: monedaNombre, ...cellStyleRight }
                     ],
                
