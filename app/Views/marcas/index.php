@@ -1,4 +1,5 @@
 <?php include __DIR__ . '/../layout/header.php'; ?>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
 
 <style>
   img:hover {
@@ -6,6 +7,7 @@
     transition-duration: 0.5s;
   }
 </style>
+
 <div class="container-fluid">
 
   <div class="alert alert-info mt-2" role="alert">
@@ -31,7 +33,7 @@
         <div class="card-header">
           <div class="row">
             <div class="col">Lista de marcas</div>
-            <div class="col text-end"><a href="#" id="lnk-agregar-marca">[ Agregar ]</a></div>
+            <div class="col text-end animate__animated animate__pulse animate__infinite"><a href="#" id="lnk-agregar-marca">[ Agregar ]</a></div>
           </div>
         </div>
         <div class="card-body">
@@ -144,7 +146,7 @@
 </div>
 
 <div class="modal fade" id="modal-modelos" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="modalModelos" aria-hidden="true">
-  <div class="modal-dialog modal-md modal-dialog-centered">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content">
       <form autocomplete="off" id="formulario-modelos" enctype="multipart/form-data">
         <div class="modal-header bg-yonda">
@@ -201,6 +203,14 @@
     </div>
   </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/viewerjs@1.11.6/dist/viewer.min.css">
+<script src="https://cdn.jsdelivr.net/npm/viewerjs@1.11.6/dist/viewer.min.js"></script>
+
+
+
+
 <script>
   document.addEventListener("DOMContentLoaded", () => {
 
@@ -234,6 +244,34 @@
     let idmarcaSeleccionada = 0;
     const defaultImage = "/assets/images/vehiculos/model-cars.jpg";
 
+    // Inicializar Viewer.js sobre la imagen del modal
+    const viewer = new Viewer(imagenPreview, {
+      inline: false,
+      navbar: false,
+      title: false,
+      toolbar: {
+        zoomIn: true,
+        zoomOut: true,
+        reset: true,
+        oneToOne: true,
+        rotateLeft: true,
+        rotateRight: true,
+        flipHorizontal: true,
+        flipVertical: true,
+      },
+      tooltip: true,
+      movable: true,
+      zoomable: true,
+      rotatable: true,
+      scalable: true,
+      fullscreen: true,
+      transition: true,
+      viewed() {
+        viewer.zoomTo(1);
+      },
+    });
+
+
 
     const RUTAS = {
       marcas: {
@@ -261,24 +299,46 @@
 
 
 
+    // async function cargarTipoVehiculos() {
+    //   try {
+    //     const req = await fetch(RUTAS.tipos.getAll);
+    //     const res = await req.json();
+    //     if (res.success && res.data.length > 0) {
+    //       tipoVehiculoSelect.innerHTML = '<option value="">Seleccione</option>';
+    //       res.data.forEach(tipo => {
+    //         tipoVehiculoSelect.innerHTML += `<option value="${tipo.idtipovehiculo}">${tipo.tipovehiculo}</option>`;
+    //       });
+    //     } else {
+    //       tipoVehiculoSelect.innerHTML = '<option value="">No se encontraron tipos</option>';
+    //     }
+    //   } catch (error) {
+    //     console.error("Error cargando tipos de vehículo:", error);
+    //     tipoVehiculoSelect.innerHTML = '<option value="">Error al cargar</option>';
+    //   }
+    // }
+
+
+    // Probando 'axios' y 'lodash', muy bueno xd:
     async function cargarTipoVehiculos() {
       try {
-        const req = await fetch(RUTAS.tipos.getAll);
-        const res = await req.json();
-        if (res.success && res.data.length > 0) {
-          tipoVehiculoSelect.innerHTML = '<option value="">Seleccione</option>';
-          res.data.forEach(tipo => {
-            tipoVehiculoSelect.innerHTML += `<option value="${tipo.idtipovehiculo}">${tipo.tipovehiculo}</option>`;
-          });
-        } else {
-          tipoVehiculoSelect.innerHTML = '<option value="">No se encontraron tipos</option>';
-        }
-      } catch (error) {
-        console.error("Error cargando tipos de vehículo:", error);
-        tipoVehiculoSelect.innerHTML = '<option value="">Error al cargar</option>';
-      }
-    }
+        const {data: res} = await axios.get(RUTAS.tipos.getAll); // Paso los datos de la variable 'data' para la varible 'res'
+        const tipos = _.get(res, 'data', []); // Del objeto 'res' traer el campo 'data', si no existe 'data', me trae un array vacío
 
+        tipoVehiculoSelect.innerHTML = tipos.length ?
+          '<option value="">Seleccione</option>' :
+          '<option value="">No se encontraron tipos</option>';
+
+        _.forEach(tipos, tipo => {
+          tipoVehiculoSelect.innerHTML += `<option value="${tipo.idtipovehiculo}">${_.startCase(tipo.tipovehiculo)}</option>`;
+        });
+
+      } catch (error) {
+        console.error('Error cargando tipo de vehículos: ', error);
+        tipoVehiculoSelect.innerHTML = '<option value="">Error al cargar</option>'
+      }
+
+
+    }
 
 
 
@@ -328,6 +388,7 @@
           const reader = new FileReader();
           reader.onload = (e) => {
             imagenPreview.src = e.target.result;
+            viewer.update();
           }
           reader.readAsDataURL(file);
         } else {
@@ -536,32 +597,80 @@
       tablaMarcasBody.appendChild(newRow);
     }
 
-
-
     /**
      * Carga los modelos de la marca seleccionada en la tabla de modelos.
      */
+    // async function cargarModelos(idmarca) {
+    //   tablaModelosBody.innerHTML = `<tr><td colspan="5" class="text-center"><i class="fas fa-spinner fa-spin"></i> Cargando...</td></tr>`;
+    //   try {
+    //     const req = await fetch(`${RUTAS.modelos.getAll}?idmarca=${idmarca}`);
+    //     const res = await req.json();
+
+    //     tablaModelosBody.innerHTML = '';
+    //     if (res.success && res.data.length > 0) {
+    //       let i = 1;
+    //       res.data.forEach(modelo => {
+    //         agregarFilaModelo(modelo, i);
+    //         i++;
+    //       });
+    //     } else {
+    //       tablaModelosBody.innerHTML = `<tr id="fila-no-modelos"><td colspan="5" class="text-center">No hay modelos registrados para esta marca</td></tr>`;
+    //     }
+    //   } catch (error) {
+    //     console.error("Error cargando modelos:", error);
+    //     tablaModelosBody.innerHTML = `<tr><td colspan="5" class="text-center">Error al cargar modelos</td></tr>`;
+    //   }
+    // }
+
+
     async function cargarModelos(idmarca) {
-      tablaModelosBody.innerHTML = `<tr><td colspan="5" class="text-center"><i class="fas fa-spinner fa-spin"></i> Cargando...</td></tr>`;
+
+      tablaModelosBody.innerHTML = `
+        <tr>
+          <td colspan="5" class="text-center">
+            <i class="fas fa-spinner fa-spin"></i> Cargando...
+          </td>
+        </tr>
+      `;
+
       try {
-        const req = await fetch(`${RUTAS.modelos.getAll}?idmarca=${idmarca}`);
-        const res = await req.json();
+
+        const { data: res } = await axios.get(`${RUTAS.modelos.getAll}?idmarca=${idmarca}`);
 
         tablaModelosBody.innerHTML = '';
-        if (res.success && res.data.length > 0) {
-          let i = 1;
-          res.data.forEach(modelo => {
-            agregarFilaModelo(modelo, i);
-            i++;
+
+        //  Uso de Lodash para leer con seguridad el array `data`
+        const modelos = _.get(res, 'data', []);
+        const success = _.get(res, 'success', false);
+
+        if (success && modelos.length > 0) {
+
+          _.forEach(modelos, (modelo, i) => {
+            agregarFilaModelo(modelo, i + 1);
           });
         } else {
-          tablaModelosBody.innerHTML = `<tr id="fila-no-modelos"><td colspan="5" class="text-center">No hay modelos registrados para esta marca</td></tr>`;
+          tablaModelosBody.innerHTML = `
+        <tr id="fila-no-modelos">
+          <td colspan="5" class="text-center">
+            No hay modelos registrados para esta marca
+          </td>
+        </tr>
+      `;
         }
+
       } catch (error) {
         console.error("Error cargando modelos:", error);
-        tablaModelosBody.innerHTML = `<tr><td colspan="5" class="text-center">Error al cargar modelos</td></tr>`;
+        const mensaje = _.get(error, 'response.data.message', 'Error al cargar modelos');
+        tablaModelosBody.innerHTML = `
+      <tr>
+        <td colspan="5" class="text-center text-danger">
+          ${mensaje}
+        </td>
+      </tr>
+    `;
       }
     }
+
 
     /**
      * Abre el modal de modelos para crear o editar.
@@ -577,20 +686,26 @@
         modalModelo.show();
       } else if (modo === 'edit' && id) {
         try {
+          const {data:req} = await axios.get(`${RUTAS.modelos.show}?id=${id}`);
+          // console.log(req)
 
-          const req = await fetch(`${RUTAS.modelos.show}?id=${id}`);
-          const res = await req.json();
-          if (res.success && res.data) {
-            inputIdModelo.value = res.data.idmodelo;
-            inputIdMarcaModelo.value = res.data.idmarca;
-            tipoVehiculoSelect.value = res.data.idtipovehiculo;
-            inputModelo.value = res.data.modelo;
-            inputAnio.value = res.data.anio;
+          // const req = await fetch(`${RUTAS.modelos.show}?id=${id}`);
+          const res = _.get(req,'data',[]);
+          // console.log(res);
+          // const res = await req.json();
+          const success = _.get(req,'success',false);
+
+          if (success && res) {
+            inputIdModelo.value = res.idmodelo;
+            inputIdMarcaModelo.value = res.idmarca;
+            tipoVehiculoSelect.value = res.idtipovehiculo;
+            inputModelo.value = res.modelo;
+            inputAnio.value = res.anio;
 
             // Manejo de la imagen
-            if (res.data.imagenreferencial) {
-              imagenPreview.src = `/assets/images/vehiculos/${res.data.imagenreferencial}`;
-              imagenActualTexto.textContent = `Imagen actual: ${res.data.imagenreferencial}. Seleccione una nueva para reemplazarla.`;
+            if (res.imagenreferencial) {
+              imagenPreview.src = `/assets/images/vehiculos/${res.imagenreferencial}`;
+              imagenActualTexto.textContent = `Imagen actual: ${res.imagenreferencial}. Seleccione una nueva para reemplazarla.`;
             } else {
               imagenPreview.src = defaultImage;
               imagenActualTexto.textContent = "No hay imagen referencial.";
