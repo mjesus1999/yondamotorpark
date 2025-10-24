@@ -330,7 +330,14 @@ BEGIN
             WHEN cli.tipocliente = 'P' THEN p.telprimario
             ELSE e.telprimario
         END AS telefono,
-        CONCAT(m.marca, ' ', mo.modelo) AS vehiculo,
+        CASE
+			WHEN cli.tipocliente = 'P' THEN 
+				CONCAT(COALESCE(dp.distrito, 'Sin distrito'), '/', COALESCE(p.direccion, 'Sin direccion'))
+            ELSE 
+				CONCAT(COALESCE(dp.distrito, 'Sin distrito'), '/', COALESCE(p.direccion, 'Sin direccion'))
+		END AS ubicacion_cliente,
+        
+        CONCAT(m.marca, ' / ', mo.modelo, ' / ', v.color, ' / ', v.placa) AS vehiculo,
         COALESCE(d.distrito, 'Sin distrito') AS tienda,
         cot.numcuotas AS cuotas_totales,
         
@@ -392,6 +399,8 @@ BEGIN
     INNER JOIN modelos mo ON v.idmodelo = mo.idmodelo
     INNER JOIN marcas m ON mo.idmarca = m.idmarca
     LEFT JOIN locales loc ON c.idlocal = loc.idlocal
+    LEFT JOIN distritos dp ON p.iddistrito = dp.iddistrito
+    LEFT JOIN distritos de ON e.iddistrito = de.iddistrito
     LEFT JOIN distritos d ON loc.iddistrito = d.iddistrito
     INNER JOIN cronogramas cron ON cron.idcontrato = c.idcontrato
     
@@ -399,7 +408,8 @@ BEGIN
     
     GROUP BY 
         c.idcontrato, cli.tipocliente, p.apellidos, p.nombres, p.nrodoc, p.telprimario,
-        e.razonsocial, e.ruc, e.telprimario, m.marca, mo.modelo, d.distrito, cot.numcuotas
+        e.razonsocial, e.ruc, e.telprimario, m.marca, mo.modelo, d.distrito, cot.numcuotas,
+        p.direccion, e.direccion, dp.distrito, de.distrito
     
     HAVING cuotas_vencidas > 0
     ORDER BY dias_atraso DESC, deuda_vencida DESC;

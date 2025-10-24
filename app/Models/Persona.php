@@ -10,11 +10,27 @@ class Persona
 {
     private PDO $db;
 
+    /**
+     * Contructor del modelo
+     * 
+     * Inicializa la conexion a la base de datos
+     */
     public function __construct()
     {
         $this->db = Database::getInstance();
     }
 
+    /**
+     * Obtiene una persona por su ID
+     * 
+     * Retorna los datos de una persona incluyendo su ubicacion geografica
+     * - Distrito
+     * - Provincia
+     * - Departamento
+     * 
+     * @param int $idpersona ID de la persona a consultar
+     * @return array|null Array asociativo con los datos de la persona o array vacio si no existe
+     */
     public function getById($idpersona = 0): ?array
     {
 
@@ -52,6 +68,13 @@ class Persona
         }
     }
 
+    /**
+     * Obtiene todas las personas que son clientes
+     * 
+     * Retorna un listado de personas registradas como clientes de tipo 'P' (Persona)
+     * con estado activo, incluyendo su informacion de contrato y ubicacion.
+     * @return array Array asociativo con los datos de los clientes o array vacio en caso de error
+     */
     public function getAllPersonasCliente(): ?array
     {
         try {
@@ -83,7 +106,26 @@ class Persona
         }
     }
 
-
+    /**
+     * Crea un nuevo registro de persona
+     * 
+     * Inserta una nueva persona en la base de datos con su informacion personal, de contacto y ubicacion geografica.
+     * 
+     * @param array $params Array asociativo con los datos de la persona:
+     *                      - apellidos: string
+     *                      - nombres: string
+     *                      - tipodoc: string
+     *                      - nrodoc: string
+     *                      - genero: string
+     *                      - isdistrito: int
+     *                      - direccion: string|null
+     *                      - referencia: string|null
+     *                      - telprimario: string|null
+     *                      - telalternativo: string|null
+     *                      - latitud: float|null
+     *                      - longitud: float|null
+     * @return int ID de la persona creada o -1 en caso de error
+     */
     public function create($params): int
     {
         $query = "INSERT INTO personas(apellidos,nombres, tipodoc, nrodoc, genero,iddistrito, direccion, referencia, telprimario, telalternativo,latitud, longitud)
@@ -117,6 +159,14 @@ class Persona
         }
     }
 
+    /**
+     * Actualiza los datos de una persona existente
+     * 
+     * Modifica la informacion personal, de contacto y ubicacion de una persona.
+     * 
+     * @param mixed $params
+     * @return int
+     */
     public function update($params): int
     {
         try {

@@ -1,5 +1,14 @@
 <?php
-// app/Controllers/UsuarioController.php
+
+/**
+ * Controlador de Usuarios
+ * 
+ * Summary of namespace App\Controllers
+ * app/Controllers/UsuarioController.php
+ * 
+ * Gestiona todas las Operaciones relacionada con usuarios, colaboradores, contratos laborales y autenticacion en el sistema
+ * 
+ */
 namespace App\Controllers;
 
 use App\Core\Controller;
@@ -9,15 +18,53 @@ use App\Models\Colaborador;
 use App\Helpers\Validation;
 use App\Models\Local;
 
+/**
+ * Clase UsuarioController
+ * 
+ * Controlador principal para la gestion de usuarios del sistema.
+ * Maneja operaciones CRUD, autenticacion, perfiles y restricciones horarias.
+ */
 
 class UsuarioController extends Controller
 {
+
+  /**
+   * Modelo de Usuario
+   * @var Usuario
+   */
   private Usuario $usuarioModel;
+  
+  /**
+   * Modelo de Contrato laboral
+   * @var ContratoLaboral
+   */
   private ContratoLaboral $contratoModel;
+
+  /**
+   * Modelo de Colaborador
+   * @var Colaborador
+   */
   private Colaborador $colaboradorModel;
+
+  /**
+   * Modelo de Validacion
+   * @var Validation
+   */
   private Validation $validator;
+
+  /**
+   * Modelo de Locales
+   * @var Local
+   */
   private Local $localModel;
 
+
+  /**
+   * Constructor del controlador 
+   * 
+   * Inicializa todos los modelos y helpers necesarios para el funcionamiento del controlador.
+   * Tambien ajusta la inicializacion de sesion del controlador padre.
+   */
   public function __construct()
   {
     parent::__construct(); // INICIO DE SESION H/CONTROLLER
@@ -28,6 +75,13 @@ class UsuarioController extends Controller
     $this->localModel = new Local();
   }
 
+  /**
+   * Muestra el listado de todos los usuarios
+   * 
+   * Renderiza la vista principal con todos los usuarios del sistema.
+   * Requiere autenticacion previa.
+   * @return void
+   */
   public function index(): void
   {
     $this->authRequired();
@@ -35,6 +89,13 @@ class UsuarioController extends Controller
     $this->view('usuarios.index', ['Usuarios' => $usuario]);
   }
 
+  /**
+   * Muestra el formulario de creacion de usuario
+   * 
+   * Carga las areas y locales disponibles para mostrarlos en el formulario
+   * de registro de nuevo usuario.
+   * @return void
+   */
   public function create(): void
   {
     $areas = $this->usuarioModel->getAllAreas();
@@ -47,6 +108,12 @@ class UsuarioController extends Controller
     ]);
   }
 
+  /**
+   * Obtiene los cargos filtrados por área
+   * 
+   * EndPoint AJAX que devuelve los cargos disponibles para un area especifica en formato JSON
+   * @return never
+   */
   public function getCargosByArea(): void
   {
     $idArea = isset($_GET['idarea']) ? (int) $_GET['idarea'] : 0;
@@ -57,11 +124,18 @@ class UsuarioController extends Controller
     exit;
   }
 
+  /**
+   * Almacena un nuevo usuario en el sistema
+   * 
+   * Procesa el formulario de registro, valida los datos, crea el contrato laboral y el colaborador asociado
+   * Soporta llamadas AJAX y tradicionales.
+   * Implementa rollback en caso de error
+   * 
+   * @throws \RuntimeException
+   * @return void
+   */
   public function store(): void
   {
-    /* if (session_status() !== PHP_SESSION_ACTIVE) {
-      session_start();
-    } */
     //obtener datos del formulario
     $idPersona = (int) ($_POST['idpersona'] ?? 0);
     $idCargo = (int) ($_POST['idcargo'] ?? 0);
@@ -76,7 +150,13 @@ class UsuarioController extends Controller
     $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest';
 
     // helper local para responder errores (JSON o renderizar vista)
-    $respondError = function (array $errors) use ($isAjax) {
+    /**
+     * Helper local para responder errores
+     * 
+     * @param array $errors Array de mensajes error
+     * @return void
+     */
+    $respondError = function (array $errors) use ($isAjax): void {
       if ($isAjax) {
         header('Content-Type: application/json; charset=utf-8');
         echo json_encode(['success' => false, 'errors' => $errors]);
@@ -158,6 +238,14 @@ class UsuarioController extends Controller
     ]);
   }
 
+  /**
+   * Cambia la contraseña de un colaborador
+   * 
+   * Valida y actualiza la contraseña de un usuario existente.
+   * Responde en formato JSON.
+   * 
+   * @return void
+   */
   public function changePassword(): void
   {
     header('Content-Type: application/json; charset=utf-8');
@@ -196,6 +284,13 @@ class UsuarioController extends Controller
     }
   }
 
+  /**
+   * Deshabilita un usuario del sistema
+   * 
+   * Marca un usuario como deshabilitado sin eliminarlo de la base de datos.
+   * @param int $id ID del colaboradora deshabilitar
+   * @return void
+   */
   public function disabled(int $id): void
   {
     $disabled = $this->usuarioModel->disabled($id);
@@ -207,7 +302,14 @@ class UsuarioController extends Controller
     $this->redirect('/usuarios');
   }
 
-  // PERFIL DEL USUARIO
+  /**
+   * Muestra el perfil del usuario autenticado
+   * 
+   * Renderiza la vista del perfil con los datos del usuario en sesión
+   * Requiere autenticacion.
+   * 
+   * @return void
+   */
   public function profile(): void
   {
     $this->authRequired();
@@ -218,10 +320,19 @@ class UsuarioController extends Controller
     $this->view('usuarios.profile', ['usuario' => $usuario]);
   }
 
+  /**
+   * Sube y actualiza el avatar del usuario
+   * 
+   * Procesa la imagen de avatar, la guarda en el servidor y actualiza la referencia en la base de datos.
+   * Responde en formato JSON.
+   * 
+   * @return void
+   */
   public function uploadAvatar(): void
   {
     $this->authRequired();
     header('Content-Type: application/json; charset=utf-8');
+
     $avatarErrors = $this->validator->validateAvatarUpload($_FILES['avatar'] ?? null);
     if ($avatarErrors) {
       http_response_code(400);
@@ -232,10 +343,10 @@ class UsuarioController extends Controller
       return;
     }
 
-    //Definimos la carpeta
+    // Definir la carpeta
     $avatarsDir = $_SERVER['DOCUMENT_ROOT'] . '/assets/images/avatar';
 
-    //Creacion de la carpeta si no eciste
+    // Crear carpeta si no existe
     if (!is_dir($avatarsDir)) {
       mkdir($avatarsDir, 0755, true);
     }
@@ -245,7 +356,7 @@ class UsuarioController extends Controller
     $filename = "avatar_{$id}." . $ext;
     $dest = $avatarsDir . '/' . $filename;
 
-    //Mueve el archivo
+    // Mover el archivo
     if (!move_uploaded_file($tmp, $dest)) {
       http_response_code(500);
       echo json_encode([
@@ -276,16 +387,15 @@ class UsuarioController extends Controller
   }
 
   /**
-   * FUNCIONES PARA MOSTRAR VISTAS Y FORMULARIOS PARA REGISTRAR CONTRATOS DESDE EL LOGIN
-   * CREAR CUENTA (SOLO EL ADMIN)
+   * Muestra el formulario de creacion de cuentas desde contratos existentes
+   * 
+   * Lista los contratos laborales que aún no tienen un colaborador asociado para permitir la creación de cuentas de usuario.
+   * Solo accesible por administradores.
+   * @return void
    */
-
-  //Mostrar Crear Cuenta
-
   public function showCreateFromContracts(): void
   {
     $contracts = $this->usuarioModel->getContractsWithoutColaborador();
-    /* $locales = $this->usuarioModel->getAllLocales(); */
 
     // Obtener locales desde Local::getAllLocales()
     $locales = $this->localModel->getAllLocales();
@@ -301,6 +411,15 @@ class UsuarioController extends Controller
   }
 
   //CREAR COLABORADOR CON PERSONAS QUE TIENEN CONTRATO PERO NO UNA CUENTA 
+  /**
+   * Crea un colaborador a partir de un contrato existente
+   * 
+   * Asocia una cuenta de usuario (colaborador) a un contrato laboral que previamente no tenía usuario asignado.
+   * Preserva la sesion actual del administrador.
+   * 
+   * @throws \RuntimeException
+   * @return void
+   */
   public function createFromContract(): void
   {
     /* if (session_status() !== PHP_SESSION_ACTIVE)
@@ -354,14 +473,12 @@ class UsuarioController extends Controller
       ]);
       return;
     }
-    // restaurar sesion original (evita login automatico del nuevo usuario)
+
+    // restaurar sesion original
     if ($prevUser !== null) {
       $_SESSION['user'] = $prevUser;
     }
 
-    // actualizar lista
-    /* if (session_status() !== PHP_SESSION_ACTIVE)
-      session_start(); */
     $_SESSION['success_message'] = "Cuenta creada correctamente para <strong>" . htmlspecialchars($usernick) . "</strong>";
     $this->redirect('/createAccount');
     return;
@@ -370,6 +487,16 @@ class UsuarioController extends Controller
   /**
    * Toggle de restricción horaria (S <-> N)
    * Accesible via POST /usuarios/toggleRestriccion/{id}
+   */
+
+  /**
+   * Altera el estado de restriccion horaria de un colaborador
+   * 
+   * Cambia el valor de restriccion horaria entre:
+   * 'S' (con restriccion)
+   * 'N' (sin restriccion)
+   * para un colaborador específico.
+   * @return void
    */
   public function toggleRestriccion(): void
   {
@@ -387,7 +514,7 @@ class UsuarioController extends Controller
       return;
     }
 
-    // obtener valor actual (usa el método del modelo que agregamos)
+    // obtener valor actual
     $actual = $this->usuarioModel->getRestriccionHoraria($idColab);
     if ($actual === null) {
       $_SESSION['error_message'] = 'No se pudo obtener el estado actual.';
@@ -407,7 +534,6 @@ class UsuarioController extends Controller
         $_SESSION['error_message'] = 'No se pudo actualizar la restricción horaria.';
       }
     } catch (\Throwable $e) {
-      //error_log($e->getMessage());
       $_SESSION['error_message'] = 'Error al actualizar.';
     }
 
@@ -415,7 +541,14 @@ class UsuarioController extends Controller
     $this->redirect('/usuarios');
   }
 
-  //VISTA DE EDIT / USUARIO
+  /**
+   * Muestra el formulario de edición de usuario (VISTA EDITAR)
+   * 
+   * Carga los datos del usuario, areas, cargos, y locales disponibles para su edicion.
+   * 
+   * @param int $id ID del colaborador a editar
+   * @return void
+   */
   public function edit(int $id): void
   {
     $this->authRequired();
@@ -449,6 +582,12 @@ class UsuarioController extends Controller
   }
 
   //ACTUALIZAR / EDIT
+  /**
+   * Actualiza los datos de un usuario existente
+   * 
+   * Procesa y valida los datos del formulario de edición, actualizando la informacion personal y laboral del colaborador.
+   * @return void
+   */
   public function update(): void
   {
     $this->authRequired();

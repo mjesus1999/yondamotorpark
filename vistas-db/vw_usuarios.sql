@@ -45,7 +45,8 @@ CREATE VIEW vwGetAllUser AS
 	END AS restriccionhoraria,
     
     col.idlocal AS idlocal,
-    CONCAT_WS('/', NULLIF(dep.departamento, ''), NULLIF(pro.provincia, '')) AS ubicacion
+    --  NULLIF(dep.departamento, ''),
+    CONCAT_WS('/', NULLIF(pro.provincia, '')) AS ubicacion
     
 	FROM colaboradores col
 	INNER JOIN contratoslaborales cl
