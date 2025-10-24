@@ -64,9 +64,7 @@ CREATE TABLE personas (
     CONSTRAINT fk_iddistrito_per FOREIGN KEY (iddistrito) REFERENCES distritos (iddistrito)
 ) ENGINE = INNODB;
 
-USE motorpark;
-SELECT * FROM personas;
-SELECT * FROM empresas;
+
 SHOW COLUMNS FROM personas;
 -- ALTER TABLE personas ADD COLUMN latitud VARCHAR(20) NULL;
 -- ALTER TABLE personas ADD COLUMN longitud VARCHAR(20) NULL;
@@ -303,6 +301,7 @@ CREATE TABLE vehiculos (
 -- Cuando se compra un vehículo, este además de su valor, supone pagos adicioanles como:
 -- Tarjeta de propiedad y placa, Flete picanto, gastos administrativos
 -- No se requiere indiciar la moneda porque esto se especifica al momento de realizar la comrpa
+
 CREATE TABLE gastos (
     idgasto INT AUTO_INCREMENT PRIMARY KEY,
     idvehiculo INT NOT NULL,
@@ -338,8 +337,6 @@ CREATE TABLE ordenescompra (
     CONSTRAINT fk_idlogistica_ocp FOREIGN KEY (idlogistica) REFERENCES colaboradores (idcolaborador)
 ) ENGINE = INNODB;
 
-USE motorpark;
-SELECT * FROM ordenescompra;
 
 --ALTER TABLE ordenescompra ADD COLUMN  facturado ENUM('S','N') NOT NULL DEFAULT 'N' ;
 -- ALTER TABLE ordenescompra ADD COLUMN creado DATETIME NOT NULL DEFAULT NOW();
@@ -421,7 +418,7 @@ CREATE TABLE compras (
     CONSTRAINT fk_idlogistica_cmp FOREIGN KEY (idlogistica) REFERENCES colaboradores (idcolaborador)
 ) ENGINE = INNODB;
 
--- USE motorpark2;
+
 
 -- SELECT * FROM COMPRAS;
 -- SELECT * FROM pagos;
@@ -482,9 +479,7 @@ CREATE TABLE cotizaciones (
     CONSTRAINT fk_idcolventa_cot FOREIGN KEY (idasesor) REFERENCES colaboradores (idcolaborador)
 ) ENGINE = INNODB;
 
-USE motorpark;
-
- ALTER TABLE cotizaciones MODIFY COLUMN estadocotizacion ENUM('P', 'O', 'A', 'C', 'R','CONT') NOT NULL DEFAULT 'P' COMMENT 'Pendiente | OBSERVADA | Aprobada |  Rechazada (Analista crédito) | CONTRATO';
+--  ALTER TABLE cotizaciones MODIFY COLUMN estadocotizacion ENUM('P', 'O', 'A', 'C', 'R','CONT') NOT NULL DEFAULT 'P' COMMENT 'Pendiente | OBSERVADA | Aprobada |  Rechazada (Analista crédito) | CONTRATO';
 
 -- ALTER TABLE cotizaciones ADD COLUMN comentarios TEXT AFTER estadocotizacion;
 -- --  ALTER TABLE cotizaciones ADD COLUMN fechaseguimiento DATETIME NULL AFTER comentarios;
@@ -511,8 +506,6 @@ CREATE TABLE fichasolicitud (
     CONSTRAINT fk_idavalconyuge_ficha FOREIGN KEY(idavalconyuge) REFERENCES personas(idpersona)
 ) ENGINE = INNODB;
 
-SELECT * FROM fichasolicitud;
-USE motorpark;
 -- ALTER TABLE fichasolicitud CHANGE COLUMN fechavisista  fechavisita   DATE NOT NULL;
 
 CREATE TABLE conceptospago (
@@ -545,7 +538,6 @@ CREATE TABLE contratos (
     CONSTRAINT fk_idlogistica_contrato FOREIGN KEY (idlogistica) REFERENCES colaboradores (idcolaborador)
 ) ENGINE = InnoDB;
 
-SHOW COLUMNS FROM contratos;
 -- ALTER TABLE contratos
 -- ADD COLUMN penalidadbase DECIMAL(10, 2) NOT NULL DEFAULT 0.1;
 
@@ -585,7 +577,7 @@ CREATE TABLE cronogramas (
 -- ALTER TABLE cronogramas
 -- MODIFY COLUMN abonocapital DECIMAL(10, 2) NOT NULL;
 
--- USE motorpark;
+
 
 CREATE TABLE pagos (
     idpago INT AUTO_INCREMENT PRIMARY KEY,
@@ -625,17 +617,15 @@ CREATE TABLE pagos (
     CONSTRAINT fk_idcliente_pagos  FOREIGN KEY(idcliente) REFERENCES clientes(idcliente)
 ) ENGINE = InnoDB;
 
-ALTER TABLE pagos ADD COLUMN  moneda ENUM('USD', 'PEN')  NULL AFTER saldorestante;
-ALTER TABLE pagos ADD COLUMN montomonedaoriginal DECIMAL(10,2) NULL AFTER amortizacion;
-ALTER TABLE pagos ADD COLUMN tipocambioaplicado DECIMAL(10, 4) NULL AFTER montomonedaoriginal;
+-- ALTER TABLE pagos ADD COLUMN  moneda ENUM('USD', 'PEN')  NULL AFTER saldorestante;
+-- ALTER TABLE pagos ADD COLUMN montomonedaoriginal DECIMAL(10,2) NULL AFTER amortizacion;
+-- ALTER TABLE pagos ADD COLUMN tipocambioaplicado DECIMAL(10, 4) NULL AFTER montomonedaoriginal;
 
 -- ALTER TABLE pagos MODIFY COLUMN comprobante VARCHAR(200) NULL;
 -- ALTER TABLE pagos MODIFY COLUMN numerotransaccion VARCHAR(30) NULL;
 -- ADD COLUMN tipo ENUM('Cuota', 'Penalidad') NOT NULL DEFAULT 'Cuota';
 -- -- USE motorpark;
 -- SELECT * FROM pagos;
-
---     use motorpark2;
 
 -- SHOW COLUMNS FROM pagos;
 
@@ -665,19 +655,6 @@ CREATE TABLE entidadespago (
     modificado DATETIME NULL,
     CONSTRAINT uk_entidad_epg UNIQUE (entidad)
 ) ENGINE = INNODB;
-
-
-SELECT * FROM entidadespago;
-SELECT * FROM cuentaspago;
-
-INSERT INTO cuentaspago(identidadpago,moneda,numcuenta)VALUES(3,'Soles','000132121521212');
-
-
-
-
-
--- DB DE DEYANIRA:
-
 
 CREATE TABLE accesos (
 
@@ -722,7 +699,6 @@ CREATE TABLE cotizacion_financiamiento (
 ) ENGINE=INNODB;
 
 
-
 CREATE TABLE conceptoegreso(
     idconceptoegreso INT PRIMARY KEY AUTO_INCREMENT,
     concepto VARCHAR(150) NOT NULL,
@@ -748,10 +724,6 @@ CREATE TABLE egresos(
     CONSTRAINT fk_colaborador_egreso_solicita FOREIGN KEY (idcolsolicitante) REFERENCES colaboradores (idcolaborador)
 
 )ENGINE = INNODB;
-
-SELECT * FROM egresos;
-
-ALTER TABLE egresos ADD COLUMN fecha DATE NULL AFTER requierecomprobante;
 
 
 CREATE TABLE comprobantes(
@@ -811,25 +783,4 @@ CREATE TABLE arqueocaja (
 ) ENGINE = InnoDB;
 
 -- ALTER TABLE arqueocaja ADD COLUMN entregado ENUM('S', 'N') NOT NULL DEFAULT 'N';
-
--- INSERT INTO areas(area)values('Gerencia');
-
--- SELECT * FROM cargos;
--- INSERT INTO cargos(idarea,cargo)VALUES(10,'Gerente general');
--- SELECT * FROM contratoslaborales;
---     INSERT INTO contratoslaborales(idpersona,idcargo,fechainicio,tipocontrato)VALUES(37,18,'2022-01-01','P')
-
--- INSERT INTO personas(apellidos,nombres,tipodoc,nrodoc,genero,fechanac,estadocivil,iddistrito,telprimario)
---     VALUES('Mendoza Huaraca','Yohn Kennidey','DNI','45546464','M','1988-10-08','SOL',100,'969693698');
-
-
-SELECT * FROM arqueocaja;
-
-SELECT * FROM  entregasdinero_destinos;
-
-SELECT * FROM arqueocaja WHERE entregado = 'S';
-
-
-
-
 

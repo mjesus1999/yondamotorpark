@@ -29,8 +29,6 @@ class TipoVehiculo
 
 
 
-    // MIO
-
     public function getTipoVehiculoByMarca(int $idmarca): array
     {
         $query = "
@@ -50,4 +48,6 @@ class TipoVehiculo
             return [];
         }
     }
+
+    
 }
