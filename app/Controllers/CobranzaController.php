@@ -158,7 +158,7 @@ class CobranzaController extends Controller
         }
     }
 
-    public function getVencidos(): void
+    /* public function getVencidos(): void
     {
         $this->authRequired();
         header('Content-Type: application/json; charset=utf-8');
@@ -182,8 +182,31 @@ class CobranzaController extends Controller
                 'message' => 'Error al obtener vencidos: ' . $e->getMessage()
             ]);
         }
+    } */
+    public function getVencidos(): void
+    {
+        $this->authRequired();
+        header('Content-Type: application/json; charset=utf-8');
+
+        try {
+            // Leer desde JSON
+            $jsonData = $this->cobranzaModel->leerJsonVencidos();
+
+            echo json_encode([
+                'success' => true,
+                'data' => $jsonData['data'],
+                'fecha_datos' => $jsonData['date'],
+                'total_registros' => $jsonData['total_registros']
+            ]);
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Error al obtener vencidos: ' . $e->getMessage()
+            ]);
+        }
     }
-    
+
     public function indexNotificar()
     {
         $this->authRequired();
@@ -202,13 +225,13 @@ class CobranzaController extends Controller
     public function reporteCobranzaAtrasado($id)
     {
         $this->authRequired();
-        
+
         // Validar que el ID sea válido
         if (!$id || !is_numeric($id)) {
             http_response_code(400);
             die('ID de contrato inválido');
         }
-        
+
         // Pasar el idcontrato a la vista
         $this->view('cobranza/reports.notificacion_reporte_atraso_mes', [
             'idcontrato' => (int) $id
@@ -224,12 +247,12 @@ class CobranzaController extends Controller
     public function reporteRecojoVehicular($id)
     {
         $this->authRequired();
-        
+
         if (!$id || !is_numeric($id)) {
             http_response_code(400);
             die('ID de contrato inválido');
         }
-        
+
         $this->view('cobranza/reports.notificacion_reporte-constancia-recojo', [
             'idcontrato' => (int) $id
         ]);
@@ -464,5 +487,54 @@ class CobranzaController extends Controller
         }
     }
 
+    public function actualizarVencidos(): void
+    {
+        $this->authRequired();
+        header('Content-Type: application/json; charset=utf-8');
+
+        try {
+            $resultado = $this->cobranzaModel->actualizarJsonVencidos();
+
+            if ($resultado) {
+                $jsonData = $this->cobranzaModel->leerJsonVencidos();
+
+                echo json_encode([
+                    'success' => true,
+                    'message' => 'Datos actualizados correctamente',
+                    'fecha_actualizacion' => $jsonData['date'],
+                    'total_registros' => $jsonData['total_registros']
+                ]);
+            } else {
+                throw new Exception('No se pudo actualizar el archivo JSON');
+            }
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Error al actualizar: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    public function verificarActualizacion(): void
+    {
+        $this->authRequired();
+        header('Content-Type: application/json; charset=utf-8');
+
+        try {
+            $necesita = $this->cobranzaModel->necesitaActualizacion();
+
+            echo json_encode([
+                'success' => true,
+                'necesita_actualizacion' => $necesita
+            ]);
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
 
 }

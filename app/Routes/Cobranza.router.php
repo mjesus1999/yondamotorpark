@@ -34,6 +34,9 @@ $router->add('GET', '/Cobranza/getDatosReporteNotificacion', 'CobranzaController
 $router->add('GET', '/reportesRecojo/(\d+)', 'CobranzaController', 'reporteRecojoVehicular');
 $router->add('GET', '/Cobranza/getDatosReporteRecojoVehicular', 'CobranzaController', 'getDatosReporteRecojoVehicular');
 
+$router->add('POST', '/Cobranza/actualizarVencidos', 'CobranzaController', 'actualizarVencidos');
+$router->add('GET', '/Cobranza/verificarActualizacion', 'CobranzaController', 'verificarActualizacion');
+
 /* $router->add('GET', '/reportes', 'CobranzaController', 'reporteCobranza'); */
 /* $router->add('GET', '/reportesAtrasado', 'CobranzaController', 'reporteCobranzaAtrasado'); */
 
