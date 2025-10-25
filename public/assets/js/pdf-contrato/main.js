@@ -122,7 +122,7 @@ async function generarPDFContrato(data) {
             },
 
             defaultStyle: { fontSize: 8,    color: '#333333' },
-            pageMargins: [57, 80, 40,30],
+            pageMargins: [60, 80, 40,30],
     
           
         };

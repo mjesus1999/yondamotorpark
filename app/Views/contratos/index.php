@@ -60,10 +60,18 @@
         layout: "fitColumns",
         responsiveLayout: "collapse",
         pagination: "local",
-        paginationSize: 15,
+        paginationSize: 20,
+        responsiveLayoutCollapseStartOpen: false,
         index: "idcontrato", // El identificador de cada fila
         placeholder: "No hay contratos disponibles.",
         movableColumns: true,
+        groupBy:'doc_cliente',
+        groupHeader: function(value, count, data, group) {
+                const nombreCliente = data[0].cliente || 'Cliente Desconocido';
+                return `${nombreCliente} (${value}) <span class='badge bg-info ms-2'>${count} contratos</span>`;
+            },
+        groupStartOpen: false,
+        groupToggleElement: "header",
 
         columns: [
             {formatter: "responsiveCollapse",width: 40,minWidth: 30,hozAlign: "center",resizable: false,headerSort: false},
@@ -116,6 +124,24 @@
             console.error(" Error al cargar los contratos:", error);
             console.warn("Verifica el endpoint o la respuesta del servidor");
         },
+
+         langs: {
+                "es-es": {
+                    "pagination": {
+                        "page_size": "Registros por página",
+                        "first": "<<",
+                        "last": ">>",
+                        "prev": "<",
+                        "next": ">",
+                        "counter": {
+                            "showing": "Mostrando",
+                            "of": "de",
+                            "rows": "registros"
+                        }
+                    }
+                }
+            },
+            locale: "es-es"
 
  
       
