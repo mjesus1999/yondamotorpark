@@ -1,5 +1,6 @@
 {
     "query": "vencidos",
+<<<<<<< HEAD
     "date": "2025-10-27 21:06:51",
     "total_registros": 4,
     "data": [
@@ -80,4 +81,9 @@
             "dias_atraso": 14
         }
     ]
+=======
+    "date": "2025-10-27 19:55:38",
+    "total_registros": 0,
+    "data": []
+>>>>>>> 5511dfe5c702b99c3a2901379eec257dc3901cd9
 }

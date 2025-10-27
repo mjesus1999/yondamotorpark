@@ -1,4 +1,3 @@
-</main>
 
 <!-- Selector de temas -->
 <a href="#" class="theme-toggle">

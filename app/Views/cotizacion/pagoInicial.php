@@ -1,7 +1,7 @@
 <?php include __DIR__ . '/../layout/header.php'; ?>
-<link rel="stylesheet" href="/assets/css/pago-inicial.css">
+<?php var_dump($cotizacion); ?>
 
-?>
+<link rel="stylesheet" href="/assets/css/pago-inicial.css">
 <div class="container-fluid">
 
     <div class="alert alert-info mt-2" role="alert">
@@ -435,7 +435,7 @@
                                 <small class="opacity-75">Registro completo de todos los pagos realizados (<span id="cantidadPagos"><?= count($historialPagos) ?> pago<?= count($historialPagos) !== 1 ? 's' : '' ?></span>)</small>
                             </div>
                         </div>
-                        <button class="btn btn-light btn-sm">
+                        <button class="btn btn-light btn-sm" id="btnExportarPagos" data-id="<?= htmlspecialchars($cotizacion['idcotizacion']) ?>" data-vehiculo="<?= htmlspecialchars($cotizacion['vehiculo']) ?>" data-precioventa="<?= htmlspecialchars($cotizacion['precioventa']) ?>" data-cliente="<?= htmlspecialchars($cotizacion['nombrecliente']) ?>">
                             <i class="bi bi-download me-2"></i>Exportar
                         </button>
                     </div>
@@ -448,11 +448,12 @@
                         <?php else: ?>
                             <?php
                             $totalPagado = 0;
-                            $simboloMoneda = 'S/'; 
+                            $simboloMoneda = 'S/';
 
                             foreach ($historialPagos as $pago) {
+
                                 $totalPagado += (float)$pago['monto_pago'];
-                     
+
                                 $simboloMoneda = $pago['moneda_simbolo'];
                             }
                             ?>
@@ -543,9 +544,14 @@
         </div>
     </div>
 </div>
-<?php include __DIR__ . '/../layout/footer.php'; ?>
+
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js" defer></script>
+<script src="/assets/js/logoBase64.js"></script>
+
 <script>
-   
     const estadoFinanciero = {
         monedaCotizacion: '<?= htmlspecialchars($cotizacion['moneda']) ?>',
         simboloCotizacion: '<?= $cotizacion['moneda'] == 'PEN' ? 'S/' : '$' ?>',
@@ -555,7 +561,7 @@
         tipoCambio: 0.00
     };
 
-    
+
     const els = {
         formularioPago: document.getElementById('formularioPago'),
         fechaPago: document.getElementById('fechapago'),
@@ -567,7 +573,7 @@
         radioButtonsMoneda: document.querySelectorAll('input[name="moneda"]'),
         inputMontoOriginal: document.getElementById('montoOriginal'),
         inputTipoCambio: document.getElementById('tipoCambio'),
-        simboloMonedaPago: document.getElementById('simboloMoneda'), 
+        simboloMonedaPago: document.getElementById('simboloMoneda'),
         inputAmortizacionFinalPEN: document.getElementById('amortizacionFinalPEN'),
 
         uiSaldoActualForm: document.getElementById('saldoActualForm'),
@@ -578,9 +584,10 @@
         alertaExito: document.getElementById('alertaExito'),
         alertaError: document.getElementById('alertaError'),
         mensajeError: document.getElementById('mensajeError'),
+        btnExportarPagos: document.getElementById('btnExportarPagos'),
     };
 
- 
+
 
     /**
      * Obtiene el tipo de cambio del servidor y actualiza el estado.
@@ -603,7 +610,7 @@
             }
 
             estadoFinanciero.tipoCambio = tc;
-            els.inputTipoCambio.value = tc.toFixed(4); 
+            els.inputTipoCambio.value = tc.toFixed(4);
             return tc;
         } catch (error) {
             console.error('Error al obtener tipo de cambio:', error);
@@ -618,19 +625,19 @@
      */
     function calcularYActualizar() {
         const montoOriginal = parseFloat(els.inputMontoOriginal.value) || 0;
-        const monedaPago = document.querySelector('input[name="moneda"]:checked').value; 
+        const monedaPago = document.querySelector('input[name="moneda"]:checked').value;
         const tipoCambio = estadoFinanciero.tipoCambio;
 
         let amortizacionCalculadaPEN = 0;
 
-    
+
         if (monedaPago === 'USD') {
             if (tipoCambio <= 0) {
                 mostrarAlerta('error', 'El tipo de cambio no está disponible. No se puede calcular el monto en Soles.');
-                return; 
+                return;
             }
             amortizacionCalculadaPEN = montoOriginal * tipoCambio;
-        } else { 
+        } else {
             amortizacionCalculadaPEN = montoOriginal;
         }
 
@@ -642,20 +649,20 @@
         let amortizacionConvertidaACotizacion = 0;
 
         if (estadoFinanciero.monedaCotizacion === 'USD') {
-            if (tipoCambio <= 0) return; 
+            if (tipoCambio <= 0) return;
             amortizacionConvertidaACotizacion = amortizacionCalculadaPEN / tipoCambio;
-        } else { 
+        } else {
             amortizacionConvertidaACotizacion = amortizacionCalculadaPEN;
         }
 
         const nuevoSaldoRestante = saldoPendienteBase - amortizacionConvertidaACotizacion;
 
-     
+
         const formato = {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         };
-        const simbolo = estadoFinanciero.simboloCotizacion; 
+        const simbolo = estadoFinanciero.simboloCotizacion;
 
         if (montoOriginal > 0) {
             els.uiMontoAPagarContainer.style.display = 'block';
@@ -726,7 +733,7 @@
             if (medioPago !== 'Transferencia Bancaria' && !datos.get('numerotransaccion').trim()) return 'Debe ingresar el número de operación.';
         }
 
-        return null; 
+        return null;
     }
 
     /**
@@ -742,7 +749,7 @@
         const formData = new FormData(els.formularioPago);
         const amortizacionFinal = parseFloat(els.inputAmortizacionFinalPEN.value);
 
-        
+
         let amortizacionConvertidaACotizacion = 0;
         if (estadoFinanciero.monedaCotizacion === 'USD') {
             amortizacionConvertidaACotizacion = amortizacionFinal / estadoFinanciero.tipoCambio;
@@ -751,9 +758,9 @@
         }
         const nuevoSaldoRestante = estadoFinanciero.saldoPendiente - amortizacionConvertidaACotizacion;
 
-    
+
         formData.append('saldorestante', nuevoSaldoRestante.toFixed(2));
-   
+
         formData.set('amortizacion', amortizacionFinal.toFixed(2));
 
         const registrarBtn = els.formularioPago.querySelector('button[type="submit"]');
@@ -783,7 +790,7 @@
         }
     }
 
-  
+
     function limpiarFormulario() {
         els.formularioPago.reset();
         document.getElementById('monedaPEN').checked = true;
@@ -825,7 +832,7 @@
         radio.addEventListener('change', async function() {
             if (this.value === 'USD') {
                 els.simboloMonedaPago.textContent = '$';
-                await fetchTipoCambio(true); 
+                await fetchTipoCambio(true);
             } else {
                 els.simboloMonedaPago.textContent = 'S/';
                 els.inputTipoCambio.value = '';
@@ -863,6 +870,326 @@
         }
     });
 
+
+    async function getPagos(id) {
+        try {
+            const req = await fetch(`/api/pagosCotizacion/${id}`);
+            const res = await req.json();
+
+
+            if (res.success && res.data && res.data.length > 0) {
+                return res.data;
+            }
+
+            return [];
+
+        } catch (error) {
+            console.error("Error al obtener pagos:", error);
+            return [];
+        }
+    }
+
+
+  
+    function generarCuerpoTablaPagos(pagos) {
     
+        const headerStyle = {
+            text: '',
+            bold: true,
+            color: 'white',
+            fillColor: '#007bff',
+            alignment: 'center'
+        };
+
+       
+        const body = [
+            [{
+                    ...headerStyle,
+                    text: 'Fecha'
+                },
+                {
+                    ...headerStyle,
+                    text: 'Medio de Pago'
+                },
+                {
+                    ...headerStyle,
+                    text: 'N° Transacción'
+                },
+                {
+                    ...headerStyle,
+                    text: 'Monto Pagado'
+                },
+                {
+                    ...headerStyle,
+                    text: 'Saldo Restante'
+                }
+            ]
+        ];
+
+        let totalPagado = 0;
+        let simbolo = 'S/'; 
+
+       
+        pagos.forEach(pago => {
+            const monto = parseFloat(pago.monto_pago);
+            const saldo = parseFloat(pago.saldorestante);
+            simbolo = pago.moneda_simbolo ?? 'S/';
+            totalPagado += monto;
+
+            body.push([{
+                    text: pago.fechapago,
+                    alignment: 'center'
+                },
+                {
+                    text: pago.mediopago ?? '-'
+                },
+                {
+                    text: pago.numerotransaccion ?? '-',
+                    alignment: 'center'
+                },
+                {
+                    text: `${simbolo} ${monto.toFixed(2)}`,
+                    alignment: 'right'
+                },
+                // Mostramos el saldo restante del último pago
+                {
+                    text: `${simbolo} ${saldo.toFixed(2)}`,
+                    alignment: 'right'
+                }
+            ]);
+        });
+
+       
+        body.push([{
+                text: 'TOTAL PAGADO',
+                bold: true,
+                colSpan: 3,
+                alignment: 'right',
+                margin: [0, 5, 0, 5]
+            },
+            {}, 
+            {},
+            {
+                text: `${simbolo} ${totalPagado.toFixed(2)}`,
+                bold: true,
+                alignment: 'right',
+                margin: [0, 5, 0, 5]
+            },
+            {
+                text: '',
+                margin: [0, 5, 0, 5]
+            } 
+        ]);
+
+        return body;
+    }
+
+     
+
+    if (els.btnExportarPagos) {
+
+      
+        els.btnExportarPagos.addEventListener('click', async (e) => {
+
+            
+            const idCotizacion = e.target.dataset.id;
+            const vehiculo = e.target.dataset.vehiculo; 
+            const precioVenta = e.target.dataset.precioventa; 
+            const cliente = e.target.dataset.cliente; 
+
+            if (idCotizacion) {
+
+                
+                const datosPagos = await getPagos(idCotizacion);
+
+                if (datosPagos.length === 0) {
+                    alert('No hay pagos registrados para exportar.');
+                    return;
+                }
+
+                
+                const cuerpoTabla = generarCuerpoTablaPagos(datosPagos);
+
+                
+                const vehiculoParts = vehiculo.split(' / '); 
+                const monedaSimbolo = datosPagos[0].moneda_simbolo ?? 'S/';
+
+             
+                const documento = {
+                    pageSize: 'A4',
+                    pageOrientation: 'portrait',
+                    pageMargins: [40, 25, 40, 25], 
+                    defaultStyle: {
+                        fontSize: 9,
+                        color: '#333333' 
+                    },
+                    content: [
+                      
+                        {
+                            columns: [{
+                                    image: window.logoBase64,
+                                    width: 80,
+                                    alignment: 'left'
+                                },
+                                {
+                                    stack: [{
+                                            text: 'YONDA & GRUPO HUARACA E.I.R.L',
+                                            bold: true,
+                                            color: '#2c3e50',
+                                            alignment: 'right',
+                                            fontSize: 12
+                                        },
+                                        {
+                                            text: 'RUC: 20609396866',
+                                            margin: [0, 2, 0, 0],
+                                            bold: true,
+                                            alignment: 'right'
+                                        }
+                                    ],
+                                    alignment: 'right'
+                                }
+                            ],
+                            margin: [0, 0, 0, 10] 
+                        },
+
+                      
+                        {
+                            text: `HISTORIAL DE PAGOS DE INICIAL`,
+                            style: 'header',
+                            alignment: 'center',
+                            margin: [0, 5, 0, 5]
+                        },
+                        {
+                            text: `COTIZACIÓN N°: ${idCotizacion}`,
+                            style: 'subheader',
+                            alignment: 'center',
+                            margin: [0, 0, 0, 15],
+                            decoration: 'underline'
+                        },
+
+                        {
+                            text: 'DATOS GENERALES DE LA OPERACIÓN',
+                            style: 'sectionHeader',
+                            margin: [0, 10, 0, 5]
+                        },
+                        {
+                          
+                            columns: [
+                                
+                                {
+                                    width: '50%',
+                                    stack: [{
+                                            text: 'CLIENTE:',
+                                            style: 'label'
+                                        },
+                                        {
+                                            text: cliente,
+                                            style: 'data'
+                                        }
+                                    ]
+                                },
+                                
+                                {
+                                    width: '50%',
+                                    stack: [{
+                                            text: 'VEHÍCULO:',
+                                            style: 'label'
+                                        },
+                                        {
+                                            text: `${vehiculoParts[0] ?? ''} ${vehiculoParts[1] ?? ''}`,
+                                            style: 'data',
+                                            margin: [0, 0, 0, 0]
+                                        },
+                                        {
+                                            text: `Año: ${vehiculoParts[2] ?? ''} / Color: ${vehiculoParts[3] ?? ''}`,
+                                            style: 'data',
+                                            fontSize: 8
+                                        }
+                                    ]
+                                }
+                            ],
+                            margin: [0, 0, 0, 10]
+                        },
+                       
+                        {
+                            width: '100%',
+                            stack: [{
+                                    text: 'PRECIO TOTAL DE VENTA:',
+                                    style: 'label'
+                                },
+                                {
+                                    text: `${monedaSimbolo} ${parseFloat(precioVenta).toFixed(2)}`,
+                                    style: 'data',
+                                    fontSize: 12,
+                                    bold: true,
+                                    color: '#007bff'
+                                }
+                            ],
+                            margin: [0, 0, 0, 15]
+                        },
+
+
+                      
+                        {
+                            text: 'RESUMEN DE PAGOS REALIZADOS',
+                            style: 'sectionHeader',
+                            margin: [0, 0, 0, 5]
+                        },
+                        {
+                            table: {
+                                headerRows: 1,
+                                widths: ['auto', '*', 'auto', 'auto', 'auto'],
+                                body: cuerpoTabla 
+                            },
+                            layout: {
+                                fillColor: (rowIndex) => (rowIndex === 0) ? '#007bff' : (rowIndex % 2 !== 0) ? '#f8f9fa' : null,
+                                hLineWidth: () => 0.5, 
+                                vLineWidth: () => 0.5, 
+                                hLineColor: () => '#DDDDDD',
+                                vLineColor: () => '#DDDDDD'
+                            }
+                        }
+                    ],
+                    // Estilos Profesionales
+                    styles: {
+                        header: {
+                            fontSize: 16,
+                            bold: true,
+                            color: '#343a40'
+                        },
+                        subheader: {
+                            fontSize: 12,
+                            bold: true,
+                            color: '#555555'
+                        },
+                        sectionHeader: {
+                            bold: true,
+                            color: '#007bff',
+                            fontSize: 10,
+                            decoration: 'underline',
+                            decorationColor: '#DDDDDD'
+                        },
+                        label: {
+                            bold: true,
+                            color: '#666666',
+                            fontSize: 8,
+                            margin: [0, 0, 0, 2] 
+                        },
+                        data: {
+                            color: '#000000',
+                            fontSize: 9,
+                            margin: [0, 0, 0, 8] 
+                        }
+                    }
+                };
+
+                // 6. Creamos el PDF
+                pdfMake.createPdf(documento).open();
+            }
+        });
+    }
+    // getPagos(109);
     fetchTipoCambio();
 </script>
+
+<?php include __DIR__ . '/../layout/footer.php'; ?>
