@@ -537,4 +537,20 @@ class CobranzaController extends Controller
         }
     }
 
+    public function getDetalleVencidas($idContrato): void
+    {
+        $this->authRequired();
+        header('Content-Type: application/json');
+
+        try {
+            $this->cobranzaModel->getDetalleVencidas($idContrato);
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Error al obtener detalle de vencidas'
+            ]);
+        }
+    }
+
 }

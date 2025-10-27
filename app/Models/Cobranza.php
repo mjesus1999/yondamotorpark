@@ -406,4 +406,24 @@ class Cobranza
         return $diferencia >= 1;
     }
 
+    public function getDetalleVencidas($idContrato)
+    {
+        try {
+            $stmt = $this->db->prepare("CALL sp_get_detalle_cuotas_vencidas(?)");
+            $stmt->execute([$idContrato]);
+            $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            $this->sendJSON([
+                'success' => true,
+                'data' => $data
+            ]);
+        } catch (PDOException $e) {
+            $this->sendJSON([
+                'success' => false,
+                'message' => 'Error al obtener detalle: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+
 }

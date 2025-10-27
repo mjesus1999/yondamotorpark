@@ -1,7 +1,12 @@
 <?php include __DIR__ . '/../layout/header.php'; ?>
 <link href="https://unpkg.com/tabulator-tables@5.5.2/dist/css/tabulator_simple.min.css" rel="stylesheet">
 <link rel="stylesheet" href="/assets/css/tabulator.css">
-
+<!-- <style>
+    .tabulator-placeholder {
+        background-color: #585858ff !important;
+        color: #383838ff !important;
+    }
+</style> -->
 <div class="container-fluid">
 
     <!-- CABECERA -->
@@ -18,6 +23,9 @@
                 </nav>
             </div>
             <div class="col-md-6 text-end">
+                <button id="btn-exportar-excel" class="btn btn-sm btn-success">
+                    <i class="bi bi-file-earmark-excel me-1"></i> Exportar Excel
+                </button>
                 <a href="#" class="btn btn-sm btn-outline-success">
                     <i class="bi bi-arrow-clockwise me-1"></i> Actualizar</a>
                 <a href="/Cobranza" class="btn btn-sm btn-outline-primary">Volver</a>
@@ -27,59 +35,6 @@
 
     <div class="card">
 
-        <!-- <div class="card-header d-none d-md-flex justify-content-between align-items-center">
-            <div>
-                <div class="btn-group">
-                    <button class="btn btn-success btn-sm btn-exportar-excel" onclick="exportarVencidosExcel(false)">
-                        <i class="bi bi-file-earmark-excel me-1"></i>Exportar Excel
-                    </button>
-                    <button type="button" class="btn btn-success btn-sm dropdown-toggle dropdown-toggle-split"
-                        data-bs-toggle="dropdown" aria-expanded="false">
-                        <span class="visually-hidden">Opciones</span>
-                    </button>
-                    <ul class="dropdown-menu">
-                        <li>
-                            <a class="dropdown-item" href="#"
-                                onclick="event.preventDefault(); exportarVencidosExcel(false)">
-                                <i class="bi bi-list-ul me-2"></i>Exportar Todos
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="#"
-                                onclick="event.preventDefault(); exportarVencidosExcel(true)">
-                                <i class="bi bi-funnel me-2"></i>Exportar Solo Filtrados
-                            </a>
-                        </li>
-                        <li>
-                            <hr class="dropdown-divider">
-                        </li>
-                        <li>
-                            <span class="dropdown-item-text text-muted small">
-                                <i class="bi bi-info-circle me-1"></i>
-                                El filtrado respeta las cuotas vencidas seleccionadas
-                            </span>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-            <div>
-                <button class="btn btn-outline-primary btn-sm me-2 btn-filtro-tramo" data-tramo="1">
-                    <i class="bi bi-funnel me-1"></i>1 vencida (0)
-                </button>
-                <button class="btn btn-outline-primary btn-sm me-2 btn-filtro-tramo" data-tramo="2">
-                    <i class="bi bi-funnel me-1"></i>2 vencidas (0)
-                </button>
-                <button class="btn btn-outline-primary btn-sm me-2 btn-filtro-tramo" data-tramo="3">
-                    <i class="bi bi-funnel me-1"></i>3 vencidas (0)
-                </button>
-                <button class="btn btn-outline-primary btn-sm me-2 btn-filtro-tramo" data-tramo="4+">
-                    <i class="bi bi-funnel me-1"></i>4 a + vencidas (0)
-                </button>
-                <button class="btn btn-warning btn-sm btn-filtro-tramo active" data-tramo="todos">
-                    <i class="bi bi-list-ul me-1"></i>Todos
-                </button>
-            </div>
-        </div> -->
         <div class="card-header d-none d-md-flex justify-content-end">
 
             <button class="btn btn-outline-primary btn-sm me-2 btn-filtro-tramo" data-tramo="1">
@@ -143,35 +98,8 @@
 <script src="https://unpkg.com/tabulator-tables@5.5.2/dist/js/tabulator.min.js"></script>
 
 <script>
-    /* function cargarVencidos() {
-        return new Promise((resolve, reject) => {
-            fetch('/Cobranza/getVencidos', { cache: 'no-store' })
-                .then(async response => {
-                    const text = await response.text();
-                    try {
-                        const data = JSON.parse(text);
-                        if (response.ok) {
-                            if (data && data.success) {
-                                resolve(data.data || []);
-                            } else {
-                                reject(new Error(data.message || 'Respuesta inválida del servidor'));
-                            }
-                        } else {
-                            reject(new Error(data && data.message ? `Error ${response.status}: ${data.message}` : `Error HTTP ${response.status}`));
-                        }
-                    } catch (err) {
-                        console.error('Respuesta no JSON recibida:', text);
-                        reject(new Error('Respuesta inválida del servidor (no JSON). Revisa el endpoint.'));
-                    }
-                })
-                .catch(error => {
-                    console.error('Fetch error:', error);
-                    reject(error);
-                });
-        });
-    } */
-
     let tablaGlobal = null;
+    let tramoActivo = 'todos';
 
     function cargarVencidos() {
         return new Promise((resolve, reject) => {
@@ -270,6 +198,8 @@
     function filtrarPorTramo(tramo) {
         if (!tablaGlobal) return;
 
+        tramoActivo = tramo; // Guardar el tramo activo
+
         // Remover clase active de todos los botones
         document.querySelectorAll('.btn-filtro-tramo').forEach(btn => {
             btn.classList.remove('active');
@@ -285,21 +215,54 @@
             btnActivo.classList.add('btn-warning');
         }
 
-        // Aplicar filtro
-        if (tramo === 'todos') {
-            tablaGlobal.clearFilter();
-        } else if (tramo === '1') {
-            tablaGlobal.setFilter("cuotas_vencidas", "=", 1);
-        } else if (tramo === '2') {
-            tablaGlobal.setFilter("cuotas_vencidas", "=", 2);
-        } else if (tramo === '3') {
-            tablaGlobal.setFilter("cuotas_vencidas", "=", 3);
-        } else if (tramo === '4+') {
-            tablaGlobal.setFilter("cuotas_vencidas", ">=", 4);
-        }
+        // Aplicar filtro combinado
+        aplicarFiltrosCombinados();
 
         // Actualizar contadores
         actualizarContadores();
+    }
+
+    function aplicarFiltrosCombinados() {
+        if (!tablaGlobal) return;
+
+        const searchInput = document.getElementById("busqueda-global");
+        const searchValue = searchInput ? searchInput.value.trim() : '';
+
+        // Construir filtros
+        let filtros = [];
+
+        // Filtro de búsqueda
+        if (searchValue !== '') {
+            filtros.push([
+                { field: "cliente", type: "like", value: searchValue },
+                { field: "telefono", type: "like", value: searchValue },
+                { field: "vehiculo", type: "like", value: searchValue },
+                /* { field: "tienda", type: "like", value: searchValue }, */
+                { field: "ubicacion_cliente", type: "like", value: searchValue },
+                { field: "provincia_cliente", type: "like", value: searchValue },
+                { field: "distrito_cliente", type: "like", value: searchValue }
+            ]);
+        }
+
+        // Filtro de tramo (si no es "todos")
+        if (tramoActivo !== 'todos') {
+            if (tramoActivo === '1') {
+                filtros.push({ field: "cuotas_vencidas", type: "=", value: 1 });
+            } else if (tramoActivo === '2') {
+                filtros.push({ field: "cuotas_vencidas", type: "=", value: 2 });
+            } else if (tramoActivo === '3') {
+                filtros.push({ field: "cuotas_vencidas", type: "=", value: 3 });
+            } else if (tramoActivo === '4+') {
+                filtros.push({ field: "cuotas_vencidas", type: ">=", value: 4 });
+            }
+        }
+
+        // Aplicar filtros
+        if (filtros.length === 0) {
+            tablaGlobal.clearFilter();
+        } else {
+            tablaGlobal.setFilter(filtros);
+        }
     }
 
     function actualizarContadores() {
@@ -324,26 +287,6 @@
         if (btn4) btn4.innerHTML = `<i class="bi bi-funnel me-1"></i>4 a + vencidas (${count4})`;
     }
 
-    /* function actualizarContadores() {
-        if (!tablaGlobal) return;
-
-        const datosCompletos = tablaGlobal.getData();
-
-        const count1 = datosCompletos.filter(r => parseInt(r.cuotas_vencidas) === 1).length;
-        const count2 = datosCompletos.filter(r => parseInt(r.cuotas_vencidas) === 2).length;
-        const count3 = datosCompletos.filter(r => parseInt(r.cuotas_vencidas) === 3).length;
-        const count4 = datosCompletos.filter(r => parseInt(r.cuotas_vencidas) >= 4).length;
-
-        document.querySelector('[data-tramo="1"]').innerHTML = 
-            `<i class="bi bi-funnel me-1"></i>1 vencida (${count1})`;
-        document.querySelector('[data-tramo="2"]').innerHTML = 
-            `<i class="bi bi-funnel me-1"></i>2 vencidas (${count2})`;
-        document.querySelector('[data-tramo="3"]').innerHTML = 
-            `<i class="bi bi-funnel me-1"></i>3 vencidas (${count3})`;
-        document.querySelector('[data-tramo="4+"]').innerHTML = 
-            `<i class="bi bi-funnel me-1"></i>4 a + vencidas (${count4})`;
-    } */
-
     function formatMoneda(valor) {
         const n = parseFloat(valor) || 0;
         return 'S/. ' + n.toFixed(2);
@@ -366,6 +309,88 @@
         nt.innerHTML = `<div class="d-flex align-items-center"><i class="fas fa-${tipo === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i><div>${mensaje}</div><button type="button" class="btn-close ms-auto" onclick="this.parentElement.parentElement.remove()"></button></div>`;
         document.body.appendChild(nt);
         setTimeout(() => nt.remove(), 5000);
+    }
+
+    //FUNCIONES PARA MOSTRAR EL MODAL DE VENCIDOS EN ESTADO DE PAGO
+    function obtenerDetalleVencidas(idContrato) {
+        return new Promise((resolve, reject) => {
+            fetch(`/Cobranza/getDetalleVencidas/${idContrato}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        resolve(data.data);
+                    } else {
+                        reject(new Error('No se pudieron cargar los detalles'));
+                    }
+                })
+                .catch(err => reject(err));
+        });
+    }
+
+    function mostrarPopoverVencidas(element, detalles) {
+        // Remover popovers existentes
+        document.querySelectorAll('.popover-vencidas').forEach(p => p.remove());
+
+        if (!detalles || detalles.length === 0) {
+            return;
+        }
+
+        const popover = document.createElement('div');
+        popover.className = 'popover-vencidas';
+        popover.style.cssText = `
+            position: absolute;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 10000;
+            max-width: 280px;
+            font-size: 13px;
+        `;
+
+        let html = '<div style="font-weight: 600; margin-bottom: 8px; color: #333; border-bottom: 1px solid #eee; padding-bottom: 6px;">Cuotas Vencidas</div>';
+
+        detalles.forEach((cuota, index) => {
+            const badgeColor = index === 0 ? '#dc3545' : '#6c757d';
+            html += `
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid #f5f5f5;">
+                    <span style="color: #666;">
+                        <span style="background: ${badgeColor}; color: white; padding: 2px 6px; border-radius: 3px; font-size: 11px; margin-right: 6px;">
+                            Cuota ${cuota.numcuota}
+                        </span>
+                        ${cuota.fecha_formateada} -
+                    </span>
+                    <span style="color: #dc3545; font-weight: 600; font-size: 12px;">
+                        > ${formatMoneda(cuota.monto)}
+                    </span>
+                </div>
+            `;
+        });
+
+        html += `
+            <div style="margin-top: 8px; padding-top: 8px; border-top: 2px solid #eee; display: flex; justify-content: space-between; font-weight: 600;">
+                <span style="color: #666;">Total:</span>
+                <span style="color: #dc3545;">${formatMoneda(detalles.reduce((sum, c) => sum + parseFloat(c.monto), 0))}</span>
+            </div>
+        `;
+
+        popover.innerHTML = html;
+        document.body.appendChild(popover);
+
+        const rect = element.getBoundingClientRect();
+        popover.style.top = `${rect.bottom + window.scrollY + 5}px`;
+        popover.style.left = `${rect.left + window.scrollX}px`;
+
+        // Cerrar al hacer clic fuera
+        setTimeout(() => {
+            document.addEventListener('click', function closePopover(e) {
+                if (!popover.contains(e.target) && e.target !== element) {
+                    popover.remove();
+                    document.removeEventListener('click', closePopover);
+                }
+            });
+        }, 100);
     }
 
     //Inicializar
@@ -423,8 +448,9 @@
                 paginationSizeSelector: [10, 15, 25, 50],
                 movableRows: false,
                 reactiveData: false,
+                placeholder: "No se encontraron resultados",
                 /* dataLoaded: function () {
-                    actualizarContadores(); // ← Se ejecuta DESPUÉS de cargar los datos
+                    actualizarContadores();
                 }, */
                 columns: [
                     { title: "#", formatter: "rownum", width: 45, hozAlign: "center" },
@@ -435,6 +461,8 @@
                     { title: "Vehículo", field: "vehiculo", width: 300, tooltip: true },
                     { title: "Tienda", field: "tienda", width: 100, tooltip: true, hozAlign: "center" },
                     { title: "Cuotas T.", field: "cuotas_totales", with: 100, hozAlign: "center", tooltip: true },
+                    { title: "Monto Cuota", field: "monto_primera_vencida", width: 140, hozAlign: "right", tooltip: true, formatter: function (cell) { return formatMoneda(cell.getValue()); } },
+                    { title: "Deuda", field: "deuda_vencida", width: 120, hozAlign: "right", tooltip: true, formatter: function (cell) { const v = parseFloat(cell.getValue()) || 0; return `<span class="${v > 0 ? 'text-danger fw-bold' : ''}">${formatMoneda(v)}</span>`; } },
                     {
                         title: "C. Venc.", field: "cuotas_vencidas", width: 100, hozAlign: "center", tooltip: true,
                         formatter: function (cell) {
@@ -447,9 +475,24 @@
                             return `<span class="${badge}">${val}</span>`;
                         }
                     },
-                    { title: "Monto Cuota", field: "monto_primera_vencida", width: 140, hozAlign: "right", tooltip: true, formatter: function (cell) { return formatMoneda(cell.getValue()); } },
-                    { title: "Deuda", field: "deuda_vencida", width: 120, hozAlign: "right", tooltip: true, formatter: function (cell) { const v = parseFloat(cell.getValue()) || 0; return `<span class="${v > 0 ? 'text-danger fw-bold' : ''}">${formatMoneda(v)}</span>`; } },
-                    { title: "Estado de pagos", field: "estado_pagos", width: 150, tooltip: true, hozAlign: "center" },
+                    /* { title: "Estado de pagos", field: "estado_pagos", width: 150, tooltip: true, hozAlign: "center" }, */
+                    {
+                        title: "Estado de pagos",
+                        field: "estado_pagos",
+                        width: 150,
+                        tooltip: true,
+                        hozAlign: "center",
+                        formatter: function (cell) {
+                            const value = cell.getValue();
+                            const rowData = cell.getRow().getData();
+
+                            return `<span class="estado-pagos-clickable" 
+                                        data-contrato="${rowData.idcontrato}" 
+                                        style="cursor: pointer; color: #0d6efd; text-decoration: underline; text-decoration-style: dotted;">
+                                        ${value}
+                                    </span>`;
+                        }
+                    },
                     { title: "Cuota P.", field: "cuotas_pagadas", width: 100, hozAlign: "center", tooltip: true },
                     {
                         title: "Reporte",
@@ -493,61 +536,50 @@
                 btnTodos.classList.remove('btn-primary');
                 btnTodos.classList.add('btn-warning');
             }
-            /* actualizarContadores(); */
 
-            // busqueda global
+            // BÚSQUEDA GLOBAL - Event listener para el input
             const searchInput = document.getElementById("busqueda-global");
             if (searchInput) {
                 searchInput.addEventListener("keyup", function (e) {
-                    const value = e.target.value.trim();
-                    if (value === "") {
-                        tablaGlobal.clearFilter();
-                        return;
-                    }
-                    tablaGlobal.setFilter([
-                        [
-                            { field: "cliente", type: "like", value: value },
-                            /* { field: "ndocumento", type: "like", value: value }, */
-                            { field: "telefono", type: "like", value: value },
-                            { field: "vehiculo", type: "like", value: value },
-                            { field: "tienda", type: "like", value: value },
-                            { field: "ubicacion_cliente", type: "like", value: value }
-                        ]
-                    ]);
+                    aplicarFiltrosCombinados(); // ← Esto aplica búsqueda + filtro de tramo
                 });
             }
 
-            contTabla.addEventListener('click', function (e) {
+            contTabla.addEventListener('click', async function (e) {
+                // 1. Verificar si es clic en "Estado de pagos"
+                const estadoPagos = e.target.closest('.estado-pagos-clickable');
+                if (estadoPagos) {
+                    const contrato = estadoPagos.dataset.contrato;
+                    estadoPagos.style.opacity = '0.5';
+
+                    try {
+                        const detalles = await obtenerDetalleVencidas(contrato);
+                        mostrarPopoverVencidas(estadoPagos, detalles);
+                    } catch (err) {
+                        console.error('Error al cargar detalles:', err);
+                        mostrarNotificacion('No se pudo cargar el detalle', 'warning');
+                    } finally {
+                        estadoPagos.style.opacity = '1';
+                    }
+                    return;
+                }
+
+                // 2. Verificar si es clic en botones PDF
                 const atrasadoBtn = e.target.closest('.btn-pdf-atrasado');
                 const recojoBtn = e.target.closest('.btn-pdf-recojo');
 
                 if (atrasadoBtn) {
                     const contrato = atrasadoBtn.dataset.contrato;
-                    // CAMBIO: URL limpia sin parámetros query
                     window.open(`/reportesAtrasado/${contrato}`, '_blank');
+                    return;
                 }
 
                 if (recojoBtn) {
                     const contrato = recojoBtn.dataset.contrato;
-                    // CAMBIO: URL limpia sin parámetros query
                     window.open(`/reportesRecojo/${contrato}`, '_blank');
+                    return;
                 }
             });
-            /* // Delegación de eventos para botones dentro de Tabulator (Reportes)
-            contTabla.addEventListener('click', function (e) {
-                const atrasadoBtn = e.target.closest('.btn-pdf-atrasado');
-                const recojoBtn = e.target.closest('.btn-pdf-recojo');
-
-                if (atrasadoBtn) {
-                    const contrato = atrasadoBtn.dataset.contrato;
-                    window.open('/reportesAtrasado?contrato=' + encodeURIComponent(contrato), '_blank');
-                }
-
-                if (recojoBtn) {
-                    const contrato = recojoBtn.dataset.contrato;
-                    window.open('/reportesRecojo?contrato=' + encodeURIComponent(contrato), '_blank');
-                }
-            }); */
 
             //Construir acordeón para móvil
             const gruposHtml = [];
@@ -555,7 +587,6 @@
             datos.forEach(row => {
                 const id = `vencido-${row.idcontrato}`;
 
-                // Badge color según cuotas vencidas
                 let badgeColor = 'secondary';
                 const cv = parseInt(row.cuotas_vencidas);
                 if (cv >= 4) badgeColor = 'danger';
@@ -575,6 +606,8 @@
                             <div class="accordion-body">
                                 <ul class="list-group list-group-flush">
                                     <li class="list-group-item"><strong>#:</strong> ${contador++}</li>
+                                    <li class="list-group-item"><strong>Provincia:</strong> ${escapeHtml(row.provincia_cliente)}</li>
+                                    <li class="list-group-item"><strong>Distrito:</strong> ${escapeHtml(row.distrito_cliente)}</li>
                                     <li class="list-group-item"><strong>Telefono:</strong> ${escapeHtml(row.telefono)}</li>
                                     <li class="list-group-item"><strong>N° Documento:</strong> ${escapeHtml(row.documento)}</li>
                                     <li class="list-group-item"><strong>Vehículo:</strong> ${escapeHtml(row.vehiculo)}</li>
@@ -583,7 +616,15 @@
                                     <li class="list-group-item"><strong>Cuotas Vencidas:</strong> <span class="badge bg-${badgeColor}">${cv}</span></li>
                                     <li class="list-group-item"><strong>Monto Cuota:</strong> ${formatMoneda(row.monto_primera_vencida)}</li>
                                     <li class="list-group-item"><strong>Deuda:</strong> <span class="${(parseFloat(row.deuda_vencida) || 0) > 0 ? 'text-danger fw-bold' : ''}">${formatMoneda(row.deuda_vencida)}</span></li>
-                                    <li class="list-group-item"><strong>Estado pagos:</strong> ${escapeHtml(row.estado_pagos)}</li>
+                                    <li class="list-group-item">
+                                        <strong>Estado pagos:</strong> 
+                                        <span class="estado-pagos-clickable" 
+                                            data-contrato="${row.idcontrato}" 
+                                            style="cursor: pointer; color: #0d6efd; text-decoration: underline; text-decoration-style: dotted;">
+                                            ${escapeHtml(row.estado_pagos)}
+                                        </span>
+                                    </li>
+                                    <li class="list-group-item"><strong>Cuotas Pagadas:</strong> ${escapeHtml(row.cuotas_pagadas)}</li>
                                     <li class="list-group-item d-flex gap-2">
                                         <button class="btn btn-sm btn-danger w-100 btn-pdf-atrasado" data-contrato="${row.idcontrato}">Notificar PDF</button>
                                         <button class="btn btn-sm btn-danger w-100 btn-pdf-recojo" data-contrato="${row.idcontrato}">Recojo PDF</button>
@@ -597,36 +638,41 @@
             });
             acordeon.innerHTML = `<div class="accordion" id="acordeonVencidos">${gruposHtml.join('')}</div>`;
 
-            acordeon.addEventListener('click', function (e) {
+            acordeon.addEventListener('click', async function (e) {
+                // 1. Verificar si es clic en "Estado de pagos"
+                const estadoPagos = e.target.closest('.estado-pagos-clickable');
+                if (estadoPagos) {
+                    const contrato = estadoPagos.dataset.contrato;
+                    estadoPagos.style.opacity = '0.5';
+
+                    try {
+                        const detalles = await obtenerDetalleVencidas(contrato);
+                        mostrarPopoverVencidas(estadoPagos, detalles);
+                    } catch (err) {
+                        console.error('Error al cargar detalles:', err);
+                        mostrarNotificacion('No se pudo cargar el detalle', 'warning');
+                    } finally {
+                        estadoPagos.style.opacity = '1';
+                    }
+                    return; // ← Importante: detener aquí
+                }
+
+                // 2. Verificar si es clic en botones PDF
                 const atrasadoBtn = e.target.closest('.btn-pdf-atrasado');
                 const recojoBtn = e.target.closest('.btn-pdf-recojo');
 
                 if (atrasadoBtn) {
                     const contrato = atrasadoBtn.dataset.contrato;
-                    // CAMBIO: URL limpia sin parámetros query
                     window.open(`/reportesAtrasado/${contrato}`, '_blank');
+                    return;
                 }
 
                 if (recojoBtn) {
                     const contrato = recojoBtn.dataset.contrato;
-                    // CAMBIO: URL limpia sin parámetros query
                     window.open(`/reportesRecojo/${contrato}`, '_blank');
+                    return;
                 }
             });
-
-            /* // Delegación para botones móviles:
-            acordeon.addEventListener('click', function (e) {
-                const atrasadoBtn = e.target.closest('.btn-pdf-atrasado');
-                const recojoBtn = e.target.closest('.btn-pdf-recojo');
-                if (atrasadoBtn) {
-                    const contrato = atrasadoBtn.dataset.contrato;
-                    window.open('/reportesAtrasado?contrato=' + encodeURIComponent(contrato), '_blank');
-                }
-                if (recojoBtn) {
-                    const contrato = recojoBtn.dataset.contrato;
-                    window.open('/reportesRecojo?contrato=' + encodeURIComponent(contrato), '_blank');
-                }
-            }); */
 
         } catch (err) {
             console.error('Error al cargar vencidos:', err);
