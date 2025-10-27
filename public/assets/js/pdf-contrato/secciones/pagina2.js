@@ -1,21 +1,22 @@
+import { formatNumber } from "./helpers.js";
+import { getMonedaSymbol } from "./helpers.js";
+// function formatNumber(numStr) {
+//     if (!numStr) return '0.00';
+//     const num = parseFloat(numStr);
+//     if (isNaN(num)) return '0.00';
 
-function formatNumber(numStr) {
-    if (!numStr) return '0.00';
-    const num = parseFloat(numStr);
-    if (isNaN(num)) return '0.00';
-
-    return new Intl.NumberFormat('es-PE', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-    }).format(num);
-}
+//     return new Intl.NumberFormat('es-PE', {
+//         minimumFractionDigits: 2,
+//         maximumFractionDigits: 2
+//     }).format(num);
+// }
 
 /**
  * Obtiene el símbolo de la moneda
  */
-function getMonedaSymbol(monedaCode) {
-    return (monedaCode === 'PEN') ? 'S/ ' : '$ ';
-}
+// function getMonedaSymbol(monedaCode) {
+//     return (monedaCode === 'PEN') ? 'S/ ' : '$ ';
+// }
 
 
 function crearCeldaVehiculo(label, value) {

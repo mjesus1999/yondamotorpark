@@ -10,40 +10,40 @@ import { getPagina9 } from './secciones/pagina9.js';
 
 async function generarPDFContrato(data) {
     try {
-        // console.log('Datos del contrato para PDF:', data);
+       
 
         const docDefinition = {
             pageSize: 'A4',
             pageOrientation: 'portrait',
             header: {
                 image: window.cabeceraYonda,
-                width: 620,
-                height:40,
+                width: 623,
+                height: 40,
                 alignment: 'left',
                 margin: [-23, 25, 0, 20]
             },
             content: [
                 ...getPagina1(data),
-                { text: '', pageBreak: 'before'},
+                { text: '', pageBreak: 'before' },
                 ...getPagina2(data),
-                { text: '', pageBreak: 'before'},
+                { text: '', pageBreak: 'before' },
                 ...getPagina3(),
-                {text:'',pageBreak:'before'},
+                { text: '', pageBreak: 'before' },
                 ...getPagina4(),
-                {text:'', pageBreak:'before'},
+                { text: '', pageBreak: 'before' },
                 getPagina5(),
-                {text:'',pageBreak:'before'},
+                { text: '', pageBreak: 'before' },
                 ...getPagina6(),
-                {text:'', pageBreak:'before'},
+                { text: '', pageBreak: 'before' },
                 ...getPagina7(data),
-                {text:'', pageBreak:'before'},
+                { text: '', pageBreak: 'before' },
                 getPagina8(data),
-                {text:'',pageBreak:'before'},
+                { text: '', pageBreak: 'before' },
                 getPagina9(data),
 
-               
+
             ],
-             footer: function() {
+            footer: function () {
                 return {
                     columns: [{
                         image: window.footerYonda,
@@ -53,78 +53,118 @@ async function generarPDFContrato(data) {
                     }]
                 };
             },
-           styles: {
-              
-                titulo: { 
-                    
-                    bold: true, 
-                    alignment: 'center' 
-                },
-                
-            
-                tituloContrato: {
-                   
+            styles: {
+
+                titulo: {
+
                     bold: true,
-                    fontSize:10,
+                    alignment: 'center'
+                },
+
+
+                tituloContrato: {
+
+                    bold: true,
+                    fontSize: 10,
                     alignment: 'center',
                     margin: [0, 2, 0, 2]
                 },
                 subtituloContrato: {
-                   
+
                     alignment: 'center',
                     margin: [0, 2, 0, 2],
                     bold: true
                 },
                 parrafo: {
-                  
+
                     alignment: 'justify',
                     lineHeight: 1.3
                 },
                 cellText: {
-                 
+
                     fontSize: 7.5,
-                    margin: [2, 2, 2, 2] 
+                    margin: [2, 2, 2, 2]
                 },
                 parrafoLegal: {
-                   
+
                     alignment: 'justify',
                     lineHeight: 1.2
                 },
                 lineaFirma: {
-                    margin: [0, 0, 0, 1], 
+                    margin: [0, 0, 0, 1],
                 },
                 tituloFirma: {
                     bold: true,
-                   
-                    margin: [0, 0, 0, 2] 
+
+                    margin: [0, 0, 0, 2]
                 },
                 textoFirma: {
                 },
                 resumenHeader: {
                     bold: true,
-                   
-                    fillColor: '#EEEEEE', 
+
+                    fillColor: '#EEEEEE',
                     margin: [4, 4, 4, 4]
                 },
-               
+
                 tituloImportante: {
                     bold: true,
-                    decoration:'underline',
-                    fontSize:10,
+                    decoration: 'underline',
+                    fontSize: 10,
                     alignment: 'center'
                 },
                 listaItem: {
-                
+
                     alignment: 'justify',
                     lineHeight: 1.2,
-                    margin: [0, 0, 0, 8] 
+                    margin: [0, 0, 0, 8]
+                },
+                subtituloCuenta: {
+                    fontSize: 8,
+                    alignment: 'center',
+                    bold: true,
+                    margin: [0, 1, 0, 1],
+                },
+                headerCuenta: {
+                    fontSize: 7,
+                    alignment: 'center',
+                    bold: true,
+                    color: 'white',
+                    margin: [0, 4, 0, 4]
+                },
+                monedaSoles: {
+                    fontSize: 7.5,
+                    alignment: 'center',
+                    bold: true,
+                    color: 'white',
+                    fillColor: '#F58220', 
+                   
+                },
+                monedaDolares: {
+                    fontSize: 7.5,
+                    alignment: 'center',
+                    bold: true,
+                    color: 'white',
+                    fillColor: '#F58220', 
+                    margin: [0, 2, 0, 4]
+                },
+                textoCuenta: {
+                    fontSize: 7.5,
+                    alignment: 'center',
+                    bold: true,
+           
+                },
+                contactoPie: {
+                    fontSize: 8,
+                    bold: true,
+                    color: '#F58220' 
                 }
             },
 
-            defaultStyle: { fontSize: 8,    color: '#333333' },
-            pageMargins: [60, 80, 40,30],
-    
-          
+            defaultStyle: { fontSize: 8, color: '#333333' },
+            pageMargins: [60, 80, 40, 30],
+
+
         };
 
         pdfMake.createPdf(docDefinition).open();

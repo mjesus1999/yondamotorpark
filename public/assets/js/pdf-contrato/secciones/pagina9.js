@@ -2,15 +2,15 @@
 import { crearBloqueFirma } from "./helpers.js";
 
 export function getPagina9(data) {
-    const tipoDoc = data.cliente.tipocliente == 'P' ? 'DNI':'RUC'
+    const tipoDoc = data.cliente.tipocliente == 'P' ? 'DNI' : 'RUC'
 
     const contenido = [
-       
+
         {
             text: 'INFORMACIÓN IMPORTANTE',
-            style: 'tituloImportante', 
+            style: 'tituloImportante',
             alignment: 'center',
-            margin: [0, 25, 0, 15]
+            margin: [0, 8, 0, 15]
         },
 
 
@@ -24,28 +24,236 @@ export function getPagina9(data) {
             margin: [0, 0, 0, 10]
         },
 
-      
         {
-            image: window.bancosYonda, 
-            width: 300, 
-            height:250,
-            alignment: 'center',
-            margin: [0, 10, 0, 7]
-        },
 
-     
+            stack: [
+             
+               {
+                  
+                    table: {
+                        widths: ['*'],
+                        body: [
+                            [
+                               
+                                {
+                                    text: 'NÚMEROS DE CUENTA - RUC: 20609396866',
+                                    style: 'tituloCuenta',
+                                    alignment: 'center',
+                                    color: 'white', 
+                                    bold: true,
+                                    fillColor: '#F58220', 
+                                    border: [false, false, false, false] // Sin bordes
+                                }
+                            ]
+                        ]
+                    },
+                    margin: [0, 0, 0, 5] 
+                },
+
+        
+                {
+                    alignment: 'center',
+                    columnGap: 10, 
+                    columns: [
+                      
+                        {
+                            image: window.interbankLogo,
+                            width: 80, 
+                            height:45,
+                            alignment: 'center'
+                        },
+                 
+                        {
+                            width: '*', 
+                            table: {
+                                widths: [75, '*', '*'],
+                                body: [
+                                    [
+                                        { text: '', border: [false, false, false, false], fillColor: '#F58220' }, // Celda vacía sobre SOLES
+                                        { text: 'N° CTA.', style: 'headerCuenta', fillColor: '#F58220' },
+                                        { text: 'INTERBANCARIO - CCI', style: 'headerCuenta', fillColor: '#F58220' }
+                                    ],
+                                    [
+                                        { text: 'SOLES', style: 'monedaSoles' },
+                                        { text: '402 - 30041193 - 55', style: 'textoCuenta' },
+                                        { text: '00 - 340200300411935555', style: 'textoCuenta' }
+                                    ],
+                                    [
+                                        { text: 'DÓLARES', style: 'monedaDolares' },
+                                        { text: '402 - 300411936 - 2', style: 'textoCuenta' },
+                                        { text: '003-402- 003004119362-51', style: 'textoCuenta' }
+                                    ]
+                                ]
+                            },
+                            layout: 'lightHorizontalLines' 
+                        }
+                    ]
+                },
+
+             
+                {
+                    alignment: 'center',
+                    columnGap: 10,
+                    margin: [0, 5, 0, 0],
+                    columns: [
+                        {
+                            image: window.scotiabankLogo,
+                            width: 80,
+                            height:45,
+                            alignment: 'center'
+                        },
+                        {
+                            width: '*',
+                            table: {
+                                widths: [75, '*', '*'],
+                                body: [
+                                    [
+                                        { text: '', border: [false, false, false, false], fillColor: '#F58220' },
+                                        { text: 'N° CTA.', style: 'headerCuenta', fillColor: '#F58220' },
+                                        { text: 'INTERBANCARIO - CCI', style: 'headerCuenta', fillColor: '#F58220' }
+                                    ],
+                                    [
+                                        { text: 'SOLES', style: 'monedaSoles' },
+                                        { text: '000 - 2381999', style: 'textoCuenta' },
+                                        { text: '00 - 930100000238199938', style: 'textoCuenta' }
+                                    ],
+                                    [
+                                        { text: 'DÓLARES', style: 'monedaDolares' },
+                                        { text: '000 - 5142842', style: 'textoCuenta' },
+                                        { text: '009 -301- 000005142842-33', style: 'textoCuenta' }
+                                    ]
+                                ]
+                            },
+                            layout: 'lightHorizontalLines'
+                        }
+                    ]
+                },
+
+                
+                {
+                    alignment: 'center',
+                    columnGap: 10,
+                    margin: [0, 5, 0, 0],
+                    columns: [
+                        {
+                            image: window.bbvaLogo,
+                            width: 80,
+                            height:45,
+                            alignment: 'center'
+                        },
+                        {
+                            width: '*',
+                            table: {
+                                widths: [75, '*', '*'],
+                                body: [
+                                    [
+                                        { text: '', border: [false, false, false, false], fillColor: '#F58220' },
+                                        { text: 'N° CTA.', style: 'headerCuenta', fillColor: '#F58220' },
+                                        { text: 'INTERBANCARIO - CCI', style: 'headerCuenta', fillColor: '#F58220' }
+                                    ],
+                                    [
+                                        { text: 'SOLES', style: 'monedaSoles' },
+                                        { text: '00 - 1102150100057114', style: 'textoCuenta' },
+                                        { text: '0 - 11215010005711419', style: 'textoCuenta' }
+                                    ],
+                                    [
+                                        { text: 'DÓLARES', style: 'monedaDolares' },
+                                        { text: '0200932381', style: 'textoCuenta' },
+                                        { text: '01121500020093238113', style: 'textoCuenta' }
+                                    ]
+                                ]
+                            },
+                            layout: 'lightHorizontalLines'
+                        }
+                    ]
+                },
+
+               
+                {
+                    alignment: 'center',
+                    columnGap: 10,
+                    margin: [0, 5, 0, 0],
+                    columns: [
+                        {
+                            image: window.bcpLogo,
+                            width: 80,
+                            alignment: 'center'
+                        },
+                        {
+                            width: '*',
+                            table: {
+                                widths: [75, '*', '*'],
+                                body: [
+                                    [
+                                        { text: '', border: [false, false, false, false], fillColor: '#F58220' },
+                                        { text: 'N° CTA.', style: 'headerCuenta', fillColor: '#F58220' },
+                                        { text: 'INTERBANCARIO - CCI', style: 'headerCuenta', fillColor: '#F58220' }],
+                                    [
+                                        { text: 'SOLES', style: 'monedaSoles' },
+                                        { text: '1941467876028', style: 'textoCuenta' },
+                                        { text: '00219400146787602892', style: 'textoCuenta' }
+                                    ],
+                                    [
+                                        { text: 'DÓLARES', style: 'monedaDolares' },
+                                        { text: '1941467964127', style: 'textoCuenta' },
+                                        { text: '00219400146796412795', style: 'textoCuenta' }
+                                    ]
+                                ]
+                            },
+                            layout: 'lightHorizontalLines'
+                        }
+                    ]
+                },
+
+                {
+                    columns: [
+                      
+                        {
+                            width: '*', 
+                            alignment: 'left',
+                            margin: [4, 0, 0, 0], 
+                           
+                            columns: [
+                                
+                                {
+                                    image: window.logoWsap, 
+                                    width: 12, 
+                                    margin: [0, 0, 0, 0] 
+                                },
+                              
+                                {
+                                    text: '950690394 - 908808538',
+                                    style: 'contactoPie',
+                                    margin: [5, 0, 0, 0] 
+                                }
+                            ]
+                        },
+                       
+                        {
+                            image: window.logoBase64,
+                            width: 50,
+                            alignment: 'right'
+                        }
+                    ],
+                    margin: [0, 5, 0, 0]
+                }
+            ],
+            alignment: 'center',
+            margin: [0, 7, 0, 10]
+        },
+       
         {
             text: [
-                'Las Pre – cancelaciones y Cancelaciones se realizarán exclusivamente previo acuerdo con ',
+                'Las Pre - cancelaciones y Cancelaciones se realizarán exclusivamente previo acuerdo con ',
                 { text: 'Yonda & Grupo Huaraca E.I.R.L.', bold: true }
             ],
             style: 'parrafo',
             alignment: 'center',
-            margin: [0, 0, 0, 15]
+            margin: [0, 0, 0, 8]
         },
 
         {
-            
+
             ul: [
                 {
                     text: [
@@ -80,11 +288,10 @@ export function getPagina9(data) {
         }
     ];
 
-    
 
-    
 
-    contenido.push({ text: '', margin: [0, 10, 0, 0] }); 
+
+    contenido.push({ text: '', margin: [0, 7.5, 0, 0] });
 
     const bloquesDeFirmas = [];
 
@@ -109,8 +316,8 @@ export function getPagina9(data) {
     }
 
 
-     
-       if (data.aval && data.aval.nombre) {
+
+    if (data.aval && data.aval.nombre) {
         bloquesDeFirmas.push(
             crearBloqueFirma(
                 'FIRMA DEL AVAL',
@@ -120,7 +327,7 @@ export function getPagina9(data) {
         );
     }
 
-   
+
     if (data.aval && data.aval.conyuge && data.aval.conyuge.nombre) {
         bloquesDeFirmas.push(
             crearBloqueFirma(
@@ -131,7 +338,7 @@ export function getPagina9(data) {
         );
     }
 
-    // FIRMA 5: REPRESENTANTE LEGAL (Siempre)
+ 
     bloquesDeFirmas.push(
         crearBloqueFirma(
             'FIRMA DEL REPRESENTANTE LEGAL',
@@ -140,17 +347,17 @@ export function getPagina9(data) {
         )
     );
 
-    
+
 
     for (let i = 0; i < bloquesDeFirmas.length; i += 2) {
-        
+
         if (i + 1 === bloquesDeFirmas.length) {
-           
+
             const bloqueFirmaUnica = bloquesDeFirmas[i];
-            delete bloqueFirmaUnica.width; 
-            
+            delete bloqueFirmaUnica.width;
+
             contenido.push({
-                columns: [ bloqueFirmaUnica ],
+                columns: [bloqueFirmaUnica],
                 margin: [0, 15, 0, 15]
             });
         } else {
@@ -160,10 +367,10 @@ export function getPagina9(data) {
                     bloquesDeFirmas[i],
                     bloquesDeFirmas[i + 1]
                 ],
-                margin: [0, 15, 0,12]
+                margin: [0, 15, 0, 12]
             });
         }
     }
-    
+
     return contenido;
 }

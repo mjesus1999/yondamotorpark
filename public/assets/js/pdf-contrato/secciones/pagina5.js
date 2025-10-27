@@ -1,4 +1,4 @@
-// /assets/js/pdf-contrato/secciones/pagina5.js
+
 
 export function getPagina5(data) {
 
