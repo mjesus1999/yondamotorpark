@@ -315,4 +315,95 @@ class Cobranza
         }
     }
 
+    /**
+     * CREAR JSON DE LOS VENCIDOS
+     */
+
+    public function actualizarJsonVencidos(): bool
+    {
+        try {
+            $query = "CALL sp_get_cuotas_vencidas()";
+            $stmt = $this->db->prepare($query);
+            $stmt->execute();
+
+            $datos = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+            $stmt->closeCursor();
+
+            // Preparar estructura JSON
+            $jsonData = [
+                'query' => 'vencidos',
+                'date' => date('Y-m-d H:i:s'),
+                'total_registros' => count($datos),
+                'data' => $datos
+            ];
+
+            // Crear directorio si no existe
+            $dirPath = __DIR__ . '/../../storage/jsonvencidos';
+            if (!is_dir($dirPath)) {
+                mkdir($dirPath, 0755, true);
+            }
+
+            $filePath = $dirPath . '/vencidos.json';
+
+            // Guardar JSON
+            $result = file_put_contents(
+                $filePath,
+                json_encode($jsonData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
+            );
+
+            return $result !== false;
+
+        } catch (PDOException $error) {
+            error_log("Error en actualizarJsonVencidos: " . $error->getMessage());
+            return false;
+        }
+    }
+
+    public function leerJsonVencidos(): array
+    {
+        $filePath = __DIR__ . '/../../storage/jsonvencidos/vencidos.json';
+
+        if (!file_exists($filePath)) {
+            // Si no existe, crear uno nuevo
+            $this->actualizarJsonVencidos();
+        }
+
+        $jsonContent = file_get_contents($filePath);
+        $data = json_decode($jsonContent, true);
+
+        if (!$data) {
+            return [
+                'query' => 'vencidos',
+                'date' => date('Y-m-d H:i:s'),
+                'total_registros' => 0,
+                'data' => []
+            ];
+        }
+
+        return $data;
+    }
+
+    public function necesitaActualizacion(): bool
+    {
+        $filePath = __DIR__ . '/../../storage/jsonvencidos/vencidos.json';
+
+        if (!file_exists($filePath)) {
+            return true;
+        }
+
+        $jsonContent = file_get_contents($filePath);
+        $data = json_decode($jsonContent, true);
+
+        if (!$data || !isset($data['date'])) {
+            return true;
+        }
+
+        // Verificar si tiene más de 1 hora
+        $fechaJson = strtotime($data['date']);
+        $horaActual = time();
+        $diferencia = ($horaActual - $fechaJson) / 3600; // convertir a horas
+
+        return $diferencia >= 1;
+    }
+
 }
