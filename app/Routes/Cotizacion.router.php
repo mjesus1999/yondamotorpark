@@ -44,3 +44,5 @@ $router->add('POST', '/cotizacion/reactivar/(\d+)', 'CotizacionController', 'rea
 
 $router->add('GET', '/cotizacion/reporteCot/(\d+)', 'CotizacionController', 'reporte-cotizacion');
 $router->add('GET', '/api/actaSeparacion/{id}', 'CotizacionController', 'getDataSeparacionVehicular');
+
+$router->add('GET','/api/pagosCotizacion/{id}','CotizacionController','getPagosCliente');

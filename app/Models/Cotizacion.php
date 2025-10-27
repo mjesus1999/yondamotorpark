@@ -199,10 +199,11 @@ class Cotizacion
         }
     }
 
-    public function getHistorialPagosInicial($idcotizacion): array
+    public function getHistorialPagosInicial($idcotizacion): ?array
     {
         $query = "
         SELECT 
+            c.idcotizacion,
             DATE_FORMAT(p.fechapago,'%d-%m-%Y') AS fechapago,
             e.entidad AS entidadbancaria,
             cp.numcuenta,
@@ -239,10 +240,12 @@ class Cotizacion
             $stmt = $this->db->prepare($query);
             $stmt->bindParam(":idcotizacion", $idcotizacion, PDO::PARAM_INT);
             $stmt->execute();
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            // return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            return $result !== false ? $result : null;
         } catch (PDOException $e) {
             error_log($e->getMessage());
-            return [];
+            return null;
         }
     }
 

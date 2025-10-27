@@ -728,4 +728,25 @@ class CotizacionController extends Controller
             'data' => $data
         ]);
     }
+
+    public function getPagosCliente(int $idcotizacion): void {
+
+        header('Content-Type: application/json; charset=utf-8');
+        $pagos = $this->cotizacionModel->getHistorialPagosInicial($idcotizacion);
+
+        if($pagos === false) {
+            http_response_code(500);
+            echo json_encode([
+                'success'=> false,
+                'message'=> 'Ocurrió un error al consultar la base de datos'
+            ]);
+        }
+         echo json_encode([
+            'success'=> true,
+            'data'=> $pagos
+         ]);
+    }
+
+
+
 }

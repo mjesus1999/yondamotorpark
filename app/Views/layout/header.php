@@ -48,7 +48,6 @@ $allModules = [
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Motorpark Yonda</title>
-
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet"
     xintegrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
@@ -58,8 +57,6 @@ $allModules = [
   <link rel="stylesheet" href="/assets/css/style-dashboard.css">
   <link rel="stylesheet" href="/assets/css/motorpark-style.css">
   <link rel="stylesheet" href="https://cdn.datatables.net/2.2.2/css/dataTables.bootstrap5.min.css">
-
-
 </head>
 
 <body>
@@ -298,7 +295,55 @@ $allModules = [
       </nav>
       <main class="content px-3 py-2">
 
-        <script>
+      
+
+        <!-- <script>
+          document.addEventListener('DOMContentLoaded', function () {
+            const currentPath = window.location.pathname;
+            const sidebarLinks = document.querySelectorAll('.sidebar-link');
+            const collapseElements = document.querySelectorAll('.collapse');
+
+            // Resaltar el enlace activo y abrir su menú padre
+            sidebarLinks.forEach(link => {
+              const href = link.getAttribute('href');
+              if (href && currentPath.startsWith(href)) {
+                link.classList.add('active');
+                const parentCollapse = link.closest('.sidebar-item').querySelector('.collapse');
+                if (parentCollapse) {
+                  parentCollapse.classList.add('show');
+                }
+              }
+            });
+
+            // Controlar la persistencia del estado
+            document.body.addEventListener('shown.bs.collapse', function (event) {
+              const openedCollapseId = event.target.id;
+              localStorage.setItem(openedCollapseId, 'open');
+            });
+
+            document.body.addEventListener('hidden.bs.collapse', function (event) {
+              const hiddenCollapseId = event.target.id;
+              localStorage.setItem(hiddenCollapseId, 'closed');
+            });
+
+            //  Restaurar el estado al cargar la página
+            collapseElements.forEach(collapse => {
+              const collapseId = collapse.id;
+              if (localStorage.getItem(collapseId) === 'open') {
+                const bsCollapse = new bootstrap.Collapse(collapse, {
+                  toggle: false
+                });
+                bsCollapse.show();
+              }
+            });
+          });
+        </script> -->
+
+
+
+
+
+          <script>
           document.addEventListener('DOMContentLoaded', function () {
             const currentPath = window.location.pathname;
             const sidebarLinks = document.querySelectorAll('.sidebar-link');
@@ -350,45 +395,3 @@ $allModules = [
             });
           });
         </script>
-
-        <!-- <script>
-          document.addEventListener('DOMContentLoaded', function () {
-            const currentPath = window.location.pathname;
-            const sidebarLinks = document.querySelectorAll('.sidebar-link');
-            const collapseElements = document.querySelectorAll('.collapse');
-
-            // Resaltar el enlace activo y abrir su menú padre
-            sidebarLinks.forEach(link => {
-              const href = link.getAttribute('href');
-              if (href && currentPath.startsWith(href)) {
-                link.classList.add('active');
-                const parentCollapse = link.closest('.sidebar-item').querySelector('.collapse');
-                if (parentCollapse) {
-                  parentCollapse.classList.add('show');
-                }
-              }
-            });
-
-            // Controlar la persistencia del estado
-            document.body.addEventListener('shown.bs.collapse', function (event) {
-              const openedCollapseId = event.target.id;
-              localStorage.setItem(openedCollapseId, 'open');
-            });
-
-            document.body.addEventListener('hidden.bs.collapse', function (event) {
-              const hiddenCollapseId = event.target.id;
-              localStorage.setItem(hiddenCollapseId, 'closed');
-            });
-
-            //  Restaurar el estado al cargar la página
-            collapseElements.forEach(collapse => {
-              const collapseId = collapse.id;
-              if (localStorage.getItem(collapseId) === 'open') {
-                const bsCollapse = new bootstrap.Collapse(collapse, {
-                  toggle: false
-                });
-                bsCollapse.show();
-              }
-            });
-          });
-        </script> -->
