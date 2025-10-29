@@ -1,19 +1,46 @@
 <?php
 
+/**
+ * Controlador de Marcas
+ * 
+ * Gestiona todas las operaciones CRUD relacionadas con las marcas de vehiculos o productos, 
+ * incluyendo validaciones y respuestas JSON para operaciones AJAX
+ */
 namespace App\Controllers;
 
 use App\Core\Controller;
 use App\Models\Marca;
 
+/**
+ * Clase MarcaController
+ * 
+ * Controlador para la gestion de marcas.
+ * Porporciona endPoints para listar, crear, actualizar y eliminar marcas,
+ * con manejo de restricciones de integridad y validaciones
+ */
 class MarcaController extends Controller
 {
+    /**
+     * Modelo de Marca
+     * @var Marca
+     */
     private Marca $marcaModel;
 
+    /**
+     * Inicializa el modelo de Marca necesario para las operaciones del controlador.
+     */
     public function __construct()
     {
         $this->marcaModel = new Marca();
     }
 
+    /**
+     * Muestra el listado de todas las marcas
+     * Renderiza la vista principal con todas las marcas registradas,
+     * requiere autenticacion previa.
+     * 
+     * @return void
+     */
     public function index(): void
     {
         $this->authRequired();
@@ -21,13 +48,19 @@ class MarcaController extends Controller
         $this->view('marcas.index', ['marcas' => $data]);
     }
 
-  
-
+    /**
+     * Obtiene una marca especifica por ID
+     * 
+     * EndPoint Ajax que retorna los datos de una marca en formato JSON.
+     * Valida que el ID sea valido antes de realizar la busqueda.
+     * 
+     * @return void
+     */
     public function show(): void
     {
         header('Content-Type: application/json');
         $id = $_GET['id'] ?? 0;
-        
+
         if ($id <= 0) {
             echo json_encode(['success' => false, 'message' => 'ID de marca no válido']);
             return;
@@ -42,7 +75,15 @@ class MarcaController extends Controller
         }
     }
 
-   
+    /**
+     * Registra una nueva marca
+     * 
+     * EndPoint AJAX que procesa el formulario de registro de una marca.
+     * Valida que el nombre no este vacio y maneja duplicados mediante
+     * restriccion (UNIQUE), responde en formato JSON.
+     * 
+     * @return void
+     */
     public function store()
     {
         header('Content-Type: application/json');
@@ -63,14 +104,19 @@ class MarcaController extends Controller
                 'data' => $nuevaMarca
             ]);
         } elseif ($id === -2) {
-             echo json_encode(['success' => false, 'message' => 'Esta marca ya existe.', 'type' => 'WARNING']);
+            echo json_encode(['success' => false, 'message' => 'Esta marca ya existe.', 'type' => 'WARNING']);
         } else {
             echo json_encode(['success' => false, 'message' => 'No se ha podido registrar la marca']);
         }
     }
 
     /**
-     * Actualiza una marca existente.
+     * Atualiza una marca exitente
+     * 
+     * Endpoint AJAX que procesa la actualizacion de una marca.
+     * Valida que los datos esten completos y maneja duplicados.
+     * Retorna los datos actualizacion en formato JSON.
+     * @return void
      */
     public function update()
     {
@@ -93,13 +139,22 @@ class MarcaController extends Controller
                 'data' => $marcaActualizada
             ]);
         } elseif ($filasAfectadas === -2) {
-             echo json_encode(['success' => false, 'message' => 'Esta marca ya existe.', 'type' => 'WARNING']);
+            echo json_encode(['success' => false, 'message' => 'Esta marca ya existe.', 'type' => 'WARNING']);
         } else {
             echo json_encode(['success' => false, 'message' => 'No se pudo actualizar la marca o no hubo cambios.']);
         }
     }
 
-    
+    /**
+     * Elimina una marca
+     *
+     * Endpoint AJAX que procesa la eliminacion de una marca.
+     * Valida que el ID sea correcto y maneja rectricciones de integridad
+     * referencial cuando la marca tiene modelos asociados.
+     * Responde en formato JSON con el resultado de la operacion.
+     *
+     * @return void
+     */
     public function destroy()
     {
         header('Content-Type: application/json');
@@ -121,7 +176,15 @@ class MarcaController extends Controller
         }
     }
 
-
+    /**
+     * Obtiene todas las marcas para uso en select/combos
+     *
+     * Endpoint AJAX que retorna todas las marcas en formato JSON,
+     * tipicamente utilizado para poblar elementos select en formularios.
+     * Retorna codigo HTTP 404 si no hay marcas disponibles.
+     *
+     * @return never
+     */
     public function getMarcasDB(): void
     {
         header('Content-Type: application/json');

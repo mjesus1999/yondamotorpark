@@ -1,13 +1,31 @@
 <?php
 
+/**
+ * Modelo de Persona 
+ * 
+ * Gestiona las operaciones de base de datos relacionadas con la informacion
+ * personal de los individuos en el sistema, incluyendo datos demograficos, de contacto y ubicacion geografica.
+ */
+
 namespace App\Models;
 
 use App\Core\Database;
 use PDO;
 use PDOException;
 
+/**
+ * Clase Persona
+ * 
+ * Modelo para la gestion de datos personales.
+ * Proporciona metodos para crear, leer y actualizar informacion de personas, asi como busquedas especificas y relaciones con clientes.
+ */
+
 class Persona
 {
+    /**
+     * Instancia de conexion a la base de datos
+     * @var PDO
+     */
     private PDO $db;
 
     /**
@@ -207,7 +225,18 @@ class Persona
     }
 
 
-    // DEYANIRA
+    /**
+     * Busca una person por su DNI
+     * 
+     * Realiza una busqueda exacta del numero del documento de identidad (DNI)
+     * y retorna informacion basica de la persona si existe.
+     * 
+     * @param string $dni
+     * @return array|null Array asociativo con:
+     *                      - idpersona
+     *                      - apellidos
+     *                      - nombres, o null si no se encuentra , o array vacio en caso de error
+     */
     public function searchByDNI(string $dni): ?array
     {
         $query = "SELECT idpersona, apellidos, nombres FROM personas WHERE nrodoc = :dni LIMIT 1";

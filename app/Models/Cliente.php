@@ -1,22 +1,49 @@
 <?php
 
+/**
+ * Modelo de Cliente
+ * 
+ * Gestiona las operaciones de base de datos relacionales con los clientes del sistema, tanto personas naturales como empresas,
+ * incluyendo su creacion, consulta y gestion de estados 
+ */
 namespace App\Models;
 
 use App\Core\Database;
 use PDO;
 use PDOException;
 
-
+/**
+ * Clase Cliente 
+ * 
+ * Modelo para la gestion de cliente del sistema.
+ * Proporciona metodos para crear, consultar y administrar clientes, diferenciando entre personas naturales y empresas
+ */
 class Cliente
 {
+    /**
+     * Instancia de conexion a la base de datos
+     * @var PDO
+     */
     private PDO $db;
 
+    /**
+     * Contructor del modelo
+     * 
+     * Inicializa la conexion a la base de datos
+     */
     public function __construct()
     {
         $this->db = Database::getInstance();
     }
 
-
+    /**
+     * Obtiene el tipo de cliente por su ID
+     * 
+     * Determina si un cliente es tipo 'P' (Persona) o 'E' (Empresa).
+     * 
+     * @param int $id ID del cliente
+     * @return string|null Tipo de cliente ('P' o 'E') o null si no existe
+     */
     public function getTipoClienteById(int $id): ?string
     {
         try {
@@ -31,7 +58,15 @@ class Cliente
         }
     }
 
-
+    /**
+     * Busca un cliente persona por DNI
+     * 
+     * Realiza una busqueda de clientes de tipo persona (tipocliente = 'P')
+     * utilizando el numero de documento de identidad.
+     * 
+     * @param string $dni Numero de documento de identidad
+     * @return array Array asociativo con los datos del cliente (idcliente, cliente, nrodoc, telprimario) o array vacio si no se encuentra y hay error.
+     */
     public function searchClienteDB(string $dni): array
     {
         $query = "SELECT c.idcliente,
@@ -54,7 +89,19 @@ class Cliente
         }
     }
 
-
+    /**
+     * Crea un cliente en el sistema
+     * 
+     * Registra un nuevo cliente asociado a una persona o empresa.
+     * El colaborador que registra se obtiene automaticamente de la sesion.
+     * 
+     * @param array $params Array asociativo con los datos del cliente:
+     *                      - idpersonas: int (ID de la persona, requerido si el tipocliente = 'P')
+     *                      - idempresa: int|null (ID de la empresa, requerido si tipocliente = 'E')
+     *                      - idcolactualiza: int|null (ID del colaborador que actualiza)
+     *                      - tipocliente: string ('P' para persona y 'E' para empresa)
+     * @return int ID del cliente creado o -1 en caso de error 
+     */
     public function create($params = []): int
     {
         $query = "INSERT INTO clientes(idpersona, idempresa, idcolregistra, idcolactualiza, tipocliente)
@@ -76,7 +123,15 @@ class Cliente
         }
     }
 
-
+    /**
+     * Deshabilita un cliente
+     * 
+     * Marca el cliente como inactivo cambiando su estado a 'INACT'.
+     * No elimina el registro fisicamente de la base de datos.
+     * 
+     * @param int $idcliente ID del cliente a deshabilitar
+     * @return int Numero de filas afectadas o -1 en caso de error
+     */
     public function disabled($idcliente = -1): int
     {
         try {

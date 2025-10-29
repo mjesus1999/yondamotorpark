@@ -95,6 +95,7 @@
 </div>
 
 <?php include __DIR__ . '/../layout/footer.php'; ?>
+<script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
 <script src="https://unpkg.com/tabulator-tables@5.5.2/dist/js/tabulator.min.js"></script>
 
 <script>
@@ -359,21 +360,22 @@
                         <span style="background: ${badgeColor}; color: white; padding: 2px 6px; border-radius: 3px; font-size: 11px; margin-right: 6px;">
                             Cuota ${cuota.numcuota}
                         </span>
-                        ${cuota.fecha_formateada} -
+                        ${cuota.fecha_formateada}
                     </span>
-                    <span style="color: #dc3545; font-weight: 600; font-size: 12px;">
-                        > ${formatMoneda(cuota.monto)}
-                    </span>
+                    
                 </div>
             `;
         });
+        /* <span style="color: #dc3545; font-weight: 600; font-size: 12px;">
+            > ${formatMoneda(cuota.monto)}
+        </span> */
 
-        html += `
+        /* html += `
             <div style="margin-top: 8px; padding-top: 8px; border-top: 2px solid #eee; display: flex; justify-content: space-between; font-weight: 600;">
                 <span style="color: #666;">Total:</span>
                 <span style="color: #dc3545;">${formatMoneda(detalles.reduce((sum, c) => sum + parseFloat(c.monto), 0))}</span>
             </div>
-        `;
+        `; */
 
         popover.innerHTML = html;
         document.body.appendChild(popover);
@@ -393,10 +395,178 @@
         }, 100);
     }
 
+    async function obtenerFechasVencidas(idContrato) {
+        try {
+            const response = await fetch(`/Cobranza/getDetalleVencidas/${idContrato}`);
+            const data = await response.json();
+            if (data.success && data.data) {
+                return data.data.map(cuota =>
+                    `Cuota ${cuota.numcuota}: ${cuota.fecha_formateada}` /* (S/. ${parseFloat(cuota.monto).toFixed(2)}) */
+                ).join(' | ');
+            }
+            return '';
+        } catch (error) {
+            console.error('Error al obtener fechas:', error);
+            return '';
+        }
+    }
+
+    async function exportarAExcel() {
+        if (!tablaGlobal) {
+            mostrarNotificacion('No hay datos para exportar', 'warning');
+            return;
+        }
+
+        const btnExportar = document.getElementById('btn-exportar-excel');
+        if (btnExportar) {
+            btnExportar.disabled = true;
+            btnExportar.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Exportando...';
+        }
+
+        try {
+            const datos = tablaGlobal.getData();
+
+            if (!datos || datos.length === 0) {
+                mostrarNotificacion('No hay datos para exportar', 'warning');
+                return;
+            }
+
+            // Obtener fechas de cuotas vencidas para cada contrato
+            /* mostrarNotificacion('Obteniendo detalles de cuotas...', 'info'); */
+            const datosConFechas = await Promise.all(
+                datos.map(async (row) => {
+                    const fechasVencidas = await obtenerFechasVencidas(row.idcontrato);
+                    return { ...row, fechas_vencidas: fechasVencidas };
+                })
+            );
+
+            // Crear workbook y worksheet
+            const workbook = new ExcelJS.Workbook();
+            const worksheet = workbook.addWorksheet('Vencidos');
+
+            // Definir columnas (diseño simple)
+            worksheet.columns = [
+                { header: '#', key: 'numero', width: 6 },
+                { header: 'Cliente', key: 'cliente', width: 30 },
+                { header: 'Documento', key: 'documento', width: 12 },
+                { header: 'Teléfono', key: 'telefono', width: 12 },
+                { header: 'Ubicación', key: 'ubicacion_cliente', width: 40 },
+                { header: 'Vehículo', key: 'vehiculo', width: 35 },
+                { header: 'Tienda', key: 'tienda', width: 12 },
+                { header: 'C. Totales', key: 'cuotas_totales', width: 10 },
+                { header: 'Monto Cuota', key: 'monto_primera_vencida', width: 12 },
+                { header: 'Deuda', key: 'deuda_vencida', width: 12 },
+                { header: 'C. Vencidas', key: 'cuotas_vencidas', width: 10 },
+                { header: 'C. Pagadas', key: 'cuotas_pagadas', width: 10 },
+                { header: 'Días Atraso', key: 'dias_atraso', width: 10 },
+                { header: 'Fechas de Cuotas Vencidas', key: 'fechas_vencidas', width: 80 }
+            ];
+
+            // Estilo simple del encabezado
+            worksheet.getRow(1).font = { bold: true };
+            worksheet.getRow(1).fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: 'FFD9D9D9' }
+            };
+            worksheet.getRow(1).alignment = { vertical: 'middle', horizontal: 'center' };
+
+            // Agregar datos
+            datosConFechas.forEach((row, index) => {
+                worksheet.addRow({
+                    numero: index + 1,
+                    cliente: row.cliente || '',
+                    documento: row.documento || '',
+                    telefono: row.telefono || '',
+                    ubicacion_cliente: row.ubicacion_cliente || '',
+                    vehiculo: row.vehiculo || '',
+                    tienda: row.tienda || '',
+                    cuotas_totales: row.cuotas_totales || 0,
+                    monto_primera_vencida: parseFloat(row.monto_primera_vencida) || 0,
+                    deuda_vencida: parseFloat(row.deuda_vencida) || 0,
+                    cuotas_vencidas: parseInt(row.cuotas_vencidas) || 0,
+                    cuotas_pagadas: parseInt(row.cuotas_pagadas) || 0,
+                    dias_atraso: parseInt(row.dias_atraso) || 0,
+                    fechas_vencidas: row.fechas_vencidas || ''
+                });
+            });
+
+            // Formatear columnas de moneda
+            worksheet.getColumn('monto_primera_vencida').numFmt = '"S/. "#,##0.00';
+            worksheet.getColumn('deuda_vencida').numFmt = '"S/. "#,##0.00';
+
+            // Alinear números a la derecha
+            worksheet.getColumn('cuotas_totales').alignment = { horizontal: 'center' };
+            worksheet.getColumn('cuotas_vencidas').alignment = { horizontal: 'center' };
+            worksheet.getColumn('cuotas_pagadas').alignment = { horizontal: 'center' };
+            worksheet.getColumn('dias_atraso').alignment = { horizontal: 'center' };
+
+            // Ajustar altura de filas con wrap text para fechas
+            worksheet.getColumn('fechas_vencidas').alignment = { wrapText: true, vertical: 'top' };
+
+            // Fila de totales
+            const totalDeuda = datosConFechas.reduce((sum, row) => sum + (parseFloat(row.deuda_vencida) || 0), 0);
+            const totalRow = worksheet.addRow({
+                numero: '',
+                cliente: '',
+                documento: '',
+                telefono: '',
+                ubicacion_cliente: '',
+                vehiculo: '',
+                tienda: '',
+                cuotas_totales: '',
+                monto_primera_vencida: 'TOTAL',
+                deuda_vencida: totalDeuda,
+                cuotas_vencidas: '',
+                cuotas_pagadas: '',
+                dias_atraso: '',
+                fechas_vencidas: ''
+            });
+
+            totalRow.font = { bold: true };
+            totalRow.getCell('deuda_vencida').numFmt = '"S/. "#,##0.00';
+
+            // Generar archivo
+            workbook.xlsx.writeBuffer().then((buffer) => {
+                const blob = new Blob([buffer], {
+                    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+
+                const fecha = new Date().toISOString().split('T')[0];
+                a.download = `Vencidos_${fecha}.xlsx`;
+
+                a.click();
+                window.URL.revokeObjectURL(url);
+
+                mostrarNotificacion(`Excel exportado: ${datosConFechas.length} registros`, 'success');
+            });
+
+        } catch (error) {
+            console.error('Error al exportar:', error);
+            mostrarNotificacion('Error al generar el archivo Excel', 'danger');
+        } finally {
+            if (btnExportar) {
+                btnExportar.disabled = false;
+                btnExportar.innerHTML = '<i class="bi bi-file-earmark-excel me-1"></i> Exportar Excel';
+            }
+        }
+    }
+
     //Inicializar
     document.addEventListener('DOMContentLoaded', async () => {
 
         verificarActualizacionAutomatica();
+
+        const btnExportarExcel = document.getElementById('btn-exportar-excel');
+        if (btnExportarExcel) {
+            btnExportarExcel.addEventListener('click', (e) => {
+                e.preventDefault();
+                exportarAExcel();
+            });
+        }
 
         // Event listener para botón actualizar
         const btnActualizar = document.querySelector('.btn-outline-success');
@@ -480,7 +650,7 @@
                         title: "Estado de pagos",
                         field: "estado_pagos",
                         width: 150,
-                        tooltip: true,
+                        /*tooltip: true,*/
                         hozAlign: "center",
                         formatter: function (cell) {
                             const value = cell.getValue();
