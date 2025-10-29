@@ -8,6 +8,7 @@
             b = window;
         b[c] || (b[c] = {});
         var d = b[c];
+        
         d.maps || (d.maps = {});
 
         // Guarda la función load original si existe
