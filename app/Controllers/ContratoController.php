@@ -99,7 +99,7 @@ class ContratoController extends Controller
 
     public function apiGetContratos()
     {
-        $this->authRequired();
+        // $this->authRequired();
         header("Content-Type: application/json");
 
         $contratos = $this->contratoModel->getAll();
