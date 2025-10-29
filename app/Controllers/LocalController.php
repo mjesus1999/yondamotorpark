@@ -1,21 +1,54 @@
 <?php
 
-
+/**
+ * Controlador de Local
+ * 
+ * app/Controllers/LocalController.php
+ * 
+ * Gestiona todas las operaciones CRUD relacionadas con los locales/sucursales
+ * de la empresa, incluyendo validaciones de datos, gestión de estados y
+ * endpoints API para consumo AJAX.
+ */
 namespace App\Controllers;
 
 use App\Core\Controller;
 use App\Models\Local;
 use App\Helpers\Validador;
 
+/**
+ * Clase LocalController
+ * 
+ * Controlador para la gestion de locales/sucusales.
+ * Proporciona funcionalidades completas de CRUD con validaciones robustas y
+ * endpoints tanto para vistas como para operaciones AJAX/API.
+ */
 class LocalController extends Controller
 {
+
+    /**
+     * Modelo de Local
+     * @var Local
+     */
     private Local $localModel;
 
+    /**
+     * Constructor del controlador
+     * 
+     * Inicializa el modelo de Local necesario para las operaciones del controlador.
+     */
     public function __construct()
     {
         $this->localModel = new Local();
     }
 
+    /**
+     * Muestra el listado de todos los locales
+     * 
+     * Renderiza la vista principal con todos los locales activos del sistema.
+     * requiere autenticacion previa.
+     * 
+     * @return void
+     */
     public function index(): void
     {
         $this->authRequired();
@@ -23,11 +56,29 @@ class LocalController extends Controller
         $this->view('locales.index', ['locales' => $locales]);
     }
 
+    /**
+     * Muestra el formulario de creacion de local
+     * 
+     * Renderiza la vista con el formulario para registrar un nuevo local.
+     * 
+     * @return void
+     */
     public function create(): void
     {
         $this->view('locales.create');
     }
 
+    /**
+     * Registra un nuevo local.
+     * 
+     * Procesa el formulario de creacion de local, validando todo los campos
+     * requeridos incluyendo formato de telefono y email.
+     * Realiza validaciones:
+     *      - campos obligatorios: Tienda, distrito, motorpark, principal, responsable, telefono
+     *      - Formato de telefono valido
+     *      - Formato de email valido (si se proporciona)
+     * @return int ID del Localcreado si existe 
+     */
     public function store(): int
     {
         $this->authRequired();
