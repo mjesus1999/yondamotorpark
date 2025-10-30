@@ -1,23 +1,55 @@
 <?php
 
+/**
+ * Controlador de Conceptos de Pago
+ * 
+ * app/Controllers/ConceptoPagoController.php
+ * 
+ * Gestiona las operaciones relacionadas con los conceptos de pago del sistema.
+ * Proporciona endpoints API para obtener los catálogos de conceptos que se
+ * utilizan para clasificar las transacciones financieras en el sistema.
+ */
 namespace App\Controllers;
 
 use App\Core\Controller;
 use App\Models\ConceptoPago;
 
 
+/**
+ * Clase ConceptoPagoController
+ * 
+ * Controlador para la gestión de conceptos de pago.
+ * Proporciona acceso a los catálogos de conceptos utilizados en las
+ * transacciones financieras del sistema mediante endpoints API REST.
+ */
 class ConceptoPagoController extends Controller
 {
+
+    /**
+     * Modelo de ConceptoPago
+     * @var ConceptoPago
+     */
     private ConceptoPago $conceptoPagoModel;
 
-
+    /**
+     * Constructor del controlador
+     * 
+     * Inicializa el modelo de ConceptoPago necesario para las operaciones
+     * de consulta de conceptos de pago.
+     */
     public function __construct()
     {
         $this->conceptoPagoModel = new ConceptoPago();
     }
 
-
-
+    /**
+     * API: Obtiene el catálogo completo de conceptos de pago
+     * 
+     * Endpoint AJAX que retorna todos los conceptos de pago disponibles en el
+     * sistema en formato JSON. Requiere autenticación para acceder.
+     * 
+     * @return void
+     */
     public function getConceptosPago(): void
     {
         $this->authRequired();
@@ -32,4 +64,5 @@ class ConceptoPagoController extends Controller
             echo json_encode(['success' => false, 'message' => 'No se ha podido traer los conceptos de pagos']);
         }
     }
+
 }

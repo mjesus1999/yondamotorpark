@@ -1,21 +1,63 @@
 <?php
 
+/**
+ * Controlador de Compras
+ * 
+ * app/Controllers/CompraController.php
+ * 
+ * Gestiona todas las operaciones relacionadas con el registro y consulta de compras
+ * de vehículos realizadas a concesionarios. Incluye el registro de compras con su
+ * documentación fiscal (facturas y boletas), carga de documentos PDF escaneados,
+ * consultas especializadas de órdenes de compra por concesionario, y listado completo
+ * de compras registradas en el sistema con información consolidada de concesionarios.
+ * 
+ */
 namespace App\Controllers;
 
 use App\Core\Controller;
 use App\Helpers\Validador;
 use App\Models\Compra;
 
-
+/**
+ * Clase CompraController
+ * 
+ * Controlador para la gestión integral de compras de vehículos.
+ * Implementa operaciones de registro de compras con validación exhaustiva,
+ * gestión de archivos PDF de documentación fiscal, consultas especializadas
+ * de órdenes de compra disponibles para registro, y endpoints API para
+ * integración con interfaces dinámicas de selección de concesionarios y
+ * órdenes de compra.
+ * 
+ */
 class CompraController extends Controller
 {
+    /**
+     * Modelo de Compra
+     * @var Compra
+     */
     private Compra $compraModel;
 
+    /**
+     * Constructor del controlador
+     * 
+     * Inicializa el modelo de Compra necesario para las operaciones
+     * del controlador.
+     */
     public function __construct()
     {
         $this->compraModel = new Compra();
     }
 
+    /**
+     * Muestra el listado de todas las compras registradas
+     * 
+     * Renderiza la vista principal con el listado completo de compras
+     * registradas en el sistema, incluyendo información consolidada del
+     * concesionario asociado a cada compra. Los datos se ordenan por
+     * fecha de creación descendente. Requiere autenticación.
+     * 
+     * @return void
+     */
     public function index(): void
     {
         $compras = $this->compraModel->getAll();
@@ -23,12 +65,41 @@ class CompraController extends Controller
         $this->view('compras.index', ['compras' => $compras]);
     }
 
-
+    /**
+     * Muestra el formulario de registro de compra
+     * 
+     * Renderiza la vista con el formulario para registrar una nueva compra.
+     * El formulario incluye selección dinámica de concesionarios con órdenes
+     * activas, selección de orden de compra específica, datos de facturación
+     * y carga de documento PDF escaneado. Requiere autenticación.
+     * 
+     * @return void
+     */
     public function create(): void
     {
         $this->authRequired();
         $this->view('compras.create');
     }
+
+    /**
+     * Registra una nueva compra en el sistema con documentación fiscal
+     * 
+     * Endpoint AJAX que procesa el formulario de creación de compra.
+     * Realiza validaciones exhaustivas de campos obligatorios, gestiona
+     * la carga del archivo PDF de la factura o boleta, organiza los archivos
+     * en subdirectorios según tipo de documento, y registra la compra en
+     * la base de datos asociándola a su orden de compra correspondiente.
+     *
+     * Validaciones realizadas:
+     * - Orden de Compra: Obligatoria, debe existir y estar en estado válido
+     * - Fecha de Compra: Obligatoria, formato válido
+     * - Tipo de Documento: Obligatorio, debe ser 'F' (Factura) o 'B' (Boleta)
+     * - Serie: Obligatoria, formato de serie de comprobante
+     * - Número de Documento: Obligatorio, número del comprobante
+     * - Archivo PDF: Obligatorio, debe ser formato PDF válido
+     *
+     * @return void Respuesta JSON con resultado de la operación
+     */
     public function store(): void
     {
         $this->authRequired();
@@ -141,10 +212,21 @@ class CompraController extends Controller
         }
     }
 
+    // ========================================================================
+    // MÉTODOS PARA APIS
+    // ========================================================================
 
-
-
-    // APIS
+    /**
+     * API: Obtiene detalle de órdenes de compra de un concesionario específico
+     * 
+     * Endpoint AJAX que retorna información detallada y agrupada de todas las
+     * órdenes de compra de un concesionario que estén en estado "proceso" o
+     * "pagado". Los datos se reorganizan jerárquicamente agrupando los detalles
+     * de vehículos bajo cada orden de compra correspondiente.
+     *
+     * @param int $id ID del concesionario
+     * @return never Respuesta JSON con órdenes agrupadas o array vacío
+     */
     public function searchDetOCByConcesionario($id)
     {
         $this->authRequired();
@@ -181,7 +263,16 @@ class CompraController extends Controller
         exit();
     }
 
-    // Traerá los Concesioanrios con OC Activas('Proceso','Pagado').
+    /**
+     * API: Obtiene concesionarios con órdenes de compra activas
+     * 
+     * Endpoint AJAX que retorna únicamente los concesionarios que tienen al menos
+     * una orden de compra en estado "proceso" o "pagado". Estos son los
+     * concesionarios elegibles para registrar nuevas compras, ya que tienen
+     * operaciones comerciales pendientes de materialización.
+     *
+     * @return never Respuesta JSON con array de concesionarios o array vacío
+     */
     public function searchConcesionarioOCActiva(): void
     {
         $this->authRequired();
@@ -196,4 +287,5 @@ class CompraController extends Controller
         }
         exit();
     }
+
 }

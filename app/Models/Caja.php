@@ -1,20 +1,74 @@
 <?php
 
+/**
+ * Modelo de Caja
+ * 
+ * app/Models/Caja.php
+ * 
+ * Gestiona las operaciones de base de datos relacionadas con el módulo de caja
+ * y tesorería: consulta de contratos activos con datos financieros, cronogramas
+ * de pago por contrato, generación de reportes de ingresos diarios, reportes
+ * por rangos de fechas personalizados, y resúmenes ejecutivos de cartera morosa.
+ * Todos los métodos utilizan procedimientos almacenados para garantizar lógica
+ * de negocio consistente y optimización de consultas complejas.
+ */
 namespace App\Models;
 
 use App\Core\Database;
 use PDO;
 use PDOException;
 
+/**
+ * Clase Caja
+ * 
+ * Modelo que representa y gestiona las operaciones de caja en el sistema.
+ * Proporciona acceso a información financiera de contratos, cronogramas de
+ * cuotas, reportes de ingresos por períodos, y análisis de cartera morosa.
+ * Todas las consultas se realizan mediante stored procedures para asegurar
+ * integridad de datos y rendimiento óptimo.
+ */
 class Caja
 {
+    /**
+     * Instancia de conexión a la base de datos
+     * @var PDO
+     */
     private PDO $db;
 
+    /**
+     * Constructor del modelo
+     * 
+     * Inicializa la conexión a la base de datos
+     */
     public function __construct()
     {
         $this->db = Database::getInstance();
     }
 
+    /**
+     * Obtiene todos los contratos con sus datos financieros para caja
+     * 
+     * Ejecuta procedimiento almacenado que retorna el listado completo de
+     * contratos activos con información detallada necesaria para operaciones
+     * de caja: datos del cliente, vehículo, montos, saldos pendientes,
+     * estado de pagos, y fechas relevantes.
+     * 
+     * Utiliza stored procedure: sp_getAll_contratos_caja
+     * 
+     * @return array Array de contratos con estructura definida por el SP:
+     *   Estructura típica esperada:
+     *   - idcontrato (int): ID del contrato
+     *   - numero_contrato (string): Número de contrato
+     *   - cliente_nombre (string): Nombre completo del cliente
+     *   - cliente_documento (string): DNI/RUC del cliente
+     *   - vehiculo_descripcion (string): Descripción del vehículo
+     *   - monto_total (decimal): Monto total del contrato
+     *   - saldo_pendiente (decimal): Saldo por cobrar
+     *   - cuotas_pagadas (int): Número de cuotas pagadas
+     *   - cuotas_totales (int): Total de cuotas del contrato
+     *   - estado_pago (string): Estado actual (Al Día, Moroso, etc.)
+     *   Retorna array vacío si no hay contratos o hay error
+     */
     public function getAllContratosDatos(): ?array
     {
         $query = "CALL sp_getAll_contratos_caja()";
@@ -30,6 +84,29 @@ class Caja
         }
     }
 
+    /**
+     * Obtiene el cronograma de pagos completo de un contrato específico
+     * 
+     * Ejecuta procedimiento almacenado que retorna todas las cuotas programadas
+     * de un contrato con su estado actual: número de cuota, fecha de vencimiento,
+     * monto de la cuota, monto pagado, saldo pendiente, fecha de pago real,
+     * días de atraso, y estado (Pendiente, Pagada, Vencida).
+     * 
+     * Utiliza stored procedure: sp_get_cronogramas_by_idcontrato
+     * 
+     * @param int $id ID del contrato
+     * @return array Array de cuotas del cronograma con estructura:
+     *   - numero_cuota (int): Número secuencial de cuota
+     *   - fecha_vencimiento (date): Fecha programada de vencimiento
+     *   - monto_cuota (decimal): Monto original de la cuota
+     *   - monto_pagado (decimal): Monto efectivamente pagado
+     *   - saldo_pendiente (decimal): Saldo que falta por pagar de la cuota
+     *   - fecha_pago (date|null): Fecha real del pago (NULL si pendiente)
+     *   - dias_atraso (int): Días transcurridos desde vencimiento
+     *   - estado (string): Pendiente, Pagada, Vencida, Pagada con Mora
+     *   - monto_mora (decimal): Monto adicional por mora (si aplica)
+     *   Retorna array vacío si el contrato no existe o hay error
+     */
     public function getCronogramaByIdContrato(int $id): array
     {
         $query = "CALL sp_get_cronogramas_by_idcontrato(:idcontrato)";
@@ -47,6 +124,18 @@ class Caja
         }
     }
 
+    /**
+     * Obtiene el reporte completo de ingresos del día actual
+     * 
+     * Ejecuta procedimiento almacenado que genera un reporte detallado de todos
+     * los ingresos registrados en caja durante el día actual (fecha del servidor).
+     * Incluye pagos de cuotas, iniciales, gastos administrativos, y otros conceptos,
+     * con información del cliente, contrato, método de pago, y monto.
+     * 
+     * Utiliza stored procedure: spu_caja_reporte_completo_hoy
+     *
+     * @return array
+     */
     public function getReporteIngresosHoy(): array
     {
         $query = "CALL spu_caja_reporte_completo_hoy()";
@@ -62,6 +151,32 @@ class Caja
         }
     }
 
+    /**
+     * Obtiene reporte de pagos por rango de fechas personalizado
+     * 
+     * Ejecuta procedimiento almacenado que genera un reporte detallado de todos
+     * los pagos registrados entre dos fechas específicas. Permite análisis
+     * periódicos (semanal, mensual, trimestral) con información completa de
+     * cada transacción: cliente, contrato, concepto, método de pago, y montos.
+     * 
+     * Utiliza stored procedure: ObtenerReportePagosPorFechas
+     *
+     * @param string $fechaInicio Fecha de inicio del reporte
+     * @param string $fechaFin Fecha de fin del reporte
+     * @return array Array de pagos del período con estructura:
+     *   - fecha_pago (date): Fecha del pago
+     *   - hora_pago (time): Hora del pago
+     *   - numero_recibo (string): Número de comprobante
+     *   - cliente_nombre (string): Nombre del cliente
+     *   - cliente_documento (string): DNI/RUC
+     *   - numero_contrato (string): Referencia al contrato
+     *   - concepto (string): Tipo de pago
+     *   - metodo_pago (string): Forma de pago
+     *   - monto (decimal): Monto del ingreso
+     *   - usuario_caja (string): Usuario que registró
+     *   - total_periodo (decimal): Suma total del período
+     *   Retorna array vacío si no hay pagos en el período o hay error
+     */
     public function getReporteByFecha($fechaInicio, $fechaFin)
     {
         $query = "CALL ObtenerReportePagosPorFechas(:fechainicio, :fechafin)";
@@ -83,6 +198,32 @@ class Caja
         }
     }
 
+    /**
+     * Obtiene resumen ejecutivo de cartera morosa
+     * 
+     * Ejecuta procedimiento almacenado que genera un resumen consolidado de
+     * la cartera morosa con información agregada por cliente: cantidad de
+     * cuotas vencidas, días de atraso promedio, monto total adeudado,
+     * última fecha de pago, y datos de contacto para gestión de cobranza.
+     * 
+     * Utiliza stored procedure: getMorososResumen
+     *
+     * @return array Array de clientes morosos con estructura:
+     *   - idcliente (int): ID del cliente
+     *   - cliente_nombre (string): Nombre completo del cliente
+     *   - cliente_documento (string): DNI/RUC del cliente
+     *   - cliente_telefono (string): Teléfono de contacto
+     *   - cliente_email (string): Email del cliente
+     *   - numero_contrato (string): Número de contrato
+     *   - cuotas_vencidas (int): Cantidad de cuotas en mora
+     *   - monto_total_mora (decimal): Total adeudado en mora
+     *   - dias_atraso_maximo (int): Mayor atraso en días
+     *   - dias_atraso_promedio (decimal): Promedio de días de atraso
+     *   - ultimo_pago_fecha (date): Fecha del último pago registrado
+     *   - ultimo_pago_monto (decimal): Monto del último pago
+     *   - asesor_nombre (string): Asesor responsable
+     *   Retorna array vacío si no hay morosos o hay error
+     */
     public function getMorososResumen(): array
     {
         $sql = "CALL getMorososResumen()";
@@ -96,9 +237,5 @@ class Caja
             return [];  // En caso de error, devolvemos un array vacío
         }
     }
-
-
-
-
 
 }

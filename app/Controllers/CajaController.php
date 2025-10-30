@@ -1,23 +1,64 @@
 <?php
 
+/**
+ * Controlador de Caja
+ * 
+ * app/Controllers/CajaController.php
+ * 
+ * Gestiona todas las operaciones del módulo de caja y tesorería: visualización
+ * de contratos activos con datos financieros, consulta de cronogramas de pago
+ * con sistema de caché JSON, generación de reportes de ingresos
+ * diarios agrupados por método de pago, y reportes personalizados por rangos
+ * de fechas. Implementa optimización de rendimiento mediante caché de archivos
+ * para cronogramas frecuentemente consultados, reduciendo carga en base de
+ * datos. Todas las operaciones requieren autenticación y los reportes retornan
+ * respuestas en formato JSON con datos estructurados para frontend.
+ */
 namespace App\Controllers;
 
 use App\Core\Controller;
 use App\Helpers\Validador;
 use App\Models\Caja;
 
-
+/**
+ * Clase CajaController
+ * 
+ * Controlador principal para el módulo de caja. Maneja todas las peticiones
+ * relacionadas con operaciones de tesorería: visualización de contratos con
+ * saldos pendientes, consulta de cronogramas de pago con caché inteligente,
+ * generación de reportes de ingresos del día agrupados por método de pago,
+ * y reportes personalizados por períodos con validación de parámetros.
+ * 
+ */
 class CajaController extends Controller
 {
+    /**
+     * Instancia del modelo de Caja
+     * @var Caja
+     */
     private Caja $cajaModel;
 
-
+    /**
+     * Constructor del controlador
+     * 
+     * Inicializa la instancia del modelo Caja necesario para todas las
+     * operaciones del controlador.
+     */
     public function __construct()
     {
         $this->cajaModel = new Caja();
     }
 
-    // Me enlistara todos los contratos
+    /**
+     * Vista principal del módulo de caja
+     * 
+     * Renderiza la vista principal del módulo de caja con el listado completo
+     * de contratos activos y sus datos financieros. Muestra información de
+     * clientes, vehículos, montos, saldos pendientes y estados de pago.
+     * Requiere autenticación
+     * 
+     * @return void
+     */
     public function index(): void
     {
         // $tiempoInicio = microtime(true);
@@ -32,15 +73,39 @@ class CajaController extends Controller
         // error_log("Tiempo de ejecución de CAJA/Contratos: " . number_format($tiempoEjecucion, 2) . " segundos.");
     }
 
-    // MEOTOD QUE ME MEUSTRA LA VISTA DE REPORTES POR FECHA:
-
+    /**
+     * Muestra la vista de reportes por fechas personalizadas
+     * 
+     * Renderiza la interfaz para generar reportes de ingresos por rangos de
+     * fechas personalizados. La vista incluye selector de fechas (date picker),
+     * botón de generación de reporte, y área de visualización de resultados
+     * con tablas y gráficos. Requiere autenticación.
+     * 
+     * @return void Renderiza vista caja.reporte-by-fechas
+     */
     public function indexReporteByFecha()
     {
         $this->authRequired();
         $this->view('caja.reporte-by-fechas');
     }
 
-
+    /**
+     * Muestra el cronograma de pagos de un contrato con sistema de caché
+     * 
+     * Renderiza la vista del cronograma de pagos completo de un contrato
+     * específico. Implementa sistema de caché JSON inteligente con TTL de
+     * 1 hora para optimizar rendimiento y reducir carga en base de datos.
+     *
+     * Verificación de caché:
+     *    - Busca archivo en storage/cache/cronograma-contratos/
+     *    - Verifica si existe y no ha expirado (< 1 hora)
+     *    - Si es válido, carga datos desde json
+     *  Ruta de caché: storage/cache/cronograma-contratos/cronograma-contrato{ID}.json
+     *  TTL (Time To Live): 3600 segundos (1 hora)
+     *
+     * @param int $id ID del contrato para consultar cronograma
+     * @return void Renderiza vista caja.cronograma con datos del cronograma
+     */
     public function cronogramaByContrato(int $id): void
     {
         $this->authRequired();
@@ -81,9 +146,17 @@ class CajaController extends Controller
         // error_log("Tiempo de ejecución de CAJA/CRONOGRAMA: " . number_format($tiempoEjecucion, 4) . " segundos.");
     }
 
-
-
-    public function getReporteIngresosCajaHoy()
+    /**
+     * API: Obtiene reporte de ingresos del día agrupado por método de pago
+     * 
+     * Endpoint AJAX que genera un reporte detallado de todos los ingresos del
+     * día actual, agrupados por método de pago (Efectivo, Transferencia, Yape,
+     * POS, etc.). Calcula subtotales por método y total general del día.
+     * Requiere autenticación.
+     *
+     * @return never Respuesta JSON con datos agrupados o error
+     */
+    public function getReporteIngresosCajaHoy(): void
     {
         $this->authRequired();
         header('Content-Type: application/json');
@@ -94,7 +167,7 @@ class CajaController extends Controller
 
         foreach ($transacciones as $transaccion) {
             $metodoPago = $transaccion['metodo_pago'];
-            $monto = (float)$transaccion['monto'];
+            $monto = (float) $transaccion['monto'];
 
             if (!isset($reporteAgrupado[$metodoPago])) {
                 $reporteAgrupado[$metodoPago] = [
@@ -123,8 +196,22 @@ class CajaController extends Controller
         exit();
     }
 
-
-    public function reportePagosByFecha()
+    /**
+     * API: Obtiene reporte de pagos por rango de fechas personalizado
+     * 
+     * Endpoint AJAX que genera un reporte detallado de pagos entre dos fechas
+     * específicas. Valida parámetros obligatorios y retorna error HTTP 400 si
+     * faltan fechas. Útil para reportes mensuales, trimestrales o períodos
+     * personalizados. Requiere autenticación.
+     *
+     * Validaciones implementadas:
+     * - Presencia de ambas fechas (obligatorio)
+     * - Formato de fecha válido (manejado por BD)
+     * - Retorno apropiado si no hay datos
+     *
+     * @return never Respuesta JSON con datos del período, error de validación o sin resultados
+     */
+    public function reportePagosByFecha(): void
     {
         $this->authRequired();
         header('Content-Type: application/json');
