@@ -1,6 +1,12 @@
+<!-- app/Views/cobranza/indexVencidos.php -->
 <?php include __DIR__ . '/../layout/header.php'; ?>
 <link href="https://unpkg.com/tabulator-tables@5.5.2/dist/css/tabulator_simple.min.css" rel="stylesheet">
 <link rel="stylesheet" href="/assets/css/tabulator.css">
+
+<!-- Includes del mapa viewer -->
+<?php include __DIR__ . '/../components/mapa-viewer-includes.php'; ?>
+<?php include __DIR__ . '/../components/mapa-viewer-modal.php'; ?>
+
 <!-- <style>
     .tabulator-placeholder {
         background-color: #585858ff !important;
@@ -824,7 +830,7 @@
                     } finally {
                         estadoPagos.style.opacity = '1';
                     }
-                    return; // ← Importante: detener aquí
+                    return;
                 }
 
                 // 2. Verificar si es clic en botones PDF

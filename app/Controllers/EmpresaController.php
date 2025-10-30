@@ -1,5 +1,14 @@
 <?php
 
+/**
+ * Controlador de Empresa
+ * 
+ * app/Controllers/EmpresaController.php
+ * 
+ * Gestiona todas las operaciones relacionadas con empresas cliente,
+ * Incluyendo validaciones fiscales (RUC), integracion con API externa de SUNAT,
+ * y sincronizacion con la base de datos local.
+ */
 namespace App\Controllers;
 
 use App\Core\Controller;
@@ -8,17 +17,46 @@ use App\Models\Cliente;
 use App\Helpers\Validador;
 use Exception;
 
+/**
+ * Clase EmpresaController
+ * 
+ * Controlador para la gestion de empresas cliente,
+ * Porporciona funcionalidades CRUD completas con validaciones robustas,
+ * verificacion de RUC mediante API externa y gestion dual de cliente empresa.
+ */
 class EmpresaController extends Controller
 {
+
+    /**
+     * Modelo de empresa
+     * @var Empresa
+     */
     private Empresa $empresaModel;
+    /**
+     * Modelo de cleinte
+     * @var Cliente
+     */
     private Cliente $clienteModel;
 
+    /**
+     * Contructor del controlador
+     * 
+     * Inicializa los modelos de Empresa y cliente necesarios para las operaciones del controlador.
+     */
     public function __construct()
     {
         $this->empresaModel = new Empresa();
         $this->clienteModel = new Cliente();
     }
 
+    /**
+     * Muestra el listado de empresas cliente
+     * 
+     * Renderiza la vista principal con todas las empresas registradas como clientes activos del sistema.
+     * Requiere autenticacion previa
+     * 
+     * @return void
+     */
     public function indexEmpresaClientes(): void
     {
         $empresas = $this->empresaModel->getAllEmpresasCliente();
@@ -26,12 +64,35 @@ class EmpresaController extends Controller
         $this->view('/clientes/empresas.index', ['empresasClientes' => $empresas]);
     }
 
+    /**
+     * Muestra el formulario de creacion de empresa cliente
+     * 
+     * Renderiza la vista con el formulario para registrar una nueva empresa como cliente.
+     * 
+     * @return void
+     */
     public function createEmpresaClient(): void
     {
         $this->authRequired();
         $this->view('/clientes/empresas.create');
     }
 
+    /**
+     * Registra una nueva empresa cliente en el sistema
+     * 
+     * Procesa el formulario de creacion, validando todos los campos requeridos incluyendo RUC unico,
+     * formato de telefono y email. Crea tanto el registro de una empresa como el de cliente asociado
+     * en una operacion transaccional. 
+     * 
+     * Validaciones realizadas:
+     * - Campos obligatorios: DIST, RAZON SOCIAL, NOMBRE COMERCIAL, RUC, REPRESENTANTE, TELEFONO.
+     * - RUC: solo numeros y unicidad en el sistema
+     * - Formato de telefono valido
+     * - Formato de email valido (si se proporciona)
+     * 
+     * @return int ID del cliente creado si exitoso, -1 en error de validacion o registro
+     *              0 si el metodo HTTP no es POST
+     */
     public function storeEmpresaClient(): int
     {
         $this->authRequired();
@@ -44,18 +105,18 @@ class EmpresaController extends Controller
         $data = array_map([Validador::class, 'limpiar'], $_POST);
 
         $empresa = [
-            'iddistrito'      => (int) ($data['distrito'] ?? 0),
-            'razonsocial'     => html_entity_decode($data['razonsocial'] ?? '', ENT_QUOTES | ENT_HTML5, 'UTF-8'),
+            'iddistrito' => (int) ($data['distrito'] ?? 0),
+            'razonsocial' => html_entity_decode($data['razonsocial'] ?? '', ENT_QUOTES | ENT_HTML5, 'UTF-8'),
             'nombrecomercial' => html_entity_decode($data['nombrecomercial'] ?? '', ENT_QUOTES | ENT_HTML5, 'UTF-8'),
-            'ruc'             => $data['ruc'] ?? '',
-            'representante'   => html_entity_decode($data['representante'] ?? '', ENT_QUOTES | ENT_HTML5, 'UTF-8'),
-            'email'           => !empty($data['email']) ? $data['email'] : null,
-            'direccion'       => !empty($data['direccion']) ? html_entity_decode($data['direccion'], ENT_QUOTES | ENT_HTML5, 'UTF-8') : null,
-            'referencia'      => !empty($data['referencia']) ? html_entity_decode($data['referencia'], ENT_QUOTES | ENT_HTML5, 'UTF-8') : null,
-            'latitud'         => !empty($data['latitud']) ? $data['latitud'] : null,
-            'longitud'        => !empty($data['longitud']) ? $data['longitud'] : null,
-            'telprimario'     => $data['telprimario'] ?? '',
-            'telsecundario'   => !empty($data['telsecundario']) ? $data['telsecundario'] : null,
+            'ruc' => $data['ruc'] ?? '',
+            'representante' => html_entity_decode($data['representante'] ?? '', ENT_QUOTES | ENT_HTML5, 'UTF-8'),
+            'email' => !empty($data['email']) ? $data['email'] : null,
+            'direccion' => !empty($data['direccion']) ? html_entity_decode($data['direccion'], ENT_QUOTES | ENT_HTML5, 'UTF-8') : null,
+            'referencia' => !empty($data['referencia']) ? html_entity_decode($data['referencia'], ENT_QUOTES | ENT_HTML5, 'UTF-8') : null,
+            'latitud' => !empty($data['latitud']) ? $data['latitud'] : null,
+            'longitud' => !empty($data['longitud']) ? $data['longitud'] : null,
+            'telprimario' => $data['telprimario'] ?? '',
+            'telsecundario' => !empty($data['telsecundario']) ? $data['telsecundario'] : null,
         ];
 
 
@@ -132,6 +193,15 @@ class EmpresaController extends Controller
         return -1; // No se pudo agregar a la DB
     }
 
+    /**
+     * Muestra el formulario de edicion de Empresa cliente
+     * 
+     * Carga los datos de una empresa especifica para su edicion.
+     * Requiere autenticacion y muestra error 404 si no existe.
+     * 
+     * @param int $id ID de la empresa a editar
+     * @return void
+     */
     public function edit(int $id): void
     {
         $this->authRequired();
@@ -143,6 +213,17 @@ class EmpresaController extends Controller
             $this->view('errors.404');
         }
     }
+
+    /**
+     * Actualiza los datos de una empresa cliente existente
+     * 
+     * Procesa el formulario de actualizacion, validando todos los campos.
+     * Realiza las mismas validaciones que en la creacion (RUC, TELEFONO, EMAIL).
+     * Solo procesa peticiones POST y requiere autenticacion.
+     * 
+     * @param int $id ID de la empresa a actualizar
+     * @return void
+     */
     public function update(int $id): void
     {
         $this->authRequired();
@@ -222,7 +303,24 @@ class EmpresaController extends Controller
     }
 
     /**
-     * Buscar empresa por RUC usando API externa
+     * Busca una empresa por RUC usando base de datos local y API externa
+     * 
+     * Endpoint AJAX que realiza una búsqueda en dos niveles:
+     * 1. Primero busca en la base de datos local
+     * 2. Si no existe localmente, consulta la API externa de SUNAT
+     * 
+     * Acepta peticiones GET y POST. Responde en formato JSON con información
+     * completa de la empresa incluyendo razón social, nombre comercial,
+     * representante y datos de contacto.
+     * 
+     * Respuesta para empresa local:
+     * - success: true
+     * - source: 'local'
+     * - datos de la empresa (idempresa, razonsocial, nombrecomercial, etc.)
+     * 
+     * Respuesta para API externa:
+     * - Formato definido por el helper Api_ruc.php
+     *
      * @return void
      */
     public function searchByRUCApi(): void

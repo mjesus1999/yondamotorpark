@@ -1,21 +1,67 @@
 <?php
 
+/**
+ * Controlador de Tienda
+ * 
+ * app/Controllers/TiendaController.php
+ * 
+ * Gestiona todas las operaciones CRUD relacionadas con las tiendas/sucursales
+ * de concesionarios, incluyendo validaciones de datos, búsquedas por concesionario
+ * y endpoints API para operaciones AJAX.
+ */
 namespace App\Controllers;
 
 use App\Core\Controller;
 use App\Helpers\Validador;
 use App\Models\Tienda;
+
+/**
+ * Clase TiendaController
+ * 
+ * Controlador para la gestión de tiendas/sucursales de concesionarios.
+ * Proporciona endpoints AJAX exclusivamente, con validaciones robustas
+ * y respuestas en formato JSON para todas las operaciones.
+ * 
+ */
 class TiendaController extends Controller
 {
 
-    private  Tienda $tiendaModel;
+    /**
+     * Instancia de la conexion de la base de datos
+     * @var Tienda
+     */
+    private Tienda $tiendaModel;
 
+    /**
+     * Constructor del controlador
+     * 
+     * Inicializa el modelo de Tienda necesario para las operaciones
+     * del controlador.
+     */
     public function __construct()
     {
         $this->tiendaModel = new Tienda();
     }
 
-
+    /**
+     * Registra una nueva tienda en el sistema
+     * 
+     * Endpoint AJAX que procesa el formulario de creación de tienda.
+     * Valida todos los campos obligatorios y responde en formato JSON.
+     * Solo acepta peticiones POST y requiere autenticación.
+     * 
+     * Validaciones realizadas:
+     * - Campos obligatorios: distrito, dirección, email, teléfono, contacto
+     * 
+     * Respuestas JSON:
+     * - success true: Tienda creada exitosamente con ID
+     * - success false: Errores de validación o fallo en creación
+     * 
+     * Códigos HTTP:
+     * - 405: Método no permitido
+     * 
+     * @return int ID de la tienda creada si exitoso, 0 en caso de error
+     */
     public function store(): int
     {
         $this->authRequired();
@@ -25,9 +71,9 @@ class TiendaController extends Controller
             exit;
         }
 
-         header('Content-Type: application/json');
+        header('Content-Type: application/json');
 
-         $data = array_map([Validador::class, 'limpiar'], $_POST);
+        $data = array_map([Validador::class, 'limpiar'], $_POST);
         $registro = [
 
             'iddistrito' => $data['iddistrito'] ?? '',
@@ -47,7 +93,7 @@ class TiendaController extends Controller
 
         $errores = array_filter($errores);
 
-        
+
         if (!empty($errores)) {
             echo json_encode([
                 'success' => false,
@@ -74,17 +120,26 @@ class TiendaController extends Controller
             ]);
             exit;
         }
-        
+
 
     }
-    // Me traera lso datos de la tienda.
 
-    public function edit(int $id) : void {
+    /**
+     * Obtiene los datos de una tienda para edición
+     * 
+     * Endpoint AJAX que retorna los datos completos de una tienda específica
+     * en formato JSON. Requiere autenticación.
+     * 
+     * @param int $id ID de la tienda a consultar 
+     * @return void
+     */
+    public function edit(int $id): void
+    {
 
         $this->authRequired();
         header('Content-Type: application/json');
 
-        $tienda =$this->tiendaModel->getTiendasById($id);
+        $tienda = $this->tiendaModel->getTiendasById($id);
 
         if ($tienda) {
             echo json_encode($tienda[0]);
@@ -93,9 +148,30 @@ class TiendaController extends Controller
         }
     }
 
-
-    // Enviar los datos 
-    public function update($id):int {
+    /**
+     * Actualiza los datos de una tienda existente
+     * 
+     * Endpoint AJAX que procesa la actualización de una tienda.
+     * Valida campos obligatorios incluyendo formato de teléfono y email.
+     * Solo acepta peticiones POST y responde en formato JSON.
+     * 
+     * Validaciones realizadas:
+     * - Campos obligatorios: distrito, dirección, teléfono
+     * - Formato de teléfono válido
+     * - Formato de email válido (si se proporciona)
+     * 
+     * Respuestas JSON:
+     * - success true: Actualización exitosa con número de filas afectadas
+     * - success false: Errores de validación o fallo en actualización
+     * 
+     * Códigos HTTP:
+     * - 405: Método no permitido
+     * 
+     * @param int $id ID de la tienda a actualizar
+     * @return int Número de filas afectadas o -1 en caso de error
+     */
+    public function update($id): int
+    {
         $this->authRequired();
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             http_response_code(405);
@@ -117,8 +193,8 @@ class TiendaController extends Controller
 
         $errores = [];
 
-        $errores[] = Validador::campoObligatorio($registro['iddistrito'],'Distrito');
-        $errores[] = Validador::campoObligatorio($registro['direccion'],'Dirección');
+        $errores[] = Validador::campoObligatorio($registro['iddistrito'], 'Distrito');
+        $errores[] = Validador::campoObligatorio($registro['direccion'], 'Dirección');
         $errorTel = Validador::campoObligatorio($registro['telefono'], 'Teléfono');
 
         if ($errorTel) {
@@ -129,7 +205,7 @@ class TiendaController extends Controller
 
         // Email solo si no está vacío
         if (!empty($registro['email'])) {
-            
+
             $errores[] = Validador::emailValido($registro['email']);
         }
 
@@ -158,10 +234,10 @@ class TiendaController extends Controller
             echo json_encode([
                 'success' => true,
                 'message' => '¡Concesionario creado exitosamente!',
-                'rows' => $rowAffects 
+                'rows' => $rowAffects
             ]);
             exit;
-        }else {
+        } else {
             echo json_encode([
                 'success' => false,
                 'message' => 'No se pudo crear el concesionario',
@@ -171,24 +247,52 @@ class TiendaController extends Controller
         }
     }
 
-
-    public function delete($id): void {
+    /**
+     * Elimina una tienda del sistema
+     * 
+     * Endpoint AJAX que procesa la eliminación de una tienda.
+     * Solo acepta peticiones POST y responde en formato JSON.
+     * Requiere autenticación.
+     * 
+     * Respuestas JSON:
+     * - success true: Tienda eliminada correctamente
+     * - success false: No se pudo eliminar o restricciones de integridad
+     * 
+     * Códigos HTTP:
+     * - 405: Método no permitido
+     * 
+     * @param int $id ID de la tienda a eliminar
+     * @return void
+     */
+    public function delete($id): void
+    {
         $this->authRequired();
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-          if ($this->tiendaModel->delete($id) > 0) {
-                        echo json_encode(["success" => true, "message" => "Tienda eliminada"]);
-          } else {
-            echo json_encode(["success" => false, "message" => "No se pudo eliminar"]);
-          }
+            if ($this->tiendaModel->delete($id) > 0) {
+                echo json_encode(["success" => true, "message" => "Tienda eliminada"]);
+            } else {
+                echo json_encode(["success" => false, "message" => "No se pudo eliminar"]);
+            }
         } else {
-          http_response_code(405);
-          echo json_encode(["success" => false, "message" => "Método no permitido"]);
+            http_response_code(405);
+            echo json_encode(["success" => false, "message" => "Método no permitido"]);
         }
-      }
-      
-    // METODO PARA APIS
+    }
 
-    // BUSCAR LAS TIENDAS DE UN CONCESIONARIO POR ID.
+    /**
+     * API: Busca tiendas por ID de concesionario
+     * 
+     * Endpoint AJAX que retorna todas las tiendas asociadas a un
+     * concesionario específico en formato JSON. Típicamente usado
+     * para poblar elementos select en formularios.
+     * 
+     * Respuestas HTTP:
+     * - 200 OK: Array de tiendas del concesionario
+     * - 404 Not Found: No se encontraron tiendas
+     * 
+     * @param int $id ID del concesionario
+     * @return never
+     */
     public function searchTiendaByConcesionario($id): void
     {
         $this->authRequired();
@@ -205,4 +309,5 @@ class TiendaController extends Controller
 
         exit();
     }
+
 }

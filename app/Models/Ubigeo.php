@@ -1,23 +1,53 @@
 <?php
 
+/**
+ * Modelo de Ubigeo
+ * 
+ * Gestiona las operaciones de base de datos relacionadas con la división
+ * política territorial del Perú, incluyendo departamentos, provincias y distritos.
+ * Proporciona datos de ubicación geográfica para el sistema.
+ * 
+ */
 namespace App\Models;
 
 use App\Core\Database;
 use Exception;
 use PDO;
 
+/**
+ * Clase Ubigeo
+ * 
+ * Modelo para la gestión de datos de ubicación geográfica del Perú.
+ * Proporciona métodos de consulta para obtener departamentos, provincias
+ * y distritos de forma jerárquica y ordenada alfabéticamente.
+ */
 class Ubigeo
 {
+
+  /**
+   * Instancia de conexion a la base de datos
+   * @var PDO
+   */
   private PDO $db;
 
+  /**
+   * Constructor del modelo 
+   * 
+   * Inicializa la conexion a la base de datos
+   */
   public function __construct()
   {
     $this->db = Database::getInstance();
   }
 
   /**
-   * Retorna una lista de los departamentos del Perú en orden alfabético
-   * @return array
+   * Obtiene todos los departamentos del Perú
+   * 
+   * Retorna una lista completa de los departamentos del Perú
+   * ordenados alfabéticamente por nombre.
+   * 
+   * @return array Array asociativo con los departamentos (iddepartamento, departamento)
+   *               o array vacío en caso de error
    */
   public function getAllDepartamentos(): array
   {
@@ -32,9 +62,14 @@ class Ubigeo
   }
 
   /**
-   * Retorna una lista de las provincias de un determinado departamento del Perú en orden alfabético
-   * @param int $iddepartamento Clave primaria del departamento del que se quiere consultar sus provincias
-   * @return array
+   * Obtiene todas las provincias de un departamento específico
+   * 
+   * Retorna una lista de provincias pertenecientes a un departamento
+   * determinado, ordenadas alfabéticamente por nombre.
+   * 
+   * @param int $iddepartamento ID del departamento del cual consultar sus provincias
+   * @return array Array asociativo con las provincias (idprovincia, provincia, iddepartamento)
+   *               o array vacío en caso de error
    */
   public function getAllProvincias(int $iddepartamento): array
   {
@@ -51,9 +86,14 @@ class Ubigeo
   }
 
   /**
-   * Retorna una lista de los distritos de una determinada provincia
-   * @param int $idprovincia Clave primaria de la provincia de la que se quiere consultar sus distritos
-   * @return array
+   * Obtiene todos los distritos de una provincia específica
+   * 
+   * Retorna una lista de distritos pertenecientes a una provincia
+   * determinada, ordenados alfabéticamente por nombre.
+   * 
+   * @param int $idprovincia ID de la provincia de la cual consultar sus distritos
+   * @return array Array asociativo con los distritos (iddistrito, distrito, idprovincia)
+   *               o array vacío en caso de error
    */
   public function getAllDistritos(int $idprovincia): array
   {
@@ -69,9 +109,16 @@ class Ubigeo
     }
   }
 
-
-  // DEYANIRA:
-
+  /**
+   * Obtiene todos los distritos del Perú
+   * 
+   * Retorna una lista completa de todos los distritos del Perú
+   * sin filtrar por provincia o departamento, ordenados alfabéticamente.
+   * Útil para listados generales o búsquedas sin jerarquía.
+   * 
+   * @return array Array asociativo con los distritos (iddistrito, distrito)
+   *               o array vacío en caso de error
+   */
   public function getAllDistritosAll(): array
   {
     $sql = "SELECT iddistrito, distrito FROM distritos ORDER BY distrito";

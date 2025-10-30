@@ -1,3 +1,6 @@
+/**
+ * public/assets/js/mapa.js
+ */
 class MapaSelector {
     constructor(options = {}) {
         

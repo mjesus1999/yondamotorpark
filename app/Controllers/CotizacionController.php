@@ -1,6 +1,14 @@
 <?php
-//app/controllers/CotizacionController.php
 
+/**
+ * Controlador de Cotización
+ * 
+ * Gestiona todas las operaciones relacionadas con cotizaciones de venta
+ * de vehículos, incluyendo creación con múltiples opciones de financiamiento,
+ * cálculos de cuotas con tasas de interés, gestión de pagos de inicial,
+ * generación de reportes PDF, control de acceso por roles (supervisores/asesores),
+ * y reactivación de cotizaciones vencidas.
+ */
 namespace App\Controllers;
 
 use App\Core\Controller;
@@ -13,12 +21,39 @@ use Exception;
 use JsonException;
 use PDOException;
 
+/**
+ * Clase CotizacionController
+ * 
+ * Controlador para la gestión integral de cotizaciones de venta.
+ * Implementa control de acceso basado en roles (supervisores ven todas,
+ * asesores solo las suyas), cálculo de financiamiento con interés compuesto,
+ * generación de cronogramas de pago, registro de pagos iniciales con
+ * conversión de moneda, y generación de documentos PDF para clientes.
+ */
 class CotizacionController extends Controller
 {
+    /**
+     * Modelo de Cotizacion
+     * @var Cotizacion
+     */
     private Cotizacion $cotizacionModel;
+    /**
+     * Modelo de Vehiculo
+     * @var Vehiculo
+     */
     private Vehiculo $vehiculoModel;
+    /**
+     * Modelo de FormatoCotizacion
+     * @var FormatoCotizacion
+     */
     private FormatoCotizacion $formatoModel;
 
+    /**
+     * Constructor del controlador
+     * 
+     * Inicializa los modelos de Cotizacion, Vehiculo y FormatoCotizacion
+     * necesarios para las operaciones del controlador
+     */
     public function __construct()
     {
         $this->cotizacionModel = new Cotizacion();
@@ -26,6 +61,22 @@ class CotizacionController extends Controller
         $this->formatoModel = new FormatoCotizacion();
     }
 
+    /**
+     * Muestra el listado de cotizaciones con control de acceso por rol
+     * 
+     * Renderiza la vista de cotizaciones aplicando filtros según el rol del usuario:
+     * - Supervisores/Jefes: Ven todas las cotizaciones del estado seleccionado
+     * - Asesores: Solo ven sus propias cotizaciones
+     *
+     * Estados válidos: 'P' (Pendiente), 'A' (Aprobada), 'S' (Separada), 
+     * 'V' (Vencida), 'C' (Cancelada)
+     * 
+     * Cargos supervisores: 1 (Jefe Sistemas), 8 (Logística), 10 (RRHH),
+     * 13 (Contabilidad), 14 (Marketing), 16 (Ventas), 17 (Caja)
+     * 
+     * @param string $estado Estado de las cotizaciones a mostrar (por defecto: 'P')
+     * @return void
+     */
     public function index(string $estado = 'P'): void
     {
         $this->authRequired();
@@ -86,6 +137,16 @@ class CotizacionController extends Controller
         ]);
     }
 
+    /**
+     * Muestra la vista de gestión de pagos de inicial
+     * 
+     * Renderiza la interfaz para registrar y visualizar pagos del inicial
+     * de una cotización, incluyendo total pagado, saldo pendiente, historial
+     * de pagos y estado de completitud para habilitar contrato.
+     *
+     * @param mixed $idCotizacion ID de la cotización
+     * @return void
+     */
     public function indexPagoInicial($idCotizacion)
     {
         $datos = $this->cotizacionModel->getDatosCotizacion($idCotizacion);
@@ -95,9 +156,16 @@ class CotizacionController extends Controller
         $this->view('cotizacion.pagoInicial', ['cotizacion' => $datos, 'montosInfo' => $montosInfo, 'historialPagos' => $historialPagos, 'completoInicial' => $completoIncial]);
     }
 
-
-
-
+    /**
+     * Genera reporte PDF de cotización con control de acceso
+     * 
+     * Genera documento PDF de cotización con todas las opciones de financiamiento.
+     * Aplica control de acceso: supervisores pueden generar cualquier cotización,
+     * asesores solo las propias. Incluye validación de permisos antes de generar.
+     *
+     * @param mixed $id ID de la cotización
+     * @return void
+     */
     public function html2pdfReport($id): void
     {
         $this->authRequired();
@@ -138,12 +206,36 @@ class CotizacionController extends Controller
         ]);
     }
 
+    /**
+     * Muestra la vista de reportes de cotizaciones
+     * 
+     * Renderiza la interfaz para generar reportes y análisis de cotizaciones.
+     * Requiere autenticación.
+     *
+     * @return void
+     */
     public function indexReporteByCotizacion(): void
     {
         $this->authRequired();
         $this->view('cotizacion.reporte-cotizacion');
     }
 
+    /**
+     * Registra un pago del inicial de cotización
+     * 
+     * Endpoint AJAX que procesa pagos de inicial con validaciones exhaustivas,
+     * manejo de comprobantes, conversión de moneda y rollback automático de
+     * archivos en caso de error. Valida disponibilidad de vehículo mediante
+     * triggers de BD.
+     *
+     * Validaciones realizadas:
+     * - Campos obligatorios: concepto, vehículo, medio de pago, fecha, montos
+     * - Comprobante: obligatorio para medios distintos a efectivo
+     * - Conversión de moneda: calcula montos según moneda de cotización
+     *
+     * @throws \Exception 
+     * @return void
+     */
     public function storePagoInicial()
     {
         header('Content-Type: application/json');
@@ -161,20 +253,20 @@ class CotizacionController extends Controller
             $errores = [];
 
             $registro = [
-                'idconcepto'        => ConceptosPago::INICIAL_ID,
-                'idcotizacion'      => $data['idcotizacion'] ?? null,
-                'idvehiculo'        => $data['idvehiculo'] ?? null,
-                'idcuentapago'      => empty($data['idcuentapago']) ? null : $data['idcuentapago'],
-                'mediopago'         => $data['mediopago'] ?? null,
+                'idconcepto' => ConceptosPago::INICIAL_ID,
+                'idcotizacion' => $data['idcotizacion'] ?? null,
+                'idvehiculo' => $data['idvehiculo'] ?? null,
+                'idcuentapago' => empty($data['idcuentapago']) ? null : $data['idcuentapago'],
+                'mediopago' => $data['mediopago'] ?? null,
                 'numerotransaccion' => empty($data['numerotransaccion']) ? null : $data['numerotransaccion'],
-                'fechapago'         => $data['fechapago'] ?? null,
-                'amortizacion'      => $data['amortizacion'] ?? null,
-                'saldorestante'     => $data['saldorestante'] ?? null,
-                'comprobante'       => null,
-                'observacion'       => empty($data['observacion']) ? null : $data['observacion'],
-                'moneda'            => $data['moneda'] ?? null,
+                'fechapago' => $data['fechapago'] ?? null,
+                'amortizacion' => $data['amortizacion'] ?? null,
+                'saldorestante' => $data['saldorestante'] ?? null,
+                'comprobante' => null,
+                'observacion' => empty($data['observacion']) ? null : $data['observacion'],
+                'moneda' => $data['moneda'] ?? null,
                 'montomonedaoriginal' => $data['montomonedaoriginal'] ?? null,
-                'tipocambioaplicado'  => empty($data['tipocambioaplicado']) ? null : $data['tipocambioaplicado']
+                'tipocambioaplicado' => empty($data['tipocambioaplicado']) ? null : $data['tipocambioaplicado']
             ];
 
 
@@ -235,7 +327,8 @@ class CotizacionController extends Controller
             }
         } catch (PDOException $e) {
 
-            if ($rutaArchivoGuardado && file_exists($rutaArchivoGuardado)) @unlink($rutaArchivoGuardado);
+            if ($rutaArchivoGuardado && file_exists($rutaArchivoGuardado))
+                @unlink($rutaArchivoGuardado);
 
             if (strpos($e->getMessage(), 'El vehículo ya fue separado') !== false || strpos($e->getMessage(), 'vendido al contado') !== false) {
                 http_response_code(409);
@@ -252,7 +345,8 @@ class CotizacionController extends Controller
             }
         } catch (Exception $e) {
 
-            if ($rutaArchivoGuardado && file_exists($rutaArchivoGuardado)) @unlink($rutaArchivoGuardado);
+            if ($rutaArchivoGuardado && file_exists($rutaArchivoGuardado))
+                @unlink($rutaArchivoGuardado);
 
             http_response_code(500);
             echo json_encode([
@@ -262,18 +356,22 @@ class CotizacionController extends Controller
         }
     }
 
-
-
-
-
-
-
-
-
-
-
-
-    // En CotizacionController.php - Método apiShow actualizado
+    /**
+     * API: Obtiene datos completos de una cotización para visualización
+     * 
+     * Endpoint AJAX que retorna información estructurada de cotización incluyendo
+     * cliente, vehículo, precios con conversión de moneda, asesor, requisitos
+     * dinámicos (gastos administrativos procesados), y todas las opciones de
+     * financiamiento. Maneja fechas de reactivación y valores por defecto.
+     *
+     * Procesamiento especial:
+     * - Requisitos: Reemplaza "gastos administrativos" con monto real
+     * - Fechas: Prioriza fecha de reactivación sobre fecha de registro
+     * - Precios: Formatea según moneda de cotización (PEN/USD)
+     *
+     * @param int $idcotizacion ID de la cotización
+     * @return never
+     */
     public function apiShow(int $idcotizacion): void
     {
         header('Content-Type: application/json; charset=utf-8');
@@ -371,6 +469,14 @@ class CotizacionController extends Controller
         exit;
     }
 
+    /**
+     * Muestra el formulario de creación de cotización
+     * 
+     * Renderiza la vista con formulario de nueva cotización, incluyendo
+     * listados de formatos disponibles y vehículos en estado Libre o Proceso.
+     *
+     * @return void
+     */
     public function create(): void
     {
         $this->authRequired();
@@ -382,6 +488,14 @@ class CotizacionController extends Controller
         ]);
     }
 
+    /**
+     * API: Obtiene requisitos de un formato de cotización
+     * 
+     * Endpoint AJAX que retorna los requisitos asociados a un formato específico.
+     *
+     * @param int $idformato ID del formato de cotización
+     * @return void
+     */
     public function requisitos(int $idformato): void
     {
         $this->authRequired();
@@ -393,6 +507,15 @@ class CotizacionController extends Controller
         exit;
     }
 
+    /**
+     * API: Busca cliente por tipo y número de documento
+     * 
+     * Endpoint AJAX que busca clientes registrados por DNI (personas) o
+     * RUC (empresas). Retorna datos completos del cliente si existe,
+     * o indica que no fue encontrado para permitir registro.
+     *
+     * @return void
+     */
     public function buscarCliente(): void
     {
         $this->authRequired();
@@ -425,6 +548,18 @@ class CotizacionController extends Controller
         }
         exit;
     }
+
+    /**
+     * Registra una nueva cotización con múltiples opciones de financiamiento
+     * 
+     * Procesa formulario de cotización creando múltiples registros (uno por cada
+     * opción de plazo). Valida datos, ordena opciones por número de cuotas,
+     * y crea cotizaciones relacionadas con mismo cliente/vehículo/timestamp.
+     * Requiere autenticación y asigna automáticamente el asesor desde sesión.
+     *
+     * @throws \Exception
+     * @return void
+     */
     public function store(): void
     {
         $this->authRequired();
@@ -463,7 +598,8 @@ class CotizacionController extends Controller
                 $tasaanual = (float) ($opcion['tasaanual'] ?? 65.00);
                 $tasamensual = (float) ($opcion['tasamensual'] ?? 0.00);
 
-                if ($numcuotas <= 0) continue;
+                if ($numcuotas <= 0)
+                    continue;
 
                 $input = [
                     'idformato' => $_POST['modalidad'] ?? null,
@@ -485,12 +621,12 @@ class CotizacionController extends Controller
                     throw new Exception('Faltan datos obligatorios para crear la cotización.');
                 }
 
-                
+
                 $idcot = $this->cotizacionModel->create($input);
                 $idsCotizacionesCreadas[] = $idcot;
 
                 $this->cotizacionModel->createFinanciamiento(
-                    $idcot, 
+                    $idcot,
                     $numcuotas,
                     $inicial,
                     $valorcuota,
@@ -508,8 +644,14 @@ class CotizacionController extends Controller
         }
     }
 
-
-
+    /**
+     * API: Obtiene el tipo de cambio actual
+     * 
+     * Endpoint AJAX que consulta API externa para obtener el tipo de cambio
+     * USD/PEN actualizado. Utilizado en cálculos de cotización.
+     *
+     * @return void
+     */
     public function tipoCambio(): void
     {
         header('Content-Type: application/json; charset=utf-8');
@@ -519,6 +661,17 @@ class CotizacionController extends Controller
         exit;
     }
 
+    /**
+     * API: Calcula el pago mensual de un financiamiento
+     * 
+     * Endpoint AJAX que aplica fórmula de anualidad para calcular cuota mensual
+     * con tasa de interés compuesto. Acepta tasa anual como parámetro opcional.
+     *
+     * @param float $importeTotal Precio total del vehículo
+     * @param float $inicial Monto del pago inicial
+     * @param int $meses Plazo en meses
+     * @return void
+     */
     public function calcularPagoMensual(float $importeTotal, float $inicial, int $meses): void
     {
         header('Content-Type: application/json');
@@ -530,7 +683,17 @@ class CotizacionController extends Controller
         exit();
     }
 
-    // Generar cronograma:
+    /**
+     * API: Genera cronograma completo de pagos
+     * 
+     * Endpoint AJAX que genera cronograma detallado mes a mes con distribución
+     * de interés y capital, mostrando la amortización del préstamo.
+     *
+     * @param float $importeTotal Precio total del vehivulo
+     * @param float $inicial Monto del pago inicial
+     * @param int $meses Plazo en meses del financiamiento
+     * @return void Respuesta JSON con array de pagos mensuales
+     */
     public function generarCronograma(float $importeTotal, float $inicial, int $meses): void
     {
         header('Content-Type: application/json');
@@ -542,11 +705,15 @@ class CotizacionController extends Controller
         exit();
     }
 
-
-
-    //NUEVAS FUNCIONES (BUSCA EL DNI DEL ULTIMO CLIENTE (GET) Y LLEVA A UNA COTIZACION (POST))
     /**
-     * API para obtener el último cliente registrado
+     * API: Obtiene el último cliente registrado desde la sesión
+     * 
+     * Endpoint AJAX que recupera información del último cliente registrado
+     * almacenado en sesión. Verifica que el registro sea reciente (menos de 30 minutos)
+     * y limpia automáticamente registros obsoletos. Utilizado para auto-completar
+     * formularios de cotización después de registrar un nuevo cliente.
+     * 
+     * @return never Respuesta JSON con datos del cliente o mensaje de error
      */
     public function ultimoClienteRegistrado(): void
     {
@@ -581,7 +748,13 @@ class CotizacionController extends Controller
     }
 
     /**
-     * API para limpiar el último cliente registrado de la sesión
+     * API: Limpia el último cliente registrado de la sesión
+     * 
+     * Endpoint AJAX que elimina de la sesión la información del último cliente
+     * registrado. Útil para limpiar el estado después de completar una cotización
+     * o cuando el usuario decide no usar los datos precargados.
+     * 
+     * @return never Respuesta JSON confirmando la limpieza
      */
     public function limpiarUltimoCliente(): void
     {
@@ -598,7 +771,20 @@ class CotizacionController extends Controller
         exit;
     }
 
-    //HISTORIAL PARA VER LAS COTIZACIONES VENCIDAS : 09/09/25
+    /**
+     * Muestra el historial de cotizaciones vencidas
+     * 
+     * Renderiza la vista de historial con cotizaciones en estado Vencido ('V').
+     * Aplica control de acceso por rol:
+     * - Supervisores/Jefes: Ven todas las cotizaciones vencidas con información del asesor
+     * - Asesores: Solo ven sus propias cotizaciones vencidas
+     * 
+     * Permite identificar cotizaciones que requieren reactivación o seguimiento.
+     * Cargos supervisores: 1, 8, 10, 13, 14, 16, 17
+     * 
+     * @return void 
+     * @throws Exception Si no se puede identificar al usuario
+     */
     public function historial(): void
     {
         $this->authRequired();
@@ -654,6 +840,22 @@ class CotizacionController extends Controller
         ]);
     }
 
+    /**
+     * Reactiva una cotización vencida
+     * 
+     * Endpoint AJAX que reactiva una cotización vencida cambiando su estado a Pendiente
+     * y actualizando su fecha de vigencia. Aplica control de acceso: supervisores
+     * pueden reactivar cualquier cotización, asesores solo las propias.
+     * 
+     * Proceso de reactivación:
+     * - Cambia estado de 'V' (Vencida) a 'P' (Pendiente)
+     * - Registra fecha de reactivación
+     * - Extiende vigencia por días configurados (default: 7 días)
+     * - Recupera opciones de financiamiento actualizadas
+     *
+     * @param int $idcotizacion ID de la cotización a reactivar
+     * @return never Respuesta JSON con resultado de la operación
+     */
     public function reactivar(int $idcotizacion): void
     {
         header('Content-Type: application/json; charset=utf-8');
@@ -706,7 +908,19 @@ class CotizacionController extends Controller
         }
     }
 
-
+    /**
+     * API: Obtiene datos para acta de separación vehicular
+     * 
+     * Endpoint AJAX que recupera toda la información necesaria para generar
+     * el acta de separación de un vehículo asociado a una cotización.
+     * Incluye datos del cliente, vehículo, financiamiento y pagos realizados.
+     * 
+     * Utilizado para documentos legales de separación de vehículo previo
+     * a la firma del contrato de compra-venta.
+     *
+     * @param int $idcotizacion ID de la cotización
+     * @return void Respuesta JSON con datos del acta o error
+     */
     public function getDataSeparacionVehicular(int $idcotizacion): void
     {
 
@@ -729,24 +943,37 @@ class CotizacionController extends Controller
         ]);
     }
 
-    public function getPagosCliente(int $idcotizacion): void {
+    /**
+     * API: Obtiene historial de pagos del inicial de un cliente
+     * 
+     * Endpoint AJAX que recupera el historial completo de pagos realizados
+     * por el cliente para cubrir el inicial de una cotización específica.
+     * Incluye información de cada transacción: fecha, monto, medio de pago,
+     * comprobante y observaciones.
+     * 
+     * verificar el estado de completitud del inicial y generar
+     * reportes de pagos del cliente.
+     *
+     * @param int $idcotizacion ID de la cotización
+     * @return void Respuesta JSON con array de pagos o error
+     */
+    public function getPagosCliente(int $idcotizacion): void
+    {
 
         header('Content-Type: application/json; charset=utf-8');
         $pagos = $this->cotizacionModel->getHistorialPagosInicial($idcotizacion);
 
-        if($pagos === false) {
+        if ($pagos === false) {
             http_response_code(500);
             echo json_encode([
-                'success'=> false,
-                'message'=> 'Ocurrió un error al consultar la base de datos'
+                'success' => false,
+                'message' => 'Ocurrió un error al consultar la base de datos'
             ]);
         }
-         echo json_encode([
-            'success'=> true,
-            'data'=> $pagos
-         ]);
+        echo json_encode([
+            'success' => true,
+            'data' => $pagos
+        ]);
     }
-
-
 
 }

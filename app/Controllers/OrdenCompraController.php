@@ -1,5 +1,16 @@
 <?php
 
+/**
+ * Controlador de Orden de Compra
+ * 
+ * app/Controllers/OrdenCompraController.php
+ * 
+ * Gestiona todas las operaciones relacionadas con órdenes de compra de vehículos,
+ * incluyendo creación, seguimiento de estados, gestión de pagos, recepción de
+ * mercadería y generación de reportes. Integra funcionalidades de múltiples
+ * modelos para un flujo completo de compras.
+ * 
+ */
 namespace App\Controllers;
 
 use App\Core\Controller;
@@ -8,19 +19,58 @@ use App\Models\OrdenCompra;
 use App\Models\PagosOC;
 use App\Models\EntidadPago;
 
+/**
+ * Clase OrdenCompraController
+ * 
+ * Controlador para la gestión integral de órdenes de compra.
+ * Proporciona funcionalidades para CRUD, control de estados, gestión de pagos,
+ * verificación de recepción y reportes ejecutivos. Coordina operaciones entre
+ * múltiples modelos (OrdenCompra, PagosOC, EntidadPago).
+ */
 class OrdenCompraController extends Controller
 {
+    /**
+     * Modelo de Orden de compra
+     * @var OrdenCompra
+     */
     private OrdenCompra $ordenCompraModel;
+
+    /**
+     * Modelo de Pagos de Orden de Compra
+     * @var PagosOC
+     */
     private PagosOC $pagosModel;
+
+    /**
+     * Modelo de entidad de Pago
+     * @var EntidadPago
+     */
     private EntidadPago $entidadesPagoModel;
+
+    /**
+     * Constructor del controlador
+     * 
+     * Inicializa los modelos de OrdenCompra, PagosOC y EntidadPago
+     * necesarios para las operaciones del controlador.
+     */
     public function __construct()
     {
         $this->ordenCompraModel = new OrdenCompra();
-        $this->pagosModel =  new PagosOC();
+        $this->pagosModel = new PagosOC();
         $this->entidadesPagoModel = new EntidadPago();
     }
 
-    // Me enlistara todas las ordenes de compras, dependiendo de su estado:
+    /**
+     * Muestra el listado de órdenes de compra por estado
+     * 
+     * Renderiza la vista principal con las órdenes de compra filtradas
+     * por su estado actual. Requiere autenticación.
+     * 
+     * Estados posibles: 'emitido', 'proceso', 'recepcionado', 'anulado'
+     * 
+     * @param string $estado Estado de las órdenes a mostrar (por defecto: 'emitido')
+     * @return void
+     */
     public function index(string $estado = 'emitido'): void
     {
         $this->authRequired();
@@ -28,12 +78,20 @@ class OrdenCompraController extends Controller
         $this->view('oc.index', ['ordenCompras' => $ordenCompras, 'estado' => $estado]);
     }
 
-
-    // METODO QUE LLEVARA A LA VISTA PARA REGISTRAR LOS PAGOS
+    /**
+     * Muestra la vista de gestión de pagos de una orden de compra
+     * 
+     * Renderiza la vista para registrar y visualizar pagos de una OC específica.
+     * Incluye historial de pagos, saldo restante, información del concesionario,
+     * estado de vehículos y entidades de pago disponibles.
+     * 
+     * @param int $idorden ID de la orden de compra
+     * @return void
+     */
     public function indexPagos($idorden): void
     {
         $this->authRequired();
-        $idorden = (int)$idorden;
+        $idorden = (int) $idorden;
 
 
         $result = $this->pagosModel->listarPagosByOC($idorden);
@@ -54,25 +112,46 @@ class OrdenCompraController extends Controller
         ]);
     }
 
-    // METODO QUE ME LLEVARA A LS VISTA DE RPEORTES POR CONCESIONARIO
-
+    /**
+     * Muestra la vista de reportes por concesionario
+     * 
+     * Renderiza la vista para generar y visualizar reportes de órdenes
+     * de compra agrupados por concesionario. Requiere autenticación.
+     * 
+     * @return void
+     */
     public function indexReporteByConcesionario(): void
     {
         $this->authRequired();
         $this->view('oc.reporteBy-concesionario');
     }
 
-
-
-
-
-    // Me llevará a la vista de crear
+    /**
+     * Muestra el formulario de creación de orden de compra
+     * 
+     * Renderiza la vista con el formulario para crear una nueva orden
+     * de compra. Requiere autenticación.
+     * 
+     * @return void
+     */
     public function create(): void
     {
         $this->authRequired();
         $this->view('oc.create');
     }
 
+    /**
+     * Registra una nueva orden de compra
+     * 
+     * Endpoint AJAX que procesa el formulario de creación de OC.
+     * Valida campos obligatorios y crea la orden en la base de datos.
+     * Solo acepta peticiones POST y requiere autenticación.
+     * 
+     * Validaciones realizadas:
+     * - Campos obligatorios: tienda, moneda, serie
+     * 
+     * @return int ID de la orden creada si exitoso, 0 en caso de error
+     */
     public function store(): int
     {
         $this->authRequired();
@@ -127,7 +206,17 @@ class OrdenCompraController extends Controller
         }
     }
 
-    // METODO PARA CAMBIAR EL ESTADO  EN LA TABAL OC  = 'PROCESO,ANULADO'
+    /**
+     * Actualiza el estado de una orden de compra
+     * 
+     * Endpoint AJAX que cambia el estado de una OC (proceso, anulado, etc.).
+     * Si el estado es 'anulado', ejecuta lógica especial de anulación.
+     * Solo acepta peticiones POST y requiere autenticación.
+     * 
+     * @param string $estado Nuevo estado de la orden
+     * @param int $idOC ID de la orden de compra
+     * @return never
+     */
     public function setEstado($estado, $idOC): void
     {
         $this->authRequired();
@@ -158,7 +247,19 @@ class OrdenCompraController extends Controller
         exit();
     }
 
-    // ACTUALIZA SI ES CORRECTO 
+    /**
+     * Actualiza el estado de verificación del detalle de OC
+     * 
+     * Endpoint AJAX que marca si los vehículos de una orden fueron
+     * recepcionados correctamente (campo 'escorrecto': S/N).
+     * Solo acepta peticiones POST y requiere autenticación.
+     * 
+     * Validaciones realizadas:
+     * - Campo obligatorio: escorrecto
+     * 
+     * @param int $idOC ID de la orden de compra
+     * @return int Número de filas afectadas
+     */
     public function update($idOC): int
     {
         $this->authRequired();
@@ -206,9 +307,16 @@ class OrdenCompraController extends Controller
         }
     }
 
-
-    // API PARA TRAER EL DETALLE DE UNA OC OR SU ID:
-
+    /**
+     * API: Obtiene el detalle completo de una orden de compra
+     * 
+     * Endpoint AJAX que retorna el detalle de una OC en formato JSON estructurado,
+     * separando información de la orden, concesionario, totales y vehículos.
+     * Útil para visualización detallada o impresión de OC.
+     * 
+     * @param int $idOC ID de la orden de compra
+     * @return void
+     */
     public function searchtDetOCByIdOc($idOC): void
     {
         $this->authRequired();
@@ -273,10 +381,16 @@ class OrdenCompraController extends Controller
         exit();
     }
 
-
-
-    // API PARA TRAER LOS DATOS DEL AUTO A ACTULIZAR EN DETALLE_OC SI LLEGO CORRECTO
-
+    /**
+     * API: Obtiene información de vehículos para verificación
+     * 
+     * Endpoint AJAX que retorna los datos de los vehículos de una OC
+     * con su estado de verificación (escorrecto) para el proceso de
+     * recepción de mercadería.
+     * 
+     * @param int $idOC ID de la orden de compra
+     * @return never
+     */
     public function searchInfoAutos($idOC)
     {
         $this->authRequired();
@@ -292,9 +406,18 @@ class OrdenCompraController extends Controller
         exit();
     }
 
+    /**
+     * API: Genera reporte ejecutivo de órdenes en proceso
+     * 
+     * Endpoint AJAX que retorna un reporte completo con dos secciones:
+     * resumen ejecutivo (totales, promedios) y detalle de órdenes en proceso.
+     * Útil para dashboards y análisis gerencial.
+     * 
+     * @return void
+     */
     public function getReporteOCProceso(): void
     {
-        $this->authRequired();  
+        $this->authRequired();
         header('Content-Type: application/json');
         try {
             $data = $this->ordenCompraModel->getReporteOCProceso();
@@ -306,4 +429,5 @@ class OrdenCompraController extends Controller
         }
         exit();
     }
+
 }

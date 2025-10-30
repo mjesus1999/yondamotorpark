@@ -1,3 +1,4 @@
+<!-- app/views/components/mapa-includes.php -->
 <script>
     (g => {
         var h, a, k, p = "The Google Maps JavaScript API",

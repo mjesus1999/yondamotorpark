@@ -1,5 +1,14 @@
 <?php
 
+/**
+ * Controlador de Persona
+ * 
+ * app/Controllers/PersonaController.php
+ * 
+ * Gestiona todas las operaciones relacionadas con personas y clientes del tipo persona,
+ * incluyendo la creación, edición, visualización y búsqueda de información personal.
+ * 
+ */
 namespace App\Controllers;
 
 use App\Core\Controller;
@@ -8,17 +17,49 @@ use App\Models\Cliente;
 use App\Helpers\Validador;
 use PDOException;
 
+
+/**
+ * Clase de PersonaController
+ * 
+ * Controlador para la gestión de personas y clientes tipo persona.
+ * Maneja las operaciones CRUD y búsquedas tanto locales como mediante API externa.
+ * 
+ */
 class PersonaController extends Controller
 {
+
+    /**
+     * Instancia del modelo Persona 
+     * @var Persona
+     */
     private Persona $personaModel;
+
+    /**
+     * Instancia del modelo Cliente
+     * @var Cliente
+     */
     private Cliente $clienteModel;
 
+    /**
+     * Constructor del controlador 
+     * 
+     * Inicializa las instancias de los modelos necesarios para las operaciones
+     * del controlador.
+     */
     public function __construct()
     {
         $this->personaModel = new Persona();
         $this->clienteModel = new Cliente();
     }
 
+    /**
+     * Muestra el listado de personas que son clientes
+     * 
+     * Renderiza la vista principal con el listado completo de todos los clientes
+     * de tipo persona registrados en el sistema.
+     * 
+     * @return void
+     */
     public function indexPersonCliente(): void
     {
         $this->authRequired();
@@ -26,12 +67,30 @@ class PersonaController extends Controller
         $this->view('clientes.index', ['personClientes' => $personClientes]);
     }
 
+    /**
+     * Muestra el formulario de creación de cliente persona
+     * 
+     * Renderiza la vista con el formulario para registrar un nuevo cliente
+     * de tipo persona en el sistema.
+     * 
+     * @return void
+     */
     public function createPersonClient(): void
     {
         $this->authRequired();
         $this->view('clientes.create');
     }
 
+    /**
+     * Procesa el registro de un nuevo cliente persona
+     * 
+     * Maneja la creación de una nueva persona y su registro como cliente.
+     * Soporta tanto peticiones AJAX como formularios tradicionales.
+     * Si la creación es exitosa, guarda la información del último cliente
+     * registrado en sesión y redirige según corresponda.
+     * 
+     * @return void
+     */
     public function storePersonaClient(): void
     {
         $this->authRequired();
@@ -56,7 +115,7 @@ class PersonaController extends Controller
             'nrodoc' => $data['nrodoc'] ?? '',
             'genero' => $data['genero'] ?? '',
             'iddistrito' => !empty($data['distrito']) ? (int) $data['distrito'] : null,
-            'direccion' => empty($data['direccion']) ? null :$data['direccion'],
+            'direccion' => empty($data['direccion']) ? null : $data['direccion'],
             'referencia' => $data['referencia'] ?? null,
             'telprimario' => $data['telprimario'] ?? null,
             'telalternativo' => empty($data['telalternativo']) ? null : $data['telalternativo'],
@@ -97,10 +156,10 @@ class PersonaController extends Controller
                     'apellidos' => $registroPersona['apellidos'],
                     'telprimario' => $registroPersona['telprimario'],
                     'telalternativo' => $registroPersona['telalternativo'],
-                    'direccion'      => $registroPersona['direccion'] ?? '',
+                    'direccion' => $registroPersona['direccion'] ?? '',
                     'timestamp' => time()
                 ];
-            
+
 
                 // Preparamos los datos para la respuesta
                 $nuevoCliente = [
@@ -132,6 +191,16 @@ class PersonaController extends Controller
         }
     }
 
+    /**
+     * Envía una respuesta JSON al cliente
+     * 
+     * Método auxiliar para enviar respuestas en formato JSON con el código
+     * de estado HTTP correspondiente. Termina la ejecución del script.
+     * 
+     * @param array $data Datos a enviar en formato JSON
+     * @param int $statusCode Código de estado HTTP (por defecto 200)
+     * @return never
+     */
     protected function jsonResponse(array $data, int $statusCode = 200): void
     {
         http_response_code($statusCode);
@@ -140,7 +209,16 @@ class PersonaController extends Controller
         exit;
     }
 
-
+    /**
+     * Muestra el formulario de edición de un cliente persona
+     * 
+     * Renderiza la vista con el formulario de edición prellenado con los datos
+     * de la persona especificada por su ID.
+     *
+     * @param int $id ID de la persona a editar
+     * @return void
+     * @throws \Exception Si hay error en la autenticación
+     */
     public function edit(int $id): void
     {
         $this->authRequired();
@@ -153,6 +231,16 @@ class PersonaController extends Controller
         }
     }
 
+    /**
+     * Procesa la actualización de datos de un cliente persona
+     * 
+     * Valida y actualiza la información de una persona existente en el sistema.
+     * Muestra mensajes de éxito o error según el resultado de la operación.
+     *
+     * @param int $id ID de la persona a actualizar
+     * @return void
+     * @throws \Exception Si hay error en la autenticación
+     */
     public function update(int $id): void
     {
         $this->authRequired();
@@ -204,6 +292,16 @@ class PersonaController extends Controller
         }
     }
 
+    /**
+     * Procesa el registro de una nueva persona
+     * 
+     * Crea un registro de persona sin asociarlo necesariamente a un cliente.
+     * Soporta tanto peticiones AJAX como formularios tradicionales.
+     * Utilizado principalmente en el contexto de usuarios.
+     * 
+     * @return void
+     * @throws \Exception Si hay error en la autenticación
+     */
     public function store(): void
     {
         $this->authRequired();
@@ -316,8 +414,14 @@ class PersonaController extends Controller
     }
 
     /**
-     * Buscar persona por DNI usando API externa
+     * Busca una persona por DNI usando API externa de RENIEC
+     * 
+     * Realiza una búsqueda de persona por su número de DNI consultando
+     * una API externa. Retorna los datos encontrados en formato JSON.
+     * 
      * @return void
+     * @throws \Exception Si hay error en la autenticación
+     * @throws PDOException Si hay error en la consulta a la base de datos
      */
     public function searchByDNIApi(): void
     {
@@ -391,8 +495,14 @@ class PersonaController extends Controller
     }
 
     /**
-     * Buscar Persona por DNI
+     * Busca una persona por DNI en la base de datos local
+     * 
+     * Realiza una búsqueda rápida de persona por su número de DNI
+     * en la base de datos local del sistema. Retorna los datos básicos
+     * de la persona si existe.
+     * 
      * @return void
+     * @throws \Exception Si hay error en la autenticación
      */
     public function searchByDNI(): void
     {

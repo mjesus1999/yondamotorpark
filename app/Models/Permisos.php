@@ -1,21 +1,58 @@
 <?php
-// app/Models/Permisos.php
 
+/**
+ * Modelo de Permisos
+ * 
+ * app/Models/Permisos.php
+ * 
+ * Gestiona las operaciones de base de datos relacionadas con los permisos
+ * y accesos de los usuarios según su cargo en el sistema. Controla qué módulos
+ * de la aplicación están disponibles para cada rol.
+ * 
+ */
 namespace App\Models;
 
 use App\Core\Database;
 use Exception;
 use PDO;
 
+/**
+ * Clase Permisos
+ * 
+ * Modelo para la gestión de permisos y control de acceso basado en roles (RBAC).
+ * Proporciona métodos para verificar y obtener los permisos de acceso a módulos
+ * según el cargo del usuario.
+ */
 class Permisos
 {
+
+    /**
+     * Instancia de conexión a la base de datos
+     * @var PDO
+     */
     private PDO $db;
 
+    /**
+     * Constructor del modelo
+     * 
+     * Inicializa la conexión a la base de datos
+     */
     public function __construct()
     {
         $this->db = Database::getInstance();
     }
 
+    /**
+     * Obtiene los módulos permitidos para un cargo específico
+     * 
+     * Retorna una lista de nombres de módulos a los cuales un cargo
+     * tiene permiso de acceso (permisos = 1). Utilizado para construir
+     * menús dinámicos y controlar el acceso a funcionalidades.
+     * 
+     * @param int $idCargo ID del cargo a consultar
+     * @return array Array simple con los nombres de los módulos permitidos
+     *               o array vacío si no tiene permisos o hay error
+     */
     public function getPermisosByCargo(int $idCargo): array
     {
         $stmt = $this->db->prepare("
@@ -27,6 +64,16 @@ class Permisos
         return $stmt->fetchAll(PDO::FETCH_COLUMN);
     }
 
+    /**
+     * Método comentado - Verificación de permiso específico
+     * 
+     * Este método alternativo verifica si un cargo tiene permiso para un módulo específico.
+     * Actualmente no está en uso pero se mantiene para referencia futura.
+     * 
+     * @param int $idCargo ID del cargo a verificar
+     * @param string $modulo Nombre del módulo a verificar
+     * @return bool True si tiene permiso, false en caso contrario
+     */
     /* public function tienePermiso(int $idCargo, string $modulo): bool
     {
         $stmt = $this->db->prepare("

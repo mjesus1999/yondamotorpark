@@ -90,14 +90,14 @@ class LocalController extends Controller
         $data = array_map([Validador::class, 'limpiar'], $_POST);
 
         $registro = [
-            'tienda'      => $data['tienda'] ?? '',
-            'iddistrito'  => (int)($data['iddistrito'] ?? 0),
-            'idmotorpark' => (int)($data['idmotorpark'] ?? 0),
-            'principal'   =>  $data['principal'] ?? '',
+            'tienda' => $data['tienda'] ?? '',
+            'iddistrito' => (int) ($data['iddistrito'] ?? 0),
+            'idmotorpark' => (int) ($data['idmotorpark'] ?? 0),
+            'principal' => $data['principal'] ?? '',
             'responsable' => $data['responsable'] ?? '',
-            'correo' =>   !empty($data['correo']) ? $data['correo'] : null,
+            'correo' => !empty($data['correo']) ? $data['correo'] : null,
             'direccion' => !empty($data['direccion']) ? $data['direccion'] : null,
-            'telefono' =>   $data['telefono'] ?? ''
+            'telefono' => $data['telefono'] ?? ''
         ];
 
 
@@ -139,8 +139,15 @@ class LocalController extends Controller
         }
     }
 
-
-
+    /**
+     * Obtiene los datos de un local para edicion 
+     * 
+     * Enpoint AJAX que retorna los datos especifico en formato JSON.
+     * Requiere autenticacion y responde con codigo HTTP 404 si no existe.
+     * 
+     * @param int $id ID del local a consultar 
+     * @return void
+     */
     public function edit(int $id): void
     {
         $this->authRequired();
@@ -155,6 +162,22 @@ class LocalController extends Controller
         exit();
     }
 
+    /**
+     * Actualiza los datos de un local existente
+     * 
+     * Endpoint AJAX que procesa la actualiza de responsable y telefono
+     * de un local. Valida campos obligatorios y responde en formato JSON.
+     * Solo acepta peticiones POST.
+     * 
+     * Respuesta HTTP:
+     * - 200: Actualiza exitosa
+     * - 400: Errores de validacion
+     * - 405: Metodo no permitido
+     * - 500: Error en la actualizacion
+     * 
+     * @param int $id ID del local a actualizar
+     * @return void
+     */
     public function update(int $id): void
     {
         $this->authRequired();
@@ -165,8 +188,8 @@ class LocalController extends Controller
 
             $registro = [
                 'responsable' => $responsable,
-                'telefono'    => $telefono,
-                'idlocal'     => $id
+                'telefono' => $telefono,
+                'idlocal' => $id
             ];
 
             $errores = [];
@@ -199,7 +222,16 @@ class LocalController extends Controller
         exit();
     }
 
-
+    /**
+     * Deshabilita un local.
+     * 
+     * Marca el local como inactivo sin eliminarlo fisicamente de la base de datos.
+     * Solo procesa peticiones POST y requiere autenticacion.
+     * Redirige al listado de locales despues de la operacion.
+     * 
+     * @param int $id ID del local a deshabilitar
+     * @return void
+     */
     public function delete(int $id): void
     {
         $this->authRequired();
@@ -216,8 +248,6 @@ class LocalController extends Controller
             $this->view('errors.405');
         }
     }
-
-
 
     /**
      * Devuelve la lista de locales activos en formato JSON.

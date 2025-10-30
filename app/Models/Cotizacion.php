@@ -1,5 +1,13 @@
 <?php
-//app/Controller/Cotizacion.php
+
+/**
+ * Modelo de Cotización
+ * 
+ * Gestiona las operaciones de base de datos relacionadas con cotizaciones
+ * de vehículos, incluyendo cálculo de financiamiento, generación de cronogramas
+ * de pago, gestión de pagos iniciales, y control de estados. Implementa
+ * algoritmos financieros para calcular cuotas y tasas de interés.
+ */
 namespace App\Models;
 
 use App\Core\Database;
@@ -9,16 +17,46 @@ use DateTime;
 use DateInterval;
 use PDOException;
 
+/**
+ * Clase Cotizacion
+ * 
+ * Modelo para la gestión de cotizaciones de venta de vehículos.
+ * Proporciona métodos para crear cotizaciones con diferentes opciones
+ * de financiamiento, calcular cuotas mensuales con interés compuesto,
+ * generar cronogramas de pago, gestionar pagos de inicial, y controlar
+ * estados (pendiente, aprobada, vencida). Implementa fórmulas financieras
+ * para cálculo de anualidades y manejo de múltiples monedas (PEN/USD)
+ */
 class Cotizacion
 {
+    /**
+     * Instancia de conexión a la base de datos
+     * @var PDO
+     */
     private PDO $db;
 
+    /**
+     * Constructor del modelo
+     * 
+     * Inicializa la conexión a la base de datos
+     */
     public function __construct()
     {
         $this->db = Database::getInstance();
     }
 
-
+    /**
+     * Obtiene todas las cotizaciones por estado
+     * 
+     * Retorna cotizaciones filtradas por estado mediante vista,
+     * ordenadas por fecha de registro descendente.
+     * 
+     * Estados válidos: 'P' (Pendiente), 'A' (Aprobada), 'S' (Separada),
+     * 'V' (Vencida), 'C' (Cancelada)
+     * 
+     * @param string $estado Estado de las cotizaciones a consultar
+     * @return array Array asociativo con las cotizaciones
+     */
     public function getAll(string $estado): array
     {
 
@@ -32,6 +70,14 @@ class Cotizacion
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    /**
+     * Obtiene el precio de venta al contado de un vehículo
+     * 
+     * Consulta el precio base del vehículo para cálculos de cotización.
+     * 
+     * @param int $idvehiculo ID del vehículo
+     * @return float|null Precio de venta o null si no existe
+     */
     public function getPrecioVehiculoAlContado(int $idvehiculo): ?float
     {
         $sql = "SELECT precioventa FROM vehiculos WHERE idvehiculo = :idvehiculo LIMIT 1";
@@ -49,6 +95,17 @@ class Cotizacion
             return null;
         }
     }
+
+    /**
+     * Obtiene cotizaciones de un asesor específico por estado
+     * 
+     * Filtra cotizaciones por asesor y estado, ordenadas por fecha descendente.
+     * Útil para dashboards personalizados por vendedor.
+     * 
+     * @param int $idasesor ID del asesor de ventas
+     * @param string $estado Estado de las cotizaciones
+     * @return array Array asociativo con las cotizaciones del asesor
+     */
     public function getAllByAsesor(int $idasesor, string $estado): array
     {
         $query = "SELECT * FROM vwGetAllCotizacion 
@@ -62,6 +119,19 @@ class Cotizacion
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    /**
+     * 
+     * Verifica si se completó el pago del inicial
+     * 
+     * Calcula el total pagado del inicial considerando conversiones de moneda
+     * (PEN/USD) y determina si se ha completado el monto requerido para
+     * habilitar la generación del contrato.
+     *
+     * @param int $idcotizacion ID de la cotización
+     * @return int 1 si inicial completado y cotización aprobada/separada,
+     *             0 si no cumple condiciones, -1 en error
+     */
     public function completoInicial(int $idcotizacion): int
     {
         $query = "
@@ -116,8 +186,15 @@ class Cotizacion
         }
     }
 
+    /**
+     * Obtiene datos resumidos de una cotización
+     * 
+     * Retorna información esencial de la cotización para visualización rápida:
+     * vehículo, precio, cliente, condiciones de financiamiento.
 
-
+     * @param string $id ID de la cotización
+     * @return array Array asociativo con datos resumidos de la cotización
+     */
     public function getDatosCotizacion(string $id): array
     {
 
@@ -146,6 +223,17 @@ class Cotizacion
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
+    /**
+     * Obtiene el total pagado y saldo pendiente del inicial
+     * 
+     * Calcula el monto total pagado de inicial con conversión de moneda automática
+     * y determina el saldo restante. Si hay pagos previos, usa el saldo del último;
+     * si no, retorna el monto inicial completo.
+
+     * @param mixed $idcotizacion ID de la cotización
+     * @return array Array con: idcotizacion, idvehiculo, moneda_cotizacion,
+     *               monto_inicial, totalpagado, saldorestante
+     */
     public function getTotalPagadoYSaldoPendiente($idcotizacion): array
     {
         $query = "
@@ -199,6 +287,17 @@ class Cotizacion
         }
     }
 
+    /**
+     * Obtiene el historial de pagos del inicial
+     * 
+     * Retorna todos los pagos realizados del concepto "Inicial" con información
+     * detallada de entidad bancaria, medio de pago, conversiones de moneda,
+     * y comprobantes. Ordenado cronológicamente.
+
+     * @param int $idcotizacion ID de la cotización   
+     * @return array|null Array de pagos con conversión automática a moneda de cotización,
+     *                    o null en caso de error
+     */
     public function getHistorialPagosInicial($idcotizacion): ?array
     {
         $query = "
@@ -249,6 +348,31 @@ class Cotizacion
         }
     }
 
+    /**
+     * Registra un pago del inicial de cotización
+     * 
+     * Ejecuta procedimiento almacenado que registra un pago de inicial
+     * con cálculo automático de saldo restante y soporte para múltiples
+     * monedas con tipo de cambio.
+
+     * @param array $params Array asociativo con datos del pago:
+     *                      - idconcepto: int (ID del concepto "Inicial")
+     *                      - idcotizacion: int
+     *                      - idvehiculo: int
+     *                      - idcuentapago: int|null (null si es efectivo)
+     *                      - idcolcaja: int|null (ID del colaborador)
+     *                      - mediopago: string (Efectivo/Transferencia/etc.)
+     *                      - numerotransaccion: string
+     *                      - fechapago: string (Fecha del pago)
+     *                      - amortizacion: float (Monto pagado)
+     *                      - saldorestante: float (Saldo después del pago)
+     *                      - comprobante: string (Ruta del comprobante)
+     *                      - observacion: string
+     *                      - moneda: string (Moneda del pago: USD/PEN)
+     *                      - montomonedaoriginal: float (Monto en moneda original)
+     *                      - tipocambioaplicado: float (Tipo de cambio usado)
+     * @return int ID del pago creado o 0 en caso de error
+     */
     public function addPagoInicial($params = [])
     {
         $query = "CALL sp_pagoInicial(:idconcepto, :idcotizacion, :idvehiculo, :idcuentapago, :idcolcaja, :mediopago, :numerotransaccion, :fechapago, :amortizacion, :saldorestante, :comprobante, :observacion,:moneda,:montomonedaoriginal,:tipocambioaplicado)";
@@ -275,6 +399,15 @@ class Cotizacion
         return (int) ($result['idpago'] ?? 0);
     }
 
+    /**
+     * Obtiene datos para acta de separación
+     * 
+     * Ejecuta procedimiento almacenado que retorna toda la información necesaria
+     * para generar el acta de separación: datos del cliente, vehículo, condiciones
+     * de venta y financiamiento.
+
+     * @param int $idcotizacion ID de la cotización
+     */
     public function getDataActaSeparacionByIdCotizacion(int $idcotizacion): ?array
     {
         $query = 'CALL sp_getActaSeparacionByIdCotizacion(:idcotizacion)';
@@ -290,6 +423,15 @@ class Cotizacion
         }
     }
 
+    /**
+     * Aprueba una cotización
+     * 
+     * Cambia el estado de la cotización a 'A' (Aprobada), permitiendo
+     * el registro de pagos de inicial y posterior generación de contrato.
+
+     * @param int $id ID de la cotización
+     * @return int Número de filas afectadas (1 si exitoso, 0 si no)
+     */
     public function aprobarCotizacion(int $id): int
     {
         try {
@@ -307,7 +449,19 @@ class Cotizacion
         }
     }
 
-
+    /**
+     * Busca un cliente por tipo y número de documento
+     * 
+     * Busca en tablas de personas (DNI) o empresas (RUC) según el tipo
+     * de documento proporcionado. Retorna datos del cliente si existe
+     * como cliente registrado en el sistema.
+     *
+     *- DNI: Busca en tabla personas
+     * - RUC: Busca en tabla empresas
+     *
+     * @param string $tipo Tipo de documento: 'DNI' o 'RUC'
+     * @param string $doc Número de documento
+     */
     public function getClienteByDoc(string $tipo, string $doc): ?array
     {
         // Solo personas por DNI
@@ -347,6 +501,17 @@ class Cotizacion
         return null;
     }
 
+    /**
+     * Calcula el pago de una anualidad (fórmula financiera)
+     * 
+     * Método privado que implementa la fórmula estándar de anualidades
+     * para calcular el pago periódico de un préstamo con interés compuesto.
+     *
+     * @param float $tasaInteres Tasa de interés por período (decimal)
+     * @param int $numPagos Número total de pagos
+     * @param float $montoPrestamo Monto principal del préstamo
+     * @return float|int Valor del pago periódico
+     */
     private function Pago($tasaInteres, $numPagos, $montoPrestamo)
     {
         // Verificar si la tasa de interés es 0
@@ -359,6 +524,21 @@ class Cotizacion
         return $pago;
     }
 
+    /**
+     * Calcula el pago mensual de un financiamiento
+     * 
+     * Calcula la cuota mensual aplicando tasa de interés anual convertida
+     * a mensual mediante interés compuesto. La tasa por defecto es 65% anual
+     * (0.65), típica de financiamiento de vehículos.
+     *
+     * Conversión de tasa: tasa_mensual = (1 + tasa_anual)^(1/12) - 1
+     *
+     * @param float $importeTotal Precio total del vehículo
+     * @param float $inicial Monto del pago inicial
+     * @param int $meses Plazo en meses
+     * @param float $tasaAnual Tasa de interés anual (por defecto: 0.65 = 65%)
+     * @return float Valor de la cuota mensual redondeada a 2 decimales
+     */
     public function calcularPagoMensual($importeTotal, $inicial, $meses, $tasaAnual = 0.65)
     {
         $tasaMensual = pow((1 + $tasaAnual), (1 / 12)) - 1;
@@ -367,7 +547,25 @@ class Cotizacion
         return $cuota;
     }
 
-    // AQUI EL 0.65 ESTA COMO VALOR POR DEFECTO PERO SI SE CAMBIA EN EL INPUT DE TASA ANUAL RECIBE EL NUEVO VALOR :)
+    /**
+     * Genera cronograma completo de pagos
+     * 
+     * Crea un cronograma detallado mes a mes mostrando la distribución
+     * de cada pago entre interés y capital, con el saldo de capital
+     * decreciente. El último pago ajusta el abono a capital para saldar
+     * exactamente el préstamo (elimina centavos residuales por redondeo).
+     *
+     * Características:
+     * - Primera cuota: 1 mes después de la fecha actual
+     * - Cada cuota incluye: interés calculado, abono a capital, saldo
+     * - Ajuste en última cuota para saldo exacto en 0
+     * 
+     * @param float $importeTotal Precio total del vehículo
+     * @param float $inicial Monto del pago inicial
+     * @param int $meses Plazo en meses
+     * @param float $tasaAnual Tasa de interés anual (por defecto: 0.65)
+     * @return array <array|array{abono_capital: float, fecha_pago: string, interes: float, item: int, saldo_capital: float, valor_cuota: float>}
+     */
     public function generarCronograma(float $importeTotal, float $inicial, int $meses, float $tasaAnual = 0.65): array
     {
         $tasaMensual = pow((1 + $tasaAnual), (1 / 12)) - 1;
@@ -406,6 +604,29 @@ class Cotizacion
         return $cronograma;
     }
 
+    /**
+     * Crea una nueva cotización
+     * 
+     * Registra una cotización con todas sus condiciones de venta y
+     * financiamiento. Incluye validaciones de formato, cliente, vehículo
+     * y asesor responsable.
+
+     * @param array $d Array asociativo con datos de la cotización:
+     *                 - idformato: int (Tipo de formato de cotización)
+     *                 - idcliente: int (ID del cliente)
+     *                 - idvehiculo: int (ID del vehículo)
+     *                 - moneda: string (USD/PEN)
+     *                 - precioventa: float (Precio del vehículo)
+     *                 - vigenciadias: int (Días de vigencia)
+     *                 - inicial: float (Monto inicial)
+     *                 - numcuotas: int (Número de cuotas)
+     *                 - valorcuota: float (Valor de cada cuota)
+     *                 - gastosadministrativos: float (Gastos admin, opcional)
+     *                 - tasaanual: float (Tasa anual, opcional, default: 65%)
+     *                 - tasamensual: float (Tasa mensual, opcional)
+     *                 - idasesor: int (ID del asesor de ventas)
+     * @return int ID de la cotización creada
+     */
     public function create(array $d): int
     {
         $sql = "INSERT INTO cotizaciones
@@ -436,7 +657,21 @@ class Cotizacion
         return (int) $this->db->lastInsertId();
     }
 
-   
+    /**
+     * Crea una opción de financiamiento adicional
+     * 
+     * Registra una opción alternativa de financiamiento para una cotización,
+     * permitiendo ofrecer múltiples planes de pago al cliente (ej: 12, 24, 36 meses).
+     * Las opciones comparten el mismo vehículo y cliente pero difieren en plazo y cuota.
+     *
+     * @param int $idcotizacion ID de la cotización base
+     * @param int $numcuotas Número de cuotas de esta opción
+     * @param float $inicial Monto inicial
+     * @param float $valorcuota Valor de la cuota mensual
+     * @param string $moneda Moneda (USD/PEN)
+     * @param float $precioventa Precio de venta del vehículo
+     * @return int ID del financiamiento creado
+     */
     public function createFinanciamiento(int $idcotizacion, int $numcuotas, float $inicial, float $valorcuota, string $moneda, float $precioventa): int
     {
         $sql = "INSERT INTO cotizacion_financiamiento
@@ -454,6 +689,16 @@ class Cotizacion
         return (int) $this->db->lastInsertId();
     }
 
+    /**
+     * Obtiene todas las opciones de financiamiento de una cotización
+     * 
+     * Retorna todas las cotizaciones generadas en la misma sesión (mismo cliente,
+     * vehículo y timestamp) para ofrecer múltiples alternativas de pago al cliente.
+     * Permite comparar diferentes plazos y montos de cuota.
+     *
+     * @param int $idcotizacion ID de cualquier cotización del grupo
+     * @return array Array de opciones de financiamiento ordenadas por número de cuotas ascendente
+     */
     public function getFinanciamientos(int $idcotizacion): array
     {
         //Obtener la marca de tiempo de la cotización principal, el vehículo Y EL CLIENTE.
@@ -488,16 +733,24 @@ class Cotizacion
 
         $stmtOpciones = $this->db->prepare($sqlOpciones);
         $stmtOpciones->execute([
-            ':idcliente' => $idcliente, 
+            ':idcliente' => $idcliente,
             ':idvehiculo' => $idvehiculo,
             ':fecha_base' => $fechaBase
         ]);
 
-      
+
         return $stmtOpciones->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    /**
+     * Obtiene una cotización por ID con sus opciones de financiamiento
+     * 
+     * Retorna información completa de una cotización mediante vista,
+     * incluyendo datos del cliente, vehículo, condiciones de venta,
+     * y todas las opciones de financiamiento asociadas.
 
+     * @param int $idcotizacion ID de la cotización
+     */
     public function getById(int $idcotizacion): ?array
     {
         $query = "SELECT * FROM vwGetCotizacionDetail WHERE idcotizacion = :id LIMIT 1";
@@ -517,6 +770,11 @@ class Cotizacion
 
     /**
      * Obtiene todas las cotizaciones vencidas
+     * 
+     * Retorna cotizaciones que superaron su período de vigencia sin
+     * ser aprobadas o convertidas en venta.
+     *
+     * @return array Array de cotizaciones vencidas con información completa
      */
     public function getAllVencidas(): array
     {
@@ -526,7 +784,13 @@ class Cotizacion
     }
 
     /**
-     * Obtiene todas las cotizaciones vencidas de un asesor específico
+     * Obtiene cotizaciones vencidas de un asesor específico
+     * 
+     * Filtra cotizaciones vencidas por asesor para seguimiento individual
+     * de gestión comercial y recuperación de oportunidades.
+     *
+     * @param int $idasesor ID del asesor de ventas
+     * @return array Array de cotizaciones vencidas del asesor
      */
     public function getAllVencidasByAsesor(int $idasesor): array
     {
@@ -538,7 +802,15 @@ class Cotizacion
     }
 
     /**
-     * Funcion de reactivar una cotizacion con nueva fecha
+     * Reactiva una cotización vencida
+     * 
+     * Restablece una cotización vencida a estado 'P' (Pendiente) con nueva
+     * fecha de vigencia, permitiendo continuar con el proceso de venta.
+     * Registra la fecha de reactivación para auditoría.
+     *
+     * @param int $idcotizacion ID de la cotización a reactivar
+     * @param int $vigenciadias Nueva vigencia en días (por defecto: 7 días)
+     * @return bool True si se reactivó exitosamente, false en caso contrario
      */
     public function reactivar(int $idcotizacion, int $vigenciadias = 7): bool
     {

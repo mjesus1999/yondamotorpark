@@ -1,26 +1,63 @@
 <?php
 
+/**
+ * Controlador de Egreso
+ * 
+ * app/Controllers/EgresoController.php
+ * 
+ * Gestiona las peticiones HTTP relacionadas con los egresos del sistema
+ * (salidas de dinero y gastos operativos). Proporciona interfaces web para
+ * visualizar, registrar y validar egresos con sus comprobantes asociados.
+ * Implementa el flujo completo: registro de egreso → carga de comprobante
+ * (si aplica) → validación contable. Incluye manejo transaccional con
+ * rollback automático en caso de errores, gestión de archivos PDF, y
+ * generación de reportes financieros por periodo. Todos los métodos
+ * requieren autenticación previa.
+ */
 namespace App\Controllers;
 
 use App\Core\Controller;
 use App\Helpers\Validador;
 use App\Models\Egreso;
 
-
-
+/**
+ * Clase EgresoController
+ * 
+ * Controlador para la gestión de egresos y comprobantes.
+ * Hereda de Controller para acceder a funcionalidades base como
+ * renderizado de vistas, validación de autenticación y manejo de sesiones.
+ * Implementa lógica transaccional robusta: si falla el registro del
+ * comprobante, revierte automáticamente el egreso creado y elimina
+ * archivos temporales para mantener consistencia de datos.
+ */
 class EgresoController extends Controller
 {
+    /**
+     * Instancia del modelo Egreso
+     * @var Egreso
+     */
     private Egreso $egresoModel;
 
-
+    /**
+     * Constructor del controlador
+     * 
+     * Inicializa la instancia del modelo Egreso para
+     * realizar operaciones de base de datos y gestión financiera
+     */
     public function __construct()
     {
         $this->egresoModel = new Egreso();
     }
 
     /**
-     * Renderiza la vista principal de egresos.
-     * @return void Renderiza la vista principal de egresos.
+     * Página principal de egresos filtrados por estado
+     * 
+     * Renderiza la vista principal del módulo mostrando el listado de
+     * egresos según el estado solicitado. Maneja dos vistas diferentes:
+     * 
+     * @param string $estado Estado de los egresos a filtrar (default: 'N').
+     *                       Valor especial 'validados' para comprobantes validados
+     * @return void Renderiza la vista principal de egresos
      */
     public function index(string $estado = 'N'): void
     {
@@ -38,29 +75,60 @@ class EgresoController extends Controller
         }
     }
 
+    /**
+     * Página de reporte de egresos por fechas
+     * 
+     * Renderiza la interfaz para generar reportes de egresos filtrados
+     * por rango de fechas. Incluye controles de fecha y botones para
+     * generar reportes ejecutivos con múltiples vistas.
+     * 
+     * @return void
+     */
     public function indexReporteByFecha(): void
     {
         $this->authRequired();
         $this->view('egresos.reporteByFecha');
     }
 
-
-
+    /**
+     * Página para adjuntar comprobantes a egresos existentes
+     * 
+     * Renderiza la interfaz para cargar comprobantes (facturas, boletas)
+     * a egresos que fueron registrados sin comprobante inicialmente pero
+     * que ahora requieren documentación de respaldo.
+     * 
+     * @return void
+     */
     public function indexAjuntarComprobante(): void
     {
         $this->authRequired();
         $this->view('egresos.adjuntarComprobante');
     }
 
+    /**
+     * Página de creación de nuevo egreso
+     * 
+     * Renderiza el formulario para registrar un nuevo egreso.
+     * Incluye selectores de concepto, solicitante, proveedor (si aplica),
+     * y campos para cargar comprobante si es requerido.
 
+     * @return void
+     */
     public function create(): void
     {
         $this->authRequired();
         $this->view('egresos.create');
     }
 
+    /**
+     * Endpoint API: Registrar egreso con comprobante opcional
+     * 
+     * Procesa el registro de un nuevo egreso implementando lógica
+     * transaccional robusta con rollback automático. El flujo varía
+     * según si el egreso requiere o no comprobante
 
-
+     * @return void Envía respuesta JSON y termina ejecución
+     */
     public function store(): void
     {
         $this->authRequired();
@@ -76,8 +144,8 @@ class EgresoController extends Controller
 
         $registroEgreso = [
             'idconceptoegreso' => $data['idconceptoegreso'] ?? null,
-            'idsolicitante' => empty($data['idsolicitante']) ? null : (int)$data['idsolicitante'],
-            'monto' => empty($data['monto']) ? null : (float)$data['monto'],
+            'idsolicitante' => empty($data['idsolicitante']) ? null : (int) $data['idsolicitante'],
+            'monto' => empty($data['monto']) ? null : (float) $data['monto'],
             'comentario' => empty($data['comentario']) ? null : $data['comentario'],
             'requierecomprobante' => empty($data['requierecomprobante']) ? 'N' : $data['requierecomprobante']
         ];
@@ -108,11 +176,11 @@ class EgresoController extends Controller
 
         $registroComprobante = [
             'idegreso' => $newId,
-            'idproovedor' => empty($data['idproovedor']) ? null : (int)$data['idproovedor'],
+            'idproovedor' => empty($data['idproovedor']) ? null : (int) $data['idproovedor'],
             'tipodoc' => $data['tipodoc'] ?? null,
             'serie' => $data['serie'] ?? null,
             'numdocumento' => $data['numdocumento'] ?? null,
-            'monto' => empty($data['monto_comprobante']) ? null : (float)$data['monto_comprobante']
+            'monto' => empty($data['monto_comprobante']) ? null : (float) $data['monto_comprobante']
         ];
 
         $erroresComprobante = [];
@@ -196,9 +264,17 @@ class EgresoController extends Controller
         }
     }
 
-
-
-
+    /**
+     * Endpoint API: Validar comprobante contablemente
+     * 
+     * Marca un comprobante como validado por el área de contabilidad,
+     * actualizando su estado a 'cargadocontabilidad = S' y registrando
+     * la fecha/hora de validación. Este proceso confirma que el
+     * comprobante cumple requisitos fiscales y contables.
+     *
+     * @param int $id ID del comprobante a validar
+     * @return void Envía respuesta JSON y termina ejecución
+     */
     public function validarComprobante($id): void
     {
         $this->authRequired();
@@ -224,14 +300,18 @@ class EgresoController extends Controller
         }
     }
 
-
-
-
-
-
+    /**
+     * Endpoint API: Obtener catálogo de conceptos de egreso
+     * 
+     * Retorna la lista completa de conceptos disponibles para clasificar
+     * egresos (combustible, viáticos, servicios). Utilizado para
+     * poblar selectores en formularios de registro.
+     *
+     * @return void Envía respuesta JSON
+     */
     public function getConceptosEgreso(): void
     {
-        
+
         header('Content-Type: application/json');
         $this->authRequired();
         $data = $this->egresoModel->getConceptosEgreso();
@@ -243,6 +323,14 @@ class EgresoController extends Controller
         }
     }
 
+    /**
+     * Endpoint API: Obtener listado de colaboradores activos
+     * 
+     * Retorna todos los colaboradores con contratos vigentes (excluyendo
+     * practicantes) para seleccionar solicitantes de egresos.
+
+     * @return void
+     */
     public function getColaboradores(): void
     {
         header('Content-Type: application/json');
@@ -256,6 +344,14 @@ class EgresoController extends Controller
         }
     }
 
+    /**
+     * Endpoint API: Obtener catálogo de proveedores
+     * 
+     * Retorna la lista completa de proveedores registrados para
+     * seleccionar emisores de comprobantes en egresos.
+     *
+     * @return void Envía respuesta JSON
+     */
     public function getProovedores(): void
     {
         header('Content-Type: application/json');
@@ -269,13 +365,21 @@ class EgresoController extends Controller
         }
     }
 
-
+    /**
+     * Endpoint API: Obtener detalle de un egreso con comprobante
+     * 
+     * Retorna información completa de un egreso que tiene comprobante
+     * asociado, incluyendo datos del proveedor y ruta del archivo PDF
+     *
+     * @param int $id ID del egreso a consultar
+     * @return void Envía respuesta JSON
+     */
     public function getDetalleEgreso(int $id): void
     {
         header('Content-Type: application/json');
         $this->authRequired();
 
-        $data =  $this->egresoModel->getDetalleEgresoById($id);
+        $data = $this->egresoModel->getDetalleEgresoById($id);
 
 
         if (!empty($data)) {
@@ -285,7 +389,20 @@ class EgresoController extends Controller
         }
     }
 
+    /**
+     * Endpoint API: Generar reporte de egresos por periodo
+     * 
+     * Retorna un reporte completo con múltiples vistas de egresos en un
+     * rango de fechas específico. 
+     *
+     * El reporte incluye cuatro conjuntos:
+     * 1. egresoSinComprobante: Egresos sin documentación
+     * 2. egresoConComprobante: Egresos con comprobantes
+     * 3. egresoByConcepto: Totales agrupados por concepto
+     * 4. egresoGeneral: Resumen ejecutivo con totales generales
 
+     * @return void Envía respuesta JSON y termina ejecución
+     */
     public function getReporteEgresos(): void
     {
         header('Content-Type: application/json');
@@ -333,4 +450,5 @@ class EgresoController extends Controller
 
         exit();
     }
+
 }

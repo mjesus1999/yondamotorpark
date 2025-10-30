@@ -1,3 +1,5 @@
+<!-- app/views/components/mapa-modal.php -->
+
 <div class="modal fade" id="modalMapa" aria-labelledby="modalMapaLabel" aria-hidden="true">
     <div class="modal-dialog modal-fullscreen modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content shadow d-flex flex-column h-100">

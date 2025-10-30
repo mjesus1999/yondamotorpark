@@ -328,6 +328,144 @@ BEGIN
             ELSE e.telprimario
         END AS telefono,
         
+        -- ⭐ Ubicación completa (provincia/distrito/dirección SOLO SI EXISTE)
+        CASE
+            WHEN cli.tipocliente = 'P' THEN 
+                CONCAT(
+                    COALESCE(pp.provincia, 'Sin provincia'), ' / ',
+                    COALESCE(dp.distrito, 'Sin distrito'),
+                    -- Solo agregar dirección si NO está vacía
+                    CASE 
+                        WHEN p.direccion IS NOT NULL AND TRIM(p.direccion) != '' 
+                        THEN CONCAT(' / ', p.direccion)
+                        ELSE ''
+                    END
+                )
+            ELSE 
+                CONCAT(
+                    COALESCE(pe.provincia, 'Sin provincia'), ' / ',
+                    COALESCE(de.distrito, 'Sin distrito'),
+                    -- Solo agregar dirección si NO está vacía
+                    CASE 
+                        WHEN e.direccion IS NOT NULL AND TRIM(e.direccion) != '' 
+                        THEN CONCAT(' / ', e.direccion)
+                        ELSE ''
+                    END
+                )
+        END AS ubicacion_cliente,
+        
+        -- Campos separados para filtrado
+        CASE 
+            WHEN cli.tipocliente = 'P' THEN COALESCE(pp.provincia, 'Sin provincia')
+            ELSE COALESCE(pe.provincia, 'Sin provincia')
+        END AS provincia_cliente,
+        
+        CASE 
+            WHEN cli.tipocliente = 'P' THEN COALESCE(dp.distrito, 'Sin distrito')
+            ELSE COALESCE(de.distrito, 'Sin distrito')
+        END AS distrito_cliente,
+        
+        CONCAT(m.marca, ' / ', mo.modelo, ' / ', v.color, ' / ', v.placa) AS vehiculo,
+        COALESCE(d.distrito, 'Sin distrito') AS tienda,
+        cot.numcuotas AS cuotas_totales,
+        
+        MIN(CASE 
+            WHEN cron.fechapago < CURDATE() AND cron.estado IN ('Pendiente', 'Vencido')
+            THEN (cron.abonocapital + cron.interes + IFNULL(cron.penalidad, 0))
+        END) AS monto_primera_vencida,
+        
+        SUM(CASE 
+            WHEN cron.fechapago < CURDATE() AND cron.estado IN ('Pendiente', 'Vencido')
+            THEN (cron.abonocapital + cron.interes + IFNULL(cron.penalidad, 0))
+            ELSE 0
+        END) AS deuda_vencida,
+        
+        SUM(CASE 
+            WHEN cron.fechapago < CURDATE() AND cron.estado IN ('Pendiente', 'Vencido')
+            THEN 1 
+            ELSE 0 
+        END) AS cuotas_vencidas,
+        
+        SUM(CASE 
+            WHEN cron.estado = 'Pagado' 
+            THEN 1 
+            ELSE 0 
+        END) AS cuotas_pagadas,
+        
+        CONCAT(
+            SUM(CASE 
+                WHEN cron.fechapago < CURDATE() AND cron.estado IN ('Pendiente', 'Vencido')
+                THEN 1 ELSE 0 
+            END),
+            ' vencidas de ',
+            GREATEST(cot.numcuotas - SUM(CASE WHEN cron.estado = 'Pagado' THEN 1 ELSE 0 END), 0)
+        ) AS estado_pagos,
+        
+        MIN(CASE 
+            WHEN cron.fechapago < CURDATE() AND cron.estado IN ('Pendiente', 'Vencido')
+            THEN cron.fechapago
+        END) AS fecha_vencida_mas_antigua,
+        
+        DATEDIFF(CURDATE(), MIN(CASE 
+            WHEN cron.fechapago < CURDATE() AND cron.estado IN ('Pendiente', 'Vencido')
+            THEN cron.fechapago
+        END)) AS dias_atraso
+        
+    FROM contratos c
+    INNER JOIN cotizaciones cot ON c.idcotizacion = cot.idcotizacion
+    INNER JOIN clientes cli ON cot.idcliente = cli.idcliente
+    LEFT JOIN personas p ON cli.idpersona = p.idpersona
+    LEFT JOIN empresas e ON cli.idempresa = e.idempresa
+    INNER JOIN vehiculos v ON cot.idvehiculo = v.idvehiculo
+    INNER JOIN modelos mo ON v.idmodelo = mo.idmodelo
+    INNER JOIN marcas m ON mo.idmarca = m.idmarca
+    LEFT JOIN locales loc ON c.idlocal = loc.idlocal
+    
+    -- Joins para persona (distrito y provincia)
+    LEFT JOIN distritos dp ON p.iddistrito = dp.iddistrito
+    LEFT JOIN provincias pp ON dp.idprovincia = pp.idprovincia
+    
+    -- Joins para empresa (distrito y provincia)
+    LEFT JOIN distritos de ON e.iddistrito = de.iddistrito
+    LEFT JOIN provincias pe ON de.idprovincia = pe.idprovincia
+    
+    -- Distrito de tienda
+    LEFT JOIN distritos d ON loc.iddistrito = d.iddistrito
+    
+    INNER JOIN cronogramas cron ON cron.idcontrato = c.idcontrato
+    
+    WHERE c.estado = 'ACT'
+    
+    GROUP BY 
+        c.idcontrato, cli.tipocliente, p.apellidos, p.nombres, p.nrodoc, p.telprimario,
+        e.razonsocial, e.ruc, e.telprimario, m.marca, mo.modelo, d.distrito, cot.numcuotas,
+        p.direccion, e.direccion, dp.distrito, de.distrito, pp.provincia, pe.provincia
+    
+    HAVING cuotas_vencidas > 0
+    ORDER BY dias_atraso DESC, deuda_vencida DESC;
+END$$
+DELIMITER ;
+
+/*
+DROP PROCEDURE IF EXISTS sp_get_cuotas_vencidas;
+DELIMITER $$
+CREATE PROCEDURE sp_get_cuotas_vencidas()
+BEGIN
+    SELECT
+        c.idcontrato,
+        CASE 
+            WHEN cli.tipocliente = 'P' THEN CONCAT(p.apellidos, ' ', p.nombres)
+            ELSE e.razonsocial
+        END AS cliente,
+        CASE 
+            WHEN cli.tipocliente = 'P' THEN p.nrodoc
+            ELSE e.ruc
+        END AS documento,
+        CASE 
+            WHEN cli.tipocliente = 'P' THEN p.telprimario
+            ELSE e.telprimario
+        END AS telefono,
+        
         -- Ubicación completa (provincia/distrito/dirección)
         CASE
             WHEN cli.tipocliente = 'P' THEN 
@@ -435,7 +573,7 @@ BEGIN
     ORDER BY dias_atraso DESC, deuda_vencida DESC;
 END$$
 DELIMITER ;
-
+*/
 
 -- 8) PRÓXIMAS A VENCER 
 
@@ -841,7 +979,7 @@ BEGIN
         cr.numcuota,
         DATE_FORMAT(cr.fechapago, '%d/%m/%Y') AS fecha_formateada,
         cr.fechapago,
-        (cr.abonocapital + cr.interes + IFNULL(cr.penalidad, 0)) AS monto,
+        /*(cr.abonocapital + cr.interes + IFNULL(cr.penalidad, 0)) AS monto,*/
         DATEDIFF(CURDATE(), cr.fechapago) AS dias_vencido
     FROM cronogramas cr
     WHERE cr.idcontrato = p_idcontrato

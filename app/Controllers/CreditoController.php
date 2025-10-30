@@ -1,22 +1,64 @@
 <?php
-// app/Controllers/CreditoController.php
 
+/**
+ * Controlador de Crédito
+ * 
+ * app/Controllers/CreditoController.php
+ * 
+ * Gestiona las peticiones HTTP relacionadas con la gestión y seguimiento
+ * de créditos morosos del sistema. Proporciona interfaces web para
+ * visualizar dashboard de morosidad, registrar seguimientos de cobranza
+ * (llamadas, visitas, acuerdos), consultar historiales completos de
+ * gestión, y obtener estadísticas ejecutivas. Implementa detección
+ * automática de peticiones AJAX para responder apropiadamente con JSON
+ * o redirecciones según el tipo de cliente. Maneja carga de archivos
+ * de evidencia (fotos, grabaciones, documentos) con validaciones de
+ * seguridad.
+ * 
+ */
 namespace App\Controllers;
 
 use App\Core\Controller;
 use App\Models\Credito;
 
+/**
+ * Clase CreditoController
+ * 
+ * Controlador para la gestión de créditos y control de morosidad.
+ * Hereda de Controller para acceder a funcionalidades base como
+ * renderizado de vistas, validación de autenticación y manejo de sesiones.
+ * Implementa endpoints REST para consultas asíncronas y métodos tradicionales
+ * para navegación web, adaptando respuestas según tipo de petición (AJAX o
+ * navegador). Maneja almacenamiento seguro de evidencias de seguimiento.
+ */
 class CreditoController extends Controller
 {
+    /**
+     * Instancia del modelo Credito
+     * @var Credito
+     */
     private Credito $creditoModel;
 
+    /**
+     * Constructor del controlador
+     * 
+     * Inicializa la instancia del modelo Credito para
+     * realizar operaciones de gestión de cobranza y morosidad
+     */
     public function __construct()
     {
         $this->creditoModel = new Credito();
     }
 
     /**
-     * Vista principal
+     * Página principal del módulo de créditos
+     * 
+     * Renderiza el dashboard principal de gestión de morosidad.
+     * Incluye gráficos estadísticos, clasificación de morosos por
+     * nivel de atraso (5 días, 2 semanas, 1+ mes), y acceso a
+     * funcionalidades de registro de seguimientos.
+     * 
+     * @return void
      */
     public function index(): void
     {
@@ -25,7 +67,14 @@ class CreditoController extends Controller
     }
 
     /**
-     * API: Obtener estadísticas
+     * Endpoint API: Obtener estadísticas de morosidad
+     * 
+     * Retorna indicadores clave de gestión de cobranza: cantidad de
+     * clientes morosos, deuda total acumulada, seguimientos realizados
+     * en el día actual, y promedio de días de atraso. Utilizado para
+     * alimentar widgets del dashboard en tiempo real.
+     * 
+     * @return void Envía respuesta JSON
      */
     public function getEstadisticas(): void
     {
@@ -52,7 +101,19 @@ class CreditoController extends Controller
     }
 
     /**
-     * API: Obtener morosos clasificados
+     * Endpoint API: Obtener morosos clasificados por nivel de atraso
+     * 
+     * Retorna la lista completa de clientes morosos organizados en tres
+     * categorías según días de atraso. Actualiza automáticamente el
+     * estado de cuotas vencidas antes de consultar para garantizar
+     * información en tiempo real.
+     * 
+     * Categorías retornadas:
+     * - 5-dias: Clientes con 1-5 días de atraso (gestión temprana)
+     * - 2-semanas: Clientes con 6-14 días (seguimiento activo)
+     * - 1-mes: Clientes con 15+ días (gestión intensiva/legal)
+     * 
+     * @return void Envía respuesta JSON
      */
     public function getMorosos(): void
     {
@@ -81,7 +142,15 @@ class CreditoController extends Controller
     }
 
     /**
-     * Registrar seguimiento
+     * Registrar seguimiento de gestión de cobranza
+     * 
+     * Procesa el registro de un seguimiento de cobranza con carga de
+     * archivo de evidencia. Implementa detección automática de peticiones
+     * AJAX para responder apropiadamente:
+     * - Peticiones AJAX: Responde con JSON
+     * - Peticiones tradicionales: Redirige con mensaje flash
+     * 
+     * @return void Envía JSON o redirige según tipo de petición
      */
     public function registrarSeguimiento(): void
     {
@@ -213,7 +282,17 @@ class CreditoController extends Controller
     }
 
     /**
-     * Ver historial de seguimientos
+     * Página de historial de seguimientos de un contrato
+     * 
+     * Renderiza la vista con el historial completo de todas las gestiones
+     * de cobranza realizadas sobre un contrato específico. Incluye datos
+     * del cliente y línea temporal de seguimientos ordenados cronológicamente.
+     * 
+     * Permite auditar la gestión realizada, evaluar efectividad de
+     * estrategias, y documentar acciones ante posibles procesos legales.
+     * 
+     * @param int $idContrato ID del contrato a consultar
+     * @return void
      */
     public function verHistorial(int $idContrato): void
     {
@@ -230,7 +309,16 @@ class CreditoController extends Controller
     }
 
     /**
-     * Guardar evidencia
+     * Guarda archivo de evidencia de seguimiento
+     * 
+     * Método privado que procesa y almacena archivos de evidencia
+     * (fotos, grabaciones, documentos) con validaciones de seguridad:
+     * extensiones permitidas, tamaño máximo, y nombre único para
+     * evitar sobrescrituras.
+     * 
+     * @param array $archivo Array de información del archivo $_FILES
+     * @return string|null Ruta relativa del archivo guardado (ej: 'seguimientos/seguimiento_abc123.jpg'),
+     *                     o null si falla la validación o subida
      */
     private function guardarEvidencia(array $archivo): ?string
     {
@@ -260,4 +348,5 @@ class CreditoController extends Controller
 
         return null;
     }
+
 }

@@ -1,21 +1,56 @@
 <?php
 
+/**
+ * Modelo de Orden de Compra
+ * 
+ * app/Models/OrdenCompra.php
+ * 
+ * Gestiona las operaciones de base de datos relacionadas con las órdenes
+ * de compra de vehículos, incluyendo creación, seguimiento de estados,
+ * recepción de mercadería, pagos y generación de reportes.
+ */
 namespace App\Models;
 
 use App\Core\Database;
 use PDO;
 use PDOException;
 
+/**
+ * Clase OrdenCompra
+ * 
+ * Modelo para la gestión de órdenes de compra de vehículos.
+ * Proporciona métodos para CRUD, control de estados (emitido, proceso,
+ * recepcionado, anulado), validación de recepción correcta y generación
+ * de reportes ejecutivos.
+ */
 class OrdenCompra
 {
+    /**
+     * Instancia de conexion a la base de datos
+     * @var PDO
+     */
     private PDO $db;
 
+    /**
+     * Constructor del modelo
+     * 
+     * Inicializa la conexión a la base de datos
+     */
     public function __construct()
     {
         $this->db = Database::getInstance();
     }
 
-    // Probando OC por estado 
+    /**
+     * Obtiene órdenes de compra por estado
+     * 
+     * Ejecuta un procedimiento almacenado que retorna las órdenes de compra
+     * filtradas por su estado actual (emitido, proceso, recepcionado, anulado).
+     * 
+     * @param string $estado Estado de la orden a filtrar (por defecto: 'emitido')
+     * @return array Array asociativo con las órdenes de compra
+     *                    o array vacío en caso de error
+     */
     public function getByEstado(string $estado = 'emitido'): ?array
     {
         $query = "CALL sp_oc_por_estado(:estado)";
@@ -30,7 +65,15 @@ class OrdenCompra
         }
     }
 
-
+    /**
+     * Obtiene información del concesionario por ID de orden
+     * 
+     * Retorna datos del concesionario asociado a una orden de compra,
+     * incluyendo identificador formateado de OC y ubicación completa
+     * (departamento/provincia/distrito).
+     * 
+     * @param int $idorden ID de la orden de compra
+     */
     public function obtenerConcesionarioById(int $idorden): ?array
     {
         $query = "SELECT 
@@ -58,6 +101,16 @@ class OrdenCompra
         }
     }
 
+    /**
+     * Obtiene el detalle de una orden de compra
+     * 
+     * Ejecuta un procedimiento almacenado que retorna todos los ítems
+     * (vehículos) asociados a una orden de compra específica.
+     * 
+     * @param mixed $idOC ID de la orden de compra
+     * @return array Array asociativo con el detalle de la OC
+     *               o array vacío en caso de error
+     */
     public function getDetOCByIdOC($idOC): ?array
     {
         $query = 'CALL sp_detOC_By_IdOC(:idOC)';
@@ -74,6 +127,17 @@ class OrdenCompra
 
     // TRAERA LOS DATOS DE LOS VEHICULOS A ACTUALIZAR EN LA TABLA DETALLE_OC, VERIFICAR SI HAN LLEGADO DE MANERA CORRECTA
 
+    /**
+     * Obtiene información de vehículos para verificación de recepción
+     * 
+     * Ejecuta un procedimiento almacenado que retorna los datos de los vehículos
+     * de una OC con su estado de verificación (escorrecto) para el proceso
+     * de recepción de mercadería.
+     * 
+     * @param int $idOC
+     * @return array Array asociativo con información de los vehículos
+     *                    y su estado de verificación, o array vacío en caso de error
+     */
     public function getInfoAutosOC($idOC): ?array
     {
         $query = 'CALL sp_det_oc_escorrecto(:idOC)';
@@ -90,9 +154,17 @@ class OrdenCompra
         }
     }
 
-
-    //  METODO PARA ACTUAlIZAR EL CAMPO ESCORRECTO EN LA TABLA DET_ORDEN_COMPRA DE LA DB
-
+    /**
+     * Actualiza el estado de verificación del detalle de OC
+     * 
+     * Marca si los vehículos de una orden de compra fueron recepcionados
+     * correctamente mediante el campo 'escorrecto' en la tabla detalle.
+     * 
+     * @param array $params Array asociativo con:
+     *                      - escorrecto: string ('S' si es correcto, 'N' si no)
+     *                      - idordencompra: int (ID de la orden de compra)
+     * @return int Número de filas afectadas o -1 en caso de error
+     */
     public function updateEscorrectoDetOC($params = []): int
     {
         $query = 'CALL sp_check_recepcion_OC(:escorrecto,:idordencompra)';
@@ -110,7 +182,25 @@ class OrdenCompra
         }
     }
 
-    // METODO QUE EPRMITE ACTUALIZAR EL CAMPO ESTADO EN LA TABLA OC
+    /**
+     * Actualiza el estado de una orden de compra
+     * 
+     * Modifica el estado de una OC (emitido, proceso, recepcionado, anulado).
+     * Si el estado es 'anulado', ejecuta un procedimiento almacenado especial
+     * que realiza acciones adicionales de anulación.
+     * 
+     * Estados válidos:
+     * - emitido: Orden creada
+     * - proceso: En proceso de recepción
+     * - recepcionado: Mercadería recibida completamente
+     * - anulado: Orden cancelada
+     * 
+     * @param array $params Array asociativo con:
+     *                      - estado: string (Nuevo estado de la orden)
+     *                      - observaciones: string (Observaciones del cambio de estado)
+     *                      - idordencompra: int (ID de la orden de compra)
+     * @return int Número de filas afectadas o -1 en caso de error
+     */
     public function updateEstado($params = []): int
     {
         try {
@@ -132,7 +222,7 @@ class OrdenCompra
                     ':observaciones' => $params['observaciones'],
                     ':idordencompra' => $params['idordencompra']
                 ]);
-                return (int)$stmt->rowCount();
+                return (int) $stmt->rowCount();
             }
         } catch (PDOException $error) {
             error_log($error->getMessage());
@@ -140,8 +230,21 @@ class OrdenCompra
         }
     }
 
-
-
+    /**
+     * Crea una nueva orden de compra
+     * 
+     * Registra una nueva orden de compra mediante procedimiento almacenado.
+     * El ID del colaborador de logística se obtiene automáticamente de la sesión.
+     * 
+     * @param array $params Array asociativo con los datos de la OC:
+     *                      - idtienda: int (ID de la tienda/concesionario)
+     *                      - moneda: string (Moneda de la orden: USD/PEN)
+     *                      - serie: string (Serie de la orden)
+     *                      - numstock: int (Número de stock)
+     *                      - observaciones: string (Observaciones iniciales)
+     * @return int ID de la orden creada, 0 si no se pudo obtener el ID,
+     *             o -1 en caso de error
+     */
     public function create($params = []): int
     {
         $query = 'call spu_oc_registrar(:idtienda,:idlogistica,:moneda,:serie,:numstock,:observaciones)';
@@ -167,7 +270,15 @@ class OrdenCompra
         }
     }
 
-
+    /**
+     * Genera reporte general de órdenes de compra en proceso
+     * 
+     * Ejecuta un procedimiento almacenado que retorna un reporte ejecutivo
+     * con dos conjuntos de datos: resumen ejecutivo (totales, promedios)
+     * y detalle de órdenes en proceso.
+     * 
+     * @return array {detalleOrdenes: array, resumenEjecutivo: mixed|null} 
+     */
     public function getReporteOCProceso(): ?array
     {
         $query = "CALL sp_reporte_general_oc_proceso()";
@@ -190,6 +301,7 @@ class OrdenCompra
             return null;
         }
     }
+    
 }
 
 //  $orden = new OrdenCompra();
