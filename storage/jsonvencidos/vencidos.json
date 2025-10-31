@@ -1,6 +1,6 @@
 {
     "query": "vencidos",
-    "date": "2025-10-30 23:58:21",
+    "date": "2025-10-31 15:44:12",
     "total_registros": 4,
     "data": [
         {
@@ -22,7 +22,7 @@
             "cuotas_pagadas": "0",
             "estado_pagos": "3 vencidas de 36",
             "fecha_vencida_mas_antigua": "2025-08-16",
-            "dias_atraso": 75
+            "dias_atraso": 76
         },
         {
             "idcontrato": 8,
@@ -43,7 +43,7 @@
             "cuotas_pagadas": "1",
             "estado_pagos": "2 vencidas de 35",
             "fecha_vencida_mas_antigua": "2025-09-15",
-            "dias_atraso": 45
+            "dias_atraso": 46
         },
         {
             "idcontrato": 7,
@@ -64,7 +64,7 @@
             "cuotas_pagadas": "0",
             "estado_pagos": "2 vencidas de 15",
             "fecha_vencida_mas_antigua": "2025-09-29",
-            "dias_atraso": 31
+            "dias_atraso": 32
         },
         {
             "idcontrato": 2,
@@ -85,7 +85,7 @@
             "cuotas_pagadas": "1",
             "estado_pagos": "1 vencidas de 35",
             "fecha_vencida_mas_antigua": "2025-10-13",
-            "dias_atraso": 17
+            "dias_atraso": 18
         }
     ]
 }
