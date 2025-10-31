@@ -319,46 +319,46 @@
                 const btn = this;
                 btn.disabled = true;
                 btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Enviando...';
-                
+
                 let exitosos = 0;
                 let fallidos = 0;
-                
+
                 // Obtener todas las filas visibles de la tabla
                 const rows = tabla.getRows();
-                
+
                 for (let i = 0; i < datos.length; i++) {
                     const c = datos[i];
                     const result = await enviarSms(c);
-                    
+
                     // Buscar la fila correspondiente por idcontrato
                     const row = rows.find(r => r.getData().idcontrato === c.idcontrato);
-                    
+
                     if (row) {
                         // Obtener el elemento DOM de la celda de acciones
                         const cells = row.getCells();
                         const accionCell = cells[cells.length - 1]; // La última celda es "Acciones"
                         const btnSms = accionCell.getElement().querySelector('.btn-sms');
-                        
+
                         if (btnSms) {
                             btnSms.className = `btn btn-sm ${result.success ? 'btn-success' : 'btn-danger'} btn-sms`;
                             btnSms.innerHTML = `<i class="fas fa-${result.success ? 'check' : 'times'}"></i>`;
                             btnSms.title = result.message || '';
                         }
                     }
-                    
+
                     // Contadores
                     if (result.success) {
                         exitosos++;
                     } else {
                         fallidos++;
                     }
-                    
+
                     await new Promise(r => setTimeout(r, 1000));
                 }
-                
+
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fas fa-paper-plane me-1"></i>Notificar Todos';
-                
+
                 // Mostrar resultado con showToast
                 if (fallidos === 0) {
                     showToast(`Proceso completado: ${exitosos} notificaciones enviadas exitosamente`, 'SUCCESS');
@@ -368,18 +368,6 @@
                     showToast(`Proceso completado: ${exitosos} exitosas, ${fallidos} fallidas`, 'WARNING');
                 }
             });
-            /* document.getElementById('btnNotificarTodos').addEventListener('click', async function () {
-                const btn = this;
-                btn.disabled = true;
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Enviando...';
-                for (const c of datos) {
-                    await enviarSms(c);
-                    await new Promise(r => setTimeout(r, 1000));
-                }
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-paper-plane me-1"></i>Notificar Todos';
-                mostrarToast('Proceso completado', 'success');
-            }); */
 
             //Guardar telefono
             document.getElementById('btnGuardarTelefono').addEventListener('click', async () => {
@@ -395,7 +383,7 @@
                     return;
                 }
 
-                // Remover clase de error si habia
+                // Remover clase de error si había
                 document.getElementById('telefonoNuevo').classList.remove('is-invalid');
 
                 let confirmado = true;
@@ -410,7 +398,7 @@
 
                 if (!confirmado) return;
 
-                // Deshabilitar boton durante la actualizacion
+                // Deshabilitar botón durante la actualización
                 btnGuardar.disabled = true;
                 btnGuardar.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Guardando...';
 
@@ -428,57 +416,74 @@
                     const result = await res.json();
 
                     if (result.success) {
+                        // CRÍTICO: Recargar los datos desde el servidor
+                        const datosActualizados = await cargarClientes();
+
+                        // Actualizar la variable datos
+                        datos.length = 0; // Limpiar array
+                        datos.push(...datosActualizados); // Agregar nuevos datos
+
+                        // Actualizar la tabla Tabulator
+                        tabla.setData(datosActualizados);
+
+                        // Actualizar el acordeón móvil
+                        actualizarAcordeonMovil(datosActualizados);
+
+                        // Cerrar modal
                         modalEditarTelefono.hide();
 
                         showToast('Teléfono actualizado correctamente', 'SUCCESS');
-
-                        // Actualizar la tabla
-                        const datos = await cargarClientes();
-                        tabla.setData(datos);
-
-                        // Restaurar boton
-                        btnGuardar.disabled = false;
-                        btnGuardar.innerHTML = 'Guardar Cambios';
                     } else {
                         showToast(result.message || 'Error al actualizar el teléfono', 'ERROR');
-
-                        // Restaurar boton
-                        btnGuardar.disabled = false;
-                        btnGuardar.innerHTML = 'Guardar Cambios';
                     }
                 } catch (error) {
                     console.error('Error:', error);
                     showToast('Error de conexión al actualizar el teléfono', 'ERROR');
-
-                    // Restaurar boton
+                } finally {
+                    // Restaurar botón
                     btnGuardar.disabled = false;
                     btnGuardar.innerHTML = 'Guardar Cambios';
                 }
             });
 
-            /* document.getElementById('btnGuardarTelefono').addEventListener('click', async () => {
-                const id = document.getElementById('idcontratoModal').value;
-                const telNuevo = document.getElementById('telefonoNuevo').value.trim();
-                const telActual = document.getElementById('telefonoActual').value.trim();
+            function actualizarAcordeonMovil(datosActualizados) {
+                const acordeon = document.getElementById('acordeonClientes');
+                if (!acordeon) return;
 
-                if (!validarTelefono(telNuevo)) {
-                    document.getElementById('telefonoNuevo').classList.add('is-invalid');
-                    return;
-                }
+                let html = '';
+                let i = 1;
 
-                const res = await fetch('/Cobranza/actualizarTelefono', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ idcontrato: id, telefono_actual: telActual, telefono_nuevo: telNuevo })
+                datosActualizados.forEach(c => {
+                    const id = `cliente-${c.idcontrato}`;
+                    html += `
+                                <div class="accordion-item mb-2 shadow-sm">
+                                    <h2 class="accordion-header" id="heading-${id}">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-${id}" aria-expanded="false">
+                                            <i class="bi bi-person-circle me-2 text-primary"></i>${escapeHtml(c.cliente)}
+                                        </button>
+                                    </h2>
+                                    <div id="collapse-${id}" class="accordion-collapse collapse" data-bs-parent="#acordeonClientes">
+                                        <div class="accordion-body">
+                                            <ul class="list-group list-group-flush">
+                                                <li class="list-group-item"><strong>#:</strong> ${i++}</li>
+                                                <li class="list-group-item"><strong>Teléfono:</strong> ${c.telefono || 'N/A'}</li>
+                                                <li class="list-group-item"><strong>Vehículo:</strong> ${escapeHtml(c.vehiculo)}</li>
+                                                <li class="list-group-item"><strong>Tienda:</strong> ${escapeHtml(c.local)}</li>
+                                                <li class="list-group-item"><strong>Cuotas:</strong> ${c.cuotas_pagadas} / ${c.cuotas_totales}</li>
+                                                <li class="list-group-item"><strong>Monto Cuota:</strong> ${formatMoneda(c.monto_cuota)}</li>
+                                                <li class="list-group-item"><strong>Fecha Vencimiento:</strong> ${escapeHtml(c.fecha_vencimiento)}</li>
+                                                <li class="list-group-item d-flex gap-2">
+                                                    <button class="btn btn-sm btn-secondary w-50 btn-sms" data-id="${c.idcontrato}"><i class="fas fa-paper-plane"></i></button>
+                                                    <button class="btn btn-sm btn-primary w-50 btn-editar" data-id="${c.idcontrato}" data-cliente="${escapeHtml(c.cliente)}" data-tel="${c.telefono || ''}"><i class="fas fa-edit"></i></button>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
                 });
-
-                const result = await res.json();
-                if (result.success) {
-                    modalEditarTelefono.hide();
-                    mostrarToast('Teléfono actualizado correctamente', 'success');
-                    location.reload();
-                } else mostrarToast(result.message || 'Error al actualizar', 'danger');
-            }); */
+                acordeon.innerHTML = `<div class="accordion">${html}</div>`;
+            }
 
         } catch (err) {
             console.error(err);

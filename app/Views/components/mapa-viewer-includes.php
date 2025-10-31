@@ -24,6 +24,7 @@
             const loader = originalLoad || function (callback) { callback(); };
 
             loader(() => {
+
                 // Si ya está cargado Google Maps, solo ejecutar el callback
                 if (b.google && b.google.maps && b.google.maps.Map) {
                     console.log('Google Maps ya está cargado, usando instancia existente');
@@ -35,7 +36,7 @@
                 var i = m.createElement("script");
                 i.id = p;
 
-                // Tu API KEY
+                // API KEY
                 i.src = "https://maps.googleapis.com/maps/api/js?key=AIzaSyBtnx36dsihnq0sNBChV9KHH4QtGEmkEfQ&callback=__googleMapsViewerCallback";
 
                 i.async = true;

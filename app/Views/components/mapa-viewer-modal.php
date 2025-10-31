@@ -1,6 +1,7 @@
 <!-- app/Views/components/mapa-viewer-modal.php -->
 
-<div class="modal fade" id="modalMapaViewer" tabindex="-1" aria-labelledby="modalMapaViewerLabel" aria-hidden="true">
+<div class="modal fade" id="modalMapaViewer" tabindex="-1" aria-labelledby="modalMapaViewerLabel" aria-hidden="true"
+    data-bs-backdrop="static">
     <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header bg-yonda">
@@ -49,9 +50,9 @@
                         </div>
 
                         <div class="d-grid gap-2">
-                            <button type="button" class="btn btn-success btn-sm" id="btnCompartirUbicacion">
+                            <!-- <button type="button" class="btn btn-success btn-sm" id="btnCompartirUbicacion">
                                 <i class="bi bi-share-fill me-1"></i>Compartir Ubicación
-                            </button>
+                            </button> -->
                             <a href="#" id="btnAbrirGoogleMaps" target="_blank" class="btn btn-outline-primary btn-sm">
                                 <i class="bi bi-globe me-1"></i>Abrir en Google Maps
                             </a>
