@@ -24,10 +24,12 @@ $router->add('POST','/oc/updateEstado/{estado}/{idOC}','OrdenCompraController','
 // RUTAS DE LAS APIS
 //MOSTRAR LOS DETAALLES EN LA VISTA INDEX
 
-$router->add('GET','/api/oc/{id}','OrdenCompraController','searchtDetOCByIdOc');
+$router->add('GET','/api/oc/([0-9]+)','OrdenCompraController','searchtDetOCByIdOc');
 
 $router->add('GET','/api/oc/infoAutos/{id}','OrdenCompraController','searchInfoAutos');
 
 $router->add('GET','/api/ocproceso/reporte','OrdenCompraController','getReporteOCProceso');
+
+$router->add('GET','/api/oc/reporte-general','OrdenCompraController','getReporteGeneral'); 
 
 

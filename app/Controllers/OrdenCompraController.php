@@ -11,6 +11,7 @@
  * modelos para un flujo completo de compras.
  * 
  */
+
 namespace App\Controllers;
 
 use App\Core\Controller;
@@ -430,4 +431,36 @@ class OrdenCompraController extends Controller
         exit();
     }
 
+
+    public function getReporteGeneral(): void
+    {
+        header('Content-Type: application/json');
+        try {
+            
+            $data = $this->ordenCompraModel->getReporteGeneral();
+
+            $dataAgrupada = [
+                'emitido'  => [],
+                'proceso'  => [],
+                'pagado'   => [],
+                'anulado'  => []
+            ];
+
+    
+            foreach ($data as $orden) {
+                $estado = $orden['estado']; 
+
+               
+                if (isset($dataAgrupada[$estado])) {
+                    $dataAgrupada[$estado][] = $orden;
+                }
+            }
+
+            
+            echo json_encode(['success' => true, 'data' => $dataAgrupada]);
+        } catch (\Exception $e) {
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
+        exit();
+    }
 }

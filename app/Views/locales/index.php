@@ -40,6 +40,9 @@
 
                     <!-- Vista de escritorio (tabla) -->
                     <div class="table-responsive d-none d-md-block">
+                        <div class="d-flex justify-content-end align-items-end">
+                            <button class="btn btn-sm btn-outline-success mb-2" id="btnExportExcel">Exportar Excel</button>
+                        </div>
                         <div id="tabla-locales">
                             <!-- <thead>
                                 <tr>
@@ -204,9 +207,10 @@
 </div>
 
 <script src="https://unpkg.com/tabulator-tables@5.5.2/dist/js/tabulator.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
     const localesData = <?= json_encode($locales, JSON_UNESCAPED_UNICODE) ?>;
-
+    // console.log(localesData);
     const tablaLocales = new Tabulator("#tabla-locales", {
         data: localesData,
         layout: "fitColumns",
@@ -217,7 +221,8 @@
                 title: "#",
                 formatter: "rownum",
                 hozAlign: "center",
-                width: 50
+                width: 50,
+                download: false
             },
             {
                 title: "Tienda",
@@ -225,42 +230,60 @@
 
                 tooltip: true
             },
+
             {
                 title: "Ubicación",
-                field: "ubicacion",
+                field:"ubicacion",
                 tooltip: true,
+                download: true,
+
                 formatter: (cell) => {
                     const d = cell.getRow().getData();
                     return `${d.departamento}/${d.provincia}/${d.distrito}`;
+                },
+
+                accessorDownload: (value, data, type, params, column, row) => {
+                    // console.log("Datos recibidos por accessorDownload:", data);
+                    // console.log("Departamento:", data.departamento);
+                    // console.log("Provincia:", data.provincia);
+                    // console.log("Distrito:", data.distrito);
+                    // 'data' es la fila completa
+                    return `${data.departamento}/${data.provincia}/${data.distrito}`;
                 }
             },
+
             {
                 title: "Dirección",
                 field: "direccion",
                 tooltip: true,
+                download: true,
                 formatter: (cell) => cell.getValue() || "N/A"
             },
             {
                 title: "Responsable",
                 field: "responsable",
-                tooltip: true
+                tooltip: true,
+                download: true,
             },
             {
                 title: "Correo",
                 field: "correo",
-                  tooltip: true,
+                tooltip: true,
+                download: true,
                 formatter: (cell) => cell.getValue() || "N/A"
             },
             {
                 title: "Teléfono",
                 field: "telefono",
-                  tooltip: true,
+                download: true,
+                tooltip: true,
             },
             {
                 title: "Acciones",
                 headerSort: false,
                 hozAlign: "center",
                 width: 150,
+                download: false,
                 formatter: function(cell) {
                     const d = cell.getRow().getData();
                     return `
@@ -344,7 +367,7 @@
 
             const formData = new FormData(formularioLocales);
 
-            if (await ask("¿Desea actualizar este local?",'Locales')) {
+            if (await ask("¿Desea actualizar este local?", 'Locales')) {
                 try {
                     const response = await fetch(`/locales/update/${parsedIdlocal}`, {
                         method: 'POST',
@@ -379,6 +402,13 @@
             }
         });
 
+    });
+
+
+    document.getElementById('btnExportExcel').addEventListener('click', () => {
+        tablaLocales.download("xlsx", "Locales.xlsx", {
+            sheetName: "Locales"
+        });
     });
 </script>
 

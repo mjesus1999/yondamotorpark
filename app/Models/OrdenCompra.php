@@ -65,6 +65,21 @@ class OrdenCompra
         }
     }
 
+    public function getReporteGeneral(): ?array{
+
+        $query = "CALL sp_oc_reporte_general();";
+        try {
+            $stmt = $this->db->prepare($query);
+            $stmt->execute();
+        //   error_log(json_encode($stmt->fetchAll(PDO::FETCH_ASSOC), JSON_PRETTY_PRINT), 3, "");
+
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log($e->getMessage());
+            return [];
+        }
+    }
+
     /**
      * Obtiene información del concesionario por ID de orden
      * 

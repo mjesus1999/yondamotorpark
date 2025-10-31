@@ -1,6 +1,7 @@
 
-USE motorpark2;
+USE motorpark;
 
+select * from ordenescompra;
 DROP PROCEDURE IF EXISTS sp_oc_por_estado;
 DELIMITER $$
 CREATE PROCEDURE sp_oc_por_estado(IN p_estado VARCHAR(50))
@@ -71,6 +72,64 @@ DELIMITER ;
 
 CALL sp_oc_por_estado('proceso');
 
+
+DROP PROCEDURE sp_oc_reporte_general;
+DELIMITER $$
+CREATE PROCEDURE sp_oc_reporte_general()
+BEGIN
+    SELECT 
+        oc.idordencompra,
+        oc.serie,
+        DATE_FORMAT(oc.emision, '%d-%m-%Y') AS emision, 
+        oc.moneda,
+        con.razonsocial,
+        CONCAT(dep.departamento, ' / ', p.provincia, ' / ', d.distrito) AS ubicacion,
+        fn_format_oc_display_id(oc.idordencompra, oc.serie) AS numeroOCIdentificador,
+
+        ROUND((
+            SELECT IFNULL(SUM(preciocompra * 1.18),0) 
+            FROM detordencompra 
+            WHERE idordencompra = oc.idordencompra
+        ), 2) AS totalOC,
+
+        ROUND((
+            SELECT IFNULL(SUM(
+                CASE 
+                    WHEN moneda = 'PEN' AND tipocambio > 0 THEN amortizacion / tipocambio
+                    ELSE amortizacion
+                END
+            ),0)
+            FROM pagosOC
+            WHERE idorden = oc.idordencompra
+        ), 2) AS totalPagado,
+
+        ROUND((
+            (SELECT IFNULL(SUM(preciocompra * 1.18),0) 
+             FROM detordencompra 
+             WHERE idordencompra = oc.idordencompra)
+            -
+            (SELECT IFNULL(SUM(
+                CASE 
+                    WHEN moneda = 'PEN' AND tipocambio > 0 THEN amortizacion / tipocambio
+                    ELSE amortizacion
+                END
+            ),0)
+             FROM pagosOC 
+             WHERE idorden = oc.idordencompra)
+        ), 2) AS saldoRestante,
+        oc.estado
+
+    FROM ordenescompra oc
+    JOIN tiendas t ON oc.idtienda = t.idtienda
+    JOIN concesionarios con ON t.idconcesionario = con.idconcesionario
+    JOIN distritos d ON t.iddistrito = d.iddistrito
+    JOIN provincias p ON d.idprovincia = p.idprovincia
+    JOIN departamentos dep ON p.iddepartamento = dep.iddepartamento
+    ORDER BY oc.idordencompra DESC;
+END $$
+DELIMITER ;
+
+CALL sp_oc_reporte_general();
 
 
 DROP PROCEDURE sp_getAll_OC_Compras;

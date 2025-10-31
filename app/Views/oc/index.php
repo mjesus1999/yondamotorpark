@@ -58,6 +58,12 @@
                             <i class="bi bi-bar-chart"></i> Reporte por Concesionario
 
                         </a>
+
+                    <?php elseif ($estadoActual === 'emitido'): ?>
+
+                        <button title="Exportar Reporte General por Hojas" class="btn btn-sm btn-outline-success" id="btn-exportar-general-estados">
+                            <i class="bi bi-file-earmark-spreadsheet"></i> Reporte General
+                        </button>
                     <?php endif; ?>
                 </div>
             </div>
@@ -307,10 +313,16 @@
     <script>
         document.addEventListener("DOMContentLoaded", () => {
 
+            const ordenesCompras = <?= json_encode($ordenCompras) ?>
+
+
             const botonesFiltro = document.querySelectorAll("#botones-filtro .btn")
             const enlacesDetalle = document.querySelectorAll(".show-details")
             const botonVolver = document.querySelector("#btn-volver")
             const speedAnimation = 750;
+
+            const btnExportarGeneralEstados = document.getElementById("btn-exportar-general-estados");
+
 
             // Referencias a los contenedores principales
             const listaOc = document.getElementById('lista-oc');
@@ -588,6 +600,162 @@
 
             }
 
+            if (btnExportarGeneralEstados) {
+
+                const styleHeader = (cell) => {
+                    cell.font = {
+                        bold: true,
+                        color: {
+                            argb: 'FFFFFFFF'
+                        }
+                    };
+                    cell.fill = {
+                        type: 'pattern',
+                        pattern: 'solid',
+                        fgColor: {
+                            argb: 'FF007BFF'
+                        }
+                    }; // Azul
+                    cell.border = {
+                        top: {
+                            style: 'thin'
+                        },
+                        left: {
+                            style: 'thin'
+                        },
+                        bottom: {
+                            style: 'thin'
+                        },
+                        right: {
+                            style: 'thin'
+                        }
+                    };
+                };
+                const styleCell = (cell) => {
+                    cell.border = {
+                        top: {
+                            style: 'thin'
+                        },
+                        left: {
+                            style: 'thin'
+                        },
+                        bottom: {
+                            style: 'thin'
+                        },
+                        right: {
+                            style: 'thin'
+                        }
+                    };
+                };
+                const capitalizar = (str) => str.charAt(0).toUpperCase() + str.slice(1);
+
+                btnExportarGeneralEstados.addEventListener('click', async () => {
+                    btnExportarGeneralEstados.disabled = true;
+                    btnExportarGeneralEstados.innerHTML = '<i class="bi bi-arrow-clockwise me-1"></i> Generando...';
+
+                    try {
+                        const response = await fetch('/api/oc/reporte-general');
+                        if (!response.ok) throw new Error('No se pudo obtener la data del reporte.');
+
+                        const res = await response.json();
+                        if (!res.success || !res.data) throw new Error('La respuesta de la API no fue exitosa o no trajo datos.');
+
+                        const workbook = new ExcelJS.Workbook();
+                        const dataAgrupada = res.data;
+
+
+                        const headers = [
+                            '#',
+                            'Serie',
+                            'Concesionario',
+                            'Ubicación',
+                            'Fecha Emisión',
+                            'Moneda',
+                            'Total OC',
+                            'Total Pagado',
+                            'Saldo'
+                        ];
+
+
+                        for (const estado in dataAgrupada) {
+
+                            const listaOrdenes = dataAgrupada[estado];
+                            const nombreHoja = capitalizar(estado);
+
+                            // Crear una nueva hoja por cada estado
+                            const worksheet = workbook.addWorksheet(nombreHoja);
+
+                            // Agregar la fila de cabeceras
+                            const headerRow = worksheet.addRow(headers);
+                            headerRow.eachCell(styleHeader); // Aplicar estilo de cabecera
+
+                            // Agregar las filas de datos
+                            listaOrdenes.forEach((orden, index) => {
+                                const row = worksheet.addRow([
+                                    index + 1,
+                                    orden.numeroOCIdentificador,
+                                    orden.razonsocial,
+                                    orden.ubicacion,
+                                    orden.emision,
+                                    orden.moneda,
+                                    parseFloat(orden.totalOC),
+                                    parseFloat(orden.totalPagado),
+                                    parseFloat(orden.saldoRestante)
+                                ]);
+
+                                // Aplicar estilos a las celdas de datos
+                                row.eachCell(styleCell);
+
+                                // Formato de moneda (columnas G, H, I)
+                                row.getCell(7).numFmt = '$ #,##0.00';
+                                row.getCell(8).numFmt = '$ #,##0.00';
+                                row.getCell(9).numFmt = '$ #,##0.00';
+                            });
+
+                            // Auto-ajustar el ancho de las columnas
+                            worksheet.columns.forEach((column, i) => {
+                                let maxLength = 0;
+                                column.eachCell({
+                                    includeEmpty: true
+                                }, (cell) => {
+                                    let columnLength = cell.value ? cell.value.toString().length : 10;
+                                    if (columnLength > maxLength) {
+                                        maxLength = columnLength;
+                                    }
+                                });
+                          
+                                column.width = Math.min(60, maxLength + 2); 
+                            });
+
+                          
+                            worksheet.getColumn(7).width = 18; // Ancho para 'Total OC'
+                            worksheet.getColumn(8).width = 18; // Ancho para 'Total Pagado'
+                            worksheet.getColumn(9).width = 18; // Ancho para 'Saldo'
+                           
+                        }
+
+                        //  Generar y Descargar el Archivo 
+                        const buffer = await workbook.xlsx.writeBuffer();
+                        const blob = new Blob([buffer], {
+                            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                        });
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = 'Reporte_General_OC.xlsx';
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+
+                    } catch (error) {
+                        console.error('Error al generar Excel general:', error);
+                        alert('Error al generar el reporte: ' + error.message);
+                    } finally {
+
+                        btnExportarGeneralEstados.disabled = false;
+                        btnExportarGeneralEstados.innerHTML = '<i class="bi bi-file-earmark-spreadsheet"></i> Reporte General';
+                    }
+                });
+            }
 
 
             document.querySelectorAll(".btn-abrir-modal-estado").forEach(btn => {
@@ -817,493 +985,490 @@
 
 
 
-               btnPdfOcs.forEach(btn => {
-            btn.addEventListener('click', async (e) => {
-                e.preventDefault();
-                const ocId = btn.getAttribute('data-idoc');
+            btnPdfOcs.forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    const ocId = btn.getAttribute('data-idoc');
 
-                if (!ocId) {
-                    console.error('No se encontró el ID de la orden de compra en el atributo data-idoc.');
-                    return;
-                }
-
-                try {
-
-
-                    //  Obtener los datos de la API
-                    const response = await fetch(`/api/oc/${ocId}`);
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    const data = await response.json();
-
-                    if (!data || !data.orden || !Array.isArray(data.vehiculos)) {
-                        throw new Error('No se encontraron datos válidos en la respuesta de la API.');
+                    if (!ocId) {
+                        console.error('No se encontró el ID de la orden de compra en el atributo data-idoc.');
+                        return;
                     }
 
-                    const ocOrden = data.orden;
-                    const ocDetalles = data.vehiculos;
-                    const logoBase64 = window.logoBase64;
+                    try {
 
 
-                    const documento = {
-                        pageSize: 'A4',
-                        pageOrientation: 'portrait',
-                        pageMargins: [40, 25, 25, 25],
-                        defaultStyle: {
-                            fontSize: 7.2,
-                            alignment: 'center'
-                        },
-                        content: [
-                            // Header
-                            {
-                                columns: [{
-                                        image: logoBase64,
-                                        width: 90,
-                                        alignment: 'left'
-                                    },
-                                    {
-                                        text: '',
-                                        width: '*'
-                                    },
-                                    {
-                                        table: {
-                                            widths: ['auto'],
-                                            body: [
-                                                [{
-                                                    text: 'ORDEN DE COMPRA',
-                                                    alignment: 'center',
-                                                    fontSize: 14,
-                                                    bold: true,
-                                                    margin: [0, 5, 0, 0],
-                                                    color: '#000'
-                                                }],
-                                                [{
-                                                    text: ocOrden.numero_oc_formateado || '-',
-                                                    alignment: 'center',
-                                                    fontSize: 14,
-                                                    bold: true,
-                        
-                                                    margin: [0, 8, 0, 5],
-                                                    border: [true, false, true, true]
-                                                }],
-                                            ],
+                        //  Obtener los datos de la API
+                        const response = await fetch(`/api/oc/${ocId}`);
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        const data = await response.json();
+
+                        if (!data || !data.orden || !Array.isArray(data.vehiculos)) {
+                            throw new Error('No se encontraron datos válidos en la respuesta de la API.');
+                        }
+
+                        const ocOrden = data.orden;
+                        const ocDetalles = data.vehiculos;
+                        const logoBase64 = window.logoBase64;
+
+
+                        const documento = {
+                            pageSize: 'A4',
+                            pageOrientation: 'portrait',
+                            pageMargins: [40, 25, 25, 25],
+                            defaultStyle: {
+                                fontSize: 7.2,
+                                alignment: 'center'
+                            },
+                            content: [
+                                // Header
+                                {
+                                    columns: [{
+                                            image: logoBase64,
+                                            width: 90,
+                                            alignment: 'left'
                                         },
-                                        layout: 'noBorders',
-                                        alignment: 'right',
-                                        width: 150,
-                                    },
-                                ],
-                            },
-                            {
-                                text: '',
-                                margin: [0, 10]
-                            },
-
-                            // Sección de Concesionario
-                            {
-                                table: {
-                                    widths: ['*'],
-                                    body: [
-                                        [{
-                                            text: 'CONCESIONARIO',
-                                            alignment: 'center',
-                                            bold: true,
-                                            fillColor: '#E0E0E0'
-                                        }]
-                                    ]
-                                },
-                                layout: 'noBorders',
-                                margin: [0, 5, 0, 5],
-                            },
-                            {
-                                table: {
-                                    widths: ['auto', '*', 'auto', '*'],
-                                    body: [
-                                        [{
-                                            text: 'Punto de venta:',
-                                            bold: true,
-                                            alignment: 'left'
-                                        }, {
-                                            text: ocOrden.concesionario.ubigeo || '-',
-                                            alignment: 'left'
-                                        }, {
-                                            text: 'Banco:',
-                                            bold: true,
-                                            alignment: 'left'
-                                        }, {
-                                            text: '-',
-                                            alignment: 'left'
-                                        }],
-                                        [{
-                                            text: 'Razón Social:',
-                                            bold: true,
-                                            alignment: 'left'
-                                        }, {
-                                            text: ocOrden.concesionario.razon_social || '-',
-                                            alignment: 'left'
-                                        }, {
-                                            text: 'N° Oper:',
-                                            bold: true,
-                                            alignment: 'left'
-                                        }, {
-                                            text: '-',
-                                            alignment: 'left'
-                                        }],
-                                        [{
-                                            text: 'RUC:',
-                                            bold: true,
-                                            alignment: 'left'
-                                        }, {
-                                            text: ocOrden.concesionario.ruc || '-',
-                                            alignment: 'left'
-                                        }, {
-                                            text: 'Fecha:',
-                                            bold: true,
-                                            alignment: 'left'
-                                        }, {
-                                            text: ocOrden.fecha_emision_oc || '-',
-                                            alignment: 'left'
-                                        }],
-                                        [{
-                                            text: 'Dirección:',
-                                            bold: true,
-                                            alignment: 'left'
-                                        }, {
-                                            text: ocOrden.concesionario.direccion || '-',
-                                            alignment: 'left',
-                                            colSpan: 3
-                                        }, {}, {}],
-                                        [{
-                                            text: 'Vendedor:',
-                                            bold: true,
-                                            alignment: 'left'
-                                        }, {
-                                            text: ocOrden.concesionario.vendedor_contacto || '-',
-                                            alignment: 'left'
-                                        }, {
-                                            text: 'Teléfono:',
-                                            bold: true,
-                                            alignment: 'left'
-                                        }, {
-                                            text: ocOrden.concesionario.telefono || '-',
-                                            alignment: 'left'
-                                        }],
-                                    ],
-                                },
-                                layout: 'lightHorizontalLines',
-                                margin: [0, 0, 0, 10],
-                            },
-
-                            // Sección de Asociado
-                            {
-                                table: {
-                                    widths: ['*'],
-                                    body: [
-                                        [{
-                                            text: 'ASOCIADO',
-                                            alignment: 'center',
-                                            bold: true,
-                                            fillColor: '#E0E0E0'
-                                        }]
-                                    ]
-                                },
-                                layout: 'noBorders',
-                                margin: [0, 5, 0, 5],
-                            },
-                            {
-                                table: {
-                                    widths: ['auto', '*', 'auto', '*'],
-                                    body: [
-                                        [{
-                                            text: 'Titular:',
-                                            bold: true,
-                                            alignment: 'left'
-                                        }, {
-                                            text: 'YONDA & GRUPO HUARACA EIRL',
-                                            alignment: 'left'
-                                        }, {
-                                            text: 'Teléfono:',
-                                            bold: true,
-                                            alignment: 'left'
-                                        }, {
-                                            text: '926743607',
-                                            alignment: 'left'
-                                        }],
-                                        [{
-                                            text: 'DNI o RUC:',
-                                            bold: true,
-                                            alignment: 'left'
-                                        }, {
-                                            text: '20609396866',
-                                            alignment: 'left'
-                                        }, {
-                                            text: 'Correo:',
-                                            bold: true,
-                                            alignment: 'left'
-                                        }, {
-                                            text: 'asistentecontable@yondaperu.com',
-                                            alignment: 'left'
-                                        }],
-                                        [{
-                                            text: 'Dirección:',
-                                            bold: true,
-                                            alignment: 'left'
-                                        }, {
-                                            text: 'PANAMERICANA SUR KM PUERTA 201',
-                                            alignment: 'left',
-                                            colSpan: 3
-                                        }, {}, {}],
-                                    ],
-                                },
-                                layout: 'lightHorizontalLines',
-                                margin: [0, 0, 0, 10],
-                            },
-
-                            // Sección de Vehículos
-                            {
-                                table: {
-                                    widths: ['*'],
-                                    body: [
-                                        [{
-                                            text: 'DESCRIPCIÓN DE VEHÍCULOS',
-                                            alignment: 'center',
-                                            bold: true,
-                                            fillColor: '#E0E0E0'
-                                        }]
-                                    ]
-                                },
-                                layout: 'noBorders',
-                                margin: [0, 5, 0, 5],
-                            },
-                            {
-                                table: {
-                                    headerRows: 1,
-                                    widths: ['auto', 'auto', 'auto', 'auto', 'auto', '*', 'auto', 'auto', 'auto', 'auto'],
-                                    body: [
-                                        ['MARCA', 'MODELO', 'VERSIÓN', 'AÑO', 'COLOR', 'CHASIS', 'PLACA', 'PLACA R.', 'SERIE MOTOR', 'PRECIO INDIVIDUAL'].map(text => ({
-                                            text,
-                                            bold: true,
-                                            alignment: 'center'
-                                        })),
-                                        ...ocDetalles.map(v => [{
-                                                text: v.marca || '',
-                                                alignment: 'center'
-                                            },
-                                            {
-                                                text: v.modelo || '',
-                                                alignment: 'center'
-                                            },
-                                            {
-                                                text: v.version || '',
-                                                alignment: 'center'
-                                            },
-                                            {
-                                                text: v.anio_modelo || '',
-                                                alignment: 'center'
-                                            },
-                                            {
-                                                text: v.color || '',
-                                                alignment: 'center'
-                                            },
-                                            {
-                                                text: v.chasis || '',
-                                                alignment: 'center'
-                                            },
-                                            {
-                                                text: v.placa || '',
-                                                alignment: 'center'
-                                            },
-                                            {
-                                                text: v.placa_rotativa || '',
-                                                alignment: 'center'
-                                            },
-                                            {
-                                                text: v.serie_motor || '',
-                                                alignment: 'center'
-                                            },
-                                            {
-                                                text: `$ ${parseFloat(v.precio_unitario || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
-                                                alignment: 'right'
-                                            },
-                                        ]),
-                                    ],
-                                },
-                                layout: 'lightHorizontalLines',
-                            },
-                            {
-                                text: '',
-                                margin: [0, 10]
-                            },
-
-                            // Resumen Financiero y Observaciones
-                            {
-                                columns: [{
-                                        text: 'Observaciones:',
-                                        width: 'auto',
-                                        bold: true,
-                                        alignment: 'left',
-                                        margin: [0, 0, 0, 5],
-                                    },
-                                    {
-                                        text:   ocOrden.observaciones_oc || 'Sin observaciones',
-                                        width: '*',
-                                        alignment: 'left',
-                                        margin: [0, 0, 0, 5],
-                                    },
-                                    {
-                                        table: {
-                                            widths: ['auto', 'auto'],
-                                            body: [
-                                                [{
-                                                    text: 'RESUMEN FINANCIERO',
-                                                    colSpan: 2,
-                                                    bold: true,
-                                                    alignment: 'center',
-                                                    fillColor: '#E0E0E0'
-                                                }, {}],
-                                                [{
-                                                    text: 'Valor Venta:',
-                                                    bold: true,
-                                                    alignment: 'left'
-                                                }, {
-                                                    text: `$ ${parseFloat(ocOrden.totales.valor_venta || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
-                                                    alignment: 'right'
-                                                }],
-                                                [{
-                                                    text: 'IGV:',
-                                                    bold: true,
-                                                    alignment: 'left'
-                                                }, {
-                                                    text: `$ ${parseFloat(ocOrden.totales.igv || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
-                                                    alignment: 'right'
-                                                }],
-                                                [{
-                                                    text: 'TOTAL:',
-                                                    bold: true,
-                                                    alignment: 'left'
-                                                }, {
-                                                    text: `$ ${parseFloat(ocOrden.totales.total || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
-                                                    alignment: 'right'
-                                                }],
-                                            ],
+                                        {
+                                            text: '',
+                                            width: '*'
                                         },
-                                        width: 'auto',
-                                    },
-                                ],
-                            },
-                            {
-                                text: '',
-                                margin: [0, 10]
-                            },
+                                        {
+                                            table: {
+                                                widths: ['auto'],
+                                                body: [
+                                                    [{
+                                                        text: 'ORDEN DE COMPRA',
+                                                        alignment: 'center',
+                                                        fontSize: 14,
+                                                        bold: true,
+                                                        margin: [0, 5, 0, 0],
+                                                        color: '#000'
+                                                    }],
+                                                    [{
+                                                        text: ocOrden.numero_oc_formateado || '-',
+                                                        alignment: 'center',
+                                                        fontSize: 14,
+                                                        bold: true,
 
-                            // Sección de Aprobaciones
-                            {
-                                table: {
-                                    widths: ['*'],
-                                    body: [
-                                        [{
-                                            text: 'APROBACIONES',
-                                            alignment: 'center',
-                                            bold: true,
-                                            fillColor: '#E0E0E0'
-                                        }]
-                                    ]
-                                },
-                                layout: 'noBorders',
-                                margin: [0, 5, 0, 5],
-                            },
-                            {
-                                table: {
-                                    widths: ['*', '*', '*', '*'],
-                                    body: [
-                                        [{
-                                            text: 'PREPARADO',
-                                            bold: true,
-                                            alignment: 'center'
-                                        }, {
-                                            text: 'APROBADO',
-                                            bold: true,
-                                            alignment: 'center'
-                                        }, {
-                                            text: 'AUTORIZADO',
-                                            bold: true,
-                                            alignment: 'center'
-                                        }, {
-                                            text: 'PROCESADO',
-                                            bold: true,
-                                            alignment: 'center'
-                                        }],
-                                        [{
-                                            text: ' ',
-                                            margin: [0, 35]
-                                        }, {
-                                            text: ' ',
-                                            margin: [0, 35]
-                                        }, {
-                                            text: ' ',
-                                            margin: [0, 35]
-                                        }, {
-                                            text: ' ',
-                                            margin: [0, 35]
-                                        }],
+                                                        margin: [0, 8, 0, 5],
+                                                        border: [true, false, true, true]
+                                                    }],
+                                                ],
+                                            },
+                                            layout: 'noBorders',
+                                            alignment: 'right',
+                                            width: 150,
+                                        },
                                     ],
                                 },
-                                layout: {
-                                    hLineWidth: function(i, node) {
-                                        return 1;
+                                {
+                                    text: '',
+                                    margin: [0, 10]
+                                },
+
+                                // Sección de Concesionario
+                                {
+                                    table: {
+                                        widths: ['*'],
+                                        body: [
+                                            [{
+                                                text: 'CONCESIONARIO',
+                                                alignment: 'center',
+                                                bold: true,
+                                                fillColor: '#E0E0E0'
+                                            }]
+                                        ]
                                     },
-                                    vLineWidth: function(i, node) {
-                                        return 1;
+                                    layout: 'noBorders',
+                                    margin: [0, 5, 0, 5],
+                                },
+                                {
+                                    table: {
+                                        widths: ['auto', '*', 'auto', '*'],
+                                        body: [
+                                            [{
+                                                text: 'Punto de venta:',
+                                                bold: true,
+                                                alignment: 'left'
+                                            }, {
+                                                text: ocOrden.concesionario.ubigeo || '-',
+                                                alignment: 'left'
+                                            }, {
+                                                text: 'Banco:',
+                                                bold: true,
+                                                alignment: 'left'
+                                            }, {
+                                                text: '-',
+                                                alignment: 'left'
+                                            }],
+                                            [{
+                                                text: 'Razón Social:',
+                                                bold: true,
+                                                alignment: 'left'
+                                            }, {
+                                                text: ocOrden.concesionario.razon_social || '-',
+                                                alignment: 'left'
+                                            }, {
+                                                text: 'N° Oper:',
+                                                bold: true,
+                                                alignment: 'left'
+                                            }, {
+                                                text: '-',
+                                                alignment: 'left'
+                                            }],
+                                            [{
+                                                text: 'RUC:',
+                                                bold: true,
+                                                alignment: 'left'
+                                            }, {
+                                                text: ocOrden.concesionario.ruc || '-',
+                                                alignment: 'left'
+                                            }, {
+                                                text: 'Fecha:',
+                                                bold: true,
+                                                alignment: 'left'
+                                            }, {
+                                                text: ocOrden.fecha_emision_oc || '-',
+                                                alignment: 'left'
+                                            }],
+                                            [{
+                                                text: 'Dirección:',
+                                                bold: true,
+                                                alignment: 'left'
+                                            }, {
+                                                text: ocOrden.concesionario.direccion || '-',
+                                                alignment: 'left',
+                                                colSpan: 3
+                                            }, {}, {}],
+                                            [{
+                                                text: 'Vendedor:',
+                                                bold: true,
+                                                alignment: 'left'
+                                            }, {
+                                                text: ocOrden.concesionario.vendedor_contacto || '-',
+                                                alignment: 'left'
+                                            }, {
+                                                text: 'Teléfono:',
+                                                bold: true,
+                                                alignment: 'left'
+                                            }, {
+                                                text: ocOrden.concesionario.telefono || '-',
+                                                alignment: 'left'
+                                            }],
+                                        ],
                                     },
-                                    hLineColor: function(i, node) {
-                                        return '#000';
+                                    layout: 'lightHorizontalLines',
+                                    margin: [0, 0, 0, 10],
+                                },
+
+                                // Sección de Asociado
+                                {
+                                    table: {
+                                        widths: ['*'],
+                                        body: [
+                                            [{
+                                                text: 'ASOCIADO',
+                                                alignment: 'center',
+                                                bold: true,
+                                                fillColor: '#E0E0E0'
+                                            }]
+                                        ]
                                     },
-                                    vLineColor: function(i, node) {
-                                        return '#000';
+                                    layout: 'noBorders',
+                                    margin: [0, 5, 0, 5],
+                                },
+                                {
+                                    table: {
+                                        widths: ['auto', '*', 'auto', '*'],
+                                        body: [
+                                            [{
+                                                text: 'Titular:',
+                                                bold: true,
+                                                alignment: 'left'
+                                            }, {
+                                                text: 'YONDA & GRUPO HUARACA EIRL',
+                                                alignment: 'left'
+                                            }, {
+                                                text: 'Teléfono:',
+                                                bold: true,
+                                                alignment: 'left'
+                                            }, {
+                                                text: '926743607',
+                                                alignment: 'left'
+                                            }],
+                                            [{
+                                                text: 'DNI o RUC:',
+                                                bold: true,
+                                                alignment: 'left'
+                                            }, {
+                                                text: '20609396866',
+                                                alignment: 'left'
+                                            }, {
+                                                text: 'Correo:',
+                                                bold: true,
+                                                alignment: 'left'
+                                            }, {
+                                                text: 'asistentecontable@yondaperu.com',
+                                                alignment: 'left'
+                                            }],
+                                            [{
+                                                text: 'Dirección:',
+                                                bold: true,
+                                                alignment: 'left'
+                                            }, {
+                                                text: 'PANAMERICANA SUR KM PUERTA 201',
+                                                alignment: 'left',
+                                                colSpan: 3
+                                            }, {}, {}],
+                                        ],
                                     },
-                                    paddingLeft: function(i, node) {
-                                        return 4;
+                                    layout: 'lightHorizontalLines',
+                                    margin: [0, 0, 0, 10],
+                                },
+
+                                // Sección de Vehículos
+                                {
+                                    table: {
+                                        widths: ['*'],
+                                        body: [
+                                            [{
+                                                text: 'DESCRIPCIÓN DE VEHÍCULOS',
+                                                alignment: 'center',
+                                                bold: true,
+                                                fillColor: '#E0E0E0'
+                                            }]
+                                        ]
                                     },
-                                    paddingRight: function(i, node) {
-                                        return 4;
+                                    layout: 'noBorders',
+                                    margin: [0, 5, 0, 5],
+                                },
+                                {
+                                    table: {
+                                        headerRows: 1,
+                                        widths: ['auto', 'auto', 'auto', 'auto', 'auto', '*', 'auto', 'auto', 'auto', 'auto'],
+                                        body: [
+                                            ['MARCA', 'MODELO', 'VERSIÓN', 'AÑO', 'COLOR', 'CHASIS', 'PLACA', 'PLACA R.', 'SERIE MOTOR', 'PRECIO INDIVIDUAL'].map(text => ({
+                                                text,
+                                                bold: true,
+                                                alignment: 'center'
+                                            })),
+                                            ...ocDetalles.map(v => [{
+                                                    text: v.marca || '',
+                                                    alignment: 'center'
+                                                },
+                                                {
+                                                    text: v.modelo || '',
+                                                    alignment: 'center'
+                                                },
+                                                {
+                                                    text: v.version || '',
+                                                    alignment: 'center'
+                                                },
+                                                {
+                                                    text: v.anio_modelo || '',
+                                                    alignment: 'center'
+                                                },
+                                                {
+                                                    text: v.color || '',
+                                                    alignment: 'center'
+                                                },
+                                                {
+                                                    text: v.chasis || '',
+                                                    alignment: 'center'
+                                                },
+                                                {
+                                                    text: v.placa || '',
+                                                    alignment: 'center'
+                                                },
+                                                {
+                                                    text: v.placa_rotativa || '',
+                                                    alignment: 'center'
+                                                },
+                                                {
+                                                    text: v.serie_motor || '',
+                                                    alignment: 'center'
+                                                },
+                                                {
+                                                    text: `$ ${parseFloat(v.precio_unitario || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
+                                                    alignment: 'right'
+                                                },
+                                            ]),
+                                        ],
                                     },
-                                    paddingTop: function(i, node) {
-                                        return 4;
+                                    layout: 'lightHorizontalLines',
+                                },
+                                {
+                                    text: '',
+                                    margin: [0, 10]
+                                },
+
+                                // Resumen Financiero y Observaciones
+                                {
+                                    columns: [{
+                                            text: 'Observaciones:',
+                                            width: 'auto',
+                                            bold: true,
+                                            alignment: 'left',
+                                            margin: [0, 0, 0, 5],
+                                        },
+                                        {
+                                            text: ocOrden.observaciones_oc || 'Sin observaciones',
+                                            width: '*',
+                                            alignment: 'left',
+                                            margin: [0, 0, 0, 5],
+                                        },
+                                        {
+                                            table: {
+                                                widths: ['auto', 'auto'],
+                                                body: [
+                                                    [{
+                                                        text: 'RESUMEN FINANCIERO',
+                                                        colSpan: 2,
+                                                        bold: true,
+                                                        alignment: 'center',
+                                                        fillColor: '#E0E0E0'
+                                                    }, {}],
+                                                    [{
+                                                        text: 'Valor Venta:',
+                                                        bold: true,
+                                                        alignment: 'left'
+                                                    }, {
+                                                        text: `$ ${parseFloat(ocOrden.totales.valor_venta || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
+                                                        alignment: 'right'
+                                                    }],
+                                                    [{
+                                                        text: 'IGV:',
+                                                        bold: true,
+                                                        alignment: 'left'
+                                                    }, {
+                                                        text: `$ ${parseFloat(ocOrden.totales.igv || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
+                                                        alignment: 'right'
+                                                    }],
+                                                    [{
+                                                        text: 'TOTAL:',
+                                                        bold: true,
+                                                        alignment: 'left'
+                                                    }, {
+                                                        text: `$ ${parseFloat(ocOrden.totales.total || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
+                                                        alignment: 'right'
+                                                    }],
+                                                ],
+                                            },
+                                            width: 'auto',
+                                        },
+                                    ],
+                                },
+                                {
+                                    text: '',
+                                    margin: [0, 10]
+                                },
+
+                                // Sección de Aprobaciones
+                                {
+                                    table: {
+                                        widths: ['*'],
+                                        body: [
+                                            [{
+                                                text: 'APROBACIONES',
+                                                alignment: 'center',
+                                                bold: true,
+                                                fillColor: '#E0E0E0'
+                                            }]
+                                        ]
                                     },
-                                    paddingBottom: function(i, node) {
-                                        return 4;
+                                    layout: 'noBorders',
+                                    margin: [0, 5, 0, 5],
+                                },
+                                {
+                                    table: {
+                                        widths: ['*', '*', '*', '*'],
+                                        body: [
+                                            [{
+                                                text: 'PREPARADO',
+                                                bold: true,
+                                                alignment: 'center'
+                                            }, {
+                                                text: 'APROBADO',
+                                                bold: true,
+                                                alignment: 'center'
+                                            }, {
+                                                text: 'AUTORIZADO',
+                                                bold: true,
+                                                alignment: 'center'
+                                            }, {
+                                                text: 'PROCESADO',
+                                                bold: true,
+                                                alignment: 'center'
+                                            }],
+                                            [{
+                                                text: ' ',
+                                                margin: [0, 35]
+                                            }, {
+                                                text: ' ',
+                                                margin: [0, 35]
+                                            }, {
+                                                text: ' ',
+                                                margin: [0, 35]
+                                            }, {
+                                                text: ' ',
+                                                margin: [0, 35]
+                                            }],
+                                        ],
+                                    },
+                                    layout: {
+                                        hLineWidth: function(i, node) {
+                                            return 1;
+                                        },
+                                        vLineWidth: function(i, node) {
+                                            return 1;
+                                        },
+                                        hLineColor: function(i, node) {
+                                            return '#000';
+                                        },
+                                        vLineColor: function(i, node) {
+                                            return '#000';
+                                        },
+                                        paddingLeft: function(i, node) {
+                                            return 4;
+                                        },
+                                        paddingRight: function(i, node) {
+                                            return 4;
+                                        },
+                                        paddingTop: function(i, node) {
+                                            return 4;
+                                        },
+                                        paddingBottom: function(i, node) {
+                                            return 4;
+                                        },
                                     },
                                 },
-                            },
-                        ],
-                    };
+                            ],
+                        };
 
 
-                    pdfMake.createPdf(documento).open();
+                        pdfMake.createPdf(documento).open();
 
-                } catch (error) {
-                    console.error('Error al generar el PDF:', error);
-                    alert('Ocurrió un error al generar el PDF. Por favor, inténtelo de nuevo.');
-                }
+                    } catch (error) {
+                        console.error('Error al generar el PDF:', error);
+                        alert('Ocurrió un error al generar el PDF. Por favor, inténtelo de nuevo.');
+                    }
+                });
+
+
+
+
+
             });
 
 
 
 
 
-        });
-
-
-
-
-
 
 
         });
-
-       
-     
     </script>
 
 

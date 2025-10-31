@@ -7,7 +7,7 @@
 <div class="container-fluid ">
 
 
-    <div class="alert alert-info mt-2 mb-5" role="alert">
+    <div class="alert alert-info mt-2 mb-4" role="alert">
         <div class="row">
             <div class="col-md-6 d-flex align-items-center justify-content-start">
                 <nav aria-label="breadcrumb">
@@ -28,6 +28,10 @@
                 </nav>
             </div>
         </div>
+    </div>
+
+    <div class="d-flex justify-content-end align-items-end">
+        <button class="btn btn-sm btn-outline-success mb-2" id="btnExportExcel">Exportar Excel</button>
     </div>
 
     <div id="tabla-vehiculos"></div>
@@ -326,6 +330,7 @@
 <script src="/assets/js/logoBase64.js"></script>
 <script src=" https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
 
 <script>
@@ -384,9 +389,10 @@
                 }, // Columna en movil para manejar el accordion
                 {
                     title: "#",
-                    formatter: "rownum",
+                    field: "num_fila",
                     hozAlign: "center",
-                    width: 50
+                    width: 50,
+                    headerSort: false
                 },
                 {
                     title: 'Amortización',
@@ -395,7 +401,7 @@
                     headerHozAlign: 'left',
                     width: 130,
                     tooltip: true,
-                    formatter: function(cell) {
+                    formatter: function(cell) { 
                         const rowData = cell.getRow().getData();
                         const monto = parseFloat(cell.getValue());
                         const simbolo = rowData.moneda === 'USD' ? '$' : 'S/';
@@ -403,7 +409,21 @@
                             minimumFractionDigits: 2,
                             maximumFractionDigits: 2
                         });
+                    },
+
+                   
+                    accessorDownload: function(value, data, type, component) {
+                        // 'value' es el valor crudo 
+                        // 'data' es el objeto de la fila (contiene 'moneda')
+                        const monto = parseFloat(value);
+                        const simbolo = data.moneda === 'USD' ? '$' : 'S/';
+
+                        return simbolo + ' ' + monto.toLocaleString('es-PE', {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2
+                        });
                     }
+                   
                 },
                 {
                     title: 'Vehículo',
@@ -446,6 +466,7 @@
                 {
                     title: 'Acciones',
                     headerHozAlign: 'left',
+                    download: false,
                     formatter: (cell) => {
                         const id = cell.getRow().getData().idvehiculo;
                         return `
@@ -460,9 +481,17 @@
             ],
 
             ajaxResponse: (url, params, response) => {
-                if (response.success) {
-                    return response.vehiculos;
+                if (response.success && response.vehiculos) {
+                    const data = response.vehiculos;
+
+
+                    data.forEach((row, index) => {
+                        row.num_fila = index + 1;
+                    });
+
+                    return data;
                 }
+                return [];
             },
             ajaxError: (error) => {
                 console.error("Error al cargar los datos:", error);
@@ -1179,12 +1208,12 @@
             pageOrientation: 'portrait',
             pageMargins: [70, 25, 70, 25],
             defaultStyle: {
-            fontSize: 8.3,
-            lineHeight: 1.15,
-            color: '#333333'
-            
-        },
-        
+                fontSize: 8.3,
+                lineHeight: 1.15,
+                color: '#333333'
+
+            },
+
             header: {
                 image: imgCabecera,
                 width: 610,
@@ -1486,4 +1515,11 @@
 
     });
 
+
+
+    document.getElementById('btnExportExcel').addEventListener('click', () => {
+        table.download("xlsx", "VehículosALContado.xlsx", {
+            sheetName: "VehiculosAlContado"
+        });
+    });
 </script>

@@ -27,6 +27,9 @@
 
           <!-- Vista de escritorio -->
           <div class="table-responsive d-none d-md-block">
+            <div class="d-flex justify-content-end align-items-end">
+        <button class="btn btn-sm btn-outline-success mb-2" id="btnExportExcel">Exportar Excel</button>
+    </div>
             <div id="tabla-concesionarios"></div>
           </div>
 
@@ -112,8 +115,8 @@
     </div>
   </div>
   <?php include __DIR__ . '/../layout/footer.php'; ?>
-  <script src="https://cdn.jsdelivr.net/npm/simple-datatables@9.0.3"></script>
   <script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.5.2/dist/js/tabulator.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -129,14 +132,15 @@
         data: data,
         layout: "fitColumns",
         columns: [
-          { title: "#", formatter: 'rownum',width: 60, responsive: 0, headerSort: false, hozAlign: "center" },
-          { title: "Nombre comercial", field: "nombrecomercial", headerFilter: "input" },
-          { title: "Razón social", field: "razonsocial", headerFilter: "input" },
-          { title: "RUC", field: "ruc", headerFilter: "input" },
+          { title: "#", formatter: 'rownum',width: 60, responsive: 0, headerSort: false, hozAlign: "center", download:false },
+          { title: "Nombre comercial", field: "nombrecomercial", headerFilter: "input", download:true },
+          { title: "Razón social", field: "razonsocial", headerFilter: "input" , download:true},
+          { title: "RUC", field: "ruc", headerFilter: "input", download:true },
           {
             title: "Acciones",
             field: "acciones",
             hozAlign: "center",
+            download:false,
             formatter: function(cell, formatterParams) {
               const id = cell.getRow().getData().idconcesionario;
               const nombrecomercial = cell.getRow().getData().nombrecomercial;
@@ -257,5 +261,35 @@
         e.preventDefault();
         await actualizarConcesionario();
       });
+
+      document.getElementById('btnExportExcel').addEventListener('click', async () => {
+            await new Promise(resolve => setTimeout(resolve, 100));
+            const data = tablaConcesionarios.getData().map((row, index) => ({
+                ...row,
+                index: index + 1, // Campo enumerado
+            }));
+
+            
+            tablaConcesionarios.download("xlsx", "Concesionarios.xlsx", {
+                sheetName: "Concesionarios",
+                data: data 
+            });
+
+        });
+
+
+
+
     });
+
+
+    
+
+
+
+
+
+
+
+
   </script>

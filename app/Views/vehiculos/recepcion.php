@@ -4,15 +4,14 @@
 <link rel="stylesheet" href="/assets/css/tabulator.css">
 <style>
     #tabla-vehiculos-recepcion {
-  padding: 0 !important;
-  margin: 0 !important;
-}
+        padding: 0 !important;
+        margin: 0 !important;
+    }
 
-#tabla-vehiculos-recepcion .tabulator {
-  border: none !important;
-  width: 100% !important;
-}
-
+    #tabla-vehiculos-recepcion .tabulator {
+        border: none !important;
+        width: 100% !important;
+    }
 </style>
 <div class="container-fluid">
     <div class="alert alert-info mt-2" role="alert">
@@ -28,8 +27,11 @@
         </div>
     </div>
 
-    <div class="row d-none d-md-block mt-5">
-       <div id="tabla-vehiculos-recepcion"></div>
+    <div class="row d-none d-md-block mt-3">
+        <div class="d-flex justify-content-end align-items-end">
+            <button class="btn btn-sm btn-outline-success mb-2" id="btnExportExcel">Exportar Excel</button>
+        </div>
+        <div id="tabla-vehiculos-recepcion"></div>
     </div>
 
     <div class="row d-md-none">
@@ -80,47 +82,98 @@
 </div>
 <?php include __DIR__ . '/../layout/footer.php'; ?>
 <script src="https://unpkg.com/tabulator-tables@5.5.2/dist/js/tabulator.min.js"></script>
-
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
-  const data = <?= json_encode($data) ?>;
+    const data = <?= json_encode($data) ?>;
+    
+    data.forEach((row, index) => {
+        row.num_fila = index + 1;
+    });
 
-  const tablaVehiculos = new Tabulator("#tabla-vehiculos-recepcion", {
-    data,
-    layout: "fitColumns",
-    pagination: "local",
-    paginationSize: 10,
-    paginationSizeSelector: [5, 10, 20],
-    responsiveLayout: "collapse",
-    columns: [
-      { title: "#", field: "numero", width: 50 },
-      { title: "Concesionario", field: "nombrecomercial" },
-      { title: "Dirección Conces.", field: "direccion_completa_concesionario", minWidth: 300 },
-      { title: "Emisión OC", field: "fecha_emision_oc" },
-      { title: "Serie OC", field: "serie_oc" },
-      { title: "Fecha compra", field: "fechacompra" },
-      { title: "Cant. Pendientes", field: "vehiculos_pendientes", formatter: "html" },
-      { title: "Por / Liberar", field: "listos_para_liberar", formatter: "html" },
-      { title: "Acciones", field: "acciones", formatter: (cell) => {
-          const data = cell.getRow().getData();
-          return `<a href="/recepcionVehiculos/edit/${data.idcompra}" title="Llevará a la vista de recepción de vehículos">
+    const tablaVehiculos = new Tabulator("#tabla-vehiculos-recepcion", {
+        data,
+        layout: "fitColumns",
+        pagination: "local",
+        paginationSize: 10,
+        paginationSizeSelector: [5, 10, 20],
+        responsiveLayout: "collapse",
+        columns: [{
+                title: "#",
+                field: "num_fila",
+                width: 50,
+                hozAlign: "center",
+                download: true, 
+            },
+            {
+                title: "Concesionario",
+                field: "nombrecomercial",
+                download: true
+            },
+            {
+                title: "Dirección Conces.",
+                field: "direccion_completa_concesionario",
+                minWidth: 300,
+                download: true
+            },
+            {
+                title: "Emisión OC",
+                field: "fecha_emision_oc",
+                download: true
+            },
+            {
+                title: "Serie OC",
+                field: "serie_oc",
+                download: true
+            },
+            {
+                title: "Fecha compra",
+                field: "fechacompra",
+                download: true
+            },
+            {
+                title: "Cant. Pendientes",
+                field: "vehiculos_pendientes",
+                formatter: "html",
+                download: true
+            },
+            {
+                title: "Por / Liberar",
+                field: "listos_para_liberar",
+                formatter: "html",
+                download: true
+            },
+            {
+                title: "Acciones",
+                field: "acciones",
+                download: false,
+                formatter: (cell) => {
+                    const data = cell.getRow().getData();
+                    return `<a href="/recepcionVehiculos/edit/${data.idcompra}" title="Llevará a la vista de recepción de vehículos">
                     <i class="fa-solid fa-book fs-5" style="color: #40cbf5ff;"></i>
                     
                   </a>`;
 
-        
-      }},
-    ],
-    locale: "es-es",
-    langs: {
-      "es-es": {
-        pagination: {
-          page_size: "Registros por página",
-          first: "<<",
-          last: ">>",
-          prev: "<",
-          next: ">",
+
+                }
+            },
+        ],
+        locale: "es-es",
+        langs: {
+            "es-es": {
+                pagination: {
+                    page_size: "Registros por página",
+                    first: "<<",
+                    last: ">>",
+                    prev: "<",
+                    next: ">",
+                },
+            },
         },
-      },
-    },
-  });
+    });
+
+    document.getElementById('btnExportExcel').addEventListener('click', () => {
+        tablaVehiculos.download("xlsx", "VehículosPorRecepcionar.xlsx", {
+            sheetName: "VehiculosXRecepcionar"
+        });
+    });
 </script>
