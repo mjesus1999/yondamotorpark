@@ -45,6 +45,9 @@
 
                     <!-- Vista de escritorio (tabla) -->
                     <div class="table-responsive d-none d-md-block">
+                        <div class="d-flex justify-content-end align-items-end">
+                            <button class="btn btn-sm btn-outline-success mb-2" id="btnExportExcel">Exportar Excel</button>
+                        </div>
                          <div class="mb-3">
                             <div class="input-group">
                                 <span class="input-group-text">
@@ -186,7 +189,8 @@
 <?php include __DIR__ . '/../../layout/footer.php'; ?>
 
 
-<script src="https://unpkg.com/tabulator-tables@5.5.2/dist/js/tabulator.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script type="text/javascript" src="https://unpkg.com/tabulator-tables@6.3.1/dist/js/tabulator.min.js"></script>
 
 
 <script>
@@ -199,8 +203,8 @@
             data: datos,
             pagination: "local",
             layout: "fitColumns",
-            paginationSize: 15,
-            paginationSizeSelector: [5, 10, 20],
+            paginationSize: 20,
+            paginationSizeSelector: [5, 10, 20,30],
             movableRows: true,
 
             columns: [{
@@ -249,6 +253,7 @@
                     field: "acciones",
                     widthGrow: 2,
                     headerSort: false,
+                    download:false,
                 
                     formatter: function(cell, formatterParams) {
                         const data = cell.getRow().getData();
@@ -307,6 +312,28 @@
                 }
             });
         }
+
+
+          document.getElementById('btnExportExcel').addEventListener('click', async () => {
+           
+
+            await new Promise(resolve => setTimeout(resolve, 100));
+
+
+            const data = tabla.getData().map((row, index) => ({
+                ...row,
+                index: index + 1, // Campo enumerado
+            }));
+
+
+            tabla.download("xlsx", "ClientesEmpresas.xlsx", {
+                sheetName: "ClientesEmpresas",
+                data: data
+            });
+
+            
+        });
+
 
 
     });

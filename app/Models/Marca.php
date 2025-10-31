@@ -1,5 +1,13 @@
 <?php
 
+/**
+ * Modelo de marca
+ * app/Models/Marca.php
+ * 
+ * Gestiona las operaciones de base de datos relacionadas con las marcas de vehiculos o productos,
+ * incluyendo su relacion con modelos asociados.
+ * 
+ */
 namespace App\Models;
 
 use App\Core\Database;
@@ -7,15 +15,38 @@ use Exception;
 use PDO;
 use PDOException;
 
+/**
+ * Clase Marca
+ * 
+ * Modelo para la gestion CRUD completos para marcas, incluyendo conteo
+ * de modelos asociados y manejo de restricciones de intregidad.
+ * 
+ */
 class Marca
 {
+    /**
+     * Intancia de conexion a la base de datos
+     * @var PDO
+     */
     private PDO $db;
 
+    /**
+     * Constructor del modelo
+     * 
+     * Inicializa la conexion a la base de datos
+     */
     public function __construct()
     {
         $this->db = Database::getInstance();
     }
 
+    /**
+     * Obtiene todas las marcas ordenadas alfabeticamente,
+     * incluyendo el conteo de modelos asociados a cada uno.
+     * 
+     * @return array Array asociativo con idmarca, marca y cantidad de modelos,
+     *                  o array vacio en caso de error
+     */
     public function getAll(): array
     {
         $query = "
@@ -35,7 +66,12 @@ class Marca
         }
     }
 
- 
+    /**
+     * Obtiene una marca especifica incluyendo el conteo de modelos asociados.
+     * 
+     * @param int $idmarca ID de la marca a consultar
+     * @return array|null Array asociativo con los datos de la marca o null si no existe o hay error
+     */
     public function getById(int $idmarca): ?array
     {
         $query = "
@@ -57,9 +93,14 @@ class Marca
         }
     }
 
+
     /**
-     * Registra una nueva marca
-     * @return int PK obtenida, -1 en error genérico, -2 si la marca ya existe (UNIQUE constraint)
+     * Registra una marca nueva
+     * 
+     * Crea un nuevo registro de marca verificando que no exista una marca con el mismo nombre
+     * (contraint UNIQUE)
+     * @param string $marca Nombre de la marca a registrar  
+     * @return int ID de la marca creada, -1 en error generico, -2 si la marca ya existe (violacion UNIQUE)
      */
     public function create(string $marca = ''): int
     {
@@ -70,7 +111,7 @@ class Marca
             $stmt->execute();
             return (int) $this->db->lastInsertId();
         } catch (PDOException $e) {
-            if ($e->getCode() == '23000') { 
+            if ($e->getCode() == '23000') {
                 return -2;
             }
             return -1;
@@ -78,8 +119,14 @@ class Marca
     }
 
     /**
-     * Actualiza una marca
-     * @return int Registros afectados, -1 en error, -2 si la marca ya existe
+     * Actualiza los datos de una marca existente 
+     * 
+     * Modifica el nombre de un marca y actualiza automaticamente el campo 'modificado' con la fecha actual.
+     * Verifica que no exista otra con el mismo nombre.
+     * 
+     * @param int $idmarca ID de la marca a actualizar
+     * @param string $marca Nuevo nombre de la marca
+     * @return int Numero de registros afectados (generalmente 1), -1 en error generico, -2 si la marca ya existe
      */
     public function update(int $idmarca, string $marca): int
     {
@@ -98,7 +145,16 @@ class Marca
         }
     }
 
-   
+    /**
+     * Elimina una marca
+     * 
+     * Elimina fisicamente una marca de la base de datos. si la marca tiene modelos asociados,
+     * la operacion fallara debido a restricciones de intregidad referencial (FOREIGN KEY).
+     * 
+     * @param int $idmarca ID de la marca a eliminar
+     * @return int Numero de registros eliminados (1 si, exitoso - 0 si no existe),
+     *              -1 en error generico, -2 si tiene modelos asociados (Violacion FK)
+     */
     public function delete(int $idmarca): int
     {
         $query = "DELETE FROM marcas WHERE idmarca = :idmarca";

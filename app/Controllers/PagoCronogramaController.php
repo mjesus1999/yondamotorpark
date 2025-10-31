@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Controlador de Pago de Cronograma
+ * 
+ * app/Controllers/PagoCronogramaController.php
+ * 
+ * Gestiona el registro de pagos de cuotas y penalidades de contratos
+ * de financiamiento de vehículos. Incluye validaciones exhaustivas,
+ * manejo de archivos de comprobantes, control de secuencia de pagos
+ * y gestión de caché.
+ */
 namespace App\Controllers;
 
 use App\Core\Controller;
@@ -8,18 +18,50 @@ use App\Models\PagoCronograma;
 use App\Models\Caja;
 use DateTime;
 
-
+/**
+ * Clase PagoCronogramaController
+ * 
+ * Controlador para la gestión de pagos de cronogramas de financiamiento.
+ * Proporciona funcionalidades para registrar pagos de cuotas y penalidades,
+ * validar secuencia de pagos (primera cuota pendiente), gestionar comprobantes
+ * y mantener historial de transacciones.
+ */
 class PagoCronogramaController extends Controller
 {
+
+    /**
+     * Modelo de PagoCronograma
+     * @var PagoCronograma
+     */
     private PagoCronograma $pagoCronogramaModel;
+
+    /**
+     * Modelo de Caja
+     * @var Caja
+     */
     private Caja $cajaModel;
 
+    /**
+     * Constructor del controlador
+     * 
+     * Inicializa los modelos de PagoCronograma y Caja necesarios
+     * para las operaciones del controlador.
+     */
     public function __construct()
     {
         $this->pagoCronogramaModel = new PagoCronograma();
         $this->cajaModel = new Caja();
     }
 
+    /**
+     * Muestra el historial de pagos de un contrato
+     * 
+     * Renderiza la vista con el historial completo de pagos realizados
+     * para un contrato específico. Requiere autenticación.
+     * 
+     * @param int $id ID del contrato a consultar
+     * @return void
+     */
     public function indexHistorialPagos(int $id): void
     {
         $this->authRequired();
@@ -30,19 +72,28 @@ class PagoCronogramaController extends Controller
 
         // $tiempoFin = microtime(true);
         // $tiempoEjecucion = $tiempoFin - $tiempoInicio;
-
         // error_log("Tiempo de ejecución de indexHistorialPagos: " . number_format($tiempoEjecucion, 4) . " segundos.");
     }
 
-
+    /**
+     * Verifica si una cuota está habilitada para ser pagada
+     * 
+     * Método privado que valida si la cuota seleccionada es la primera
+     * cuota pendiente de pago del contrato. Esto asegura que los pagos
+     * se realicen en orden secuencial.
+     * 
+     * @param int $idContrato ID del contrato
+     * @param int $idCronograma ID de la cuota a validar
+     * @return bool True si la cuota es la primera pendiente, false en caso contrario
+     */
     private function esCuotaHabilitadaParaPago(int $idContrato, int $idCronograma): bool
     {
         $this->authRequired();
         $cronograma = $this->cajaModel->getCronogramaByIdContrato($idContrato);
         $primeraCuotaPendienteId = null;
         foreach ($cronograma as $cuota) {
-            $cuotaPendiente = (float)($cuota['saldocuota_pendiente'] ?? 0);
-            $penalidadPendiente = (float)($cuota['penalidad_pendiente'] ?? 0);
+            $cuotaPendiente = (float) ($cuota['saldocuota_pendiente'] ?? 0);
+            $penalidadPendiente = (float) ($cuota['penalidad_pendiente'] ?? 0);
 
 
             if ($cuotaPendiente > 0 || $penalidadPendiente > 0) {
@@ -54,8 +105,16 @@ class PagoCronogramaController extends Controller
         return $primeraCuotaPendienteId !== null && $primeraCuotaPendienteId === $idCronograma;
     }
 
-
-
+    /**
+     * Guarda un archivo de comprobante de pago
+     * 
+     * Método privado que procesa y almacena un archivo de comprobante,
+     * generando un nombre único y creando el directorio si no existe.
+     * 
+     * @param array $archivo Array del archivo $_FILES con información del upload
+     * @return string|null Ruta relativa del archivo guardado (comprobantes/nombre.ext)
+     *                     o null si falla la operación
+     */
     private function guardarComprobante(array $archivo): ?string
     {
         $this->authRequired();
@@ -81,10 +140,23 @@ class PagoCronogramaController extends Controller
         return null;
     }
 
-
-
-
-
+    /**
+     * Registra un pago de cuota y/o penalidad
+     * 
+     * Endpoint AJAX que procesa el registro de pagos de cronograma.
+     * Maneja pagos individuales o combinados (cuota + penalidad) con
+     * validaciones exhaustivas y control de secuencia de pagos.
+     * 
+     * Validaciones:
+     * - Campos obligatorios según medio de pago
+     * - Fecha de pago no futura
+     * - Monto de cuota no excede el pendiente
+     * - Penalidad debe pagarse completa
+     * - Solo permite pagar la primera cuota pendiente
+     * - Comprobante obligatorio para transferencias/depósitos
+     * 
+     * @return void
+     */
     public function store(): void
     {
         $this->authRequired();
@@ -101,13 +173,13 @@ class PagoCronogramaController extends Controller
             $errores = [];
 
             // Asignar y validar campos básicos
-            $idCronograma = (int)($data['idcronograma'] ?? 0);
+            $idCronograma = (int) ($data['idcronograma'] ?? 0);
 
             $numeroTransaccion = $data['numerotransaccion'] ?? '';
-            $numeroTransaccionPenalidad = (string)($data['numeroTransaccionPenalidad'] ?? '');
+            $numeroTransaccionPenalidad = (string) ($data['numeroTransaccionPenalidad'] ?? '');
 
-            $amortizacionCuota = (float)($data['amortizacionCuota'] ?? 0);
-            $amortizacionPenalidad = (float)($data['amortizacionPenalidad'] ?? 0);
+            $amortizacionCuota = (float) ($data['amortizacionCuota'] ?? 0);
+            $amortizacionPenalidad = (float) ($data['amortizacionPenalidad'] ?? 0);
 
             $medioPagoPenalidad = $data['mediopagopenalidad'] ?? '';
             $medioPago = $data['mediopago'] ?? '';
@@ -216,7 +288,7 @@ class PagoCronogramaController extends Controller
                 $errores[] = "La cuota no puede exceder S/ {$cronogramaData['cuotapendiente']}";
             }
 
-            $penalidadPendiente = (float)($cronogramaData['penalidadpendiente'] ?? 0);
+            $penalidadPendiente = (float) ($cronogramaData['penalidadpendiente'] ?? 0);
             if ($amortizacionPenalidad > 0) {
                 if ($penalidadPendiente <= 0) {
                     $errores[] = "No hay penalidad pendiente para esta cuota, la penalidad es: S/ {$penalidadPendiente}";
@@ -239,7 +311,7 @@ class PagoCronogramaController extends Controller
             if ($amortizacionCuota > 0) {
                 $pagoCuota = [
                     'idcronograma' => $idCronograma,
-                    'idcuentapago' => empty($idCuentaPago) ? null : (int)$idCuentaPago,
+                    'idcuentapago' => empty($idCuentaPago) ? null : (int) $idCuentaPago,
                     'mediopago' => $medioPago,
                     'numerotransaccion' => $numeroTransaccion,
                     'fechapago' => $fechaPago,
@@ -254,7 +326,7 @@ class PagoCronogramaController extends Controller
             if ($amortizacionPenalidad > 0) {
                 $pagoPenalidad = [
                     'idcronograma' => $idCronograma,
-                    'idcuentapago' => empty($idCuentaPagoPenalidad) ? null : (int)$idCuentaPagoPenalidad,
+                    'idcuentapago' => empty($idCuentaPagoPenalidad) ? null : (int) $idCuentaPagoPenalidad,
                     'mediopago' => $medioPagoPenalidad,
                     'numerotransaccion' => $numeroTransaccionPenalidad,
                     'fechapago' => $fechaPago,
@@ -300,9 +372,15 @@ class PagoCronogramaController extends Controller
             ]);
         }
     }
-    
 
-    // TRAER LOS NUMEROS DE CUENTAS
+    /**
+     * API: Obtiene las cuentas de pago disponibles
+     * 
+     * Endpoint AJAX que retorna todas las cuentas bancarias disponibles
+     * para registrar pagos, con formato concatenado (Entidad - NumCuenta - Moneda).
+     * 
+     * @return void
+     */
     public function searchNumCuentasPagos(): void
     {
         $this->authRequired();

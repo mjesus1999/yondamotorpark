@@ -1,21 +1,56 @@
 <?php
 
+/**
+ * Modelo de Vehiculos
+ * 
+ * app/Models/Vehiculo.php
+ * 
+ * Gestiona las operaciones de base de datos relacionados con los vehiculos, incluyendo registros,
+ * actualizacion, ventas al contado, ordenes de compra y recepcion de inventario.
+ * 
+ */
 namespace App\Models;
 
 use App\Core\Database;
 use PDO;
 use PDOException;
 
+
+/**
+ * Clase vehiculo
+ * 
+ * Modelo para la gestion integral de vehiculos.
+ * Proporciona metodos para operaciones CRUD, 
+ * gestion de ordenes de compra, ventas al contado, busquedas avanzadas y control de disponibilidad.
+ * 
+ */
 class Vehiculo
 {
+
+  /**
+   * Instancia de conexion a la base de datos
+   * @var PDO
+   */
   private PDO $db;
 
+  /**
+   * Constructor del modelo 
+   * 
+   * Inicializa la conexion a la base de datos
+   */
   public function __construct()
   {
     $this->db = Database::getInstance();
   }
 
-
+  /**
+   * Obtiene todas las ordenes de compra
+   * 
+   * Ejecuta el procedimiento almacenado para obtener el listado completo de ordenes de compra
+   * de vehiculos.
+   * 
+   * @return array Array asociativo con las ordenes de compra o array vacio en caso de error
+   */
   public function getAllOCompras(): array
   {
     $query = "CALL sp_getAll_OC_Compras()";
@@ -32,7 +67,14 @@ class Vehiculo
     }
   }
 
-
+  /**
+   * Obtiene los vehiculos vendidos al contado
+   * 
+   * Ejecuta el procedimiento almacenado que retorna el historial de vehiculos 
+   * que han sido vendidos mediante pago al contado.
+   * 
+   * @return array|bool Array asociativo con los vehiculos vendidos.  
+   */
   public function getVehiculosVendidosAlContado(): array|false
   {
     $query = "CALL sp_vehiculosVendidoAlContado();";
@@ -46,7 +88,16 @@ class Vehiculo
     }
   }
 
-
+  /**
+   * Busca vehiculos por criterio de busqueda
+   * 
+   * Realiza una busqueda flexible de vehiculos mediante el procedimiento almacenado "sp_buscar_vehiculos", 
+   * permitiendo busqueda por multiples campos
+   * 
+   * @param string $busqueda Criterio de busqueda (marca, modelo, placa, entre otros)
+   * @return array Array asociativo con los vehiculos encontrados o array vacio con los vehiculos encontrados o 
+   *                array vacio si no hay resultados
+   */
   public function searchvehiculos(string $busqueda = ''): array
   {
     $query = "CALL sp_buscar_vehiculos(:busqueda)";
@@ -63,7 +114,19 @@ class Vehiculo
     }
   }
 
-
+  /**
+   * Obtiene todos de una orden de compra para recepcion 
+   * 
+   * Ejecuta el procedimineto almacenado de "sp_get_OC_details_for_recepcion" que retornara multiples conjuntos de resultados:
+   * informacion general de la compra y listado de vehiculos.
+   * utilizando en el proceso de recepcion de vehiculos.
+   * 
+   * @param int $idcompra ID de la orden de compra 
+   * @return array|array Array con dos claves:
+   *                      - 'info_compra': Información general de la orden
+   *                      - 'vehiculos': Array de vehículos de la orden
+   *                      -  Array vacío en caso de error
+   */
   public function getAllDatosRecepcion(int $idcompra): array
   {
 
@@ -92,13 +155,24 @@ class Vehiculo
     }
   }
 
-
-
-
-
-
-  // Se creará los vehículos para una orden de compra - Se mandará
-
+  /**
+   * Crea un vehiculo asociado a una orden de compra 
+   * 
+   * Registra un nuevo vehiculo mediante el procedimiento almacenado "sp_vehiculo_OC_registrar",
+   * vinculado a una orden de compra existente.
+   * 
+   * @param array $params Array asociativo con los datos del vehículo:
+   *                      - idmodelo: int (ID del modelo)
+   *                      - idcombustible: int (ID del tipo de combustible)
+   *                      - version: string (Versión del vehículo)
+   *                      - condicion: string (Nuevo/Usado)
+   *                      - color: string (Color del vehículo)
+   *                      - chasis: string (Número de chasis)
+   *                      - placa: string (Placa del vehículo)
+   *                      - placarotativa: string (Placa rotativa si aplica)
+   *                      - seriemotor: string (Serie del motor)
+   * @return int ID del vehiculo agregado o -1 en caso de error
+   */
   public function createVehiculoOC($params = []): int
   {
 
@@ -127,9 +201,18 @@ class Vehiculo
     }
   }
 
-
-  /// DEAYANNIRA
-
+  /**
+   * Obtiene todos los vehiculos con filtro opcional de estado
+   * 
+   * Retorna el listado de vehiculos con informacion completa de marca,
+   * modelo, tipo de vehiculo y combustible.
+   * Permite filtrar por estado de disponibilidad unico o multiple.
+   * 
+   * @param string|array $estado Estado de disponibilidad a filtrar:
+   *                              - String: un solo estado
+   *                              - array
+   * @return array Array asociativo con los vehiculos o array vacio en caso de error 
+   */
   public function getAll($estado = ''): array
   {
     $query = "
@@ -185,7 +268,28 @@ class Vehiculo
     }
   }
 
-  // CREAR VEHICUKO DE FORMA NATURAL.
+  /**
+   * Crea un vehiculo de forma directa (no por OC)
+   * 
+   * Registra un nuevo vehiculo mediante el procedimiento almacenado "spu_vehiculos_registrar",
+   * incluyendo precio de venta y asignacion de local y responsable logistico.
+   * 
+   * @param array $data Array asociativo con los datos del vehiculo:
+   *                    - idmodelo: int
+   *                    - version: string
+   *                    - condicion: string
+   *                    - idcombustible: int
+   *                    - color: string
+   *                    - chasis: string
+   *                    - placa: string
+   *                    - placarotativa: string
+   *                    - seriemotor: string
+   *                    - moneda: string (USD/PEN)
+   *                    - precioventa: float
+   *                    - idlogistica: int (ID del colaborador de logística)
+   *                    - idlocal: int (ID del local asignado)
+   * @return int ID del vehiculo creado
+   */
   public function create(array $data): int
   {
     $stmt = $this->db->prepare("CALL spu_vehiculos_registrar(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
@@ -209,6 +313,14 @@ class Vehiculo
     return (int) $idvehiculo;
   }
 
+  /**
+   * Obtiene el precio de venta de un vehiculo al contado 
+   * 
+   * Consulta el precio de venta configurado para el vehiculo especifico.
+   * 
+   * @param int $idvehiculo ID del vehiculo
+   * @return float|null Precio de venta o null si no existe o hay error 
+   */
   public function getPrecioVehiculoAlContado(int $idvehiculo): ?float
   {
     $sql = "SELECT precioventa FROM vehiculos WHERE idvehiculo = :idvehiculo LIMIT 1";
@@ -220,13 +332,21 @@ class Vehiculo
 
       $precio = $stmt->fetchColumn(); // solo el valor de la primera columna
 
-      return $precio !== false ? (float)$precio : null;
+      return $precio !== false ? (float) $precio : null;
     } catch (PDOException $e) {
       error_log("Error en getPrecioVehiculoAlContado: " . $e->getMessage());
       return null;
     }
   }
 
+  /**
+   * Obtiene los datos completos de un vehiculo para venta al contado
+   * 
+   * Ejecuta el procedimiento almacenado "sp_getDataVentaVehiculoContado" que retorna la imformacion
+   * necesaria para procesar una venta al contado.
+   * 
+   * @param int $idvehiculo ID del vehiculo
+   */
   public function getDataVehiculoAlContado(int $idvehiculo): ?array
   {
     $query = "CALL sp_getDataVentaVehiculoContado(:idvehiculo);";
@@ -243,9 +363,28 @@ class Vehiculo
     }
   }
 
-
-
-
+  /**
+   * Registra una venta al contado de un vehiculo
+   * 
+   * Procesa una venta completa al contado mediante procedimiento almacenado, incluyendo informacion de pago, cliente, asesor y comprobante.
+   * El ID del asesor vendedor se obtiene automaticamente de la sesion.
+   * 
+   * @param array $params Array asociativo con los datos de la venta:
+   *                      - idcliente: int (ID del cliente comprador)
+   *                      - idconcepto: int (ID del concepto de pago)
+   *                      - idvehiculo: int (ID del vehículo vendido)
+   *                      - idcuentapago: int (ID de la cuenta bancaria)
+   *                      - mediopago: string (Efectivo/Transferencia/etc.)
+   *                      - numerotransaccion: string (Número de transacción / si aplica)
+   *                      - fechapago: string (Fecha del pago)
+   *                      - amortizacion: float (Monto pagado)
+   *                      - montomonedaoriginal: float (Monto en moneda original)
+   *                      - tipocambioaplicado: float (Tipo de cambio usado)
+   *                      - moneda: string (USD/PEN)
+   *                      - comprobante: string (Número de comprobante)
+   *                      - observacion: string (Observaciones)
+   * @return int ID del pago registrado o 0 en caso de error
+   */
   public function createPagoAlContado(array $params = []): int
   {
 
@@ -286,12 +425,27 @@ class Vehiculo
     }
   }
 
+  /**
+   * Elimina un vehiculo.
+   * 
+   * Elimina fisicamente un registro de vehiculo en la base de datos.
+   * 
+   * @param int $id ID del vehiculo a eliminar
+   * @return bool Resultado de la ejecucion
+   */
   public function delete(int $id): int
   {
     $stmt = $this->db->prepare("DELETE FROM vehiculos WHERE idvehiculo = :id");
     return $stmt->execute([':id' => $id]);
   }
 
+  /**
+   * Obtiene el vehiculo por su ID
+   * 
+   * Retorna todos los datos de un vehiculo especifico.
+   * 
+   * @param int $id ID del vehiculo
+   */
   public function getById(int $id): ?array
   {
     $stmt = $this->db->prepare('SELECT * FROM vehiculos WHERE idvehiculo = :idvehiculo');
@@ -301,6 +455,13 @@ class Vehiculo
     return $vehiculo ?: null;
   }
 
+  /**
+   * Obtiene los detalles completos de un modelo de vehiculo
+   * 
+   * Retorna informacion detallada de un modelo incluyendo marca, tipo de vehiculo y año.
+   * 
+   * @param int $idmodelo ID del modelo
+   */
   public function getModeloDetalle(int $idmodelo): ?array
   {
     $query = "
@@ -325,6 +486,15 @@ class Vehiculo
     return $detalle ?: null;
   }
 
+  /**
+   * Actualiza los datos de un vehiculo existente
+   * 
+   * Modifica la informacion de un vehiculo incluyendo modelo, version, condicion, caracteristicas fisicas y precio de venta.
+   * 
+   * @param int $idvehiculo ID del vehiculo a actualizar
+   * @param array $data Array asociativo con los datos a actualizar 
+   * @return bool True si se actualizo y false en caso de error 
+   */
   public function update(int $idvehiculo, array $data): bool
   {
     $sql = "UPDATE vehiculos SET
@@ -358,12 +528,15 @@ class Vehiculo
     ]);
   }
 
-
   /**
-   * Método que actualizará los datos del vehículo: chasis, placa, color y disponibilidad.
-   *
-   * @param array $params Arreglo asociativo con los datos a actualizar.
-   * @return int Número de filas afectadas (0 si no se actualizó nada).
+   * Actualiza un vehiculo durante el proceso de recepcion de OC
+   * 
+   * Actualiza los datos fisicos del vehiculos (chasis, placa, color) y su disponibilidad durante el proceso de recepcion de orden de compra.
+   * Registra el colaborador de logistica y local asignado.
+   * El ID del colaborador se obtiene automaticamente de la sesion.
+   * 
+   * @param array $params
+   * @return int
    */
   public function updateVehiculoRecepcionOc(array $params): int
   {
@@ -394,4 +567,5 @@ class Vehiculo
       return -1;
     }
   }
+
 }

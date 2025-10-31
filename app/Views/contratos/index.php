@@ -1,10 +1,10 @@
 <?php include __DIR__ . '/../layout/header.php'; ?>
-<link href="https://unpkg.com/tabulator-tables@5.5.2/dist/css/tabulator_simple.min.css" rel="stylesheet">
+<link href="https://unpkg.com/tabulator-tables@6.3.1/dist/css/tabulator_simple.min.css" rel="stylesheet">
 <link rel="stylesheet" href="/assets/css/tabulator.css">
 
 <div class="container-fluid">
 
-    <div class="alert alert-info mt-2 mb-5" role="alert">
+    <div class="alert alert-info mt-2 mb-3" role="alert">
         <div class="row">
             <div class="col-md-6 d-flex align-items-center justify-content-start">
                 <nav aria-label="breadcrumb">
@@ -15,6 +15,10 @@
                 </nav>
             </div>
         </div>
+    </div>
+
+    <div class="d-flex justify-content-end align-items-end">
+        <button class="btn btn-sm btn-outline-success mb-2" id="btnExportExcel">Exportar Excel</button>
     </div>
     <!-- <button id="btnExportCSV">Exportar CSV</button>
     <button id="btnExportJSON">Exportar JSON</button>
@@ -43,7 +47,8 @@
 
 
 <?php include __DIR__ . '/../layout/footer.php'; ?>
-<script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.5.2/dist/js/tabulator.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script type="text/javascript" src="https://unpkg.com/tabulator-tables@6.3.1/dist/js/tabulator.min.js"></script>
 <script src=" https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
 <script src="/assets/js/logoBase64.js" defer></script>
@@ -52,80 +57,158 @@
     document.addEventListener("DOMContentLoaded", async () => {
 
         const table = new Tabulator("#tabla-contratos", {
-        ajaxURL: "/api/contratos",
-        ajaxConfig:'GET',
-        ajaxContentType:"json",
-        //  progressiveLoad:"load",
-        progressiveLoadScrollMargin:300 ,
-        layout: "fitColumns",
-        responsiveLayout: "collapse",
-        pagination: "local",
-        paginationSize: 20,
-        responsiveLayoutCollapseStartOpen: false,
-        index: "idcontrato", // El identificador de cada fila
-        placeholder: "No hay contratos disponibles.",
-        movableColumns: true,
-        groupBy:'doc_cliente',
-        groupHeader: function(value, count, data, group) {
+            ajaxURL: "/api/contratos",
+            ajaxConfig: 'GET',
+            ajaxContentType: "json",
+            //  progressiveLoad:"load",
+            progressiveLoadScrollMargin: 300,
+            layout: "fitColumns",
+            responsiveLayout: "collapse",
+            pagination: "local",
+            paginationSize: 20,
+            responsiveLayoutCollapseStartOpen: false,
+            index: "idcontrato", // El identificador de cada fila
+            placeholder: "No hay contratos disponibles.",
+            movableColumns: true,
+            groupBy: 'doc_cliente',
+            groupHeader: function(value, count, data, group) {
                 const nombreCliente = data[0].cliente || 'Cliente Desconocido';
                 return `${nombreCliente} (${value}) <span class='badge bg-info ms-2'>${count} contratos</span>`;
             },
-        groupStartOpen: false,
-        groupToggleElement: "header",
-
-        columns: [
-            {formatter: "responsiveCollapse",width: 40,minWidth: 30,hozAlign: "center",resizable: false,headerSort: false},
-            {title: "#", formatter: "rownum", hozAlign: "center", width: 40, responsive: 10},
-            {title: "Inicio", field: "fechainicio", hozAlign: "center", minWidth: 110, responsive:10, tooltip:true},
-            {title: "Día Pago", field: "diapago", hozAlign: "center", width: 70, responsive:10,tooltip:true},
-            {title: "Tienda", field: "tienda", headerHozAlign: "left", width:200, responsive:5,tooltip:true},
-            {title: "Vehículo", field: "vehiculo", headerHozAlign: "left",width:200,  responsive:1,tooltip:true},
-            {title: "Cliente", field: "cliente", headerHozAlign: "center", width:250, responsive:2,tooltip:true},
-            {title: "Documento", field: "doc_cliente", hozAlign: "center", responsive:10,tooltip:true},
-            {title: "Asesor", field: "asesor", headerHozAlign: "left", responsive:10,tooltip:true},
-          { title: "Precio Venta",field: "precioventa",hozAlign: "right",
-                formatter: (cell) => {
-                    const data = cell.getData();
-                    const simbolo = data.moneda === "USD" ? "$" : "S/ ";
-                    const valor = parseFloat(data.precioventa) || 0;
-                    return simbolo + valor.toLocaleString("en-US", { minimumFractionDigits: 2 });
+            groupStartOpen: false,
+            groupToggleElement: "header",
+            columns: [{
+                    formatter: "responsiveCollapse", // Boton de agrupamiento
+                    width: 40,
+                    minWidth: 30,
+                    hozAlign: "center",
+                    resizable: false,
+                    headerSort: false,
+                    download: false
                 },
-                minWidth: 100,
-                tooltip: true
-            },
+                {
+                    title: "#",
+                    field:'index',
+                    formatter: "rownum",
+                    hozAlign: "center",
+                    width: 40,
+                    responsive: 10,
+                    download: true
+                },
+                {
+                    title: "Inicio",
+                    field: "fechainicio",
+                    hozAlign: "center",
+                    minWidth: 110,
+                    responsive: 10,
+                    tooltip: true,
+                    download: true
+                },
+                {
+                    title: "Día Pago",
+                    field: "diapago",
+                    hozAlign: "center",
+                    width: 70,
+                    responsive: 10,
+                    tooltip: true,
+                    download: true
+                },
+                {
+                    title: "Tienda",
+                    field: "tienda",
+                    headerHozAlign: "left",
+                    width: 200,
+                    responsive: 5,
+                    tooltip: true,
+                    download: true
+                },
+                {
+                    title: "Vehículo",
+                    field: "vehiculo",
+                    headerHozAlign: "left",
+                    width: 200,
+                    responsive: 1,
+                    tooltip: true,
+                    download: true
+                },
+                {
+                    title: "Cliente",
+                    field: "cliente",
+                    headerHozAlign: "center",
+                    width: 250,
+                    responsive: 2,
+                    tooltip: true,
+                    download: true
+                },
+                {
+                    title: "Documento",
+                    field: "doc_cliente",
+                    hozAlign: "center",
+                    responsive: 10,
+                    tooltip: true,
+                    download: true
+                },
+                {
+                    title: "Asesor",
+                    field: "asesor",
+                    headerHozAlign: "left",
+                    responsive: 10,
+                    tooltip: true,
+                    download: true
+                },
+                {
+                    title: "Precio Venta",
+                    field: "precioventa",
+                    hozAlign: "right",
+                    formatter: (cell) => {
+                        const data = cell.getData();
+                        const simbolo = data.moneda === "USD" ? "$" : "S/ ";
+                        const valor = parseFloat(data.precioventa) || 0;
+                        return simbolo + valor.toLocaleString("en-US", {
+                            minimumFractionDigits: 2
+                        });
+                    },
+                    minWidth: 100,
+                    tooltip: true,
+                    download: true
+                },
 
-            {title: 'Acciones', hozAlign: 'left', responsive:0,
-                formatter: (cell) => {
-                    const id = cell.getRow().getData().idcontrato;
-                    return `
+                {
+                    title: 'Acciones',
+                    hozAlign: 'left',
+                    responsive: 0,
+                    download: false,
+                    formatter: (cell) => {
+                        const id = cell.getRow().getData().idcontrato;
+                        return `
                         <button class="btn btn-sm btn-verPDF fs-5" data-id="${id}" data-action="verPDF"><i class="bi bi-filetype-pdf text-danger"></i></button>
                         <button class="btn btn-sm btn-eliminar" data-id="${id}" data-action="delete">
                                 <i class="bi bi-trash text-danger fs-5"></i>
                         </button>
                             
                             `;
-                        
+
+                    }
                 }
-            }
-        ],
+            ],
 
-        ajaxResponse:(url,params,response) => {
-            if(response.success) {
-                 return response.data;
-            }
-            // console.log(" Datos cargados correctamente desde:", url);
-            // console.log(" Total de registros:", response.length);
-            // console.log(" Datos:", response);
-            // console.info(" Carga de contratos exitosa");
-            // Devolver para que tabulator lo renderice en la tabla.
-       
-        },
-         ajaxError: function(error) {
-            console.error(" Error al cargar los contratos:", error);
-            console.warn("Verifica el endpoint o la respuesta del servidor");
-        },
+            ajaxResponse: (url, params, response) => {
+                if (response.success) {
+                    return response.data;
+                }
+                // console.log(" Datos cargados correctamente desde:", url);
+                // console.log(" Total de registros:", response.length);
+                // console.log(" Datos:", response);
+                // console.info(" Carga de contratos exitosa");
+                // Devolver para que tabulator lo renderice en la tabla.
 
-         langs: {
+            },
+            ajaxError: function(error) {
+                console.error(" Error al cargar los contratos:", error);
+                console.warn("Verifica el endpoint o la respuesta del servidor");
+            },
+
+            langs: {
                 "es-es": {
                     "pagination": {
                         "page_size": "Registros por página",
@@ -143,9 +226,9 @@
             },
             locale: "es-es"
 
- 
-      
-    });
+
+
+        });
 
 
         const searchInput = document.getElementById("busqueda-global");
@@ -229,7 +312,7 @@
 
                 if (res.success) {
                     // console.log(res.data);
-                   generarPDFContrato(res.data);
+                    generarPDFContrato(res.data);
                 } else {
                     showToast(res.message, 'ERROR', 1250);
                 }
@@ -263,15 +346,36 @@
         });
 
 
-        // document.getElementById('btnExportCSV').addEventListener('click', () => {
-        //     table.download('csv', 'contratos');
-        // });
+        document.getElementById('btnExportExcel').addEventListener('click', async () => {
+            table.setGroupBy(false);
+
+            
+            await new Promise(resolve => setTimeout(resolve, 100));
+
+            
+            const data = table.getData().map((row, index) => ({
+                ...row,
+                index: index + 1, // Campo enumerado
+            }));
+
+            
+            table.download("xlsx", "contratos.xlsx", {
+                sheetName: "Contratos",
+                data: data 
+            });
+
+            // Restaura la agrupación
+            setTimeout(() => {
+                table.setGroupBy('doc_cliente');
+            }, 220);
+        });
+
 
         // document.getElementById("btnExportJSON").addEventListener("click", () => {
         //     table.download("json", "contratos.json");
         // });
 
-       
+
 
 
 

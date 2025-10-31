@@ -1,5 +1,18 @@
 <?php
 
+/**
+ * Controlador de Ficha de Solicitud
+ * 
+ * app/Controllers/FichaSolicitudController.php
+ * 
+ * Gestiona las peticiones HTTP relacionadas con las fichas de solicitud
+ * de crédito vehicular. Coordina el proceso completo de creación de fichas:
+ * búsqueda/creación de personas involucradas (titular, cónyuge, avales),
+ * validación de datos, carga de documentos PDF, y actualización de estados
+ * de cotizaciones. Integra consultas a APIs externas (RENIEC) para
+ * validación de identidad y proporciona endpoints REST para operaciones
+ * asíncronas desde el frontend.
+ */
 namespace App\Controllers;
 
 use App\Core\Controller;
@@ -7,25 +20,64 @@ use App\Models\FichaSolicitud;
 use App\Helpers\Validador;
 use PDOException;
 
-
+/**
+ * Clase FichaSolicitudController
+ * 
+ * Controlador para la gestión de fichas de solicitud de crédito.
+ * Hereda de Controller para acceder a funcionalidades base como
+ * renderizado de vistas, validación de autenticación y manejo de sesiones.
+ * Implementa el flujo completo: cotización → búsqueda de personas →
+ * registro de nuevas personas → creación de ficha con documento PDF →
+ * actualización de estado de cotización.
+ */
 class FichaSolicitudController extends Controller
 {
+    /**
+     * Instancia del modelo FichaSolicitud
+     * @var FichaSolicitud
+     */
     private FichaSolicitud $fichaSolicitudModel;
 
+    /**
+     * Constructor del controlador
+     * 
+     * Inicializa la instancia del modelo FichaSolicitud para
+     * realizar operaciones de base de datos
+     */
     public function __construct()
     {
         $this->fichaSolicitudModel = new FichaSolicitud();
     }
 
-    public function index($id)
+    /**
+     * Página principal de creación de ficha
+     * 
+     * Renderiza el formulario de creación de ficha de solicitud
+     * precargado con los datos de una cotización específica.
+     * Muestra información del vehículo, condiciones de crédito,
+     * y datos básicos del cliente para facilitar el llenado
+     * 
+     * @param int $id ID de la cotización base
+     * @return void 
+     */
+    public function index($id): void
     {
         $this->authRequired();
         $datosCotizacion = $this->fichaSolicitudModel->getDatosCotizacion($id);
         $this->view('cotizacion.ficha', ['infoFicha' => $datosCotizacion]);
     }
 
-
-    public function storePersona()
+    /**
+     * Endpoint API: Registrar una nueva persona
+     * 
+     * Crea un nuevo registro de persona (titular, cónyuge, aval, o aval-cónyuge)
+     * después de validar todos los campos obligatorios. Los datos son
+     * sanitizados antes de procesarse. Utilizado cuando la persona no
+     * existe en el sistema tras búsqueda por DNI.
+     * 
+     * @return void Envía respuesta JSON, retorna -1 si hay errores de validación
+     */
+    public function storePersona(): void
     {
         $this->authRequired();
         header('Content-Type: application/json; charset=utf-8');
@@ -46,7 +98,7 @@ class FichaSolicitudController extends Controller
 
         if (!empty($errores)) {
             $this->view('cotizacion.ficha', ['error' => implode("<br>", $errores), 'data' => $registro]);
-            return -1;
+            return /* -1 */ ;
         }
 
         $idPersona = $this->fichaSolicitudModel->createPersona($registro);
@@ -64,9 +116,19 @@ class FichaSolicitudController extends Controller
         }
     }
 
-
-
-    public function storeFicha()
+    /**
+     * Endpoint API: Registrar ficha de solicitud completa
+     * 
+     * Procesa el registro de una ficha de solicitud incluyendo:
+     * - Validación de datos obligatorios
+     * - Carga y validación de archivo PDF
+     * - Almacenamiento del archivo en el sistema de archivos
+     * - Registro en base de datos con ruta del archivo
+     * - Actualización automática del estado de la cotización según resultado
+     * 
+     * @return void Envía respuesta JSON y termina ejecución
+     */
+    public function storeFicha(): void
     {
         $this->authRequired();
         header('Content-Type: application/json; charset=utf-8');
@@ -80,14 +142,14 @@ class FichaSolicitudController extends Controller
         $data = array_map([Validador::class, 'limpiar'], $_POST);
 
         $registro = [
-            'idcotizacion'   => $data['idcotizacion'],
-            'idconyuge'      => empty($data['idconyuge']) ? null : $data['idconyuge'],
-            'idaval'         => empty($data['idaval']) ? null : $data['idaval'],
-            'idavalconyuge'  => empty($data['idavalconyuge']) ? null : $data['idavalconyuge'],
-            'fechavisita'    => $data['fechavisita'],
-            'rutaficha'      => '',
-            'comentarios'    => empty($data['comentarios']) ? null : $data['comentarios'],
-            'estado'         => $data['estado']
+            'idcotizacion' => $data['idcotizacion'],
+            'idconyuge' => empty($data['idconyuge']) ? null : $data['idconyuge'],
+            'idaval' => empty($data['idaval']) ? null : $data['idaval'],
+            'idavalconyuge' => empty($data['idavalconyuge']) ? null : $data['idavalconyuge'],
+            'fechavisita' => $data['fechavisita'],
+            'rutaficha' => '',
+            'comentarios' => empty($data['comentarios']) ? null : $data['comentarios'],
+            'estado' => $data['estado']
         ];
 
         // Validaciones obligatorias
@@ -186,22 +248,17 @@ class FichaSolicitudController extends Controller
         }
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    /**
+     * Endpoint API: Buscar persona por DNI en base de datos local
+     * 
+     * Consulta si una persona ya existe en el sistema mediante su DNI.
+     * Retorna información completa si la encuentra, permitiendo reutilizar
+     * el registro en lugar de crear uno duplicado. Primera opción de búsqueda
+     * antes de consultar API externa de RENIEC.
+     * 
+     * @param string $dni Número de DNI a buscar
+     * @return void Envía respuesta JSON
+     */
     public function searchPersonaByDNI(string $dni)
     {
         $this->authRequired();
@@ -216,10 +273,21 @@ class FichaSolicitudController extends Controller
         }
     }
 
+    /**
+     * Endpoint API: Buscar persona en RENIEC mediante API externa
+     * 
+     * Consulta la API de RENIEC para obtener nombres y apellidos de una
+     * persona mediante su DNI. Utilizado como segunda opción cuando la
+     * persona no existe en la base de datos local. Permite prellenar
+     * el formulario de registro con datos oficiales.
+
+     * @param string $dni Número de DNI a consultar en RENIEC
+     * @return void Envía respuesta JSON
+     */
     public function searchPersonaByReniec(string $dni): void
     {
         $this->authRequired();
-   
+
         try {
             require_once __DIR__ . '/../Helpers/Api_dni.php';
             // Capturar la salida de la función
@@ -251,4 +319,5 @@ class FichaSolicitudController extends Controller
             ]);
         }
     }
+
 }

@@ -1,27 +1,77 @@
 <?php
 
+/**
+ * Controlador de Contratos de Venta de Vehículos
+ * 
+ * app/Controller/ContratoController.php
+ * 
+ * Gestiona todas las operaciones relacionadas con los contratos de venta
+ * de vehículos, incluyendo la creación, consulta, eliminación y generación
+ * de datos para PDFs. Maneja la integración entre cotizaciones, contratos,
+ * cronogramas de pago y actualización de estados de vehículos
+ * 
+ */
 namespace App\Controllers;
 
 use App\Core\Controller;
 use App\Models\Contrato;
 use Exception;
 
+/**
+ * Clase ContratoController
+ * 
+ * Controlador principal para la gestión de contratos de venta de vehículos.
+ * Proporciona endpoints para crear contratos basados en cotizaciones aprobadas,
+ * generar cronogramas de pago automáticos, consultar información de contratos
+ * y preparar datos estructurados para la generación de documentos PDF.
+ */
 class ContratoController extends Controller
 {
+
+    /**
+     * Instancia del modelo Contrato
+     * @var Contrato
+     */
     private Contrato $contratoModel;
 
+    /**
+     * Constructor del controlador
+     * 
+     * Inicializa el modelo de Contrato que será utilizado por todos
+     * los métodos del controlador para interactuar con la base de datos.
+     */
     public function __construct()
     {
         $this->contratoModel = new Contrato();
     }
 
+    /**
+     * Muestra la vista principal de contratos
+     * 
+     * Renderiza la interfaz de usuario para la gestión de contratos.
+     * Requiere que el usuario esté autenticado para acceder.
+     * 
+     * @return void
+     */
     public function index()
     {
         $this->authRequired();
         $this->view("contratos.index");
     }
 
-    public function store()
+    /**
+     * Crea un nuevo contrato de venta de vehículo
+     * 
+     * Proceso completo de creación de contrato:
+     * 1. Valida que exista ID de cotización
+     * 2. Obtiene datos completos de la cotización
+     * 3. Crea el contrato con datos del formulario
+     * 4. Genera cronograma de pagos automático
+     * 5. Actualiza estado del vehículo a "vendido"
+     * 
+     * @return void Envía respuesta JSON directamente
+     */
+    public function store(): void
     {
         $this->authRequired();
         header("Content-Type: application/json");
@@ -45,10 +95,10 @@ class ContratoController extends Controller
 
 
             $contractData = [
-                'idlocal'       => $_POST['idlocal'] ?? null,
-                'idcotizacion'  => $idcotizacion,
-                'fechainicio'   => $_POST['fechainicio'] ?? date("Y-m-d"),
-                'diapago'       => $_POST['diapago'] ?? date("d"),
+                'idlocal' => $_POST['idlocal'] ?? null,
+                'idcotizacion' => $idcotizacion,
+                'fechainicio' => $_POST['fechainicio'] ?? date("Y-m-d"),
+                'diapago' => $_POST['diapago'] ?? date("d"),
                 'fecharevision' => empty($_POST['fecharevision']) ? null : $_POST['fecharevision'],
                 'observaciones' => empty($_POST['observaciones']) ? null : $_POST['observaciones']
 
@@ -78,6 +128,14 @@ class ContratoController extends Controller
         }
     }
 
+    /**
+     * Desactiva (elimina) un contrato existente
+     * 
+     * Realiza la eliminación lógica o física de un contrato mediante su ID.
+     * Requiere autenticación y envía respuesta en formato JSON.
+     * 
+     * @return void Envía respuesta JSON directamente
+     */
     public function disabledContrato()
     {
         $this->authRequired();
@@ -96,10 +154,17 @@ class ContratoController extends Controller
         }
     }
 
-
+    /**
+     * API: Obtiene el listado completo de contratos
+     * 
+     * Endpoint API que retorna todos los contratos registrados en el sistema.
+     * Devuelve un array con la información básica de cada contrato.
+     * 
+     * @return void Envía respuesta JSON con array de contratos
+     */
     public function apiGetContratos()
     {
-        $this->authRequired();
+        // $this->authRequired();
         header("Content-Type: application/json");
 
         $contratos = $this->contratoModel->getAll();
@@ -111,6 +176,16 @@ class ContratoController extends Controller
         }
     }
 
+    /**
+     * API: Obtiene datos estructurados de un contrato para generación de PDF
+     * 
+     * Endpoint API que recupera toda la información necesaria para generar
+     * un documento PDF del contrato, incluyendo datos del cliente, cónyuge,
+     * aval (con su cónyuge), vehículo y términos financieros.
+     * 
+     * @param int $idcontrato ID del contrato a consultar
+     * @return void Envía respuesta JSON con datos estructurados
+     */
     public function apiGetPDFContrato(int $idcontrato)
     {
         // $this->authRequired();
@@ -132,7 +207,7 @@ class ContratoController extends Controller
             return;
         }
 
-   
+
         $row = $data[0];
 
         $response = [
@@ -185,7 +260,7 @@ class ContratoController extends Controller
                         'telefono' => $row['telAvalConyuge']
                     ]
                 ],
-              
+
 
                 'vehiculo' => [
                     'marca' => $row['marca'],
@@ -207,12 +282,13 @@ class ContratoController extends Controller
                     'numCuotas' => $row['numcuotas'],
                     'valorCuota' => $row['valorcuota'],
                     'tasaAnual' => $row['tasaanual'],
-                    'tasaMensual'=> $row['tasamensual'],
-               
+                    'tasaMensual' => $row['tasamensual'],
+
                 ]
             ]
         ];
 
         echo json_encode($response, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
     }
+
 }

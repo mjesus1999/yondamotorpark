@@ -1,22 +1,67 @@
 <?php
 
+/**
+ * Modelo de Pagos de Orden de Compra
+ * 
+ * Gestiona las operaciones de base de datos relacionadas con los pagos
+ * de órdenes de compra de vehículos, incluyendo conversión de monedas,
+ * cálculo de saldos y gestión de amortizaciones.
+ * 
+ */
 namespace App\Models;
 
 use App\Core\Database;
 use PDO;
 use PDOException;
 
+/**
+ * Clase PagosOC
+ * 
+ * Modelo para la gestión de pagos de órdenes de compra.
+ * Proporciona métodos para registrar pagos, calcular amortizaciones,
+ * manejar conversiones de moneda (PEN/USD) y obtener saldos pendientes.
+ */
 class PagosOC
 {
+    /**
+     * Instancia de conexion a la base de datos
+     * @var PDO
+     */
     private PDO $db;
 
+    /**
+     * Constructor del modelo
+     * 
+     * Inicializa la conexion a la base de datos
+     */
     public function __construct()
     {
         $this->db = Database::getInstance();
     }
 
     /**
-     * Registrar un nuevo pago - tipo de cambio es null, cuando el pago es moneda de dolares- Obervaciones es null tambien.
+     *  Registra un nuevo pago de orden de compra
+     * 
+     * Crea un nuevo registro de pago asociado a una orden de compra.
+     * El ID del colaborador de logística se obtiene automáticamente de la sesión.
+     * Maneja pagos en diferentes monedas (USD/PEN) con tipo de cambio opcional.
+     * 
+     * Notas:
+     * - tipocambio es null cuando el pago es en dólares
+     * - observaciones puede ser null
+     * 
+     * @param array $params Array asociativo con los datos del pago:
+     *                      - idorden: int (ID de la orden de compra)
+     *                      - identidadpago: int (ID de la entidad de pago/banco)
+     *                      - fecharealpago: string (Fecha del pago, formato: YYYY-MM-DD)
+     *                      - numtransaccion: string (Número de transacción)
+     *                      - moneda: string (Moneda del pago: USD/PEN)
+     *                      - tipocambio: float|null (Tipo de cambio, null si es USD)
+     *                      - valorUSD: float (Valor equivalente en USD)
+     *                      - amortizacion: float (Monto pagado)
+     *                      - comprobante: string (Número de comprobante)
+     *                      - observaciones: string|null (Observaciones adicionales, opcional)
+     * @return int ID del pago creado o -1 en caso de error
      */
     public function create($params = []): int
     {
@@ -48,7 +93,15 @@ class PagosOC
     }
 
     /**
-     * Listar todos los pagos de una orden de compra
+     * Lista todos los pagos de una orden de compra específica
+     * 
+     * Retorna el historial completo de pagos de una orden de compra,
+     * incluyendo información del colaborador de logística y la entidad de pago.
+     * Calcula automáticamente el total amortizado en USD, considerando
+     * conversiones de moneda cuando aplica.
+     * 
+     * @param int $idorden
+     * @return array {pagos: array, totalAmortizado: float|int|array{pagos: array, totalAmortizado: int}}
      */
     public function listarPagosByOC(int $idorden): array
     {
@@ -103,9 +156,15 @@ class PagosOC
             ];
         }
     }
-
-
-
+    /**
+     * Obtiene todas las entidades de pago disponibles
+     * 
+     * Retorna el listado de bancos o entidades financieras disponibles
+     * para registrar pagos, ordenadas alfabéticamente.
+     * 
+     * @return array Array asociativo con las entidades de pago (identidadpago, entidad)
+     *               o array vacío en caso de error
+     */
     public function getAllEntidadesPago(): array
     {
         $query = 'SELECT identidadpago, entidad FROM entidadespago ORDER BY entidad ASC;';
@@ -120,10 +179,19 @@ class PagosOC
     }
 
     /**
-     * Obtiene el saldo restante de una orden de compra, considerando la conversión de PEN a USD.
-     *
-     * @param int $idorden ID de la orden de compra.
-     * @return float El saldo restante en USD.
+     * Obtiene el saldo restante de una orden de compra
+     * 
+     * Calcula el saldo pendiente de pago de una orden de compra.
+     * Si existen pagos previos, retorna el saldo del último pago registrado.
+     * Si no hay pagos, calcula el total de la orden (suma de productos + IGV 18%).
+     * Todos los valores se manejan en USD considerando conversiones de moneda.
+     * 
+     * 1. Busca el saldo del último pago registrado
+     * 2. Si no existe, calcula el total de la OC (preciocompra * 1.18)
+     * 3. Retorna el saldo en USD
+     * 
+     * @param int $idorden ID de la orden de compra
+     * @return float Saldo restante en USD o 0.0 en caso de error
      */
     public function obtenerSaldoRestante(int $idorden): float
     {

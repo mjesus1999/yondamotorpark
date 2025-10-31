@@ -7,7 +7,7 @@ $router->add('POST', '/vehiculosOC/store', 'VehiculoController', 'storeVehiculoO
 
 
 $router->add('GET', '/vehiculos', 'VehiculoController', 'index');
-$router->add('GET', '/vehiculosAlContado','VehiculoController', 'indexVehiculosAlContado');
+$router->add('GET', '/vehiculosAlContado', 'VehiculoController', 'indexVehiculosAlContado');
 
 $router->add('GET', '/vehiculos/create', 'VehiculoController', 'create');
 // $router->add('GET', '/vehiculos/edit/{id}','VehiculoController', 'edit');
@@ -20,15 +20,14 @@ $router->add('GET', '/vehiculos/edit/{id}', 'VehiculoController', 'edit');
 
 $router->add('GET', '/recepcionVehiculos', 'VehiculoController', 'indexRecepcionVehiculos');
 
-
 $router->add('GET', '/recepcionVehiculos/edit/{idcompra}', 'VehiculoController', 'recepcionEdit');
-
 
 //registro del vehiculo:
 $router->add('POST', '/vehiculos/store', 'VehiculoController', 'store');
+
 //Eliminar vehiculo
 $router->add('POST', '/vehiculos/delete', 'VehiculoController', 'delete');
-$router->add('POST', '/vehiculo/store/PagoAlContado','VehiculoController', 'storePagoALContado');
+$router->add('POST', '/vehiculo/store/PagoAlContado', 'VehiculoController', 'storePagoALContado');
 
 $router->add('POST', '/vehiculos/update', 'VehiculoController', 'update');
 
@@ -42,6 +41,6 @@ $router->add('POST', '/vehiculos/agregarAnio', 'VehiculoController', 'agregarAni
 $router->add('POST', '/update/vehiculoRecepcionado', 'VehiculoController', 'updateVehiculoRecepcionOC');
 
 
-$router->add('GET', '/api/vehiculo/searchVehiculo','VehiculoController', 'searchVehiculo');
-$router->add('GET', '/vehiculosVendidosAlContado','VehiculoController','getVehiculosVendidosAlContado');
-$router->add('GET', '/api/getDataVehiculo/{id}','VehiculoController','getDataVehiculoAlContado');
+$router->add('GET', '/api/vehiculo/searchVehiculo', 'VehiculoController', 'searchVehiculo');
+$router->add('GET', '/vehiculosVendidosAlContado', 'VehiculoController', 'getVehiculosVendidosAlContado');
+$router->add('GET', '/api/getDataVehiculo/{id}', 'VehiculoController', 'getDataVehiculoAlContado');

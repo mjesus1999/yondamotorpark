@@ -1,5 +1,5 @@
 <?php include __DIR__ . '/../layout/header.php'; ?>
-<?php var_dump($cotizacion); ?>
+
 
 <link rel="stylesheet" href="/assets/css/pago-inicial.css">
 <div class="container-fluid">

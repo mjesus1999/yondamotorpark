@@ -1,20 +1,60 @@
 <?php
 
+/**
+ * Controlador de Concesionarios
+ * 
+ * app/Controller/ConsesionarioController.php 
+ * 
+ * Gestiona todas las operaciones relacionadas con los concesionarios proveedores
+ * de vehículos, incluyendo CRUD completo, integración con API de SUNAT para
+ * validación de RUC, consultas especializadas de concesionarios con órdenes
+ * de compra activas, generación de reportes detallados con resumen ejecutivo,
+ * y gestión de tiendas asociadas a cada concesionario.
+ * 
+ */
 namespace App\Controllers;
 
 use App\Core\Controller;
 use App\Helpers\Validador;
 use App\Models\Concesionario;
 
+/**
+ * Clase ConcesionarioController
+ * 
+ * Controlador para la gestión integral de concesionarios.
+ * Implementa operaciones CRUD, validaciones de integridad referencial,
+ * integración con API externa de SUNAT para validación de datos tributarios,
+ * y generación de reportes ejecutivos con información de pagos y vehículos.
+ * 
+ */
 class ConcesionarioController extends Controller
 {
+    /**
+     * Modelo de Concesionario
+     * @var Concesionario
+     */
     private Concesionario $concesionarioModel;
 
+    /**
+     * Constructor del controlador
+     * 
+     * Inicializa el modelo de Concesionario necesario para las operaciones
+     * del controlador.
+     */
     public function __construct()
     {
         $this->concesionarioModel = new Concesionario();
     }
 
+    /**
+     * Muestra el listado de todos los concesionarios
+     * 
+     * Renderiza la vista principal con el listado completo de concesionarios
+     * registrados en el sistema, ordenados por fecha de creación descendente.
+     * Requiere autenticación.
+     * 
+     * @return void
+     */
     public function index(): void
     {
         $concesionarios = $this->concesionarioModel->getAll();
@@ -22,12 +62,36 @@ class ConcesionarioController extends Controller
         $this->view('concesionarios.index', ['concesionarios' => $concesionarios]);
     }
 
+    /**
+     * Muestra el formulario de creación de concesionario
+     * 
+     * Renderiza la vista con el formulario para registrar un nuevo concesionario.
+     * Incluye integración con API de SUNAT para autocompletar datos a partir
+     * del RUC. Requiere autenticación.
+     *
+     * @return void
+     */
     public function create(): void
     {
         $this->authRequired();
         $this->view('concesionarios.create');
     }
 
+    /**
+     * Registra un nuevo concesionario en el sistema
+     * 
+     * Endpoint AJAX que procesa el formulario de creación de concesionario.
+     * Realiza validaciones exhaustivas de campos obligatorios y registra
+     * el nuevo concesionario en la base de datos.
+     * 
+     * Validaciones realizadas:
+     * - RUC: Obligatorio, debe tener 11 dígitos
+     * - Nombre Comercial: Obligatorio
+     * - Razón Social: Obligatoria
+     *
+     * @return int ID del concesionario creado (positivo) o 0 en caso de error
+     * @throws \Exception Si el método HTTP no es POST
+     */
     public function store(): int
     {
         $this->authRequired();
@@ -81,6 +145,20 @@ class ConcesionarioController extends Controller
         }
     }
 
+    /**
+     * Summary of updateActualiza el nombre comercial de un concesionario
+     * 
+     * Endpoint AJAX que procesa la actualización del nombre comercial de un
+     * concesionario existente. No permite modificar RUC ni razón social por
+     * ser datos tributarios que no deben cambiar.
+     * 
+     * Validaciones:
+     * - Nombre Comercial: Obligatorio
+     * - ID de Concesionario: Debe existir en el sistema
+     *
+     * @param int $id ID del concesionario a actualizar
+     * @return int Número de filas afectadas o 0 si no se realizó actualización
+     */
     public function update($id): int
     {
         $this->authRequired();
@@ -127,7 +205,16 @@ class ConcesionarioController extends Controller
         }
     }
 
-    // Metodo que me permite ver las tiendas del concesionario.
+    /**
+     * Summary of gestionarMuestra la vista de gestión de tiendas de un concesionario
+     * 
+     * Renderiza la interfaz para administrar las tiendas asociadas a un
+     * concesionario específico, buscado por su RUC. Si el concesionario
+     * no existe, muestra una página de error 404.
+     *
+     * @param string $ruc RUC del concesionario
+     * @return void
+     */
     public function gestionar($ruc): void
     {
         $this->authRequired();
@@ -142,6 +229,16 @@ class ConcesionarioController extends Controller
         $this->view('concesionarios.create', ['ruc' => $concesionario[0]['ruc']]);
     }
 
+    /**
+     * Elimina un concesionario con validación de integridad referencial
+     * 
+     * Endpoint AJAX que elimina un concesionario después de verificar que
+     * no tenga órdenes de compra registradas. Si tiene órdenes de compra,
+     * la eliminación es rechazada para mantener la integridad referencial.
+     *
+     * @param int $id ID del concesionario a eliminar
+     * @return void Respuesta JSON con resultado de la operación
+     */
     public function delete($id)
     {
         $this->authRequired();
@@ -183,9 +280,22 @@ class ConcesionarioController extends Controller
         }
     }
 
-    // METODOS PARA LAS APIS:
 
-    // Retorna los datos de un Concesionario buscado mediante la api de Sunat
+    // ========================================================================
+    // MÉTODOS PARA APIS
+    // ========================================================================
+
+
+    /**
+     * API: Consulta datos de RUC en la API de SUNAT
+     * 
+     * Endpoint AJAX que consulta la API externa de apis.net.pe para obtener
+     * información completa de un RUC desde los registros de SUNAT.
+     * Utilizado para autocompletar datos al registrar nuevos concesionarios.
+     *
+     * @param string $ruc Número de RUC a consultar
+     * @return void Respuesta JSON con datos del RUC o error
+     */
     public function searchRucSunat($ruc): void
     {
         $this->authRequired();
@@ -216,8 +326,16 @@ class ConcesionarioController extends Controller
         echo $response;
     }
 
-    // Buscará el Ruc del concesionario en la DB.
-
+    /**
+     *API: Busca un concesionario por RUC en la base de datos local
+     * 
+     * Endpoint AJAX que busca un concesionario registrado en el sistema
+     * utilizando su número de RUC. Útil para verificar si un concesionario
+     * ya está registrado antes de crear uno nuevo, o para recuperar sus datos.
+     *
+     * @param string $ruc Número de RUC del concesionario a buscar
+     * @return never Respuesta JSON con datos del concesionario o array vacío si no existe
+     */
     public function searchRucDB($ruc): void
     {
         $this->authRequired();
@@ -234,7 +352,15 @@ class ConcesionarioController extends Controller
         exit();
     }
 
-
+    /**
+     * API: Obtiene el listado completo de concesionarios
+     * 
+     * Endpoint AJAX que retorna todos los concesionarios registrados en el
+     * sistema. Utilizado para poblar selectores, tablas dinámicas y otros
+     * componentes de interfaz que requieren listar concesionarios.
+     *
+     * @return never  Respuesta JSON con array de concesionarios o array vacío
+     */
     public function getConcesionariosDB(): void
     {
         $this->authRequired();
@@ -250,6 +376,16 @@ class ConcesionarioController extends Controller
         exit();
     }
 
+    /**
+     * *
+     * API: Obtiene concesionarios con órdenes de compra en proceso
+     * 
+     * Endpoint AJAX que retorna únicamente los concesionarios que tienen
+     * al menos una orden de compra en estado "proceso". Útil para filtrar
+     * proveedores con operaciones comerciales activas o pendientes de completar.
+     *
+     * @return never Respuesta JSON con array de concesionarios o array vacío
+     */
     public function getConcesionariosWhitOCProceso(): void
     {
         $this->authRequired();
@@ -266,7 +402,17 @@ class ConcesionarioController extends Controller
         exit();
     }
 
-    public function getReporteByConcesionario(INT $id): void
+    /**
+     * API: Genera reporte detallado completo de un concesionario
+     * 
+     * Endpoint AJAX que genera un reporte ejecutivo completo con tres secciones
+     * de información sobre un concesionario específico. Utiliza procedimiento
+     * almacenado para obtener datos agregados y detallados.
+     *
+     * @param int $id ID del concesionario para el reporte
+     * @return void Respuesta JSON con tres arrays de datos o error 404
+     */
+    public function getReporteByConcesionario(int $id): void
     {
         $this->authRequired();
         header('Content-Type: application/json');

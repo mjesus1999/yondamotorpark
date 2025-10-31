@@ -1,6 +1,14 @@
 <?php
-// app/Controllers/ProductController.php
 
+/**
+ * Controlador de Vehiculos
+ * 
+ * app/Controllers/VehiculoController.php
+ * 
+ * Maneja todas las operaciones relacionadas con la gestion de vehiculos, incluyendo
+ * registros, actualizacion, ventas al contado, recepcion de ordenes de compra y busquedas.
+ * 
+ */
 namespace App\Controllers;
 
 use App\Core\Controller;
@@ -11,15 +19,48 @@ use App\Models\Local;
 use App\Models\Modelo;
 use App\Config\ConceptosPago;
 
-//use App\Models\Product;
 
+/**
+ * Clase de VehiculoController
+ * 
+ * Controlador principal para la gestion de integridad de vehiculos 
+ * Proporciona funcionalidades para:
+ * - Visualizar y listado de vehiculos
+ * - Registro de vehiculos (directo y pon orden de compra)
+ * - Actualizacion de datos de vehiculos
+ * - Recepcion de vehiculos desde ordenes de compra
+ * - Ventas al contado
+ * - Busqueda y filtrados
+ * 
+ */
 class VehiculoController extends Controller
 {
+  /**
+   * Instancia del modelo de Vehiculos
+   * @var Vehiculo
+   */
   private Vehiculo $vehiculoModel;
+  /**
+   * Instancia del modelo de Usuarios
+   * @var Usuario
+   */
   private Usuario $usuarioModel;
+  /**
+   * Instancia del modelo de Local
+   * @var Local
+   */
   private Local $localModel;
+  /**
+   * Instancia del modelo de Modelo 
+   * @var Modelo
+   */
   private Modelo $modeloModel;
 
+  /**
+   * Constructor del controlador
+   * 
+   * Inicializa las instancias de los modelos necesarios para las operaciones del controlador.
+   */
   public function __construct()
   {
     $this->vehiculoModel = new Vehiculo();
@@ -28,6 +69,17 @@ class VehiculoController extends Controller
     $this->modeloModel = new Modelo();
   }
 
+  /**
+   * Muestra la pagina principal
+   * 
+   * Lista los vehiculos filtrados por estado de disponibilidad
+   * Estado permitidos: libre, proceso, separado, vendido.
+   * Por defecto muestra vehiculos en estado PROCESO.
+   * 
+   * @return void
+   * 
+   * @uses Vehiculo::getAll() Para obtener el listado de vehículos
+   */
   public function index(): void
   {
     $this->authRequired();
@@ -48,19 +100,29 @@ class VehiculoController extends Controller
     );
   }
 
+  /**
+   * Muestra la lista de vehiculos vendidos al contado
+   * 
+   * Renderiza la interfaz para consultar y gestionar el historial de vehiculos vendidos
+   * mediante pago al contado
+   * 
+   * @return void
+   */
   public function indexVehiculosAlContado()
   {
     $this->authRequired();
     $this->view('vehiculos.vehiculosAlContado');
   }
 
-
-
-
   /**
-   * Método que muestra la vista para recepcionar los vehículos provenientes de una Orden de Compra (OC).
-   *
-   * @return void No retorna ningún valor; únicamente carga la vista correspondiente.
+   * Muestra la vista para recepcionar vehiculos de ordenes de compra
+   * 
+   * Despliega el listado de todas las ordenes de compra disponibles para iniciar el proceso de recepcion
+   * de vehiculos.
+   * 
+   * @return void
+   * 
+   * @uses Vehiculo::getAllOCompras() Para obtener las órdenes de compra
    */
   public function indexRecepcionVehiculos()
   {
@@ -70,27 +132,60 @@ class VehiculoController extends Controller
   }
 
   /**
-   * Método que muestra la vista de editar los datos del vehículo
+   * Muestra la vista de edicion para recepcion de vehiculos
    * 
-   * @return void No retorna ningun valor; únicamente carga la vista correspondiente
+   * Carga los detalles de una orden de compra especifica y sus vehiculos 
+   * asociados para realizar el proceso de recepcion y actualizacion.
+   * 
+   * @param int  $idcompra ID de la orden de compra a recepcionar
+   * @return void 
+   *  
+   * @uses Vehiculo::getAllDatosRecepcion() Para obtener datos de la orden y vehículos
    */
   public function recepcionEdit($idcompra)
   {
-    $this->authRequired();  
-    $idcompra = (int)$idcompra;
+    $this->authRequired();
+    $idcompra = (int) $idcompra;
     $datosRecepcion = $this->vehiculoModel->getAllDatosRecepcion($idcompra);
     $infoCompra = $datosRecepcion['info_compra'];
     $vehiculos = $datosRecepcion['vehiculos'];
-    $this->view('vehiculos.recepcionEdit', ['info_compra' => $infoCompra, 'vehiculos'  => $vehiculos]);
+    $this->view('vehiculos.recepcionEdit', ['info_compra' => $infoCompra, 'vehiculos' => $vehiculos]);
   }
 
+  /**
+   * Muestra el formulario de creacion de vehiculo
+   * 
+   * Renderiza la vista con el formulario para registrar un nuevo vehiculo de forma directa 
+   * (no mediante orden de compra).
+   * 
+   * @return void
+   */
   public function create(): void
   {
     $this->authRequired();
     $this->view('vehiculos.create');
   }
 
-
+  /**
+   * Registra un nuevo vehículo asociado a una orden de compra
+   * 
+   * Procesa la solicitud POST para crear un vehículo vinculado a una orden de compra.
+   * Realiza validaciones de campos obligatorios y retorna respuesta JSON.
+   * 
+   * @return int ID del vehiculo creado
+   * 
+   * @throws \Exception Si ocurre un error durante la creación
+   * 
+   * @uses Validador::limpiar() Para sanitizar los datos de entrada
+   * @uses Validador::campoObligatorio() Para validar campos requeridos
+   * @uses Vehiculo::createVehiculoOC() Para registrar el vehículo
+   * 
+   * @api
+   * @httpmethod POST
+   * @response 200 JSON con success=true y el ID del vehículo
+   * @response 405 Método no permitido
+   * @response 422 Errores de validación
+   */
   public function storeVehiculoOC(): int
   {
     $this->authRequired();
@@ -150,13 +245,31 @@ class VehiculoController extends Controller
     }
   }
 
-  // STORE DEYANIRA:
+  /**
+   * Registra un nuevo vehículo de forma directa
+   * 
+   * Crea un vehículo sin estar asociado a una orden de compra.
+   * Solo personal de logística puede realizar esta operación.
+   * Asigna automáticamente el local de Chincha y el colaborador de la sesión.
+   * 
+   * 
+   * @return void Redirige a la pagina de vehiculos con mensajes de resultado 
+   * 
+   * throws \Exception Si ocurre un error durante el registro
+   * 
+   * @uses Usuario::esDeLogistica() Para verificar permisos del usuario
+   * @uses Local::getByTienda() Para obtener el local por defecto
+   * @uses Vehiculo::create() Para registrar el vehículo
+   * 
+   * @security Requiere rol de logística
+   */
   public function store(): void
   {
     $this->authRequired();
     header('Content-Type: application/json; charset=utf-8');
 
     $idcolaborador = $_SESSION['user']['id'];
+
     //SOLO PODRA REGISTRAR USUARIO DE LOGISTICA
     if (!$this->usuarioModel->esDeLogistica($idcolaborador)) {
       $_SESSION['error_message'] = 'Solo el personal de Logística puede registrar vehículos';
@@ -217,6 +330,35 @@ class VehiculoController extends Controller
     }
   }
 
+  /**
+   * Registra una venta al contado de un vehículo
+   * 
+   * Procesa el pago completo de un vehículo al contado, validando:
+   * - Monto recibido coincida con el precio del vehículo
+   * - Tipo de cambio aplicado correctamente según moneda
+   * - Disponibilidad del vehículo
+   * 
+   * Soporta pagos en USD y PEN con conversión automática.
+   * Permite adjuntar comprobante de pago (PDF, JPG, JPEG, PNG, WEBP).
+   * 
+   * @throws \Exception Si hay inconsistencias en el monto o errores de validacion
+   * @return void Respuesta JSON con resultado de la operacion
+   * 
+   * @uses Validador::limpiar() Para sanitizar datos
+   * @uses Validador::campoObligatorio() Para validar campos requeridos
+   * @uses Vehiculo::getPrecioVehiculoAlContado() Para obtener precio real
+   * @uses Vehiculo::createPagoAlContado() Para registrar la venta
+   * 
+   * @api
+   * @httpmethod POST
+   * @response 200 JSON con success=true y el ID del pago
+   * @response 405 Método no permitido
+   * @response 422 Errores de validación
+   * @response 500 Error en el proceso de registro
+   * 
+   * @filesupport Acepta archivo 'comprobante' en formato PDF, JPG, PNG, WEBP
+
+   */
   public function storePagoALContado()
   {
     $this->authRequired();
@@ -300,19 +442,19 @@ class VehiculoController extends Controller
       $amortizacionParaGuardar = $precioVehiculoEnUSD * $tipoCambioAplicado;
 
       $registro = [
-        'idcliente'           => $data['idcliente'],
-        'idconcepto'          => ConceptosPago::CONTADO_ID,
-        'idvehiculo'          => $idvehiculo,
-        'idcuentapago'        => empty($data['idcuentapago']) ? null : $data['idcuentapago'],
-        'mediopago'           => $data['mediopago'],
-        'numerotransaccion'   => empty($data['numerotransaccion']) ? null : $data['numerotransaccion'],
-        'fechapago'           => $data['fechapago'],
-        'amortizacion'        => $amortizacionParaGuardar,
+        'idcliente' => $data['idcliente'],
+        'idconcepto' => ConceptosPago::CONTADO_ID,
+        'idvehiculo' => $idvehiculo,
+        'idcuentapago' => empty($data['idcuentapago']) ? null : $data['idcuentapago'],
+        'mediopago' => $data['mediopago'],
+        'numerotransaccion' => empty($data['numerotransaccion']) ? null : $data['numerotransaccion'],
+        'fechapago' => $data['fechapago'],
+        'amortizacion' => $amortizacionParaGuardar,
         'montomonedaoriginal' => $precioVehiculoEnUSD,
-        'tipocambioaplicado'  => $tipoCambioAplicado,
-        'moneda'              => $monedaPago,
-        'observacion'         => empty($data['observacion']) ? null : $data['observacion'],
-        'comprobante'         => null
+        'tipocambioaplicado' => $tipoCambioAplicado,
+        'moneda' => $monedaPago,
+        'observacion' => empty($data['observacion']) ? null : $data['observacion'],
+        'comprobante' => null
       ];
 
 
@@ -365,10 +507,23 @@ class VehiculoController extends Controller
     }
   }
 
-
-
-
-
+  /**
+   * Elimina un vehiculo
+   * 
+   * Elimina fisicamente un registro de vehículo de la base de datos.
+   * Retorna respuesta JSON con el resultado de la operacion.
+   * 
+   * @return void Respuesta JSON indicando exito o error
+   * 
+   * @throws \Exception Si ocurre un error durante la eliminación
+   * 
+   * @uses Vehiculo::delete() Para eliminar el vehículo
+   * 
+   * @api
+   * @httpmethod POST
+   * @param int $idvehiculo ID del vehículo a eliminar (vía POST)
+   * @response 200 JSON con success o error
+   */
   public function delete(): void
   {
     $this->authRequired();
@@ -394,6 +549,18 @@ class VehiculoController extends Controller
     }
   }
 
+  /**
+   * Muestra el formulario de edición de un vehículo
+   * 
+   * Carga los datos completos del vehiculo y su modelo asociado
+   * para mostrar el formulario de edicion.
+   * 
+   * @param int $id ID del vehiculo a editar
+   * @return void Renderiza vista de edicion o pagina 404 si no existe
+   * 
+   * @uses Vehiculo::getById() Para obtener datos del vehículo
+   * @uses Vehiculo::getModeloDetalle() Para obtener información del modelo
+   */
   public function edit(int $id): void
   {
     $vehiculo = $this->vehiculoModel->getById($id);
@@ -410,6 +577,22 @@ class VehiculoController extends Controller
     }
   }
 
+  /**
+   * Actualiza los datos de un vehículo existente
+   * 
+   * Procesa la actualizacion de informacion del vehículo incluyendo
+   * modelo, version, condicion, caracteristicas fisicas y precio.
+   * Redirige a la lista de vehiculos con mensaje de resultado.
+   * 
+   * @return void Redirige con mensaje de éxito o error en sesión
+   * 
+   * @throws \Exception Si ocurre un error durante la actualización
+   * 
+   * @uses Vehiculo::update() Para actualizar el vehículo
+   * 
+   * @httpmethod POST
+   * @param int $idvehiculo ID del vehículo (vía POST)
+   */
   public function update(): void
   {
     $this->authRequired();
@@ -461,32 +644,25 @@ class VehiculoController extends Controller
     exit;
   }
 
-  public function agregarAnio(): void
-  {
-    header('Content-Type: application/json; charset=utf-8');
-    $body = json_decode(file_get_contents('php://input'), true) ?: [];
-    $id = (int) ($body['idmodelo_base'] ?? 0);
-    $anio = (int) ($body['anio'] ?? 0);
-
-    if ($id <= 0 || $anio <= 0) {
-      http_response_code(400);
-      echo json_encode(['success' => false, 'error' => 'Parámetros inválidos']);
-      return;
-    }
-
-    $nuevoId = $this->modeloModel->addYearToModelo($id, $anio); // <-- sin "new" aquí
-    if ($nuevoId > 0) {
-      echo json_encode(['success' => true, 'idmodelo' => $nuevoId, 'anio' => $anio]);
-    } else {
-      http_response_code(500);
-      echo json_encode(['success' => false, 'error' => 'No se pudo crear el año']);
-    }
-  }
-
-
-
-
-
+  /**
+   * Actualiza datos de vehículo durante recepción de orden de compra
+   * 
+   * Procesa la actualización de datos físicos del vehículo (chasis, placa, color)
+   * y asigna local y estado de disponibilidad durante el proceso de recepción.
+   * El colaborador de logística se obtiene automáticamente de la sesión.
+   * 
+   * @return void Respuesta JSON con resultado de la operación
+   * 
+   * @uses Validador::limpiar() Para sanitizar datos
+   * @uses Validador::campoObligatorio() Para validar campos requeridos
+   * @uses Vehiculo::updateVehiculoRecepcionOc() Para actualizar el vehículo
+   * 
+   * @api
+   * @httpmethod POST
+   * @response 200 JSON con success=true si se actualizó
+   * @response 405 Método no permitido
+   * @response 422 Errores de validación
+   */
   public function updateVehiculoRecepcionOC()
   {
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -548,7 +724,24 @@ class VehiculoController extends Controller
     }
   }
 
-
+  /**
+   * Busca vehículos por criterio de búsqueda
+   * 
+   * Realiza una búsqueda flexible de vehículos por marca, modelo, placa,
+   * u otros campos. Retorna resultados en formato JSON.
+   * 
+   * @return void Respuesta JSON con vehiculos encontrados
+   * 
+   * @uses Vehiculo::searchvehiculos() Para realizar la búsqueda
+   * 
+   * @api
+   * @httpmethod GET
+   * @param string $q Criterio de búsqueda (vía GET)
+   * @response 200 JSON con success=true y array de vehículos
+   * @response 200 JSON con success=false si no hay resultados
+   * 
+   * @example GET /vehiculos/search?q=toyota
+   */
   public function searchVehiculo()
   {
     header('Content-Type: application/json');
@@ -570,6 +763,21 @@ class VehiculoController extends Controller
     }
   }
 
+  /**
+   * Obtiene el listado de vehiculos vendidos al contado
+   * 
+   * Retorna el historial completo de vehiculos que han sido vendidos
+   * mediante pago al contado en formato JSON.
+   * 
+   * @return void Respuesta JSON con array de vehiculos vendidos
+   * 
+   * @uses Vehiculo::getVehiculosVendidosAlContado() Para obtener el listado
+   * 
+   * @api
+   * @httpmethod GET
+   * @response 200 JSON con success = true y array de vehículos
+   * @response 500 Error de base de datos
+   */
   public function getVehiculosVendidosAlContado()
   {
     header('Content-Type: application/json; charset=utf-8');
@@ -584,12 +792,29 @@ class VehiculoController extends Controller
       return;
     }
     echo json_encode([
-      'success'   => true,
+      'success' => true,
       'vehiculos' => $vehiculos
     ]);
   }
 
-
+  /**
+   * Obtiene los datos completos de un vehículo para venta al contado
+   * 
+   * Retorna toda la información necesaria para procesar una venta al contado
+   * de un vehículo específico, incluyendo precio, disponibilidad y detalles.
+   * 
+   * @param int $idvehiculo ID del vehículo a consultar
+   * @return void Respuesta JSON con datos del vehiculo
+   * 
+   * @uses Vehiculo::getDataVehiculoAlContado() Para obtener los datos
+   * 
+   * @api
+   * @httpmethod GET
+   * @response 200 JSON con success=true y datos del vehículo
+   * @response 500 Error de base de datos
+   * 
+   * @example GET /vehiculos/data-contado/123
+   */
   public function getDataVehiculoAlContado(int $idvehiculo)
   {
     header('Content-Type: application/json; charset=utf-8');
@@ -609,4 +834,53 @@ class VehiculoController extends Controller
       'data' => $vehiculo
     ]);
   }
+
+  /**
+   * Agrega un nuevo año a un modelo existente
+   * 
+   * Endpoint AJAX que permite crear una nueva variante de un modelo
+   * con un año diferente. Copia los datos del modelo base (marca, tipo,
+   * nombre, imagen) y crea un nuevo registro con el año especificado.
+   * 
+   * Útil cuando se quiere registrar el mismo modelo pero de un año nuevo
+   * sin tener que ingresar todos los datos manualmente.
+   * 
+   * @return void JSON con resultado de la operación
+   * 
+   * @uses Modelo::addYearToModelo() Para crear el modelo con nuevo año
+   * 
+   * @api
+   * @httpmethod POST
+   * @param int $idmodelo_base ID del modelo a copiar (vía JSON body)
+   * @param int $anio Nuevo año para el modelo (vía JSON body)
+   * @response 200 JSON con success=true, idmodelo y anio
+   * @response 400 Parámetros inválidos
+   * @response 500 No se pudo crear el año
+   * 
+   * @example POST /vehiculos/agregarAnio
+   * Body: {"idmodelo_base": 15, "anio": 2025}
+   */
+  public function agregarAnio(): void
+  {
+    header('Content-Type: application/json; charset=utf-8');
+    $body = json_decode(file_get_contents('php://input'), true) ?: [];
+    $id = (int) ($body['idmodelo_base'] ?? 0);
+    $anio = (int) ($body['anio'] ?? 0);
+
+    if ($id <= 0 || $anio <= 0) {
+      http_response_code(400);
+      echo json_encode(['success' => false, 'error' => 'Parámetros inválidos']);
+      return;
+    }
+
+    $nuevoId = $this->modeloModel->addYearToModelo($id, $anio);
+    if ($nuevoId > 0) {
+      echo json_encode(['success' => true, 'idmodelo' => $nuevoId, 'anio' => $anio]);
+    } else {
+      http_response_code(500);
+      echo json_encode(['success' => false, 'error' => 'No se pudo crear el año']);
+    }
+  }
+
+
 }

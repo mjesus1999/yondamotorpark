@@ -4,11 +4,31 @@ use function App\Helpers\persistirDatosFormulario;
 
 require_once __DIR__ . '/../../../Helpers/functions.php'; ?>
 <?php include __DIR__ . '/../../layout/header.php'; ?>
+<script src="/assets/js/mapa.js"></script>
 <?php include __DIR__ . '/../../components/mapa-includes.php'; ?>
 <?php include __DIR__ . '/../../components/mapa-modal.php'; ?>
 
 
 <style>
+    .custom-infowindow {
+        font-family: 'Segoe UI', sans-serif;
+        color: #1a1a1a;
+        font-size: 14px;
+        padding: 8px 12px;
+        background: rgba(255, 255, 255, 0.95);
+        border: 2px solid rgba(0, 123, 255, 0.6);
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+        max-width: 240px;
+        text-align: center;
+        backdrop-filter: blur(4px);
+    }
+
+    .custom-infowindow strong {
+        color: #007bff;
+        font-weight: 600;
+    }
+
     .form-control,
     .form-select {
         border-radius: 0.375rem;
@@ -775,7 +795,7 @@ require_once __DIR__ . '/../../../Helpers/functions.php'; ?>
         limpiarCamposEmpresa();
 
         try {
-            
+
             const response = await fetch(`/clientes/empresas/searchByRUCApi?ruc=${ruc}`, {
                 method: 'GET',
                 headers: {
