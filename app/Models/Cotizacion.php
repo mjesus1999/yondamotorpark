@@ -436,7 +436,7 @@ class Cotizacion
         return (int) $this->db->lastInsertId();
     }
 
-   
+
     public function createFinanciamiento(int $idcotizacion, int $numcuotas, float $inicial, float $valorcuota, string $moneda, float $precioventa): int
     {
         $sql = "INSERT INTO cotizacion_financiamiento
@@ -488,12 +488,12 @@ class Cotizacion
 
         $stmtOpciones = $this->db->prepare($sqlOpciones);
         $stmtOpciones->execute([
-            ':idcliente' => $idcliente, 
+            ':idcliente' => $idcliente,
             ':idvehiculo' => $idvehiculo,
             ':fecha_base' => $fechaBase
         ]);
 
-      
+
         return $stmtOpciones->fetchAll(PDO::FETCH_ASSOC);
     }
 
