@@ -35,7 +35,7 @@ class MapaViewer {
       return window.googleMapsLoading;
     }
 
-    console.log("-> Cargando Google Maps API por primera vez...");
+    /* console.log("-> Cargando Google Maps API por primera vez..."); */
 
     // Crear promesa de carga
 
@@ -46,7 +46,7 @@ class MapaViewer {
         window.google.maps &&
         window.google.maps.loadViewer
       ) {
-        console.log("-> Usando sistema de carga existente");
+        /* console.log("-> Usando sistema de carga existente"); */
         window.google.maps.loadViewer(null, () => {
           this.apiLoaded = true;
           console.log("-> Google Maps cargado vía loadViewer");
@@ -88,7 +88,7 @@ class MapaViewer {
     }
 
     try {
-      console.log("-> Inicializando servicios de Google Maps...");
+      /* console.log("-> Inicializando servicios de Google Maps..."); */
 
       // Asegurar que la API está cargada
       await this.cargarScriptGoogleMaps();
@@ -346,11 +346,11 @@ class MapaViewer {
     if (!this.infoWindow || !this.mapa || !this.marcador) return;
 
     const contenido = `
-        <div style="padding: 10px; max-width: 250px;">
-            <h6 style="margin: 0 0 8px 0; color: #0d6efd; font-weight: 600;">
+        <div style="padding: 0; margin: 0; max-width: 250px;">
+            <h6 style="margin: 0 0 6px 0; padding: 0; color: #0d6efd; font-weight: 600; font-size: 14px; line-height: 1.2;">
                 <i class="bi bi-person-circle"></i> ${this.datosCliente.nombre}
             </h6>
-            <p style="margin: 0; font-size: 13px; color: #666;">
+            <p style="margin: 0; padding: 0; font-size: 13px; color: #666; line-height: 1.4;">
                 <i class="bi bi-geo-alt"></i> ${this.datosCliente.direccion}
             </p>
         </div>

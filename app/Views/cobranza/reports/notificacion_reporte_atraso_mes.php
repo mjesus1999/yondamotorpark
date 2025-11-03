@@ -239,6 +239,7 @@
             const tipo_doc = rawValueAsString(datos.tipo_documento || '');
             const nro_doc = rawValueAsString(datos.numero_documento || '');
             const direccion = rawValueAsString(datos.direccion_completa || '');
+            const telefono = rawValueAsString(datos.telefono || '');
             const marca = rawValueAsString(datos.marca || '');
             const modelo = rawValueAsString(datos.modelo || '');
             const anio = rawValueAsString(datos.vehiculo_anio || '');
@@ -334,6 +335,11 @@
                                     { text: 'Dirección', style: 'normal', bold: true, border: [false, false, false, false] },
                                     { text: ':', style: 'normal', bold: true, alignment: 'center', border: [false, false, false, false] },
                                     { text: direccion, style: 'normal', border: [false, false, false, false] }
+                                ],
+                                [
+                                    { text: 'Celular', style: 'normal', bold: true, border: [false, false, false, false] },
+                                    { text: ':', style: 'normal', bold: true, alignment: 'center', border: [false, false, false, false] },
+                                    { text: telefono, style: 'normal', border: [false, false, false, false] }
                                 ]
                             ]
                         },
@@ -410,7 +416,7 @@
                 const datos = await getDatosReporteNotificacion(idContrato);
                 if (!datos) throw new Error("No se encontraron datos para el contrato especificado.");
 
-                const headerImageBase64 = await convertImageToBase64('/assets/images/logos/cabecera-yonda-t.png').catch(() => null);
+                const headerImageBase64 = await convertImageToBase64('/assets/images/logos/cabecera-yonda.png').catch(() => null);
 
                 const docDefinition = createNotificacionPDF(headerImageBase64, datos);
                 const pdfDocGenerator = pdfMake.createPdf(docDefinition);

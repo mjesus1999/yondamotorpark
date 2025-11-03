@@ -498,7 +498,7 @@
                 const datos = await getDatosReporteRecojoVehicular(idContrato);
                 if (!datos) throw new Error("No se encontraron datos para el contrato especificado.");
 
-                const headerImageBase64 = await convertImageToBase64('/assets/images/logos/cabecera-yonda-t.png').catch(() => null);
+                const headerImageBase64 = await convertImageToBase64('/assets/images/logos/cabecera-yonda.png').catch(() => null);
 
                 const docDefinition = createNotificacionPDF(headerImageBase64, datos);
                 const pdfDocGenerator = pdfMake.createPdf(docDefinition);
