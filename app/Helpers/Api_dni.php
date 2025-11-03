@@ -21,7 +21,7 @@ function searchByDNI($dni = "")
   $ch = curl_init();
   curl_setopt($ch, CURLOPT_URL, $api_endpoint);
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-  //curl_setopt($ch, CURLOPT_TIMEOUT, 30); // Timeout de 30 segundos
+  curl_setopt($ch, CURLOPT_TIMEOUT, 30); // Timeout de 30 segundos
   curl_setopt($ch, CURLOPT_HTTPHEADER, [
     'Content-Type: ' . $content_type,
     'Authorization: Bearer ' . $api_token
@@ -30,7 +30,8 @@ function searchByDNI($dni = "")
   // Ejecutar la petición
   $api_response = curl_exec($ch);
   $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-  //$curl_error = curl_error($ch);
+  $curl_error = curl_error($ch);
+  echo $curl_error;
   curl_close($ch);
 
   // Error en cURL
@@ -97,3 +98,4 @@ function searchByDNI($dni = "")
   }
 }
 
+// echo searchByDNI('71882015');

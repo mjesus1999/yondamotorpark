@@ -106,7 +106,7 @@
             responsiveLayoutCollapseStartOpen: false, // Inicia colapsado
 
             pagination: "local",
-            paginationSize: 10,
+            paginationSize: 20,
             paginationSizeSelector: [10, 25, 50, 100],
             columns: [{
                     formatter: "responsiveCollapse",

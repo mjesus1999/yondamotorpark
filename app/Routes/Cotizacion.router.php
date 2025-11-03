@@ -3,7 +3,7 @@
 $router->add('GET', '/cotizacion', 'CotizacionController', 'index');
 
 $router->add('GET', '/cotizacion/([A-Za-z])', 'CotizacionController', 'index');
-$router->add('GET', '/cotizacion/pagoInicial/{id}','CotizacionController', 'indexPagoInicial');
+$router->add('GET', '/cotizacion/pagoInicial/{id}', 'CotizacionController', 'indexPagoInicial');
 
 $router->add('POST', '/cotizacion/aprobar/{id}', 'CotizacionController', 'aprobarCotizacion');
 
@@ -45,4 +45,6 @@ $router->add('POST', '/cotizacion/reactivar/(\d+)', 'CotizacionController', 'rea
 $router->add('GET', '/cotizacion/reporteCot/(\d+)', 'CotizacionController', 'reporte-cotizacion');
 $router->add('GET', '/api/actaSeparacion/{id}', 'CotizacionController', 'getDataSeparacionVehicular');
 
-$router->add('GET','/api/pagosCotizacion/{id}','CotizacionController','getPagosCliente');
+$router->add('GET', '/api/pagosCotizacion/{id}', 'CotizacionController', 'getPagosCliente');
+
+$router->add('GET', '/api/cotizacion/reporte-general', 'CotizacionController', 'getReporteGeneral');

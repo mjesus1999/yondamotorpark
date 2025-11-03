@@ -66,6 +66,8 @@
                                 class="btn btn-sm <?= strtoupper($estadoActual) === 'A' ? 'btn-success' : 'btn-outline-success' ?>" title="Cotizaciones que han sido aprobadas por el análista de crédito">
                                 <i class="bi bi-check-circle"></i> Aprobadas
                             </a>
+
+
                             <!-- <a href="/cotizacion/O"
                                 class="btn btn-sm <?= strtoupper($estadoActual) === 'O' ? 'btn-info' : 'btn-outline-info' ?>" title="Cotizaciones que han tenido obervaciones por parte del análista de crédito">
                                 <i class="bi bi-eye"></i> Observadas
@@ -78,6 +80,9 @@
 
 
                         </div>
+                        <button title="Exportar Reporte General por Hojas" class="btn btn-sm btn-outline-success" id="btn-exportar-general">
+                            <i class="bi bi-file-earmark-spreadsheet"></i> Reporte General
+                        </button>
                     </div>
                 </div>
                 <div class="card-body">
@@ -267,6 +272,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
 <script src="/assets/js/logoBase64.js"></script>
 <script src="/assets/js/cotizacionPDF.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js" defer></script>
 
 <script>
     function mostrarModalReserva(cliente, motivo) {
@@ -306,6 +312,7 @@
         const diaPago = document.getElementById('diapago');
         const fechaInicio = document.getElementById('fechainicio');
         const selectLocal = document.getElementById('idlocal');
+        const btnExcelReporteGeneral = document.getElementById('btn-exportar-general');
         window.APP_DATA_TABLE = <?php echo json_encode($cotizaciones); ?>;
 
         window.APP_CONFIG = {
@@ -325,7 +332,6 @@
         const tabla = new Tabulator("#tabla-cotizacion", {
             data: cotizaciones,
             theme: "simple",
-            layout: "fitDataStrech",
             layout: "fitColumns",
             responsiveLayout: "collapse", //hace que colapse columnas en móvil
             pagination: true,
@@ -544,8 +550,8 @@
 
             if (value === "") {
                 tabla.clearFilter(true);
-                tabla.setData(cotizaciones); 
-                tabla.redraw(true); 
+                tabla.setData(cotizaciones);
+                tabla.redraw(true);
             } else {
                 tabla.setFilter([
                     [{
@@ -678,7 +684,7 @@
         function generarPDFActaSeparacion(data) {
 
             if (!data) {
-                
+
                 showToast('No se encontraron datos para el acta de separación.', 'ERROR', 2000);
                 return;
             }
@@ -691,7 +697,7 @@
             });
             const fechaFormateada = `Chincha, ${dia} de ${mes} del ${anio}`;
             const simboloMoneda = data.moneda == 'PEN' ? 'S/' : '$/';
-            const tipoDoc = data.tipocliente == 'P' ?'DNI' :'RUC';
+            const tipoDoc = data.tipocliente == 'P' ? 'DNI' : 'RUC';
 
             let textoPago = '';
             if (data.mediopago === 'Efectivo') {
@@ -960,6 +966,172 @@
             pdfMake.createPdf(docDefinition).open();
         }
 
+        async function generarExcel() {
+            if (btnExcelReporteGeneral) {
+                try {
+                    const req = await fetch('/api/cotizacion/reporte-general', {
+                        method: 'GET'
+                    });
+                    const res = await req.json();
+                    if (res.success && Object.keys(res.data).length > 0) {
+
+                        const styleHeader = (cell) => {
+                          
+                            cell.font = {
+                                bold: true,
+                                color: {
+                                    argb: 'FFFFFFFF'
+                                }
+                            };
+                            cell.fill = {
+                                type: 'pattern',
+                                pattern: 'solid',
+                                fgColor: {
+                                    argb: 'FF007BFF'
+                                }
+                            };
+                            cell.border = {
+                                top: {
+                                    style: 'thin'
+                                },
+                                left: {
+                                    style: 'thin'
+                                },
+                                bottom: {
+                                    style: 'thin'
+                                },
+                                right: {
+                                    style: 'thin'
+                                }
+                            };
+                        };
+
+                        const styleCell = (cell) => {
+                   
+                            cell.border = {
+                                top: {
+                                    style: 'thin'
+                                },
+                                left: {
+                                    style: 'thin'
+                                },
+                                bottom: {
+                                    style: 'thin'
+                                },
+                                right: {
+                                    style: 'thin'
+                                }
+                            };
+                        };
+
+                        const capitalizar = (str) => str.charAt(0).toUpperCase() + str.slice(1);
+
+                        const workbook = new ExcelJS.Workbook();
+
+                        const dataAgrupada = res.data; 
+
+                        const headers = [
+                            '#',
+                            'Cliente',
+                            'Documento',
+                            'Vehículo',
+                            'Moneda',
+                            'Inicial',
+                            'Número cuotas',
+                            'Valor cuota',
+                            'Asesor',
+                            'Estado'
+                        ];
+
+                        for (const estado in dataAgrupada) {
+                            const listaCotizaciones = dataAgrupada[estado];
+                            const nombreHoja = capitalizar(estado);
+
+                            if (listaCotizaciones.length === 0) continue;
+
+                            const worksheet = workbook.addWorksheet(nombreHoja);
+
+                            const headerRow = worksheet.addRow(headers);
+                            headerRow.eachCell(styleHeader);
+
+
+                            listaCotizaciones.forEach((cot, index) => {
+
+                                const row = worksheet.addRow([
+                                    index + 1,
+                                    cot.cliente,
+                                    cot.documento,
+                                    cot.vehiculo,
+                                    cot.moneda,
+                                    parseFloat(cot.inicial.replace(/[S/$,]/g, '').trim()), 
+                                    cot.numcuotas,
+                                    parseFloat(cot.valorcuota.replace(/[S/$,]/g, '').trim()), 
+
+                                    cot.asesor,
+                                    cot.estado
+                                ]);
+
+                                row.eachCell(styleCell);
+
+    
+                                row.getCell(6).numFmt = '#,##0.00';
+                                row.getCell(8).numFmt = '#,##0.00';
+
+                                // Añadir la moneda al formato (ej. S/ #,##0.00 o $ #,##0.00)
+                                const currencySymbol = cot.moneda === 'USD' ? '$ ' : 'S/ ';
+                                row.getCell(6).numFmt = `"${currencySymbol}"#,##0.00`;
+                                row.getCell(8).numFmt = `"${currencySymbol}"#,##0.00`;
+
+                            });
+
+                         
+                            worksheet.columns.forEach((column, i) => {
+                                let maxLength = 0;
+                                column.eachCell({
+                                    includeEmpty: true
+                                }, (cell) => {
+                                    let columnLength = cell.value ? cell.value.toString().length : 10;
+                                    if (columnLength > maxLength) {
+                                        maxLength = columnLength;
+                                    }
+                                });
+                                column.width = Math.min(60, maxLength + 2);
+                            });
+
+                            worksheet.getColumn(6).width = 18;
+
+                        }
+
+                        // Generar y Descargar el Archivo 
+                        const buffer = await workbook.xlsx.writeBuffer();
+                        const blob = new Blob([buffer], {
+                            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                        });
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = 'Reporte_General_Cotizaciones.xlsx';
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                    } else if (res.success && Object.keys(res.data).length === 0) {
+                   
+                        console.log(res.message); 
+                    } else {
+                       
+                        console.error(res.message); 
+                    }
+
+                } catch (error) {
+                    console.error('Error al procesar la solicitud o generar el Excel:', error);
+                }
+
+            } else {
+                console.log('No existe el botón para exportar el excel');
+            }
+
+        }
+
+        btnExcelReporteGeneral.addEventListener('click', generarExcel);
 
 
         document.getElementById('tabla-cotizacion').addEventListener('click', function(e) {
