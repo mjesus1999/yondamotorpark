@@ -53,9 +53,9 @@
                             <!-- <button type="button" class="btn btn-success btn-sm" id="btnCompartirUbicacion">
                                 <i class="bi bi-share-fill me-1"></i>Compartir Ubicación
                             </button> -->
-                            <a href="#" id="btnAbrirGoogleMaps" target="_blank" class="btn btn-outline-primary btn-sm">
+                            <!-- <a href="#" id="btnAbrirGoogleMaps" target="_blank" class="btn btn-outline-primary btn-sm">
                                 <i class="bi bi-globe me-1"></i>Abrir en Google Maps
-                            </a>
+                            </a> -->
                         </div>
                     </div>
                 </div>

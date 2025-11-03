@@ -1,6 +1,6 @@
 {
     "query": "vencidos",
-    "date": "2025-10-31 15:44:12",
+    "date": "2025-11-03 15:45:52",
     "total_registros": 4,
     "data": [
         {
@@ -22,7 +22,7 @@
             "cuotas_pagadas": "0",
             "estado_pagos": "3 vencidas de 36",
             "fecha_vencida_mas_antigua": "2025-08-16",
-            "dias_atraso": 76
+            "dias_atraso": 79
         },
         {
             "idcontrato": 8,
@@ -43,13 +43,13 @@
             "cuotas_pagadas": "1",
             "estado_pagos": "2 vencidas de 35",
             "fecha_vencida_mas_antigua": "2025-09-15",
-            "dias_atraso": 46
+            "dias_atraso": 49
         },
         {
             "idcontrato": 7,
             "cliente": "FLORES MENDOZA JUANA MARÍA",
             "documento": "75655555",
-            "telefono": "919629135",
+            "telefono": "922259580",
             "ubicacion_cliente": "Chincha \/ Chincha Alta \/ Tambo de mora - Av. 2 de mayo",
             "provincia_cliente": "Chincha",
             "distrito_cliente": "Chincha Alta",
@@ -58,13 +58,13 @@
             "vehiculo": "HYUNDAI \/ i20 Hatch \/ NEGRO \/ 6234654726",
             "tienda": "Chincha Alta",
             "cuotas_totales": 15,
-            "monto_primera_vencida": "6267.62",
-            "deuda_vencida": "13162.00",
+            "monto_primera_vencida": "6894.38",
+            "deuda_vencida": "13788.76",
             "cuotas_vencidas": "2",
             "cuotas_pagadas": "0",
             "estado_pagos": "2 vencidas de 15",
             "fecha_vencida_mas_antigua": "2025-09-29",
-            "dias_atraso": 32
+            "dias_atraso": 35
         },
         {
             "idcontrato": 2,
@@ -85,7 +85,7 @@
             "cuotas_pagadas": "1",
             "estado_pagos": "1 vencidas de 35",
             "fecha_vencida_mas_antigua": "2025-10-13",
-            "dias_atraso": 18
+            "dias_atraso": 21
         }
     ]
 }

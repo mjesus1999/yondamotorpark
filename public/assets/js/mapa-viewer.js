@@ -400,7 +400,7 @@ class MapaViewer {
           url: `https://www.google.com/maps?q=${this.coordenadas.lat},${this.coordenadas.lng}`,
         })
         .then(() =>
-          this.mostrarMensaje("Ubicación compartida exitosamente", "success")
+          this.mostrarMensaje("-> Ubicación compartida exitosamente", "success")
         )
         .catch((err) => {
           if (err.name !== "AbortError") {
@@ -418,9 +418,9 @@ class MapaViewer {
       navigator.clipboard
         .writeText(texto)
         .then(() =>
-          this.mostrarMensaje("Ubicación copiada al portapapeles", "success")
+          this.mostrarMensaje("-> Ubicación copiada al portapapeles", "success")
         )
-        .catch(() => this.mostrarMensaje("No se pudo copiar", "danger"));
+        .catch(() => this.mostrarMensaje("-> No se pudo copiar", "danger"));
     } else {
       // Fallback antiguo
       const textarea = document.createElement("textarea");
@@ -431,9 +431,9 @@ class MapaViewer {
       textarea.select();
       try {
         document.execCommand("copy");
-        this.mostrarMensaje("Ubicación copiada al portapapeles", "success");
+        this.mostrarMensaje("-> Ubicación copiada al portapapeles", "success");
       } catch (err) {
-        this.mostrarMensaje("No se pudo copiar", "danger");
+        this.mostrarMensaje("-> No se pudo copiar", "danger");
       }
       document.body.removeChild(textarea);
     }
@@ -501,24 +501,22 @@ class MapaViewer {
       lng: null,
     };
     // NO destruir el mapa ni los servicios para reutilizarlos
-    console.log("Datos del cliente limpiados");
+    console.log("-> Datos del cliente limpiados");
   }
 }
 
-// ============================================
 // INICIALIZACIÓN GLOBAL
-// ============================================
 
 // Instancia global del visor
 let mapaViewerInstance = null;
 
 //Función de inicialización (NO carga Google Maps, solo crea la instancia vacía)
 async function initMapaViewer() {
-  console.log("🚀 Inicializando MapaViewer (instancia vacía)...");
+  console.log(" :D -> Inicializando MapaViewer (instancia vacía)...");
   if (!mapaViewerInstance) {
     mapaViewerInstance = new MapaViewer();
     console.log(
-      "✓ MapaViewer instanciado correctamente (sin cargar Google Maps aún)"
+      "-> MapaViewer instanciado correctamente (sin cargar Google Maps aún)"
     );
   }
 }
@@ -527,7 +525,7 @@ async function initMapaViewer() {
 window.abrirMapaViewer = function (datos) {
   if (!mapaViewerInstance) {
     console.error(
-      "MapaViewer no está inicializado. Llama a initMapaViewer() primero."
+      "-> MapaViewer no está inicializado. Llama a initMapaViewer() primero."
     );
     return;
   }

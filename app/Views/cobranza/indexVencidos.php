@@ -442,7 +442,7 @@
         }
 
         try {
-            const datos = tablaGlobal.getData();
+            const datos = tablaGlobal.getData("active");
 
             if (!datos || datos.length === 0) {
                 showToast('No hay datos para exportar', 'WARNING');
@@ -461,15 +461,15 @@
 
             worksheet.columns = [
                 { header: '#', key: 'numero', width: 6 },
-                { header: 'Cliente', key: 'cliente', width: 30 },
+                { header: 'Cliente', key: 'cliente', width: 60 },
                 { header: 'Documento', key: 'documento', width: 12 },
                 { header: 'Teléfono', key: 'telefono', width: 12 },
-                { header: 'Ubicación', key: 'ubicacion_cliente', width: 40 },
-                { header: 'Vehículo', key: 'vehiculo', width: 35 },
+                { header: 'Ubicación', key: 'ubicacion_cliente', width: 60 },
+                { header: 'Vehículo', key: 'vehiculo', width: 50 },
                 { header: 'Tienda', key: 'tienda', width: 12 },
                 { header: 'C. Totales', key: 'cuotas_totales', width: 10 },
-                { header: 'Monto Cuota', key: 'monto_primera_vencida', width: 12 },
-                { header: 'Deuda', key: 'deuda_vencida', width: 12 },
+                { header: 'Monto Cuota', key: 'monto_primera_vencida', width: 15 },
+                { header: 'Deuda', key: 'deuda_vencida', width: 15 },
                 { header: 'C. Vencidas', key: 'cuotas_vencidas', width: 10 },
                 { header: 'C. Pagadas', key: 'cuotas_pagadas', width: 10 },
                 { header: 'Días Atraso', key: 'dias_atraso', width: 10 },
@@ -543,7 +543,30 @@
                 a.href = url;
 
                 const fecha = new Date().toISOString().split('T')[0];
-                a.download = `Vencidos_${fecha}.xlsx`;
+                /* a.download = `Vencidos_${fecha}.xlsx`; */
+
+                let NombreArchivoFiltrado = 'Vencidos';
+
+                if (tramoActivo !== 'todos') {
+                    if (tramoActivo === '1') {
+                        NombreArchivoFiltrado += '_1Cuota';
+                    } else if (tramoActivo === '2') {
+                        NombreArchivoFiltrado += '_2Cuotas';
+                    } else if (tramoActivo === '3') {
+                        NombreArchivoFiltrado += '_3Cuotas';
+                    } else if (tramoActivo === '4+') {
+                        NombreArchivoFiltrado += '_4oMasCuotas';
+                    }
+                }
+
+                const searchInput = document.getElementById("busqueda-global");
+                const searchValue = searchInput ? searchInput.value.trim() : '';
+                if (searchValue !== '') {
+                    NombreArchivoFiltrado = '_Busqueda_Filtrado';
+                }
+
+                NombreArchivoFiltrado += `_${fecha}.xlsx`;
+                a.download = NombreArchivoFiltrado;
 
                 a.click();
                 window.URL.revokeObjectURL(url);
