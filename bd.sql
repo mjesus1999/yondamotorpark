@@ -578,3 +578,8 @@ CREATE TABLE conceptospago (
 
 -- USE motorpark;
 -- SELECT * FROM cotizaciones;
+
+
+
+
+SHOW COLUMNS FROM cotizaciones;

@@ -8,6 +8,7 @@
  * de pago, gestión de pagos iniciales, y control de estados. Implementa
  * algoritmos financieros para calcular cuotas y tasas de interés.
  */
+
 namespace App\Models;
 
 use App\Core\Database;
@@ -826,5 +827,22 @@ class Cotizacion
             ':id' => $idcotizacion
         ]);
         return $stmt->rowCount() > 0;
+    }
+
+
+    public function getReporteCotizacionGeneral(): ?array
+    {
+        $query = "CALL sp_reporte_cotizaciones_general();";
+        try {
+            $stmt = $this->db->prepare($query);
+            $stmt->execute();
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $stmt->closeCursor();
+            return $result;
+        } catch (PDOException $e) {
+          
+            error_log("Error PDO en reporte general: " . $e->getMessage());
+            return null;
+        }
     }
 }
