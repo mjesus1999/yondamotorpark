@@ -106,7 +106,7 @@
 
             <!-- Total -->
             <div class="mt-3 text-end fw-bold">
-                <i class="fas fa-calculator me-2"></i>Total deuda: <span id="total-deuda" class="text-danger">S/.
+                <i class="fas fa-calculator me-2"></i>Total Saldos Vencidos: <span id="total-deuda" class="text-danger">S/.
                     0.00</span>
             </div>
         </div>

@@ -1,4 +1,6 @@
 <?php
+//app/Helpers/ApiSms.php
+
 class ApiSms
 {
     private $token;
@@ -6,7 +8,7 @@ class ApiSms
     private $autorization;
     private $smstype;
     private $shorturl;
-   
+
 
     public function __construct()
     {
@@ -17,15 +19,15 @@ class ApiSms
         $this->url = "https://api3.gamanet.pe/token/smssend";
     }
 
-    public function sendMessage(string $phone, string $message): bool 
+    public function sendMessage(string $phone, string $message): bool
     {
-    
+
 
         $fields = [
             'smsnumber' => $phone,
-            'smstext'   => $message,
-            'smstype'   => $this->smstype,
-            'shorturl'  => $this->shorturl
+            'smstext' => $message,
+            'smstype' => $this->smstype,
+            'shorturl' => $this->shorturl
         ];
         $fields_string = http_build_query($fields);
 
@@ -45,17 +47,17 @@ class ApiSms
         curl_close($ch);
 
         if ($result === false) {
-           
+
             return false;
         }
 
         $array = json_decode($result, true);
         if (!is_array($array)) {
-            
+
             return false;
         }
 
-      
+
         if (isset($array['message']) && $array['message'] === "0") {
             return true;
         }
