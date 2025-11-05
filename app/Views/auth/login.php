@@ -19,35 +19,40 @@
         body {
             font-family: 'Roboto', sans-serif;
             background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%);
+            background-attachment: fixed;
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
+            padding: 40px 20px;
             position: relative;
-            overflow: hidden;
+            overflow-x: hidden;
+        }
+
+        body>* {
+            position: relative;
+            z-index: 1;
         }
 
         body::before {
             content: '';
-            position: absolute;
+            position: fixed;
             width: 500px;
             height: 500px;
             background: radial-gradient(circle, rgba(255, 95, 0, 0.15) 0%, transparent 70%);
             top: -150px;
             right: -150px;
             animation: pulse 8s ease-in-out infinite;
+            z-index: 0;
         }
 
         body::after {
             content: '';
-            position: absolute;
+            position: fixed;
             width: 400px;
             height: 400px;
             background: radial-gradient(circle, rgba(255, 95, 0, 0.1) 0%, transparent 70%);
             bottom: -100px;
             left: -100px;
             animation: pulse 10s ease-in-out infinite reverse;
+            z-index: 0;
         }
 
         @keyframes pulse {
@@ -62,6 +67,14 @@
                 transform: scale(1.2);
                 opacity: 0.8;
             }
+        }
+
+        .page-wrapper {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 0;
         }
 
         .login-container {
@@ -136,11 +149,6 @@
             letter-spacing: 2px;
         }
 
-        /* .features {
-            position: relative;
-            z-index: 1;
-        } */
-
         .feature {
             display: flex;
             align-items: center;
@@ -203,7 +211,7 @@
         }
 
         .form-header {
-            margin-bottom: 40px;
+            margin-bottom: 20px;
         }
 
         .form-header h2 {
@@ -254,7 +262,7 @@
         }
 
         .form-group {
-            margin-bottom: 25px;
+            margin-bottom: 20px;
             position: relative;
         }
 
@@ -280,6 +288,10 @@
             transition: color 0.3s;
         }
 
+        .input-wrapper.focused i {
+            color: #FF5F00;
+        }
+
         .form-control {
             width: 100%;
             padding: 16px 20px 16px 50px;
@@ -295,10 +307,6 @@
             border-color: #FF5F00;
             background: white;
             box-shadow: 0 0 0 4px rgba(255, 95, 0, 0.1);
-        }
-
-        .form-control:focus+i {
-            color: #FF5F00;
         }
 
         .checkbox-wrapper {
@@ -328,13 +336,12 @@
             color: white;
             border: none;
             border-radius: 12px;
-            font-size: 1.1em;
+            font-size: 1em;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
             text-transform: uppercase;
             letter-spacing: 1px;
-            box-shadow: 0 10px 30px rgba(255, 95, 0, 0.3);
             position: relative;
             overflow: hidden;
         }
@@ -346,7 +353,6 @@
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
             transition: left 0.5s;
         }
 
@@ -402,10 +408,6 @@
                 font-size: 2.2em;
             }
 
-            /* .features {
-                display: none;
-            } */
-
             .form-section {
                 padding: 40px 30px;
             }
@@ -428,58 +430,70 @@
 </head>
 
 <body>
-    <div class="login-container">
-        <div class="image-section">
-            <!-- Imagen -->
-        </div>
-
-        <div class="form-section">
-            <div class="form-header">
-                <h2>Bienvenido</h2>
-                <p>Accede a tu cuenta para continuar</p>
+    <div class="page-wrapper">
+        <div class="login-container">
+            <div class="image-section">
+                <!-- Imagen -->
             </div>
 
-            <!-- Alertas de ejemplo (en producción usar PHP) -->
-            <!-- <div class="alert alert-danger">
-                <i class="fas fa-exclamation-circle"></i>
-                <span>Credenciales incorrectas</span>
-            </div> -->
+            <div class="form-section">
+                <div class="form-header">
+                    <h2>Bienvenido</h2>
+                    <p>Accede a tu cuenta para continuar</p>
+                </div>
 
-            <form action="/login" method="POST" class="signin-form" autocomplete="on">
-                <div class="form-group">
-                    <label for="usernick">Nombre de usuario</label>
-                    <div class="input-wrapper">
-                        <input type="text" id="usernick" name="usernick" class="form-control"
-                            placeholder="Ingresa tu usuario" required>
-                        <i class="fas fa-user"></i>
+                <?php if (!empty($error)): ?>
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span><?= htmlspecialchars($error) ?></span>
                     </div>
-                </div>
+                <?php endif; ?>
 
-                <div class="form-group">
-                    <label for="userpassword">Contraseña</label>
-                    <div class="input-wrapper">
-                        <input type="password" id="userpassword" name="userpassword" class="form-control"
-                            placeholder="Ingresa tu contraseña" required>
-                        <i class="fas fa-lock"></i>
+                <?php if (!empty($message)): ?>
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle"></i>
+                        <span><?= htmlspecialchars($message) ?></span>
                     </div>
-                </div>
+                <?php endif; ?>
 
-                <div class="checkbox-wrapper">
-                    <input type="checkbox" name="remember" id="remember" value="1" checked>
-                    <label for="remember">Recordar mi sesión</label>
-                </div>
+                <form action="/login" method="POST" class="signin-form" autocomplete="on">
+                    <div class="form-group">
+                        <label for="usernick">Nombre de usuario</label>
+                        <div class="input-wrapper">
+                            <input type="text" id="usernick" name="usernick" class="form-control"
+                                placeholder="Ingresa tu usuario" required
+                                value="<?= isset($old['usernick']) ? htmlspecialchars($old['usernick']) : '' ?>">
+                            <i class="fas fa-user"></i>
+                        </div>
+                    </div>
 
-                <button type="submit" class="btn-submit">
-                    <span>Acceder</span>
-                </button>
+                    <div class="form-group">
+                        <label for="userpassword">Contraseña</label>
+                        <div class="input-wrapper">
+                            <input type="password" id="userpassword" name="userpassword" class="form-control"
+                                placeholder="Ingresa tu contraseña" required>
+                            <i class="fas fa-lock"></i>
+                        </div>
+                    </div>
 
-                <div class="form-footer">
-                    <a href="/recoverAccount" class="recover-link">
-                        <i class="fas fa-key"></i>
-                        <span>¿Olvidaste tu contraseña?</span>
-                    </a>
-                </div>
-            </form>
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" name="remember" id="remember" value="1" checked>
+                        <label for="remember">Recordar mi sesión</label>
+                    </div>
+
+                    <button type="submit" class="btn-submit">
+                        <span>Acceder</span>
+                    </button>
+
+                    <div class="form-footer">
+                        <?php $prefill = isset($old['usernick']) ? urlencode($old['usernick']) : ''; ?>
+                        <a href="/recoverAccount<?= $prefill ? '?usernick=' . $prefill : '' ?>" class="recover-link">
+                            <i class="fas fa-key"></i>
+                            <span>¿Olvidaste tu contraseña?</span>
+                        </a>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -491,8 +505,6 @@
 
                 const usernick = document.querySelector('input[name="usernick"]').value;
                 const password = document.querySelector('input[name="userpassword"]').value;
-
-                // Aquí puedes agregar validación adicional si lo necesitas
 
                 form.submit();
             });
