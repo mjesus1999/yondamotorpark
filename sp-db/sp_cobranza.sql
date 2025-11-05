@@ -453,6 +453,7 @@ BEGIN
     ORDER BY dias_atraso DESC, deuda_vencida DESC;
 END$$
 DELIMITER ;
+
 /*
 DROP PROCEDURE IF EXISTS sp_get_cuotas_vencidas;
 DELIMITER $$
@@ -932,6 +933,11 @@ BEGIN
             WHEN cl.tipocliente = 'P' THEN CONCAT(pe.direccion, ', ', dp.distrito, ', ', pp.provincia)
             ELSE CONCAT(e.direccion, ', ', de.distrito, ', ', peprov.provincia)
         END AS direccion_completa,
+        
+        CASE 
+            WHEN cl.tipocliente = 'P' THEN pe.telprimario
+            ELSE e.telprimario
+        END AS telefono,
         
         -- Datos del vehículo
         ma.marca,

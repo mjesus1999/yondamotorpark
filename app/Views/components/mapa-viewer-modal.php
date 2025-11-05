@@ -5,10 +5,12 @@
     <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header bg-yonda">
+
                 <h5 class="modal-title" id="modalMapaViewerLabel">
                     <i class="bi bi-geo-alt-fill me-2"></i>Ubicación del Cliente
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+
             </div>
             <div class="modal-body p-0">
                 <div class="row g-0">
