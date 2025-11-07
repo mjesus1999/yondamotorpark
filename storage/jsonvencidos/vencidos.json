@@ -1,6 +1,6 @@
 {
     "query": "vencidos",
-    "date": "2025-11-05 22:40:44",
+    "date": "2025-11-06 18:16:47",
     "total_registros": 4,
     "data": [
         {
@@ -11,7 +11,9 @@
             "ubicacion_cliente": "Lima \/ Miraflores \/ Ciclovía Avenida Larco, Cocharcas",
             "provincia_cliente": "Lima",
             "distrito_cliente": "Miraflores",
-            "vehiculo": "HYUNDAI \/ Grand i10 \/  \/ XYZ-111",
+            "latitud": "-12.120596",
+            "longitud": "-77.029463",
+            "vehiculo": "HYUNDAI \/ Grand i10 \/  \/ ",
             "tienda": "Chincha Alta",
             "cuotas_totales": 36,
             "monto_primera_vencida": "2292.03",
@@ -20,7 +22,7 @@
             "cuotas_pagadas": "1",
             "estado_pagos": "2 vencidas de 35",
             "fecha_vencida_mas_antigua": "2025-09-15",
-            "dias_atraso": 51
+            "dias_atraso": 52
         },
         {
             "idcontrato": 9,
@@ -30,7 +32,9 @@
             "ubicacion_cliente": "Pisco \/ Independencia \/ Vía de los Libertadores",
             "provincia_cliente": "Pisco",
             "distrito_cliente": "Independencia",
-            "vehiculo": "HYUNDAI \/ Grand i10 \/  \/ XYZ-111",
+            "latitud": "-13.680974",
+            "longitud": "-76.081276",
+            "vehiculo": "HYUNDAI \/ Grand i10 \/  \/ ",
             "tienda": "Chincha Alta",
             "cuotas_totales": 36,
             "monto_primera_vencida": "2256.13",
@@ -39,26 +43,28 @@
             "cuotas_pagadas": "1",
             "estado_pagos": "2 vencidas de 35",
             "fecha_vencida_mas_antigua": "2025-09-16",
-            "dias_atraso": 50
+            "dias_atraso": 51
         },
         {
             "idcontrato": 7,
             "cliente": "FLORES MENDOZA JUANA MARÍA",
             "documento": "75655555",
-            "telefono": "919629135",
+            "telefono": "922259580",
             "ubicacion_cliente": "Chincha \/ Chincha Alta \/ Tambo de mora - Av. 2 de mayo",
             "provincia_cliente": "Chincha",
             "distrito_cliente": "Chincha Alta",
+            "latitud": "-13.458065",
+            "longitud": "-76.180396",
             "vehiculo": "HYUNDAI \/ i20 Hatch \/ NEGRO \/ 6234654726",
             "tienda": "Chincha Alta",
             "cuotas_totales": 15,
-            "monto_primera_vencida": "6267.62",
-            "deuda_vencida": "13162.00",
+            "monto_primera_vencida": "6894.38",
+            "deuda_vencida": "13788.76",
             "cuotas_vencidas": "2",
             "cuotas_pagadas": "0",
             "estado_pagos": "2 vencidas de 15",
             "fecha_vencida_mas_antigua": "2025-09-29",
-            "dias_atraso": 37
+            "dias_atraso": 38
         },
         {
             "idcontrato": 2,
@@ -68,6 +74,8 @@
             "ubicacion_cliente": "Bagua \/ Bagua \/ Av. Buenos Aires #56343",
             "provincia_cliente": "Bagua",
             "distrito_cliente": "Bagua",
+            "latitud": "-6.791101",
+            "longitud": "-76.327092",
             "vehiculo": null,
             "tienda": "Chincha Alta",
             "cuotas_totales": 36,
@@ -77,7 +85,7 @@
             "cuotas_pagadas": "1",
             "estado_pagos": "1 vencidas de 35",
             "fecha_vencida_mas_antigua": "2025-10-13",
-            "dias_atraso": 23
+            "dias_atraso": 24
         }
     ]
 }

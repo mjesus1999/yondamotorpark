@@ -93,8 +93,6 @@ require APP_ROOT . '/app/Routes/ArqueoCaja.router.php';
 require APP_ROOT . '/app/Routes/Contrato.router.php';
 require APP_ROOT . '/app/Routes/FichaSolicitud.router.php';
 require APP_ROOT .'/app/Routes/ConceptoPagos.router.php';
-
-// DEYANIRA :
 require APP_ROOT . '/app/Routes/Usuario.router.php';
 require APP_ROOT . '/app/Routes/Auth.router.php';
 require APP_ROOT . '/app/Routes/ForCotizacion.router.php';
