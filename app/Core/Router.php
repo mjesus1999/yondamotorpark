@@ -3,10 +3,36 @@
 
 namespace App\Core;
 
+/**
+ * Clase Router
+ * 
+ * Maneja el enrutamiento de la aplicación, permitiendo registrar rutas
+ * y despachar las peticiones HTTP a los controladores correspondientes.
+ * 
+ */
 class Router
 {
+
+  /**
+   * Almacena todas las rutas registradas en la aplicación.
+   * 
+   * Cada ruta es un array asociativo con las claves: method, uri, controller y action.
+   * @var array
+   */
   protected array $routes = [];
 
+  /**
+   * Registra una nueva ruta en el sistema de enrutamiento.
+   * 
+   * Permite definir qué controlador y acción deben ejecutarse cuando
+   * se reciba una petición HTTP con el método y URI especificados.
+   * 
+   * @param string $method El método HTTP (GET, POST, PUT, DELETE)
+   * @param string $uri La URI de la ruta
+   * @param string $controller El nombre del controlador
+   * @param string $action El nombre del método del controlador que se ejecutará
+   * @return void
+   */
   public function add(string $method, string $uri, string $controller, string $action): void
   {
     $this->routes[] = [
@@ -17,6 +43,21 @@ class Router
     ];
   }
 
+  /**
+   * Despacha la petición HTTP actual a la ruta correspondiente.
+   * 
+   * Este método procesa la URI de la petición, limpia parámetros de consulta,
+   * busca una ruta coincidente y ejecuta el controlador y acción asociados.
+   * 
+   * 1. Limpia y normaliza la URI de la petición
+   * 2. Obtiene el método HTTP (GET, POST,.......)
+   * 3. Busca una ruta que coincida con el método y URI
+   * 4. Extrae los parámetros dinámicos de la URI
+   * 5. Instancia el controlador y ejecuta la acción
+   * 6. Si no encuentra una ruta, muestra error 404
+   * 
+   * @return void 
+   */
   public function dispatch(): void
   {
     // === Lógica para limpiar la URI, como ya habíamos hecho para Virtual Hosts ===

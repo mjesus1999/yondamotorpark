@@ -5,10 +5,12 @@
     <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header bg-yonda">
+
                 <h5 class="modal-title" id="modalMapaViewerLabel">
                     <i class="bi bi-geo-alt-fill me-2"></i>Ubicación del Cliente
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+
             </div>
             <div class="modal-body p-0">
                 <div class="row g-0">
@@ -53,9 +55,9 @@
                             <!-- <button type="button" class="btn btn-success btn-sm" id="btnCompartirUbicacion">
                                 <i class="bi bi-share-fill me-1"></i>Compartir Ubicación
                             </button> -->
-                            <a href="#" id="btnAbrirGoogleMaps" target="_blank" class="btn btn-outline-primary btn-sm">
+                            <!-- <a href="#" id="btnAbrirGoogleMaps" target="_blank" class="btn btn-outline-primary btn-sm">
                                 <i class="bi bi-globe me-1"></i>Abrir en Google Maps
-                            </a>
+                            </a> -->
                         </div>
                     </div>
                 </div>

@@ -9,6 +9,7 @@
  * generación de reportes PDF, control de acceso por roles (supervisores/asesores),
  * y reactivación de cotizaciones vencidas.
  */
+
 namespace App\Controllers;
 
 use App\Core\Controller;
@@ -976,4 +977,49 @@ class CotizacionController extends Controller
         ]);
     }
 
+    public function getReporteGeneral(): void
+    {
+        header('Content-Type: application/json; charset=utf-8');
+        $cotizaciones = $this->cotizacionModel->getReporteCotizacionGeneral();
+
+
+        $dataAgrupada = [
+            'Pendiente' => [],
+            'Separada' => [],
+            'Aprobada'=> [],
+        ];
+
+        foreach ($cotizaciones as $cotizacion) {
+            $estado = $cotizacion['estado'];
+
+            // Si existe el estado en mi arreglo, que me o agregue con todos su datos
+            if(isset($dataAgrupada[$estado])) {
+                $dataAgrupada[$estado][] = $cotizacion;
+            }
+
+        }
+
+
+        if ($cotizaciones === null) {
+            http_response_code(500);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Error de conexión o configuración con la base de datos.'
+            ]);
+        } elseif (empty($cotizaciones)) {
+            http_response_code(200);
+            echo json_encode([
+                'success' => true,
+                'message' => 'No se encontraron cotizaciones con el estado actual.',
+                'data' => []
+            ]);
+        } else {
+            http_response_code(200);
+            echo json_encode([
+                'success' => true,
+                'message' => 'Reporte generado con éxito.',
+                'data' => $dataAgrupada
+            ]);
+        }
+    }
 }

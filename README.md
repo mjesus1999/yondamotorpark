@@ -2,22 +2,23 @@
 
 ## Documentacion
 
+Entrar a esta URL: https://phpdoc.org/phpDocumentor.phar y Instalar
 
 ```bash
-Instalar phpDocumentor.phar
+phpDocumentor.phar
 
 ```
 
+Ejecutas en el bash (En el directorio que estara la documentacion):
+
 ```bash
-Ejecutas en el bash:
 $ php phpDocumentor.phar -d ./app -t ./docs
 
 ```
 
+Para visualizar la documentacion:
 
 ```bash
-Para visualizar la documentacion:
 $ start ./docs/index.html
 
 ```
-

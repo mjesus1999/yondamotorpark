@@ -649,6 +649,8 @@
                 };
                 const capitalizar = (str) => str.charAt(0).toUpperCase() + str.slice(1);
 
+
+                
                 btnExportarGeneralEstados.addEventListener('click', async () => {
                     btnExportarGeneralEstados.disabled = true;
                     btnExportarGeneralEstados.innerHTML = '<i class="bi bi-arrow-clockwise me-1"></i> Generando...';

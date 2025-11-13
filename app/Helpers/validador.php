@@ -5,13 +5,39 @@ namespace App\Helpers;
 use DateTime;
 use Exception;
 
+/**
+ * Clase Validador
+ * 
+ * Proporciona métodos estáticos para validar y sanitizar datos de entrada
+ * en formularios y operaciones de la aplicación.
+ */
 class Validador
 {
+
+    /**
+     * Limpia y sanitiza una cadena de texto.
+     * 
+     * Elimina espacios en blanco al inicio y final, y convierte caracteres
+     * especiales a entidades HTML para prevenir ataques XSS.
+     * 
+     * @param string $valor El valor a limpiar
+     * @return string El valor limpio y sanitizado
+     */
     public static function limpiar(string $valor): string
     {
         return htmlspecialchars(trim($valor));
     }
 
+    /**
+     * Valida que un campo no esté vacío.
+     * 
+     * Verifica si el valor es nulo o está vacío después de eliminar espacios.
+     * Retorna un mensaje de error personalizado si el campo está vacío.
+     * 
+     * @param string $valor El valor a validar
+     * @param string $nombre El nombre del campo para el mensaje de error
+     * @return string|null Mensaje de error si el campo está vacío, null si es válido
+     */
     public static function campoObligatorio(?string $valor, string $nombre): ?string
     {
         return (is_null($valor) || trim($valor) === '')
@@ -19,13 +45,32 @@ class Validador
             : null;
     }
 
-
+    /**
+     * Valida el formato de una dirección de correo electrónico.
+     * 
+     * Utiliza el filtro nativo de PHP para validar el formato del email.
+     * Si el email está vacío, retorna null (no es obligatorio por defecto).
+     * 
+     * @param string $email El email a validar
+     * @return string|null Mensaje de error si el email es inválido, null si es válido o vacío
+     */
     public static function emailValido(?string $email): ?string
     {
-        if (empty($email)) return null;
+        if (empty($email))
+            return null;
         return filter_var($email, FILTER_VALIDATE_EMAIL) ? null : "El correo no es válido.";
     }
 
+    /**
+     * Valida el formato de un número de teléfono.
+     * 
+     * Verifica que el teléfono contenga únicamente dígitos y tenga
+     * una longitud entre 9 y 12 caracteres.
+     * 
+     * @param string $telefono El número de teléfono a validar
+     * @param string $campo El nombre del campo para el mensaje de error
+     * @return string|null Mensaje de error si el teléfono es inválido, null si es válido
+     */
     public static function telefonoValido(string $telefono, string $campo): ?string
     {
         if (!preg_match('/^\d{9,12}$/', $telefono)) {
@@ -34,6 +79,14 @@ class Validador
         return null;
     }
 
+    /**
+     * Valida que un valor contenga solo números con una longitud específica.
+     * 
+     * @param string $valor El valor a validar
+     * @param string $campo El nombre del campo para el mensaje de error
+     * @param int $longitud La longitud exacta requerida
+     * @return string|null Mensaje de error si el valor es inválido, null si es válido
+     */
     public static function soloNumeros(string $valor, string $campo, int $longitud = 11): ?string
     {
         if (!preg_match('/^\d{' . $longitud . '}$/', $valor)) {
@@ -42,8 +95,12 @@ class Validador
         return null;
     }
 
-    // Algunos ejmplos para validar la persona y no repetir tanto código de validacióm el Controller.
-
+    /**
+     * Valida todos los campos requeridos para crear una nueva Persona.
+     * 
+     * @param array $data Array asociativo con los datos de la persona a validar
+     * @return array Array con los mensajes de error encontrados
+     */
     public static function validarPersonaCrear(array $data): array
     {
 
@@ -72,6 +129,12 @@ class Validador
         return array_filter($errores);
     }
 
+    /**
+     * Valida los campos requeridos para actualizar una Persona existente.
+     * 
+     * @param array $data Array asociativo con los datos de la persona a validar
+     * @return array Array con los mensajes de error encontrados
+     */
     public static function validarPersonaUpdate(array $data): array
     {
         $errores = [];
@@ -89,7 +152,6 @@ class Validador
 
         return array_filter($errores);
     }
-
 
 
     // public static function validarFechaNacimiento(string $fecha): ?string

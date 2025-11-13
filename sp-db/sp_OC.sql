@@ -74,9 +74,31 @@ CALL sp_oc_por_estado('proceso');
 
 
 DROP PROCEDURE sp_oc_reporte_general;
-DELIMITER $$
+
 CREATE PROCEDURE sp_oc_reporte_general()
 BEGIN
+  
+    WITH TotalOC_CTE AS (
+        SELECT
+            idordencompra,
+            ROUND(SUM(preciocompra * 1.18), 2) AS totalOC
+        FROM detordencompra
+        GROUP BY idordencompra
+    ),
+   
+    TotalPagado_CTE AS (
+        SELECT
+            idorden AS idordencompra,
+            ROUND(SUM(
+                CASE 
+                    WHEN moneda = 'PEN' AND tipocambio > 0 THEN amortizacion / tipocambio
+                    ELSE amortizacion
+                END
+            ), 2) AS totalPagado
+        FROM pagosOC
+        GROUP BY idorden
+    )
+ 
     SELECT 
         oc.idordencompra,
         oc.serie,
@@ -85,38 +107,14 @@ BEGIN
         con.razonsocial,
         CONCAT(dep.departamento, ' / ', p.provincia, ' / ', d.distrito) AS ubicacion,
         fn_format_oc_display_id(oc.idordencompra, oc.serie) AS numeroOCIdentificador,
-
-        ROUND((
-            SELECT IFNULL(SUM(preciocompra * 1.18),0) 
-            FROM detordencompra 
-            WHERE idordencompra = oc.idordencompra
-        ), 2) AS totalOC,
-
-        ROUND((
-            SELECT IFNULL(SUM(
-                CASE 
-                    WHEN moneda = 'PEN' AND tipocambio > 0 THEN amortizacion / tipocambio
-                    ELSE amortizacion
-                END
-            ),0)
-            FROM pagosOC
-            WHERE idorden = oc.idordencompra
-        ), 2) AS totalPagado,
-
-        ROUND((
-            (SELECT IFNULL(SUM(preciocompra * 1.18),0) 
-             FROM detordencompra 
-             WHERE idordencompra = oc.idordencompra)
-            -
-            (SELECT IFNULL(SUM(
-                CASE 
-                    WHEN moneda = 'PEN' AND tipocambio > 0 THEN amortizacion / tipocambio
-                    ELSE amortizacion
-                END
-            ),0)
-             FROM pagosOC 
-             WHERE idorden = oc.idordencompra)
-        ), 2) AS saldoRestante,
+        
+    
+        IFNULL(toc.totalOC, 0) AS totalOC,
+        IFNULL(tp.totalPagado, 0) AS totalPagado,
+        
+       
+        ROUND(IFNULL(toc.totalOC, 0) - IFNULL(tp.totalPagado, 0), 2) AS saldoRestante,
+        
         oc.estado
 
     FROM ordenescompra oc
@@ -125,9 +123,11 @@ BEGIN
     JOIN distritos d ON t.iddistrito = d.iddistrito
     JOIN provincias p ON d.idprovincia = p.idprovincia
     JOIN departamentos dep ON p.iddepartamento = dep.iddepartamento
+    LEFT JOIN TotalOC_CTE toc ON oc.idordencompra = toc.idordencompra
+    LEFT JOIN TotalPagado_CTE tp ON oc.idordencompra = tp.idordencompra
+    
     ORDER BY oc.idordencompra DESC;
-END $$
-DELIMITER ;
+END
 
 CALL sp_oc_reporte_general();
 

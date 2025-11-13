@@ -24,6 +24,7 @@ $allModules = [
   'usuarios' => ['url' => '/usuarios', 'icon' => 'fa-solid fa-list pe-2', 'label' => 'Usuarios'],
   'formatoCotizacion' => ['url' => '/formatoCotizacion', 'icon' => 'fa-solid fa-list pe-2', 'label' => 'Requisitos'],
   'cotizacion' => ['url' => '/cotizacion', 'icon' => 'fa-solid fa-list pe-2', 'label' => 'Cotización'],
+  'auth' => ['url' => '/auth', 'icon' => 'fa-solid fa-list pe-2', 'label' => 'Auth']
 ];
 ?>
 
@@ -166,15 +167,15 @@ $allModules = [
             </ul>
           </li>
 
-            <li class="sidebar-item">
+          <li class="sidebar-item">
             <a href="/contratos" class="sidebar-link">
-             <i class="bi bi-journal-text pe-2"></i> Contratos
+              <i class="bi bi-journal-text pe-2"></i> Contratos
             </a>
           </li>
 
-             <li class="sidebar-item">
+          <li class="sidebar-item">
             <a href="/vehiculosAlContado" class="sidebar-link">
-             <i class="fa-solid fa-car-side pe-2"></i> Vehículos al contado
+              <i class="fa-solid fa-car-side pe-2"></i> Vehículos al contado
             </a>
           </li>
 
@@ -295,7 +296,7 @@ $allModules = [
       </nav>
       <main class="content px-3 py-2">
 
-      
+
 
         <!-- <script>
           document.addEventListener('DOMContentLoaded', function () {
@@ -343,7 +344,7 @@ $allModules = [
 
 
 
-          <script>
+        <script>
           document.addEventListener('DOMContentLoaded', function () {
             const currentPath = window.location.pathname;
             const sidebarLinks = document.querySelectorAll('.sidebar-link');

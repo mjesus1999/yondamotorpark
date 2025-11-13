@@ -19,6 +19,9 @@ namespace App\Controllers;
 use App\Core\Controller;
 use App\Models\Usuario;
 
+require_once __DIR__ . '/../Helpers/ApiSms.php';
+use ApiSms;
+
 /**
  * Clase AuthController
  * 
@@ -73,7 +76,7 @@ class AuthController extends Controller
         $message = $_SESSION['login_success'] ?? null;
         $old = $_SESSION['login_old'] ?? null;
 
-        // Eliminar después de usarlos (para que no persistan)
+        // Eliminar después de usarlos
         unset($_SESSION['login_error'], $_SESSION['login_success'], $_SESSION['login_old']);
 
         $this->view('auth.login', [
@@ -286,57 +289,256 @@ class AuthController extends Controller
      */
     public function handleRecover(): void
     {
+        $action = $_POST['action'] ?? 'send_code';
+
+        if ($action === 'send_code') {
+            $this->sendVerificationCode();
+        } elseif ($action === 'verify_code') {
+            $this->verifyCode();
+        } elseif ($action === 'change_password') {
+            $this->changePassword();
+        }
+    }
+
+
+    // RECUPERACION DE CONTRASEÑA CON CODIGO
+
+    private function sendVerificationCode(): void
+    {
         $usernick = trim($_POST['usernick'] ?? '');
         $email = trim($_POST['email'] ?? '');
+        $telprimario = trim($_POST['telprimario'] ?? '');
+
+        if (empty($usernick) || empty($email) || empty($telprimario)) {
+            $this->view('auth.recoverAccount', [
+                'error'         => 'Completa todos los campos.',
+                'step'          => 1,
+                'usernick'      => $usernick,
+                'email'         => $email,
+                'telprimario'   => $telprimario
+            ]);
+            return;
+        }
+
+        $user = $this->usuarioModel->searchByUsernick($usernick);
+        if (!$user) {
+            $this->view('auth.recoverAccount', [
+                'error'         => 'Usuario no encontrado.',
+                'step'          => 1,
+                'usernick'      => $usernick
+            ]);
+            return;
+        }
+
+        $full = $this->usuarioModel->getById((int) $user['idcolaborador']);
+        $emailStored = $full['email'] ?? '';
+        $telStored = $full['telprimario'] ?? '';
+
+        if (mb_strtolower(trim($emailStored)) !== mb_strtolower(trim($email))) {
+            $this->view('auth.recoverAccount', [
+                'error'         => 'El email no coincide con el registrado.',
+                'step'          => 1,
+                'usernick'      => $usernick,
+                'email'         => $email,
+                'telprimario'   => $telprimario
+            ]);
+            return;
+        }
+
+        if (trim($telStored) !== trim($telprimario)) {
+            $this->view('auth.recoverAccount', [
+                'error'         => 'El teléfono no coincide con el registrado.',
+                'step'          => 1,
+                'usernick'      => $usernick,
+                'email'         => $email,
+                'telprimario'   => $telprimario
+            ]);
+            return;
+        }
+
+        // Generar código de 6 dígitos
+        $code = str_pad((string) rand(100000, 999999), 6, '0', STR_PAD_LEFT);
+
+        // Guardar en sesión con timestamp
+        $_SESSION['recovery_code'] = $code;
+        $_SESSION['recovery_user'] = $usernick;
+        $_SESSION['recovery_time'] = time();
+        $_SESSION['recovery_attempts'] = 0;
+
+        // Enviar SMS
+        $apiSms = new ApiSms();
+        $message = "Motorpark Yonda - Tu codigo de recuperacion es: $code. Valido por 10 minutos.";
+
+        $sent = $apiSms->sendMessage($telprimario, $message);
+
+        if (!$sent) {
+            $this->view('auth.recoverAccount', [
+                'error'         => 'No se pudo enviar el código SMS. Intenta más tarde.',
+                'step'          => 1,
+                'usernick'      => $usernick,
+                'email'         => $email,
+                'telprimario'   => $telprimario
+            ]);
+            return;
+        }
+
+        // Ir a paso 2
+        $this->view('auth.recoverAccount', [
+            'message'           => 'Código enviado a tu teléfono. Verifica e ingresa el código.',
+            'step'              => 2,
+            'usernick'          => $usernick,
+            'telprimario'       => $telprimario
+        ]);
+    }
+
+    private function verifyCode(): void
+    {
+        $usernick = trim($_POST['usernick'] ?? '');
+        $code = trim($_POST['code'] ?? '');
+
+        if (empty($code)) {
+            $this->view('auth.recoverAccount', [
+                'error'         => 'Ingresa el código recibido.',
+                'step'          => 2,
+                'usernick'      => $usernick
+            ]);
+            return;
+        }
+
+        // Verificar sesión
+        if (empty($_SESSION['recovery_code']) || empty($_SESSION['recovery_user'])) {
+            $this->view('auth.recoverAccount', [
+                'error'         => 'Sesión expirada. Solicita un nuevo código.',
+                'step'          => 1
+            ]);
+            return;
+        }
+
+        if ($_SESSION['recovery_user'] !== $usernick) {
+            $this->view('auth.recoverAccount', [
+                'error'         => 'Usuario no coincide con la solicitud.',
+                'step'          => 1
+            ]);
+            return;
+        }
+
+        // Verificar tiempo (10 minutos)
+        $elapsed = time() - ($_SESSION['recovery_time'] ?? 0);
+        if ($elapsed > 600) {
+            unset($_SESSION['recovery_code'], $_SESSION['recovery_user'], $_SESSION['recovery_time']);
+            $this->view('auth.recoverAccount', [
+                'error'         => 'Código expirado. Solicita uno nuevo.',
+                'step'          => 1
+            ]);
+            return;
+        }
+
+        // Verificar intentos
+        $_SESSION['recovery_attempts'] = ($_SESSION['recovery_attempts'] ?? 0) + 1;
+        if ($_SESSION['recovery_attempts'] > 3) {
+            unset($_SESSION['recovery_code'], $_SESSION['recovery_user'], $_SESSION['recovery_time']);
+            $this->view('auth.recoverAccount', [
+                'error'         => 'Demasiados intentos. Solicita un nuevo código.',
+                'step'          => 1
+            ]);
+            return;
+        }
+
+        // Verificar código
+        if ($code !== $_SESSION['recovery_code']) {
+            $remaining = 3 - $_SESSION['recovery_attempts'];
+            $this->view('auth.recoverAccount', [
+                'error'         => "Código incorrecto. Te quedan $remaining intentos.",
+                'step'          => 2,
+                'usernick'      => $usernick
+            ]);
+            return;
+        }
+
+        // Código correcto - ir a paso 3
+        $_SESSION['recovery_verified'] = true;
+        $this->view('auth.recoverAccount', [
+            'message'           => 'Código verificado. Ahora cambia tu contraseña.',
+            'step'              => 3,
+            'usernick'          => $usernick
+        ]);
+    }
+
+    private function changePassword(): void
+    {
+        $usernick = trim($_POST['usernick'] ?? '');
         $password = $_POST['password'] ?? '';
         $password_confirm = $_POST['password_confirm'] ?? '';
 
-        // Validaciones
-        if (empty($usernick) || empty($email) || empty($password) || empty($password_confirm)) {
-            $this->view('auth.recoverAccount', ['error' => 'Completa todos los campos.', 'usernick' => $usernick, 'email' => $email]);
-            return;
-        }
-        if (strlen($password) < 8) {
-            $this->view('auth.recoverAccount', ['error' => 'La contraseña debe tener al menos 8 caracteres.', 'usernick' => $usernick, 'email' => $email]);
-            return;
-        }
-        if ($password !== $password_confirm) {
-            $this->view('auth.recoverAccount', ['error' => 'Las contraseñas no coinciden.', 'usernick' => $usernick, 'email' => $email]);
+        // Verificar que pasó la verificación
+        if (empty($_SESSION['recovery_verified']) || $_SESSION['recovery_user'] !== $usernick) {
+            $this->view('auth.recoverAccount', [
+                'error'         => 'Debes verificar el código primero.',
+                'step'          => 1
+            ]);
             return;
         }
 
-        // Buscar usuario por usernick
+        if (empty($password) || empty($password_confirm)) {
+            $this->view('auth.recoverAccount', [
+                'error'         => 'Completa ambos campos de contraseña.',
+                'step'          => 3,
+                'usernick'      => $usernick
+            ]);
+            return;
+        }
+
+        if (strlen($password) < 8) {
+            $this->view('auth.recoverAccount', [
+                'error'         => 'La contraseña debe tener al menos 8 caracteres.',
+                'step'          => 3,
+                'usernick'      => $usernick
+            ]);
+            return;
+        }
+
+        if ($password !== $password_confirm) {
+            $this->view('auth.recoverAccount', [
+                'error'         => 'Las contraseñas no coinciden.',
+                'step'          => 3,
+                'usernick'      => $usernick
+            ]);
+            return;
+        }
+
         $user = $this->usuarioModel->searchByUsernick($usernick);
         if (!$user) {
-            $this->view('auth.recoverAccount', ['error' => 'Usuario no encontrado.', 'usernick' => $usernick, 'email' => $email]);
+            $this->view('auth.recoverAccount', [
+                'error'         => 'Usuario no encontrado.',
+                'step'          => 1
+            ]);
             return;
         }
 
-        // Obtener email real desde getById
-        $full = $this->usuarioModel->getById((int) $user['idcolaborador']);
-        $emailStored = $full['email'] ?? '';
-
-        if ($emailStored === '') {
-            $this->view('auth.recoverAccount', ['error' => 'El usuario no tiene email registrado.', 'usernick' => $usernick]);
-            return;
-        }
-
-        // Comparar emails
-        if (mb_strtolower(trim($emailStored)) !== mb_strtolower(trim($email))) {
-            $this->view('auth.recoverAccount', ['error' => 'El email no coincide con el usuario.', 'usernick' => $usernick, 'email' => $email]);
-            return;
-        }
-
-        // Actualizar contraseña
         $newHash = password_hash($password, PASSWORD_DEFAULT);
         $ok = $this->usuarioModel->updatePassword((int) $user['idcolaborador'], $newHash);
 
         if ($ok) {
-            $this->view('auth.login', ['message' => 'Contraseña actualizada. Ya puedes iniciar sesión.', 'old' => ['usernick' => $usernick]]);
-            return;
+            // Limpiar sesión de recuperación
+            unset(
+                $_SESSION['recovery_code'],
+                $_SESSION['recovery_user'],
+                $_SESSION['recovery_time'],
+                $_SESSION['recovery_attempts'],
+                $_SESSION['recovery_verified']
+            );
+
+            $_SESSION['login_success'] = 'Contraseña actualizada exitosamente. Ya puedes iniciar sesión.';
+            $_SESSION['login_old'] = ['usernick' => $usernick];
+            header('Location: /login');
+            exit;
         }
 
-        $this->view('auth.recoverAccount', ['error' => 'No se pudo actualizar la contraseña. Intenta más tarde.', 'usernick' => $usernick, 'email' => $email]);
+        $this->view('auth.recoverAccount', [
+            'error'             => 'No se pudo actualizar la contraseña. Intenta más tarde.',
+            'step'              => 3,
+            'usernick'          => $usernick
+        ]);
     }
 
     /**

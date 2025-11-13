@@ -52,5 +52,3 @@ function obtenerTipoCambio(): float
 
     return 0;
 } 
-//  echo obtenerTipoCambio(); 
-?>

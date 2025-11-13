@@ -549,18 +549,8 @@ CREATE TABLE cotizaciones (
     CONSTRAINT fk_idcolventa_cot FOREIGN KEY (idasesor) REFERENCES colaboradores (idcolaborador)
 ) ENGINE = INNODB;
 
-<<<<<<< HEAD
 USE motorpark;
 SHOW COLUMNS FROM cotizaciones;
-=======
-/*
-ALTER TABLE cotizaciones
-ADD COLUMN tasaanual DECIMAL(5,2) NOT NULL DEFAULT 65.00 COMMENT 'Tasa de interés anual (%) aplicada a la cotización',
-ADD COLUMN tasamensual DECIMAL(5,2) NOT NULL DEFAULT 0.00 COMMENT 'Tasa de interés mensual (%) aplicada a la cotización';
-*/
-
-
->>>>>>> 2f8934d6ac52f07a8b9c24a32b1b5724223ca86f
 
 CREATE TABLE conceptospago (
     idconcepto INT PRIMARY KEY AUTO_INCREMENT,
@@ -578,3 +568,8 @@ CREATE TABLE conceptospago (
 
 -- USE motorpark;
 -- SELECT * FROM cotizaciones;
+
+
+
+
+SHOW COLUMNS FROM cotizaciones;

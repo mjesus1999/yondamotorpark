@@ -467,7 +467,7 @@ CREATE TABLE cotizaciones (
     numcuotas SMALLINT NOT NULL,
     valorcuota DECIMAL(9, 2) NOT NULL, -- Se usara en la tabla de cronogramas
     gastosadministrativos DECIMAL(9,2) NOT NULL DEFAULT 0.00 COMMENT 'Gastos administrativos de la cotización',
-    estadocotizacion ENUM('P', 'E', 'A', 'C', 'R') NOT NULL DEFAULT 'P' COMMENT 'Pendiente | Evaluación | Aprobada | Cancelada (cliente) | Rechazada (Analista crédito)',
+    estadocotizacion ENUM('P', ,'S','E', 'A', 'C', 'R') NOT NULL DEFAULT 'P' COMMENT 'Pendiente | Separada | Evaluación | Aprobada | Cancelada (cliente) | Rechazada (Analista crédito)',
     comentarios TEXT,
     fechaseguimiento DATETIME NULL,
     creado DATETIME NOT NULL DEFAULT NOW(),

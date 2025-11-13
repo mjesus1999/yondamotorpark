@@ -1,22 +1,57 @@
 <?php
 // app/Helpers/Validation.php
 
+/**
+ * Helper de Validación
+ * 
+ * app/Helpers/Validation.php
+ * 
+ * Proporciona métodos estáticos para validar datos de formularios relacionados
+ * con usuarios del sistema: creación, edición, cambio de contraseñas, subida
+ * de avatares, y creación desde contratos. Implementa validaciones exhaustivas
+ * de formato, longitud, unicidad de usuarios, tipos MIME de imágenes, y rangos
+ * de fechas. Retorna arrays de mensajes de error descriptivos para feedback
+ * al usuario. Todas las validaciones son reutilizables y centralizadas para
+ * mantener consistencia en todo el sistema.
+ * 
+ */
 namespace App\Helpers;
 
 use App\Models\Usuario;
 use DateTime;
 use finfo;
 
+/**
+ * Clase Validation
+ * 
+ * Helper que centraliza todas las validaciones de datos de usuario.
+ * Proporciona métodos estáticos para validar formularios de creación,
+ * edición, cambio de contraseña, y subida de archivos. Cada método
+ * retorna un array de errores descriptivos para mostrar al usuario.
+ * 
+ */
 class Validation
 {
 
     // VALIDACIONES DE USUARIOS
 
     /**
-     * validateUsuarioData / Valida los datos del formulario de usuario.
-     * @param array $data
-     * @param \App\Models\Usuario $usuarioModel
-     * @return string[]
+     * Valida datos del formulario de creación de usuario
+     * 
+     * Realiza validación completa de todos los campos requeridos para crear
+     * un nuevo usuario en el sistema. Verifica formato de datos, longitud
+     * de contraseña, coincidencia de confirmación, y unicidad del nombre de
+     * usuario mediante consulta a base de datos.
+     * 
+     * @param array $data Datos del formulario con claves:
+     *   - idpersona (int): ID de la persona base
+     *   - idcargo (int): ID del cargo asignado
+     *   - fecha_inicio (string): Fecha inicio formato YYYY-MM-DD
+     *   - usuario (string): Nombre de usuario (usernick)
+     *   - password1 (string): Contraseña
+     *   - password2 (string): Confirmación de contraseña
+     * @param \App\Models\Usuario $usuarioModel Instancia del modelo para validar unicidad
+     * @return string[] 
      */
     public static function validateUsuarioData(array $data, Usuario $usuarioModel): array
     {
@@ -78,8 +113,16 @@ class Validation
     }
 
     /**
-     * validateChangePassword /Valida cambio de contraseña.
-     * @param array $data
+     * Valida cambio de contraseña de usuario
+     * 
+     * Valida los datos para actualizar la contraseña de un usuario existente.
+     * Verifica que el ID sea válido, las contraseñas no estén vacías, coincidan
+     * entre sí, y cumplan con la longitud mínima de seguridad.
+     * 
+     * @param array $data Datos del formulario con claves:
+     *   - idcolaborador (int): ID del usuario a actualizar
+     *   - password1 (string): Nueva contraseña
+     *   - password2 (string): Confirmación de contraseña
      * @return string[] / Espera ['idcolaborador'=>int,'password1'=>string,'password2'=>string]
      */
     public function validateChangePassword(array $data): array
@@ -106,55 +149,75 @@ class Validation
     }
 
     /**
-     * validateAvatarUpload / Valida subida de avatar. Recibe el array equivalente a $_FILES['avatar'] o null.
-     * @param mixed $file
+     * Valida subida de archivo de avatar de usuario
+     * 
+     * Realiza validación exhaustiva de archivos de imagen subidos como avatares
+     * de usuario. Verifica tipo MIME real del archivo (no solo extensión) para
+     * prevenir subida de archivos maliciosos, valida tamaño máximo, y confirma
+     * que el archivo fue subido correctamente por PHP.
+     * 
+     * @param array $file Array del archivo ($_FILES['avatar']) o null
+     *   Estructura esperada de $file:
+     *   - error (int): Código de error de subida
+     *   - size (int): Tamaño en bytes
+     *   - tmp_name (string): Ruta temporal del archivo
+     *   - name (string): Nombre original del archivo
      * @return string[]
      */
     public function validateAvatarUpload(?array $file): array
-{
-    $errors = [];
+    {
+        $errors = [];
 
-    if (empty($file) || !isset($file['error'])) {
-        $errors[] = 'Archivo no recibido.';
+        if (empty($file) || !isset($file['error'])) {
+            $errors[] = 'Archivo no recibido.';
+            return $errors;
+        }
+
+        if ($file['error'] !== UPLOAD_ERR_OK) {
+            $errors[] = 'Error al subir el archivo (código ' . (int) $file['error'] . ').';
+            return $errors;
+        }
+
+        // Tamaño máximo: 2 MB
+        $maxBytes = 2 * 1024 * 1024;
+        if (isset($file['size']) && $file['size'] > $maxBytes) {
+            $errors[] = 'El archivo supera el límite de 2 MB.';
+        }
+
+        // Verificar que el archivo fue subido por PHP
+        if (empty($file['tmp_name']) || !is_uploaded_file($file['tmp_name'])) {
+            $errors[] = 'El archivo no es válido.';
+            return $errors;
+        }
+
+        // Validación por tipo MIME (no solo extensión)
+        $finfo = new finfo(FILEINFO_MIME_TYPE);
+        $mimeType = $finfo->file($file['tmp_name']);
+
+        // Agregamos image/webp para aceptar imágenes editadas por apps móviles
+        $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+
+        if (!in_array($mimeType, $allowedTypes, true)) {
+            $errors[] = 'Formato de imagen no soportado. Usa JPG, PNG, GIF o WEBP.';
+        }
+
         return $errors;
     }
-
-    if ($file['error'] !== UPLOAD_ERR_OK) {
-        $errors[] = 'Error al subir el archivo (código ' . (int) $file['error'] . ').';
-        return $errors;
-    }
-
-    // Tamaño máximo: 2 MB
-    $maxBytes = 2 * 1024 * 1024;
-    if (isset($file['size']) && $file['size'] > $maxBytes) {
-        $errors[] = 'El archivo supera el límite de 2 MB.';
-    }
-
-    // Verificar que el archivo fue subido por PHP
-    if (empty($file['tmp_name']) || !is_uploaded_file($file['tmp_name'])) {
-        $errors[] = 'El archivo no es válido.';
-        return $errors;
-    }
-
-    // Validación por tipo MIME (no solo extensión)
-    $finfo = new finfo(FILEINFO_MIME_TYPE);
-    $mimeType = $finfo->file($file['tmp_name']);
-    
-    // Agregamos image/webp para aceptar imágenes editadas por apps móviles
-    $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-
-    if (!in_array($mimeType, $allowedTypes, true)) {
-        $errors[] = 'Formato de imagen no soportado. Usa JPG, PNG, GIF o WEBP.';
-    }
-
-    return $errors;
-}
-
 
     /**
-     * validateCreateFromContract / Valida creación de colaborador a partir de contrato.
-     * @param array $data
-     * @param \App\Models\Usuario $usuarioModel
+     * Valida creación de usuario a partir de contrato laboral existente
+     * 
+     * Valida los datos para crear un usuario (colaborador) basándose en un
+     * contrato laboral ya registrado. Útil para dar acceso al sistema a
+     * empleados contratados. Verifica unicidad del username y seguridad
+     * de contraseña.
+     * 
+     * @param array $data Datos del formulario con claves:
+     *   - idcontrato (int): ID del contrato laboral base
+     *   - usernick (string): Nombre de usuario deseado
+     *   - password1 (string): Contraseña
+     *   - password2 (string): Confirmación de contraseña
+     * @param \App\Models\Usuario $usuarioModel Instancia del modelo para validar unicidad
      * @return string[] / Espera ['idcontrato'=>int,'usernick'=>string,'password1'=>string,'password2'=>string]
      */
     public function validateCreateFromContract(array $data, Usuario $usuarioModel): array
@@ -194,7 +257,11 @@ class Validation
     }
 
     /**
-     * validateUpdateUsuario / Valida los datos del formulario de edición de usuario.
+     * Valida datos del formulario de edición de usuario
+     * 
+     * Realiza validación completa de todos los campos para actualizar datos
+     * de un usuario existente.
+     * 
      * @param array $data Espera keys: idcolaborador, nombres, apellidos, idarea, idcargo, nrodoc, fechainicio
      * @return string[] lista de errores
      */

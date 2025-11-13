@@ -6,6 +6,9 @@ namespace App\Core;
 use PDO;
 use PDOException;
 
+/**
+ * Clase Database
+ */
 class Database
 {
 
@@ -15,7 +18,7 @@ class Database
    * Almacena la conexión activa a la base de datos. Es estática para
    * mantener una única instancia compartida por toda la aplicación.
    * Se inicializa como null y se crea solo cuando se solicita por
-   * primera vez (lazy initialization).
+   * primera vez.
    * 
    * @var 
    */
