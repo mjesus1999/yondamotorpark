@@ -1,10 +1,9 @@
 <?php include __DIR__ . '/../layout/header.php'; ?>
-
-<!-- Incluir librerías y JavaScript del mapa -->
+<script src="/assets/js/mapa.js"></script>
 <?php include __DIR__ . '/../components/mapa-includes.php'; ?>
-
-<!-- Incluir modal del mapa -->
 <?php include __DIR__ . '/../components/mapa-modal.php'; ?>
+
+
 
 <?php if (isset($error)): ?>
     <div class="alert alert-danger" role="alert">
@@ -127,23 +126,23 @@
                         <h6 class="text-primary mb-3 border-bottom pb-2"><i class="bi bi-info-circle me-2"></i>Datos Personales</h6>
                         <div class="row g-3">
 
-                        <div class="col-md-4">
-                            <div class="form-floating">
-                                <input type="date" class="form-control" id="fechanac" name="fechanac"
-                                    placeholder="Fecha de nacimiento" value="<?= htmlspecialchars($personaCliente['fechanac'] ?? 'No asignado') ?>">
-                                <label for="fechanac"><i class="bi bi-calendar me-1"></i>Fecha de nacimiento</label>
+                            <div class="col-md-4">
+                                <div class="form-floating">
+                                    <input type="date" class="form-control" id="fechanac" name="fechanac"
+                                        placeholder="Fecha de nacimiento" value="<?= htmlspecialchars($personaCliente['fechanac'] ?? 'No asignado') ?>">
+                                    <label for="fechanac"><i class="bi bi-calendar me-1"></i>Fecha de nacimiento</label>
+                                </div>
                             </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="form-floating">
-                                <select name="estadocivil" id="estadocivil" class="form-select">
-                                    <?php
+                            <div class="col-md-4">
+                                <div class="form-floating">
+                                    <select name="estadocivil" id="estadocivil" class="form-select">
+                                        <?php
                                         // Opción por defecto si no hay estado civil asignado
                                         $estadoCivilActual = $personaCliente['estadocivil'] ?? '';
                                         if (empty($estadoCivilActual)) {
                                             echo "<option value=\"\" selected>Seleccione</option>";
                                         }
-                                        
+
                                         $estados = [
                                             'SOL' => 'Solter@',
                                             'CAS' => 'Casad@',
@@ -245,10 +244,10 @@
                     <!-- Botones de acción -->
                     <div class="d-flex justify-content-end mt-4 pt-3 border-top gap-2">
                         <a href="/clientes" class="btn btn-outline-secondary">
-                             Cancelar
+                            Cancelar
                         </a>
                         <button type="submit" class="btn btn-primary">
-                             Actualizar
+                            Actualizar
                         </button>
                     </div>
                 </form>

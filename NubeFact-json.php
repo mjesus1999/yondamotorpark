@@ -31,10 +31,10 @@
  */
 
 // RUTA para enviar documentos
-$ruta = "https://demo.nubefact.com/api/v1/03989d1a-6c8c-4b71-b1cd-7d37001deaa0";
+$ruta = "https://api.nubefact.com/api/v1/46483739-a800-43d4-be51-45cd0c5a97ee";
 
 //TOKEN para enviar documentos
-$token = "d0a80b88cde446d092025465bdb4673e103a0d881ca6479ebbab10664dbc5677";
+$token = "e4823c34cc29491fa1730cce976929d8b27415bf9b1c41238eeff01b7624a595";
 
 /*
 #########################################################

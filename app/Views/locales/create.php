@@ -130,7 +130,7 @@ require_once __DIR__ . '/../../Helpers/functions.php';
                                 <select name="departamento" id="departamento" class="form-select" required>
                                     <option value="">Seleccione</option>
                                 </select>
-                                <label for="departamento"><i class="bi bi-map me-1"></i>Departamento</label>
+                                <label for="departamento"><i class="bi bi-map me-1"></i>Departamento <span class="text-danger fw-bold">*</span></label>
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -138,7 +138,7 @@ require_once __DIR__ . '/../../Helpers/functions.php';
                                 <select name="provincia" id="provincia" class="form-select" required>
                                     <option value="">Seleccione</option>
                                 </select>
-                                <label for="provincia"><i class="bi bi-map me-1"></i>Provincia</label>
+                                <label for="provincia"><i class="bi bi-map me-1"></i>Provincia <span class="text-danger fw-bold">*</span></label>
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -146,7 +146,7 @@ require_once __DIR__ . '/../../Helpers/functions.php';
                                 <select name="iddistrito" id="distrito" class="form-select" required>
                                     <option value="">Seleccione</option>
                                 </select>
-                                <label for="distrito"><i class="bi bi-map me-1"></i>Distrito</label>
+                                <label for="distrito"><i class="bi bi-map me-1"></i>Distrito <span class="text-danger fw-bold">*</span></label>
                             </div>
                         </div>
                     </div>
@@ -156,21 +156,38 @@ require_once __DIR__ . '/../../Helpers/functions.php';
                 <div class="mb-4">
                     <h6 class="text-primary mb-3 border-bottom pb-2"><i class="bi bi-building me-2"></i>Datos de Tienda</h6>
                     <div class="row g-3">
-                        <div class="col-md-6">
+                        <div class="col-md-3">
                             <div class="form-floating">
                                 <select name="idmotorpark" id="idmotorpark" class="form-select" required>
                                     <option value="">Seleccione</option>
                                 </select>
-                                <label for="idmotorpark"><i class="bi bi-shop me-1"></i>Tienda</label>
+                                <label for="idmotorpark"><i class="bi bi-shop me-1"></i>Tienda <span class="text-danger fw-bold">*</span></label>
                             </div>
                         </div>
-                        <div class="col-md-6">
+
+                        <div class="col-md-3">
+                            <div class="form-floating">
+                                <input type="text" name="tienda" id="tienda" class="form-control" maxlength="40"
+                                    placeholder="Nombre del local" required>
+                                <label for="tienda"><i class="bi bi-tag me-1"></i>Nombre del Local <span class="text-danger fw-bold">*</span></label>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="form-floating">
+                                <input type="text" name="responsable" id="responsable" class="form-control"
+                                    maxlength="100" placeholder="Responsable" required>
+                                <label for="responsable"><i class="bi bi-person me-1"></i>Responsable <span class="text-danger fw-bold">*</span></label>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
                             <div class="form-floating">
                                 <select name="principal" id="principal" class="form-select" required>
                                     <option value="S">Sí</option>
                                     <option value="N">No</option>
                                 </select>
-                                <label for="principal"><i class="bi bi-star me-1"></i>¿Es principal?</label>
+                                <label for="principal"><i class="bi bi-star me-1"></i>¿Es principal? <span class="text-danger fw-bold">*</span></label>
                             </div>
                         </div>
                     </div>
@@ -181,56 +198,42 @@ require_once __DIR__ . '/../../Helpers/functions.php';
 
                 <!-- Sección 4: Responsable -->
                 <div class="mb-4">
-                    <h6 class="text-primary mb-3 border-bottom pb-2"><i class="bi bi-person-badge me-2"></i>Responsable</h6>
+                    <h6 class="text-primary mb-3 border-bottom pb-2"><i class="bi bi-person-badge me-2"></i>Detalles de Tienda</h6>
                     <div class="row g-3">
-
                         <div class="col-md-3">
                             <div class="form-floating">
-                                <input type="text" name="tienda" id="tienda" class="form-control" maxlength="40"
-                                    placeholder="Nombre del local" required>
-                                <label for="tienda"><i class="bi bi-tag me-1"></i>Nombre del Local</label>
+                                <input type="tel" id="telefono" name="telefono" maxlength="9" pattern="[0-9]+"
+                                    class="form-control" placeholder="Teléfono" required>
+                                <label for="telefono"><i class="bi bi-phone me-1"></i>Teléfono <span class="text-danger fw-bold">*</span></label>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="form-floating">
-                                <input type="text" name="responsable" id="responsable" class="form-control"
-                                    maxlength="100" placeholder="Responsable" required>
-                                <label for="responsable"><i class="bi bi-person me-1"></i>Responsable</label>
+                                <input type="email" name="correo" id="correo" class="form-control"
+                                    placeholder="Correo electrónico">
+                                <label for="correo"><i class="bi bi-envelope me-1"></i>Correo electrónico</label>
                             </div>
                         </div>
 
-                         <div class="col-md-3">
-                                <div class="form-floating">
-                                    <input type="tel" id="telefono" name="telefono" maxlength="9" pattern="[0-9]+"
-                                        class="form-control" placeholder="Teléfono" required>
-                                    <label for="telefono"><i class="bi bi-phone me-1"></i>Teléfono</label>
-                                </div>
+                        <!--  Dirección -->
+                        <div class="col-md-6">
+
+                            <div class="form-floating">
+                                <textarea name="direccion" id="direccion" rows="3" class="form-control" maxlength="300"
+                                    placeholder="Dirección" style="height: auto"></textarea>
+                                <label for="direccion">Dirección</label>
                             </div>
-                            <div class="col-md-3">
-                                <div class="form-floating">
-                                    <input type="email" name="correo" id="correo" class="form-control"
-                                        placeholder="Correo electrónico">
-                                    <label for="correo"><i class="bi bi-envelope me-1"></i>Correo electrónico</label>
-                                </div>
-                            </div>
+                        </div>
+
 
 
                     </div>
 
-                   
+
 
 
                 </div>
 
-                <!--  Dirección -->
-                <div class="mb-4">
-                    <h6 class="text-primary mb-3 border-bottom pb-2"><i class="bi bi-signpost me-2"></i>Dirección</h6>
-                    <div class="form-floating">
-                        <textarea name="direccion" id="direccion" rows="3" class="form-control" maxlength="300"
-                            placeholder="Dirección" style="height: auto"></textarea>
-                        <label for="direccion">Dirección</label>
-                    </div>
-                </div>
 
                 <!-- Botones de acción -->
                 <div class="d-flex justify-content-end mt-4 pt-3 border-top gap-2">
