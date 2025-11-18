@@ -134,6 +134,32 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
 
+    /**
+ * Calcula el prorrateo de capital e interés cuando hay un pago parcial
+ * @param {number} montoPagado - Monto que el cliente está pagando
+ * @param {number} valorCuotaTotal - Valor total de la cuota
+ * @param {number} interesCuota - Monto del interés de la cuota
+ * @param {number} capitalCuota - Monto del capital de la cuota
+ * @returns {Object} - {capital: number, interes: number}
+ */
+    function calcularProrrateo(montoPagado, valorCuotaTotal, interesCuota, capitalCuota) {
+        if (valorCuotaTotal <= 0 || montoPagado <= 0) {
+            return { capital: 0, interes: 0 };
+        }
+
+        // Calcular proporción del pago
+        const proporcion = montoPagado / valorCuotaTotal;
+
+        // Prorratear interés y capital
+        const interesPagado = interesCuota * proporcion;
+        const capitalPagado = capitalCuota * proporcion;
+
+        return {
+            interes: parseFloat(interesPagado.toFixed(2)),
+            capital: parseFloat(capitalPagado.toFixed(2))
+        };
+    }
+
 
     /**
      * Muestra u oculta los campos de pago en el modal según el tipo de pago seleccionado.
@@ -299,77 +325,94 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
     configurarValidacionesFormulario(elements);
-
     elements.amortizacionCuotaInput.addEventListener('input', () => {
-
         elements.amortizacionCuotaInput.classList.remove('is-valid', 'is-invalid');
         const monto = parseFloat(elements.amortizacionCuotaInput.value);
-        const containerInavlidText = document.getElementById('invalid-amortizacionCuota');
-        containerInavlidText.textContent = '';
+        const containerInvalidText = document.getElementById('invalid-amortizacionCuota');
+        containerInvalidText.textContent = '';
+
+        const modal = document.getElementById('modalPago');
+        const interesCuota = parseFloat(modal.dataset.interesCuota) || 0;
+        const capitalCuota = parseFloat(modal.dataset.capitalCuota) || 0;
+
         if (!isNaN(monto) && monto > 0) {
             if (monto <= valorCuotaDeuda) {
                 marcarInput(elements.amortizacionCuotaInput, true);
-                //   elements.amortizacionCuotaInput.classList.add('is-valid');
+
+                //  CALCULAR Y MOSTRAR PRORRATEO
+                const prorrateo = calcularProrrateo(monto, valorCuotaDeuda, interesCuota, capitalCuota);
+
+                console.log(` Pago ingresado: S/ ${monto.toFixed(2)}`);
+                console.log(` Interés prorrateado: S/ ${prorrateo.interes.toFixed(2)}`);
+                console.log(`Capital prorrateado: S/ ${prorrateo.capital.toFixed(2)}`);
+                console.log(`Total: S/ ${(prorrateo.interes + prorrateo.capital).toFixed(2)}`);
+
             } else {
                 marcarInput(elements.amortizacionCuotaInput, false);
-                //   elements.amortizacionCuotaInput.classList.add('is-invalid');
-                containerInavlidText.textContent = `Debe ser menor o igual al saldo pendiente de la cuota: S/${valorCuotaDeuda.toFixed(2)}`;
+                containerInvalidText.textContent = `Debe ser menor o igual al saldo pendiente de la cuota: S/${valorCuotaDeuda.toFixed(2)}`;
             }
         } else if (elements.amortizacionCuotaInput.value.trim().length > 0) {
             marcarInput(elements.amortizacionCuotaInput, false);
-            //   elements.amortizacionCuotaInput.classList.add('is-invalid');
-            containerInavlidText.textContent = 'Debe ser un monto válido y mayor a 0.';
+            containerInvalidText.textContent = 'Debe ser un monto válido y mayor a 0.';
         }
     });
-
 
     /**
      * Envía los datos del formulario
      */
 
+    /**
+      * Envía los datos del formulario con VALORES ESTÁTICOS DE PRUEBA.
+      */
     async function submitForm() {
-        // Confirmación al usuario antes de proceder con el envío
         if (!await ask('¿Estás seguro de registrar este pago?', 'Confirmar')) {
             return;
         }
 
-        // Deshabilitar el botón de confirmación y mostrar un indicador de carga
         elements.btnConfirmarPago.disabled = true;
         elements.btnConfirmarPago.classList.add('disabled', 'opacity-75');
         elements.btnConfirmarPago.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Procesando...';
 
-        // Crear un objeto FormData con los datos del formulario
         const formData = new FormData(elements.formPago);
         formData.append('idcronograma', idCronogramaSeleccionado);
 
-        // Lógica para el pago de la CUOTA
+        
+        const modal = document.getElementById('modalPago');
+        const interesCuota = parseFloat(modal.dataset.interesCuota) || 0;
+        const capitalCuota = parseFloat(modal.dataset.capitalCuota) || 0;
+        const montoPagado = parseFloat(elements.amortizacionCuotaInput.value) || 0;
+
+        const prorrateo = calcularProrrateo(montoPagado, valorCuotaDeuda, interesCuota, capitalCuota);
+
+        console.log("ENVIANDO AL BACKEND:");
+        console.log(`   Monto pagado: S/ ${montoPagado.toFixed(2)}`);
+        console.log(`   Capital prorrateado: S/ ${prorrateo.capital.toFixed(2)}`);
+        console.log(`   Interés prorrateado: S/ ${prorrateo.interes.toFixed(2)}`);
+
+        formData.append('total_capital_prorrateado', prorrateo.capital.toFixed(2));
+        formData.append('total_interes_prorrateado', prorrateo.interes.toFixed(2));
+
+        // Lógica para el pago de la CUOTA (Cuentas bancarias)
         if (elements.medioPagoSelect.value === MEDIOS_PAGO.transferenciaBancaria) {
             formData.append('idcuentapago', elements.numeroCuentaSelect.value);
         }
 
         // Lógica para el pago de la PENALIDAD 
-        // Solo se procesan los campos de penalidad si el monto es mayor que 0
         if (elements.amortizacionPenalidadInput.value > 0) {
-            // Se añade explícitamente el medio de pago de la penalidad al FormData
             formData.append('mediopagopenalidad', elements.selectMedioPagoPenalidad.value);
 
-            // Si el pago de penalidad es una transferencia, se añade la cuenta
             if (elements.selectMedioPagoPenalidad.value === MEDIOS_PAGO.transferenciaBancaria) {
                 formData.append('idcuentapagopenalidad', elements.idCuentaPagoPenalidadSelect.value);
             }
 
-            // Se añade el número de transacción de la penalidad
             formData.append('numeroTransaccionPenalidad', elements.numeroTransaccionPenalidadInput.value);
         }
 
         let delay = 1000;
         const delayPromise = new Promise(resolve => setTimeout(resolve, delay));
 
-
         try {
-
             const [res] = await Promise.all([
-
                 fetch('/pago/cronograma', {
                     method: 'POST',
                     body: formData
@@ -377,33 +420,38 @@ document.addEventListener('DOMContentLoaded', async () => {
                 delayPromise
             ]);
 
-
             const data = await res.json();
 
             if (data.debug_info) {
                 console.error("Mensaje de Depuración:", data.debug_info);
             }
 
-
             if (data.success) {
                 showToast(data.message, 'SUCCESS', 1200);
+
+                if (data.enlace_pdf) {
+                    console.log("Abriendo Boleta:", data.enlace_pdf);
+                    window.open(data.enlace_pdf, '_blank');
+                }
+
                 setTimeout(() => {
                     elements.modalPago.hide();
                     setTimeout(() => location.reload(), 500);
                 }, 500);
             } else {
-
                 showToast(data.message || 'Error al registrar el pago.', 'WARNING', 2000);
                 elements.btnConfirmarPago.disabled = false;
                 elements.btnConfirmarPago.classList.remove('disabled', 'opacity-75');
                 elements.btnConfirmarPago.innerHTML = '<i class="fas fa-check-circle me-1"></i> Confirmar Pago';
             }
         } catch (err) {
-
             console.error('Error de red o del servidor:', err);
             showToast('Error de red o del servidor. Intenta de nuevo.', 'ERROR', 2000);
-        }
 
+            elements.btnConfirmarPago.disabled = false;
+            elements.btnConfirmarPago.classList.remove('disabled', 'opacity-75');
+            elements.btnConfirmarPago.innerHTML = '<i class="fas fa-check-circle me-1"></i> Confirmar Pago';
+        }
     }
 
 
@@ -435,21 +483,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     showPage(currentPage);
 
     // Click en botones de pagar
-
+    // Click en botones de pagar
     document.addEventListener('click', function (e) {
         const btn = e.target.closest('.btn-pagar');
 
-        // Si el elemento clicado o su padre más cercano tiene la clase 'btn-pagar'
         if (btn) {
             const saldoCuota = parseFloat(btn.dataset.saldoCuota) || 0;
             const saldoPenalidad = parseFloat(btn.dataset.saldoPenalidad) || 0;
 
-            // Llena el modal con los datos
+            //  CAPTURAR INTERÉS Y CAPITAL 
+            const interesCuota = parseFloat(btn.dataset.interes) || 0;
+            const capitalCuota = parseFloat(btn.dataset.abonocapital) || 0;
+
             const modal = document.getElementById('modalPago');
             if (modal) {
                 idCronogramaSeleccionado = btn.dataset.idcronograma;
                 valorCuotaDeuda = saldoCuota;
                 valorPenalidadDeuda = saldoPenalidad;
+
+                // GUARDAR VALORES EN EL MODAL
+                modal.dataset.interesCuota = interesCuota;
+                modal.dataset.capitalCuota = capitalCuota;
+                modal.dataset.valorCuotaTotal = saldoCuota;
 
                 elements.amortizacionCuotaInput.value = saldoCuota.toFixed(2);
                 elements.amortizacionPenalidadInput.value = saldoPenalidad.toFixed(2);
@@ -466,10 +521,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 if (mostrarSelectCompleto) {
                     elements.tipoPagoSelect.innerHTML = `
-                    <option value='${TIPOS_PAGO.ambas}'>Cuota y Penalidad</option>
-                    <option value='${TIPOS_PAGO.soloCuota}'>Solo Cuota</option>
-                    <option value='${TIPOS_PAGO.soloPenalidad}'>Solo Penalidad</option>
-                `;
+                <option value='${TIPOS_PAGO.ambas}'>Cuota y Penalidad</option>
+                <option value='${TIPOS_PAGO.soloCuota}'>Solo Cuota</option>
+                <option value='${TIPOS_PAGO.soloPenalidad}'>Solo Penalidad</option>
+            `;
                     elements.tipoPagoSelect.value = TIPOS_PAGO.ambas;
                 } else if (mostrarSoloPenalidad) {
                     elements.tipoPagoSelect.innerHTML = `<option value='${TIPOS_PAGO.soloPenalidad}'>Solo Penalidad</option>`;
@@ -483,7 +538,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
     });
-    
+
     // elements.tablaBody.addEventListener('click', function (e) {
     //     const btn = e.target.closest('.btn-pagar');
     //     if (!btn) return;

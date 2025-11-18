@@ -617,6 +617,33 @@ CREATE TABLE pagos (
     CONSTRAINT fk_idcliente_pagos  FOREIGN KEY(idcliente) REFERENCES clientes(idcliente)
 ) ENGINE = InnoDB;
 
+-- ALTER TABLE pagos 
+-- ADD COLUMN enlace_pdf_nubefact VARCHAR(500) NULL AFTER observacion;
+
+-- ALTER TABLE pagos 
+-- ADD COLUMN numero_boleta_sunat INT NULL AFTER enlace_pdf_nubefact; 
+
+-- CREATE TABLE series_nubefact (
+--     serie VARCHAR(4) PRIMARY KEY,
+--     ultimo_numero INT NOT NULL
+-- ) ENGINE=InnoDB;
+
+-- -
+-- INSERT INTO series_nubefact (serie, ultimo_numero) VALUES ('BBB1', 0);
+
+-- SELECT * FROM series_nubefact;
+
+
+-- SELECT * FROM PAGOS
+
+
+
+
+
+
+
+
+
 -- ALTER TABLE pagos ADD COLUMN  moneda ENUM('USD', 'PEN')  NULL AFTER saldorestante;
 -- ALTER TABLE pagos ADD COLUMN montomonedaoriginal DECIMAL(10,2) NULL AFTER amortizacion;
 -- ALTER TABLE pagos ADD COLUMN tipocambioaplicado DECIMAL(10, 4) NULL AFTER montomonedaoriginal;

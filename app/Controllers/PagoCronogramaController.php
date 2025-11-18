@@ -10,13 +10,16 @@
  * manejo de archivos de comprobantes, control de secuencia de pagos
  * y gestión de caché.
  */
+
 namespace App\Controllers;
 
 use App\Core\Controller;
 use App\Helpers\Validador;
 use App\Models\PagoCronograma;
 use App\Models\Caja;
+use App\Controllers\ComprobanteNubefactController;
 use DateTime;
+use Exception;
 
 /**
  * Clase PagoCronogramaController
@@ -157,6 +160,7 @@ class PagoCronogramaController extends Controller
      * 
      * @return void
      */
+
     public function store(): void
     {
         $this->authRequired();
@@ -172,51 +176,40 @@ class PagoCronogramaController extends Controller
             $data = array_map([Validador::class, 'limpiar'], $_POST);
             $errores = [];
 
-            // Asignar y validar campos básicos
+          
             $idCronograma = (int) ($data['idcronograma'] ?? 0);
-
             $numeroTransaccion = $data['numerotransaccion'] ?? '';
             $numeroTransaccionPenalidad = (string) ($data['numeroTransaccionPenalidad'] ?? '');
-
             $amortizacionCuota = (float) ($data['amortizacionCuota'] ?? 0);
             $amortizacionPenalidad = (float) ($data['amortizacionPenalidad'] ?? 0);
-
             $medioPagoPenalidad = $data['mediopagopenalidad'] ?? '';
             $medioPago = $data['mediopago'] ?? '';
-
             $idCuentaPago = $data['idcuentapago'] ?? null;
             $idCuentaPagoPenalidad = $data['idcuentapagopenalidad'] ?? null;
-
             $fechaPago = $data['fechapago'] ?? '';
             $observacion = $data['observacion'] ?? '';
 
-            // --- Procesamiento de archivos antes de las validaciones ---
-            $rutaComprobanteCuota = null;
-            if (isset($_FILES['comprobanteCuota'])) {
-                $rutaComprobanteCuota = $this->guardarComprobante($_FILES['comprobanteCuota']);
-            }
+         
+            $totalInteresProrrateado = (float) ($data['total_interes_prorrateado'] ?? 0);
+            $totalCapitalProrrateado = (float) ($data['total_capital_prorrateado'] ?? 0);
 
-            $rutaComprobantePenalidad = null;
-            if (isset($_FILES['comprobantePenalidad'])) {
-                $rutaComprobantePenalidad = $this->guardarComprobante($_FILES['comprobantePenalidad']);
-            }
+      
+            $rutaComprobanteCuota = isset($_FILES['comprobanteCuota']) ? $this->guardarComprobante($_FILES['comprobanteCuota']) : null;
+            $rutaComprobantePenalidad = isset($_FILES['comprobantePenalidad']) ? $this->guardarComprobante($_FILES['comprobantePenalidad']) : null;
 
-
-
+          
             if ($idCronograma <= 0) {
                 $errores[] = 'Cuota a pagar no es válida.';
             }
-
             if ($amortizacionCuota <= 0 && $amortizacionPenalidad <= 0) {
                 $errores[] = 'Debes ingresar un monto válido mayor a 0 (cuota o penalidad).';
             }
 
-            // Validación del medio de pago para la CUOTA
+         
             if ($amortizacionCuota > 0) {
                 if (empty($medioPago)) {
                     $errores[] = 'El método de pago de la cuota es obligatorio.';
                 }
-
                 if ($medioPago !== 'Efectivo') {
                     if (empty($numeroTransaccion)) {
                         $errores[] = 'El número de transacción de la cuota es obligatorio.';
@@ -224,19 +217,16 @@ class PagoCronogramaController extends Controller
                     if ($medioPago === 'Transferencia Bancaria' && empty($idCuentaPago)) {
                         $errores[] = 'Debes seleccionar una cuenta bancaria para la cuota.';
                     }
-                    // Se valida si la ruta del archivo existe, no si el archivo está en $_FILES
                     if (is_null($rutaComprobanteCuota)) {
                         $errores[] = 'Debe adjuntar un comprobante válido para el pago de cuota.';
                     }
                 }
             }
-
-            // Validación del medio de pago para la PENALIDAD
+            
             if ($amortizacionPenalidad > 0) {
                 if (empty($medioPagoPenalidad)) {
                     $errores[] = 'El método de pago de la penalidad es obligatorio.';
                 }
-
                 if ($medioPagoPenalidad !== 'Efectivo') {
                     if (empty($numeroTransaccionPenalidad)) {
                         $errores[] = 'El número de transacción de la penalidad es obligatorio.';
@@ -244,13 +234,11 @@ class PagoCronogramaController extends Controller
                     if ($medioPagoPenalidad === 'Transferencia Bancaria' && empty($idCuentaPagoPenalidad)) {
                         $errores[] = 'Debes seleccionar una cuenta bancaria para la penalidad.';
                     }
-                    // Se valida si la ruta del archivo existe
                     if (is_null($rutaComprobantePenalidad)) {
                         $errores[] = 'Debe adjuntar un comprobante válido para el pago de penalidad.';
                     }
                 }
             }
-
             // Validaciones generales de la fecha
             if (empty($fechaPago)) {
                 $errores[] = 'La fecha de pago es obligatoria.';
@@ -261,52 +249,31 @@ class PagoCronogramaController extends Controller
                     $errores[] = 'La fecha de pago no puede ser futura.';
                 }
             }
-
-            // Si hay errores en los campos básicos, no continuamos
-            if (!empty($errores)) {
-                echo json_encode([
-                    'success' => false,
-                    'message' => implode('<br>', $errores)
-                ]);
-                return;
-            }
-
-            // Obtener datos del cronograma y validaciones de negocio
+            // Validación de negocio
             $cronogramaData = $this->pagoCronogramaModel->getCronogramaData($idCronograma);
             if (!$cronogramaData) {
-                echo json_encode(['success' => false, 'message' => 'No se encontró la cuota.']);
-                return;
+                $errores[] = 'No se encontró la cuota.';
+            } else {
+                $idContrato = $cronogramaData['idcontrato'];
             }
-
-            $idContrato = $cronogramaData['idcontrato'];
-
-            if (!$this->esCuotaHabilitadaParaPago($idContrato, $idCronograma)) {
+            if (isset($idContrato) && !$this->esCuotaHabilitadaParaPago($idContrato, $idCronograma)) {
                 $errores[] = 'Solo puedes pagar la primera cuota pendiente';
             }
-
             if ($amortizacionCuota > 0 && $amortizacionCuota > $cronogramaData['cuotapendiente']) {
                 $errores[] = "La cuota no puede exceder S/ {$cronogramaData['cuotapendiente']}";
             }
-
             $penalidadPendiente = (float) ($cronogramaData['penalidadpendiente'] ?? 0);
-            if ($amortizacionPenalidad > 0) {
-                if ($penalidadPendiente <= 0) {
-                    $errores[] = "No hay penalidad pendiente para esta cuota, la penalidad es: S/ {$penalidadPendiente}";
-                } else if ($amortizacionPenalidad != $penalidadPendiente) {
-                    $errores[] = "La penalidad debe pagarse completa: S/ {$penalidadPendiente}";
-                }
+            if ($amortizacionPenalidad > 0 && ($penalidadPendiente <= 0 || $amortizacionPenalidad != $penalidadPendiente)) {
+                $errores[] = "La penalidad debe pagarse completa: S/ {$penalidadPendiente}";
             }
 
-            // Si hay errores en las validaciones de negocio, se detiene la ejecución
             if (!empty($errores)) {
-                echo json_encode([
-                    'success' => false,
-                    'message' => implode('<br>', $errores)
-                ]);
+                echo json_encode(['success' => false, 'message' => implode('<br>', $errores)]);
                 return;
             }
+            
+            $idContrato = $cronogramaData['idcontrato'];
 
-            // Preparar y registrar los pagos si no hay errores
             $pagoCuota = null;
             if ($amortizacionCuota > 0) {
                 $pagoCuota = [
@@ -321,7 +288,6 @@ class PagoCronogramaController extends Controller
                     'tipo' => 'Cuota'
                 ];
             }
-
             $pagoPenalidad = null;
             if ($amortizacionPenalidad > 0) {
                 $pagoPenalidad = [
@@ -337,41 +303,87 @@ class PagoCronogramaController extends Controller
                 ];
             }
 
-
             $idPagos = $this->pagoCronogramaModel->addMultiplePagos($pagoCuota, $pagoPenalidad);
+
             if (!empty($idPagos)) {
-                echo json_encode([
-                    'success' => true,
-                    'message' => '¡Pago registrado correctamente!',
-                    'ids' => $idPagos
 
-                ]);
-                // Identificar la ruta
+                $enlacePdf = null;
+                $mensajeExtra = "";
+
+                if ($amortizacionCuota > 0) {
+
+                    try {
+                        $serieBoleta = 'BBB1';
+                        $clienteData = $this->cajaModel->getDatosClientePorCronograma($idCronograma);
+                        $nuevoNumero = $this->cajaModel->obtenerNuevoCorrelativo($serieBoleta);
+
+                        if ($clienteData && $nuevoNumero) {
+
+                           
+                            $datosFacturacion = [
+                                'tipo_comprobante' => 2,
+                                'serie' => $serieBoleta,
+                                'numero_comprobante' => $nuevoNumero,
+                                'total_capital' => $totalCapitalProrrateado,
+                                'total_interes' => $totalInteresProrrateado,
+                                'datos_cliente' => [
+                                    'tipo_documento' => 1,
+                                    'numero_documento' => $clienteData['nrodoc'],
+                                    'denominacion' => $clienteData['razon_social'],
+                                    'direccion' => $clienteData['direccion'] ?? 'LIMA',
+                                    'email' => $clienteData['email'] ?? ''
+                                ]
+                            ];
+
+                            //  Emitir Boleta
+                            $nubefactController = new ComprobanteNubefactController();
+                            $respNube = $nubefactController->procesarPagoYEmitirComprobante($datosFacturacion);
+
+                            if ($respNube['success']) {
+                                $enlacePdf = $respNube['enlace_pdf'];
+                                $idPagoCuota = $idPagos[0];
+                                $this->pagoCronogramaModel->actualizarEnlaceYDeclarado($idPagoCuota, $enlacePdf, $nuevoNumero);
+                            } else {
+                                error_log("Error NubeFact (Emisión): " . $respNube['message']);
+                                $mensajeExtra = " (Pago OK, pero Boleta con Error: " . $respNube['message'] . ")";
+                            }
+                        } else {
+                            $mensajeExtra = " (Advertencia: Pago registrado, pero faltan datos del cliente para la Boleta)";
+                        }
+                    } catch (Exception $ex) {
+                        error_log("Excepción Facturación: " . $ex->getMessage());
+                        $mensajeExtra = " (Nota: Pago guardado, pero falló la comunicación con NubeFact)";
+                    }
+                }
                 $cacheFile = __DIR__ . "/../../storage/cache/cronograma-contratos/cronograma-contrato{$idContrato}.json";
-
                 if (file_exists($cacheFile)) {
                     unlink($cacheFile);
-                    error_log("Caché borrada para el contrato ID: {$idContrato}");
-                } else {
-                    error_log("ERROR: No se pudo borrar la caché para el contrato ID: {$idContrato}");
                 }
+
+               
+                echo json_encode([
+                    'success' => true,
+                    'message' => '¡Pago registrado correctamente!' . $mensajeExtra,
+                    'enlace_pdf' => $enlacePdf 
+                ]);
             } else {
                 echo json_encode([
                     'success' => false,
                     'message' => 'No se pudo registrar el pago'
-
                 ]);
             }
         } catch (\Throwable $th) {
             http_response_code(500);
             error_log($th->getMessage());
-
             echo json_encode([
                 'success' => false,
                 'message' => 'Error inesperado del servidor. Intente más tarde.'
             ]);
         }
     }
+
+
+
 
     /**
      * API: Obtiene las cuentas de pago disponibles

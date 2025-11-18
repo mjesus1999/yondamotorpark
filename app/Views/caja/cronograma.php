@@ -71,6 +71,7 @@
                                         $cuotaHabilitada = false;
 
                                         foreach ($cronograma as $index => $fila) {
+                                            
                                             $fecha_cuota = new DateTimeImmutable($fila['fechapago']);
                                             $fecha_formateada = $fecha_cuota->format('d/m/Y');
                                             $estado = strtolower(trim($fila['estado']));
@@ -190,6 +191,8 @@
                                                             data-penalidad="<?= $fila['penalidad'] ?>"
                                                             data-saldo-cuota="<?= $fila['saldocuota_pendiente'] ?>"
                                                             data-saldorestante="<?= $fila['saldorestante'] ?>"
+                                                            data-interes="<?= $fila['interes'] ?>"
+                                                            data-abonocapital="<?= $fila["abonocapital"] ?>"
                                                             data-saldo-penalidad="<?= $fila['penalidad_pendiente'] ?>">
                                                             <i class="fa-solid fa-dollar-sign me-1"></i> Pagar
                                                         </button>

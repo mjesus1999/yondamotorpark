@@ -12,6 +12,7 @@
  * Todos los métodos utilizan procedimientos almacenados para garantizar lógica
  * de negocio consistente y optimización de consultas complejas.
  */
+
 namespace App\Models;
 
 use App\Core\Database;
@@ -83,6 +84,69 @@ class Caja
             return [];
         }
     }
+
+
+
+
+
+    public function getDatosClientePorCronograma(int $idCronograma): ?array
+    {
+      
+        $sql = "
+        SELECT 
+            p.nrodoc, 
+            CONCAT(p.nombres, ' ', p.apellidos) as razon_social,
+            p.direccion,
+            p.email,
+            cli.idcliente
+        FROM cronogramas cr
+        INNER JOIN contratos c ON cr.idcontrato = c.idcontrato
+        INNER JOIN cotizaciones cot ON c.idcotizacion = cot.idcotizacion
+        INNER JOIN clientes cli ON cot.idcliente = cli.idcliente
+        INNER JOIN personas p ON cli.idpersona = p.idpersona
+        WHERE cr.idcronograma = :id
+    ";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([':id' => $idCronograma]);
+        return $stmt->fetch(PDO::FETCH_ASSOC); // Devuelve el cliente o null
+    }
+
+
+
+    public function obtenerNuevoCorrelativo(string $serie): int
+    {
+        $sqlUpdate = "UPDATE series_nubefact SET ultimo_numero = ultimo_numero + 1 WHERE serie = :serie";
+        $stmtUpdate = $this->db->prepare($sqlUpdate);
+        $stmtUpdate->execute([':serie' => $serie]);
+
+        // 2. Obtener el número que acabamos de generar
+        $sqlSelect = "SELECT ultimo_numero FROM series_nubefact WHERE serie = :serie";
+        $stmtSelect = $this->db->prepare($sqlSelect);
+        $stmtSelect->execute([':serie' => $serie]);
+        $resultado = $stmtSelect->fetch(PDO::FETCH_ASSOC);
+        return $resultado ? (int)$resultado['ultimo_numero'] : 1;
+    }
+
+
+    public function actualizarEnlaceYDeclarado($idPago, $urlPdf, $numeroBoleta)
+    {
+        $sql = "UPDATE pagos SET 
+                enlace_pdf_nubefact = :pdf, 
+                numero_boleta_sunat = :num, 
+                declarado = 'S' 
+            WHERE idpago = :id";
+
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute([
+            ':pdf' => $urlPdf,
+            ':num' => $numeroBoleta,
+            ':id' => $idPago
+        ]);
+    }
+
+
+
 
     /**
      * Obtiene el cronograma de pagos completo de un contrato específico
@@ -237,5 +301,4 @@ class Caja
             return [];  // En caso de error, devolvemos un array vacío
         }
     }
-
 }

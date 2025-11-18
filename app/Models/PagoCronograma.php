@@ -11,6 +11,7 @@
  * automática de estados de cronograma.
  * 
  */
+
 namespace App\Models;
 
 use App\Core\Database;
@@ -104,13 +105,35 @@ class PagoCronograma
 
             $this->db->commit();
             return $ids;
-
         } catch (PDOException $error) {
             $this->db->rollBack();
             error_log("Error en la transacción de pagos: " . $error->getMessage());
             return [];
         }
     }
+
+
+    
+    public function actualizarEnlaceYDeclarado($idPago, $urlPdf, $numeroBoleta)
+    {
+        // Usamos el campo declarado para marcar que la boleta fue enviada
+        $sql = "UPDATE pagos SET 
+                enlace_pdf_nubefact = :pdf, 
+                numero_boleta_sunat = :num, 
+                declarado = 'S' 
+            WHERE idpago = :id";
+
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute([
+            ':pdf' => $urlPdf,
+            ':num' => $numeroBoleta,
+            ':id' => $idPago
+        ]);
+    }
+
+
+
+
 
     /**
      * Inserta un único pago en la base de datos
@@ -311,5 +334,4 @@ class PagoCronograma
             return [];
         }
     }
-
 }
