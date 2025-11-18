@@ -114,11 +114,12 @@ class PagoCronograma
 
 
     
-    public function actualizarEnlaceYDeclarado($idPago, $urlPdf, $numeroBoleta)
+    public function actualizarEnlaceYDeclarado($idPago, $urlPdf,$urlXml, $numeroBoleta)
     {
         // Usamos el campo declarado para marcar que la boleta fue enviada
         $sql = "UPDATE pagos SET 
                 enlace_pdf_nubefact = :pdf, 
+                enlace_xml_nubefact = :xmlUrl,
                 numero_boleta_sunat = :num, 
                 declarado = 'S' 
             WHERE idpago = :id";
@@ -126,6 +127,7 @@ class PagoCronograma
         $stmt = $this->db->prepare($sql);
         return $stmt->execute([
             ':pdf' => $urlPdf,
+            ':xmlUrl' => $urlXml,
             ':num' => $numeroBoleta,
             ':id' => $idPago
         ]);

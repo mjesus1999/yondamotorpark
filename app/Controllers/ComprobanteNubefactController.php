@@ -23,7 +23,6 @@ class ComprobanteNubefactController extends Controller
        
     }
 
-   
     public function procesarPagoYEmitirComprobante(array $datos) 
     {
         
@@ -106,6 +105,7 @@ class ComprobanteNubefactController extends Controller
                 'status' => $estado_sunat,
                 'message' => $respuesta_api['sunat_description'] ?? 'Comprobante enviado con éxito.',
                 'enlace_pdf' => $respuesta_api['enlace_del_pdf'] ?? null,
+                'enlace_xml' => $respuesta_api['enlace_del_xml'] ?? null,
                 'respuesta_completa_nubefact' => $respuesta_api
             ];
         } catch (Exception $e) {

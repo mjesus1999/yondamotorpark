@@ -605,6 +605,9 @@ CREATE TABLE pagos (
     saldorestante DECIMAL(10, 2) NULL,
     comprobante VARCHAR(200) NULL,
     observacion VARCHAR(300) NULL,
+    enlace_pdf_nubefact VARCHAR(500) NULL,
+    enlace_xml_nubefact VARCHAR(500) NULL,
+    numero_boleta_sunat INT NULL,
     facturado ENUM('S', 'N') DEFAULT 'S',
     declarado ENUM('S', 'N') DEFAULT 'N',
     tipo        ENUM('Cuota','Penalidad', 'Otro') NOT NULL DEFAULT 'Cuota',
@@ -617,16 +620,19 @@ CREATE TABLE pagos (
     CONSTRAINT fk_idcliente_pagos  FOREIGN KEY(idcliente) REFERENCES clientes(idcliente)
 ) ENGINE = InnoDB;
 
+-- ALTER TABLE pagos ADD COLUMN enlace_xml_nubefact VARCHAR(500) NULL AFTER enlace_pdf_nubefact;
+
 -- ALTER TABLE pagos 
 -- ADD COLUMN enlace_pdf_nubefact VARCHAR(500) NULL AFTER observacion;
 
 -- ALTER TABLE pagos 
 -- ADD COLUMN numero_boleta_sunat INT NULL AFTER enlace_pdf_nubefact; 
 
--- CREATE TABLE series_nubefact (
---     serie VARCHAR(4) PRIMARY KEY,
---     ultimo_numero INT NOT NULL
--- ) ENGINE=InnoDB;
+ CREATE TABLE series_nubefact (
+    serie VARCHAR(4) PRIMARY KEY,
+    ultimo_numero INT NOT NULL
+     
+) ENGINE=InnoDB;
 
 -- -
 -- INSERT INTO series_nubefact (serie, ultimo_numero) VALUES ('BBB1', 0);
@@ -636,6 +642,8 @@ CREATE TABLE pagos (
 
 -- SELECT * FROM PAGOS
 
+USE MOTORPARK;
+SELECT * FROM series_nubefact;
 
 
 

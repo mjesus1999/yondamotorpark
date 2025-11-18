@@ -308,6 +308,7 @@ class PagoCronogramaController extends Controller
             if (!empty($idPagos)) {
 
                 $enlacePdf = null;
+                $enlaceXml = null;
                 $mensajeExtra = "";
 
                 if ($amortizacionCuota > 0) {
@@ -341,8 +342,9 @@ class PagoCronogramaController extends Controller
 
                             if ($respNube['success']) {
                                 $enlacePdf = $respNube['enlace_pdf'];
+                                $enlaceXml = $respNube['enlace_xml'];
                                 $idPagoCuota = $idPagos[0];
-                                $this->pagoCronogramaModel->actualizarEnlaceYDeclarado($idPagoCuota, $enlacePdf, $nuevoNumero);
+                                $this->pagoCronogramaModel->actualizarEnlaceYDeclarado($idPagoCuota, $enlacePdf, $enlaceXml, $nuevoNumero);
                             } else {
                                 error_log("Error NubeFact (Emisión): " . $respNube['message']);
                                 $mensajeExtra = " (Pago OK, pero Boleta con Error: " . $respNube['message'] . ")";
@@ -364,7 +366,8 @@ class PagoCronogramaController extends Controller
                 echo json_encode([
                     'success' => true,
                     'message' => '¡Pago registrado correctamente!' . $mensajeExtra,
-                    'enlace_pdf' => $enlacePdf 
+                    'enlace_pdf' => $enlacePdf ,
+                    'enlace_xml' => $enlaceXml ,
                 ]);
             } else {
                 echo json_encode([

@@ -135,13 +135,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
     /**
- * Calcula el prorrateo de capital e interés cuando hay un pago parcial
- * @param {number} montoPagado - Monto que el cliente está pagando
- * @param {number} valorCuotaTotal - Valor total de la cuota
- * @param {number} interesCuota - Monto del interés de la cuota
- * @param {number} capitalCuota - Monto del capital de la cuota
- * @returns {Object} - {capital: number, interes: number}
- */
+     * Calcula el prorrateo de capital e interés cuando hay un pago parcial
+     * @param {number} montoPagado - Monto que el cliente está pagando
+     * @param {number} valorCuotaTotal - Valor total de la cuota
+     * @param {number} interesCuota - Monto del interés de la cuota
+     * @param {number} capitalCuota - Monto del capital de la cuota
+     * @returns {Object} - {capital: number, interes: number}
+     */
     function calcularProrrateo(montoPagado, valorCuotaTotal, interesCuota, capitalCuota) {
         if (valorCuotaTotal <= 0 || montoPagado <= 0) {
             return { capital: 0, interes: 0 };
@@ -335,21 +335,22 @@ document.addEventListener('DOMContentLoaded', async () => {
         const interesCuota = parseFloat(modal.dataset.interesCuota) || 0;
         const capitalCuota = parseFloat(modal.dataset.capitalCuota) || 0;
 
+
+        const valorTotalOriginal = parseFloat(modal.dataset.valorCuotaTotalOriginal) || 0;
+
         if (!isNaN(monto) && monto > 0) {
-            if (monto <= valorCuotaDeuda) {
+            if (monto.toFixed(2) <= valorCuotaDeuda.toFixed(2)) {
                 marcarInput(elements.amortizacionCuotaInput, true);
+                const prorrateo = calcularProrrateo(monto, valorTotalOriginal, interesCuota, capitalCuota);
 
-                //  CALCULAR Y MOSTRAR PRORRATEO
-                const prorrateo = calcularProrrateo(monto, valorCuotaDeuda, interesCuota, capitalCuota);
-
-                console.log(` Pago ingresado: S/ ${monto.toFixed(2)}`);
-                console.log(` Interés prorrateado: S/ ${prorrateo.interes.toFixed(2)}`);
-                console.log(`Capital prorrateado: S/ ${prorrateo.capital.toFixed(2)}`);
-                console.log(`Total: S/ ${(prorrateo.interes + prorrateo.capital).toFixed(2)}`);
+                // console.log(`Pago ingresado: S/ ${monto.toFixed(2)}`);
+                // console.log(`Interés (calc. sobre original): S/ ${prorrateo.interes.toFixed(2)}`);
+                // console.log(`Capital (calc. sobre original): S/ ${prorrateo.capital.toFixed(2)}`);
 
             } else {
                 marcarInput(elements.amortizacionCuotaInput, false);
-                containerInvalidText.textContent = `Debe ser menor o igual al saldo pendiente de la cuota: S/${valorCuotaDeuda.toFixed(2)}`;
+
+                containerInvalidText.textContent = `El monto no puede exceder el saldo pendiente: S/${valorCuotaDeuda.toFixed(2)}`;
             }
         } else if (elements.amortizacionCuotaInput.value.trim().length > 0) {
             marcarInput(elements.amortizacionCuotaInput, false);
@@ -358,47 +359,47 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     /**
-     * Envía los datos del formulario
-     */
-
-    /**
-      * Envía los datos del formulario con VALORES ESTÁTICOS DE PRUEBA.
-      */
+       * Envía los datos del formulario al backend.
+       */
     async function submitForm() {
         if (!await ask('¿Estás seguro de registrar este pago?', 'Confirmar')) {
             return;
         }
 
+        //  Bloquear botón para evitar doble clic
         elements.btnConfirmarPago.disabled = true;
         elements.btnConfirmarPago.classList.add('disabled', 'opacity-75');
         elements.btnConfirmarPago.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Procesando...';
 
+        //  Preparar datos del formulario
         const formData = new FormData(elements.formPago);
         formData.append('idcronograma', idCronogramaSeleccionado);
 
-        
+
+        //  OBTENER DATOS DEL MODAL PARA CÁLCULOS MATEMÁTICOS
         const modal = document.getElementById('modalPago');
         const interesCuota = parseFloat(modal.dataset.interesCuota) || 0;
         const capitalCuota = parseFloat(modal.dataset.capitalCuota) || 0;
+        const valorTotalOriginal = parseFloat(modal.dataset.valorCuotaTotalOriginal) || 0;
         const montoPagado = parseFloat(elements.amortizacionCuotaInput.value) || 0;
 
-        const prorrateo = calcularProrrateo(montoPagado, valorCuotaDeuda, interesCuota, capitalCuota);
+        // Calcular prorrateo usando el VALOR TOTAL ORIGINAL
+        const prorrateo = calcularProrrateo(montoPagado, valorTotalOriginal, interesCuota, capitalCuota);
 
-        console.log("ENVIANDO AL BACKEND:");
-        console.log(`   Monto pagado: S/ ${montoPagado.toFixed(2)}`);
-        console.log(`   Capital prorrateado: S/ ${prorrateo.capital.toFixed(2)}`);
-        console.log(`   Interés prorrateado: S/ ${prorrateo.interes.toFixed(2)}`);
+        console.log("--- ENVIANDO PAGO ---");
+        console.log(`Monto Pagado: S/ ${montoPagado.toFixed(2)}`);
+        console.log(`Base de cálculo (Original): S/ ${valorTotalOriginal.toFixed(2)}`);
+        console.log(`Capital asignado: S/ ${prorrateo.capital.toFixed(2)}`);
+        console.log(`Interés asignado: S/ ${prorrateo.interes.toFixed(2)}`);
 
         formData.append('total_capital_prorrateado', prorrateo.capital.toFixed(2));
         formData.append('total_interes_prorrateado', prorrateo.interes.toFixed(2));
 
-        // Lógica para el pago de la CUOTA (Cuentas bancarias)
         if (elements.medioPagoSelect.value === MEDIOS_PAGO.transferenciaBancaria) {
             formData.append('idcuentapago', elements.numeroCuentaSelect.value);
         }
 
-        // Lógica para el pago de la PENALIDAD 
-        if (elements.amortizacionPenalidadInput.value > 0) {
+        if (parseFloat(elements.amortizacionPenalidadInput.value) > 0) {
             formData.append('mediopagopenalidad', elements.selectMedioPagoPenalidad.value);
 
             if (elements.selectMedioPagoPenalidad.value === MEDIOS_PAGO.transferenciaBancaria) {
@@ -423,12 +424,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             const data = await res.json();
 
             if (data.debug_info) {
-                console.error("Mensaje de Depuración:", data.debug_info);
+                console.info("Debug Info:", data.debug_info);
             }
 
             if (data.success) {
-                showToast(data.message, 'SUCCESS', 1200);
+                console.log('MENSAJE DESDE EL CONTROLLER: ', data);
+                showToast(data.message, 'SUCCESS', 1250);
 
+
+                // Abrir PDF si el backend devuelve el enlace
                 if (data.enlace_pdf) {
                     console.log("Abriendo Boleta:", data.enlace_pdf);
                     window.open(data.enlace_pdf, '_blank');
@@ -436,25 +440,28 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 setTimeout(() => {
                     elements.modalPago.hide();
-                    setTimeout(() => location.reload(), 500);
-                }, 500);
+                    setTimeout(() => location.reload(), 8000);
+                }, 8000);
+
             } else {
-                showToast(data.message || 'Error al registrar el pago.', 'WARNING', 2000);
+                showToast(data.message || 'Error al registrar el pago.', 'WARNING', 3000);
+
+                // Restaurar botón
                 elements.btnConfirmarPago.disabled = false;
                 elements.btnConfirmarPago.classList.remove('disabled', 'opacity-75');
                 elements.btnConfirmarPago.innerHTML = '<i class="fas fa-check-circle me-1"></i> Confirmar Pago';
             }
+
         } catch (err) {
+
             console.error('Error de red o del servidor:', err);
-            showToast('Error de red o del servidor. Intenta de nuevo.', 'ERROR', 2000);
+            showToast('Error de red o del servidor. Intenta de nuevo.', 'ERROR', 3000);
 
             elements.btnConfirmarPago.disabled = false;
             elements.btnConfirmarPago.classList.remove('disabled', 'opacity-75');
             elements.btnConfirmarPago.innerHTML = '<i class="fas fa-check-circle me-1"></i> Confirmar Pago';
         }
     }
-
-
     /**
      * Filtra las filas de la tabla por el término de búsqueda.
      * @param {string} searchTerm El término de búsqueda.
@@ -483,48 +490,56 @@ document.addEventListener('DOMContentLoaded', async () => {
     showPage(currentPage);
 
     // Click en botones de pagar
-    // Click en botones de pagar
     document.addEventListener('click', function (e) {
         const btn = e.target.closest('.btn-pagar');
 
         if (btn) {
-            const saldoCuota = parseFloat(btn.dataset.saldoCuota) || 0;
-            const saldoPenalidad = parseFloat(btn.dataset.saldoPenalidad) || 0;
 
-            //  CAPTURAR INTERÉS Y CAPITAL 
+            const saldoPendiente = parseFloat(btn.dataset.saldoCuota) || 0;
+            const valorOriginalCuota = parseFloat(btn.dataset.valorcuota) || 0;
+
+            const saldoPenalidad = parseFloat(btn.dataset.saldoPenalidad) || 0;
+            const saldoRestante = parseFloat(btn.dataset.saldorestante) || 0;
+
+            // CAPTURAR INTERÉS Y CAPITAL ORIGINALES
             const interesCuota = parseFloat(btn.dataset.interes) || 0;
             const capitalCuota = parseFloat(btn.dataset.abonocapital) || 0;
 
             const modal = document.getElementById('modalPago');
             if (modal) {
                 idCronogramaSeleccionado = btn.dataset.idcronograma;
-                valorCuotaDeuda = saldoCuota;
+
+
+                valorCuotaDeuda = saldoPendiente;
                 valorPenalidadDeuda = saldoPenalidad;
 
-                // GUARDAR VALORES EN EL MODAL
                 modal.dataset.interesCuota = interesCuota;
                 modal.dataset.capitalCuota = capitalCuota;
-                modal.dataset.valorCuotaTotal = saldoCuota;
 
-                elements.amortizacionCuotaInput.value = saldoCuota.toFixed(2);
+                modal.dataset.valorCuotaTotalOriginal = valorOriginalCuota;
+
+                elements.amortizacionCuotaInput.value = saldoPendiente.toFixed(2);
+
                 elements.amortizacionPenalidadInput.value = saldoPenalidad.toFixed(2);
-                elements.detalleCuotaInput.value = saldoCuota.toFixed(2);
+                elements.detalleCuotaInput.value = saldoPendiente.toFixed(2);
                 elements.detallePenalidadInput.value = saldoPenalidad.toFixed(2);
-                elements.detalleTotalDeudaInput.value = (saldoCuota + saldoPenalidad).toFixed(2);
-                elements.numeroCuotaDisplay.textContent = `Está a punto de registrar el pago de la cuota N° ${btn.dataset.cuota}`;
+                elements.detalleTotalDeudaInput.value = (saldoPendiente + saldoPenalidad).toFixed(2);
 
-                const mostrarSoloPenalidad = saldoCuota === 0 && saldoPenalidad > 0;
-                const mostrarSoloCuota = saldoCuota > 0 && saldoPenalidad === 0;
-                const mostrarSelectCompleto = saldoCuota > 0 && saldoPenalidad > 0;
+                // Mostrar mensaje informativo correcto
+                elements.numeroCuotaDisplay.textContent = `Pago de cuota N° ${btn.dataset.cuota} (Saldo: S/ ${saldoPendiente.toFixed(2)})`;
+
+                const mostrarSoloPenalidad = saldoPendiente === 0 && saldoPenalidad > 0;
+                const mostrarSoloCuota = saldoPendiente > 0 && saldoPenalidad === 0;
+                const mostrarSelectCompleto = saldoPendiente > 0 && saldoPenalidad > 0;
 
                 elements.contenedorTipoPago.classList.toggle('hidden', !mostrarSelectCompleto);
 
                 if (mostrarSelectCompleto) {
                     elements.tipoPagoSelect.innerHTML = `
-                <option value='${TIPOS_PAGO.ambas}'>Cuota y Penalidad</option>
-                <option value='${TIPOS_PAGO.soloCuota}'>Solo Cuota</option>
-                <option value='${TIPOS_PAGO.soloPenalidad}'>Solo Penalidad</option>
-            `;
+                        <option value='${TIPOS_PAGO.ambas}'>Cuota y Penalidad</option>
+                        <option value='${TIPOS_PAGO.soloCuota}'>Solo Cuota</option>
+                        <option value='${TIPOS_PAGO.soloPenalidad}'>Solo Penalidad</option>
+                    `;
                     elements.tipoPagoSelect.value = TIPOS_PAGO.ambas;
                 } else if (mostrarSoloPenalidad) {
                     elements.tipoPagoSelect.innerHTML = `<option value='${TIPOS_PAGO.soloPenalidad}'>Solo Penalidad</option>`;
@@ -539,48 +554,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // elements.tablaBody.addEventListener('click', function (e) {
-    //     const btn = e.target.closest('.btn-pagar');
-    //     if (!btn) return;
 
-    //     const saldoCuota = parseFloat(btn.dataset.saldoCuota) || 0;
-    //     const saldoPenalidad = parseFloat(btn.dataset.saldoPenalidad) || 0;
-
-    //     idCronogramaSeleccionado = btn.dataset.idcronograma;
-    //     valorCuotaDeuda = saldoCuota;
-    //     valorPenalidadDeuda = saldoPenalidad;
-
-    //     elements.amortizacionCuotaInput.value = saldoCuota.toFixed(2);
-    //     elements.amortizacionPenalidadInput.value = saldoPenalidad.toFixed(2);
-    //     elements.detalleCuotaInput.value = saldoCuota.toFixed(2);
-    //     elements.detallePenalidadInput.value = saldoPenalidad.toFixed(2);
-    //     elements.detalleTotalDeudaInput.value = (saldoCuota + saldoPenalidad).toFixed(2);
-    //     elements.numeroCuotaDisplay.textContent = `Está a punto de registrar el pago de la cuota N° ${btn.dataset.cuota}`;
-
-    //     const mostrarSoloPenalidad = saldoCuota === 0 && saldoPenalidad > 0;
-    //     const mostrarSoloCuota = saldoCuota > 0 && saldoPenalidad === 0;
-    //     const mostrarSelectCompleto = saldoCuota > 0 && saldoPenalidad > 0;
-
-    //     elements.contenedorTipoPago.classList.toggle('hidden', !mostrarSelectCompleto);
-    //     configurarValidacionesFormulario(elements, valorCuotaDeuda);
-
-    //     if (mostrarSelectCompleto) {
-    //         elements.tipoPagoSelect.innerHTML = `
-    //             <option value='${TIPOS_PAGO.ambas}'>Cuota y Penalidad</option>
-    //             <option value='${TIPOS_PAGO.soloCuota}'>Solo Cuota</option>
-    //             <option value='${TIPOS_PAGO.soloPenalidad}'>Solo Penalidad</option>
-    //         `;
-    //         elements.tipoPagoSelect.value = TIPOS_PAGO.ambas;
-    //     } else if (mostrarSoloPenalidad) {
-    //         elements.tipoPagoSelect.innerHTML = `<option value='${TIPOS_PAGO.soloPenalidad}'>Solo Penalidad</option>`;
-    //         elements.tipoPagoSelect.value = TIPOS_PAGO.soloPenalidad;
-    //     } else if (mostrarSoloCuota) {
-    //         elements.tipoPagoSelect.innerHTML = `<option value='${TIPOS_PAGO.soloCuota}'>Solo Cuota</option>`;
-    //         elements.tipoPagoSelect.value = TIPOS_PAGO.soloCuota;
-    //     }
-
-    //     updateSelectTipoPago();
-    // });
 
 
     // Eventos del modal de pago
