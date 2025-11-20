@@ -823,7 +823,7 @@
         });
     });
 
-    // localStorage.removeItem('currentPage');
+ 
 </script>
 
 <?php include __DIR__ . '/../layout/footer.php'; ?>

@@ -78,7 +78,7 @@ class ComprobanteNubefactController extends Controller
                 "total" => round($total_operacion, 2),
                 "detraccion" => false,
                 "enviar_automaticamente_a_la_sunat" => true,
-                "enviar_automaticamente_al_cliente" => true,
+                "enviar_automaticamente_al_cliente" => false,
             ], $cliente);
 
             $json_data['items'] = [
@@ -119,20 +119,20 @@ class ComprobanteNubefactController extends Controller
     }
 
 
-    public function apiEmitirComprobante(): void
-    {
-        header('Content-Type: application/json');
-        $input = json_decode(file_get_contents('php://input'), true);
+    // public function apiEmitirComprobante(): void
+    // {
+    //     header('Content-Type: application/json');
+    //     $input = json_decode(file_get_contents('php://input'), true);
 
-        if (!$input) {
-            echo json_encode([
-                'success' => false,
-                'message' => 'JSON inválido o vacío'
-            ]);
-            return;
-        }
+    //     if (!$input) {
+    //         echo json_encode([
+    //             'success' => false,
+    //             'message' => 'JSON inválido o vacío'
+    //         ]);
+    //         return;
+    //     }
 
-        $resultado = $this->procesarPagoYEmitirComprobante($input);
-        echo json_encode($resultado);
-    }
+    //     $resultado = $this->procesarPagoYEmitirComprobante($input);
+    //     echo json_encode($resultado);
+    // }
 }

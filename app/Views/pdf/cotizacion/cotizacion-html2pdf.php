@@ -13,7 +13,7 @@
       background: white;
     }
 
- 
+
     #loading-indicator {
       position: fixed;
       top: 50%;
@@ -101,17 +101,7 @@
 </head>
 
 <body>
-  <!-- Indicador de carga -->
-  <div id="loading-indicator">
-    <div style="color: #d32f2f; font-weight: bold; margin-bottom: 15px; font-size: 18px;">
-      Generando PDF...
-    </div>
-    <div style="font-size: 14px; color: #666;">Por favor espere...</div>
-  </div>
 
-  <!-- PDFMake -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
 
   <script>
     // Obtener el ID de cotización desde la URL
@@ -210,15 +200,34 @@
           const cuota = parseFloat(opcion.valorcuota) || 0;
           const monedaTexto = (cotizacion.moneda === 'USD') ? 'DÓLARES' : 'SOLES';
 
-          return [
-            { text: (index + 1).toString(), style: 'tableCell' },
-            { text: meses.toString(), style: 'tableCell' },
-            { text: formatCurrency(inicial, cotizacion.moneda), style: 'tableCell' },
-            { text: monedaTexto, style: 'tableCell' },
-            { text: formatCurrency(cuota, cotizacion.moneda), style: 'tableCellRight' }
+          return [{
+              text: (index + 1).toString(),
+              style: 'tableCell'
+            },
+            {
+              text: meses.toString(),
+              style: 'tableCell'
+            },
+            {
+              text: formatCurrency(inicial, cotizacion.moneda),
+              style: 'tableCell'
+            },
+            {
+              text: monedaTexto,
+              style: 'tableCell'
+            },
+            {
+              text: formatCurrency(cuota, cotizacion.moneda),
+              style: 'tableCellRight'
+            }
           ];
-        }) :
-        [[{ text: 'Sin opciones de financiamiento disponibles', colSpan: 5, style: 'tableCellEmpty' }]];
+        }) : [
+          [{
+            text: 'Sin opciones de financiamiento disponibles',
+            colSpan: 5,
+            style: 'tableCellEmpty'
+          }]
+        ];
 
       // Preparar asesor info
       const asesorNombre = cotizacion.asesor?.nombre_completo || cotizacion.asesor?.nombre || '';
@@ -235,19 +244,13 @@
         pageOrientation: 'portrait',
         pageMargins: [70, 65, 40, 80], // Márgenes ajustados - reducido margen superior
 
-        header: function (currentPage, pageCount, pageSize) {
-          if (headerImageBase64 && currentPage === 1) {
-            return {
-              image: headerImageBase64,
-              width: 520,
-              alignment: 'center',
-              margin: [0, 10, 0, 0]
-            };
-          }
-          return null;
+        header: {
+          image: window.cabeceraYonda,
+          width: 595,
+          alignment: 'center',
+          margin: [0, 25, 0, 0]
         },
-
-        footer: function (currentPage, pageCount, pageSize) {
+        footer: function(currentPage, pageCount, pageSize) {
           // Footer con información del asesor y línea naranja
           return {
             stack: [
@@ -260,17 +263,15 @@
               },
               // Línea naranja debajo
               {
-                canvas: [
-                  {
-                    type: 'line',
-                    x1: 0,
-                    y1: 0,
-                    x2: 525,
-                    y2: 0,
-                    lineWidth: 4,
-                    lineColor: '#ff6600'
-                  }
-                ],
+                canvas: [{
+                  type: 'line',
+                  x1: 0,
+                  y1: 0,
+                  x2: 525,
+                  y2: 0,
+                  lineWidth: 4,
+                  lineColor: '#ff6600'
+                }],
                 margin: [0, 0, 0, 0]
               }
             ],
@@ -326,23 +327,83 @@
             table: {
               widths: [140, '*'],
               body: [
-                [{ text: 'Nombre del cliente', style: 'tableClienteLabel' }, { text: `: ${cotizacion.cliente?.nombre || ''}`, style: 'tableClienteValue' }],
-                [{ text: 'Dni', style: 'tableClienteLabel' }, { text: `: ${cotizacion.cliente?.dni || ''}`, style: 'tableClienteValue' }],
-                [{ text: 'Celular', style: 'tableClienteLabel' }, { text: `: ${cotizacion.cliente?.celular || ''}`, style: 'tableClienteValue' }],
-                [{ text: 'Marca del vehículo', style: 'tableClienteLabel' }, { text: `: ${cotizacion.vehiculo?.marca || ''}`, style: 'tableClienteValue' }],
-                [{ text: 'Modelo', style: 'tableClienteLabel' }, { text: `: ${cotizacion.vehiculo?.modelo || ''}`, style: 'tableClienteValue' }],
-                [{ text: 'Año', style: 'tableClienteLabel' }, { text: `: ${cotizacion.vehiculo?.anio || ''}`, style: 'tableClienteValue' }],
-                [{ text: 'Color', style: 'tableClienteLabel' }, { text: `: ${cotizacion.vehiculo?.color || 'Por definir'}`, style: 'tableClienteValue' }],
-                [{ text: 'Precio', style: 'tableClienteLabel' }, { text: `: ${formatCurrency(cotizacion.precios?.precio_original || 0, cotizacion.moneda)}`, style: 'tableClienteValue' }]
+                [{
+                  text: 'Nombre del cliente',
+                  style: 'tableClienteLabel'
+                }, {
+                  text: `: ${cotizacion.cliente?.nombre || ''}`,
+                  style: 'tableClienteValue'
+                }],
+                [{
+                  text: 'Dni',
+                  style: 'tableClienteLabel'
+                }, {
+                  text: `: ${cotizacion.cliente?.dni || ''}`,
+                  style: 'tableClienteValue'
+                }],
+                [{
+                  text: 'Celular',
+                  style: 'tableClienteLabel'
+                }, {
+                  text: `: ${cotizacion.cliente?.celular || ''}`,
+                  style: 'tableClienteValue'
+                }],
+                [{
+                  text: 'Marca del vehículo',
+                  style: 'tableClienteLabel'
+                }, {
+                  text: `: ${cotizacion.vehiculo?.marca || ''}`,
+                  style: 'tableClienteValue'
+                }],
+                [{
+                  text: 'Modelo',
+                  style: 'tableClienteLabel'
+                }, {
+                  text: `: ${cotizacion.vehiculo?.modelo || ''}`,
+                  style: 'tableClienteValue'
+                }],
+                [{
+                  text: 'Año',
+                  style: 'tableClienteLabel'
+                }, {
+                  text: `: ${cotizacion.vehiculo?.anio || ''}`,
+                  style: 'tableClienteValue'
+                }],
+                [{
+                  text: 'Color',
+                  style: 'tableClienteLabel'
+                }, {
+                  text: `: ${cotizacion.vehiculo?.color || 'Por definir'}`,
+                  style: 'tableClienteValue'
+                }],
+                [{
+                  text: 'Precio',
+                  style: 'tableClienteLabel'
+                }, {
+                  text: `: ${formatCurrency(cotizacion.precios?.precio_original || 0, cotizacion.moneda)}`,
+                  style: 'tableClienteValue'
+                }]
               ]
             },
             layout: {
-              hLineWidth: function () { return 0; },
-              vLineWidth: function () { return 0; },
-              paddingLeft: function () { return 0; },
-              paddingRight: function () { return 0; },
-              paddingTop: function () { return 1; },
-              paddingBottom: function () { return 1; }
+              hLineWidth: function() {
+                return 0;
+              },
+              vLineWidth: function() {
+                return 0;
+              },
+              paddingLeft: function() {
+                return 0;
+              },
+              paddingRight: function() {
+                return 0;
+              },
+              paddingTop: function() {
+                return 1;
+              },
+              paddingBottom: function() {
+                return 1;
+              }
             },
             margin: [0, 0, 0, 12]
           },
@@ -354,21 +415,43 @@
               /* widths: [30, 50, 70, 80, '*'], */
               widths: ['8%', '14%', '26%', '26%', '26%'],
               body: [
-                [
-                  { text: '#', style: 'tableHeader' },
-                  { text: 'Meses', style: 'tableHeader' },
-                  { text: 'Inicial', style: 'tableHeader' },
-                  { text: 'Moneda', style: 'tableHeader' },
-                  { text: 'Monto', style: 'tableHeader' }
+                [{
+                    text: '#',
+                    style: 'tableHeader'
+                  },
+                  {
+                    text: 'Meses',
+                    style: 'tableHeader'
+                  },
+                  {
+                    text: 'Inicial',
+                    style: 'tableHeader'
+                  },
+                  {
+                    text: 'Moneda',
+                    style: 'tableHeader'
+                  },
+                  {
+                    text: 'Monto',
+                    style: 'tableHeader'
+                  }
                 ],
                 ...tablaFinanciamiento
               ]
             },
             layout: {
-              hLineWidth: function () { return 0.5; },
-              vLineWidth: function () { return 0.5; },
-              hLineColor: function () { return '#000000'; },
-              vLineColor: function () { return '#000000'; }
+              hLineWidth: function() {
+                return 0.5;
+              },
+              vLineWidth: function() {
+                return 0.5;
+              },
+              hLineColor: function() {
+                return '#000000';
+              },
+              vLineColor: function() {
+                return '#000000';
+              }
             },
             margin: [0, 0, 0, 15]
           },
@@ -402,12 +485,24 @@
               ]
             },
             layout: {
-              hLineWidth: function () { return 0; },
-              vLineWidth: function () { return 0; },
-              paddingLeft: function () { return 8; },
-              paddingRight: function () { return 8; },
-              paddingTop: function () { return 4; },
-              paddingBottom: function () { return 4; }
+              hLineWidth: function() {
+                return 0;
+              },
+              vLineWidth: function() {
+                return 0;
+              },
+              paddingLeft: function() {
+                return 8;
+              },
+              paddingRight: function() {
+                return 8;
+              },
+              paddingTop: function() {
+                return 4;
+              },
+              paddingBottom: function() {
+                return 4;
+              }
             },
             alignment: 'center',
             margin: [20, 8, 20, 12]
@@ -568,7 +663,9 @@
       btnClose.addEventListener('click', () => {
         previewContainer.remove();
         setTimeout(() => {
-          try { window.close(); } catch (e) { }
+          try {
+            window.close();
+          } catch (e) {}
         }, 100);
       });
 
@@ -578,7 +675,9 @@
           previewContainer.remove();
           document.removeEventListener('keydown', escHandler);
           setTimeout(() => {
-            try { window.close(); } catch (e) { }
+            try {
+              window.close();
+            } catch (e) {}
           }, 100);
         }
       });
@@ -589,7 +688,7 @@
         const img = new Image();
         img.crossOrigin = 'anonymous';
 
-        img.onload = function () {
+        img.onload = function() {
           const canvas = document.createElement('canvas');
           const ctx = canvas.getContext('2d');
 
@@ -606,7 +705,7 @@
           }
         };
 
-        img.onerror = function () {
+        img.onerror = function() {
           console.warn(`No se pudo cargar la imagen: ${imagePath}`);
           resolve(null);
         };
@@ -623,7 +722,7 @@
         const cotizacion = await fetchCotizacionData();
 
         // Convertir imagen de cabecera a base64
-        const headerImageBase64 = await convertImageToBase64('/assets/images/logos/cabecera-yondaa.png');
+        const headerImageBase64 = await convertImageToBase64('/assets/images/logos/cabecera-yonda.png');
 
         // Crear definición del PDF con imágenes
         const docDefinition = createPDFDefinition(cotizacion, headerImageBase64);

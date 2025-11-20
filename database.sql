@@ -642,8 +642,8 @@ CREATE TABLE pagos (
 
 -- SELECT * FROM PAGOS
 
-USE MOTORPARK;
-SELECT * FROM series_nubefact;
+-- USE MOTORPARK;
+-- SELECT * FROM series_nubefact;
 
 
 
