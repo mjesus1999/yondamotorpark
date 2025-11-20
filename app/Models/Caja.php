@@ -91,7 +91,7 @@ class Caja
 
     public function getDatosClientePorCronograma(int $idCronograma): ?array
     {
-      
+
         $sql = "
         SELECT 
             p.nrodoc, 
@@ -113,37 +113,59 @@ class Caja
     }
 
 
-
     public function obtenerNuevoCorrelativo(string $serie): int
     {
-        $sqlUpdate = "UPDATE series_nubefact SET ultimo_numero = ultimo_numero + 1 WHERE serie = :serie";
-        $stmtUpdate = $this->db->prepare($sqlUpdate);
-        $stmtUpdate->execute([':serie' => $serie]);
 
-        // 2. Obtener el número que acabamos de generar
-        $sqlSelect = "SELECT ultimo_numero FROM series_nubefact WHERE serie = :serie";
-        $stmtSelect = $this->db->prepare($sqlSelect);
-        $stmtSelect->execute([':serie' => $serie]);
-        $resultado = $stmtSelect->fetch(PDO::FETCH_ASSOC);
-        return $resultado ? (int)$resultado['ultimo_numero'] : 1;
+        $this->db->beginTransaction();
+
+        try {
+
+
+            $sqlSelectLock = "SELECT ultimo_numero FROM series_nubefact WHERE serie = :serie FOR UPDATE";
+            $stmtSelectLock = $this->db->prepare($sqlSelectLock);
+            $stmtSelectLock->execute([':serie' => $serie]);
+            $resultado = $stmtSelectLock->fetch(PDO::FETCH_ASSOC);
+
+            if (!$resultado) {
+
+                $this->db->rollBack();
+                return 1;
+            }
+
+            $nuevoNumero = (int)$resultado['ultimo_numero'] + 1;
+
+
+            $sqlUpdate = "UPDATE series_nubefact SET ultimo_numero = :nuevoNumero WHERE serie = :serie";
+            $stmtUpdate = $this->db->prepare($sqlUpdate);
+            $stmtUpdate->execute([':nuevoNumero' => $nuevoNumero, ':serie' => $serie]);
+            $this->db->commit();
+
+            return $nuevoNumero;
+        } catch (\Throwable $e) {
+
+            if ($this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
+            error_log("Error al obtener correlativo: " . $e->getMessage());
+            throw $e;
+        }
     }
 
+    // public function actualizarEnlaceYDeclarado($idPago, $urlPdf, $numeroBoleta)
+    // {
+    //     $sql = "UPDATE pagos SET 
+    //             enlace_pdf_nubefact = :pdf, 
+    //             numero_boleta_sunat = :num, 
+    //             declarado = 'S' 
+    //         WHERE idpago = :id";
 
-    public function actualizarEnlaceYDeclarado($idPago, $urlPdf, $numeroBoleta)
-    {
-        $sql = "UPDATE pagos SET 
-                enlace_pdf_nubefact = :pdf, 
-                numero_boleta_sunat = :num, 
-                declarado = 'S' 
-            WHERE idpago = :id";
-
-        $stmt = $this->db->prepare($sql);
-        return $stmt->execute([
-            ':pdf' => $urlPdf,
-            ':num' => $numeroBoleta,
-            ':id' => $idPago
-        ]);
-    }
+    //     $stmt = $this->db->prepare($sql);
+    //     return $stmt->execute([
+    //         ':pdf' => $urlPdf,
+    //         ':num' => $numeroBoleta,
+    //         ':id' => $idPago
+    //     ]);
+    // }
 
 
 

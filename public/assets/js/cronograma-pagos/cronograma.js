@@ -386,12 +386,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Calcular prorrateo usando el VALOR TOTAL ORIGINAL
         const prorrateo = calcularProrrateo(montoPagado, valorTotalOriginal, interesCuota, capitalCuota);
 
-        console.log("--- ENVIANDO PAGO ---");
-        console.log(`Monto Pagado: S/ ${montoPagado.toFixed(2)}`);
-        console.log(`Base de cálculo (Original): S/ ${valorTotalOriginal.toFixed(2)}`);
-        console.log(`Capital asignado: S/ ${prorrateo.capital.toFixed(2)}`);
-        console.log(`Interés asignado: S/ ${prorrateo.interes.toFixed(2)}`);
-
         formData.append('total_capital_prorrateado', prorrateo.capital.toFixed(2));
         formData.append('total_interes_prorrateado', prorrateo.interes.toFixed(2));
 
@@ -409,7 +403,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             formData.append('numeroTransaccionPenalidad', elements.numeroTransaccionPenalidadInput.value);
         }
 
-        let delay = 1000;
+        let delay = 800;
         const delayPromise = new Promise(resolve => setTimeout(resolve, delay));
 
         try {
@@ -428,20 +422,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             if (data.success) {
-                console.log('MENSAJE DESDE EL CONTROLLER: ', data);
-                showToast(data.message, 'SUCCESS', 1250);
+                console.log(data)
+                showToast(data.message, 'SUCCESS', 1200);
+                setTimeout(() => {
+                    elements.modalPago.hide();
+                    location.reload();
+                }, 1200);
 
-
-                // Abrir PDF si el backend devuelve el enlace
                 if (data.enlace_pdf) {
-                    console.log("Abriendo Boleta:", data.enlace_pdf);
                     window.open(data.enlace_pdf, '_blank');
                 }
 
-                setTimeout(() => {
-                    elements.modalPago.hide();
-                    setTimeout(() => location.reload(), 8000);
-                }, 8000);
 
             } else {
                 showToast(data.message || 'Error al registrar el pago.', 'WARNING', 3000);
@@ -462,6 +453,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             elements.btnConfirmarPago.innerHTML = '<i class="fas fa-check-circle me-1"></i> Confirmar Pago';
         }
     }
+
+
+
     /**
      * Filtra las filas de la tabla por el término de búsqueda.
      * @param {string} searchTerm El término de búsqueda.

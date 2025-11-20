@@ -172,9 +172,9 @@ END$$
 DELIMITER;
 
 
+USE motorpark;
 
-
-
+DROP PROCEDURE IF EXISTS sp_get_pagos_by_contrato;
 DELIMITER $$
 
 CREATE PROCEDURE sp_get_pagos_by_contrato(IN p_idcontrato INT)
@@ -183,14 +183,15 @@ BEGIN
         p.idpago,
         p.idcronograma,
         c.numcuota,
-      DATE_FORMAT(c.fechapago,'%m/%d/%Y') AS fecha_vencimiento,
-DATE_FORMAT(p.fechapago,'%m/%d/%Y') AS fecha_pago,
+      DATE_FORMAT(c.fechapago,'%d/%m/%Y') AS fecha_vencimiento,
+      DATE_FORMAT(p.fechapago,'%d/%m/%Y') AS fecha_pago,
 
         p.amortizacion,
         p.saldorestante,
         p.mediopago,
         p.numerotransaccion,
         p.comprobante,
+        p.enlace_pdf_nubefact,
         p.tipo,
         p.observacion
     FROM pagos p
@@ -199,7 +200,7 @@ DATE_FORMAT(p.fechapago,'%m/%d/%Y') AS fecha_pago,
     ORDER BY c.numcuota, p.fechapago;
 END$$
 
-CALL sp_get_pagos_by_contrato (2);
+CALL sp_get_pagos_by_contrato (20);
 
 
 INSERT INTO
@@ -247,3 +248,4 @@ VALUES (
 
 SHOW EVENTS;
 SHOW TRIGGERS;
+

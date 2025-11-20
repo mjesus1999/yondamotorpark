@@ -1,5 +1,203 @@
 <?php include __DIR__ . '/../layout/header.php'; ?>
 
+<style>
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .modern-table {
+        font-size: 0.9rem;
+    }
+
+    .modern-table thead th {
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+        padding: 1rem 0.75rem;
+        border: none;
+    }
+
+    .table-header-custom {
+        background: linear-gradient(to right, #f8f9fa, #e9ecef);
+        color: #495057;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    .modern-table tbody tr {
+        transition: all 0.3s ease;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .modern-table tbody tr:hover {
+        background-color: #f8f9ff !important;
+        transform: scale(1.01);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .modern-table tbody td {
+        padding: 1rem 0.75rem;
+        vertical-align: middle;
+    }
+
+    .badge {
+        font-weight: 500;
+        letter-spacing: 0.3px;
+    }
+
+    .bg-info-custom {
+        background: linear-gradient(135deg, #17a2b8, #138496) !important;
+        color: white !important;
+        border: none;
+    }
+
+    .bg-success-custom {
+        background: linear-gradient(135deg, #28a745, #1e7e34) !important;
+        color: white !important;
+        border: none;
+    }
+
+    .bg-primary-custom {
+        background: linear-gradient(135deg, #007bff, #0056b3) !important;
+        color: white !important;
+        border: none;
+    }
+
+    .bg-danger-custom {
+        background: linear-gradient(135deg, #dc3545, #c82333) !important;
+        color: white !important;
+        border: none;
+    }
+
+    .btn-sm {
+        padding: 0.4rem 1rem;
+        font-size: 0.8rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .btn-outline-info:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(23, 162, 184, 0.3);
+    }
+
+    .rounded-pill {
+        border-radius: 50rem !important;
+    }
+
+    /* Estado vacío */
+    .empty-state {
+        padding: 2rem;
+    }
+
+    .empty-state i {
+        opacity: 0.3;
+    }
+
+
+    .custom-pagination .page-link {
+        border: 1px solid #dee2e6;
+        color: #667eea;
+        padding: 0.5rem 0.75rem;
+        margin: 0 2px;
+        border-radius: 0.375rem;
+        transition: all 0.3s ease;
+    }
+
+    .custom-pagination .page-item.active .page-link {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border-color: #667eea;
+        color: white;
+        box-shadow: 0 4px 8px rgba(102, 126, 234, 0.4);
+    }
+
+    .custom-pagination .page-link:hover:not(.disabled) {
+        background-color: #667eea;
+        border-color: #667eea;
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .custom-pagination .page-item.disabled .page-link {
+        opacity: 0.5;
+    }
+
+    .shadow-lg {
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
+    }
+
+
+    @media (max-width: 768px) {
+        .modern-table {
+            font-size: 0.8rem;
+        }
+
+        .modern-table thead th,
+        .modern-table tbody td {
+            padding: 0.5rem;
+        }
+
+        .badge {
+            font-size: 0.7rem;
+            padding: 0.25rem 0.5rem !important;
+        }
+
+        .btn-sm {
+            padding: 0.3rem 0.6rem;
+            font-size: 0.75rem;
+        }
+    }
+
+    /* Animación para carga */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .modern-table tbody tr {
+        animation: fadeIn 0.3s ease-in-out;
+    }
+
+    /* Scroll suave en tabla responsive */
+    .table-responsive {
+        scrollbar-width: thin;
+        scrollbar-color: #667eea #f1f1f1;
+    }
+
+    .table-responsive::-webkit-scrollbar {
+        height: 8px;
+    }
+
+    .table-responsive::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+
+    .table-responsive::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border-radius: 10px;
+    }
+
+    .table-responsive::-webkit-scrollbar-thumb:hover {
+        background: #764ba2;
+    }
+
+    @media (max-width: 767.98px) {
+        .table-responsive {
+            display: none;
+        }
+    }
+</style>
+
 
 <div class="container-fluid">
     <div class="alert alert-info mt-2" role="alert" style="border-left: 4px solid #3498db; border-radius: 0 8px 8px 0;">
@@ -25,12 +223,13 @@
         </div>
     </div>
 
-    <!-- Tarjeta principal -->
-    <div class="card border-0 shadow-sm">
-        <div class="card-header bg-body border-bottom">
+    <div class="card border-0 shadow-lg">
+        <div class="card-header bg-gradient-primary text-white border-0 py-3">
             <div class="d-flex justify-content-between align-items-center">
-                <h5 class="mb-0 fw-bold ">Detalle de Pagos</h5>
-                <span class="badge bg-primary">
+                <h5 class="mb-0 fw-bold">
+                    <i class="fas fa-file-invoice-dollar me-2"></i>Detalle de Pagos
+                </h5>
+                <span class="badge bg-white text-primary px-3 py-2">
                     Total: <?= count($pagos) ?> registros
                 </span>
             </div>
@@ -39,11 +238,11 @@
         <div class="card-body p-0">
             <div class="table-responsive">
                 <div id="area-pdf">
-                    <table class="table table-hover table-striped mb-0 bg-body-tertiary" id="tabla-historial-pagos">
-                        <thead>
+                    <table class="table table-hover mb-0 modern-table" id="tabla-historial-pagos">
+                        <thead class="table-header-custom border-bottom">
                             <tr>
-                                <th width="50">#</th>
-                                <th width="100">N° Cuota</th>
+                                <th width="50" class="text-center">#</th>
+                                <th width="80">Cuota</th>
                                 <th>Vencimiento</th>
                                 <th>Fecha pago</th>
                                 <th>Amortización</th>
@@ -51,113 +250,125 @@
                                 <th width="100">Medio</th>
                                 <th>Concepto</th>
                                 <th>Transacción</th>
-                                <th>Observaciones</th>
-                                <th class="no-imprimir" width="150">Comprobante</th>
+                                <th class="text-center">Observaciones</th>
+                                <th class="no-imprimir text-center" width="150">Comprobante</th>
+                                <th>Boleta</th>
                             </tr>
                         </thead>
                         <tbody id="tabla-body">
                             <?php if (empty($pagos)) : ?>
                                 <tr>
-                                    <td colspan="12" class="text-center py-4 text-muted">
-                                        <i class="fas fa-info-circle me-2"></i>No hay pagos registrados
+                                    <td colspan="12" class="text-center py-5">
+                                        <div class="empty-state">
+                                            <i class="fas fa-info-circle fa-3x text-muted mb-3"></i>
+                                            <p class="text-muted mb-0">No hay pagos registrados</p>
+                                        </div>
                                     </td>
                                 </tr>
                             <?php else: ?>
                                 <?php $numeroFila = 1; ?>
                                 <?php foreach ($pagos as $pago) : ?>
-                                    <tr>
-                                        <td class="text-muted"><?= htmlspecialchars($numeroFila++) ?></td>
-                                        <td><?= htmlspecialchars($pago['numcuota']) ?></td>
+                                    <tr class="align-middle">
+                                        <td class="text-center text-muted fw-semibold"><?= htmlspecialchars($numeroFila++) ?></td>
+                                        <td class="fw-semibold"><?= htmlspecialchars($pago['numcuota']) ?></td>
                                         <td>
-                                            <span class="badge bg-info text-white">
+                                            <span class="badge bg-info-custom px-3 py-2">
+                                                <i class="far fa-calendar me-1"></i>
                                                 <?= htmlspecialchars($pago['fecha_vencimiento']) ?>
                                             </span>
                                         </td>
-
-                                        <td> <span class="badge bg-info text-white">
-                                                <?= htmlspecialchars($pago['fecha_pago']) ?>
-                                            </span></td>
-                                        <td class="fw-bold"><?= htmlspecialchars($pago['amortizacion']) ?></td>
-                                        <td class=""><?= htmlspecialchars($pago['saldorestante'] ?? '') ?></td>
                                         <td>
-                                            <span class="badge bg-success text-white">
+                                            <span class="badge bg-info-custom px-3 py-2">
+                                                <i class="far fa-calendar-check me-1"></i>
+                                                <?= htmlspecialchars($pago['fecha_pago']) ?>
+                                            </span>
+                                        </td>
+                                        <td class="fw-bold text-success"><?= htmlspecialchars($pago['amortizacion']) ?></td>
+                                        <td class="fw-semibold text-body"><?= htmlspecialchars($pago['saldorestante'] ?? '') ?></td>
+                                        <td>
+                                            <span class="badge bg-success-custom px-3 py-2">
+                                                <i class="fas fa-credit-card me-1"></i>
                                                 <?= htmlspecialchars($pago['mediopago']) ?>
                                             </span>
                                         </td>
                                         <td>
-                                            <span class="badge <?= trim($pago['tipo']) === 'Cuota' ? 'bg-primary text-white' : 'bg-danger text-white' ?>">
-
+                                            <span class="badge <?= trim($pago['tipo']) === 'Cuota' ? 'bg-primary-custom' : 'bg-danger-custom' ?> px-3 py-2">
+                                                <i class="fas fa-tag me-1"></i>
                                                 <?= htmlspecialchars($pago['tipo']) ?>
-
                                             </span>
                                         </td>
-
-                                        <td class="text-muted"><?= htmlspecialchars($pago['numerotransaccion'] ?? 'N/A')  ?></td>
+                                        <td class="text-muted">
+                                            <small><?= htmlspecialchars($pago['numerotransaccion'] ?? 'N/A')  ?></small>
+                                        </td>
                                         <td class="text-center">
                                             <button type="button"
-                                                class="btn btn-sm btn-outline-secondary ver-observacion"
+                                                class="btn btn-sm btn-outline-info rounded-pill ver-observacion"
                                                 data-bs-toggle="modal"
                                                 data-bs-target="#modalObservacion"
-                                                data-observacion="<?= htmlspecialchars($pago['observacion'] ?? 'Sin observaciones') ?>" title="Ver observación">
-                                                <i class="fas fa-eye"></i> Detalle
+                                                data-observacion="<?= htmlspecialchars($pago['observacion'] ?? 'Sin observaciones') ?>"
+                                                title="Ver observación">
+                                                <i class="fas fa-eye me-1"></i>Detalle
                                             </button>
                                         </td>
-
-                                        <td class="no-imprimir">
+                                        <td class="no-imprimir text-center">
                                             <?php if (!empty($pago['comprobante'])): ?>
                                                 <?php $esPdf = strtolower(pathinfo($pago['comprobante'], PATHINFO_EXTENSION)) === 'pdf'; ?>
-                                                <?php
-                                                $urlSegura = "/archivos/" . htmlspecialchars($pago['comprobante']);
-                                                ?>
+                                                <?php $urlSegura = "/archivos/" . htmlspecialchars($pago['comprobante']); ?>
                                                 <?php if ($esPdf): ?>
                                                     <a href="<?= $urlSegura ?>" target="_blank"
-                                                        class="btn btn-sm btn-danger" title="Ver comprobante">
+                                                        class="btn btn-sm btn-danger rounded-pill" title="Ver comprobante">
                                                         <i class="fas fa-file-pdf me-1"></i>PDF
                                                     </a>
                                                 <?php else: ?>
-                                                    <button type="button" class="btn btn-sm btn-primary ver-comprobante-img"
+                                                    <button type="button" class="btn btn-sm btn-primary rounded-pill ver-comprobante-img"
                                                         data-img="<?= htmlspecialchars($urlSegura) ?>" title="Ver comprobante">
-                                                        <i class="fas fa-image me-1"></i>Comprobante
+                                                        <i class="fas fa-image me-1"></i>Imagen
                                                     </button>
                                                 <?php endif; ?>
                                             <?php else: ?>
-                                                <span class="badge bg-light text-muted">N/A</span>
+                                                <span class="badge bg-light text-muted px-3 py-2">Sin comprobante</span>
                                             <?php endif; ?>
                                         </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            <?php endif; ?>
+                                        <td>
+                                            <span class="bg-primary-custom rounded p-1"><a class="text-white small" href="<?= htmlspecialchars($pago['enlace_pdf_nubefact'] ?? '#') ?>" target="_blank"><?= htmlspecialchars($pago['enlace_pdf_nubefact'] ? 'Boleta' : 'N/A') ?></a></span>
+                                        </td>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
                         </tbody>
                     </table>
                 </div>
+                </td>
+
+
             </div>
         </div>
 
         <!-- Pie de tabla con paginación -->
-        <div class="card-footer bg-white border-top bg-body-tertiary">
-            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center">
-                <div class="mb-2 mb-md-0 text-muted">
-                    Mostrando <span class="fw-bold">1-<?= min(10, count($pagos)) ?></span> de
-                    <span class="fw-bold"><?= count($pagos) ?></span> registros
+        <div class="card-footer bg-body border-top-0 py-3">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+                <div class="text-muted">
+                    <i class="fas fa-list-ol me-2"></i>
+                    Mostrando <span class="fw-bold text-primary">1-<?= min(10, count($pagos)) ?></span> de
+                    <span class="fw-bold text-primary"><?= count($pagos) ?></span> registros
                 </div>
 
                 <nav aria-label="Paginación">
-                    <ul class="pagination pagination-sm mb-0" id="paginacion">
+                    <ul class="pagination pagination-sm mb-0 custom-pagination" id="paginacion">
                         <li class="page-item disabled" id="prev-page">
-                            <a class="page-link" href="#" tabindex="-1">
-                                <i class="fas fa-chevron-left"></i>
+                            <a class="page-link rounded-start" href="#" tabindex="-1">
+                                <i class="fas fa-chevron-left fs-6"></i>
                             </a>
                         </li>
 
-                        <?php for ($p = 1; $p <= ceil(count($pagos) / 10); $p++): ?>
+                        <?php for ($p = 1; $p <= ceil(count($pagos) / 15); $p++): ?>
                             <li class="page-item <?= $p == 1 ? 'active' : '' ?>">
                                 <a class="page-link" href="#" data-page="<?= $p ?>"><?= $p ?></a>
                             </li>
                         <?php endfor; ?>
 
                         <li class="page-item" id="next-page">
-                            <a class="page-link" href="#">
-                                <i class="fas fa-chevron-right"></i>
+                            <a class="page-link rounded-end" href="#">
+                                <i class="fas fa-chevron-right fs-6"></i>
                             </a>
                         </li>
                     </ul>
@@ -165,7 +376,6 @@
             </div>
         </div>
     </div>
-
 
 
     <div class="d-block d-md-none">
@@ -241,14 +451,6 @@
         <?php endif; ?>
     </div>
 
-    <style>
-        @media (max-width: 767.98px) {
-            .table-responsive {
-                display: none;
-            }
-        }
-    </style>
-
 
 </div>
 
@@ -307,18 +509,12 @@
     document.addEventListener('DOMContentLoaded', () => {
 
         const btnPDF = document.querySelector('#btn-pdf');
-        const itemsPerPage = 10;
+        const itemsPerPage = 15;
         const totalItems = <?= count($pagos) ?>;
         const totalPages = Math.ceil(totalItems / itemsPerPage);
         let currentPage = parseInt(localStorage.getItem('pageHistorialPago') || '1');
         const botonesObservacion = document.querySelectorAll('.ver-observacion');
         const contenidoModal = document.getElementById('contenidoObservacion');
-        
-
-
-
-
-
 
 
 
@@ -437,7 +633,7 @@
 
             const documento = {
                 pageSize: 'A4',
-                pageOrientation: 'landscape',
+                pageOrientation: 'portrait',
                 pageMargins: [40, 25, 25, 25],
                 defaultStyle: {
                     fontSize: 6.8,
@@ -606,8 +802,6 @@
         document.querySelectorAll('.ver-comprobante-img').forEach(btn => {
             btn.addEventListener('click', function() {
                 const imgSrc = this.dataset.img;
-                console.log("Ruta segura del comprobante:", imgSrc); // Para depuración
-
                 const imgElement = document.getElementById('imagenComprobante');
                 const downloadBtn = document.getElementById('descargarComprobante');
 
