@@ -14,18 +14,22 @@ if (!empty($_SESSION['user']['idcargo'])) {
   $modulosPermitidos = [];
 }
 
-// Definimos los módulos en un array
-$allModules = [
-  'oc' => ['url' => '/oc', 'icon' => 'fa-solid fa-list pe-2', 'label' => 'Orden de compra'],
-  'compras' => ['url' => '/compras', 'icon' => 'fa-solid fa-list pe-2', 'label' => 'Compras'],
-  'concesionarios' => ['url' => '/concesionarios', 'icon' => 'fa-solid fa-list pe-2', 'label' => 'Concesionarios'],
-  'marcas' => ['url' => '/marcas', 'icon' => 'fa-solid fa-list pe-2', 'label' => 'Marcas'],
-  'vehiculos' => ['url' => '/vehiculos', 'icon' => 'fa-solid fa-list pe-2', 'label' => 'Vehículos'],
-  'usuarios' => ['url' => '/usuarios', 'icon' => 'fa-solid fa-list pe-2', 'label' => 'Usuarios'],
-  'formatoCotizacion' => ['url' => '/formatoCotizacion', 'icon' => 'fa-solid fa-list pe-2', 'label' => 'Requisitos'],
-  'cotizacion' => ['url' => '/cotizacion', 'icon' => 'fa-solid fa-list pe-2', 'label' => 'Cotización'],
-  'auth' => ['url' => '/auth', 'icon' => 'fa-solid fa-list pe-2', 'label' => 'Auth']
-];
+// Función helper para verificar si tiene permiso
+function tienePermiso($modulo, $modulosPermitidos)
+{
+  return in_array($modulo, $modulosPermitidos, true);
+}
+
+// Función para verificar si tiene permiso a algún submódulo de un grupo
+function tienePermisoGrupo($modulos, $modulosPermitidos)
+{
+  foreach ($modulos as $modulo) {
+    if (in_array($modulo, $modulosPermitidos, true)) {
+      return true;
+    }
+  }
+  return false;
+}
 ?>
 
 <style>
@@ -33,7 +37,6 @@ $allModules = [
     background-color: #007bff;
     color: white;
     font-weight: bold;
-
   }
 
   .sidebar-item .collapse.show {
@@ -50,10 +53,9 @@ $allModules = [
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Motorpark Yonda</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet"
-    xintegrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
+    crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
-    xintegrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
     crossorigin="anonymous" referrerpolicy="no-referrer" />
   <link rel="stylesheet" href="/assets/css/style-dashboard.css">
   <link rel="stylesheet" href="/assets/css/motorpark-style.css">
@@ -74,192 +76,226 @@ $allModules = [
         <ul class="sidebar-nav">
           <li class="sidebar-header">Módulos</li>
 
-          <!-- Modulos de Gestión de Clientes y Concesionarios -->
-          <li class="sidebar-item">
-            <a href="#" class="sidebar-link collapsed" data-bs-toggle="collapse"
-              data-bs-target="#gestionClientesConcesionarios" aria-expanded="false">
-              <i class="fa-solid fa-users pe-2"></i> Clientes y Concesionarios
-            </a>
-            <ul id="gestionClientesConcesionarios" class="sidebar-dropdown list-unstyled collapse ms-4"
-              data-bs-parent="#sidebar">
-              <li class="sidebar-item">
-                <a href="/concesionarios" class="sidebar-link">
-                  <i class="fa-solid fa-store pe-2"></i> Concesionarios
-                </a>
-              </li>
-              <li class="sidebar-item">
-                <a href="/locales" class="sidebar-link">
-                  <i class="fa-solid fa-location-pin pe-2"></i> Locales
-                </a>
-              </li>
-              <li class="sidebar-item">
-                <a href="/clientes" class="sidebar-link">
-                  <i class="fa-solid fa-user pe-2"></i> Clientes
-                </a>
-              </li>
-            </ul>
-          </li>
+          <!-- Módulo de Clientes y Concesionarios -->
+          <?php if (tienePermisoGrupo(['concesionarios', 'locales', 'clientes'], $modulosPermitidos)): ?>
+            <li class="sidebar-item">
+              <a href="#" class="sidebar-link collapsed" data-bs-toggle="collapse"
+                data-bs-target="#gestionClientesConcesionarios" aria-expanded="false">
+                <i class="fa-solid fa-users pe-2"></i> Clientes y Concesionarios
+              </a>
+              <ul id="gestionClientesConcesionarios" class="sidebar-dropdown list-unstyled collapse ms-4"
+                data-bs-parent="#sidebar">
+                <?php if (tienePermiso('concesionarios', $modulosPermitidos)): ?>
+                  <li class="sidebar-item">
+                    <a href="/concesionarios" class="sidebar-link">
+                      <i class="fa-solid fa-store pe-2"></i> Concesionarios
+                    </a>
+                  </li>
+                <?php endif; ?>
+                <?php if (tienePermiso('locales', $modulosPermitidos)): ?>
+                  <li class="sidebar-item">
+                    <a href="/locales" class="sidebar-link">
+                      <i class="fa-solid fa-location-pin pe-2"></i> Locales
+                    </a>
+                  </li>
+                <?php endif; ?>
+                <?php if (tienePermiso('clientes', $modulosPermitidos)): ?>
+                  <li class="sidebar-item">
+                    <a href="/clientes" class="sidebar-link">
+                      <i class="fa-solid fa-user pe-2"></i> Clientes
+                    </a>
+                  </li>
+                <?php endif; ?>
+              </ul>
+            </li>
+          <?php endif; ?>
 
-          <!-- Modulos de Gestión de Vehículos -->
-          <li class="sidebar-item">
-            <a href="#" class="sidebar-link collapsed" data-bs-toggle="collapse" data-bs-target="#gestionVehiculos"
-              aria-expanded="false">
-              <i class="fa-solid fa-car pe-2"></i> Gestión de Vehículos
-            </a>
-            <ul id="gestionVehiculos" class="sidebar-dropdown list-unstyled collapse ms-3" data-bs-parent="#sidebar">
-              <li class="sidebar-item">
-                <a href="/marcas" class="sidebar-link">
-                  <i class="fa-solid fa-tag pe-2"></i> Marcas
-                </a>
-              </li>
-              <li class="sidebar-item">
-                <a href="/vehiculos" class="sidebar-link">
-                  <i class="fa-solid fa-car-side pe-2"></i> Vehículos
-                </a>
-              </li>
+          <!-- Módulo de Vehículos -->
+          <?php if (tienePermisoGrupo(['marcas', 'vehiculos', 'recepcionVehiculos'], $modulosPermitidos)): ?>
+            <li class="sidebar-item">
+              <a href="#" class="sidebar-link collapsed" data-bs-toggle="collapse" data-bs-target="#gestionVehiculos"
+                aria-expanded="false">
+                <i class="fa-solid fa-car pe-2"></i> Gestión de Vehículos
+              </a>
+              <ul id="gestionVehiculos" class="sidebar-dropdown list-unstyled collapse ms-3" data-bs-parent="#sidebar">
+                <?php if (tienePermiso('marcas', $modulosPermitidos)): ?>
+                  <li class="sidebar-item">
+                    <a href="/marcas" class="sidebar-link">
+                      <i class="fa-solid fa-tag pe-2"></i> Marcas
+                    </a>
+                  </li>
+                <?php endif; ?>
+                <?php if (tienePermiso('vehiculos', $modulosPermitidos)): ?>
+                  <li class="sidebar-item">
+                    <a href="/vehiculos" class="sidebar-link">
+                      <i class="fa-solid fa-car-side pe-2"></i> Vehículos
+                    </a>
+                  </li>
+                <?php endif; ?>
+                <?php if (tienePermiso('recepcionVehiculos', $modulosPermitidos)): ?>
+                  <li class="sidebar-item">
+                    <a href="/recepcionVehiculos" class="sidebar-link">
+                      <i class="bi bi-check-all fs-5"></i> <i class="bi bi-car-front-fill pe-2"></i>Recepción Vehículos
+                    </a>
+                  </li>
+                <?php endif; ?>
+              </ul>
+            </li>
+          <?php endif; ?>
 
-              <li class="sidebar-item">
-                <a href="/recepcionVehiculos" class="sidebar-link">
-                  <i class="bi bi-check-all  fs-5"></i> <i class="bi bi-car-front-fill pe-2 "></i>Recepción Vehículos
-                </a>
-              </li>
-            </ul>
-          </li>
+          <!-- Módulo de Compras -->
+          <?php if (tienePermisoGrupo(['oc', 'compras'], $modulosPermitidos)): ?>
+            <li class="sidebar-item">
+              <a href="#" class="sidebar-link collapsed" data-bs-toggle="collapse" data-bs-target="#gestionCompras"
+                aria-expanded="false">
+                <i class="fa-solid fa-shopping-cart pe-2"></i> Gestión de Compras
+              </a>
+              <ul id="gestionCompras" class="sidebar-dropdown list-unstyled collapse ms-4" data-bs-parent="#sidebar">
+                <?php if (tienePermiso('oc', $modulosPermitidos)): ?>
+                  <li class="sidebar-item">
+                    <a href="/oc" class="sidebar-link">
+                      <i class="fa-solid fa-file pe-2"></i> Orden de compra
+                    </a>
+                  </li>
+                <?php endif; ?>
+                <?php if (tienePermiso('compras', $modulosPermitidos)): ?>
+                  <li class="sidebar-item">
+                    <a href="/compras" class="sidebar-link">
+                      <i class="fa-solid fa-box pe-2"></i> Compras
+                    </a>
+                  </li>
+                <?php endif; ?>
+              </ul>
+            </li>
+          <?php endif; ?>
 
-          <!-- Modulos de Gestión de Compras -->
-          <li class="sidebar-item">
-            <a href="#" class="sidebar-link collapsed" data-bs-toggle="collapse" data-bs-target="#gestionCompras"
-              aria-expanded="false">
-              <i class="fa-solid fa-shopping-cart pe-2"></i> Gestión de Compras
-            </a>
-            <ul id="gestionCompras" class="sidebar-dropdown list-unstyled collapse ms-4" data-bs-parent="#sidebar">
-              <li class="sidebar-item">
-                <a href="/oc" class="sidebar-link">
-                  <i class="fa-solid fa-file pe-2"></i> Orden de compra
-                </a>
-              </li>
-              <li class="sidebar-item">
-                <a href="/compras" class="sidebar-link">
-                  <i class="fa-solid fa-box pe-2"></i> Compras
-                </a>
-              </li>
-            </ul>
-          </li>
+          <!-- Módulo de Cotización -->
+          <?php if (tienePermisoGrupo(['formatoCotizacion', 'cotizacion'], $modulosPermitidos)): ?>
+            <li class="sidebar-item">
+              <a href="#" class="sidebar-link collapsed" data-bs-toggle="collapse" data-bs-target="#cotizacionRequisitos"
+                aria-expanded="false">
+                <i class="fa-solid fa-clipboard-list pe-2"></i> Cotización y Requisitos
+              </a>
+              <ul id="cotizacionRequisitos" class="sidebar-dropdown list-unstyled collapse ms-4"
+                data-bs-parent="#sidebar">
+                <?php if (tienePermiso('formatoCotizacion', $modulosPermitidos)): ?>
+                  <li class="sidebar-item">
+                    <a href="/formatoCotizacion" class="sidebar-link">
+                      <i class="fa-solid fa-file-alt pe-2"></i> Requisitos
+                    </a>
+                  </li>
+                <?php endif; ?>
+                <?php if (tienePermiso('cotizacion', $modulosPermitidos)): ?>
+                  <li class="sidebar-item">
+                    <a href="/cotizacion" class="sidebar-link">
+                      <i class="fa-solid fa-calculator pe-2"></i> Cotización
+                    </a>
+                  </li>
+                <?php endif; ?>
+              </ul>
+            </li>
+          <?php endif; ?>
 
-          <!-- Modulos de Cotización y Requisitos -->
-          <li class="sidebar-item">
-            <a href="#" class="sidebar-link collapsed" data-bs-toggle="collapse" data-bs-target="#cotizacionRequisitos"
-              aria-expanded="false">
-              <i class="fa-solid fa-clipboard-list pe-2"></i> Cotización y Requisitos
-            </a>
-            <ul id="cotizacionRequisitos" class="sidebar-dropdown list-unstyled collapse ms-4"
-              data-bs-parent="#sidebar">
-              <li class="sidebar-item">
-                <a href="/formatoCotizacion" class="sidebar-link">
-                  <i class="fa-solid fa-file-alt pe-2"></i> Requisitos
-                </a>
-              </li>
-              <li class="sidebar-item">
-                <a href="/cotizacion" class="sidebar-link">
-                  <i class="fa-solid fa-calculator pe-2"></i> Cotización
-                </a>
-              </li>
-            </ul>
-          </li>
+          <!-- Contratos -->
+          <?php if (tienePermiso('contratos', $modulosPermitidos)): ?>
+            <li class="sidebar-item">
+              <a href="/contratos" class="sidebar-link">
+                <i class="bi bi-journal-text pe-2"></i> Contratos
+              </a>
+            </li>
+          <?php endif; ?>
 
-          <li class="sidebar-item">
-            <a href="/contratos" class="sidebar-link">
-              <i class="bi bi-journal-text pe-2"></i> Contratos
-            </a>
-          </li>
+          <!-- Vehículos al Contado -->
+          <?php if (tienePermiso('vehiculosAlContado', $modulosPermitidos)): ?>
+            <li class="sidebar-item">
+              <a href="/vehiculosAlContado" class="sidebar-link">
+                <i class="fa-solid fa-car-side pe-2"></i> Vehículos al contado
+              </a>
+            </li>
+          <?php endif; ?>
 
-          <li class="sidebar-item">
-            <a href="/vehiculosAlContado" class="sidebar-link">
-              <i class="fa-solid fa-car-side pe-2"></i> Vehículos al contado
-            </a>
-          </li>
+          <!-- Usuarios -->
+          <?php if (tienePermiso('usuarios', $modulosPermitidos)): ?>
+            <li class="sidebar-item">
+              <a href="/usuarios" class="sidebar-link">
+                <i class="fa-solid fa-users-cog pe-2"></i> Gestión de Usuarios
+              </a>
+            </li>
+          <?php endif; ?>
 
+          <!-- Módulo de Crédito y Caja -->
+          <?php if (tienePermisoGrupo(['caja', 'creditos', 'egreso', 'arqueoCaja'], $modulosPermitidos)): ?>
+            <li class="sidebar-item">
+              <a href="#" class="sidebar-link collapsed" data-bs-toggle="collapse" data-bs-target="#gestionCreditoCaja"
+                aria-expanded="false">
+                <i class="fa-solid fa-money-bill pe-2"></i> Gestión de Crédito y Caja
+              </a>
+              <ul id="gestionCreditoCaja" class="sidebar-dropdown list-unstyled collapse ms-4" data-bs-parent="#sidebar">
+                <?php if (tienePermiso('caja', $modulosPermitidos)): ?>
+                  <li class="sidebar-item">
+                    <a href="/caja" class="sidebar-link">
+                      <i class="fa-solid fa-cash-register pe-2"></i> Caja
+                    </a>
+                  </li>
+                <?php endif; ?>
+                <?php if (tienePermiso('creditos', $modulosPermitidos)): ?>
+                  <li class="sidebar-item">
+                    <a href="/creditos" class="sidebar-link">
+                      <i class="fa-solid fa-credit-card pe-2"></i> Crédito
+                    </a>
+                  </li>
+                <?php endif; ?>
+                <?php if (tienePermiso('egreso', $modulosPermitidos)): ?>
+                  <li class="sidebar-item">
+                    <a href="/egreso" class="sidebar-link">
+                      <i class="bi bi-door-open pe-2"></i> Egresos
+                    </a>
+                  </li>
+                <?php endif; ?>
+                <?php if (tienePermiso('arqueoCaja', $modulosPermitidos)): ?>
+                  <li class="sidebar-item">
+                    <a href="/arqueoCaja" class="sidebar-link">
+                      <i class="bi bi-piggy-bank-fill pe-2"></i> Arqueo
+                    </a>
+                  </li>
+                <?php endif; ?>
+              </ul>
+            </li>
+          <?php endif; ?>
 
-          <!-- Modulos de Gestión de Usuarios -->
-          <li class="sidebar-item">
-            <a href="/usuarios" class="sidebar-link">
-              <i class="fa-solid fa-users-cog pe-2"></i> Gestión de Usuarios
-            </a>
-          </li>
+          <!-- Módulo de Cobranza -->
+          <?php if (tienePermiso('cobranza', $modulosPermitidos)): ?>
+            <li class="sidebar-item">
+              <a href="#" class="sidebar-link collapsed" data-bs-toggle="collapse" data-bs-target="#gestionCobranza"
+                aria-expanded="false">
+                <i class="fa-solid fa-money-check-alt pe-2"></i> Gestión de Cobranza
+              </a>
+              <ul id="gestionCobranza" class="sidebar-dropdown list-unstyled collapse ms-4" data-bs-parent="#sidebar">
+                <li class="sidebar-item">
+                  <a href="/Cobranza" class="sidebar-link">
+                    <i class="fa-solid fa-money-bill-wave pe-2"></i> Cobranza
+                  </a>
+                </li>
+              </ul>
+            </li>
+          <?php endif; ?>
 
-          <!-- Modulos de Gestión de Crédito y Caja -->
-          <li class="sidebar-item">
-            <a href="#" class="sidebar-link collapsed" data-bs-toggle="collapse" data-bs-target="#gestionCreditoCaja"
-              aria-expanded="false">
-              <i class="fa-solid fa-money-bill pe-2"></i> Gestión de Crédito y Caja
-            </a>
-            <ul id="gestionCreditoCaja" class="sidebar-dropdown list-unstyled collapse ms-4" data-bs-parent="#sidebar">
-              <li class="sidebar-item">
-                <a href="/caja" class="sidebar-link">
-                  <i class="fa-solid fa-cash-register pe-2"></i> Caja
-                </a>
-              </li>
-              <li class="sidebar-item">
-                <a href="/creditos" class="sidebar-link">
-                  <i class="fa-solid fa-credit-card pe-2"></i> Crédito
-                </a>
-              </li>
-
-              <li class="sidebar-item">
-                <a href="/egreso" class="sidebar-link">
-
-                  <i class="bi bi-door-open pe-2"></i> Egresos
-                </a>
-              </li>
-
-              <li class="sidebar-item">
-                <a href="/arqueoCaja" class="sidebar-link">
-
-
-                  <i class="bi bi-piggy-bank-fill pe-2"></i> Arqueo
-                </a>
-              </li>
-
-            </ul>
-          </li>
-
-          <!-- Modulo de cobranza -->
-          <li class="sidebar-item">
-            <a href="#" class="sidebar-link collapsed" data-bs-toggle="collapse" data-bs-target="#gestionCobranza"
-              aria-expanded="false">
-              <i class="fa-solid fa-money-check-alt pe-2"></i> Gestión de Cobranza
-            </a>
-            <ul id="gestionCobranza" class="sidebar-dropdown list-unstyled collapse ms-4" data-bs-parent="#sidebar">
-
-              <!-- Solo Cobranza -->
-              <li class="sidebar-item">
-                <a href="/Cobranza" class="sidebar-link">
-                  <i class="fa-solid fa-money-bill-wave pe-2"></i> Cobranza
-                </a>
-              </li>
-
-            </ul>
-          </li>
-
-          <!-- Módulo de Autenticación -->
-          <li class="sidebar-item">
-            <a href="#" class="sidebar-link collapsed" data-bs-target="#auth" data-bs-toggle="collapse"
-              aria-expanded="false">
-              <i class="fa-regular fa-user pe-2"></i> Auth
-            </a>
-            <ul id="auth" class="sidebar-dropdown list-unstyled collapse ms-4" data-bs-parent="#sidebar">
-              <?php if (empty($_SESSION['user'])): ?>
-                <li class="sidebar-item"><a href="/login" class="sidebar-link">Login</a></li>
-                <li class="sidebar-item"><a href="/recoverAccount" class="sidebar-link">Recuperar
-                    contraseña</a></li>
-              <?php endif; ?>
-              <?php if (in_array('auth', $modulosPermitidos, true)): ?>
-                <li class="sidebar-item"><a href="/createAccount" class="sidebar-link"><i
-                      class="fa-solid fa-user-plus pe-2"></i>Registrar
-                    cuenta</a></li>
-              <?php endif; ?>
-            </ul>
-          </li>
+          <!-- Módulo de Autenticación (solo para usuarios con permiso) -->
+          <?php if (tienePermiso('auth', $modulosPermitidos)): ?>
+            <li class="sidebar-item">
+              <a href="#" class="sidebar-link collapsed" data-bs-target="#auth" data-bs-toggle="collapse"
+                aria-expanded="false">
+                <i class="fa-regular fa-user pe-2"></i> Auth
+              </a>
+              <ul id="auth" class="sidebar-dropdown list-unstyled collapse ms-4" data-bs-parent="#sidebar">
+                <li class="sidebar-item">
+                  <a href="/createAccount" class="sidebar-link">
+                    <i class="fa-solid fa-user-plus pe-2"></i>Registrar cuenta
+                  </a>
+                </li>
+              </ul>
+            </li>
+          <?php endif; ?>
         </ul>
       </div>
     </aside>
@@ -296,54 +332,6 @@ $allModules = [
       </nav>
       <main class="content px-3 py-2">
 
-
-
-        <!-- <script>
-          document.addEventListener('DOMContentLoaded', function () {
-            const currentPath = window.location.pathname;
-            const sidebarLinks = document.querySelectorAll('.sidebar-link');
-            const collapseElements = document.querySelectorAll('.collapse');
-
-            // Resaltar el enlace activo y abrir su menú padre
-            sidebarLinks.forEach(link => {
-              const href = link.getAttribute('href');
-              if (href && currentPath.startsWith(href)) {
-                link.classList.add('active');
-                const parentCollapse = link.closest('.sidebar-item').querySelector('.collapse');
-                if (parentCollapse) {
-                  parentCollapse.classList.add('show');
-                }
-              }
-            });
-
-            // Controlar la persistencia del estado
-            document.body.addEventListener('shown.bs.collapse', function (event) {
-              const openedCollapseId = event.target.id;
-              localStorage.setItem(openedCollapseId, 'open');
-            });
-
-            document.body.addEventListener('hidden.bs.collapse', function (event) {
-              const hiddenCollapseId = event.target.id;
-              localStorage.setItem(hiddenCollapseId, 'closed');
-            });
-
-            //  Restaurar el estado al cargar la página
-            collapseElements.forEach(collapse => {
-              const collapseId = collapse.id;
-              if (localStorage.getItem(collapseId) === 'open') {
-                const bsCollapse = new bootstrap.Collapse(collapse, {
-                  toggle: false
-                });
-                bsCollapse.show();
-              }
-            });
-          });
-        </script> -->
-
-
-
-
-
         <script>
           document.addEventListener('DOMContentLoaded', function () {
             const currentPath = window.location.pathname;
@@ -353,7 +341,6 @@ $allModules = [
             const rutasCobranza = ['/Cobranza', '/Recordatorios', '/Vencidos'];
             const esRutaCobranza = rutasCobranza.some(ruta => currentPath.startsWith(ruta));
 
-            // Resaltar el enlace activo y abrir su menú padre
             sidebarLinks.forEach(link => {
               const href = link.getAttribute('href');
 
@@ -374,7 +361,6 @@ $allModules = [
               }
             });
 
-            // Controlar la persistencia del estado
             document.body.addEventListener('shown.bs.collapse', function (event) {
               const openedCollapseId = event.target.id;
               localStorage.setItem(openedCollapseId, 'open');
