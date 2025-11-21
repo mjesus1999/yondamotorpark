@@ -607,6 +607,7 @@ CREATE TABLE pagos (
     observacion VARCHAR(300) NULL,
     enlace_pdf_nubefact VARCHAR(500) NULL,
     enlace_xml_nubefact VARCHAR(500) NULL,
+    enlace_del_cdr VARCHAR(500) NULL,
     numero_boleta_sunat INT NULL,
     facturado ENUM('S', 'N') DEFAULT 'S',
     declarado ENUM('S', 'N') DEFAULT 'N',
@@ -619,6 +620,8 @@ CREATE TABLE pagos (
     CONSTRAINT fk_idasesorvendedor_pagos FOREIGN KEY(idasesorvendedor) REFERENCES colaboradores(idcolaborador),
     CONSTRAINT fk_idcliente_pagos  FOREIGN KEY(idcliente) REFERENCES clientes(idcliente)
 ) ENGINE = InnoDB;
+
+ALTER TABLE pagos ADD COLUMN enlace_del_cdr VARCHAR(500) NULL AFTER enlace_xml_nubefact;
 
 -- ALTER TABLE pagos ADD COLUMN enlace_xml_nubefact VARCHAR(500) NULL AFTER enlace_pdf_nubefact;
 
@@ -642,7 +645,8 @@ CREATE TABLE pagos (
 
 -- SELECT * FROM PAGOS
 
--- USE MOTORPARK;
+ USE MOTORPARK;
+ SELECT * FROM pagos;
 -- SELECT * FROM series_nubefact;
 
 

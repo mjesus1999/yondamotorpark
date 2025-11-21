@@ -18,8 +18,10 @@ use App\Models\Vehiculo;
 use App\Models\FormatoCotizacion;
 use App\Helpers\Validador;
 use App\Config\ConceptosPago;
+use App\Controllers\ComprobanteNubefactController;
+use App\Models\Caja;
+use App\Models\PagoCronograma;
 use Exception;
-use JsonException;
 use PDOException;
 
 /**
@@ -49,6 +51,10 @@ class CotizacionController extends Controller
      */
     private FormatoCotizacion $formatoModel;
 
+    private Caja $cajaModel;
+    private PagoCronograma $pagoCronogramaModel;
+
+
     /**
      * Constructor del controlador
      * 
@@ -59,7 +65,9 @@ class CotizacionController extends Controller
     {
         $this->cotizacionModel = new Cotizacion();
         $this->vehiculoModel = new Vehiculo();
+        $this->cajaModel = new Caja();
         $this->formatoModel = new FormatoCotizacion();
+        $this->pagoCronogramaModel = new PagoCronograma();
     }
 
     /**
@@ -237,6 +245,7 @@ class CotizacionController extends Controller
      * @throws \Exception 
      * @return void
      */
+  
     public function storePagoInicial()
     {
         header('Content-Type: application/json');
@@ -253,6 +262,7 @@ class CotizacionController extends Controller
             $data = array_map([Validador::class, 'limpiar'], $_POST);
             $errores = [];
 
+            
             $registro = [
                 'idconcepto' => ConceptosPago::INICIAL_ID,
                 'idcotizacion' => $data['idcotizacion'] ?? null,
@@ -261,99 +271,164 @@ class CotizacionController extends Controller
                 'mediopago' => $data['mediopago'] ?? null,
                 'numerotransaccion' => empty($data['numerotransaccion']) ? null : $data['numerotransaccion'],
                 'fechapago' => $data['fechapago'] ?? null,
-                'amortizacion' => $data['amortizacion'] ?? null,
+                'amortizacion' => (float) ($data['amortizacion'] ?? 0),
                 'saldorestante' => $data['saldorestante'] ?? null,
                 'comprobante' => null,
                 'observacion' => empty($data['observacion']) ? null : $data['observacion'],
-                'moneda' => $data['moneda'] ?? null,
+                'moneda' => $data['moneda'] ?? 'PEN',
                 'montomonedaoriginal' => $data['montomonedaoriginal'] ?? null,
                 'tipocambioaplicado' => empty($data['tipocambioaplicado']) ? null : $data['tipocambioaplicado']
             ];
 
-
+      
             $errores[] = Validador::campoObligatorio($registro['idconcepto'], 'Concepto');
             $errores[] = Validador::campoObligatorio($registro['idvehiculo'], 'Identificador del vehículo');
             $errores[] = Validador::campoObligatorio($registro['mediopago'], 'Medio de pago');
             $errores[] = Validador::campoObligatorio($registro['fechapago'], 'Fecha de pago');
             $errores[] = Validador::campoObligatorio($registro['amortizacion'], 'Amortización');
-            $errores[] = Validador::campoObligatorio($registro['saldorestante'], 'Saldo restante');
-
 
             if ($data['mediopago'] !== 'Efectivo') {
-
                 if (!isset($_FILES['comprobante']) || $_FILES['comprobante']['error'] !== UPLOAD_ERR_OK) {
                     $errores[] = 'El archivo del comprobante es obligatorio para este medio de pago.';
                 }
             }
 
-
             $errores = array_filter($errores);
-
             if (count($errores) > 0) {
                 http_response_code(422);
                 echo json_encode(['success' => false, 'message' => implode('<br>', $errores)]);
                 return;
             }
 
-            // Subida de archivo
             if (isset($_FILES['comprobante']) && $_FILES['comprobante']['error'] === UPLOAD_ERR_OK) {
                 $directorioDestino = __DIR__ . '/../../storage/comprobantes/';
-
                 if (!is_dir($directorioDestino)) {
                     mkdir($directorioDestino, 0777, true);
                 }
-
                 $nombreArchivo = 'pagoInicial_' . uniqid() . '_' . basename($_FILES['comprobante']['name']);
                 $rutaArchivoGuardado = $directorioDestino . $nombreArchivo;
 
                 if (!move_uploaded_file($_FILES['comprobante']['tmp_name'], $rutaArchivoGuardado)) {
                     throw new Exception('No se pudo guardar el archivo del comprobante.');
                 }
-
                 $registro['comprobante'] = 'comprobantes/' . $nombreArchivo;
             }
 
-            // Insertar pago
             $idPago = $this->cotizacionModel->addPagoInicial($registro);
 
             if ($idPago > 0) {
+                
+            
+                $enlacePdf = null;
+                $mensajeExtra = "";
+
+                try {
+                    
+                    $datosCliente = $this->cotizacionModel->getDatosClienteByCotizacion((int)$registro['idcotizacion']);
+                    $serieBoleta = "BBB1"; // Configurar serie según tu lógica de negocio
+                    $nuevoNumero = $this->cajaModel->obtenerNuevoCorrelativo($serieBoleta);
+
+                    if ($datosCliente && $nuevoNumero) {
+                        
+                       
+                        $montoTotal = (float)$registro['amortizacion'];
+                
+                        $itemsBoleta = [
+                            [
+                                "unidad_de_medida" => "ZZ",
+                                "descripcion" => "PAGO INICIAL DE VEHICULO",
+                                "cantidad" => 1,
+                                "valor_unitario" => $montoTotal,
+                                "precio_unitario" => $montoTotal,
+                                "subtotal" => $montoTotal,
+                                "tipo_de_igv" => 9, // 9 = Inafecto 
+                                "igv" => 0.00,
+                                "total" => $montoTotal
+                            ]
+                        ];
+
+                      
+                        $totalesBoleta = [
+                            'total_gravada' => 0.00,
+                            'total_inafecta' => $montoTotal,
+                            'total_exonerada' => 0.00,
+                            'total_igv' => 0.00,
+                            'total_venta' => $montoTotal
+                        ];
+
+                     
+                        $datosFacturacion = [
+                            'tipo_comprobante' => 2, // Boleta
+                            'serie' => $serieBoleta,
+                            'numero_comprobante' => $nuevoNumero,
+                            'items' => $itemsBoleta,
+                            'totales' => $totalesBoleta,
+                            "datos_cliente" => [
+                                "tipo_documento" => 1, // DNI
+                                "numero_documento" => $datosCliente['documento'],
+                                "denominacion" => $datosCliente['nombrecliente'],
+                                "direccion" => $datosCliente['direccion'] ?? 'Dirección Desconocida',
+                                "email" => $datosCliente['email'] ?? ''
+                            ]
+                        ];
+
+                 
+                        $nubefactController = new ComprobanteNubefactController();
+                        $respNube = $nubefactController->procesarPagoYEmitirComprobante($datosFacturacion);
+
+                        if ($respNube['success']) {
+                            $enlacePdf = $respNube['enlace_pdf'];
+                            $enlaceXml = $respNube['enlace_xml'];
+                            $enlaceCdr = $respNube['enlace_cdr'];
+                            $this->pagoCronogramaModel->actualizarEnlaceYDeclarado(
+                                $idPago, 
+                                $enlacePdf, 
+                                $enlaceXml, 
+                                $enlaceCdr, 
+                                $nuevoNumero
+                            );
+                        } else {
+                            $mensajeExtra = " (Pago guardado, pero error al emitir Boleta: " . $respNube['message'] . ")";
+                            error_log("Error NubeFact Inicial: " . $respNube['message']);
+                        }
+                    } else {
+                        $mensajeExtra = " (Pago guardado, pero faltan datos de cliente para facturar)";
+                    }
+
+                } catch (Exception $exFact) {
+                    error_log("Excepción Facturación Inicial: " . $exFact->getMessage());
+                    $mensajeExtra = " (Pago guardado, error en sistema de facturación)";
+                }
+            
                 echo json_encode([
                     'success' => true,
-                    'message' => 'Pago registrado correctamente',
-                    'id' => $idPago
+                    'message' => 'Pago registrado correctamente' . $mensajeExtra,
+                    'id' => $idPago,
+                    'enlace_pdf' => $enlacePdf
                 ]);
+
             } else {
-
-                throw new Exception('No se pudo registrar el pago de inicial.');
+                throw new Exception('No se pudo registrar el pago de inicial en la BD.');
             }
+
         } catch (PDOException $e) {
-
-            if ($rutaArchivoGuardado && file_exists($rutaArchivoGuardado))
-                @unlink($rutaArchivoGuardado);
-
-            if (strpos($e->getMessage(), 'El vehículo ya fue separado') !== false || strpos($e->getMessage(), 'vendido al contado') !== false) {
+            if ($rutaArchivoGuardado && file_exists($rutaArchivoGuardado)) @unlink($rutaArchivoGuardado);
+            
+            $msg = $e->getMessage();
+            if (strpos($msg, 'El vehículo ya fue separado') !== false) {
                 http_response_code(409);
-                echo json_encode([
-                    'success' => false,
-                    'message' => $e->getMessage()
-                ]);
             } else {
                 http_response_code(500);
-                echo json_encode([
-                    'success' => false,
-                    'message' => 'Error de base de datos: ' . $e->getMessage()
-                ]);
+                $msg = 'Error de base de datos al procesar el pago.';
             }
+            
+            echo json_encode(['success' => false, 'message' => $msg]);
+
         } catch (Exception $e) {
-
-            if ($rutaArchivoGuardado && file_exists($rutaArchivoGuardado))
-                @unlink($rutaArchivoGuardado);
-
+            if ($rutaArchivoGuardado && file_exists($rutaArchivoGuardado)) @unlink($rutaArchivoGuardado);
+            
             http_response_code(500);
-            echo json_encode([
-                'success' => false,
-                'message' => 'Error: ' . $e->getMessage()
-            ]);
+            echo json_encode(['success' => false, 'message' => 'Error: ' . $e->getMessage()]);
         }
     }
 
@@ -986,17 +1061,16 @@ class CotizacionController extends Controller
         $dataAgrupada = [
             'Pendiente' => [],
             'Separada' => [],
-            'Aprobada'=> [],
+            'Aprobada' => [],
         ];
 
         foreach ($cotizaciones as $cotizacion) {
             $estado = $cotizacion['estado'];
 
             // Si existe el estado en mi arreglo, que me o agregue con todos su datos
-            if(isset($dataAgrupada[$estado])) {
+            if (isset($dataAgrupada[$estado])) {
                 $dataAgrupada[$estado][] = $cotizacion;
             }
-
         }
 
 

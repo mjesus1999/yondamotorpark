@@ -1,6 +1,9 @@
 <?php include __DIR__ . '/../layout/header.php'; ?>
 
+<?php 
+    var_dump($historialPagos);
 
+?>
 <link rel="stylesheet" href="/assets/css/pago-inicial.css">
 <div class="container-fluid">
 
@@ -485,6 +488,7 @@
                                             <th class="text-end">Amortización</th>
                                             <th class="text-end">Saldo Restante</th>
                                             <th>Comprobante</th>
+                                            <th>Boleta</th>
                                             <th>Observaciones</th>
                                         </tr>
                                     </thead>
@@ -515,6 +519,7 @@
                                                         <span class="badge bg-secondary">N/A</span>
                                                     <?php endif; ?>
                                                 </td>
+                                                <td><span class=""><a class="btn btn-link" href="<?= htmlspecialchars($pago["enlace_pdf_nubefact"]) ?>" target="_blank"><?= htmlspecialchars($pago["enlace_pdf_nubefact"] ? 'Ver Boleta' : '-') ?></a></span></td>
                                                 <td><small class="text-muted"><?= htmlspecialchars($pago['observacion'] ?? '-') ?></small></td>
                                             </tr>
                                         <?php endforeach; ?>
@@ -736,6 +741,7 @@
         return null;
     }
 
+
     /**
      * Envía el formulario
      */
@@ -777,6 +783,7 @@
             if (response.success) {
                 mostrarAlerta('exito', response.message);
                 setTimeout(() => window.location.reload(), 1500);
+                window.location.href = response.enlace_pdf;
             } else {
                 mostrarAlerta('error', response.message || 'Ocurrió un error inesperado.');
                 registrarBtn.disabled = false;
@@ -890,9 +897,9 @@
     }
 
 
-  
+
     function generarCuerpoTablaPagos(pagos) {
-    
+
         const headerStyle = {
             text: '',
             bold: true,
@@ -901,7 +908,7 @@
             alignment: 'center'
         };
 
-       
+
         const body = [
             [{
                     ...headerStyle,
@@ -927,9 +934,9 @@
         ];
 
         let totalPagado = 0;
-        let simbolo = 'S/'; 
+        let simbolo = 'S/';
 
-       
+
         pagos.forEach(pago => {
             const monto = parseFloat(pago.monto_pago);
             const saldo = parseFloat(pago.saldorestante);
@@ -959,7 +966,7 @@
             ]);
         });
 
-       
+
         body.push([{
                 text: 'TOTAL PAGADO',
                 bold: true,
@@ -967,7 +974,7 @@
                 alignment: 'right',
                 margin: [0, 5, 0, 5]
             },
-            {}, 
+            {},
             {},
             {
                 text: `${simbolo} ${totalPagado.toFixed(2)}`,
@@ -978,28 +985,28 @@
             {
                 text: '',
                 margin: [0, 5, 0, 5]
-            } 
+            }
         ]);
 
         return body;
     }
 
-     
+
 
     if (els.btnExportarPagos) {
 
-      
+
         els.btnExportarPagos.addEventListener('click', async (e) => {
 
-            
+
             const idCotizacion = e.target.dataset.id;
-            const vehiculo = e.target.dataset.vehiculo; 
-            const precioVenta = e.target.dataset.precioventa; 
-            const cliente = e.target.dataset.cliente; 
+            const vehiculo = e.target.dataset.vehiculo;
+            const precioVenta = e.target.dataset.precioventa;
+            const cliente = e.target.dataset.cliente;
 
             if (idCotizacion) {
 
-                
+
                 const datosPagos = await getPagos(idCotizacion);
 
                 if (datosPagos.length === 0) {
@@ -1007,24 +1014,24 @@
                     return;
                 }
 
-                
+
                 const cuerpoTabla = generarCuerpoTablaPagos(datosPagos);
 
-                
-                const vehiculoParts = vehiculo.split(' / '); 
+
+                const vehiculoParts = vehiculo.split(' / ');
                 const monedaSimbolo = datosPagos[0].moneda_simbolo ?? 'S/';
 
-             
+
                 const documento = {
                     pageSize: 'A4',
                     pageOrientation: 'portrait',
-                    pageMargins: [40, 25, 40, 25], 
+                    pageMargins: [40, 25, 40, 25],
                     defaultStyle: {
                         fontSize: 9,
-                        color: '#333333' 
+                        color: '#333333'
                     },
                     content: [
-                      
+
                         {
                             columns: [{
                                     image: window.logoBase64,
@@ -1049,10 +1056,10 @@
                                     alignment: 'right'
                                 }
                             ],
-                            margin: [0, 0, 0, 10] 
+                            margin: [0, 0, 0, 10]
                         },
 
-                      
+
                         {
                             text: `HISTORIAL DE PAGOS DE INICIAL`,
                             style: 'header',
@@ -1073,9 +1080,9 @@
                             margin: [0, 10, 0, 5]
                         },
                         {
-                          
+
                             columns: [
-                                
+
                                 {
                                     width: '50%',
                                     stack: [{
@@ -1088,7 +1095,7 @@
                                         }
                                     ]
                                 },
-                                
+
                                 {
                                     width: '50%',
                                     stack: [{
@@ -1110,7 +1117,7 @@
                             ],
                             margin: [0, 0, 0, 10]
                         },
-                       
+
                         {
                             width: '100%',
                             stack: [{
@@ -1129,7 +1136,7 @@
                         },
 
 
-                      
+
                         {
                             text: 'RESUMEN DE PAGOS REALIZADOS',
                             style: 'sectionHeader',
@@ -1139,12 +1146,12 @@
                             table: {
                                 headerRows: 1,
                                 widths: ['auto', '*', 'auto', 'auto', 'auto'],
-                                body: cuerpoTabla 
+                                body: cuerpoTabla
                             },
                             layout: {
                                 fillColor: (rowIndex) => (rowIndex === 0) ? '#007bff' : (rowIndex % 2 !== 0) ? '#f8f9fa' : null,
-                                hLineWidth: () => 0.5, 
-                                vLineWidth: () => 0.5, 
+                                hLineWidth: () => 0.5,
+                                vLineWidth: () => 0.5,
                                 hLineColor: () => '#DDDDDD',
                                 vLineColor: () => '#DDDDDD'
                             }
@@ -1173,12 +1180,12 @@
                             bold: true,
                             color: '#666666',
                             fontSize: 8,
-                            margin: [0, 0, 0, 2] 
+                            margin: [0, 0, 0, 2]
                         },
                         data: {
                             color: '#000000',
                             fontSize: 9,
-                            margin: [0, 0, 0, 8] 
+                            margin: [0, 0, 0, 8]
                         }
                     }
                 };

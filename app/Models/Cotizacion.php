@@ -224,6 +224,33 @@ class Cotizacion
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
+
+    public function getDatosClienteByCotizacion(int $id): ?array
+    {
+        $query = "SELECT 
+                        nombrecliente,
+                        documento,
+                        direccion,
+                        email
+                    FROM vwGetAllCotizacion
+                    WHERE idcotizacion = :idcotizacion LIMIT 1;";
+
+        try {
+            $stmt = $this->db->prepare($query);
+            $stmt->bindParam(":idcotizacion", $id, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Error al obtener datos del cliente por cotización ID {$id}: " . $e->getMessage());
+            return null;
+        }
+    }
+
+
+
+
+
+
     /**
      * Obtiene el total pagado y saldo pendiente del inicial
      * 
@@ -322,6 +349,7 @@ class Cotizacion
                 ELSE 'S/'
             END AS moneda_simbolo,
             p.comprobante,
+            p.enlace_pdf_nubefact,
             p.observacion
             
         FROM pagos p
@@ -840,7 +868,7 @@ class Cotizacion
             $stmt->closeCursor();
             return $result;
         } catch (PDOException $e) {
-          
+
             error_log("Error PDO en reporte general: " . $e->getMessage());
             return null;
         }

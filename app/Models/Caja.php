@@ -151,21 +151,6 @@ class Caja
         }
     }
 
-    // public function actualizarEnlaceYDeclarado($idPago, $urlPdf, $numeroBoleta)
-    // {
-    //     $sql = "UPDATE pagos SET 
-    //             enlace_pdf_nubefact = :pdf, 
-    //             numero_boleta_sunat = :num, 
-    //             declarado = 'S' 
-    //         WHERE idpago = :id";
-
-    //     $stmt = $this->db->prepare($sql);
-    //     return $stmt->execute([
-    //         ':pdf' => $urlPdf,
-    //         ':num' => $numeroBoleta,
-    //         ':id' => $idPago
-    //     ]);
-    // }
 
 
 

@@ -113,14 +113,15 @@ class PagoCronograma
     }
 
 
-    
-    public function actualizarEnlaceYDeclarado($idPago, $urlPdf,$urlXml, $numeroBoleta)
+
+    public function actualizarEnlaceYDeclarado($idPago, $urlPdf, $urlXml, $urlCdr, $numeroBoleta)
     {
         // Usamos el campo declarado para marcar que la boleta fue enviada
         $sql = "UPDATE pagos SET 
                 enlace_pdf_nubefact = :pdf, 
                 enlace_xml_nubefact = :xmlUrl,
                 numero_boleta_sunat = :num, 
+                enlace_del_cdr = :cdr,
                 declarado = 'S' 
             WHERE idpago = :id";
 
@@ -129,6 +130,7 @@ class PagoCronograma
             ':pdf' => $urlPdf,
             ':xmlUrl' => $urlXml,
             ':num' => $numeroBoleta,
+            ':cdr' => $urlCdr,
             ':id' => $idPago
         ]);
     }

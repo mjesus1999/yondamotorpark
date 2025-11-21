@@ -11,9 +11,6 @@ document.body.addEventListener('click', (e) => {
 });
 
 
-
-
-
     function formatDateSpanish(dateInput, ciudad = 'Chincha') {
         const months = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'setiembre', 'octubre', 'noviembre', 'diciembre'];
         let dt;
@@ -162,9 +159,9 @@ document.body.addEventListener('click', (e) => {
             pageMargins: [70, 65, 40, 80],
 
             header: function (currentPage) {
-                if (headerImageBase64 && currentPage === 1) {
+                if (currentPage === 1) {
                     return {
-                        image: headerImageBase64,
+                        image: window.cabeceraYonda || headerImageBase64,
                         width: 520,
                         alignment: 'center',
                         margin: [0, 10, 0, 0]
@@ -357,7 +354,7 @@ document.body.addEventListener('click', (e) => {
         try {
             
             const cotizacion = await fetchCotizacionData();
-            const headerImageBase64 = await convertImageToBase64('/assets/images/logos/cabecera-yondaa.png'); 
+            const headerImageBase64 = await convertImageToBase64('/assets/images/logos/cabecera-yonda.png'); 
             const docDefinition = createPDFDefinition(cotizacion, headerImageBase64);
             const pdfDocGenerator = pdfMake.createPdf(docDefinition);
 

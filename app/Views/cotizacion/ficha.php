@@ -278,7 +278,7 @@
 
                             <div class="col-md-12">
                                 <label for="fechaVisita" class="form-label fw-bold">Fecha de Visita <span class="text-danger fw-bold">*</span></label>
-                                <input type="date" class="form-control" id="fechaVisita" required>
+                                <input type="date" class="form-control" id="fechaVisita" required value="<?= htmlspecialchars(date("Y-m-d")) ?>">
                             </div>
                         </div>
 

@@ -3,6 +3,7 @@
 */
 
 USE motorpark;
+-- SELECT * FROM personas;
 
 CREATE OR REPLACE VIEW vwPagosInicialCalculados AS
 SELECT 
@@ -104,6 +105,7 @@ SELECT
     COALESCE(
         CASE WHEN cl.tipocliente = 'P' THEN p.telprimario ELSE e.telprimario END, ''
     ) AS telefono,
+    p.email,
     ma.marca AS marcaVehiculo,
     mo.modelo AS modeloVehiculo,
     mo.anio,

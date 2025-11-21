@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="es">
 
 <head>
@@ -238,6 +238,7 @@
       if (asesorTelefono && !asesorTelefono.includes('056') && asesorTelefono.length === 9) {
         asesorTelefono = `(056) ${asesorTelefono}`;
       }
+      console.log('Cabecera: ',window.cabeceraYonda)
 
       return {
         pageSize: 'A4',
@@ -248,7 +249,7 @@
           image: window.cabeceraYonda,
           width: 595,
           alignment: 'center',
-          margin: [0, 25, 0, 0]
+          margin: [-75, 25, 0, 0]
         },
         footer: function(currentPage, pageCount, pageSize) {
           // Footer con información del asesor y línea naranja
@@ -760,4 +761,4 @@
   </script>
 </body>
 
-</html>
+</html> -->
