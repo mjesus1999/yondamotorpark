@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     };
 
-    
+
     /**
      * Gestiona la paginación de la tabla.
      * @param {number} page La página a mostrar.
@@ -185,16 +185,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         elements.numeroTransaccionCuotaGroup.classList.toggle('hidden', !isCuotaVisible);
 
         elements.groupMedioPagoCuota.classList.toggle('hidden', !isCuotaVisible);
-
-
         elements.groupMedioPagoPenalidad.classList.toggle('hidden', !isPenalidadFieldsVisible);
         elements.numeroTransaccionPenalidadGroup.classList.toggle('hidden', !isPenalidadFieldsVisible);
-
 
         if (!isPenalidadFieldsVisible || elements.selectMedioPagoPenalidad.value !== MEDIOS_PAGO.transferenciaBancaria) {
             elements.groupNumCuentaPenalidad.classList.add('hidden');
         }
-
 
         if (isPenalidadVisible) {
             elements.amortizacionPenalidadInput.setAttribute('readonly', true);
@@ -212,7 +208,7 @@ document.addEventListener('DOMContentLoaded', async () => {
      */
     async function cargarCuentasBancarias(selectElement) {
         try {
-            const res = await fetch('/api/numcuentaspagos', {method:'GET'});
+            const res = await fetch('/api/numcuentaspagos', { method: 'GET' });
             const data = await res.json();
             selectElement.innerHTML = '<option value="">Selecciona una cuenta</option>';
             data.forEach(cuenta => {
@@ -416,14 +412,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 delayPromise
             ]);
 
-            const data = await res.json();
+            const data = await res.json(); 
 
             if (data.debug_info) {
                 console.info("Debug Info:", data.debug_info);
             }
 
             if (data.success) {
-                // console.log(data)
                 showToast(data.message, 'SUCCESS', 1200);
                 setTimeout(() => {
                     elements.modalPago.hide();
@@ -550,17 +545,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-
-
-
     // Eventos del modal de pago
     elements.tipoPagoSelect.addEventListener('change', updateSelectTipoPago);
-
 
     // CUOTA
     elements.medioPagoSelect.addEventListener('change', (e) => {
         elements.numeroTransaccionInput.value = '';
-        
+
         const isTransferencia = e.target.value === MEDIOS_PAGO.transferenciaBancaria;
         elements.selectCuentas.classList.toggle('hidden', !isTransferencia);
         if (isTransferencia) {
@@ -584,15 +575,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
 
-
-
     elements.formPago.addEventListener('submit', (e) => {
         e.preventDefault();
         if (validarForm()) {
             submitForm();
         }
     });
-
 
     // Eventos de paginación y búsqueda
     elements.paginacion.addEventListener('click', function (e) {
@@ -615,9 +603,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         elements.inputBuscar.value = '';
         showPage(1);
     });
-
-
-
 
     // Generar PDF
     elements.btnPdf.addEventListener('click', () => {
@@ -714,11 +699,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
 
         pdfMake.createPdf(documento).open();
-        // showToast('PDF GENERADO', 'SUCCESS', 1200);
 
     });
-
-
 
     elements.btnExcel.addEventListener('click', async () => {
 
@@ -792,6 +774,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const maxLength = Math.max(...lengths.filter(v => typeof v === 'number'));
             column.width = maxLength < 10 ? 10 : maxLength + 2;
         });
+        console.log(worksheet.colums.forEach(colum => console.log(colum)))
 
 
         const buffer = await workbook.xlsx.writeBuffer();
@@ -802,9 +785,5 @@ document.addEventListener('DOMContentLoaded', async () => {
         a.download = 'reporte-cronograma.xlsx';
         a.click();
         window.URL.revokeObjectURL(url);
-
-
     });
-
-
 });

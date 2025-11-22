@@ -1,4 +1,6 @@
 <?php include __DIR__ . '/../layout/header.php'; ?>
+<link href="https://unpkg.com/tabulator-tables@5.5.2/dist/css/tabulator_simple.min.css" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/tabulator.css">
 
 <div class="container-fluid">
 
@@ -41,9 +43,9 @@
                     <a href="/egreso/reporteByFecha" class="btn btn-sm btn-outline-secondary">Reporte por Fecha</a>
                 </div>
 
-               
 
-                
+
+
 
             </div>
 
@@ -356,6 +358,7 @@
 </div>
 
 <?php include __DIR__ . '/../layout/footer.php'; ?>
+<script src="https://unpkg.com/tabulator-tables@5.5.2/dist/js/tabulator.min.js"></script>
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -381,12 +384,9 @@
             });
         }
 
-
-
         modalComprobanteValidado.addEventListener('show.bs.modal', function(event) {
 
             const button = event.relatedTarget;
-
             const url = button.getAttribute('data-url');
 
             visorComprobanteValidado.src = url;
@@ -395,6 +395,7 @@
         modalComprobanteValidado.addEventListener('hidden.bs.modal', function() {
             visorComprobanteValidado.src = '';
         });
+
 
 
         const comprobanteModal = document.getElementById('modal-comprobante');
@@ -409,7 +410,9 @@
             comprobanteViewer.innerHTML = `<div class="text-center py-5"><div class="spinner-border text-primary" role="status"></div><p class="mt-2 text-muted">Cargando comprobante...</p></div>`;
 
             try {
-                const response = await fetch(`/api/egreso/detalle/${egresoId}`);
+                const response = await fetch(`/api/egreso/detalle/${egresoId}`, {
+                    method: 'GET'
+                });
                 const result = await response.json();
 
                 if (result.status && result.data) {
@@ -426,10 +429,7 @@
 
                     const rutaCompleta = data.rutacomprobante;
                     const partesRuta = rutaCompleta.split('/');
-                    // console.log('RUTA: ', partesRuta)
                     const tipo = partesRuta[0];
-
-                    // console.log('TIPO: ', tipo);
                     const nombreArchivo = partesRuta[1];
 
                     const urlComprobante = `/archivos/${tipo}/${nombreArchivo}`;
@@ -511,5 +511,26 @@
                 }
             }
         });
+
+
+        function getReloj() {
+            const fecha = new Date();
+            const hora = String(fecha.getHours()).padStart(2, '0');
+            const minutos = String(fecha.getMinutes()).padStart(2, '0');
+            const segundos = String(fecha.getSeconds()).padStart(2, '0');
+
+            console.log(`Hora: ${hora} : ${minutos} : ${segundos}`)
+        }
+
+        getReloj();
+        setInterval(() => {
+            getReloj()
+        }, 1000);
+
+
+
+
+
+
     });
 </script>

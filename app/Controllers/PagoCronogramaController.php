@@ -123,6 +123,8 @@ class PagoCronogramaController extends Controller
         return $primeraCuotaPendienteId !== null && $primeraCuotaPendienteId === $idCronograma;
     }
 
+    
+
     /**
      * Guarda un archivo de comprobante de pago
      *
@@ -436,14 +438,14 @@ class PagoCronogramaController extends Controller
 
                             } else {
                                 error_log("Error NubeFact (Emisión): " . $respNube['message']);
-                                $mensajeExtra = " (Pago OK, pero Boleta con Error: " . $respNube['message'] . ")";
+                                $mensajeExtra = " Pago OK, pero Boleta con Error: " . $respNube['message'] . ")";
                             }
                         } else {
-                            $mensajeExtra = " (Advertencia: Pago registrado, pero faltan datos del cliente para la Boleta)";
+                            $mensajeExtra = " Pago registrado, pero faltan datos del cliente para la Boleta";
                         }
                     } catch (Exception $ex) {
                         error_log("Excepción Facturación: " . $ex->getMessage());
-                        $mensajeExtra = " (Nota: Pago guardado, pero falló la comunicación con NubeFact)";
+                        $mensajeExtra = " Pago guardado, pero falló la comunicación con NubeFact";
                     }
                 }
 
@@ -503,4 +505,6 @@ class PagoCronogramaController extends Controller
         }
         exit();
     }
+
+ 
 }
