@@ -212,7 +212,7 @@ document.addEventListener('DOMContentLoaded', async () => {
      */
     async function cargarCuentasBancarias(selectElement) {
         try {
-            const res = await fetch('/api/numcuentaspagos');
+            const res = await fetch('/api/numcuentaspagos', {method:'GET'});
             const data = await res.json();
             selectElement.innerHTML = '<option value="">Selecciona una cuenta</option>';
             data.forEach(cuenta => {
@@ -423,7 +423,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             if (data.success) {
-                console.log(data)
+                // console.log(data)
                 showToast(data.message, 'SUCCESS', 1200);
                 setTimeout(() => {
                     elements.modalPago.hide();
@@ -573,7 +573,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     // PENALIDAD.
     elements.selectMedioPagoPenalidad.addEventListener('change', (e) => {
         elements.numeroTransaccionPenalidadInput.value = '';
-        console.error('MEDIO DE PAGO PENALIDAD: ', e.target.value);
         const isTransferencia = e.target.value === MEDIOS_PAGO.transferenciaBancaria;
         elements.groupNumCuentaPenalidad.classList.toggle('hidden', !isTransferencia);
         if (isTransferencia) {

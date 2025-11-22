@@ -2,9 +2,9 @@
 
 /**
  * Controlador de Pago de Cronograma
- * 
+ *
  * app/Controllers/PagoCronogramaController.php
- * 
+ *
  * Gestiona el registro de pagos de cuotas y penalidades de contratos
  * de financiamiento de vehículos. Incluye validaciones exhaustivas,
  * manejo de archivos de comprobantes, control de secuencia de pagos
@@ -23,7 +23,7 @@ use Exception;
 
 /**
  * Clase PagoCronogramaController
- * 
+ *
  * Controlador para la gestión de pagos de cronogramas de financiamiento.
  * Proporciona funcionalidades para registrar pagos de cuotas y penalidades,
  * validar secuencia de pagos (primera cuota pendiente), gestionar comprobantes
@@ -46,7 +46,7 @@ class PagoCronogramaController extends Controller
 
     /**
      * Constructor del controlador
-     * 
+     *
      * Inicializa los modelos de PagoCronograma y Caja necesarios
      * para las operaciones del controlador.
      */
@@ -58,10 +58,10 @@ class PagoCronogramaController extends Controller
 
     /**
      * Muestra el historial de pagos de un contrato
-     * 
+     *
      * Renderiza la vista con el historial completo de pagos realizados
      * para un contrato específico. Requiere autenticación.
-     * 
+     *
      * @param int $id ID del contrato a consultar
      * @return void
      */
@@ -95,11 +95,11 @@ class PagoCronogramaController extends Controller
 
     /**
      * Verifica si una cuota está habilitada para ser pagada
-     * 
+     *
      * Método privado que valida si la cuota seleccionada es la primera
      * cuota pendiente de pago del contrato. Esto asegura que los pagos
      * se realicen en orden secuencial.
-     * 
+     *
      * @param int $idContrato ID del contrato
      * @param int $idCronograma ID de la cuota a validar
      * @return bool True si la cuota es la primera pendiente, false en caso contrario
@@ -125,10 +125,10 @@ class PagoCronogramaController extends Controller
 
     /**
      * Guarda un archivo de comprobante de pago
-     * 
+     *
      * Método privado que procesa y almacena un archivo de comprobante,
      * generando un nombre único y creando el directorio si no existe.
-     * 
+     *
      * @param array $archivo Array del archivo $_FILES con información del upload
      * @return string|null Ruta relativa del archivo guardado (comprobantes/nombre.ext)
      *                     o null si falla la operación
@@ -160,11 +160,11 @@ class PagoCronogramaController extends Controller
 
     /**
      * Registra un pago de cuota y/o penalidad
-     * 
+     *
      * Endpoint AJAX que procesa el registro de pagos de cronograma.
      * Maneja pagos individuales o combinados (cuota + penalidad) con
      * validaciones exhaustivas y control de secuencia de pagos.
-     * 
+     *
      * Validaciones:
      * - Campos obligatorios según medio de pago
      * - Fecha de pago no futura
@@ -172,7 +172,7 @@ class PagoCronogramaController extends Controller
      * - Penalidad debe pagarse completa
      * - Solo permite pagar la primera cuota pendiente
      * - Comprobante obligatorio para transferencias/depósitos
-     * 
+     *
      * @return void
      */
 
@@ -372,7 +372,7 @@ class PagoCronogramaController extends Controller
                                 ];
                             }
 
-                            if($amortizacionPenalidad > 0) {
+                            if ($amortizacionPenalidad > 0) {
                                 $itemsFacturacion[] = [
                                     "unidad_de_medida" => "ZZ",
                                     "descripcion" => "Mora",
@@ -389,8 +389,8 @@ class PagoCronogramaController extends Controller
 
                             $totalOperacion = $totalCapitalProrrateado + $totalInteresProrrateado;
 
-                            if($amortizacionPenalidad > 0) {
-                                $totalOperacion+= $amortizacionPenalidad;
+                            if ($amortizacionPenalidad > 0) {
+                                $totalOperacion += $amortizacionPenalidad;
                             }
 
 
@@ -421,12 +421,19 @@ class PagoCronogramaController extends Controller
                             $respNube = $nubefactController->procesarPagoYEmitirComprobante($datosFacturacion);
 
                             if ($respNube['success']) {
+
                                 $enlacePdf = $respNube['enlace_pdf'];
                                 $enlaceXml = $respNube['enlace_xml'];
                                 $enlaceCdr = $respNube['enlace_cdr'];
 
-                                $idPagoCuota = $idPagos[0];
-                                $this->pagoCronogramaModel->actualizarEnlaceYDeclarado($idPagoCuota, $enlacePdf, $enlaceXml, $enlaceCdr, $nuevoNumero);
+                                foreach ($idPagos as $idpago) {
+                                    $this->pagoCronogramaModel->actualizarEnlaceYDeclarado($idpago, $enlacePdf, $enlaceXml, $enlaceCdr, $nuevoNumero);
+                                }
+
+
+                                // $idPagoCuota = $idPagos[0];
+                                // $this->pagoCronogramaModel->actualizarEnlaceYDeclarado($idPagoCuota, $enlacePdf, $enlaceXml, $enlaceCdr, $nuevoNumero);
+
                             } else {
                                 error_log("Error NubeFact (Emisión): " . $respNube['message']);
                                 $mensajeExtra = " (Pago OK, pero Boleta con Error: " . $respNube['message'] . ")";
@@ -475,10 +482,10 @@ class PagoCronogramaController extends Controller
 
     /**
      * API: Obtiene las cuentas de pago disponibles
-     * 
+     *
      * Endpoint AJAX que retorna todas las cuentas bancarias disponibles
      * para registrar pagos, con formato concatenado (Entidad - NumCuenta - Moneda).
-     * 
+     *
      * @return void
      */
     public function searchNumCuentasPagos(): void
