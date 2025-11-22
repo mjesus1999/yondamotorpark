@@ -372,8 +372,26 @@ class PagoCronogramaController extends Controller
                                 ];
                             }
 
+                            if($amortizacionPenalidad > 0) {
+                                $itemsFacturacion[] = [
+                                    "unidad_de_medida" => "ZZ",
+                                    "descripcion" => "Mora",
+                                    "cantidad" => 1,
+                                    "valor_unitario" => $amortizacionPenalidad,
+                                    "precio_unitario" => $amortizacionPenalidad,
+                                    "subtotal" => $amortizacionPenalidad,
+                                    "tipo_de_igv" => 9,
+                                    "igv" => 0.00,
+                                    "total" => $amortizacionPenalidad
+                                ];
+                            }
+
 
                             $totalOperacion = $totalCapitalProrrateado + $totalInteresProrrateado;
+
+                            if($amortizacionPenalidad > 0) {
+                                $totalOperacion+= $amortizacionPenalidad;
+                            }
 
 
                             $datosFacturacion = [

@@ -62,6 +62,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     };
 
+    // console.log("AMORTIZACIÓN DE PENSALIDAD: ",  elements.amortizacionPenalidadInput);
+
     /**
      * Gestiona la paginación de la tabla.
      * @param {number} page La página a mostrar.
@@ -490,6 +492,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (btn) {
 
             const saldoPendiente = parseFloat(btn.dataset.saldoCuota) || 0;
+            // console.log(btn.dataset.penalidad);
             const valorOriginalCuota = parseFloat(btn.dataset.valorcuota) || 0;
 
             const saldoPenalidad = parseFloat(btn.dataset.saldoPenalidad) || 0;
