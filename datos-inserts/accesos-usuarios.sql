@@ -1,6 +1,10 @@
 
 USE motorpark;
 
+
+SELECT * FROM colaboradores;
+SELECT * FROM contratoslaborales;
+UPDATE contratoslaborales SET idcargo = 1 WHERE idcontratolaboral = 3;
 SELECT * FROM cargos;
 SELECT * FROM areas;
 

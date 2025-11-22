@@ -11,6 +11,7 @@
     .contracts-table tbody tr[data-id] {
         cursor: pointer;
     }
+
 </style>
 
 <div class="container-fluid">
@@ -48,18 +49,18 @@
         <!-- Tabla contratos disponibles -->
         <div class="col-md-6">
             <div class="card">
-                <div class="card-header">
+                <div class="card-header bg-primary text-white">
                     <div class="row">
                         <div class="col">Lista de Contratos</div>
                     </div>
                 </div>
                 <div class="card-body">
-                    <table class="table table-sm table-hover table-hover-yonda contracts-table" id="tabla-contratos">
+                    <table class="table table-sm table-hover contracts-table" id="tabla-contratos">
                         <colgroup>
                             <col style="width: 5%;">
                             <col style="width: 45%;">
                             <col style="width: 25%;">
-                            <col style="width: 20%;">
+                            <col style="width: 25%;">
                         </colgroup>
                         <thead>
                             <tr>
@@ -69,16 +70,17 @@
                                 <th>Cargo</th>
                             </tr>
                         </thead>
-                        <tbody>
-                        <tbody>
+                       
+                        <tbody class="">
                             <?php if (!empty($contracts)): ?>
+                                <?php $numeroFila = 1; ?>
                                 <?php foreach ($contracts as $c): ?>
                                     <tr data-id="<?= $c['idcontratolaboral'] ?>"
                                         data-nombres="<?= htmlspecialchars($c['nombres']) ?>"
                                         data-apellidos="<?= htmlspecialchars($c['apellidos']) ?>"
                                         data-area="<?= htmlspecialchars($c['area']) ?>"
                                         data-cargo="<?= htmlspecialchars($c['cargo']) ?>">
-                                        <td><?= htmlspecialchars($c['idcontratolaboral']) ?></td>
+                                        <td><?= $numeroFila++ ?></td>
                                         <td><?= htmlspecialchars($c['nombres'] . ' ' . $c['apellidos']) ?></td>
                                         <td><?= htmlspecialchars($c['area']) ?></td>
                                         <td><?= htmlspecialchars($c['cargo']) ?></td>
@@ -109,7 +111,7 @@
                 <!-- FORMULARIO DE SESION -->
                 <div class="card mb-4">
 
-                    <div class="card-header">
+                    <div class="card-header bg-primary text-white">
                         <div class="row">
                             <div class="col-md-6 d-flex align-items-center justify-content-start">
                                 <strong id="marca-activa">Formulario de Crear sesión</strong>
