@@ -1,0 +1,32 @@
+[
+    {
+        "idpago": 803,
+        "idcronograma": 3481,
+        "numcuota": 1,
+        "fecha_vencimiento": "22\/12\/2025",
+        "fecha_pago": "22\/11\/2025",
+        "amortizacion": "2367.47",
+        "saldorestante": "0.00",
+        "mediopago": "Efectivo",
+        "numerotransaccion": null,
+        "comprobante": null,
+        "enlace_pdf_nubefact": "https:\/\/www.nubefact.com\/cpe\/1a72d29a-13ff-4bfa-9e29-f578599bd2d5.pdf",
+        "tipo": "Cuota",
+        "observacion": null
+    },
+    {
+        "idpago": 804,
+        "idcronograma": 3482,
+        "numcuota": 2,
+        "fecha_vencimiento": "22\/01\/2026",
+        "fecha_pago": "22\/11\/2025",
+        "amortizacion": "2367.47",
+        "saldorestante": "0.00",
+        "mediopago": "Efectivo",
+        "numerotransaccion": null,
+        "comprobante": null,
+        "enlace_pdf_nubefact": "https:\/\/www.nubefact.com\/cpe\/79186a9d-6e04-4c9c-9344-983088ec5f9b.pdf",
+        "tipo": "Cuota",
+        "observacion": null
+    }
+]

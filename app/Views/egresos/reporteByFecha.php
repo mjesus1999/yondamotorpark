@@ -431,11 +431,10 @@ include __DIR__ . '/../layout/header.php';
         const hoy = new Date();
         const hace7Dias = new Date();
         hace7Dias.setDate(hoy.getDate() - 7);
-
         document.getElementById('fecha-inicio').value = hace7Dias.toISOString().split('T')[0];
         document.getElementById('fecha-fin').value = hoy.toISOString().split('T')[0];
 
-        
+
         document.body.addEventListener('click', (e) => {
             const btnComentario = e.target.closest('button[data-comentario]');
             const linkComentario = e.target.closest('.ver-comentario-link[data-comentario]');
@@ -477,11 +476,13 @@ include __DIR__ . '/../layout/header.php';
 
             try {
                 const url = `/api/egreso/reporteByFecha?fecha_inicio=${fechaInicio}&fecha_fin=${fechaFin}`;
-                const response = await fetch(url);
+                const response = await fetch(url, {
+                    method: 'GET'
+                });
                 const data = await response.json();
 
                 if (!response.ok) {
-                    mostrarMensaje(data.message, 'Error');
+                    mostrarMensaje(data.message, 'Mensaje');
                     mensajeInicial.classList.remove('d-none');
                     mensajeInicial.classList.add('d-flex');
                     return;
@@ -944,7 +945,7 @@ include __DIR__ . '/../layout/header.php';
                 text: 'REPORTE DE EGRESOS POR PERIODO',
                 style: 'subheader',
                 alignment: 'center',
-                fontSize:13.2,
+                fontSize: 13.2,
                 margin: [0, 0, 0, 10],
                 decoration: 'underline'
             }, {
@@ -972,7 +973,7 @@ include __DIR__ . '/../layout/header.php';
                 content.push({
                     text: 'Egresos sin Comprobante',
                     style: 'sectionHeader',
-                    fontSize:8.2,
+                    fontSize: 8.2,
                     margin: [0, 0, 0, 9]
                 }, {
                     style: 'tableContent',
@@ -1030,7 +1031,7 @@ include __DIR__ . '/../layout/header.php';
                 content.push({
                     text: 'Egresos con Comprobante',
                     style: 'sectionHeader',
-                    fontSize:8.2,
+                    fontSize: 8.2,
                     margin: [0, 15, 0, 9]
                 }, {
                     style: 'tableContent',
@@ -1087,7 +1088,7 @@ include __DIR__ . '/../layout/header.php';
             if (data.egresoByConcepto && data.egresoByConcepto.length > 0) {
                 content.push({
                     text: 'Resumen por Concepto',
-                    fontSize:8.2,
+                    fontSize: 8.2,
                     style: 'sectionHeader',
                     margin: [0, 15, 0, 9]
                 }, {
@@ -1124,7 +1125,7 @@ include __DIR__ . '/../layout/header.php';
             if (data.egresoGeneral && data.egresoGeneral.length > 0) {
                 content.push({
                     text: 'Totales Generales',
-                    fontSize:8.2,
+                    fontSize: 8.2,
                     style: 'sectionHeader',
                     margin: [0, 15, 0, 10]
                 }, {

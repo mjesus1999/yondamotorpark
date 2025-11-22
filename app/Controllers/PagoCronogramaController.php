@@ -68,9 +68,24 @@ class PagoCronogramaController extends Controller
     public function indexHistorialPagos(int $id): void
     {
         $this->authRequired();
+        $cacheFile = __DIR__ . "/../../storage/cache/historial-pagos-contratos/historial-pagos-contrato{$id}.json";
+        $ttl = 3600;
+        $datos = [];
+
+        if (file_exists($cacheFile) && (filemtime($cacheFile) + $ttl > time())) {
+            $datos = json_decode(file_get_contents($cacheFile), true);
+        } else {
+            $datos = $this->pagoCronogramaModel->getHistorialPagosByContrato($id);
+            if (!is_dir(dirname($cacheFile))) {
+                mkdir(dirname($cacheFile), 0777, true);
+            }
+            file_put_contents($cacheFile, json_encode($datos));
+        }
+
+
         // $tiempoInicio = microtime(true);
 
-        $datos = $this->pagoCronogramaModel->getHistorialPagosByContrato($id);
+        // $datos = $this->pagoCronogramaModel->getHistorialPagosByContrato($id);
         $this->view('caja.historial', ['pagos' => $datos]);
 
         // $tiempoFin = microtime(true);
@@ -197,7 +212,7 @@ class PagoCronogramaController extends Controller
             $rutaComprobanteCuota = isset($_FILES['comprobanteCuota']) ? $this->guardarComprobante($_FILES['comprobanteCuota']) : null;
             $rutaComprobantePenalidad = isset($_FILES['comprobantePenalidad']) ? $this->guardarComprobante($_FILES['comprobantePenalidad']) : null;
 
-          
+
             if ($idCronograma <= 0) {
                 $errores[] = 'Cuota a pagar no es válida.';
             }
@@ -252,7 +267,7 @@ class PagoCronogramaController extends Controller
                 }
             }
 
-        
+
             $cronogramaData = $this->pagoCronogramaModel->getCronogramaData($idCronograma);
             if (!$cronogramaData) {
                 $errores[] = 'No se encontró la cuota.';
@@ -319,7 +334,7 @@ class PagoCronogramaController extends Controller
                 $mensajeExtra = "";
                 if ($amortizacionCuota > 0) {
                     try {
-                        $serieBoleta = 'BBB1'; 
+                        $serieBoleta = 'BBB1';
                         $clienteData = $this->cajaModel->getDatosClientePorCronograma($idCronograma);
                         $nuevoNumero = $this->cajaModel->obtenerNuevoCorrelativo($serieBoleta);
 
@@ -357,10 +372,10 @@ class PagoCronogramaController extends Controller
                                 ];
                             }
 
-                     
+
                             $totalOperacion = $totalCapitalProrrateado + $totalInteresProrrateado;
 
-                        
+
                             $datosFacturacion = [
                                 'tipo_comprobante' => 2, // Boleta
                                 'serie' => $serieBoleta,
@@ -383,7 +398,7 @@ class PagoCronogramaController extends Controller
                                 ]
                             ];
 
-                           
+
                             $nubefactController = new ComprobanteNubefactController();
                             $respNube = $nubefactController->procesarPagoYEmitirComprobante($datosFacturacion);
 
@@ -391,7 +406,7 @@ class PagoCronogramaController extends Controller
                                 $enlacePdf = $respNube['enlace_pdf'];
                                 $enlaceXml = $respNube['enlace_xml'];
                                 $enlaceCdr = $respNube['enlace_cdr'];
-                              
+
                                 $idPagoCuota = $idPagos[0];
                                 $this->pagoCronogramaModel->actualizarEnlaceYDeclarado($idPagoCuota, $enlacePdf, $enlaceXml, $enlaceCdr, $nuevoNumero);
                             } else {
@@ -409,8 +424,12 @@ class PagoCronogramaController extends Controller
 
                 // Limpieza de caché
                 $cacheFile = __DIR__ . "/../../storage/cache/cronograma-contratos/cronograma-contrato{$idContrato}.json";
+                $cacheFileHistorial = __DIR__ . "/../../storage/cache/historial-pagos-contratos/historial-pagos-contrato{$idContrato}.json";
                 if (file_exists($cacheFile)) {
                     unlink($cacheFile);
+                }
+                if (file_exists($cacheFileHistorial)) {
+                    unlink($cacheFileHistorial);
                 }
 
                 echo json_encode([
