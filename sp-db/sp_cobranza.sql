@@ -305,8 +305,7 @@ BEGIN
     LIMIT p_limite;
 END$$
 DELIMITER ;
-
-
+DROP PROCEDURE IF EXISTS sp_get_cuotas_vencidas;
 -- 7) CUOTAS VENCIDAS 
 DELIMITER $$
 CREATE PROCEDURE sp_get_cuotas_vencidas()
@@ -349,7 +348,7 @@ BEGIN
                     END
                 )
         END AS ubicacion_cliente,
-        
+
         -- Campos separados para filtrado
         CASE 
             WHEN cli.tipocliente = 'P' THEN COALESCE(pp.provincia, 'Sin provincia')
@@ -453,6 +452,9 @@ BEGIN
     ORDER BY dias_atraso DESC, deuda_vencida DESC;
 END$$
 DELIMITER ;
+USE motorpark;
+
+CALL sp_get_cuotas_vencidas();
 
 /*
 DROP PROCEDURE IF EXISTS sp_get_cuotas_vencidas;
@@ -1172,3 +1174,6 @@ SET profiling = 1;
 CALL sp_get_cuotas_vencidas();
 SHOW PROFILES;
 */
+
+
+SELECT * FROM personas WHERE apellidos = "GIL VALENTIN";

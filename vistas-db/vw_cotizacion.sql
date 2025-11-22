@@ -160,7 +160,7 @@ ORDER BY c.creado DESC;
 
 
 
-SELECT * FROM  vwGetAllCotizacion WHERE estadocotizacion = 'P';
+SELECT * FROM  vwGetAllCotizacion WHERE estadocotizacion = 'A';
 
 SELECT * FROM cotizaciones;
 

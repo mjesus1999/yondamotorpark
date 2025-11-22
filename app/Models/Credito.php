@@ -66,19 +66,18 @@ class Credito
     public function getEstadisticasMorosos(): array
     {
         try {
-            // 1) Llamar al primer SP: estadísticas base
+           
             $stmt1 = $this->db->prepare("CALL sp_get_estadisticas_morosos_base()");
             $stmt1->execute();
             $estadisticas = $stmt1->fetch(PDO::FETCH_ASSOC);
-            $stmt1->closeCursor(); // ⚠️ IMPORTANTE: cerrar cursor antes del siguiente SP
+            $stmt1->closeCursor(); 
 
-            // 2) Llamar al segundo SP: seguimientos de hoy
+     
             $stmt2 = $this->db->prepare("CALL sp_get_seguimientos_hoy()");
             $stmt2->execute();
             $seguimientos = $stmt2->fetch(PDO::FETCH_ASSOC);
             $stmt2->closeCursor();
 
-            // 3) Combinar resultados
             return [
                 'total_morosos' => (int) ($estadisticas['total_morosos'] ?? 0),
                 'deuda_total' => (float) ($estadisticas['deuda_total'] ?? 0),
@@ -126,8 +125,10 @@ class Credito
             $results = $stmtSelect->fetchAll(PDO::FETCH_ASSOC);
             $stmtSelect->closeCursor();
 
+    
             // 3) Clasificar por días de atraso
             return $this->clasificarMorosos($results);
+
 
         } catch (PDOException $error) {
             error_log("Error en morosos clasificados: " . $error->getMessage());

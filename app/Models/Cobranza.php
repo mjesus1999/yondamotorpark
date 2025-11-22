@@ -16,6 +16,7 @@
 namespace App\Models;
 
 use App\Core\Database;
+use Error;
 use PDO;
 use PDOException;
 
@@ -518,8 +519,9 @@ class Cobranza
             $query = "CALL sp_get_cuotas_vencidas()";
             $stmt = $this->db->prepare($query);
             $stmt->execute();
-
+            
             $datos = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+            error_log('Datos obtenidos: ' . print_r($datos, true));
             $stmt->closeCursor();
 
             // Preparar estructura JSON
@@ -529,7 +531,6 @@ class Cobranza
                 'total_registros' => count($datos),
                 'data' => $datos
             ];
-
             // Crear directorio si no existe
             $dirPath = __DIR__ . '/../../storage/jsonvencidos';
             if (!is_dir($dirPath)) {
@@ -578,6 +579,7 @@ class Cobranza
 
         $jsonContent = file_get_contents($filePath);
         $data = json_decode($jsonContent, true);
+ 
 
         if (!$data) {
             return [

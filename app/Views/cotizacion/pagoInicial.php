@@ -1,9 +1,5 @@
 <?php include __DIR__ . '/../layout/header.php'; ?>
 
-<?php 
-    var_dump($historialPagos);
-
-?>
 <link rel="stylesheet" href="/assets/css/pago-inicial.css">
 <div class="container-fluid">
 
@@ -519,7 +515,18 @@
                                                         <span class="badge bg-secondary">N/A</span>
                                                     <?php endif; ?>
                                                 </td>
-                                                <td><span class=""><a class="btn btn-link" href="<?= htmlspecialchars($pago["enlace_pdf_nubefact"]) ?>" target="_blank"><?= htmlspecialchars($pago["enlace_pdf_nubefact"] ? 'Ver Boleta' : '-') ?></a></span></td>
+                                                <td>
+                                                    <span class="text-muted">
+                                                        <a class="btn btn-sm btn-link"
+                                                            title="Ver boleta de pago"
+                                                            href="<?= !empty($pago['enlace_pdf_nubefact']) ? htmlspecialchars($pago['enlace_pdf_nubefact']) : '#' ?>"
+                                                            <?= !empty($pago['enlace_pdf_nubefact']) ? 'target="_blank"' : '' ?>>
+                                                            <?= !empty($pago['enlace_pdf_nubefact']) ? 'Ver Boleta' : 'Sin Boleta' ?>
+                                                        </a>
+                                                    </span>
+
+                                                </td>
+
                                                 <td><small class="text-muted"><?= htmlspecialchars($pago['observacion'] ?? '-') ?></small></td>
                                             </tr>
                                         <?php endforeach; ?>
@@ -537,15 +544,19 @@
 </div>
 
 <div class="modal fade" id="modalComprobante" tabindex="-1" aria-labelledby="modalComprobanteLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog modal-dialog-centered modal-md">
         <div class="modal-content">
-            <div class="modal-header text-white" style="background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);">
+
+            <div class="modal-header text-white"
+                style="background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);">
                 <h5 class="modal-title" id="modalComprobanteLabel">Comprobante</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body p-0">
-                <img id="imagenComprobante" src="" class="img-fluid" alt="Comprobante de Pago">
+
+            <div class="modal-body p-0" style="max-height: 80vh; overflow: auto;">
+                <img id="imagenComprobante" src="" class="img-fluid w-100" alt="Comprobante de Pago">
             </div>
+
         </div>
     </div>
 </div>
@@ -580,7 +591,6 @@
         inputTipoCambio: document.getElementById('tipoCambio'),
         simboloMonedaPago: document.getElementById('simboloMoneda'),
         inputAmortizacionFinalPEN: document.getElementById('amortizacionFinalPEN'),
-
         uiSaldoActualForm: document.getElementById('saldoActualForm'),
         uiMontoAPagarContainer: document.getElementById('montoAPagarContainer'),
         uiSaldoRestanteContainer: document.getElementById('saldoRestanteContainer'),
@@ -608,7 +618,6 @@
 
             const data = await response.json();
             const tc = parseFloat(data.tipo_cambio);
-            console.log('TIPO DE CAMBIO: ', tc);
 
             if (isNaN(tc) || tc <= 0) {
                 throw new Error('Tipo de cambio inválido recibido.');
@@ -783,7 +792,7 @@
             if (response.success) {
                 mostrarAlerta('exito', response.message);
                 setTimeout(() => window.location.reload(), 1500);
-                window.location.href = response.enlace_pdf;
+                window.open(response.enlace_boleta || '#', '_blank');
             } else {
                 mostrarAlerta('error', response.message || 'Ocurrió un error inesperado.');
                 registrarBtn.disabled = false;

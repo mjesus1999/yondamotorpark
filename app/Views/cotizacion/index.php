@@ -488,7 +488,8 @@
                                     break;
                                 case 'A':
                                     if (inicialCompleta) {
-                                        if (vehiculoYaVendidoPorContrato) {
+                                        if (vehiculoYaVendidoPorContrato ) {
+                                            console.log('vehiculoYaVendidoPorContrato', vehiculoYaVendidoPorContrato);
                                             acciones.push(`<span class="px-1" style="cursor: pointer;" onclick="mostrarModalReserva('${reserva_cliente_nombre}', 'contrato')" title="Vehículo ya tiene contrato"><i class="bi bi-file-earmark-text fs-5 text-muted"></i></span>`);
                                         } else {
                                             acciones.push(`<a class="px-1 text-info fw-bold btnCrearContrato" title="Crear Contrato" data-id="${id}" data-cliente="${nombrecliente}" data-numcuotas="${numcuotas}" data-valorCuota="${valorcuota}"  data-moneda="${moneda}"data-bs-toggle="modal" data-bs-target="#contratoModal"><i class="bi bi-file-earmark-text fs-5"></i></a>`);

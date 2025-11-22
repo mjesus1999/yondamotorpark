@@ -355,11 +355,13 @@
                 }
             });
 
+
             if (!response.ok) {
                 throw new Error('Error al cargar estadísticas');
             }
-
+            
             const data = await response.json();
+            console.log('Estadísticas data:', data);
             renderizarEstadisticas(data);
         } catch (error) {
             console.error('Error:', error);

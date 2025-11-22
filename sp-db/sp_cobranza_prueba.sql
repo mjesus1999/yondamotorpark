@@ -557,3 +557,6 @@ END$$
 DELIMITER ;*/
 
 
+
+
+SHOW CREATE PROCEDURE sp_get_cuotas_vencidas;

@@ -134,7 +134,7 @@
                         if (response.ok && data.success) {
                             const fechaDatos = data.fecha_datos || '';
                             if (fechaDatos) {
-                                console.log('Datos del:', fechaDatos);
+                                
                                 mostrarFechaDatos(fechaDatos);
                             }
 

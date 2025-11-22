@@ -310,8 +310,9 @@ BEGIN
 END$$
 DELIMITER ;
 */
-
+USE motorpark;
 DROP PROCEDURE IF EXISTS sp_get_datos_reporte_notificacion_pdf;
+
 DELIMITER $$
 CREATE PROCEDURE sp_get_datos_reporte_notificacion_pdf(IN p_idcontrato INT)
 BEGIN

@@ -22,6 +22,8 @@ BEGIN
 END$$
 DELIMITER ;
 
+CALL sp_get_estadisticas_morosos_base();
+
 -- 1.2) Seguimientos de hoy
 DROP PROCEDURE IF EXISTS sp_get_seguimientos_hoy;
 DELIMITER $$
@@ -32,6 +34,7 @@ BEGIN
     WHERE DATE(fecha_seguimiento) = CURDATE();
 END$$
 DELIMITER ;
+CALL sp_get_seguimientos_hoy();
 
 
 -- 2) MOROSOS CLASIFICADOS 
@@ -146,6 +149,7 @@ END$$
 DELIMITER ;
 
 
+CALL sp_get_morosos_clasificados();
 -- 3) REGISTRAR SEGUIMIENTO
 
 DROP PROCEDURE IF EXISTS sp_registrar_seguimiento_moroso;
@@ -289,3 +293,12 @@ ALTER TABLE cronogramas ADD INDEX idx_fechapago (fechapago);
 ALTER TABLE seguimientos_morosos ADD INDEX idx_contrato_fecha (idcontrato, fecha_seguimiento);
 ALTER TABLE seguimientos_morosos ADD INDEX idx_fecha_seguimiento (fecha_seguimiento);
 */
+
+
+
+
+
+USE motorpark;
+
+
+SELECT * FROM vehiculos WHERE idvehiculo = 75;

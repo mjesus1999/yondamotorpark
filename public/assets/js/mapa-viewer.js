@@ -26,18 +26,14 @@ class MapaViewer {
 
     if (window.google && window.google.maps && window.google.maps.Map) {
       this.apiLoaded = true;
-      console.log("-> Google Maps ya está disponible");
       return Promise.resolve();
     }
 
     if (window.googleMapsLoading) {
-      console.log("-> Esperando a que termine de cargar Google Maps...");
       return window.googleMapsLoading;
     }
 
-    /* console.log("-> Cargando Google Maps API por primera vez..."); */
 
-    // Crear promesa de carga
 
     window.googleMapsLoading = new Promise((resolve, reject) => {
       // Verificar si existe el sistema de carga del proyecto
@@ -49,7 +45,7 @@ class MapaViewer {
         /* console.log("-> Usando sistema de carga existente"); */
         window.google.maps.loadViewer(null, () => {
           this.apiLoaded = true;
-          console.log("-> Google Maps cargado vía loadViewer");
+
           resolve();
         });
         return;
@@ -66,7 +62,7 @@ class MapaViewer {
       window.__googleMapsViewerDirectCallback = () => {
         delete window.__googleMapsViewerDirectCallback;
         this.apiLoaded = true;
-        console.log("-> Google Maps API cargada correctamente (direct)");
+
         resolve();
       };
 
@@ -88,7 +84,6 @@ class MapaViewer {
     }
 
     try {
-      /* console.log("-> Inicializando servicios de Google Maps..."); */
 
       // Asegurar que la API está cargada
       await this.cargarScriptGoogleMaps();
@@ -114,7 +109,7 @@ class MapaViewer {
       });
 
       this.isInitialized = true;
-      console.log("-> MapaViewer: Servicios inicializados correctamente");
+
     } catch (error) {
       console.error("-> MapaViewer: Error al inicializar servicios:", error);
       throw error;
@@ -143,7 +138,7 @@ class MapaViewer {
       lng: parseFloat(datos.lng) || null,
     };
 
-    console.log("-> Preparando ubicación:", this.datosCliente);
+
 
     // Abrir modal
     const modalEl = document.getElementById("modalMapaViewer");
@@ -155,7 +150,7 @@ class MapaViewer {
 
     //Registrar el listener ANTES de mostrar el modal
     const handleModalShown = async () => {
-      console.log("-> Modal mostrado completamente, cargando mapa...");
+      ;
 
       try {
         await this.cargarMapa();
@@ -194,11 +189,7 @@ class MapaViewer {
 
       // Si hay coordenadas, usarlas directamente
       if (this.datosCliente.lat && this.datosCliente.lng) {
-        console.log(
-          "-> Usando coordenadas directas:",
-          this.datosCliente.lat,
-          this.datosCliente.lng
-        );
+
         ubicacion = {
           lat: this.datosCliente.lat,
           lng: this.datosCliente.lng,
@@ -212,10 +203,7 @@ class MapaViewer {
         this.datosCliente.direccion &&
         this.datosCliente.direccion !== "Sin dirección específica"
       ) {
-        console.log(
-          "-> Geocodificando dirección:",
-          this.datosCliente.direccion
-        );
+
         this.mostrarCargando(true);
         ubicacion = await this.geocodificarDireccion(
           this.datosCliente.direccion
@@ -256,7 +244,7 @@ class MapaViewer {
 
     // Crear o actualizar mapa
     if (!this.mapa) {
-      console.log("-> Creando nueva instancia del mapa...");
+
       const mapOptions = {
         center: ubicacion,
         zoom: 16,
@@ -266,7 +254,7 @@ class MapaViewer {
       };
 
       this.mapa = new window.google.maps.Map(mapaContainer, mapOptions);
-      console.log("-> Mapa creado exitosamente");
+
     } else {
       console.log("-> Actualizando mapa existente...");
       this.mapa.setCenter(ubicacion);
@@ -302,7 +290,7 @@ class MapaViewer {
     // Mostrar InfoWindow automáticamente
     setTimeout(() => this.mostrarInfoWindow(), 500);
 
-    console.log("-> Mapa completamente configurado");
+
   }
 
   async geocodificarDireccion(direccion) {
@@ -322,11 +310,7 @@ class MapaViewer {
         document.getElementById("viewer-direccion").textContent =
           this.datosCliente.direccion;
 
-        console.log(
-          "-> Geocodificación exitosa:",
-          location.lat(),
-          location.lng()
-        );
+
 
         return {
           lat: location.lat(),
@@ -478,9 +462,8 @@ class MapaViewer {
       "top: 20px; right: 20px; z-index: 9999; min-width: 250px;";
     toast.innerHTML = `
             <div class="d-flex align-items-center">
-                <i class="bi bi-${
-                  tipo === "success" ? "check-circle" : "info-circle"
-                } me-2"></i>
+                <i class="bi bi-${tipo === "success" ? "check-circle" : "info-circle"
+      } me-2"></i>
                 <div>${mensaje}</div>
                 <button type="button" class="btn-close ms-auto" onclick="this.parentElement.parentElement.remove()"></button>
             </div>
@@ -500,8 +483,7 @@ class MapaViewer {
       lat: null,
       lng: null,
     };
-    // NO destruir el mapa ni los servicios para reutilizarlos
-    console.log("-> Datos del cliente limpiados");
+
   }
 }
 
@@ -512,12 +494,10 @@ let mapaViewerInstance = null;
 
 //Función de inicialización (NO carga Google Maps, solo crea la instancia vacía)
 async function initMapaViewer() {
-  console.log(" :D -> Inicializando MapaViewer (instancia vacía)...");
+
   if (!mapaViewerInstance) {
     mapaViewerInstance = new MapaViewer();
-    console.log(
-      "-> MapaViewer instanciado correctamente (sin cargar Google Maps aún)"
-    );
+
   }
 }
 
