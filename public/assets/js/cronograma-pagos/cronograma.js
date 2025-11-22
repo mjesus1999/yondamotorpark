@@ -62,8 +62,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     };
 
-    // console.log("AMORTIZACIÓN DE PENSALIDAD: ",  elements.amortizacionPenalidadInput);
-
+    
     /**
      * Gestiona la paginación de la tabla.
      * @param {number} page La página a mostrar.
@@ -561,7 +560,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // CUOTA
     elements.medioPagoSelect.addEventListener('change', (e) => {
         elements.numeroTransaccionInput.value = '';
-        console.info('MEDIO DE PAGO CUOTA: ', e.target.value);
+        
         const isTransferencia = e.target.value === MEDIOS_PAGO.transferenciaBancaria;
         elements.selectCuentas.classList.toggle('hidden', !isTransferencia);
         if (isTransferencia) {
