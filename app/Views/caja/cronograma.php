@@ -1,6 +1,27 @@
 <?php include __DIR__ . '/../layout/header.php'; ?>
 <link rel="stylesheet" href="/assets/css/cronograma-contrato.css">
 
+
+
+<div class="modal" tabindex="-1" id="modal-boleta">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">Modal title</h5>
+                <button type="button" class="btn-close text-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- <p class="">Aquí puedes visualizar la boleta reciente: <a href="#"  target="_blank" id="link-boleta" style="text-decoration: underline;">Ver Boleta</a></p> -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+               
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <div class="container-fluid">
 
     <div class="alert alert-info mt-2" role="alert" style="border-left: 4px solid #3498db; border-radius: 0 8px 8px 0;">
@@ -25,9 +46,11 @@
                 <button class="btn btn-success btn-sm ms-2" id="btn-excel">
                     <i class="bi bi-file-earmark-excel"></i> EXCEL
                 </button>
+                  <button class="btn btn-sm btn-outline-secondary ms-1" data-bs-toggle="modal"
+                    data-bs-target="#modal-boleta" title="Ver boleta del pago mas reciente">Boleta reciente</button>
             </div>
         </div>
-    </div>
+</div>
 
     <!-- CRONOGRAMA -->
     <div class="d-none d-md-block">
@@ -60,18 +83,19 @@
                                         <th>Acciones</th>
                                     </tr>
                                 </thead>
-                                <tbody id="tabla-body" data-total-items="<?= count($cronograma) ?>">
+                                <tbody id="tabla-body" data-total-items="<?= count($cronograma) ?>" data-id-contrato="<?= htmlspecialchars($cronograma[0]['idcontrato']) ?>">
                                     <?php if (empty($cronograma)) : ?>
                                         <tr>
                                             <td colspan="10" class="text-center">No hay datos para mostrar</td>
                                         </tr>
                                     <?php else: ?>
                                         <?php
+                                        // var_dump($cronograma) ;
                                         $hoy = new DateTimeImmutable('today');
                                         $cuotaHabilitada = false;
 
                                         foreach ($cronograma as $index => $fila) {
-                                            
+
                                             $fecha_cuota = new DateTimeImmutable($fila['fechapago']);
                                             $fecha_formateada = $fecha_cuota->format('d/m/Y');
                                             $estado = strtolower(trim($fila['estado']));
@@ -348,11 +372,6 @@
     </div>
 
 
-
-
-
-
-
 </div>
 
 
@@ -534,14 +553,13 @@
         </div>
     </div>
 
+
 </div>
 
+<?php include __DIR__ . '/../layout/footer.php'; ?>
 <!-- USADO PARA GENERAR EL PDF -->
 <script src="/assets/js/logoBase64.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js" defer></script>
 <script src="/assets/js/cronograma-pagos/cronograma.js" type="module" defer></script>
-
-
-<?php include __DIR__ . '/../layout/footer.php'; ?>

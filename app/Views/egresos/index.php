@@ -353,6 +353,17 @@
         </div>
     </div>
 
+    <div class="container">
+        <div class="card">
+            <div class="card-body">
+
+                <span class="hora"></span>
+                <span class="minutos"></span>
+                <span class="segundos"></span>                                            
+            </div>
+        </div>
+    </div>
+
 
 
 </div>
@@ -512,20 +523,29 @@
             }
         });
 
+        // const horah = document.getElementsByClassName('hora');
+        // const minutosh = document.getElementsByClassName('minutos');
+        // const segundosh = document.getElementsByClassName('segundos')
+     
+        // function getReloj() {
+        //     const fecha = new Date();
+        //     const hora = String(fecha.getHours()).padStart(2, '0');
+        //     const minutos = String(fecha.getMinutes()).padStart(2, '0');
+        //     const segundos = String(fecha.getSeconds()).padStart(2, '0');
 
-        function getReloj() {
-            const fecha = new Date();
-            const hora = String(fecha.getHours()).padStart(2, '0');
-            const minutos = String(fecha.getMinutes()).padStart(2, '0');
-            const segundos = String(fecha.getSeconds()).padStart(2, '0');
 
-            console.log(`Hora: ${hora} : ${minutos} : ${segundos}`)
-        }
+        //     horah[0].textContent = `${hora} :`;
+        //     minutosh[0].textContent = `${minutos} :`;
+        //     segundosh[0].textContent = segundos;
+            
 
-        getReloj();
-        setInterval(() => {
-            getReloj()
-        }, 1000);
+        //     console.log(`Hora: ${hora} : ${minutos} : ${segundos}`)
+        // }
+
+        // getReloj();
+        // setInterval(() => {
+        //     getReloj()
+        // }, 1000);
 
 
 

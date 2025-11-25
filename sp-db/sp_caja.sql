@@ -76,6 +76,7 @@ BEGIN
     -- Luego seleccionamos los datos
     SELECT 
         cro.idcronograma,
+        cont.idcontrato,
         cro.numcuota,
         cro.fechapago,
         cro.interes,
@@ -181,6 +182,7 @@ CREATE PROCEDURE sp_get_pagos_by_contrato(IN p_idcontrato INT)
 BEGIN
     SELECT 
         p.idpago,
+        c.idcontrato,
         p.idcronograma,
         c.numcuota,
       DATE_FORMAT(c.fechapago,'%d/%m/%Y') AS fecha_vencimiento,

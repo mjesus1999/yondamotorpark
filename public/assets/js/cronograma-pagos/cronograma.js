@@ -59,8 +59,36 @@ document.addEventListener('DOMContentLoaded', async () => {
         fechaPagoInput: document.getElementById('fechapago'),
         observacionInput: document.getElementById('observacion'),
         contenedorInputMontoCuota: document.getElementById('contenedor-monto-cuota'),
+        // toastBoleta: document.getElementById('toast-boleta'),
+        linkBoleta: document.getElementById('link-boleta'),
+        modalBoleta: document.getElementById('modal-boleta'),
+
 
     };
+
+
+    elements.modalBoleta.addEventListener('shown.bs.modal', () => {
+
+        const idContrato = elements.tablaBody.dataset.idContrato;
+        const claveUnica = `ultimaBoleta_contrato_${idContrato}`;
+        const dataLocalBoleta = JSON.parse(localStorage.getItem(claveUnica));
+
+        if (dataLocalBoleta && dataLocalBoleta.enlace) {
+            // elements.linkBoleta.href = dataLocalBoleta.enlace;
+            elements.modalBoleta.querySelector('.modal-body').innerHTML = '';
+            elements.modalBoleta.querySelector('.modal-title').textContent = 'Boleta de pago reciente';
+            elements.modalBoleta.querySelector('.modal-body').innerHTML += `<p class="">Puedes dar clic aquí para ir a visualizar la boleta: <a href="${dataLocalBoleta.enlace}"  target="_blank" id="link-boleta" style="text-decoration: underline;">Ver Boleta</a></p>`;
+            elements.linkBoleta.style.display = 'inline-block';
+        } else {
+            console.warn('No hay boleta reciente para este contrato específico.');
+         
+            elements.modalBoleta.querySelector('.modal-body').innerHTML = '';
+            elements.modalBoleta.querySelector('.modal-body').innerHTML = '<p class="text-center">Todavía no se ha registrado una boleta de pago</p>'
+            elements.modalBoleta.querySelector('.modal-title').textContent = 'Sin boleta reciente';
+        }
+    });
+
+
 
 
     /**
@@ -412,23 +440,40 @@ document.addEventListener('DOMContentLoaded', async () => {
                 delayPromise
             ]);
 
-            const data = await res.json(); 
+            const data = await res.json();
 
             if (data.debug_info) {
                 console.info("Debug Info:", data.debug_info);
             }
 
             if (data.success) {
-                showToast(data.message, 'SUCCESS', 1200);
+                if (data.enlace_pdf) {
+                    const ultima = {
+                        idcronograma: idCronogramaSeleccionado,
+                        enlace: data.enlace_pdf,
+                        ts: Date.now()
+                    };
+
+                    const idContrato = elements.tablaBody.dataset.idContrato;
+                    const claveStorage = `ultimaBoleta_contrato_${idContrato}`;
+                    localStorage.setItem(claveStorage, JSON.stringify(ultima));
+
+                    try {
+                        window.open(data.enlace_pdf, '_blank');
+                    } catch (e) {
+                        console.warn('No se pudo abrir la boleta en nueva pestaña:', e);
+                    }
+
+
+                } else {
+                    showToast(data.message, 'ERROR', 1200);
+                }
+
+
                 setTimeout(() => {
                     elements.modalPago.hide();
                     location.reload();
                 }, 1200);
-
-                if (data.enlace_pdf) {
-                    window.open(data.enlace_pdf, '_blank');
-                }
-
 
             } else {
                 showToast(data.message || 'Error al registrar el pago.', 'WARNING', 3000);
