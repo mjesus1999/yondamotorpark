@@ -336,12 +336,12 @@ class CotizacionController extends Controller
                         $itemsBoleta = [
                             [
                                 "unidad_de_medida" => "ZZ",
-                                "descripcion" => "PAGO INICIAL DE VEHICULO",
+                                "descripcion" => "PAGO INICIAL DE VEHÍCULO",
                                 "cantidad" => 1,
                                 "valor_unitario" => $montoTotal,
                                 "precio_unitario" => $montoTotal,
                                 "subtotal" => $montoTotal,
-                                "tipo_de_igv" => 9, // 9 = Inafecto 
+                                "tipo_de_igv" => 9, // 9 = Inafecto - Solo es venta interna.
                                 "igv" => 0.00,
                                 "total" => $montoTotal
                             ]

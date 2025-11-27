@@ -182,8 +182,8 @@ include __DIR__ . '/../layout/header.php';
             data: datos,
             pagination: "local",
             layout: "fitColumns",
-            paginationSize: 15,
-            paginationSizeSelector: [5, 10, 20],
+            paginationSize: 20,
+            paginationSizeSelector: [5, 10, 15,25],
             movableRows: true,
 
             columns: [{

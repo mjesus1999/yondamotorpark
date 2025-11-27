@@ -89,8 +89,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
 
-
-
     /**
      * Gestiona la paginación de la tabla.
      * @param {number} page La página a mostrar.

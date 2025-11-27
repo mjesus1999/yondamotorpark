@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Controllers; 
+namespace App\Controllers;
 
 use App\Core\Controller;
 use App\Config\Credencialesnubefact;
-use App\Helpers\NubefactApiHelper; 
-use Exception; 
+use App\Helpers\NubefactApiHelper;
+use Exception;
 
 class ComprobanteNubefactController extends Controller
 {
@@ -13,9 +13,9 @@ class ComprobanteNubefactController extends Controller
 
     public function __construct()
     {
-        date_default_timezone_set('America/Lima'); 
+        date_default_timezone_set('America/Lima');
         $this->nubefactModel = new NubefactApiHelper(
-            Credencialesnubefact::NUBEFACT_RUTA, 
+            Credencialesnubefact::NUBEFACT_RUTA,
             Credencialesnubefact::NUBEFACT_TOKEN
         );
     }
@@ -23,18 +23,18 @@ class ComprobanteNubefactController extends Controller
     /**
      * Método Genérico para emitir cualquier comprobante
      */
-    public function procesarPagoYEmitirComprobante(array $datos) 
+    public function procesarPagoYEmitirComprobante(array $datos)
     {
-        $fechaHoy = date('d-m-Y'); 
-        
-       
+        $fechaHoy = date('d-m-Y');
+
+
         $campos_requeridos = [
             'tipo_comprobante', // 1=Factura, 2=Boleta
             'serie',
             'numero_comprobante',
             'datos_cliente',
-            'items',            
-            'totales'           
+            'items',
+            'totales'
         ];
 
         foreach ($campos_requeridos as $campo) {
@@ -54,7 +54,7 @@ class ComprobanteNubefactController extends Controller
             $total_inafecta = $totales['total_inafecta'] ?? 0.00;
             $total_exonerada = $totales['total_exonerada'] ?? 0.00;
             $total_igv = $totales['total_igv'] ?? 0.00;
-            $total_final = $totales['total_venta']; 
+            $total_final = $totales['total_venta'];
 
             // Preparar datos del cliente
             $cliente = [
@@ -76,19 +76,19 @@ class ComprobanteNubefactController extends Controller
                 "moneda" => 1, // 1 = Soles
                 "porcentaje_de_igv" => ($total_igv > 0) ? 18.00 : 0.00,
                 "total_gravada" => round($total_gravada, 2),
-                "total_inafecta" => round($total_inafecta, 2),
+                "total_inafecta" =>0,
                 "total_exonerada" => round($total_exonerada, 2),
                 "total_igv" => round($total_igv, 2),
                 "total" => round($total_final, 2),
-                
+                "formato_de_pdf" => "TICKET",
                 "detraccion" => false,
                 "enviar_automaticamente_a_la_sunat" => true,
-                "enviar_automaticamente_al_cliente" => false, 
+                "enviar_automaticamente_al_cliente" => true,
             ], $cliente);
 
             $json_data['items'] = $datos['items'];
             $respuesta_api = $this->nubefactModel->enviarComprobante($json_data);
-            
+
             $estado_sunat = $respuesta_api['aceptada_por_sunat'] ? 'ACEPTADA' : 'PENDIENTE';
 
             return [
@@ -100,7 +100,6 @@ class ComprobanteNubefactController extends Controller
                 'enlace_cdr' => $respuesta_api['enlace_del_cdr'] ?? null,
                 'respuesta_completa_nubefact' => $respuesta_api
             ];
-
         } catch (Exception $e) {
             return [
                 'success' => false,

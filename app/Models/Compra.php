@@ -77,7 +77,7 @@ class Compra
             c.serie,
             c.numdocumento,
             c.rutadoc,
-            con.nombrecomercial AS razon_concesionario
+            con.razonsocial AS razon_concesionario
             
         FROM compras c
         INNER JOIN ordenescompra o ON c.idorden = o.idordencompra

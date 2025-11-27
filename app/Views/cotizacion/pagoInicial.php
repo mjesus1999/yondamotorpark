@@ -792,7 +792,7 @@
             if (response.success) {
                 mostrarAlerta('exito', response.message);
                 setTimeout(() => window.location.reload(), 1500);
-                window.open(response.enlace_boleta || '#', '_blank');
+                window.open(response.enlace_pdf || '#', '_blank');
             } else {
                 mostrarAlerta('error', response.message || 'Ocurrió un error inesperado.');
                 registrarBtn.disabled = false;

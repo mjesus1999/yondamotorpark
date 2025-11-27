@@ -382,7 +382,7 @@ class PagoCronogramaController extends Controller
                                     "valor_unitario" => $amortizacionPenalidad,
                                     "precio_unitario" => $amortizacionPenalidad,
                                     "subtotal" => $amortizacionPenalidad,
-                                    "tipo_de_igv" => 9,
+                                    "tipo_de_igv" => 1, // Gravado por defecto - que haya pisibilidad de poder cambiar eso depues como para inafecta  
                                     "igv" => 0.00,
                                     "total" => $amortizacionPenalidad
                                 ];
