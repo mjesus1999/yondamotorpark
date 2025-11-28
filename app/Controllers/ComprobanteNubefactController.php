@@ -76,14 +76,15 @@ class ComprobanteNubefactController extends Controller
                 "moneda" => 1, // 1 = Soles
                 "porcentaje_de_igv" => ($total_igv > 0) ? 18.00 : 0.00,
                 "total_gravada" => round($total_gravada, 2),
-                "total_inafecta" =>0,
+                "total_inafecta" => 0,
                 "total_exonerada" => round($total_exonerada, 2),
                 "total_igv" => round($total_igv, 2),
                 "total" => round($total_final, 2),
                 "formato_de_pdf" => "TICKET",
+                "medio_de_pago" => $datos['mediopago'],
                 "detraccion" => false,
                 "enviar_automaticamente_a_la_sunat" => true,
-                "enviar_automaticamente_al_cliente" => true,
+                "enviar_automaticamente_al_cliente" => false,
             ], $cliente);
 
             $json_data['items'] = $datos['items'];

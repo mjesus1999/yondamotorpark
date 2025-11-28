@@ -66,7 +66,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     };
 
-
     elements.modalBoleta.addEventListener('shown.bs.modal', () => {
 
         const idContrato = elements.tablaBody.dataset.idContrato;
@@ -81,7 +80,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             elements.linkBoleta.style.display = 'inline-block';
         } else {
             console.warn('No hay boleta reciente para este contrato específico.');
-         
+
             elements.modalBoleta.querySelector('.modal-body').innerHTML = '';
             elements.modalBoleta.querySelector('.modal-body').innerHTML = '<p class="text-center">Todavía no se ha registrado una boleta de pago</p>'
             elements.modalBoleta.querySelector('.modal-title').textContent = 'Sin boleta reciente';
@@ -394,12 +393,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         elements.btnConfirmarPago.classList.add('disabled', 'opacity-75');
         elements.btnConfirmarPago.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Procesando...';
 
-        //  Preparar datos del formulario
+
         const formData = new FormData(elements.formPago);
         formData.append('idcronograma', idCronogramaSeleccionado);
 
 
-        //  OBTENER DATOS DEL MODAL PARA CÁLCULOS MATEMÁTICOS
+
         const modal = document.getElementById('modalPago');
         const interesCuota = parseFloat(modal.dataset.interesCuota) || 0;
         const capitalCuota = parseFloat(modal.dataset.capitalCuota) || 0;
@@ -411,6 +410,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         formData.append('total_capital_prorrateado', prorrateo.capital.toFixed(2));
         formData.append('total_interes_prorrateado', prorrateo.interes.toFixed(2));
+        // formData.append('mediopago', elements.medioPagoSelect.value);
+
 
         if (elements.medioPagoSelect.value === MEDIOS_PAGO.transferenciaBancaria) {
             formData.append('idcuentapago', elements.numeroCuentaSelect.value);
@@ -451,6 +452,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         enlace: data.enlace_pdf,
                         ts: Date.now()
                     };
+                    
 
                     const idContrato = elements.tablaBody.dataset.idContrato;
                     const claveStorage = `ultimaBoleta_contrato_${idContrato}`;
@@ -464,14 +466,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
                 } else {
-                    showToast(data.message, 'ERROR', 1200);
+                    showToast(data.message, 'ERROR', 8000);
                 }
 
 
                 setTimeout(() => {
                     elements.modalPago.hide();
                     location.reload();
-                }, 1200);
+                }, 8000);
 
             } else {
                 showToast(data.message || 'Error al registrar el pago.', 'WARNING', 3000);

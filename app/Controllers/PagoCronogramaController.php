@@ -123,7 +123,7 @@ class PagoCronogramaController extends Controller
         return $primeraCuotaPendienteId !== null && $primeraCuotaPendienteId === $idCronograma;
     }
 
-    
+
 
     /**
      * Guarda un archivo de comprobante de pago
@@ -192,8 +192,6 @@ class PagoCronogramaController extends Controller
 
             $data = array_map([Validador::class, 'limpiar'], $_POST);
             $errores = [];
-
-            // Recolección de datos
             $idCronograma = (int) ($data['idcronograma'] ?? 0);
             $numeroTransaccion = $data['numerotransaccion'] ?? '';
             $numeroTransaccionPenalidad = (string) ($data['numeroTransaccionPenalidad'] ?? '');
@@ -343,74 +341,107 @@ class PagoCronogramaController extends Controller
                         if ($clienteData && $nuevoNumero) {
 
                             $itemsFacturacion = [];
+                            $totalGravada = 0.00;
+                            // totalInafecta debe ser 0.00 para evitar el error si se envía solo Gravada
+                            $totalInafecta = 0.00;
+                            $totalIGV = 0.00;
+                            $totalVenta = 0.00;
 
-                            // Item Capital
+                            // IGV 
+                            $porcentajeIGV = 0.18;
+                            $factorIGV = 1 + $porcentajeIGV;
+
+                         
+                            // Item Capital - Tipo de IGV 1
                             if ($totalCapitalProrrateado > 0) {
+                                $totalCapitalConIGV = round($totalCapitalProrrateado, 2);
+                                // Calcular valor unitario (sin IGV) y el IGV
+                                $valorUnitarioCapital = round($totalCapitalConIGV / $factorIGV, 10);
+                                $igvCapital = round($totalCapitalConIGV - $valorUnitarioCapital, 2);
+
                                 $itemsFacturacion[] = [
                                     "unidad_de_medida" => "ZZ",
                                     "descripcion" => "Abono a Capital",
                                     "cantidad" => 1,
-                                    "valor_unitario" => $totalCapitalProrrateado,
-                                    "precio_unitario" => $totalCapitalProrrateado,
-                                    "subtotal" => $totalCapitalProrrateado,
-                                    "tipo_de_igv" => 9, // 9 = Inafecto
-                                    "igv" => 0.00,
-                                    "total" => $totalCapitalProrrateado
+                                    "valor_unitario" => $valorUnitarioCapital,
+                                    "precio_unitario" => $totalCapitalConIGV,
+                                    "subtotal" => $valorUnitarioCapital,
+                                    "tipo_de_igv" => 1, // GRAVADO ES => TIPO_DE_IGV = 1
+                                    "igv" => $igvCapital,
+                                    "total" => $totalCapitalConIGV
                                 ];
+                                $totalGravada += $valorUnitarioCapital;
+                                $totalIGV += $igvCapital;
+                                $totalVenta += $totalCapitalConIGV;
                             }
 
                             // Item Interés
                             if ($totalInteresProrrateado > 0) {
+                                $totalInteresConIGV = round($totalInteresProrrateado, 2);
+                                // Calcular valor unitario (sin IGV) y el IGV
+                                $valorUnitarioInteres = round($totalInteresConIGV / $factorIGV, 10);
+                                $igvInteres = round($totalInteresConIGV - $valorUnitarioInteres, 2);
+
                                 $itemsFacturacion[] = [
                                     "unidad_de_medida" => "ZZ",
                                     "descripcion" => "Interés",
                                     "cantidad" => 1,
-                                    "valor_unitario" => $totalInteresProrrateado,
-                                    "precio_unitario" => $totalInteresProrrateado,
-                                    "subtotal" => $totalInteresProrrateado,
-                                    "tipo_de_igv" => 9, // 9 = Inafecto
-                                    "igv" => 0.00,
-                                    "total" => $totalInteresProrrateado
+                                    "valor_unitario" => $valorUnitarioInteres,
+                                    "precio_unitario" => $totalInteresConIGV,
+                                    "subtotal" => $valorUnitarioInteres,
+                                    "tipo_de_igv" => 1, 
+                                    "igv" => $igvInteres,
+                                    "total" => $totalInteresConIGV
                                 ];
+                                $totalGravada += $valorUnitarioInteres;
+                                $totalIGV += $igvInteres;
+                                $totalVenta += $totalInteresConIGV;
                             }
 
+                            // Penalidad - Mantenido como Gravado 
                             if ($amortizacionPenalidad > 0) {
+                                $totalMoraConIGV = round($amortizacionPenalidad, 2);
+                                $valorUnitarioMora = round($totalMoraConIGV / $factorIGV, 10);
+                                $igvMora = round($totalMoraConIGV - $valorUnitarioMora, 2);
+
                                 $itemsFacturacion[] = [
                                     "unidad_de_medida" => "ZZ",
                                     "descripcion" => "Mora",
                                     "cantidad" => 1,
-                                    "valor_unitario" => $amortizacionPenalidad,
-                                    "precio_unitario" => $amortizacionPenalidad,
-                                    "subtotal" => $amortizacionPenalidad,
-                                    "tipo_de_igv" => 1, // Gravado por defecto - que haya pisibilidad de poder cambiar eso depues como para inafecta  
-                                    "igv" => 0.00,
-                                    "total" => $amortizacionPenalidad
+                                    "valor_unitario" => $valorUnitarioMora,
+                                    "precio_unitario" => $totalMoraConIGV,
+                                    "subtotal" => $valorUnitarioMora,
+                                    "tipo_de_igv" => 1, 
+                                    "igv" => $igvMora,
+                                    "total" => $totalMoraConIGV
                                 ];
+                                $totalGravada += $valorUnitarioMora;
+                                $totalIGV += $igvMora;
+                                $totalVenta += $totalMoraConIGV;
                             }
 
-
-                            $totalOperacion = $totalCapitalProrrateado + $totalInteresProrrateado;
-
-                            if ($amortizacionPenalidad > 0) {
-                                $totalOperacion += $amortizacionPenalidad;
-                            }
+                            // Redondea los totales finales 
+                            $totalGravada = round($totalGravada, 2);
+                            $totalIGV = round($totalIGV, 2);
+                            $totalVenta = round($totalVenta, 2);
 
 
                             $datosFacturacion = [
-                                'tipo_comprobante' => 2, // Boleta
+                                'tipo_comprobante' => 2, // Boleta 
                                 'serie' => $serieBoleta,
+                                'mediopago' => $medioPago,
                                 'numero_comprobante' => $nuevoNumero,
                                 'items' => $itemsFacturacion,
                                 'totales' => [
-                                    'total_gravada' => 0.00,
-                                    'total_inafecta' => $totalOperacion,
+                                    'total_gravada' => $totalGravada, // Suma de la Base Imponible (Capital + Intereses + Mora)
+                                    'total_inafecta' => 0.00, // 
                                     'total_exonerada' => 0.00,
-                                    'total_igv' => 0.00,
-                                    'total_venta' => $totalOperacion
+                                    'total_igv' => $totalIGV, 
+                                    'total_venta' => $totalVenta 
                                 ],
 
                                 'datos_cliente' => [
-                                    'tipo_documento' => 1, // DNI
+                                    'tipo_documento' => 1, // DNI 
                                     'numero_documento' => $clienteData['nrodoc'],
                                     'denominacion' => $clienteData['razon_social'],
                                     'direccion' => $clienteData['direccion'] ?? 'LIMA',
@@ -431,11 +462,6 @@ class PagoCronogramaController extends Controller
                                 foreach ($idPagos as $idpago) {
                                     $this->pagoCronogramaModel->actualizarEnlaceYDeclarado($idpago, $enlacePdf, $enlaceXml, $enlaceCdr, $nuevoNumero);
                                 }
-
-
-                                // $idPagoCuota = $idPagos[0];
-                                // $this->pagoCronogramaModel->actualizarEnlaceYDeclarado($idPagoCuota, $enlacePdf, $enlaceXml, $enlaceCdr, $nuevoNumero);
-
                             } else {
                                 error_log("Error NubeFact (Emisión): " . $respNube['message']);
                                 $mensajeExtra = " Pago OK, pero Boleta con Error: " . $respNube['message'] . ")";
@@ -464,6 +490,7 @@ class PagoCronogramaController extends Controller
                     'message' => '¡Pago registrado correctamente!' . $mensajeExtra,
                     'enlace_pdf' => $enlacePdf,
                     'enlace_xml' => $enlaceXml,
+                    'enlace_cdr' => $enlaceCdr,
                 ]);
             } else {
                 echo json_encode([
@@ -480,6 +507,7 @@ class PagoCronogramaController extends Controller
             ]);
         }
     }
+
 
 
     /**
@@ -505,6 +533,4 @@ class PagoCronogramaController extends Controller
         }
         exit();
     }
-
- 
 }
