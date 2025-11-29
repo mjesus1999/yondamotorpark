@@ -245,7 +245,7 @@ class CotizacionController extends Controller
      * @throws \Exception 
      * @return void
      */
-  
+
     public function storePagoInicial()
     {
         header('Content-Type: application/json');
@@ -262,7 +262,7 @@ class CotizacionController extends Controller
             $data = array_map([Validador::class, 'limpiar'], $_POST);
             $errores = [];
 
-            
+
             $registro = [
                 'idconcepto' => ConceptosPago::INICIAL_ID,
                 'idcotizacion' => $data['idcotizacion'] ?? null,
@@ -280,7 +280,7 @@ class CotizacionController extends Controller
                 'tipocambioaplicado' => empty($data['tipocambioaplicado']) ? null : $data['tipocambioaplicado']
             ];
 
-      
+
             $errores[] = Validador::campoObligatorio($registro['idconcepto'], 'Concepto');
             $errores[] = Validador::campoObligatorio($registro['idvehiculo'], 'Identificador del vehículo');
             $errores[] = Validador::campoObligatorio($registro['mediopago'], 'Medio de pago');
@@ -317,103 +317,100 @@ class CotizacionController extends Controller
             $idPago = $this->cotizacionModel->addPagoInicial($registro);
 
             if ($idPago > 0) {
-                
-            
-                $enlacePdf = null;
-                $mensajeExtra = "";
-
-                try {
-                    
-                    $datosCliente = $this->cotizacionModel->getDatosClienteByCotizacion((int)$registro['idcotizacion']);
-                    $serieBoleta = "BBB1"; // Configurar serie según tu lógica de negocio
-                    $nuevoNumero = $this->cajaModel->obtenerNuevoCorrelativo($serieBoleta);
-
-                    if ($datosCliente && $nuevoNumero) {
-                        
-                       
-                        $montoTotal = (float)$registro['amortizacion'];
-                
-                        $itemsBoleta = [
-                            [
-                                "unidad_de_medida" => "ZZ",
-                                "descripcion" => "PAGO INICIAL DE VEHÍCULO",
-                                "cantidad" => 1,
-                                "valor_unitario" => $montoTotal,
-                                "precio_unitario" => $montoTotal,
-                                "subtotal" => $montoTotal,
-                                "tipo_de_igv" => 9, // 9 = Inafecto - Solo es venta interna.
-                                "igv" => 0.00,
-                                "total" => $montoTotal
-                            ]
-                        ];
-
-                      
-                        $totalesBoleta = [
-                            'total_gravada' => 0.00,
-                            'total_inafecta' => $montoTotal,
-                            'total_exonerada' => 0.00,
-                            'total_igv' => 0.00,
-                            'total_venta' => $montoTotal
-                        ];
-
-                     
-                        $datosFacturacion = [
-                            'tipo_comprobante' => 2, // Boleta
-                            'serie' => $serieBoleta,
-                            'numero_comprobante' => $nuevoNumero,
-                            'items' => $itemsBoleta,
-                            'totales' => $totalesBoleta,
-                            "datos_cliente" => [
-                                "tipo_documento" => 1, // DNI
-                                "numero_documento" => $datosCliente['documento'],
-                                "denominacion" => $datosCliente['nombrecliente'],
-                                "direccion" => $datosCliente['direccion'] ?? 'Dirección Desconocida',
-                                "email" => $datosCliente['email'] ?? ''
-                            ]
-                        ];
-
-                 
-                        $nubefactController = new ComprobanteNubefactController();
-                        $respNube = $nubefactController->procesarPagoYEmitirComprobante($datosFacturacion);
-
-                        if ($respNube['success']) {
-                            $enlacePdf = $respNube['enlace_pdf'];
-                            $enlaceXml = $respNube['enlace_xml'];
-                            $enlaceCdr = $respNube['enlace_cdr'];
-                            $this->pagoCronogramaModel->actualizarEnlaceYDeclarado(
-                                $idPago, 
-                                $enlacePdf, 
-                                $enlaceXml, 
-                                $enlaceCdr, 
-                                $nuevoNumero
-                            );
-                        } else {
-                            $mensajeExtra = " (Pago guardado, pero error al emitir Boleta: " . $respNube['message'] . ")";
-                            error_log("Error NubeFact Inicial: " . $respNube['message']);
-                        }
-                    } else {
-                        $mensajeExtra = " (Pago guardado, pero faltan datos de cliente para facturar)";
-                    }
-
-                } catch (Exception $exFact) {
-                    error_log("Excepción Facturación Inicial: " . $exFact->getMessage());
-                    $mensajeExtra = " (Pago guardado, error en sistema de facturación)";
-                }
-            
                 echo json_encode([
                     'success' => true,
-                    'message' => 'Pago registrado correctamente' . $mensajeExtra,
+                    'message' => 'Pago registrado correctamente',
                     'id' => $idPago,
-                    'enlace_pdf' => $enlacePdf
+
                 ]);
 
+
+                // $enlacePdf = null;
+                // $mensajeExtra = "";
+
+                // try {
+
+                //     $datosCliente = $this->cotizacionModel->getDatosClienteByCotizacion((int)$registro['idcotizacion']);
+                //     $serieBoleta = "BBB1"; // Configurar serie según tu lógica de negocio
+                //     $nuevoNumero = $this->cajaModel->obtenerNuevoCorrelativo($serieBoleta);
+
+                //     if ($datosCliente && $nuevoNumero) {
+
+
+                //         $montoTotal = (float)$registro['amortizacion'];
+
+                //         $itemsBoleta = [
+                //             [
+                //                 "unidad_de_medida" => "ZZ",
+                //                 "descripcion" => "PAGO INICIAL DE VEHÍCULO",
+                //                 "cantidad" => 1,
+                //                 "valor_unitario" => $montoTotal,
+                //                 "precio_unitario" => $montoTotal,
+                //                 "subtotal" => $montoTotal,
+                //                 "tipo_de_igv" => 9, // 9 = Inafecto - Solo es venta interna.
+                //                 "igv" => 0.00,
+                //                 "total" => $montoTotal
+                //             ]
+                //         ];
+
+
+                //         $totalesBoleta = [
+                //             'total_gravada' => 0.00,
+                //             'total_inafecta' => $montoTotal,
+                //             'total_exonerada' => 0.00,
+                //             'total_igv' => 0.00,
+                //             'total_venta' => $montoTotal
+                //         ];
+
+
+                //         $datosFacturacion = [
+                //             'tipo_comprobante' => 2, // Boleta
+                //             'serie' => $serieBoleta,
+                //             'numero_comprobante' => $nuevoNumero,
+                //             'items' => $itemsBoleta,
+                //             'totales' => $totalesBoleta,
+                //             "datos_cliente" => [
+                //                 "tipo_documento" => 1, // DNI
+                //                 "numero_documento" => $datosCliente['documento'],
+                //                 "denominacion" => $datosCliente['nombrecliente'],
+                //                 "direccion" => $datosCliente['direccion'] ?? 'Dirección Desconocida',
+                //                 "email" => $datosCliente['email'] ?? ''
+                //             ]
+                //         ];
+
+
+                //         $nubefactController = new ComprobanteNubefactController();
+                //         $respNube = $nubefactController->procesarPagoYEmitirComprobante($datosFacturacion);
+
+                //         if ($respNube['success']) {
+                //             $enlacePdf = $respNube['enlace_pdf'];
+                //             $enlaceXml = $respNube['enlace_xml'];
+                //             $enlaceCdr = $respNube['enlace_cdr'];
+                //             $this->pagoCronogramaModel->actualizarEnlaceYDeclarado(
+                //                 $idPago, 
+                //                 $enlacePdf, 
+                //                 $enlaceXml, 
+                //                 $enlaceCdr, 
+                //                 $nuevoNumero
+                //             );
+                //         } else {
+                //             $mensajeExtra = " (Pago guardado, pero error al emitir Boleta: " . $respNube['message'] . ")";
+                //             error_log("Error NubeFact Inicial: " . $respNube['message']);
+                //         }
+                //     } else {
+                //         $mensajeExtra = " (Pago guardado, pero faltan datos de cliente para facturar)";
+                //     }
+
+                // } catch (Exception $exFact) {
+                //     error_log("Excepción Facturación Inicial: " . $exFact->getMessage());
+                //     $mensajeExtra = " (Pago guardado, error en sistema de facturación)";
+                // }
             } else {
                 throw new Exception('No se pudo registrar el pago de inicial en la BD.');
             }
-
         } catch (PDOException $e) {
             if ($rutaArchivoGuardado && file_exists($rutaArchivoGuardado)) @unlink($rutaArchivoGuardado);
-            
+
             $msg = $e->getMessage();
             if (strpos($msg, 'El vehículo ya fue separado') !== false) {
                 http_response_code(409);
@@ -421,12 +418,11 @@ class CotizacionController extends Controller
                 http_response_code(500);
                 $msg = 'Error de base de datos al procesar el pago.';
             }
-            
-            echo json_encode(['success' => false, 'message' => $msg]);
 
+            echo json_encode(['success' => false, 'message' => $msg]);
         } catch (Exception $e) {
             if ($rutaArchivoGuardado && file_exists($rutaArchivoGuardado)) @unlink($rutaArchivoGuardado);
-            
+
             http_response_code(500);
             echo json_encode(['success' => false, 'message' => 'Error: ' . $e->getMessage()]);
         }

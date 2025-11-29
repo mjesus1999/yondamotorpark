@@ -484,7 +484,7 @@
                                             <th class="text-end">Amortización</th>
                                             <th class="text-end">Saldo Restante</th>
                                             <th>Comprobante</th>
-                                            <th>Boleta</th>
+                                            <!-- <th>Boleta</th> -->
                                             <th>Observaciones</th>
                                         </tr>
                                     </thead>
@@ -515,7 +515,7 @@
                                                         <span class="badge bg-secondary">N/A</span>
                                                     <?php endif; ?>
                                                 </td>
-                                                <td>
+                                                <!-- <td>
                                                     <span class="text-muted">
                                                         <a class="btn btn-sm btn-link"
                                                             title="Ver boleta de pago"
@@ -525,7 +525,7 @@
                                                         </a>
                                                     </span>
 
-                                                </td>
+                                                </td> -->
 
                                                 <td><small class="text-muted"><?= htmlspecialchars($pago['observacion'] ?? '-') ?></small></td>
                                             </tr>
@@ -792,7 +792,7 @@
             if (response.success) {
                 mostrarAlerta('exito', response.message);
                 setTimeout(() => window.location.reload(), 1500);
-                window.open(response.enlace_pdf || '#', '_blank');
+         
             } else {
                 mostrarAlerta('error', response.message || 'Ocurrió un error inesperado.');
                 registrarBtn.disabled = false;

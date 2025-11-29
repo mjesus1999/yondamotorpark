@@ -15,6 +15,7 @@
 namespace App\Models;
 
 use App\Core\Database;
+use League\Csv\Serializer\CastToArray;
 use PDO;
 use PDOException;
 
@@ -308,6 +309,33 @@ class PagoCronograma
             $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             return $results;
+        } catch (PDOException $error) {
+            error_log($error->getMessage());
+            return [];
+        }
+    }
+
+    // Ayudará a traer el numero de cuenta donde se paga por tranasferencia.
+
+    public function getNumCuentaPagoById(int $id): ?array
+
+    {
+        $query = " SELECT 
+                        cp.idcuentapago,
+                        CONCAT(ep.entidad, ' - ', cp.numcuenta) AS nombrecuenta
+                    FROM 
+                        cuentaspago cp
+                    JOIN 
+                        entidadespago ep ON cp.identidadpago = ep.identidadpago
+
+                        WHERE cp.idcuentapago = :id
+                    ";
+        try {
+
+            $stmt = $this->db->prepare($query);
+            $stmt->bindValue(":id", $id);
+            $stmt->execute();
+            return $stmt->fetch(PDO::FETCH_ASSOC);
         } catch (PDOException $error) {
             error_log($error->getMessage());
             return [];

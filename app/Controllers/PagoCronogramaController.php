@@ -124,7 +124,6 @@ class PagoCronogramaController extends Controller
     }
 
 
-
     /**
      * Guarda un archivo de comprobante de pago
      *
@@ -177,7 +176,6 @@ class PagoCronogramaController extends Controller
      *
      * @return void
      */
-
     public function store(): void
     {
         $this->authRequired();
@@ -204,14 +202,12 @@ class PagoCronogramaController extends Controller
             $fechaPago = $data['fechapago'] ?? '';
             $observacion = $data['observacion'] ?? '';
 
-            // Datos para Nubefact (enviados desde el JS)
             $totalInteresProrrateado = (float) ($data['total_interes_prorrateado'] ?? 0);
             $totalCapitalProrrateado = (float) ($data['total_capital_prorrateado'] ?? 0);
 
-            // Manejo de archivos
             $rutaComprobanteCuota = isset($_FILES['comprobanteCuota']) ? $this->guardarComprobante($_FILES['comprobanteCuota']) : null;
             $rutaComprobantePenalidad = isset($_FILES['comprobantePenalidad']) ? $this->guardarComprobante($_FILES['comprobantePenalidad']) : null;
-
+          
 
             if ($idCronograma <= 0) {
                 $errores[] = 'Cuota a pagar no es válida.';
@@ -294,6 +290,25 @@ class PagoCronogramaController extends Controller
 
             $idContrato = $cronogramaData['idcontrato'];
 
+            $nombreCuentaCuotaBoleta = $medioPago;
+            if ($amortizacionCuota > 0 && $medioPago === 'Transferencia Bancaria' && !empty($idCuentaPago)) {
+                $datosCuenta = $this->pagoCronogramaModel->getNumCuentaPagoById((int) $idCuentaPago);
+                if ($datosCuenta) {
+                    $nombreCuentaCuotaBoleta = $datosCuenta['nombrecuenta']; 
+                }
+            }
+
+            $nombreCuentaPenalidadBoleta = $medioPagoPenalidad;
+            if ($amortizacionPenalidad > 0 && $medioPagoPenalidad === 'Transferencia Bancaria' && !empty($idCuentaPagoPenalidad)) {
+                $datosCuenta = $this->pagoCronogramaModel->getNumCuentaPagoById((int) $idCuentaPagoPenalidad);
+                if ($datosCuenta) {
+                    $nombreCuentaPenalidadBoleta = $datosCuenta['nombrecuenta']; 
+                }
+            }
+          
+            $medioPagoBoleta = ($amortizacionCuota > 0) ? $nombreCuentaCuotaBoleta : $nombreCuentaPenalidadBoleta;
+   
+
             $pagoCuota = null;
             if ($amortizacionCuota > 0) {
                 $pagoCuota = [
@@ -351,7 +366,7 @@ class PagoCronogramaController extends Controller
                             $porcentajeIGV = 0.18;
                             $factorIGV = 1 + $porcentajeIGV;
 
-                         
+
                             // Item Capital - Tipo de IGV 1
                             if ($totalCapitalProrrateado > 0) {
                                 $totalCapitalConIGV = round($totalCapitalProrrateado, 2);
@@ -375,10 +390,10 @@ class PagoCronogramaController extends Controller
                                 $totalVenta += $totalCapitalConIGV;
                             }
 
-                            // Item Interés
+                           
                             if ($totalInteresProrrateado > 0) {
                                 $totalInteresConIGV = round($totalInteresProrrateado, 2);
-                                // Calcular valor unitario (sin IGV) y el IGV
+                               
                                 $valorUnitarioInteres = round($totalInteresConIGV / $factorIGV, 10);
                                 $igvInteres = round($totalInteresConIGV - $valorUnitarioInteres, 2);
 
@@ -389,7 +404,7 @@ class PagoCronogramaController extends Controller
                                     "valor_unitario" => $valorUnitarioInteres,
                                     "precio_unitario" => $totalInteresConIGV,
                                     "subtotal" => $valorUnitarioInteres,
-                                    "tipo_de_igv" => 1, 
+                                    "tipo_de_igv" => 1,
                                     "igv" => $igvInteres,
                                     "total" => $totalInteresConIGV
                                 ];
@@ -411,7 +426,7 @@ class PagoCronogramaController extends Controller
                                     "valor_unitario" => $valorUnitarioMora,
                                     "precio_unitario" => $totalMoraConIGV,
                                     "subtotal" => $valorUnitarioMora,
-                                    "tipo_de_igv" => 1, 
+                                    "tipo_de_igv" => 1,
                                     "igv" => $igvMora,
                                     "total" => $totalMoraConIGV
                                 ];
@@ -420,7 +435,6 @@ class PagoCronogramaController extends Controller
                                 $totalVenta += $totalMoraConIGV;
                             }
 
-                            // Redondea los totales finales 
                             $totalGravada = round($totalGravada, 2);
                             $totalIGV = round($totalIGV, 2);
                             $totalVenta = round($totalVenta, 2);
@@ -429,15 +443,15 @@ class PagoCronogramaController extends Controller
                             $datosFacturacion = [
                                 'tipo_comprobante' => 2, // Boleta 
                                 'serie' => $serieBoleta,
-                                'mediopago' => $medioPago,
+                                'mediopago' => $medioPagoBoleta,
                                 'numero_comprobante' => $nuevoNumero,
                                 'items' => $itemsFacturacion,
                                 'totales' => [
-                                    'total_gravada' => $totalGravada, // Suma de la Base Imponible (Capital + Intereses + Mora)
+                                    'total_gravada' => $totalGravada,
                                     'total_inafecta' => 0.00, // 
                                     'total_exonerada' => 0.00,
-                                    'total_igv' => $totalIGV, 
-                                    'total_venta' => $totalVenta 
+                                    'total_igv' => $totalIGV,
+                                    'total_venta' => $totalVenta
                                 ],
 
                                 'datos_cliente' => [
@@ -507,9 +521,6 @@ class PagoCronogramaController extends Controller
             ]);
         }
     }
-
-
-
     /**
      * API: Obtiene las cuentas de pago disponibles
      *
@@ -527,6 +538,20 @@ class PagoCronogramaController extends Controller
 
         if ($numCuentas) {
             echo json_encode($numCuentas);
+        } else {
+            http_response_code(404);
+            echo json_encode([]);
+        }
+        exit();
+    }
+    public function getCuenta(int $id): void
+    {
+        header('Content-Type: application/json');
+        $numCuenta = $this->pagoCronogramaModel->getNumCuentaPagoById($id);
+
+
+        if ($numCuenta) {
+            echo json_encode($numCuenta);
         } else {
             http_response_code(404);
             echo json_encode([]);

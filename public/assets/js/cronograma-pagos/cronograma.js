@@ -244,6 +244,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
+
+   
+
     /**
      * Valida los datos del formulario antes del envío.
      * @returns {boolean} True si los datos son válidos, de lo contrario, false.
@@ -452,7 +455,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         enlace: data.enlace_pdf,
                         ts: Date.now()
                     };
-                    
+
 
                     const idContrato = elements.tablaBody.dataset.idContrato;
                     const claveStorage = `ultimaBoleta_contrato_${idContrato}`;
@@ -466,14 +469,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
                 } else {
-                    showToast(data.message, 'ERROR', 8000);
+                    showToast(data.message, 'ERROR', 1350);
                 }
 
 
                 setTimeout(() => {
                     elements.modalPago.hide();
                     location.reload();
-                }, 8000);
+                }, 1350);
 
             } else {
                 showToast(data.message || 'Error al registrar el pago.', 'WARNING', 3000);
