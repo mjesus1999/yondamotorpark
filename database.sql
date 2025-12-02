@@ -519,6 +519,28 @@ CREATE TABLE conceptospago (
     fechamodificacion DATETIME NULL
 ) ENGINE=InnoDB;
 
+SELECT * FROM conceptospago;
+
+USE motorpark;
+
+INSERT INTO conceptospago(idcolregistra,concepto,montosugerido) 
+    VALUES (3,'TRANSFERENCIA VEHÍCULAR',25),
+           (3,'GPS', 10),
+           (3,'NOTIFICACIÓN', 15),
+           (3,'RECOJO VEHÍCULAR', 30),
+           (3,'SOAT', 50),
+           (3,'BÚSQUEDA DE LLAVE', 20),
+           (3,'DUPLICADO DE CONTRATO', 20),
+           (3,'DUPLICADO DE TARJETA', 25),
+           (3,'CARTA PODER', 15),
+           (3,'VIGENCIA DE PODER', 10),
+           (3,'GASTOS ADMINISTRATIVOS', 20),
+           (3,'CARTA NOTARIAL', 25),
+           (3,'IMPUESTO VEHÍCULAR', 25),
+           (16,'CAMBIO DE CARACTERÍSTICA',40);
+
+           
+SELECT * FROM conceptospago;     
 
 CREATE TABLE contratos (
     idcontrato INT AUTO_INCREMENT PRIMARY KEY,
@@ -620,6 +642,9 @@ CREATE TABLE pagos (
     CONSTRAINT fk_idasesorvendedor_pagos FOREIGN KEY(idasesorvendedor) REFERENCES colaboradores(idcolaborador),
     CONSTRAINT fk_idcliente_pagos  FOREIGN KEY(idcliente) REFERENCES clientes(idcliente)
 ) ENGINE = InnoDB;
+
+
+
 
 ALTER TABLE pagos ADD COLUMN enlace_del_cdr VARCHAR(500) NULL AFTER enlace_xml_nubefact;
 
@@ -822,4 +847,9 @@ CREATE TABLE arqueocaja (
 ) ENGINE = InnoDB;
 
 -- ALTER TABLE arqueocaja ADD COLUMN entregado ENUM('S', 'N') NOT NULL DEFAULT 'N';
+
+
+
+USE motorpark;
+
 

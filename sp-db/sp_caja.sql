@@ -251,3 +251,29 @@ VALUES (
 SHOW EVENTS;
 SHOW TRIGGERS;
 
+
+
+
+
+DROP PROCEDURE  sp_getClienteBy_DNI;
+
+
+DELIMITER //
+CREATE PROCEDURE sp_getClienteBy_DNI(
+    IN dni_ CHAR(8)
+)
+BEGIN
+    SELECT
+        cl.idcliente,
+        CONCAT(p.apellidos, ' ' COLLATE utf8mb4_general_ci, p.nombres ) AS cliente,
+        p.nrodoc,
+        p.direccion,
+        p.email
+    FROM clientes cl
+        INNER JOIN personas p ON cl.idpersona = p.idpersona
+        WHERE p.nrodoc = dni_ COLLATE utf8mb4_general_ci 
+        AND cl.tipocliente = 'P' COLLATE utf8mb4_general_ci; 
+           
+END //
+DELIMITER ;
+CALL sp_getClienteBy_DNI('71882015');

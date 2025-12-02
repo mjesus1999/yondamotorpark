@@ -14,6 +14,7 @@
  * datos. Todas las operaciones requieren autenticación y los reportes retornan
  * respuestas en formato JSON con datos estructurados para frontend.
  */
+
 namespace App\Controllers;
 
 use App\Core\Controller;
@@ -87,6 +88,12 @@ class CajaController extends Controller
     {
         $this->authRequired();
         $this->view('caja.reporte-by-fechas');
+    }
+
+    public function indexPagosDenominacion()
+    {
+        $this->authRequired();
+        $this->view('caja.cobrosDenominacion');
     }
 
     /**
@@ -241,6 +248,45 @@ class CajaController extends Controller
                 'success' => false,
                 'data' => [],
                 'message' => 'No se encontraron datos para el rango de fechas proporcionado.'
+            ]);
+        }
+        exit();
+    }
+
+
+    public function searchConceptosPagos(): void
+    {
+
+        header('Content-Type: application/json');
+        $conceptos = $this->cajaModel->getConceptosPagos();
+
+        if ($conceptos) {
+            echo json_encode(["succees" => true, "conceptos" => $conceptos]);
+        } else {
+            http_response_code(404);
+            echo json_encode([
+                'success' => false,
+                'data' => [],
+                'message' => 'No se encontraron datos para el rango de fechas proporcionado.'
+            ]);
+        }
+        exit();
+    }
+
+    public function searchClienteByDNI(string $dni): void
+    {
+
+        header('Content-Type: application/json');
+        $cliente = $this->cajaModel->getClienteByDni($dni);
+
+        if ($cliente) {
+            echo json_encode(["success" => true, "cliente" => $cliente]);
+        } else {
+            http_response_code(404);
+            echo json_encode([
+                'success' => false,
+                'data' => [],
+                'message' => 'No se encontró al cliente'
             ]);
         }
         exit();

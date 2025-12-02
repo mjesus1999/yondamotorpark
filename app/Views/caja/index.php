@@ -8,7 +8,6 @@ include __DIR__ . '/../layout/header.php';
 
     <div class="alert alert-info mt-2" role="alert">
         <div class="row align-items-center">
-
             <div class="col-12 col-md-6 d-flex align-items-center">
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb mb-0" style="background-color: transparent; padding: 0;">
@@ -30,6 +29,7 @@ include __DIR__ . '/../layout/header.php';
                 <button class="btn btn-success btn-sm ms-2 mb-2 mb-md-0 w-100 w-md-auto" id="btn-excel" title="Generar reporte de pagos del día en Excel">
                     <i class="fa-regular fa-file-excel"></i> Reporte diario
                 </button>
+                <a class="btn btn-sm btn-outline-secondary mb-2 mb-md-0 w-md-auto m-1" href="/caja/pagos/denominacion">Cobros por denominación </a>
             </div>
         </div>
     </div>

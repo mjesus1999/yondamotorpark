@@ -16,8 +16,12 @@
 namespace App\Models;
 
 use App\Core\Database;
+use Error;
+use League\Csv\Serializer\CastToArray;
 use PDO;
 use PDOException;
+use PHPStan\PhpDocParser\Ast\Type\ArrayTypeNode;
+use Twig\Node\Expression\FunctionExpression;
 
 /**
  * Clase Caja
@@ -306,6 +310,40 @@ class Caja
         } catch (PDOException $e) {
             error_log('Error en getMorososResumen: ' . $e->getMessage());
             return [];  // En caso de error, devolvemos un array vacío
+        }
+    }
+
+
+    public function getConceptosPagos(): array
+    {
+
+        $sql = "SELECT * FROM conceptospago WHERE concepto NOT IN ('Contado', 'Inicial')";
+        try {
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+
+            error_log('Error en getMorososResumen: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    public function getClienteByDni(string $dni): ?array
+    {
+        $sql = "CALL sp_getClienteBy_DNI(:dni)";
+        try {
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindParam(':dni', $dni);
+            $stmt->execute();
+
+            $cliente = $stmt->fetch(PDO::FETCH_ASSOC);
+            $stmt->closeCursor();
+
+            return $cliente ?: null;
+        } catch (PDOException $e) {
+            error_log("Error al buscar cliente: " . $e->getMessage());
+            return null;
         }
     }
 }
