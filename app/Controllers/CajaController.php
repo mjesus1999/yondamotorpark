@@ -309,7 +309,7 @@ class CajaController extends Controller
                 return;
             }
 
-           
+
 
             $detallesJsonRaw = $_POST['detalles_json'] ?? '[]';
             $data = array_map([Validador::class, 'limpiar'], $_POST);
@@ -323,11 +323,12 @@ class CajaController extends Controller
             $idCuentaPago = null;
             if ($medioPago === 'Transferencia Bancaria' && !empty($data['idcuentapago'])) {
                 $idCuentaPago = (int) $data['idcuentapago'];
+                $cuentaEspecifica = $this->cajaModel->getNumCuentaPagoById($idCuentaPago);
             }
 
             $idColCaja = $_SESSION['user']['id'] ?? 0;
 
-           
+
             if ($idCliente <= 0) $errores[] = 'El ID de cliente es inválido.';
             if ($montoTotal <= 0) $errores[] = 'El monto total debe ser mayor a 0.';
             if (empty($detallesJsonRaw) || $detallesJsonRaw === '[]') $errores[] = 'No se han añadido conceptos.';
@@ -337,7 +338,7 @@ class CajaController extends Controller
                 return;
             }
 
-            
+
             $idPago = $this->cajaModel->registrarPagoCompuesto(
                 $idCliente,
                 $idColCaja,
@@ -352,7 +353,7 @@ class CajaController extends Controller
                 throw new Exception('Fallo al guardar el pago en la base de datos.');
             }
 
-    
+
             $mensajeExtra = "";
             $enlacePdf = null;
             $enlaceXml = null;
@@ -370,7 +371,7 @@ class CajaController extends Controller
 
                     $nuevoNumero = $this->cajaModel->obtenerNuevoCorrelativo($serieBoleta);
 
-                    
+
                     $detallesArray = json_decode($detallesJsonRaw, true);
                     $itemsFacturacion = [];
                     $totalGravada = 0.00;
@@ -402,14 +403,14 @@ class CajaController extends Controller
                         }
                     }
 
-                  
+
                     $datosFacturacion = [
                         'tipo_comprobante' => 2,
                         'tipo_de_comprobante' => $tipoComprobante,
                         'serie' => $serieBoleta,
                         'numero_comprobante' => $nuevoNumero,
                         'items' => $itemsFacturacion,
-                        'mediopago' => $medioPago, 
+                        'mediopago' => $medioPago == 'Transferencia Bancaria' ? $cuentaEspecifica['nombrecuenta'] : $medioPago,
                         'totales' => [
                             'total_gravada' => round($totalGravada, 2),
                             'total_igv' => round($totalIGV, 2),
@@ -431,7 +432,7 @@ class CajaController extends Controller
                         $enlacePdf = $respNube['enlace_pdf'];
                         $enlaceXml = $respNube['enlace_xml'];
 
-                       
+
                         $enlaceCdr = $respNube['enlace_cdr'] ?? null;
 
                         $this->cajaModel->actualizarDatosFacturacion($idPago, $enlacePdf, $enlaceXml, $enlaceCdr, $nuevoNumero);

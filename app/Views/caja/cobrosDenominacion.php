@@ -59,16 +59,26 @@
             </div>
             <div class="card-body">
                 <div class="row g-3">
-                    <div class="col-md-8">
+                    <div class="col-md-5">
                         <label for="concepto-manual" class="form-label">Concepto</label>
                         <input type="text" class="form-control" id="concepto-manual" placeholder="Ej: Multa de Tránsito">
                     </div>
-                    <div class="col-md-4">
+
+                    <div class="col-md-2">
                         <label for="monto-manual" class="form-label">Monto (S/)</label>
                         <div class="input-group">
                             <input type="number" class="form-control text-end" id="monto-manual" min="0" value="0.00">
+
+                        </div>
+                    </div>
+
+                    <div class="col-md-5">
+                        <label for="descripcion-concepto" class="form-label">Descripción</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="descripcion-concepto" placeholder="Ingrese alguna descripción">
                             <button class="btn btn-success" id="btn-add-manual">Añadir</button>
                         </div>
+
                     </div>
                 </div>
             </div>
@@ -128,7 +138,7 @@
                 </div>
 
                 <div class="col-md-12 mb-3" style="display: none;" id="contenedor-comprobante">
-                    <label class="form-label small text-muted" id="comprobante">Comprobante de Pago</label>
+                    <label class="form-label small text-muted">Comprobante de Pago</label>
                     <input id="comprobante" class="form-control" type="file" name="comprobante" accept="image/*,.pdf">
                 </div>
 
@@ -186,14 +196,12 @@
 
 
 <script>
-    
-     
     function showToast(message, type = 'INFO', duration = 3000) {
         console.log(`[${type}] ${message}`);
-        
+
     }
 
-   
+
     const clienteNombre = document.getElementById('nombrecompleto');
     const clienteIDSpan = document.getElementById('cliente-id');
     const clienteDNI = document.getElementById('cliente-dni');
@@ -215,14 +223,15 @@
     const btnAddDB = document.getElementById('btn-add-db');
     const conceptoManual = document.getElementById('concepto-manual');
     const montoManual = document.getElementById('monto-manual');
+    const descripcionManual = document.getElementById('descripcion-concepto');
     const btnAddManual = document.getElementById('btn-add-manual');
     const emptyMessage = document.getElementById('empty-message');
     const btnDNI = document.getElementById('btn-dni');
     const inputDNI = document.getElementById('input-dni');
 
-    let idCliente = null; 
+    let idCliente = null;
 
-   
+
 
     selectMedioPago.addEventListener('change', (e) => {
         const medioSeleccionado = e.target.value;
@@ -274,19 +283,51 @@
         emptyMessage.style.display = (montoInputs.length === 0) ? 'block' : 'none';
     }
 
- 
-     
-    function addConceptoRow(concepto, monto, idConcepto = 0) {
+
+    async function addConceptoRow(concepto, monto, idConcepto = 0) {
+        let idFinal = idConcepto;
+
+        if (idConcepto === 0) {
+            try {
+                const formData = new FormData();
+                formData.append('concepto', concepto);
+                formData.append('descripcion', document.getElementById('descripcion-concepto').value || '');
+                formData.append('montosugerido', monto);
+
+                const req = await fetch('/store/conceptoPago', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!req.ok) throw new Error('Error en la solicitud: ' + req.status);
+
+                const res = await req.json();
+
+                if (res.success) {
+                    showToast(res.message, 'SUCCESS', 1250);
+                    idFinal = res.id;
+                } else {
+                    showToast(res.message, 'ERROR', 1350);
+                    return;
+                }
+
+            } catch (error) {
+                console.error(error);
+                showToast('Error al guardar el concepto', 'ERROR');
+                return;
+            }
+        }
+
+
         const newRow = conceptosBody.insertRow();
 
-       
-        newRow.setAttribute('data-idconcepto', idConcepto);
-        newRow.setAttribute('data-nombre-concepto', concepto); 
 
+        newRow.setAttribute('data-idconcepto', idFinal);
+        newRow.setAttribute('data-nombre-concepto', concepto);
         newRow.insertCell(0).textContent = concepto.toUpperCase();
-
         const montoCell = newRow.insertCell(1);
         montoCell.classList.add('text-end');
+
         const montoInput = document.createElement('input');
         montoInput.type = 'number';
         montoInput.className = 'form-control monto-input d-inline-block';
@@ -295,7 +336,6 @@
         montoInput.value = (parseFloat(monto) || 0).toFixed(2);
         montoInput.addEventListener('input', updateTotals);
         montoCell.appendChild(montoInput);
-
         const actionCell = newRow.insertCell(2);
         const deleteBtn = document.createElement('button');
         deleteBtn.className = 'btn btn-outline-danger btn-sm';
@@ -309,7 +349,7 @@
         updateTotals();
     }
 
-    
+
 
     async function cargarCuentasBancarias() {
         try {
@@ -321,7 +361,7 @@
             const res = await req.json();
             selectCuenta.innerHTML = '<option value="" disabled selected>Seleccione una cuenta de pago</option>';
             res.forEach(cuenta => {
-                selectCuenta.innerHTML += `<option value="${cuenta.idcuentapago}">${cuenta.nombrecuenta} - ${cuenta.numerocuenta}</option>`;
+                selectCuenta.innerHTML += `<option value="${cuenta.idcuentapago}">${cuenta.nombrecuenta}</option>`;
             });
         } catch (error) {
             showToast('Error al cargar cuentas bancarias.', 'ERROR', 2000);
@@ -415,14 +455,13 @@
             const monto = parseFloat(montoInput.value) || 0;
             const idConcepto = parseInt(row.getAttribute('data-idconcepto'));
 
-         
+
             const idConceptoFinal = idConcepto > 0 ? idConcepto : 1;
 
             data.push({
-            
                 idconcepto: idConceptoFinal,
                 monto: monto.toFixed(2),
-                nombre: conceptoTexto, 
+                nombre: conceptoTexto,
                 obs: ''
             });
         });
@@ -440,7 +479,7 @@
         const medioPago = selectMedioPago.value;
         const idCuentaPago = (contenedorCuenta.style.display === 'block') ? selectCuenta.value : null;
 
-    
+
         if (conceptosData.length === 0 || montoTotal <= 0) {
             showToast('No hay conceptos o el monto es cero.', 'WARNING', 2000);
             return;
@@ -457,35 +496,31 @@
         const formData = new FormData();
         formData.append('idcliente', idCliente);
         formData.append('mediopago', medioPago);
-        
+
         formData.append('numerotransaccion', 'N/A');
         formData.append('idcuentapago', idCuentaPago);
         formData.append('monto_total', montoTotal.toFixed(2));
         formData.append('detalles_json', JSON.stringify(conceptosData));
 
-        console.log(formData);
+        // console.log(formData);
 
-        
-
-       
         const requiereComprobante = medioPago !== 'Efectivo';
 
         if (requiereComprobante) {
-      
+
             if (inputComprobante && inputComprobante.files && inputComprobante.files.length > 0) {
                 formData.append('comprobante', inputComprobante.files[0]);
             } else {
                 showToast(`El comprobante es obligatorio para pagos con ${medioPago}.`, 'ERROR', 3000);
-                return; 
+                return;
             }
         }
-    
 
-   
+
         btnGenerar.disabled = true;
         btnGenerar.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Generando Boleta...';
 
-        
+
 
         try {
             const req = await fetch('/api/storePagoCompuesto', {
@@ -496,25 +531,28 @@
             const res = await req.json();
 
             if (res.success) {
-                showToast(res.message, 'SUCCESS', 15000);
+                showToast(res.message, 'SUCCESS', 1250);
 
-             
+
                 if (res.enlace_pdf) {
                     setTimeout(() => {
                         window.open(res.enlace_pdf, '_blank');
                     }, 500);
                 }
 
-         
                 conceptosBody.innerHTML = '';
                 inputDNI.value = '';
                 selectMedioPago.selectedIndex = 0;
+                selectCuenta.selectedIndex = 0;
+                contenedorComprobante.style.display = 'none';
+                contenedorCuenta.style.display = 'none';
                 idCliente = null;
                 clienteCard.style.display = 'none';
+                inputComprobante.value = '';
                 updateTotals();
 
             } else {
-                showToast('❌ Error: ' + res.message, 'ERROR', 6000);
+                showToast(' Error: ' + res.message, 'ERROR', 6000);
             }
 
         } catch (error) {
@@ -527,7 +565,7 @@
     }
 
 
-    
+
 
     btnDNI.addEventListener('click', searchClienteDB);
 
@@ -557,13 +595,13 @@
         btnAddDB.disabled = conceptosDB.selectedIndex === 0;
     });
 
-    
+
     btnAddManual.addEventListener('click', () => {
         const concepto = conceptoManual.value.trim();
         const monto = parseFloat(montoManual.value);
 
         if (concepto && monto > 0) {
-            addConceptoRow(concepto, monto, 0); 
+            addConceptoRow(concepto, monto, 0);
             conceptoManual.value = '';
             montoManual.value = '0.00';
         } else {
@@ -571,11 +609,11 @@
         }
     });
 
- 
+
     btnGenerar.addEventListener('click', generarBoletaYRegistrarPago);
 
 
- 
+
     getConceptosPagos();
     window.onload = updateTotals;
 </script>

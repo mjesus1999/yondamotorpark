@@ -411,8 +411,7 @@ class Caja
     {
 
         $sql = "
-        
-
+    
             SELECT
                 cli.idcliente,
                 p.nrodoc,
@@ -426,6 +425,32 @@ class Caja
 
         $stmt = $this->db->prepare($sql);
         $stmt->execute([':id' => $idCliente]);
-        return $stmt->fetch(PDO::FETCH_ASSOC); 
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+
+    public function getNumCuentaPagoById(int $id): ?array
+
+    {
+        $query = " SELECT 
+                        cp.idcuentapago,
+                        CONCAT(ep.entidad, ' - ', cp.numcuenta) AS nombrecuenta
+                    FROM 
+                        cuentaspago cp
+                    JOIN 
+                        entidadespago ep ON cp.identidadpago = ep.identidadpago
+
+                        WHERE cp.idcuentapago = :id
+                    ";
+        try {
+
+            $stmt = $this->db->prepare($query);
+            $stmt->bindValue(":id", $id);
+            $stmt->execute();
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (PDOException $error) {
+            error_log($error->getMessage());
+            return [];
+        }
     }
 }

@@ -277,3 +277,116 @@ BEGIN
 END //
 DELIMITER ;
 CALL sp_getClienteBy_DNI('71882015');
+
+
+
+
+DROP PROCEDURE sp_registrar_pago_compuesto;
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_registrar_pago_compuesto`(
+
+    IN p_idcliente INT,
+
+    IN p_idcolcaja INT,
+
+    IN p_mediopago VARCHAR(50),
+
+    IN p_numerotransaccion VARCHAR(30),
+
+    IN p_idcuentapago INT,
+
+    IN p_amortizacion DECIMAL(10, 2),
+
+    IN p_detalles_json TEXT
+
+)
+BEGIN
+
+    DECLARE v_idpago INT;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+
+    BEGIN
+
+        ROLLBACK;
+
+        RESIGNAL;
+
+    END;
+
+
+
+    START TRANSACTION;
+
+
+
+    -- 1. Insertar Cabecera (PAGOS)
+
+    INSERT INTO pagos (
+
+        idcliente, idcolcaja, mediopago, numerotransaccion, idcuentapago, 
+
+        fechapago, amortizacion, tipo, 
+
+        facturado, declarado -- Por defecto S y N
+
+    ) VALUES (
+
+        p_idcliente, p_idcolcaja, p_mediopago, p_numerotransaccion, p_idcuentapago,
+
+        CURDATE(), p_amortizacion, 'Otro', 
+        'S', 'N' -- Se asume que se intentará facturar inmediatamente
+    );
+
+
+
+    SET v_idpago = LAST_INSERT_ID();
+
+
+
+    -- 2. Insertar Detalles (DETPAGOS) usando JSON_TABLE
+
+    -- El JSON se espera con estructura: [{"idconcepto": 1, "monto": 50.00, "nombre": "...", "obs": "..."}]
+
+    INSERT INTO detpagos (
+
+        idpago, idconcepto, monto_detalle, nombre_concepto_manual, observacion_detalle
+
+    )
+
+    SELECT 
+
+        v_idpago,
+
+        jt.idconcepto,
+
+        jt.monto_detalle,
+
+        jt.nombre_manual,
+
+        jt.observacion
+
+    FROM JSON_TABLE(p_detalles_json, '$[*]' COLUMNS (
+
+        idconcepto INT PATH '$.idconcepto',
+
+        monto_detalle DECIMAL(10,2) PATH '$.monto',
+
+        nombre_manual VARCHAR(150) PATH '$.nombre',
+
+        observacion VARCHAR(300) PATH '$.obs'
+
+    )) AS jt;
+
+
+
+    COMMIT;
+    -- Devolver ID para PHP
+
+    SELECT v_idpago AS id_pago_generado;
+
+
+END
+
+
+SHOW CREATE PROCEDURE sp_registrar_pago_compuesto;

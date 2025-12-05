@@ -10,6 +10,7 @@
  * transacciones financieras que se registran en el sistema, como pagos
  * de inicial, cuotas, gastos administrativos, transferencias.
  */
+
 namespace App\Models;
 
 use App\Core\Database;
@@ -70,4 +71,22 @@ class ConceptoPago
         }
     }
 
+    public function add($params = []): int
+    {
+        $query = "INSERT INTO conceptospago(idcolregistra,concepto, descripcion, montosugerido) VALUES(:idcolregistra,:concepto,:descripcion,:montosugerido);";
+        $idUsuario = $_SESSION['user']['id'] ?? 0;;
+        try {
+            $stmt = $this->db->prepare($query);
+            $stmt->execute([
+                ':idcolregistra' => $idUsuario,
+                ':concepto' => $params['concepto'],
+                ':descripcion' => $params['descripcion'],
+                ':montosugerido' => $params['montosugerido']
+            ]);
+            return (int) $this->db->lastInsertId();
+        } catch (PDOException $e) {
+            error_log($e->getMessage());
+        }
+        return -1;
+    }
 }

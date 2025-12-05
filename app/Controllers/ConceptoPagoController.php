@@ -9,10 +9,12 @@
  * Proporciona endpoints API para obtener los catálogos de conceptos que se
  * utilizan para clasificar las transacciones financieras en el sistema.
  */
+
 namespace App\Controllers;
 
 use App\Core\Controller;
 use App\Models\ConceptoPago;
+use App\Helpers\Validador;
 
 
 /**
@@ -65,4 +67,53 @@ class ConceptoPagoController extends Controller
         }
     }
 
+    
+    public function store()
+    {
+
+        header('Content-Type: application/json');
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            echo json_encode(['success' => false, 'message' => 'Método no permitido']);
+            exit;
+        }
+
+        header('Content-Type: application/json');
+
+        $data = array_map([Validador::class, 'limpiar'], $_POST);
+
+        $registro = [
+            'concepto' => empty($data['concepto']) ? null : $data['concepto'],
+            'montosugerido' => empty($data['montosugerido']) ? null : $data['montosugerido'],
+            'descripcion' => $data['descripcion'] ? null : $data['descripcion'],
+
+        ];
+
+        try {
+
+            $idConcepto = $this->conceptoPagoModel->add($registro);
+
+            if ($idConcepto > 0) {
+
+                echo json_encode([
+                    'success' => true,
+                    'message' => 'Concepto registrado correctamente',
+                    'id' => $idConcepto
+                ]);
+            } else {
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Error al registrar el concepto',
+                    'id' => $idConcepto
+                ]);
+            }
+        } catch (\Exception $e) {
+
+            echo json_encode([
+                'success' => false,
+                'message' => 'Error al registrar el concepto ' . $e->getMessage(),
+                'id' => 0
+            ]);
+        }
+    }
 }
