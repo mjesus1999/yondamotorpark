@@ -564,9 +564,6 @@
         }
     }
 
-
-
-
     btnDNI.addEventListener('click', searchClienteDB);
 
     inputDNI.addEventListener('keydown', async e => {
