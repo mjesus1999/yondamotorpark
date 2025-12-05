@@ -346,4 +346,86 @@ class Caja
             return null;
         }
     }
+
+
+
+
+
+
+
+
+
+
+    public function registrarPagoCompuesto(int $idCliente, int $idColCaja, string $medioPago, ?string $numTransaccion, ?int $idCuentaPago, float $amortizacion, string $detallesJson): int
+    {
+
+
+        $query = "CALL sp_registrar_pago_compuesto(:idcliente, :idcolcaja, :mediopago, :numerotransaccion, :idcuentapago, :amortizacion, :detalles)";
+
+        try {
+            $stmt = $this->db->prepare($query);
+            $stmt->execute([
+                ':idcliente' => $idCliente,
+                ':idcolcaja' => $idColCaja,
+                ':mediopago' => $medioPago,
+                ':numerotransaccion' => $numTransaccion,
+                ':idcuentapago' => $idCuentaPago,
+                ':amortizacion' => $amortizacion,
+                ':detalles' => $detallesJson
+            ]);
+
+            $res = $stmt->fetch(PDO::FETCH_ASSOC);
+            $stmt->closeCursor();
+            return (int) ($res['id_pago_generado'] ?? 0);
+        } catch (PDOException $e) {
+            error_log("Error DB: " . $e->getMessage());
+            return 0;
+        }
+    }
+
+
+    // 2. Actualizar datos de Nubefact tras éxito
+    public function actualizarDatosFacturacion(int $idPago, string $pdf, string $xml, ?string $cdr, int $numeroBoleta): bool
+    {
+        $sql = "UPDATE pagos SET 
+                    enlace_pdf_nubefact = :pdf,
+                    enlace_xml_nubefact = :xml,
+                    enlace_del_cdr = :cdr,
+                    numero_boleta_sunat = :num,
+                    declarado = 'S'
+                WHERE idpago = :idpago";
+
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute([
+            ':pdf' => $pdf,
+            ':xml' => $xml,
+            ':cdr' => $cdr,
+            ':num' => $numeroBoleta,
+            ':idpago' => $idPago
+        ]);
+    }
+
+
+
+    public function getDatosCliente(int $idCliente): ?array
+    {
+
+        $sql = "
+        
+
+            SELECT
+                cli.idcliente,
+                p.nrodoc,
+                CONCAT(p.nombres, ' ', p.apellidos) AS razon_social,
+                p.direccion,
+                p.email
+            FROM clientes cli
+            JOIN personas p ON cli.idpersona = p.idpersona
+            WHERE cli.idcliente = :id AND cli.tipocliente = 'P' AND cli.estado = 'ACT'; 
+    ";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([':id' => $idCliente]);
+        return $stmt->fetch(PDO::FETCH_ASSOC); 
+    }
 }

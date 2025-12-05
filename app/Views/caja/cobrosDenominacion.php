@@ -120,14 +120,14 @@
 
                 <div class="col-md-12" id="contenedor-cuenta" style="display:none;">
                     <label for="cuenta" class="mb-1">Cuenta Bancaria</label>
-                    <select class="form-select mb-4" id="cuenta" name="cuenta">
+                    <select class="form-select mb-2" id="cuenta" name="cuenta">
                         <option value="" disabled selected>Seleccione una cuenta de pago</option>
 
                     </select>
 
                 </div>
 
-                <div class="col-md-12 mb-4" style="display: none;" id="contenedor-comprobante">
+                <div class="col-md-12 mb-3" style="display: none;" id="contenedor-comprobante">
                     <label class="form-label small text-muted" id="comprobante">Comprobante de Pago</label>
                     <input id="comprobante" class="form-control" type="file" name="comprobante" accept="image/*,.pdf">
                 </div>
@@ -185,8 +185,15 @@
 </div>
 
 
-
 <script>
+    
+     
+    function showToast(message, type = 'INFO', duration = 3000) {
+        console.log(`[${type}] ${message}`);
+        
+    }
+
+   
     const clienteNombre = document.getElementById('nombrecompleto');
     const clienteIDSpan = document.getElementById('cliente-id');
     const clienteDNI = document.getElementById('cliente-dni');
@@ -194,12 +201,11 @@
     const clienteDireccion = document.getElementById('cliente-direccion');
     const clienteCard = document.getElementById('card-cliente');
 
-    const selectMedioPago = document.getElementById('medio-pago');
-
-    const contenedorComprobante = document.getElementById('contenedor-comprobante'); // OCULTO POR DEFECTO
-    const inputComprobante = document.getElementById('comprobante');
-    const contenedorCuenta = document.getElementById('contenedor-cuenta'); // OCULTO POR DEFECTO
-    const selectCuenta = document.getElementById('cuenta');
+    const selectMedioPago = document.getElementById('mediopago');
+    const contenedorComprobante = document.getElementById('contenedor-comprobante');
+    const inputComprobante = document.getElementById('comprobante'); // Input File
+    const contenedorCuenta = document.getElementById('contenedor-cuenta');
+    const selectCuenta = document.getElementById('cuenta'); // Select de cuenta bancaria
 
     const conceptosBody = document.getElementById('conceptos-body');
     const subtotalSpan = document.getElementById('subtotal');
@@ -214,33 +220,28 @@
     const btnDNI = document.getElementById('btn-dni');
     const inputDNI = document.getElementById('input-dni');
 
+    let idCliente = null; 
 
-    let idCliente = null;
-
-
-
-
-
+   
 
     selectMedioPago.addEventListener('change', (e) => {
+        const medioSeleccionado = e.target.value;
+        const requiereComprobante = (medioSeleccionado !== 'Efectivo' && medioSeleccionado !== '');
+        const esTransferencia = (medioSeleccionado === 'Transferencia Bancaria');
 
-        if (e.value.toLowerCase() == 'efectivo') {
-            inputComprobante.style.display = 'flex';
+        contenedorComprobante.style.display = requiereComprobante ? 'block' : 'none';
+        contenedorCuenta.style.display = esTransferencia ? 'block' : 'none';
+
+        if (esTransferencia) {
+            cargarCuentasBancarias();
         }
-
-
     });
-
-
-
-
 
     /**
      * Muestra los datos del cliente en la tarjeta lateral y asigna el ID global.
-     * @param {Object} data - Objeto cliente devuelto por la API.
      */
     function displayClienteData(data) {
-        idCliente = data.idcliente; // Asignación de valor crucial
+        idCliente = data.idcliente;
         clienteCard.style.display = 'block';
 
         clienteIDSpan.textContent = idCliente;
@@ -248,6 +249,84 @@
         clienteDNI.textContent = data.nrodoc ?? 'N/A';
         clienteCorreo.textContent = data.email ?? 'N/A';
         clienteDireccion.textContent = data.direccion ?? 'N/A';
+
+        updateTotals(); // Actualizar el estado del botón
+    }
+
+    /**
+     * Actualiza los totales y el estado del botón de generación.
+     */
+    function updateTotals() {
+        let total = 0;
+        const montoInputs = conceptosBody.querySelectorAll('input[type="number"]');
+
+        montoInputs.forEach(input => {
+            const monto = parseFloat(input.value) || 0;
+            total += monto;
+        });
+
+        subtotalSpan.textContent = `S/ ${total.toFixed(2)}`;
+        totalPagarSpan.textContent = `S/ ${total.toFixed(2)}`;
+
+        // Habilita el botón solo si hay un total > 0 Y un cliente seleccionado
+        btnGenerar.disabled = (total <= 0 || idCliente === null);
+
+        emptyMessage.style.display = (montoInputs.length === 0) ? 'block' : 'none';
+    }
+
+ 
+     
+    function addConceptoRow(concepto, monto, idConcepto = 0) {
+        const newRow = conceptosBody.insertRow();
+
+       
+        newRow.setAttribute('data-idconcepto', idConcepto);
+        newRow.setAttribute('data-nombre-concepto', concepto); 
+
+        newRow.insertCell(0).textContent = concepto.toUpperCase();
+
+        const montoCell = newRow.insertCell(1);
+        montoCell.classList.add('text-end');
+        const montoInput = document.createElement('input');
+        montoInput.type = 'number';
+        montoInput.className = 'form-control monto-input d-inline-block';
+        montoInput.min = '0';
+        montoInput.step = '0.01';
+        montoInput.value = (parseFloat(monto) || 0).toFixed(2);
+        montoInput.addEventListener('input', updateTotals);
+        montoCell.appendChild(montoInput);
+
+        const actionCell = newRow.insertCell(2);
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'btn btn-outline-danger btn-sm';
+        deleteBtn.innerHTML = '<i class="bi bi-trash"></i>';
+        deleteBtn.addEventListener('click', () => {
+            newRow.remove();
+            updateTotals();
+        });
+        actionCell.appendChild(deleteBtn);
+
+        updateTotals();
+    }
+
+    
+
+    async function cargarCuentasBancarias() {
+        try {
+            const req = await fetch('/api/numcuentaspagos', {
+                method: 'GET'
+            });
+            if (!req.ok) throw new Error('Fallo al cargar cuentas.');
+
+            const res = await req.json();
+            selectCuenta.innerHTML = '<option value="" disabled selected>Seleccione una cuenta de pago</option>';
+            res.forEach(cuenta => {
+                selectCuenta.innerHTML += `<option value="${cuenta.idcuentapago}">${cuenta.nombrecuenta} - ${cuenta.numerocuenta}</option>`;
+            });
+        } catch (error) {
+            showToast('Error al cargar cuentas bancarias.', 'ERROR', 2000);
+            console.error(error);
+        }
     }
 
     async function searchClienteDB() {
@@ -257,6 +336,7 @@
             showToast('El DNI debe tener 8 dígitos.', 'ERROR', 1800);
             clienteCard.style.display = 'none';
             idCliente = null;
+            updateTotals();
             return;
         }
 
@@ -269,6 +349,7 @@
                 showToast('Cliente no encontrado.', 'WARNING', 1400);
                 clienteCard.style.display = 'none';
                 idCliente = null;
+                updateTotals();
                 return;
             }
             if (!req.ok) {
@@ -285,36 +366,22 @@
                 showToast('Cliente no encontrado', 'ERROR', 1400);
                 clienteCard.style.display = 'none';
                 idCliente = null;
+                updateTotals();
             }
 
         } catch (error) {
             console.error("Error al buscar cliente:", error);
             showToast('Ocurrió un error de red o servidor.', 'ERROR', 2000);
         }
+
     }
-
-
-
-    btnDNI.addEventListener('click', searchClienteDB);
-
-    inputDNI.addEventListener('keydown', async e => {
-        if (e.key === 'Enter' || e.keyCode === 13) {
-            e.preventDefault();
-
-            await searchClienteDB();
-            console.log('ID DEL CLIENTE ASIGNADO: ', idCliente);
-        }
-    });
-
 
     async function getConceptosPagos() {
         try {
             const req = await fetch('/api/conceptoPagos', {
                 method: 'GET'
             });
-            if (!req.ok) {
-                throw new Error('Error en la solicitud ' + req.status);
-            }
+            if (!req.ok) throw new Error('Error en la solicitud ' + req.status);
 
             const res = await req.json();
             res.conceptos.forEach(concepto => {
@@ -333,83 +400,170 @@
         }
     }
 
-    // Función para actualizar el total
-    function updateTotals() {
-        let total = 0;
-        const montoInputs = conceptosBody.querySelectorAll('input[type="number"]');
 
-        montoInputs.forEach(input => {
-            const monto = parseFloat(input.value) || 0;
-            total += monto;
+    /**
+     * Recolecta todos los conceptos de la tabla y los serializa a un array JSON.
+     * Esto es lo que el SP 'sp_registrar_pago_compuesto' espera en p_detalles_json.
+     */
+    function collectConceptsData() {
+        const data = [];
+        const rows = conceptosBody.querySelectorAll('tr');
+
+        rows.forEach(row => {
+            const conceptoTexto = row.getAttribute('data-nombre-concepto');
+            const montoInput = row.cells[1].querySelector('input[type="number"]');
+            const monto = parseFloat(montoInput.value) || 0;
+            const idConcepto = parseInt(row.getAttribute('data-idconcepto'));
+
+         
+            const idConceptoFinal = idConcepto > 0 ? idConcepto : 1;
+
+            data.push({
+            
+                idconcepto: idConceptoFinal,
+                monto: monto.toFixed(2),
+                nombre: conceptoTexto, 
+                obs: ''
+            });
         });
 
-        subtotalSpan.textContent = `S/ ${total.toFixed(2)}`;
-        totalPagarSpan.textContent = `S/ ${total.toFixed(2)}`;
+        return data;
+    }
+    async function generarBoletaYRegistrarPago() {
+        if (idCliente === null || idCliente <= 0) {
+            showToast('Debe seleccionar un cliente antes de generar la boleta.', 'ERROR', 2500);
+            return;
+        }
 
-        btnGenerar.disabled = total <= 0;
+        const conceptosData = collectConceptsData();
+        const montoTotal = parseFloat(totalPagarSpan.textContent.replace('S/ ', '')) || 0;
+        const medioPago = selectMedioPago.value;
+        const idCuentaPago = (contenedorCuenta.style.display === 'block') ? selectCuenta.value : null;
 
-        emptyMessage.style.display = (montoInputs.length === 0) ? 'block' : 'none';
+    
+        if (conceptosData.length === 0 || montoTotal <= 0) {
+            showToast('No hay conceptos o el monto es cero.', 'WARNING', 2000);
+            return;
+        }
+        if (!medioPago) {
+            showToast('Seleccione un medio de pago.', 'WARNING', 2000);
+            return;
+        }
+        if (medioPago === 'Transferencia Bancaria' && !idCuentaPago) {
+            showToast('Seleccione una cuenta bancaria para la transferencia.', 'ERROR', 2000);
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('idcliente', idCliente);
+        formData.append('mediopago', medioPago);
+        
+        formData.append('numerotransaccion', 'N/A');
+        formData.append('idcuentapago', idCuentaPago);
+        formData.append('monto_total', montoTotal.toFixed(2));
+        formData.append('detalles_json', JSON.stringify(conceptosData));
+
+        console.log(formData);
+
+        
+
+       
+        const requiereComprobante = medioPago !== 'Efectivo';
+
+        if (requiereComprobante) {
+      
+            if (inputComprobante && inputComprobante.files && inputComprobante.files.length > 0) {
+                formData.append('comprobante', inputComprobante.files[0]);
+            } else {
+                showToast(`El comprobante es obligatorio para pagos con ${medioPago}.`, 'ERROR', 3000);
+                return; 
+            }
+        }
+    
+
+   
+        btnGenerar.disabled = true;
+        btnGenerar.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Generando Boleta...';
+
+        
+
+        try {
+            const req = await fetch('/api/storePagoCompuesto', {
+                method: 'POST',
+                body: formData
+            });
+
+            const res = await req.json();
+
+            if (res.success) {
+                showToast(res.message, 'SUCCESS', 15000);
+
+             
+                if (res.enlace_pdf) {
+                    setTimeout(() => {
+                        window.open(res.enlace_pdf, '_blank');
+                    }, 500);
+                }
+
+         
+                conceptosBody.innerHTML = '';
+                inputDNI.value = '';
+                selectMedioPago.selectedIndex = 0;
+                idCliente = null;
+                clienteCard.style.display = 'none';
+                updateTotals();
+
+            } else {
+                showToast('❌ Error: ' + res.message, 'ERROR', 6000);
+            }
+
+        } catch (error) {
+            console.error("Error al registrar pago:", error);
+            showToast('Error de conexión o JSON inválido en la respuesta del servidor.', 'ERROR', 4000);
+        } finally {
+            btnGenerar.disabled = false;
+            btnGenerar.innerHTML = 'Generar Boleta y Pagar';
+        }
     }
 
 
-    // Función para añadir una nueva fila a la tabla
-    function addConceptoRow(concepto, monto) {
-        const newRow = conceptosBody.insertRow();
+    
 
-        newRow.insertCell(0).textContent = concepto.toUpperCase();
+    btnDNI.addEventListener('click', searchClienteDB);
 
-        const montoCell = newRow.insertCell(1);
-        montoCell.classList.add('text-end');
-        const montoInput = document.createElement('input');
-        montoInput.type = 'number';
-        montoInput.className = 'form-control monto-input d-inline-block';
-        montoInput.min = '0';
-        montoInput.value = (parseFloat(monto) || 0).toFixed(2);
-        montoInput.addEventListener('input', updateTotals);
-        montoCell.appendChild(montoInput);
+    inputDNI.addEventListener('keydown', async e => {
+        if (e.key === 'Enter' || e.keyCode === 13) {
+            e.preventDefault();
+            await searchClienteDB();
+        }
+    });
 
-        const actionCell = newRow.insertCell(2);
-        const deleteBtn = document.createElement('button');
-        deleteBtn.className = 'btn btn-outline-danger btn-sm';
-        deleteBtn.innerHTML = '<i class="bi bi-trash"></i>';
-        deleteBtn.addEventListener('click', () => {
-            newRow.remove();
-            updateTotals();
-        });
-        actionCell.appendChild(deleteBtn);
-
-        updateTotals();
-    }
-
-
-    // Añadir desde la lista de DB (al hacer click en el botón)
     btnAddDB.addEventListener('click', () => {
         const selectedOption = conceptosDB.options[conceptosDB.selectedIndex];
 
         if (selectedOption && selectedOption.value) {
+            const idConcepto = parseInt(selectedOption.value);
             const conceptoTexto = selectedOption.getAttribute('data-concepto');
             const monto = selectedOption.getAttribute('data-monto');
 
-            addConceptoRow(conceptoTexto, monto);
+            addConceptoRow(conceptoTexto, monto, idConcepto); // Pasa el ID
 
             conceptosDB.selectedIndex = 0;
             btnAddDB.disabled = true;
         }
     });
 
-
-    // Habilitar el botón de Añadir de DB al seleccionar una opción
     conceptosDB.addEventListener('change', () => {
         btnAddDB.disabled = conceptosDB.selectedIndex === 0;
     });
 
-    // Añadir manualmente
+    
     btnAddManual.addEventListener('click', () => {
         const concepto = conceptoManual.value.trim();
         const monto = parseFloat(montoManual.value);
 
         if (concepto && monto > 0) {
-            addConceptoRow(concepto, monto);
+            addConceptoRow(concepto, monto, 0); 
             conceptoManual.value = '';
             montoManual.value = '0.00';
         } else {
@@ -417,9 +571,12 @@
         }
     });
 
-    // Llamadas iniciales
+ 
+    btnGenerar.addEventListener('click', generarBoletaYRegistrarPago);
+
+
+ 
     getConceptosPagos();
     window.onload = updateTotals;
 </script>
-
 <?php include __DIR__ . '/../layout/footer.php'; ?>

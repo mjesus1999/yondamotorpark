@@ -15,7 +15,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-               
+
             </div>
         </div>
     </div>
@@ -46,11 +46,11 @@
                 <button class="btn btn-success btn-sm ms-2" id="btn-excel">
                     <i class="bi bi-file-earmark-excel"></i> EXCEL
                 </button>
-                  <button class="btn btn-sm btn-outline-secondary ms-1" data-bs-toggle="modal"
+                <button class="btn btn-sm btn-outline-secondary ms-1" data-bs-toggle="modal"
                     data-bs-target="#modal-boleta" title="Ver boleta del pago mas reciente">Boleta reciente</button>
             </div>
         </div>
-</div>
+    </div>
 
     <!-- CRONOGRAMA -->
     <div class="d-none d-md-block">
@@ -534,6 +534,13 @@
                                         <i class="fas fa-sticky-note me-2"></i> Observaciones
                                     </h6>
                                     <textarea class="form-control" rows="3" placeholder="Ingresa cualquier observación..." id="observacion" name="observacion"></textarea>
+                                </div>
+                                <div class="form-check form-switch d-flex m-2 justify-content-end ">
+                                    <div>
+                                        <input class="form-check-input" type="checkbox" role="switch" id="check-sunat">
+                                        <span class="badge bg-success p-1 fw-bold">Enviar a SUNAT <span class="text-danger fw-bold">*</span></span>
+                                    </div>
+
                                 </div>
                             </div>
                         </div>

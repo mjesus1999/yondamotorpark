@@ -20,6 +20,7 @@ namespace App\Controllers;
 use App\Core\Controller;
 use App\Helpers\Validador;
 use App\Models\Caja;
+use Exception;
 
 /**
  * Clase CajaController
@@ -290,5 +291,172 @@ class CajaController extends Controller
             ]);
         }
         exit();
+    }
+
+
+
+
+
+    public function storePagoCompuesto(): void
+    {
+        $this->authRequired();
+        header('Content-Type: application/json');
+
+        try {
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                http_response_code(405);
+                echo json_encode(['success' => false, 'message' => 'Método no permitido']);
+                return;
+            }
+
+           
+
+            $detallesJsonRaw = $_POST['detalles_json'] ?? '[]';
+            $data = array_map([Validador::class, 'limpiar'], $_POST);
+            $errores = [];
+
+            $idCliente = (int) ($data['idcliente'] ?? 0);
+            $medioPago = $data['mediopago'] ?? 'Efectivo';
+            $numTransaccion = $data['numerotransaccion'] ?? null;
+            $montoTotal = (float) ($data['monto_total'] ?? 0);
+
+            $idCuentaPago = null;
+            if ($medioPago === 'Transferencia Bancaria' && !empty($data['idcuentapago'])) {
+                $idCuentaPago = (int) $data['idcuentapago'];
+            }
+
+            $idColCaja = $_SESSION['user']['id'] ?? 0;
+
+           
+            if ($idCliente <= 0) $errores[] = 'El ID de cliente es inválido.';
+            if ($montoTotal <= 0) $errores[] = 'El monto total debe ser mayor a 0.';
+            if (empty($detallesJsonRaw) || $detallesJsonRaw === '[]') $errores[] = 'No se han añadido conceptos.';
+
+            if (!empty($errores)) {
+                echo json_encode(['success' => false, 'message' => implode('<br>', $errores)]);
+                return;
+            }
+
+            
+            $idPago = $this->cajaModel->registrarPagoCompuesto(
+                $idCliente,
+                $idColCaja,
+                $medioPago,
+                $numTransaccion,
+                $idCuentaPago,
+                $montoTotal,
+                $detallesJsonRaw
+            );
+
+            if ($idPago <= 0) {
+                throw new Exception('Fallo al guardar el pago en la base de datos.');
+            }
+
+    
+            $mensajeExtra = "";
+            $enlacePdf = null;
+            $enlaceXml = null;
+            $enlaceCdr = null;
+            $nuevoNumero = null;
+
+            try {
+                $clienteData = $this->cajaModel->getDatosCliente($idCliente);
+
+                if ($clienteData) {
+                    $esRUC = (strlen($clienteData['nrodoc'] ?? '') == 11);
+                    $tipoComprobante = $esRUC ? 1 : 2;
+                    $serieBoleta = $esRUC ? 'FFF1' : 'BBB1';
+                    $tipoDocCliente = $esRUC ? 6 : 1;
+
+                    $nuevoNumero = $this->cajaModel->obtenerNuevoCorrelativo($serieBoleta);
+
+                    
+                    $detallesArray = json_decode($detallesJsonRaw, true);
+                    $itemsFacturacion = [];
+                    $totalGravada = 0.00;
+                    $totalIGV = 0.00;
+                    $totalVenta = 0.00;
+                    $factorIGV = 1.18;
+
+                    foreach ($detallesArray as $det) {
+                        $montoItem = (float)$det['monto'];
+                        $nombreItem = $det['nombre'] ?? 'Concepto';
+                        if ($montoItem > 0) {
+                            $valorUnitario = round($montoItem / $factorIGV, 10);
+                            $igvItem = round($montoItem - $valorUnitario, 2);
+
+                            $itemsFacturacion[] = [
+                                "unidad_de_medida" => "ZZ",
+                                "descripcion" => $nombreItem,
+                                "cantidad" => 1,
+                                "valor_unitario" => $valorUnitario,
+                                "precio_unitario" => $montoItem,
+                                "subtotal" => $valorUnitario,
+                                "tipo_de_igv" => 1,
+                                "igv" => $igvItem,
+                                "total" => $montoItem,
+                            ];
+                            $totalGravada += $valorUnitario;
+                            $totalIGV += $igvItem;
+                            $totalVenta += $montoItem;
+                        }
+                    }
+
+                  
+                    $datosFacturacion = [
+                        'tipo_comprobante' => 2,
+                        'tipo_de_comprobante' => $tipoComprobante,
+                        'serie' => $serieBoleta,
+                        'numero_comprobante' => $nuevoNumero,
+                        'items' => $itemsFacturacion,
+                        'mediopago' => $medioPago, 
+                        'totales' => [
+                            'total_gravada' => round($totalGravada, 2),
+                            'total_igv' => round($totalIGV, 2),
+                            'total_venta' => round($totalVenta, 2)
+                        ],
+                        'datos_cliente' => [
+                            'tipo_documento' => $tipoDocCliente,
+                            'numero_documento' => $clienteData['nrodoc'],
+                            'denominacion' => $clienteData['razon_social'] ?? 'CLIENTE',
+                            'direccion' => $clienteData['direccion'] ?? '-',
+                            'email' => $clienteData['email'] ?? ''
+                        ]
+                    ];
+
+                    $nubefactController = new ComprobanteNubefactController();
+                    $respNube = $nubefactController->procesarPagoYEmitirComprobante($datosFacturacion);
+
+                    if ($respNube['success']) {
+                        $enlacePdf = $respNube['enlace_pdf'];
+                        $enlaceXml = $respNube['enlace_xml'];
+
+                       
+                        $enlaceCdr = $respNube['enlace_cdr'] ?? null;
+
+                        $this->cajaModel->actualizarDatosFacturacion($idPago, $enlacePdf, $enlaceXml, $enlaceCdr, $nuevoNumero);
+                    } else {
+                        error_log("Error NubeFact: " . $respNube['message']);
+                        $mensajeExtra = " (Sin Boleta: " . $respNube['message'] . ")";
+                    }
+                }
+            } catch (Exception $ex) {
+                error_log("Excepción Facturación: " . $ex->getMessage());
+                $mensajeExtra = " (Error interno de facturación)";
+            }
+
+            echo json_encode([
+                'success' => true,
+                'message' => 'Pago registrado.' . $mensajeExtra,
+                'enlace_pdf' => $enlacePdf,
+                'enlace_xml' => $enlaceXml,
+                'enlace_cdr' => $enlaceCdr,
+                'id_pago' => $idPago
+            ]);
+        } catch (\Throwable $th) {
+            http_response_code(500);
+            error_log($th->getMessage());
+            echo json_encode(['success' => false, 'message' => 'Error: ' . $th->getMessage()]);
+        }
     }
 }

@@ -646,6 +646,44 @@ CREATE TABLE pagos (
 
 
 
+
+CREATE TABLE detpagos (
+    iddetpago INT AUTO_INCREMENT PRIMARY KEY,
+    
+    -- VÍNCULO AL ENCABEZADO
+    idpago INT NOT NULL, 
+
+    -- CONCEPTO ESPECÍFICO (FK a la tabla de conceptos)
+    idconcepto INT NOT NULL, 
+    
+    -- VALORES DE LA LÍNEA
+    monto_detalle DECIMAL(10, 2) NOT NULL, -- Monto exacto cubierto por este concepto
+    
+    -- FLEXIBILIDAD (Para conceptos ingresados manualmente, no de la lista sugerida)
+    nombre_concepto_manual VARCHAR(150) NULL, 
+    
+    -- OBSERVACIÓN ESPECÍFICA DE LA LÍNEA
+    observacion_detalle VARCHAR(300) NULL,
+    
+    creado DATETIME NOT NULL DEFAULT NOW(),
+    
+    -- RESTRICCIONES (Claves Foráneas)
+    CONSTRAINT fk_idpago_detpagos FOREIGN KEY (idpago) 
+        REFERENCES pagos (idpago) ON DELETE CASCADE, -- Si se borra el pago principal, se borran sus detalles.
+    
+    CONSTRAINT fk_idconcepto_detpagos FOREIGN KEY (idconcepto) 
+        REFERENCES conceptospago (idconcepto)
+) ENGINE = InnoDB;
+
+
+
+
+
+
+
+
+
+
 ALTER TABLE pagos ADD COLUMN enlace_del_cdr VARCHAR(500) NULL AFTER enlace_xml_nubefact;
 
 -- ALTER TABLE pagos ADD COLUMN enlace_xml_nubefact VARCHAR(500) NULL AFTER enlace_pdf_nubefact;

@@ -179,6 +179,8 @@ class PagoCronogramaController extends Controller
     public function store(): void
     {
         $this->authRequired();
+
+        ob_start();
         header('Content-Type: application/json');
 
         try {
@@ -190,6 +192,9 @@ class PagoCronogramaController extends Controller
 
             $data = array_map([Validador::class, 'limpiar'], $_POST);
             $errores = [];
+            $emitirSunat = isset($data['emitir_sunat']) && $data['emitir_sunat'] === '1';
+
+            // Recolección de datos
             $idCronograma = (int) ($data['idcronograma'] ?? 0);
             $numeroTransaccion = $data['numerotransaccion'] ?? '';
             $numeroTransaccionPenalidad = (string) ($data['numeroTransaccionPenalidad'] ?? '');
@@ -202,12 +207,14 @@ class PagoCronogramaController extends Controller
             $fechaPago = $data['fechapago'] ?? '';
             $observacion = $data['observacion'] ?? '';
 
+
             $totalInteresProrrateado = (float) ($data['total_interes_prorrateado'] ?? 0);
             $totalCapitalProrrateado = (float) ($data['total_capital_prorrateado'] ?? 0);
 
+
             $rutaComprobanteCuota = isset($_FILES['comprobanteCuota']) ? $this->guardarComprobante($_FILES['comprobanteCuota']) : null;
             $rutaComprobantePenalidad = isset($_FILES['comprobantePenalidad']) ? $this->guardarComprobante($_FILES['comprobantePenalidad']) : null;
-          
+
 
             if ($idCronograma <= 0) {
                 $errores[] = 'Cuota a pagar no es válida.';
@@ -263,7 +270,7 @@ class PagoCronogramaController extends Controller
                 }
             }
 
-
+            // Validaciones de Negocio 
             $cronogramaData = $this->pagoCronogramaModel->getCronogramaData($idCronograma);
             if (!$cronogramaData) {
                 $errores[] = 'No se encontró la cuota.';
@@ -288,13 +295,14 @@ class PagoCronogramaController extends Controller
                 return;
             }
 
+
             $idContrato = $cronogramaData['idcontrato'];
 
             $nombreCuentaCuotaBoleta = $medioPago;
             if ($amortizacionCuota > 0 && $medioPago === 'Transferencia Bancaria' && !empty($idCuentaPago)) {
                 $datosCuenta = $this->pagoCronogramaModel->getNumCuentaPagoById((int) $idCuentaPago);
                 if ($datosCuenta) {
-                    $nombreCuentaCuotaBoleta = $datosCuenta['nombrecuenta']; 
+                    $nombreCuentaCuotaBoleta = $datosCuenta['nombrecuenta'];
                 }
             }
 
@@ -302,12 +310,11 @@ class PagoCronogramaController extends Controller
             if ($amortizacionPenalidad > 0 && $medioPagoPenalidad === 'Transferencia Bancaria' && !empty($idCuentaPagoPenalidad)) {
                 $datosCuenta = $this->pagoCronogramaModel->getNumCuentaPagoById((int) $idCuentaPagoPenalidad);
                 if ($datosCuenta) {
-                    $nombreCuentaPenalidadBoleta = $datosCuenta['nombrecuenta']; 
+                    $nombreCuentaPenalidadBoleta = $datosCuenta['nombrecuenta'];
                 }
             }
-          
+
             $medioPagoBoleta = ($amortizacionCuota > 0) ? $nombreCuentaCuotaBoleta : $nombreCuentaPenalidadBoleta;
-   
 
             $pagoCuota = null;
             if ($amortizacionCuota > 0) {
@@ -339,6 +346,7 @@ class PagoCronogramaController extends Controller
                 ];
             }
 
+
             $idPagos = $this->pagoCronogramaModel->addMultiplePagos($pagoCuota, $pagoPenalidad);
 
             if (!empty($idPagos)) {
@@ -347,7 +355,11 @@ class PagoCronogramaController extends Controller
                 $enlaceXml = null;
                 $enlaceCdr = null;
                 $mensajeExtra = "";
-                if ($amortizacionCuota > 0) {
+
+
+                $debeFacturar = $emitirSunat && ($amortizacionCuota > 0 || $amortizacionPenalidad > 0);
+
+                if ($debeFacturar) {
                     try {
                         $serieBoleta = 'BBB1';
                         $clienteData = $this->cajaModel->getDatosClientePorCronograma($idCronograma);
@@ -357,20 +369,16 @@ class PagoCronogramaController extends Controller
 
                             $itemsFacturacion = [];
                             $totalGravada = 0.00;
-                            // totalInafecta debe ser 0.00 para evitar el error si se envía solo Gravada
-                            $totalInafecta = 0.00;
+                            $totalInafecta = 0.00; // Por ahora 0, calculamos gravadas abajo
                             $totalIGV = 0.00;
                             $totalVenta = 0.00;
 
-                            // IGV 
                             $porcentajeIGV = 0.18;
                             $factorIGV = 1 + $porcentajeIGV;
 
-
-                            // Item Capital - Tipo de IGV 1
+                            // Item Capital
                             if ($totalCapitalProrrateado > 0) {
                                 $totalCapitalConIGV = round($totalCapitalProrrateado, 2);
-                                // Calcular valor unitario (sin IGV) y el IGV
                                 $valorUnitarioCapital = round($totalCapitalConIGV / $factorIGV, 10);
                                 $igvCapital = round($totalCapitalConIGV - $valorUnitarioCapital, 2);
 
@@ -381,7 +389,7 @@ class PagoCronogramaController extends Controller
                                     "valor_unitario" => $valorUnitarioCapital,
                                     "precio_unitario" => $totalCapitalConIGV,
                                     "subtotal" => $valorUnitarioCapital,
-                                    "tipo_de_igv" => 1, // GRAVADO ES => TIPO_DE_IGV = 1
+                                    "tipo_de_igv" => 1,
                                     "igv" => $igvCapital,
                                     "total" => $totalCapitalConIGV
                                 ];
@@ -390,10 +398,9 @@ class PagoCronogramaController extends Controller
                                 $totalVenta += $totalCapitalConIGV;
                             }
 
-                           
+                            // Item Interés
                             if ($totalInteresProrrateado > 0) {
                                 $totalInteresConIGV = round($totalInteresProrrateado, 2);
-                               
                                 $valorUnitarioInteres = round($totalInteresConIGV / $factorIGV, 10);
                                 $igvInteres = round($totalInteresConIGV - $valorUnitarioInteres, 2);
 
@@ -413,7 +420,7 @@ class PagoCronogramaController extends Controller
                                 $totalVenta += $totalInteresConIGV;
                             }
 
-                            // Penalidad - Mantenido como Gravado 
+                            // Item Penalidad
                             if ($amortizacionPenalidad > 0) {
                                 $totalMoraConIGV = round($amortizacionPenalidad, 2);
                                 $valorUnitarioMora = round($totalMoraConIGV / $factorIGV, 10);
@@ -439,23 +446,21 @@ class PagoCronogramaController extends Controller
                             $totalIGV = round($totalIGV, 2);
                             $totalVenta = round($totalVenta, 2);
 
-
                             $datosFacturacion = [
-                                'tipo_comprobante' => 2, // Boleta 
+                                'tipo_comprobante' => 2,
                                 'serie' => $serieBoleta,
                                 'mediopago' => $medioPagoBoleta,
                                 'numero_comprobante' => $nuevoNumero,
                                 'items' => $itemsFacturacion,
                                 'totales' => [
                                     'total_gravada' => $totalGravada,
-                                    'total_inafecta' => 0.00, // 
+                                    'total_inafecta' => 0.00,
                                     'total_exonerada' => 0.00,
                                     'total_igv' => $totalIGV,
                                     'total_venta' => $totalVenta
                                 ],
-
                                 'datos_cliente' => [
-                                    'tipo_documento' => 1, // DNI 
+                                    'tipo_documento' => 1,
                                     'numero_documento' => $clienteData['nrodoc'],
                                     'denominacion' => $clienteData['razon_social'],
                                     'direccion' => $clienteData['direccion'] ?? 'LIMA',
@@ -463,12 +468,10 @@ class PagoCronogramaController extends Controller
                                 ]
                             ];
 
-
                             $nubefactController = new ComprobanteNubefactController();
                             $respNube = $nubefactController->procesarPagoYEmitirComprobante($datosFacturacion);
 
                             if ($respNube['success']) {
-
                                 $enlacePdf = $respNube['enlace_pdf'];
                                 $enlaceXml = $respNube['enlace_xml'];
                                 $enlaceCdr = $respNube['enlace_cdr'];
@@ -487,7 +490,11 @@ class PagoCronogramaController extends Controller
                         error_log("Excepción Facturación: " . $ex->getMessage());
                         $mensajeExtra = " Pago guardado, pero falló la comunicación con NubeFact";
                     }
+                } else {
+
+                    $mensajeExtra = "";
                 }
+
 
                 // Limpieza de caché
                 $cacheFile = __DIR__ . "/../../storage/cache/cronograma-contratos/cronograma-contrato{$idContrato}.json";
@@ -499,14 +506,18 @@ class PagoCronogramaController extends Controller
                     unlink($cacheFileHistorial);
                 }
 
+
+                ob_clean();
+
                 echo json_encode([
                     'success' => true,
                     'message' => '¡Pago registrado correctamente!' . $mensajeExtra,
-                    'enlace_pdf' => $enlacePdf,
+                    'enlace_pdf' => $enlacePdf, // Será null si no se activó el switch
                     'enlace_xml' => $enlaceXml,
                     'enlace_cdr' => $enlaceCdr,
                 ]);
             } else {
+                ob_clean();
                 echo json_encode([
                     'success' => false,
                     'message' => 'No se pudo registrar el pago en la base de datos.'
@@ -515,12 +526,17 @@ class PagoCronogramaController extends Controller
         } catch (\Throwable $th) {
             http_response_code(500);
             error_log($th->getMessage());
+            ob_clean();
             echo json_encode([
                 'success' => false,
                 'message' => 'Error inesperado del servidor. Intente más tarde.'
             ]);
         }
     }
+
+
+
+
     /**
      * API: Obtiene las cuentas de pago disponibles
      *

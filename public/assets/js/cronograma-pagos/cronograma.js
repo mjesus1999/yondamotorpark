@@ -1,3 +1,4 @@
+
 import { validarAmortizacionCuota, validarNumeroTransaccion, fechaEsFutura, fechaVacia, marcarInput } from './helpers-cronograma.js';
 import { TIPOS_PAGO, MEDIOS_PAGO } from "./constantes-cronograma.js";
 import { configurarValidacionesFormulario } from './eventos-cronograma.js';
@@ -15,8 +16,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     let idCronogramaSeleccionado = null;
     let valorCuotaDeuda = 0;
     let valorPenalidadDeuda = 0;
-
-
     const elements = {
 
         // Nuevos elementos para diferente tipo pago de penalidad:
@@ -24,7 +23,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         groupMedioPagoPenalidad: document.getElementById('group-medioPagoPenalidad'), // CONTENEDOR DE MEDIO PAGO DE PENALIDAD
         idCuentaPagoPenalidadSelect: document.getElementById('idcuentapagopenalidad'), // SELECT DE CUENTA DE PAGO PENALIDAD
         selectMedioPagoPenalidad: document.getElementById('mediopagopenalidad'), //  SELECT MEDIO DE PAGO DE PENALIDAD
-        groupNumCuentaPenalidad: document.getElementById('group-select-numero-cuenta'), // CONTENEDOR DE NUMERO DE CUENTAS PENALIDAD. 
+        groupNumCuentaPenalidad: document.getElementById('group-select-numero-cuenta'), // CONTENEDOR DE NUMERO DE CUENTAS PENALIDAD.
         groupMedioPagoCuota: document.getElementById('group-medioPagoCuota'), // CONTENEDOR DEL SELECT DE MEDIO DE PAGO DE cuota
 
         btnExcel: document.getElementById('btn-excel'),
@@ -62,6 +61,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         // toastBoleta: document.getElementById('toast-boleta'),
         linkBoleta: document.getElementById('link-boleta'),
         modalBoleta: document.getElementById('modal-boleta'),
+        checkSunat: document.getElementById('check-sunat'),
 
 
     };
@@ -245,7 +245,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
 
-   
+    // elements.checkSunat.addEventListener('change', (e) => {
+    //     console.log(e.target.checked);
+    // })
+
+
+
 
     /**
      * Valida los datos del formulario antes del envío.
@@ -383,22 +388,24 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    /**
-       * Envía los datos del formulario al backend.
-       */
+
+
     async function submitForm() {
+
         if (!await ask('¿Estás seguro de registrar este pago?', 'Confirmar')) {
             return;
         }
 
-        //  Bloquear botón para evitar doble clic
         elements.btnConfirmarPago.disabled = true;
         elements.btnConfirmarPago.classList.add('disabled', 'opacity-75');
         elements.btnConfirmarPago.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Procesando...';
 
-
         const formData = new FormData(elements.formPago);
         formData.append('idcronograma', idCronogramaSeleccionado);
+
+        const switchElement = document.getElementById('check-sunat');
+        const emitirSunat = switchElement && switchElement.checked ? '1' : '0';
+        formData.append('emitir_sunat', emitirSunat);
 
 
 
@@ -408,12 +415,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         const valorTotalOriginal = parseFloat(modal.dataset.valorCuotaTotalOriginal) || 0;
         const montoPagado = parseFloat(elements.amortizacionCuotaInput.value) || 0;
 
-        // Calcular prorrateo usando el VALOR TOTAL ORIGINAL
         const prorrateo = calcularProrrateo(montoPagado, valorTotalOriginal, interesCuota, capitalCuota);
 
         formData.append('total_capital_prorrateado', prorrateo.capital.toFixed(2));
         formData.append('total_interes_prorrateado', prorrateo.interes.toFixed(2));
-        // formData.append('mediopago', elements.medioPagoSelect.value);
 
 
         if (elements.medioPagoSelect.value === MEDIOS_PAGO.transferenciaBancaria) {
@@ -422,80 +427,77 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (parseFloat(elements.amortizacionPenalidadInput.value) > 0) {
             formData.append('mediopagopenalidad', elements.selectMedioPagoPenalidad.value);
-
             if (elements.selectMedioPagoPenalidad.value === MEDIOS_PAGO.transferenciaBancaria) {
                 formData.append('idcuentapagopenalidad', elements.idCuentaPagoPenalidadSelect.value);
             }
-
             formData.append('numeroTransaccionPenalidad', elements.numeroTransaccionPenalidadInput.value);
         }
 
-        let delay = 800;
-        const delayPromise = new Promise(resolve => setTimeout(resolve, delay));
-
         try {
-            const [res] = await Promise.all([
-                fetch('/pago/cronograma', {
-                    method: 'POST',
-                    body: formData
-                }),
-                delayPromise
-            ]);
 
-            const data = await res.json();
+            const res = await fetch('/pago/cronograma', {
+                method: 'POST',
+                body: formData
+            });
 
-            if (data.debug_info) {
-                console.info("Debug Info:", data.debug_info);
+
+            const textoRespuesta = await res.text();
+            let data;
+
+            try {
+                data = JSON.parse(textoRespuesta);
+            } catch (e) {
+                console.error("Respuesta no es JSON:", textoRespuesta);
+                throw new Error("El servidor devolvió una respuesta inválida.");
             }
 
+            // console.log('DATA: ', data)
+
             if (data.success) {
+
+
                 if (data.enlace_pdf) {
+                    const win = window.open(data.enlace_pdf, '_blank');
+
+                    if (!win) {
+                        showToast('Pago registrado. Habilita las ventanas emergentes para ver la boleta.', 'WARNING', 4000);
+                    }
+
+                    // Guardar en localStorage para consulta rápida posterior
                     const ultima = {
                         idcronograma: idCronogramaSeleccionado,
                         enlace: data.enlace_pdf,
                         ts: Date.now()
                     };
-
-
                     const idContrato = elements.tablaBody.dataset.idContrato;
-                    const claveStorage = `ultimaBoleta_contrato_${idContrato}`;
-                    localStorage.setItem(claveStorage, JSON.stringify(ultima));
-
-                    try {
-                        window.open(data.enlace_pdf, '_blank');
-                    } catch (e) {
-                        console.warn('No se pudo abrir la boleta en nueva pestaña:', e);
-                    }
-
-
-                } else {
-                    showToast(data.message, 'ERROR', 1350);
+                    localStorage.setItem(`ultimaBoleta_contrato_${idContrato}`, JSON.stringify(ultima));
                 }
 
+                showToast(data.message, 'SUCCESS', 2000);
 
                 setTimeout(() => {
                     elements.modalPago.hide();
                     location.reload();
-                }, 1350);
+                }, 1500);
 
             } else {
-                showToast(data.message || 'Error al registrar el pago.', 'WARNING', 3000);
 
-                // Restaurar botón
-                elements.btnConfirmarPago.disabled = false;
-                elements.btnConfirmarPago.classList.remove('disabled', 'opacity-75');
-                elements.btnConfirmarPago.innerHTML = '<i class="fas fa-check-circle me-1"></i> Confirmar Pago';
+                showToast(data.message || 'Error al registrar el pago.', 'WARNING', 3000);
+                restaurarBoton();
             }
 
         } catch (err) {
 
-            console.error('Error de red o del servidor:', err);
+            console.error('Error:', err);
             showToast('Error de red o del servidor. Intenta de nuevo.', 'ERROR', 3000);
-
-            elements.btnConfirmarPago.disabled = false;
-            elements.btnConfirmarPago.classList.remove('disabled', 'opacity-75');
-            elements.btnConfirmarPago.innerHTML = '<i class="fas fa-check-circle me-1"></i> Confirmar Pago';
+            restaurarBoton();
         }
+    }
+
+    function restaurarBoton() {
+        elements.btnConfirmarPago.disabled = false;
+        elements.btnConfirmarPago.classList.remove('disabled', 'opacity-75');
+        elements.btnConfirmarPago.innerHTML = '<i class="fas fa-check-circle me-1"></i> Confirmar Pago';
     }
 
 

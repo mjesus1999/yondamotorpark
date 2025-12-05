@@ -14,6 +14,7 @@ $router->add('GET','/caja/pagos/denominacion','CajaController','indexPagosDenomi
 $router->add('GET', '/api/reporte/hoy', 'CajaController', 'getReporteIngresosCajaHoy');
 
 $router->add('GET', '/api/conceptoPagos', 'CajaController', 'searchConceptosPagos');
+$router->add('POST','/api/storePagoCompuesto','CajaController','storePagoCompuesto');
 
 
 
