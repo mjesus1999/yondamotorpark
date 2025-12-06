@@ -84,7 +84,8 @@ class ComprobanteNubefactController extends Controller
                 "medio_de_pago" => $datos['mediopago'],
                 "detraccion" => false,
                 "enviar_automaticamente_a_la_sunat" => true,
-                "enviar_automaticamente_al_cliente" => false,
+                "enviar_automaticamente_al_cliente" => $datos['enviar_al_cliente'] ?? false,
+
             ], $cliente);
 
             $json_data['items'] = $datos['items'];

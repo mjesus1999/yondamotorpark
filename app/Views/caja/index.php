@@ -6,36 +6,36 @@ include __DIR__ . '/../layout/header.php';
 <link rel="stylesheet" href="/assets/css/tabulator.css">
 <div class="container-fluid">
 
-  <div class="alert alert-info mt-2 text-primary p-3 d-flex justify-content-between align-items-center">
-    
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb mb-0" style="background-color: transparent; padding: 0;">
-            <li class="breadcrumb-item"><a href="#" class="text-info"><i class="fas fa-home"></i></a></li>
-            <li class="breadcrumb-item"><a href="#" class="text-info">Caja</a></li>
-            <li class="breadcrumb-item active " aria-current="page">Listar</li>
-        </ol>
-    </nav>
+    <div class="alert alert-info mt-2 text-primary p-3 d-flex justify-content-between align-items-center">
 
-    <div class="d-flex">
-        
-        <a href="/caja/reporte/by/fecha" class="btn btn-sm text-white border border-info bg-info" style="border-radius: 0;">
-            <i class="fas fa-calendar-alt"></i> Reporte por fecha
-        </a>
-        
-        <button class="btn btn-danger btn-sm rounded-0" id="btn-pdf" title="Generar reporte de pagos del día" style="margin-left: -1px;">
-            <i class="far fa-file-pdf"></i> Reporte diario
-        </button>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0" style="background-color: transparent; padding: 0;">
+                <li class="breadcrumb-item"><a href="#" class="text-info"><i class="fas fa-home"></i></a></li>
+                <li class="breadcrumb-item"><a href="#" class="text-info">Caja</a></li>
+                <li class="breadcrumb-item active " aria-current="page">Listar</li>
+            </ol>
+        </nav>
 
-        <button class="btn btn-success btn-sm rounded-0" id="btn-excel" title="Generar reporte de pagos del día en Excel" style="margin-left: -1px;">
-            <i class="far fa-file-excel"></i> Reporte diario
-        </button>
-        
-        <a class="btn btn-dark btn-sm rounded-0" href="/caja/pagos/denominacion" style="margin-left: 10px; border-left: 1px solid rgba(255, 255, 255, 0.1);">
-            Cobros por denominación
-        </a>
-        
+        <div class="d-flex">
+
+            <a href="/caja/reporte/by/fecha" class="btn btn-sm text-white border border-info bg-info" style="border-radius: 0;">
+                <i class="fas fa-calendar-alt"></i> Reporte por fecha
+            </a>
+
+            <button class="btn btn-danger btn-sm rounded-0" id="btn-pdf" title="Generar reporte de pagos del día" style="margin-left: -1px;">
+                <i class="far fa-file-pdf"></i> Reporte diario
+            </button>
+
+            <button class="btn btn-success btn-sm rounded-0" id="btn-excel" title="Generar reporte de pagos del día en Excel" style="margin-left: -1px;">
+                <i class="far fa-file-excel"></i> Reporte diario
+            </button>
+
+            <a class="btn btn-dark btn-sm rounded-0" href="/caja/pagos/denominacion" style="margin-left: 10px; border-left: 1px solid rgba(255, 255, 255, 0.1);">
+                Cobros por denominación
+            </a>
+
+        </div>
     </div>
-</div>
 
 
     <div class="row">
@@ -179,13 +179,13 @@ include __DIR__ . '/../layout/header.php';
 
 
     document.addEventListener('DOMContentLoaded', async () => {
-      
+
         const tabla = new Tabulator('#tabla-contratos', {
             data: datos,
             pagination: "local",
             layout: "fitColumns",
             paginationSize: 20,
-            paginationSizeSelector: [5, 10, 15,25],
+            paginationSizeSelector: [5, 10, 15, 25],
             movableRows: true,
 
             columns: [{

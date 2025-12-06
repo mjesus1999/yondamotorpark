@@ -193,6 +193,7 @@ class PagoCronogramaController extends Controller
             $data = array_map([Validador::class, 'limpiar'], $_POST);
             $errores = [];
             $emitirSunat = isset($data['emitir_sunat']) && $data['emitir_sunat'] === '1';
+            $enviarCorreoCliente = isset($data['enviar_correo']) && $data['enviar_correo'] === '1';
 
             // Recolección de datos
             $idCronograma = (int) ($data['idcronograma'] ?? 0);
@@ -465,7 +466,9 @@ class PagoCronogramaController extends Controller
                                     'denominacion' => $clienteData['razon_social'],
                                     'direccion' => $clienteData['direccion'] ?? 'LIMA',
                                     'email' => $clienteData['email'] ?? ''
-                                ]
+                                ],
+
+                                'enviar_al_cliente' => $enviarCorreoCliente
                             ];
 
                             $nubefactController = new ComprobanteNubefactController();

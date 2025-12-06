@@ -330,8 +330,21 @@
                                             <?php endif; ?>
                                         </td>
                                         <td>
-                                            <span class="bg-primary-custom rounded p-1"><a class="text-white small" href="<?= htmlspecialchars($pago['enlace_pdf_nubefact'] ?? '#') ?>" target="_blank"><?= htmlspecialchars($pago['enlace_pdf_nubefact'] ? 'Boleta' : 'N/A') ?></a></span>
+                                            <?php if (!empty($pago['enlace_pdf_nubefact'])): ?>
+                                                <span class="bg-primary-custom rounded p-1">
+                                                    <a class="text-white small"
+                                                        href="<?= htmlspecialchars($pago['enlace_pdf_nubefact']) ?>"
+                                                        target="_blank">
+                                                        Boleta
+                                                    </a>
+                                                </span>
+                                            <?php else: ?>
+                                                <span class="bg-primary-custom rounded p-1 text-white small">
+                                                    N/A
+                                                </span>
+                                            <?php endif; ?>
                                         </td>
+
                                     <?php endforeach; ?>
                                 <?php endif; ?>
                         </tbody>
@@ -426,22 +439,39 @@
                                     </li>
                                     <li class="list-group-item">
                                         <strong>Comprobante:</strong>
+
                                         <?php if (!empty($pago['comprobante'])): ?>
-                                            <?php $urlSegura = "/archivos/" . htmlspecialchars($pago['comprobante']); ?>
-                                            <?php if (strtolower(pathinfo($pago['comprobante'], PATHINFO_EXTENSION)) === 'pdf'): ?>
-                                                <a href="<?= $urlSegura ?>" target="_blank" class="btn btn-sm btn-danger mt-1" title="Ver comprobante">
+                                            <?php
+                                            $urlSegura = "/archivos/" . htmlspecialchars($pago['comprobante']);
+                                            $extension = strtolower(pathinfo($pago['comprobante'], PATHINFO_EXTENSION));
+                                            ?>
+
+                                            <?php if ($extension === 'pdf'): ?>
+                                                <a href="<?= $urlSegura ?>" target="_blank"
+                                                    class="btn btn-sm btn-danger mt-1"
+                                                    title="Ver comprobante">
                                                     <i class="fas fa-file-pdf me-1"></i>PDF
                                                 </a>
-                                            <?php else: ?>
-                                                <button type="button" class="btn btn-sm btn-primary ver-comprobante-img mt-1"
-                                                    data-img="<?= htmlspecialchars($urlSegura) ?>" title="Ver comprobante">
+
+                                            <?php elseif (in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp'])): ?>
+                                                <button type="button"
+                                                    class="btn btn-sm btn-primary ver-comprobante-img mt-1"
+                                                    data-img="<?= htmlspecialchars($urlSegura) ?>"
+                                                    title="Ver comprobante">
                                                     <i class="fas fa-image me-1"></i>Comprobante
                                                 </button>
+
+                                            <?php else: ?>
+
+                                                <span class="badge bg-light text-muted">N/A</span>
                                             <?php endif; ?>
+
                                         <?php else: ?>
+
                                             <span class="badge bg-light text-muted">N/A</span>
                                         <?php endif; ?>
                                     </li>
+
                                 </ul>
                             </div>
                         </div>
@@ -822,8 +852,6 @@
             showPage(1);
         });
     });
-
- 
 </script>
 
 <?php include __DIR__ . '/../layout/footer.php'; ?>

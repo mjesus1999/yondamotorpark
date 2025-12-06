@@ -83,7 +83,10 @@
                                         <th>Acciones</th>
                                     </tr>
                                 </thead>
-                                <tbody id="tabla-body" data-total-items="<?= count($cronograma) ?>" data-id-contrato="<?= htmlspecialchars($cronograma[0]['idcontrato']) ?>">
+                                <tbody id="tabla-body"
+                                    data-total-items="<?= count($cronograma) ?>"
+                                    data-id-contrato="<?= htmlspecialchars($cronograma[0]['idcontrato'] ?? '') ?>">
+
                                     <?php if (empty($cronograma)) : ?>
                                         <tr>
                                             <td colspan="10" class="text-center">No hay datos para mostrar</td>
@@ -535,10 +538,15 @@
                                     </h6>
                                     <textarea class="form-control" rows="3" placeholder="Ingresa cualquier observación..." id="observacion" name="observacion"></textarea>
                                 </div>
-                                <div class="form-check form-switch d-flex m-2 justify-content-end ">
+                                <div class="form-check form-switch d-flex gap-5 m-2 justify-content-end ">
                                     <div>
                                         <input class="form-check-input" type="checkbox" role="switch" id="check-sunat">
                                         <span class="badge bg-success p-1 fw-bold">Enviar a SUNAT <span class="text-danger fw-bold">*</span></span>
+                                    </div>
+
+                                    <div>
+                                        <input class="form-check-input" type="checkbox" role="switch" id="check-enviar-email">
+                                        <span class="badge bg-primary p-1 fw-bold">Enviar correo a cliente <span class="text-danger fw-bold">*</span></span>
                                     </div>
 
                                 </div>
