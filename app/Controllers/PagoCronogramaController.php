@@ -271,8 +271,19 @@ class PagoCronogramaController extends Controller
                 }
             }
 
-            // Validaciones de Negocio 
             $cronogramaData = $this->pagoCronogramaModel->getCronogramaData($idCronograma);
+            $nroCuotaActual = $cronogramaData['numcuota'] ?? 0;
+            $totalCuotas = $cronogramaData['numcuotas'] ?? 0;
+
+            $observacionPago = "Cuota pagada {$nroCuotaActual} de {$totalCuotas}.";
+
+
+            if (!empty($observacion)) {
+                $observacionPago .= " " . $observacion;
+            }
+
+
+            error_log('DATOS DEL CRONOGRAMA: ' . print_r($cronogramaData, true)); // <-- CORRECCIÓN APLICADA
             if (!$cronogramaData) {
                 $errores[] = 'No se encontró la cuota.';
             } else {
@@ -468,7 +479,8 @@ class PagoCronogramaController extends Controller
                                     'email' => $clienteData['email'] ?? ''
                                 ],
 
-                                'enviar_al_cliente' => $enviarCorreoCliente
+                                'enviar_al_cliente' => $enviarCorreoCliente,
+                                'observaciones' => $observacionPago
                             ];
 
                             $nubefactController = new ComprobanteNubefactController();

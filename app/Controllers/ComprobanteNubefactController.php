@@ -73,6 +73,7 @@ class ComprobanteNubefactController extends Controller
                 "numero" => $numero_comprobante,
                 "sunat_transaction" => 1,
                 "fecha_de_emision" => $fechaHoy,
+                "fecha_de_vencimiento" => "",
                 "moneda" => 1, // 1 = Soles
                 "porcentaje_de_igv" => ($total_igv > 0) ? 18.00 : 0.00,
                 "total_gravada" => round($total_gravada, 2),
@@ -83,6 +84,7 @@ class ComprobanteNubefactController extends Controller
                 "formato_de_pdf" => "TICKET",
                 "medio_de_pago" => $datos['mediopago'],
                 "detraccion" => false,
+                "observaciones" => $datos['observaciones'] ?? '',
                 "enviar_automaticamente_a_la_sunat" => true,
                 "enviar_automaticamente_al_cliente" => $datos['enviar_al_cliente'] ?? false,
 

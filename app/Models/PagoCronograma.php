@@ -262,6 +262,7 @@ class PagoCronograma
                                 WHERE pag.idcronograma = cro.idcronograma
                                 AND pag.tipo = 'Cuota'
                             ), 0) AS cuotapendiente,
+                    coti.numcuotas,
 
                     cro.penalidad - COALESCE((
                                 SELECT SUM(pag.amortizacion)
