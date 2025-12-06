@@ -6,19 +6,34 @@
         text-align: right;
         font-weight: bold;
     }
-
-    .bg-custom-blue {
-        background-color: #003d75;
-        color: white;
-    }
 </style>
 
-<div class="container-fluid p-4 bg-custom-blue">
-    <h1 class="text-white">Generador de Boletas de Pago</h1>
-    <p class="text-white-50">Selecciona o ingresa los conceptos de pago para la boleta.</p>
+<div class="container-fluid p-4 ">
+
+    <div class="alert alert-info mt-2" role="alert" style="border-left: 4px solid #3498db; border-radius: 0 8px 8px 0;">
+        <div class="row align-items-center">
+            <div class="col-md-6 d-flex align-items-center">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0" style="background-color: transparent; padding: 0;">
+                        <li class="breadcrumb-item"><a href="#" class="text-primary"><i class="fas fa-home"></i></a>
+                        </li>
+                        <li class="breadcrumb-item"><a href="#" class="text-primary">Caja</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Pagos por conceptos</li>
+                    </ol>
+                </nav>
+            </div>
+            <div class="col-md-6 d-flex justify-content-end">
+                <a href="/caja/" class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-list me-1"></i> Lista
+                </a>
+
+            </div>
+        </div>
+    </div>
+
 </div>
 
-<div class="row mt-4">
+<div class="row mt-3">
 
     <div class="col-lg-8">
 
@@ -163,34 +178,46 @@
 
 
         <div class="card border-primary shadow-lg mt-4" id="card-cliente" style="display: none;">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0"><i class="bi bi-person"></i> Cliente Seleccionado</h5>
+            <div class="card-header bg-primary text-white d-flex align-items-center">
+                <h5 class="mb-0"><i class="bi bi-person-circle me-2" style="font-size: 1.2rem;"></i> Cliente Seleccionado</h5>
             </div>
             <div class="card-body">
                 <div class="d-flex justify-content-between mb-2">
-                    <span class="fw-bold">ID Cliente:</span>
-                    <span id="cliente-id" class="fw-bold text-danger"></span>
+                    <span class="fw-normal text-muted">ID Cliente:</span>
+                    <span id="cliente-id" class="fw-bold text-danger fs-5"></span>
                 </div>
-                <div class="d-flex justify-content-between mb-2">
-                    <span class="fw-bold">Nombre completo:</span>
+
+                <div class="d-flex justify-content-between mb-3">
+                    <span class="fw-normal text-muted">Nombre completo:</span>
                     <span id="nombrecompleto" class="fw-bold"></span>
                 </div>
-                <hr>
-                <div class="d-flex justify-content-between mb-2 ">
-                    <span class="fw-bold">DNI:</span>
-                    <span id="cliente-dni"></span>
+
+                <hr class="my-3">
+
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <span class="fw-bold d-flex align-items-center">
+                        <i class="bi bi-person-vcard-fill text-primary me-2" style="font-size: 1.2rem;"></i> DNI:
+                    </span>
+                    <span id="cliente-dni" class="text-muted fw-semibold"></span>
                 </div>
-                <div class="d-flex justify-content-between mb-2 ">
-                    <span class="fw-bold">Correo:</span>
-                    <span id="cliente-correo"></span>
+
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <span class="fw-bold d-flex align-items-center">
+                        <i class="bi bi-envelope-at-fill text-success me-2" style="font-size: 1.2rem;"></i> Correo:
+                    </span>
+                    <span id="cliente-correo" class="text-muted fw-semibold"></span>
                 </div>
-                <div class="d-flex justify-content-between mb-2 ">
-                    <span class="fw-bold">Dirección:</span>
-                    <span id="cliente-direccion"></span>
+
+                <div class="d-flex align-items-start justify-content-between mb-2">
+                    <span class="fw-bold d-flex align-items-center">
+                        <i class="bi bi-geo-alt-fill text-danger me-2" style="font-size: 1.2rem;"></i> Dirección:
+                    </span>
+                    <span id="cliente-direccion" class="text-muted text-end fw-semibold"></span>
                 </div>
 
             </div>
         </div>
+
     </div>
 </div>
 

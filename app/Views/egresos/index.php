@@ -353,7 +353,7 @@
         </div>
     </div>
 
-    <div class="container">
+    <!-- <div class="container">
         <div class="card">
             <div class="card-body">
 
@@ -362,7 +362,7 @@
                 <span class="segundos"></span>                                            
             </div>
         </div>
-    </div>
+    </div> -->
 
 
 
