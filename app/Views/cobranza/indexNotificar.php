@@ -358,7 +358,7 @@
 
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fas fa-paper-plane me-1"></i>Notificar Todos';
-
+ 
                 // Mostrar resultado con showToast
                 if (fallidos === 0) {
                     showToast(`Proceso completado: ${exitosos} notificaciones enviadas exitosamente`, 'SUCCESS');
