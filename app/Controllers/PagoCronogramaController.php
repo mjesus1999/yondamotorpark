@@ -216,7 +216,7 @@ class PagoCronogramaController extends Controller
             $rutaComprobanteCuota = isset($_FILES['comprobanteCuota']) ? $this->guardarComprobante($_FILES['comprobanteCuota']) : null;
             $rutaComprobantePenalidad = isset($_FILES['comprobantePenalidad']) ? $this->guardarComprobante($_FILES['comprobantePenalidad']) : null;
 
-
+                // $dddd
             if ($idCronograma <= 0) {
                 $errores[] = 'Cuota a pagar no es válida.';
             }
