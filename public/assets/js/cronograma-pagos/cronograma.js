@@ -275,13 +275,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (monto <= 0) {
                 showToast('Monto de cuota inválido.', 'WARNING', 1200);
                 marcarInput(elements.amortizacionCuotaInput, false);
+
                 return false;
             }
-            if (!validarAmortizacionCuota(monto, valorCuotaDeuda)) {
-                marcarInput(elements.amortizacionCuotaInput, false);
-                showToast(`La amortización no puede ser mayor a S/ ${valorCuotaDeuda.toFixed(2)}.`, 'WARNING', 1200);
-                return false;
-            }
+            // if (!validarAmortizacionCuota(parseFloat(Math.round(monto, 2)), parseFloat(Math.round(valorCuotaDeuda, 2)))) {
+            //     console.log(valorCuotaDeuda);
+            //     console.log(elements.btnConfirmarPago);
+            //     marcarInput(elements.amortizacionCuotaInput, false);
+            //     elements.btnConfirmarPago.disabled = false;
+
+            //     showToast(`La amortización no puede ser mayor a S/ ${parseFloat(Math.round(valorCuotaDeuda, 2))}.`, 'WARNING', 1200);
+            //     return false;
+            // }
         }
 
         if (isPenalidad && (amortizacionPenalidad <= 0 || amortizacionPenalidad !== parseFloat(valorPenalidadDeuda))) {
@@ -369,9 +374,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const valorTotalOriginal = parseFloat(modal.dataset.valorCuotaTotalOriginal) || 0;
 
+        // console.log(monto, valorCuotaDeuda)
+
         if (!isNaN(monto) && monto > 0) {
-            if (monto.toFixed(2) <= valorCuotaDeuda.toFixed(2)) {
+            if (parseFloat(Math.round(monto, 2)) <= parseFloat(Math.round(valorCuotaDeuda, 2))) {
+
                 marcarInput(elements.amortizacionCuotaInput, true);
+                elements.btnConfirmarPago.disabled = false;
                 const prorrateo = calcularProrrateo(monto, valorTotalOriginal, interesCuota, capitalCuota);
 
                 // console.log(`Pago ingresado: S/ ${monto.toFixed(2)}`);
@@ -379,7 +388,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 // console.log(`Capital (calc. sobre original): S/ ${prorrateo.capital.toFixed(2)}`);
 
             } else {
+                console.log(valorCuotaDeuda);
                 marcarInput(elements.amortizacionCuotaInput, false);
+                elements.btnConfirmarPago.disabled = true;
 
                 containerInvalidText.textContent = `El monto no puede exceder el saldo pendiente: S/${valorCuotaDeuda.toFixed(2)}`;
             }

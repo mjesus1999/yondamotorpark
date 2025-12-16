@@ -1,6 +1,8 @@
 <?php include __DIR__ . '/../layout/header.php'; ?>
 <link rel="stylesheet" href="/assets/css/cronograma-contrato.css">
 
+<?php var_dump($cronograma[2]);   ?>
+
 
 
 <div class="modal" tabindex="-1" id="modal-boleta">
@@ -540,12 +542,12 @@
                                 </div>
                                 <div class="form-check form-switch d-flex gap-5 m-2 justify-content-end ">
                                     <div>
-                                        <input class="form-check-input" type="checkbox" role="switch" id="check-sunat">
+                                        <input class="form-check-input" type="checkbox" role="switch" id="check-sunat" checked>
                                         <span class="badge bg-success p-1 fw-bold">Enviar a SUNAT <span class="text-danger fw-bold">*</span></span>
                                     </div>
 
                                     <div>
-                                        <input class="form-check-input" type="checkbox" role="switch" id="check-enviar-email">
+                                        <input class="form-check-input" type="checkbox" role="switch" id="check-enviar-email" checked>
                                         <span class="badge bg-primary p-1 fw-bold">Enviar correo a cliente <span class="text-danger fw-bold">*</span></span>
                                     </div>
 
