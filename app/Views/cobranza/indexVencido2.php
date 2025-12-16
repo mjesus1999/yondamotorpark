@@ -6,7 +6,7 @@
 <?php include __DIR__ . '/../components/mapa-viewer-modal.php'; ?>
 
 <link href="https://unpkg.com/tabulator-tables@5.5.2/dist/css/tabulator_simple.min.css" rel="stylesheet">
-<link rel="stylesheet" href="/assets/css/tabulator.css">
+<link rel="stylesheet" href="/assets/css/tabulator.css">|
 
 <div class="container-fluid">
 
@@ -546,6 +546,8 @@
             });
         });
 
+
+
         const contTabla = document.getElementById('tabla-vencidos-tabulator');
         const spinner = document.getElementById('spinner-vencidos');
         const mensajeVacio = document.getElementById('mensaje-vacio');
@@ -554,6 +556,8 @@
 
         try {
             const datos = await cargarVencidos();
+
+            console.log('DATOS: ', datos);
 
             if (spinner) spinner.remove();
 

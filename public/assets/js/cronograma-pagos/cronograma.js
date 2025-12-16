@@ -62,7 +62,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         linkBoleta: document.getElementById('link-boleta'),
         modalBoleta: document.getElementById('modal-boleta'),
         checkSunat: document.getElementById('check-sunat'),
-        checkEnviarCorreo: document.getElementById('check-enviar-email')
+        checkEnviarCorreo: document.getElementById('check-enviar-email'),
+        checkFatcura:document.getElementById('check-factura'),
 
 
     };
@@ -418,6 +419,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const switchElement = document.getElementById('check-sunat');
         const emitirSunat = switchElement && switchElement.checked ? '1' : '0';
         const enviarCorreo = elements.checkEnviarCorreo && elements.checkEnviarCorreo.checked ? '1' : '0';
+        const generarFactura = 
         formData.append('emitir_sunat', emitirSunat);
         formData.append('enviar_correo', enviarCorreo);
 

@@ -216,7 +216,7 @@ class PagoCronogramaController extends Controller
             $rutaComprobanteCuota = isset($_FILES['comprobanteCuota']) ? $this->guardarComprobante($_FILES['comprobanteCuota']) : null;
             $rutaComprobantePenalidad = isset($_FILES['comprobantePenalidad']) ? $this->guardarComprobante($_FILES['comprobantePenalidad']) : null;
 
-                // $dddd
+            // $dddd
             if ($idCronograma <= 0) {
                 $errores[] = 'Cuota a pagar no es válida.';
             }
@@ -360,6 +360,11 @@ class PagoCronogramaController extends Controller
 
 
             $idPagos = $this->pagoCronogramaModel->addMultiplePagos($pagoCuota, $pagoPenalidad);
+
+            // VARIABLES QUE AYUDARAN A GENEAR BIEN BOLETA O FACTURA:
+            $generarFactura = isset($data['generar_factura']); // Puede ser Boleta o Factura.
+            $serieDocumento = $generarFactura ? "FFF1" : "BBB1";
+
 
             if (!empty($idPagos)) {
 

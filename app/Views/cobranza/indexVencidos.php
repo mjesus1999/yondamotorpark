@@ -625,6 +625,7 @@
 
         try {
             const datos = await cargarVencidos();
+            console.log('VENCIDOS: ', datos);
 
             if (spinner) spinner.remove();
 
@@ -657,10 +658,9 @@
                             const direccion = cell.getValue();
                             const rowData = cell.getRow().getData();
                             const idcontrato = rowData.idcontrato;
-
                             return `
                                 <div class="direccion-cell">
-                                    <span class="direccion-text">${direccion}</span>
+                                    <span class="direccion-text">${direccion ?? 'Sin dirección especificada'}</span>
                                     <button class="btn btn-info btn-mapa-mini" 
                                             data-contrato="${idcontrato}"
                                             title="Ver en mapa">

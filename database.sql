@@ -684,6 +684,9 @@ ALTER TABLE pagos ADD COLUMN enlace_del_cdr VARCHAR(500) NULL AFTER enlace_xml_n
 -- -
 -- INSERT INTO series_nubefact (serie, ultimo_numero) VALUES ('BBB1', 0);
 
+USE motorpark;
+INSERT INTO series_nubefact(serie,ultimo_numero) VALUES('FFF1',0);
+
 -- SELECT * FROM series_nubefact;
 
 

@@ -1,7 +1,7 @@
 {
     "query": "vencidos",
-    "date": "2025-12-15 20:11:09",
-    "total_registros": 9,
+    "date": "2025-12-16 22:22:52",
+    "total_registros": 7,
     "data": [
         {
             "idcontrato": 19,
@@ -12,12 +12,12 @@
             "tienda": "Chincha Alta",
             "cuotas_totales": 36,
             "monto_primera_vencida": "1850.46",
-            "deuda_vencida": "3532.70",
+            "deuda_vencida": "3700.92",
             "cuotas_vencidas": "2",
             "cuotas_pagadas": "0",
             "estado_pagos": "2 vencidas de 36",
             "fecha_vencida_mas_antigua": "2025-11-10",
-            "dias_atraso": 35
+            "dias_atraso": 36
         },
         {
             "idcontrato": 22,
@@ -33,7 +33,7 @@
             "cuotas_pagadas": "0",
             "estado_pagos": "2 vencidas de 36",
             "fecha_vencida_mas_antigua": "2025-11-13",
-            "dias_atraso": 32
+            "dias_atraso": 33
         },
         {
             "idcontrato": 21,
@@ -49,23 +49,7 @@
             "cuotas_pagadas": "0",
             "estado_pagos": "2 vencidas de 36",
             "fecha_vencida_mas_antigua": "2025-11-13",
-            "dias_atraso": 32
-        },
-        {
-            "idcontrato": 26,
-            "cliente": "Pilpe Yataco Josué Isai",
-            "documento": "71882015",
-            "telefono": "987848485",
-            "vehiculo": "KIA All-new K3",
-            "tienda": "Chincha Alta",
-            "cuotas_totales": 36,
-            "monto_primera_vencida": "2390.74",
-            "deuda_vencida": "2390.74",
-            "cuotas_vencidas": "1",
-            "cuotas_pagadas": "0",
-            "estado_pagos": "1 vencidas de 36",
-            "fecha_vencida_mas_antigua": "2025-11-16",
-            "dias_atraso": 29
+            "dias_atraso": 33
         },
         {
             "idcontrato": 31,
@@ -81,7 +65,7 @@
             "cuotas_pagadas": "0",
             "estado_pagos": "1 vencidas de 36",
             "fecha_vencida_mas_antigua": "2025-11-21",
-            "dias_atraso": 24
+            "dias_atraso": 25
         },
         {
             "idcontrato": 33,
@@ -97,7 +81,7 @@
             "cuotas_pagadas": "0",
             "estado_pagos": "1 vencidas de 24",
             "fecha_vencida_mas_antigua": "2025-11-22",
-            "dias_atraso": 23
+            "dias_atraso": 24
         },
         {
             "idcontrato": 36,
@@ -113,7 +97,7 @@
             "cuotas_pagadas": "0",
             "estado_pagos": "1 vencidas de 36",
             "fecha_vencida_mas_antigua": "2025-11-23",
-            "dias_atraso": 22
+            "dias_atraso": 23
         },
         {
             "idcontrato": 37,
@@ -129,23 +113,7 @@
             "cuotas_pagadas": "0",
             "estado_pagos": "1 vencidas de 36",
             "fecha_vencida_mas_antigua": "2025-11-23",
-            "dias_atraso": 22
-        },
-        {
-            "idcontrato": 34,
-            "cliente": "DAMIAN BARROSO ANGHELY SUNNMI",
-            "documento": "78458745",
-            "telefono": "989071976",
-            "vehiculo": "HYUNDAI Grand i10 Sedan",
-            "tienda": "Chincha Alta",
-            "cuotas_totales": 36,
-            "monto_primera_vencida": "1796.78",
-            "deuda_vencida": "1796.78",
-            "cuotas_vencidas": "1",
-            "cuotas_pagadas": "0",
-            "estado_pagos": "1 vencidas de 36",
-            "fecha_vencida_mas_antigua": "2025-11-23",
-            "dias_atraso": 22
+            "dias_atraso": 23
         }
     ]
 }
