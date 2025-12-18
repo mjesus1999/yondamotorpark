@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let idCronogramaSeleccionado = null;
     let valorCuotaDeuda = 0;
     let valorPenalidadDeuda = 0;
+    let rucCliente = null;
     const elements = {
 
         // Nuevos elementos para diferente tipo pago de penalidad:
@@ -63,10 +64,70 @@ document.addEventListener('DOMContentLoaded', async () => {
         modalBoleta: document.getElementById('modal-boleta'),
         checkSunat: document.getElementById('check-sunat'),
         checkEnviarCorreo: document.getElementById('check-enviar-email'),
-        checkFatcura:document.getElementById('check-factura'),
+        checkFatcura: document.getElementById('check-factura'),
+        modalRucCliente: new bootstrap.Modal(document.getElementById('modal-ruc-cliente')),
+        btnRucCliente: document.getElementById('btn-ruc-cliente'),
+        inputRucCliente: document.getElementById('input-ruc-cliente'),
+        razonSocialCliente: document.getElementById('razonSocialCliente'),
+        numeroDocumentoCliente: document.getElementById('numeroDocumento'),
+        estadoCLiente: document.getElementById('estadoCliente'),
+        direccionCliente: document.getElementById('direccionCliente'),
+        btnGuardarRucCliente: document.getElementById('btn-gurdar-ruc-cliente'),
 
 
     };
+
+
+    async function getContribuyenteBySunat() {
+        try {
+            const res = await fetch(`/api/concesionarioSunat/${String(elements.inputRucCliente.value).trim()}`, { method: 'GET' });
+            if (!res.ok) {
+                throw new Error('Error al obtener datos de SUNAT: ', res.statusText);
+            }
+            const data = await res.json();
+
+            if (data.razonSocial && data.estado.toLowerCase() === 'activo' && data.numeroDocumento) {
+                showToast('Cliente encontrado', 'SUCCESS', 1300);
+                elements.razonSocialCliente.textContent = data.razonSocial;
+                elements.numeroDocumentoCliente.textContent = data.numeroDocumento;
+                elements.estadoCLiente.textContent = data.estado;
+                elements.direccionCliente.textContent = data.direccion || 'Sin especificar';
+
+                elements.btnGuardarRucCliente.addEventListener('click', async () => {
+
+                    rucCliente = data.numeroDocumento;
+                    elements.modalRucCliente.hide();
+                    console.log('rucCliente guardado: ', rucCliente);
+                });
+
+
+
+            } else {
+                showToast('No existe el cliente o está inactivo', 'WARNING', 1200);
+                rucCliente = null;
+            }
+        }
+        catch (error) {
+            console.error(error);
+        }
+    }
+
+    elements.btnRucCliente.addEventListener('click', async () => {
+        await getContribuyenteBySunat();
+    });
+
+
+    elements.checkFatcura.addEventListener('change', (e) => {
+        if (e.target.checked) {
+            console.log('checked');
+            elements.modalRucCliente.show();
+        } else {
+            e.target.checked = false;
+        }
+    });
+
+
+
 
     elements.modalBoleta.addEventListener('shown.bs.modal', () => {
 
@@ -419,7 +480,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         const switchElement = document.getElementById('check-sunat');
         const emitirSunat = switchElement && switchElement.checked ? '1' : '0';
         const enviarCorreo = elements.checkEnviarCorreo && elements.checkEnviarCorreo.checked ? '1' : '0';
-        const generarFactura = 
+        const generarFactura = elements.checkFatcura && elements.checkFatcura.checked ? true : false;
+
+        if (generarFactura) {
+            formData.append('generar_factura', generarFactura);
+            formData.append('ruc_cliente', elements.inputRucCliente.value.trim());
+        }
+
         formData.append('emitir_sunat', emitirSunat);
         formData.append('enviar_correo', enviarCorreo);
 

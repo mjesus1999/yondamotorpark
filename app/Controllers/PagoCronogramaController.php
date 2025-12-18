@@ -362,8 +362,22 @@ class PagoCronogramaController extends Controller
             $idPagos = $this->pagoCronogramaModel->addMultiplePagos($pagoCuota, $pagoPenalidad);
 
             // VARIABLES QUE AYUDARAN A GENEAR BIEN BOLETA O FACTURA:
-            $generarFactura = isset($data['generar_factura']); // Puede ser Boleta o Factura.
-            $serieDocumento = $generarFactura ? "FFF1" : "BBB1";
+            $generarFactura = isset($data['generar_factura']);
+            $serieFactura = "FFF1";
+            $rucClienteFactura = $data['ruc_cliente'] ?? '';
+
+            if($generarFactura) {
+                if (empty($rucClienteFactura) || strlen($rucClienteFactura) != 11) {
+                    ob_clean();
+                    echo json_encode([
+                        'success' => false,
+                        'message' => 'RUC del cliente es obligatorio y debe tener 11 dígitos para generar factura.'
+                    ]);
+                    return;
+                } else {
+                    
+                }
+            }
 
 
             if (!empty($idPagos)) {

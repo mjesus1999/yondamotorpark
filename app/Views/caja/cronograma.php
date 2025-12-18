@@ -536,24 +536,25 @@
                                     </h6>
                                     <textarea class="form-control" rows="3" placeholder="Ingresa cualquier observación..." id="observacion" name="observacion"></textarea>
                                 </div>
-                                <div class="form-check form-switch d-flex gap-5 m-2 justify-content-end ">
+                             
+                            </div>
+                               <div class="form-check form-switch d-flex gap-5 m-2 justify-content-end ">
                                     <div>
                                         <input class="form-check-input" type="checkbox" role="switch" id="check-sunat" checked>
-                                        <span class="badge bg-success p-1 fw-bold">Enviar a SUNAT <span class="text-danger fw-bold">*</span></span>
+                                        <span class="badge bg-primary p-1 fw-bold">Enviar a sunat <span class="text-danger fw-bold">*</span></span>
                                     </div>
 
                                     <div>
-                                        <input class="form-check-input" type="checkbox" role="switch" id="check-enviar-email" checked>
+                                        <input class="form-check-input" type="checkbox" role="switch" id="check-enviar-email">
                                         <span class="badge bg-primary p-1 fw-bold">Enviar correo a cliente <span class="text-danger fw-bold">*</span></span>
                                     </div>
 
-                                       <div>
+                                    <div>
                                         <input class="form-check-input" type="checkbox" role="switch" id="check-factura">
                                         <span class="badge bg-primary p-1 fw-bold">Generar factura <span class="text-danger fw-bold">*</span></span>
                                     </div>
 
                                 </div>
-                            </div>
                         </div>
                     </div>
                 </form>
@@ -572,12 +573,94 @@
     </div>
 
 
-</div>
 
-<?php include __DIR__ . '/../layout/footer.php'; ?>
-<!-- USADO PARA GENERAR EL PDF -->
-<script src="/assets/js/logoBase64.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js" defer></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js" defer></script>
-<script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js" defer></script>
-<script src="/assets/js/cronograma-pagos/cronograma.js" type="module" defer></script>
+
+
+    <div class="modal fade"
+        id="modal-ruc-cliente"
+        tabindex="-1"
+        data-bs-backdrop="static"
+        data-bs-keyboard="false">
+
+        <div class="modal-dialog modal-md modal-dialog-centered">
+            <div class="modal-content shadow">
+
+                <!-- Header -->
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">
+                        <i class="bi bi-building"></i> Buscar RUC
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <!-- Body -->
+                <div class="modal-body">
+
+                    <!-- Input RUC -->
+                    <label class="form-label fw-semibold">RUC del cliente</label>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">
+                            <i class="bi bi-credit-card-2-front"></i>
+                        </span>
+                        <input type="text"
+                            class="form-control"
+                            placeholder="Ingrese 11 dígitos"
+                            id="input-ruc-cliente"
+                            maxlength="11"
+                            required>
+                        <button class="btn btn-success" id="btn-ruc-cliente">
+                            <i class="bi bi-search"></i> Buscar
+                        </button>
+                    </div>
+
+                    <!-- Resultado -->
+                    <div class="card border-0 bg-light mt-3">
+                        <div class="card-body py-2">
+
+                            <div class="row small">
+                                <div class="col-md-6 mb-2">
+                                    <div class="fw-semibold text-muted">Razón Social</div>
+                                    <div id="razonSocialCliente" class="fw-bold"></div>
+
+                                    <div class="fw-semibold text-muted mt-2">RUC</div>
+                                    <div id="numeroDocumento"></div>
+                                </div>
+
+                                <div class="col-md-6 mb-2">
+                                    <div class="fw-semibold text-muted">Estado</div>
+                                    <div id="estadoCliente" class="badge bg-success"></div>
+
+                                    <div class="fw-semibold text-muted mt-2">Dirección</div>
+                                    <div id="direccionCliente"></div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Footer -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle"></i> Cerrar
+                    </button>
+                    <button type="button" class="btn btn-primary" id="btn-gurdar-ruc-cliente">
+                        <i class="bi bi-check-circle"></i> Guardar
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+
+
+    </div>
+
+    <?php include __DIR__ . '/../layout/footer.php'; ?>
+    <!-- USADO PARA GENERAR EL PDF -->
+    <script src="/assets/js/logoBase64.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js" defer></script>
+    <script src="/assets/js/cronograma-pagos/cronograma.js" type="module" defer></script>

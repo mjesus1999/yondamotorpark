@@ -385,25 +385,25 @@ class Caja
 
 
     // 2. Actualizar datos de Nubefact tras éxito
-    public function actualizarDatosFacturacion(int $idPago, string $pdf, string $xml, ?string $cdr, int $numeroBoleta): bool
-    {
-        $sql = "UPDATE pagos SET 
-                    enlace_pdf_nubefact = :pdf,
-                    enlace_xml_nubefact = :xml,
-                    enlace_del_cdr = :cdr,
-                    numero_boleta_sunat = :num,
-                    declarado = 'S'
-                WHERE idpago = :idpago";
+    // public function actualizarDatosFacturacion(int $idPago, string $pdf, string $xml, ?string $cdr, int $numeroBoleta): bool
+    // {
+    //     $sql = "UPDATE pagos SET 
+    //                 enlace_pdf_nubefact = :pdf,
+    //                 enlace_xml_nubefact = :xml,
+    //                 enlace_del_cdr = :cdr,
+    //                 numero_boleta_sunat = :num,
+    //                 declarado = 'S'
+    //             WHERE idpago = :idpago";
 
-        $stmt = $this->db->prepare($sql);
-        return $stmt->execute([
-            ':pdf' => $pdf,
-            ':xml' => $xml,
-            ':cdr' => $cdr,
-            ':num' => $numeroBoleta,
-            ':idpago' => $idPago
-        ]);
-    }
+    //     $stmt = $this->db->prepare($sql);
+    //     return $stmt->execute([
+    //         ':pdf' => $pdf,
+    //         ':xml' => $xml,
+    //         ':cdr' => $cdr,
+    //         ':num' => $numeroBoleta,
+    //         ':idpago' => $idPago
+    //     ]);
+    // }
 
 
 
