@@ -1,6 +1,6 @@
 {
     "query": "vencidos",
-    "date": "2025-12-16 22:22:52",
+    "date": "2025-12-19 22:50:12",
     "total_registros": 7,
     "data": [
         {
@@ -17,7 +17,7 @@
             "cuotas_pagadas": "0",
             "estado_pagos": "2 vencidas de 36",
             "fecha_vencida_mas_antigua": "2025-11-10",
-            "dias_atraso": 36
+            "dias_atraso": 39
         },
         {
             "idcontrato": 22,
@@ -33,7 +33,7 @@
             "cuotas_pagadas": "0",
             "estado_pagos": "2 vencidas de 36",
             "fecha_vencida_mas_antigua": "2025-11-13",
-            "dias_atraso": 33
+            "dias_atraso": 36
         },
         {
             "idcontrato": 21,
@@ -49,7 +49,7 @@
             "cuotas_pagadas": "0",
             "estado_pagos": "2 vencidas de 36",
             "fecha_vencida_mas_antigua": "2025-11-13",
-            "dias_atraso": 33
+            "dias_atraso": 36
         },
         {
             "idcontrato": 31,
@@ -65,13 +65,13 @@
             "cuotas_pagadas": "0",
             "estado_pagos": "1 vencidas de 36",
             "fecha_vencida_mas_antigua": "2025-11-21",
-            "dias_atraso": 25
+            "dias_atraso": 28
         },
         {
             "idcontrato": 33,
             "cliente": "RODA GUTIERREZ JAVIER",
             "documento": "74501481",
-            "telefono": "960146545",
+            "telefono": "919482381",
             "vehiculo": "HYUNDAI Grand i10 Sedan",
             "tienda": "Chincha Alta",
             "cuotas_totales": 24,
@@ -81,7 +81,7 @@
             "cuotas_pagadas": "0",
             "estado_pagos": "1 vencidas de 24",
             "fecha_vencida_mas_antigua": "2025-11-22",
-            "dias_atraso": 24
+            "dias_atraso": 27
         },
         {
             "idcontrato": 36,
@@ -97,7 +97,7 @@
             "cuotas_pagadas": "0",
             "estado_pagos": "1 vencidas de 36",
             "fecha_vencida_mas_antigua": "2025-11-23",
-            "dias_atraso": 23
+            "dias_atraso": 26
         },
         {
             "idcontrato": 37,
@@ -113,7 +113,7 @@
             "cuotas_pagadas": "0",
             "estado_pagos": "1 vencidas de 36",
             "fecha_vencida_mas_antigua": "2025-11-23",
-            "dias_atraso": 23
+            "dias_atraso": 26
         }
     ]
 }

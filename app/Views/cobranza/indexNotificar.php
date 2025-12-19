@@ -121,14 +121,23 @@
 
     //Funciones auxiliares
     function escapeHtml(t) {
-        return t ? t.replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m])) : '';
+        return t ? t.replace(/[&<>"']/g, m => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;'
+        } [m])) : '';
     }
+
     function formatMoneda(v) {
         return 'S/. ' + (parseFloat(v) || 0).toFixed(2);
     }
+
     function validarTelefono(tel) {
         return /^[0-9]{9,15}$/.test(tel.replace(/\s/g, ''));
     }
+
     function mostrarToast(mensaje, tipo = 'info') {
         const nt = document.createElement('div');
         nt.className = `alert alert-${tipo === 'success' ? 'success' : tipo === 'warning' ? 'warning' : 'danger'} position-fixed`;
@@ -140,7 +149,9 @@
 
     //Cargar clientes
     async function cargarClientes() {
-        const res = await fetch('/Cobranza/getClientesNotificar', { cache: 'no-store' });
+        const res = await fetch('/Cobranza/getClientesNotificar', {
+            cache: 'no-store'
+        });
         const data = await res.json();
         if (!data.success) throw new Error(data.message || 'Error al cargar datos');
         return data.data || [];
@@ -150,7 +161,9 @@
     async function enviarSms(cliente) {
         const res = await fetch('/Cobranza/enviarSmsNotificacion', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json'
+            },
             body: JSON.stringify(cliente)
         });
         return res.json();
@@ -181,33 +194,73 @@
                 pagination: "local",
                 paginationSize: 15,
                 paginationSizeSelector: [10, 15, 25, 50],
-                columns: [
-                    { title: "#", formatter: "rownum", width: 50 },
-                    { title: "Cliente", field: "cliente", widthGrow: 6, tooltip: true },
+                columns: [{
+                        title: "#",
+                        formatter: "rownum",
+                        width: 50
+                    },
                     {
-                        title: "Teléfono", field: "telefono", widthGrow: 3, formatter: (cell) => {
+                        title: "Cliente",
+                        field: "cliente",
+                        widthGrow: 6,
+                        tooltip: true
+                    },
+                    {
+                        title: "Teléfono",
+                        field: "telefono",
+                        widthGrow: 3,
+                        formatter: (cell) => {
                             const val = cell.getValue() || 'N/A';
                             const data = cell.getRow().getData();
-                            return val !== 'N/A'
-                                ? ` <a href="#" class="text-decoration-none link-telefono" data-id="${data.idcontrato}" data-cliente="${escapeHtml(data.cliente)}" data-tel="${val}">
+                            return val !== 'N/A' ?
+                                ` <a href="#" class="text-decoration-none link-telefono" data-id="${data.idcontrato}" data-cliente="${escapeHtml(data.cliente)}" data-tel="${val}">
                                         <i class="fas fa-phone-alt me-1"></i>${escapeHtml(val)}
-                                    </a>`
-                                : `<span class="text-muted">N/A</span>`;
+                                    </a>` :
+                                `<span class="text-muted">N/A</span>`;
                         }
                     },
-                    { title: "Vehículo", field: "vehiculo", widthGrow: 4 },
-                    { title: "Tienda", field: "local", widthGrow: 3 },
                     {
-                        title: "Cuotas", field: "cuotas_pagadas", widthGrow: 3, formatter: (cell) => {
+                        title: "Vehículo",
+                        field: "vehiculo",
+                        widthGrow: 4
+                    },
+                    {
+                        title: "Tienda",
+                        field: "local",
+                        widthGrow: 3
+                    },
+                    {
+                        title: "Cuotas",
+                        field: "cuotas_pagadas",
+                        widthGrow: 3,
+                        formatter: (cell) => {
                             const d = cell.getRow().getData();
                             return `${d.cuotas_pagadas} / ${d.cuotas_totales}`;
                         }
                     },
-                    { title: "Monto Cuota", field: "monto_cuota", widthGrow: 3, hozAlign: "right", formatter: c => formatMoneda(c.getValue()) },
-                    { title: "Fecha Venc.", field: "fecha_vencimiento", widthGrow: 3 },
                     {
-                        title: "Acciones", hozAlign: "center", headerSort: false, widthGrow: 2,
-                        formatter: (cell) => `<button class="btn btn-sm btn-secondary btn-sms"><i class="fas fa-paper-plane"></i></button>`
+                        title: "Monto Cuota",
+                        field: "monto_cuota",
+                        widthGrow: 3,
+                        hozAlign: "right",
+                        formatter: c => formatMoneda(c.getValue())
+                    },
+                    {
+                        title: "Fecha Venc.",
+                        field: "fecha_vencimiento",
+                        widthGrow: 3
+                    },
+                    {
+                        title: "Acciones",
+                        hozAlign: "center",
+                        headerSort: false,
+                        widthGrow: 2,
+                        formatter: (cell) => {
+
+                            const id = cell.getRow().getData().idcontrato;
+
+                            return `<button class="btn btn-sm btn-secondary btn-sms" data-id="${id}"><i class="fas fa-paper-plane"></i></button>`;
+                        }
                     }
                 ]
             });
@@ -215,15 +268,30 @@
             //Filtro de busqueda
             const searchInput = document.getElementById("busqueda-global");
             if (searchInput) {
-                searchInput.addEventListener("keyup", function (e) {
+                searchInput.addEventListener("keyup", function(e) {
                     const val = e.target.value.trim();
                     if (!val) tabla.clearFilter();
                     else tabla.setFilter([
-                        [
-                            { field: "cliente", type: "like", value: val },
-                            { field: "telefono", type: "like", value: val },
-                            { field: "vehiculo", type: "like", value: val },
-                            { field: "local", type: "like", value: val }
+                        [{
+                                field: "cliente",
+                                type: "like",
+                                value: val
+                            },
+                            {
+                                field: "telefono",
+                                type: "like",
+                                value: val
+                            },
+                            {
+                                field: "vehiculo",
+                                type: "like",
+                                value: val
+                            },
+                            {
+                                field: "local",
+                                type: "like",
+                                value: val
+                            }
                         ]
                     ]);
                 });
@@ -244,14 +312,22 @@
                 }
 
                 if (btnSms) {
-                    const row = tabla.getRowFromElement(btnSms.closest('.tabulator-row'));
-                    const data = row.getData();
-                    btnSms.disabled = true;
-                    btnSms.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-                    const result = await enviarSms(data);
-                    btnSms.className = `btn btn-sm ${result.success ? 'btn-success' : 'btn-danger'} btn-sms`;
-                    btnSms.innerHTML = `<i class="fas fa-${result.success ? 'check' : 'times'}"></i>`;
-                    btnSms.title = result.message || '';
+                   
+                    const id = btnSms.dataset.id;
+
+                 
+                    const data = datos.find(d => d.idcontrato == id);
+
+                    if (data) {
+                        btnSms.disabled = true;
+                        btnSms.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+                        const result = await enviarSms(data);
+
+                        btnSms.className = `btn btn-sm ${result.success ? 'btn-success' : 'btn-danger'} btn-sms`;
+                        btnSms.innerHTML = `<i class="fas fa-${result.success ? 'check' : 'times'}"></i>`;
+                        btnSms.title = result.message || '';
+                    }
                 }
             });
 
@@ -315,7 +391,7 @@
             });
 
             //Boton Notificar Todos
-            document.getElementById('btnNotificarTodos').addEventListener('click', async function () {
+            document.getElementById('btnNotificarTodos').addEventListener('click', async function() {
                 const btn = this;
                 btn.disabled = true;
                 btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Enviando...';
@@ -358,7 +434,7 @@
 
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fas fa-paper-plane me-1"></i>Notificar Todos';
- 
+
                 // Mostrar resultado con showToast
                 if (fallidos === 0) {
                     showToast(`Proceso completado: ${exitosos} notificaciones enviadas exitosamente`, 'SUCCESS');
@@ -405,7 +481,9 @@
                 try {
                     const res = await fetch('/Cobranza/actualizarTelefono', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
                         body: JSON.stringify({
                             idcontrato: id,
                             telefono_actual: telActual,
