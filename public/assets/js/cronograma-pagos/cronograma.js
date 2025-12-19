@@ -75,58 +75,97 @@ document.addEventListener('DOMContentLoaded', async () => {
         btnGuardarRucCliente: document.getElementById('btn-gurdar-ruc-cliente'),
 
 
-    };
+    }; async function getContribuyenteBySunat() {
+        const rucInput = elements.inputRucCliente.value.trim();
 
+        if (rucInput.length !== 11) {
+            showToast('El RUC debe tener 11 dígitos.', 'WARNING');
+            return;
+        }
 
-    async function getContribuyenteBySunat() {
         try {
-            const res = await fetch(`/api/concesionarioSunat/${String(elements.inputRucCliente.value).trim()}`, { method: 'GET' });
-            if (!res.ok) {
-                throw new Error('Error al obtener datos de SUNAT: ', res.statusText);
-            }
+            const res = await fetch(`/api/concesionarioSunat/${rucInput}`, { method: 'GET' });
+            if (!res.ok) throw new Error('Error API');
+
             const data = await res.json();
 
-            if (data.razonSocial && data.estado.toLowerCase() === 'activo' && data.numeroDocumento) {
+            if (data.razonSocial && data.estado.toLowerCase() === 'activo') {
                 showToast('Cliente encontrado', 'SUCCESS', 1300);
+
+                // Mostrar datos en el modal
                 elements.razonSocialCliente.textContent = data.razonSocial;
                 elements.numeroDocumentoCliente.textContent = data.numeroDocumento;
                 elements.estadoCLiente.textContent = data.estado;
                 elements.direccionCliente.textContent = data.direccion || 'Sin especificar';
 
-                elements.btnGuardarRucCliente.addEventListener('click', async () => {
-
-                    rucCliente = data.numeroDocumento;
-                    elements.modalRucCliente.hide();
-                    console.log('rucCliente guardado: ', rucCliente);
-                });
-
-
+                // Habilitar botón de guardar
+                elements.btnGuardarRucCliente.disabled = false;
+                elements.btnGuardarRucCliente.dataset.tempRuc = data.numeroDocumento;
 
             } else {
-                showToast('No existe el cliente o está inactivo', 'WARNING', 1200);
-                rucCliente = null;
+                showToast('Cliente no encontrado o inactivo', 'WARNING');
+                limpiarDatosModalRuc();
             }
-        }
-        catch (error) {
+        } catch (error) {
             console.error(error);
+            showToast('Error al consultar SUNAT', 'ERROR');
         }
     }
+
 
     elements.btnRucCliente.addEventListener('click', async () => {
         await getContribuyenteBySunat();
     });
 
 
-    elements.checkFatcura.addEventListener('change', (e) => {
-        if (e.target.checked) {
-            console.log('checked');
-            elements.modalRucCliente.show();
+    elements.btnGuardarRucCliente.addEventListener('click', () => {
+
+        const tempRuc = elements.btnGuardarRucCliente.dataset.tempRuc;
+
+        if (tempRuc) {
+            rucCliente = tempRuc;
+            elements.modalRucCliente.hide();
+            console.log('RUC confirmado:', rucCliente);
         } else {
-            e.target.checked = false;
+            showToast('Debe buscar un RUC válido primero.', 'WARNING');
         }
     });
 
+    document.getElementById('modal-ruc-cliente').addEventListener('hidden.bs.modal', () => {
 
+        if (!rucCliente) {
+            if (elements.checkFatcura.checked) {
+                elements.checkFatcura.checked = false;
+                showToast('Se desactivó Factura porque no se seleccionó un cliente.', 'INFO', 3000);
+            }
+            limpiarDatosModalRuc();
+        }
+    });
+
+    if (elements.checkFatcura) {
+        elements.checkFatcura.addEventListener('change', (e) => {
+            if (e.target.checked) {
+
+                rucCliente = null;
+                limpiarDatosModalRuc();
+                elements.modalRucCliente.show();
+            } else {
+
+                rucCliente = null;
+                limpiarDatosModalRuc();
+            }
+        });
+    }
+
+    function limpiarDatosModalRuc() {
+        elements.inputRucCliente.value = '';
+        elements.razonSocialCliente.textContent = '';
+        elements.numeroDocumentoCliente.textContent = '';
+        elements.estadoCLiente.textContent = '';
+        elements.direccionCliente.textContent = '';
+        elements.btnGuardarRucCliente.disabled = true;
+        delete elements.btnGuardarRucCliente.dataset.tempRuc;
+    }
 
 
     elements.modalBoleta.addEventListener('shown.bs.modal', () => {
@@ -138,15 +177,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (dataLocalBoleta && dataLocalBoleta.enlace) {
             // elements.linkBoleta.href = dataLocalBoleta.enlace;
             elements.modalBoleta.querySelector('.modal-body').innerHTML = '';
-            elements.modalBoleta.querySelector('.modal-title').textContent = 'Boleta de pago reciente';
-            elements.modalBoleta.querySelector('.modal-body').innerHTML += `<p class="">Puedes dar clic aquí para ir a visualizar la boleta: <a href="${dataLocalBoleta.enlace}"  target="_blank" id="link-boleta" style="text-decoration: underline;">Ver Boleta</a></p>`;
-            elements.linkBoleta.style.display = 'inline-block';
+            elements.modalBoleta.querySelector('.modal-title').textContent = 'Comprobante de pago reciente';
+            elements.modalBoleta.querySelector('.modal-body').innerHTML += `<p class="">Puedes dar clic aquí para ir a visualizar el comprobante: <a href="${dataLocalBoleta.enlace}"  target="_blank" id="link-boleta" style="text-decoration: underline;">Ver Boleta</a></p>`;
+            if (elements.linkBoleta) elements.linkBoleta.style.display = 'inline-block';
         } else {
-            console.warn('No hay boleta reciente para este contrato específico.');
+            console.warn('No hay comprobante reciente para este contrato específico.');
 
             elements.modalBoleta.querySelector('.modal-body').innerHTML = '';
-            elements.modalBoleta.querySelector('.modal-body').innerHTML = '<p class="text-center">Todavía no se ha registrado una boleta de pago</p>'
-            elements.modalBoleta.querySelector('.modal-title').textContent = 'Sin boleta reciente';
+            elements.modalBoleta.querySelector('.modal-body').innerHTML = '<p class="text-center">Todavía no se ha registrado un comprobante de pago</p>'
+            elements.modalBoleta.querySelector('.modal-title').textContent = 'Sin comprobante reciente';
         }
     });
 
@@ -308,9 +347,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
 
-    // elements.checkSunat.addEventListener('change', (e) => {
-    //     console.log(e.target.checked);
-    // })
 
 
 
@@ -463,13 +499,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
 
-
     async function submitForm() {
 
         if (!await ask('¿Estás seguro de registrar este pago?', 'Confirmar')) {
             return;
         }
 
+        // Bloquear botón
         elements.btnConfirmarPago.disabled = true;
         elements.btnConfirmarPago.classList.add('disabled', 'opacity-75');
         elements.btnConfirmarPago.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Procesando...';
@@ -477,19 +513,40 @@ document.addEventListener('DOMContentLoaded', async () => {
         const formData = new FormData(elements.formPago);
         formData.append('idcronograma', idCronogramaSeleccionado);
 
-        const switchElement = document.getElementById('check-sunat');
-        const emitirSunat = switchElement && switchElement.checked ? '1' : '0';
-        const enviarCorreo = elements.checkEnviarCorreo && elements.checkEnviarCorreo.checked ? '1' : '0';
-        const generarFactura = elements.checkFatcura && elements.checkFatcura.checked ? true : false;
-
-        if (generarFactura) {
-            formData.append('generar_factura', generarFactura);
-            formData.append('ruc_cliente', elements.inputRucCliente.value.trim());
-        }
-
+        // Switches
+        const switchSunat = document.getElementById('check-sunat');
+        const emitirSunat = switchSunat && switchSunat.checked ? '1' : '0';
         formData.append('emitir_sunat', emitirSunat);
+
+        const switchEmail = document.getElementById('check-enviar-email');
+        const enviarCorreo = switchEmail && switchEmail.checked ? '1' : '0';
         formData.append('enviar_correo', enviarCorreo);
 
+
+        const quiereFactura = elements.checkFatcura && elements.checkFatcura.checked;
+        if (quiereFactura) {
+
+            if (!rucCliente) {
+                showToast('Error: No se ha seleccionado un RUC válido para la factura.', 'ERROR');
+
+                elements.checkFatcura.checked = false;
+                restaurarBoton();
+                return;
+            }
+            if (rucCliente.length !== 11) {
+                showToast('Para emitir Factura, es obligatorio buscar y seleccionar un RUC válido (11 dígitos).', 'WARNING', 4000);
+                restaurarBoton();
+                return;
+            }
+
+            formData.append('generar_factura', 'true');
+            formData.append('ruc_cliente', rucCliente);
+
+            formData.append('razon_social_cliente', elements.razonSocialCliente.textContent);
+            formData.append('direccion_cliente', elements.direccionCliente.textContent);
+        } else {
+            formData.append('generar_factura', 'false');
+        }
 
 
         const modal = document.getElementById('modalPago');
@@ -503,7 +560,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         formData.append('total_capital_prorrateado', prorrateo.capital.toFixed(2));
         formData.append('total_interes_prorrateado', prorrateo.interes.toFixed(2));
 
-
+        // Cuentas bancarias
         if (elements.medioPagoSelect.value === MEDIOS_PAGO.transferenciaBancaria) {
             formData.append('idcuentapago', elements.numeroCuentaSelect.value);
         }
@@ -517,12 +574,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         try {
-
             const res = await fetch('/pago/cronograma', {
                 method: 'POST',
                 body: formData
             });
-
 
             const textoRespuesta = await res.text();
             let data;
@@ -534,25 +589,22 @@ document.addEventListener('DOMContentLoaded', async () => {
                 throw new Error("El servidor devolvió una respuesta inválida.");
             }
 
-            // console.log('DATA: ', data)
-
             if (data.success) {
-
 
                 if (data.enlace_pdf) {
                     const win = window.open(data.enlace_pdf, '_blank');
-
                     if (!win) {
-                        showToast('Pago registrado. Habilita las ventanas emergentes para ver la boleta.', 'WARNING', 4000);
+                        showToast('Pago registrado. Habilita las ventanas emergentes para ver el comprobante.', 'WARNING', 4000);
                     }
 
-                    // Guardar en localStorage para consulta rápida posterior
+
                     const ultima = {
                         idcronograma: idCronogramaSeleccionado,
                         enlace: data.enlace_pdf,
                         ts: Date.now()
                     };
                     const idContrato = elements.tablaBody.dataset.idContrato;
+
                     localStorage.setItem(`ultimaBoleta_contrato_${idContrato}`, JSON.stringify(ultima));
                 }
 
@@ -564,18 +616,19 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }, 1500);
 
             } else {
-
-                showToast(data.message || 'Error al registrar el pago.', 'WARNING', 3000);
+                showToast(data.message || 'Error al registrar el pago.', 'WARNING', 4000);
                 restaurarBoton();
             }
 
         } catch (err) {
-
             console.error('Error:', err);
             showToast('Error de red o del servidor. Intenta de nuevo.', 'ERROR', 3000);
             restaurarBoton();
         }
     }
+
+
+
 
     function restaurarBoton() {
         elements.btnConfirmarPago.disabled = false;

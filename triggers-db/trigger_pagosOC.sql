@@ -9,7 +9,7 @@ FOR EACH ROW
 BEGIN
     DECLARE totalOC DECIMAL(10,2);
     DECLARE totalPagosUSD DECIMAL(10,4); 
-    DECLARE totalPagosRedondeado DECIMAL(10,2); -- Nuevo: Variable para el valor redondeado
+    DECLARE totalPagosRedondeado DECIMAL(10,2); 
 
     -- Obtener el total de la OC con IGV
     SELECT ROUND(IFNULL(SUM(preciocompra * 1.18),0),2) INTO totalOC
@@ -93,15 +93,3 @@ DELIMITER ;
 
 
 
-SHOW TRIGGERS;
-
-
-SELECT * FROM pagosOC;
-
-
-use motorpark;
-
-
-SHOW EVENTS FROM motorpark;
-
-SHOW TRIGGERS;

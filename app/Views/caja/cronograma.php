@@ -573,9 +573,6 @@
     </div>
 
 
-
-
-
     <div class="modal fade"
         id="modal-ruc-cliente"
         tabindex="-1"
@@ -585,7 +582,7 @@
         <div class="modal-dialog modal-md modal-dialog-centered">
             <div class="modal-content shadow">
 
-                <!-- Header -->
+            
                 <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title">
                         <i class="bi bi-building"></i> Buscar RUC
@@ -593,10 +590,7 @@
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
 
-                <!-- Body -->
                 <div class="modal-body">
-
-                    <!-- Input RUC -->
                     <label class="form-label fw-semibold">RUC del cliente</label>
                     <div class="input-group mb-3">
                         <span class="input-group-text">
@@ -613,8 +607,8 @@
                         </button>
                     </div>
 
-                    <!-- Resultado -->
-                    <div class="card border-0 bg-light mt-3">
+              
+                    <div class="card border-0 bg-body mt-3">
                         <div class="card-body py-2">
 
                             <div class="row small">
@@ -640,7 +634,7 @@
 
                 </div>
 
-                <!-- Footer -->
+             
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                         <i class="bi bi-x-circle"></i> Cerrar
@@ -658,7 +652,7 @@
     </div>
 
     <?php include __DIR__ . '/../layout/footer.php'; ?>
-    <!-- USADO PARA GENERAR EL PDF -->
+
     <script src="/assets/js/logoBase64.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js" defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js" defer></script>

@@ -844,6 +844,7 @@ CREATE TABLE proovedores(
 
 
 
+
 CREATE TABLE arqueocaja (
     idarqueo INT PRIMARY KEY AUTO_INCREMENT,
     idcolaborador INT NOT NULL,
@@ -864,7 +865,39 @@ CREATE TABLE arqueocaja (
     CONSTRAINT fk_colaborador_arqueo FOREIGN KEY (idcolaborador) REFERENCES colaboradores(idcolaborador)
 ) ENGINE = InnoDB;
 
--- ALTER TABLE arqueocaja ADD COLUMN entregado ENUM('S', 'N') NOT NULL DEFAULT 'N';
+
+
+CREATE TABLE entregasdinero (
+    identrega INT AUTO_INCREMENT PRIMARY KEY,
+    idcolentrega INT NOT NULL,
+    fechaentrega DATETIME NOT NULL DEFAULT NOW(),
+    montoentregado DECIMAL(10, 2) NOT NULL,
+    observaciones VARCHAR(500) NULL,
+    creado DATETIME NOT NULL DEFAULT NOW(),
+    CONSTRAINT fk_colaborador_entrega FOREIGN KEY (idcolentrega) REFERENCES colaboradores(idcolaborador)
+) ENGINE = InnoDB;
+
+
+CREATE TABLE entregasdineroarqueos (
+    identregaarqueo INT AUTO_INCREMENT PRIMARY KEY,
+    identrega INT NOT NULL,
+    idarqueo INT NOT NULL,
+    CONSTRAINT fk_entrega_arqueo FOREIGN KEY (identrega) REFERENCES entregasdinero(identrega),
+    CONSTRAINT fk_arqueo_entrega FOREIGN KEY (idarqueo) REFERENCES arqueocaja(idarqueo)
+) ENGINE = InnoDB;
+
+
+
+CREATE TABLE entregasdinero_destinos (
+    identregadestino INT AUTO_INCREMENT PRIMARY KEY,
+    identrega INT NOT NULL,
+    tipodestino ENUM('Gerente', 'Deposito') NOT NULL,
+    iddestino INT NOT NULL,
+    monto DECIMAL(10, 2) NOT NULL,
+    CONSTRAINT fk_entrega_destino FOREIGN KEY (identrega) REFERENCES entregasdinero(identrega)
+) ENGINE = InnoDB;
+
+
 
 
 
