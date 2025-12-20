@@ -23,13 +23,13 @@
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     }
 
-    input[type="radio"]:checked + label {
+    input[type="radio"]:checked+label {
         background-color: #0d6efd !important;
         color: white !important;
         border-color: #0d6efd !important;
     }
-    
-    input[type="radio"]:checked + label .badge {
+
+    input[type="radio"]:checked+label .badge {
         background-color: white !important;
         color: #0d6efd !important;
     }
@@ -457,7 +457,7 @@
             .then(([estadisticas, tarjetas]) => {
                 actualizarEstadisticas(estadisticas);
                 renderizarTarjetas(tarjetas);
-                console.log('Datos cargados correctamente');
+
             })
             .catch(error => {
                 console.error('Error al cargar datos:', error);
@@ -499,12 +499,12 @@
         try {
             // Cargar todos los datos en paralelo usando Promise.all
             const [infoCliente, detalleContrato, cronograma, historialPagos] =
-                await Promise.all([
-                    fetch(`/Cobranza/getInfoCliente/${idContrato}`).then(r => r.json()),
-                    fetch(`/Cobranza/getDetalleContrato/${idContrato}`).then(r => r.json()),
-                    fetch(`/Cobranza/getCronogramaPagos/${idContrato}`).then(r => r.json()),
-                    fetch(`/Cobranza/getHistorialPagos/${idContrato}/5`).then(r => r.json())
-                ]);
+            await Promise.all([
+                fetch(`/Cobranza/getInfoCliente/${idContrato}`).then(r => r.json()),
+                fetch(`/Cobranza/getDetalleContrato/${idContrato}`).then(r => r.json()),
+                fetch(`/Cobranza/getCronogramaPagos/${idContrato}`).then(r => r.json()),
+                fetch(`/Cobranza/getHistorialPagos/${idContrato}/5`).then(r => r.json())
+            ]);
 
             // Verificar que todas las peticiones fueron exitosas
             if (!infoCliente.success || !detalleContrato.success || !cronograma.success || !historialPagos.success) {
@@ -528,7 +528,7 @@
             document.getElementById('modal-loader').style.display = 'none';
             document.getElementById('modal-contenido').style.display = 'block';
 
-            console.log('Modal cargado correctamente');
+
 
         } catch (error) {
             console.error('Error al cargar el modal:', error);
@@ -544,98 +544,243 @@
     function renderizarInfoCliente(data) {
         let html = '';
 
+       
+        const item = (label, value) => `
+        <div class="mb-3">
+            <label class="d-block text-body-secondary text-uppercase fw-bold" style="font-size: 0.65rem; letter-spacing: 1px;">
+                ${label}
+            </label>
+            <div class="text-body-emphasis fw-medium fs-6 text-break">
+                ${value || '<span class="text-body-secondary opacity-50 fst-italic small">No registrado</span>'}
+            </div>
+        </div>
+    `;
+
+        // Icono con fondo adaptable
+        const headerIcon = (iconClass, title) => `
+        <div class="d-flex align-items-center mb-4 pb-2 border-bottom border-secondary border-opacity-10">
+            <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                <i class="${iconClass} fa-lg"></i>
+            </div>
+            <h6 class="text-body-emphasis fw-bold mb-0 text-uppercase ls-1">${title}</h6>
+        </div>
+    `;
+
         if (data.tipocliente === 'P') {
-            // Cliente Persona Natural
+            // --- Cliente Persona Natural ---
             html = `
-            <h6 class="border-bottom pb-2 mb-3"><i class="fas fa-user me-2"></i>Información Personal</h6>
-            <div class="row">
-                <div class="col-md-6">
-                    <p><strong>Nombre Completo:</strong> ${data.nombre_completo || 'N/A'}</p>
-                    <p><strong>Tipo Documento:</strong> ${data.tipo_documento || 'N/A'}</p>
-                    <p><strong>Número Documento:</strong> ${data.numero_documento || 'N/A'}</p>
-                    <p><strong>Email:</strong> ${data.email_persona || 'N/A'}</p>
-                </div>
-                <div class="col-md-6">
-                    <p><strong>Teléfono Principal:</strong> ${data.telefono_primario_persona || 'N/A'}</p>
-                    <p><strong>Teléfono Alternativo:</strong> ${data.telefono_alternativo_persona || 'N/A'}</p>
-                    <p><strong>Distrito:</strong> ${data.distrito || 'N/A'}</p>
-                    <p><strong>Provincia:</strong> ${data.provincia || 'N/A'}</p>
+        <div class="row g-3">
+            <div class="col-lg-6">
+                <div class="p-4 bg-body-tertiary rounded-4 h-100 border border-translucent">
+                    ${headerIcon('fas fa-user', 'Información Personal')}
+                    
+                    <div class="row g-2">
+                        <div class="col-12">
+                            ${item('Nombre Completo', data.nombre_completo)}
+                        </div>
+                        <div class="col-sm-6">
+                            ${item('Tipo Documento', data.tipo_documento)}
+                        </div>
+                        <div class="col-sm-6">
+                            ${item('Número Documento', data.numero_documento)}
+                        </div>
+                        <div class="col-12">
+                            ${item('Email', data.email_persona)}
+                        </div>
+                        <div class="col-sm-6">
+                            ${item('Teléfono Principal', data.telefono_primario_persona)}
+                        </div>
+                        <div class="col-sm-6">
+                            ${item('Teléfono Alternativo', data.telefono_alternativo_persona)}
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="row mt-2">
-                <div class="col-12">
-                    <p><strong>Dirección:</strong> ${data.direccion_persona || 'N/A'}</p>
+
+            <div class="col-lg-6">
+                <div class="p-4 bg-body-tertiary rounded-4 h-100 border border-translucent">
+                    ${headerIcon('fas fa-map-marker-alt', 'Ubicación')}
+                    
+                    <div class="row g-2">
+                        <div class="col-sm-6">
+                            ${item('Distrito', data.distrito)}
+                        </div>
+                        <div class="col-sm-6">
+                            ${item('Provincia', data.provincia)}
+                        </div>
+                        <div class="col-12">
+                            ${item('Dirección Domiciliaria', data.direccion_persona)}
+                        </div>
+                    </div>
                 </div>
             </div>
-        `;
+        </div>`;
         } else {
-            // Cliente Empresa
+            // --- Cliente Empresa ---
             html = `
-            <h6 class="border-bottom pb-2 mb-3"><i class="fas fa-building me-2"></i>Información Empresarial</h6>
-            <div class="row">
-                <div class="col-md-6">
-                    <p><strong>Razón Social:</strong> ${data.razon_social || 'N/A'}</p>
-                    <p><strong>RUC:</strong> ${data.ruc || 'N/A'}</p>
-                    <p><strong>Representante Legal:</strong> ${data.representante_legal || 'N/A'}</p>
-                    <p><strong>Email:</strong> ${data.email_empresa || 'N/A'}</p>
-                </div>
-                <div class="col-md-6">
-                    <p><strong>Teléfono Principal:</strong> ${data.telefono_primario_empresa || 'N/A'}</p>
-                    <p><strong>Teléfono Secundario:</strong> ${data.telefono_secundario_empresa || 'N/A'}</p>
-                    <p><strong>Distrito:</strong> ${data.distrito || 'N/A'}</p>
-                    <p><strong>Provincia:</strong> ${data.provincia || 'N/A'}</p>
+        <div class="row g-3">
+            <div class="col-lg-6">
+                <div class="p-4 bg-body-tertiary rounded-4 h-100 border border-translucent">
+                    ${headerIcon('fas fa-building', 'Información Empresarial')}
+                    
+                    <div class="row g-2">
+                        <div class="col-12">
+                            ${item('Razón Social', data.razon_social)}
+                        </div>
+                        <div class="col-sm-6">
+                            ${item('RUC', data.ruc)}
+                        </div>
+                        <div class="col-sm-6">
+                            ${item('Representante Legal', data.representante_legal)}
+                        </div>
+                        <div class="col-12">
+                            ${item('Email Corporativo', data.email_empresa)}
+                        </div>
+                        <div class="col-sm-6">
+                            ${item('Teléfono Principal', data.telefono_primario_empresa)}
+                        </div>
+                        <div class="col-sm-6">
+                            ${item('Teléfono Secundario', data.telefono_secundario_empresa)}
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="row mt-2">
-                <div class="col-12">
-                    <p><strong>Dirección:</strong> ${data.direccion_empresa || 'N/A'}</p>
+
+            <div class="col-lg-6">
+                <div class="p-4 bg-body-tertiary rounded-4 h-100 border border-translucent">
+                    ${headerIcon('fas fa-map-marker-alt', 'Ubicación Fiscal')}
+                    
+                    <div class="row g-2">
+                        <div class="col-sm-6">
+                            ${item('Distrito', data.distrito)}
+                        </div>
+                        <div class="col-sm-6">
+                            ${item('Provincia', data.provincia)}
+                        </div>
+                        <div class="col-12">
+                            ${item('Dirección Fiscal', data.direccion_empresa)}
+                        </div>
+                    </div>
                 </div>
             </div>
-        `;
+        </div>`;
         }
 
         document.getElementById('info-cliente-contenido').innerHTML = html;
     }
 
     function renderizarDetalleContrato(data) {
-        const nombreMoneda = data.moneda === 'PEN' ? 'Soles' : 'Dolares';
+        const nombreMoneda = data.moneda === 'PEN' ? 'Soles (PEN)' : 'Dólares (USD)';
         const simboloMoneda = data.moneda === 'PEN' ? 'S/.' : '$';
-        const html = `
-        <div class="row">
-            <div class="col-md-6">
-                <h6 class="border-bottom pb-2 mb-3"><i class="fas fa-file-contract me-2"></i>Datos del Contrato</h6>
-                <p><strong>N° de Contrato:</strong> ${data.idcontrato || 'N/A'}</p>
-                <p><strong>Fecha Inicio:</strong> ${data.fechainicio || 'N/A'}</p>
-                <p><strong>Es Crédito:</strong> ${data.escredito === 'S' ? 'Sí' : 'No'}</p>
-            </div>
-            <div class="col-md-6">
-                <h6 class="border-bottom pb-2 mb-3"><i class="fas fa-car me-2"></i>Datos del Vehículo</h6>
-                <p><strong>Vehículo:</strong> ${data.vehiculo_descripcion || 'N/A'}</p>
-                <p><strong>Tipo:</strong> ${data.tipovehiculo || 'N/A'}</p>
-                <p><strong>Versión:</strong> ${data.version || 'N/A'}</p>
-                <p><strong>Condición:</strong> ${data.condicion || 'N/A'}</p>
-                <p><strong>Color:</strong> ${data.color || 'N/A'}</p>
-                <p><strong>Placa:</strong> ${data.placa || 'N/A'}</p>
-                <p><strong>Combustible:</strong> ${data.combustible || 'N/A'}</p>
+
+        // Badges modernos y sutiles
+        const esCreditoBadge = data.escredito === 'S' ?
+            '<span class="badge bg-success-subtle text-success border border-success-subtle px-3 rounded-pill">Crédito</span>' :
+            '<span class="badge bg-info-subtle text-info border border-info-subtle px-3 rounded-pill">Contado</span>';
+
+        const item = (label, value, isHighlight = false) => `
+        <div class="mb-3">
+            <label class="d-block text-body-secondary text-uppercase fw-bold" style="font-size: 0.65rem; letter-spacing: 1px;">
+                ${label}
+            </label>
+            <div class="${isHighlight ? 'text-primary fw-bold fs-5' : 'text-body-emphasis fw-medium fs-6'}">
+                ${value || '<span class="text-body-secondary opacity-50">-</span>'}
             </div>
         </div>
-        <div class="row mt-3">
-            <div class="col-md-6">
-                <h6 class="border-bottom pb-2 mb-3"><i class="fas fa-dollar-sign me-2"></i>Información Financiera</h6>
-                <p><strong>Moneda:</strong> ${nombreMoneda}</p>
-                <p><strong>Monto:</strong> ${simboloMoneda} ${parseFloat(data.precioventa || 0).toFixed(2)}</p>
-                <p><strong>Inicial:</strong> ${simboloMoneda} ${parseFloat(data.inicial || 0).toFixed(2)}</p>
-                <p><strong>Total de Cuotas:</strong> ${data.numcuotas || 'N/A'}</p>
-                <p><strong>Valor Cuota:</strong> ${simboloMoneda} ${parseFloat(data.valorcuota || 0).toFixed(2)}</p>
-                <p><strong>Gastos Administrativos:</strong> ${simboloMoneda} ${parseFloat(data.gastosadministrativos || 0).toFixed(2)}</p>
+    `;
+
+        const headerIcon = (iconClass, title, colorClass = 'text-primary', bgClass = 'bg-primary') => `
+        <div class="d-flex align-items-center mb-4 pb-2 border-bottom border-secondary border-opacity-10">
+            <div class="${bgClass} bg-opacity-10 ${colorClass} rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                <i class="${iconClass} fa-lg"></i>
             </div>
-            <div class="col-md-6">
-                <div class="col-12">
-                    <h6 class="border-bottom pb-2 mb-3"><i class="fas fa-comment me-2"></i>Observaciones</h6>
-                    <p>${data.observaciones}</p>
+            <h6 class="text-body-emphasis fw-bold mb-0 text-uppercase ls-1">${title}</h6>
+        </div>
+    `;
+
+        const html = `
+    <div class="row g-3">
+        <div class="col-lg-6">
+            <div class="p-4 bg-body-tertiary rounded-4 h-100 border border-translucent">
+                ${headerIcon('fas fa-file-invoice-dollar', 'Detalles Financieros')}
+                
+                <div class="row g-2">
+                     <div class="col-6">
+                        ${item('N° Contrato', `<span class="badge bg-body-secondary text-body-emphasis border">${data.idcontrato || 'N/A'}</span>`)}
+                    </div>
+                    <div class="col-6">
+                        ${item('Modalidad', esCreditoBadge)}
+                    </div>
+                    <div class="col-6">
+                        ${item('Fecha Inicio', data.fechainicio)}
+                    </div>
+                    <div class="col-6">
+                        ${item('Moneda', nombreMoneda)}
+                    </div>
+                    
+                    <div class="col-12 my-2"><hr class="text-secondary opacity-25"></div>
+
+                    <div class="col-6">
+                        ${item('Precio Venta', `${simboloMoneda} ${parseFloat(data.precioventa || 0).toFixed(2)}`, true)}
+                    </div>
+                    <div class="col-6">
+                        ${item('Cuota Inicial', `${simboloMoneda} ${parseFloat(data.inicial || 0).toFixed(2)}`)}
+                    </div>
+                    <div class="col-6">
+                         ${item('Valor Cuota', `${simboloMoneda} ${parseFloat(data.valorcuota || 0).toFixed(2)}`)}
+                    </div>
+                    <div class="col-6">
+                         ${item('Gastos Admin.', `${simboloMoneda} ${parseFloat(data.gastosadministrativos || 0).toFixed(2)}`)}
+                    </div>
+                     <div class="col-12">
+                         ${item('Plazo / Cuotas', `${data.numcuotas || '0'} <small class="text-body-secondary fw-normal">mensuales</small>`)}
+                    </div>
                 </div>
             </div>
         </div>
+
+        <div class="col-lg-6">
+            <div class="d-flex flex-column gap-3 h-100">
+                
+                <div class="p-4 bg-body-tertiary rounded-4 border border-translucent flex-grow-1">
+                    ${headerIcon('fas fa-car', 'Datos del Vehículo', 'text-success', 'bg-success')}
+                    
+                    <div class="row g-2">
+                        <div class="col-12">
+                            ${item('Vehículo', data.vehiculo_descripcion)}
+                        </div>
+                        <div class="col-6">
+                            ${item('Placa', `<span class="fw-bold mt-5 p-1 bg-warning bg-opacity-10 text-warning border border-warning  rounded small">${data.placa || 'EN TRÁMITE'}</span>`)}
+                        </div>
+                        <div class="col-6">
+                            ${item('Color', data.color)}
+                        </div>
+                        <div class="col-6">
+                            ${item('Tipo', data.tipovehiculo)}
+                        </div>
+                         <div class="col-6">
+                            ${item('Combustible', data.combustible)}
+                        </div>
+                        <div class="col-6">
+                            ${item('Versión', data.version)}
+                        </div>
+                        <div class="col-6">
+                            ${item('Condición', data.condicion)}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-4 bg-warning bg-opacity-10 rounded-4 border border-warning border-opacity-25">
+                    <h6 class="text-body-emphasis fw-bold mb-2 small text-uppercase d-flex align-items-center">
+                        <i class="fas fa-comment-dots me-2 text-warning"></i>Observaciones
+                    </h6>
+                    <p class="mb-0 text-body-emphasis fst-italic small">
+                        ${data.observaciones || 'Sin observaciones registradas.'}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
     `;
 
         document.getElementById('info-contrato-contenido').innerHTML = html;
@@ -754,9 +899,14 @@
                     sortDescending: ": activar para ordenar la columna descendente"
                 }
             },
-            lengthMenu: [[10, 20, 50, 100], [10, 20, 50, 100]],
+            lengthMenu: [
+                [10, 20, 50, 100],
+                [10, 20, 50, 100]
+            ],
             pageLength: 20,
-            order: [[0, 'asc']],
+            order: [
+                [0, 'asc']
+            ],
             responsive: true
         });
     }
@@ -804,7 +954,6 @@
     function imprimirDetalle() {
         window.print();
     }
-
 </script>
 
 <?php include __DIR__ . '/../layout/footer.php'; ?>

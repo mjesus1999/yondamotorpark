@@ -305,6 +305,7 @@ BEGIN
     LIMIT p_limite;
 END$$
 DELIMITER ;
+
 DROP PROCEDURE IF EXISTS sp_get_cuotas_vencidas;
 -- 7) CUOTAS VENCIDAS 
 DELIMITER $$
@@ -742,6 +743,8 @@ BEGIN
         END AS telefono,
         COALESCE(d.distrito, 'Sin distrito') AS local,
         CONCAT(m.marca, ' / ', mo.modelo) AS vehiculo,
+        p.latitud,
+        p.longitud,
         
         CASE
             WHEN DATEDIFF(MIN(CASE 
@@ -809,6 +812,8 @@ BEGIN
 END$$
 DELIMITER ;
 
+
+CALL sp_get_cuotas_proximas_vencer();
 
 -- 9) ACTUALIZAR TELEFONO
 

@@ -102,6 +102,8 @@ class MapaViewer {
         );
       }
 
+      
+
       // Inicializar los servicios que necesitamos
       this.geocoder = new window.google.maps.Geocoder();
       this.infoWindow = new window.google.maps.InfoWindow({
@@ -239,11 +241,13 @@ class MapaViewer {
       return;
     }
 
-    // Limpiar contenido previo
-    mapaContainer.innerHTML = "";
+    // --- CORRECCIÓN AQUÍ ---
+    // NO hacemos mapaContainer.innerHTML = ""; aquí globalmente.
 
     // Crear o actualizar mapa
     if (!this.mapa) {
+      // Solo limpiamos si vamos a crear uno nuevo desde cero
+      mapaContainer.innerHTML = "";
 
       const mapOptions = {
         center: ubicacion,
@@ -257,6 +261,8 @@ class MapaViewer {
 
     } else {
       console.log("-> Actualizando mapa existente...");
+      // Forzar un "resize" por si el modal cambió de tamaño o estaba oculto
+      window.google.maps.event.trigger(this.mapa, "resize");
       this.mapa.setCenter(ubicacion);
       this.mapa.setZoom(16);
     }
@@ -289,8 +295,6 @@ class MapaViewer {
 
     // Mostrar InfoWindow automáticamente
     setTimeout(() => this.mostrarInfoWindow(), 500);
-
-
   }
 
   async geocodificarDireccion(direccion) {
@@ -476,6 +480,8 @@ class MapaViewer {
     if (this.infoWindow) {
       this.infoWindow.close();
     }
+    this.mapa = null; // Forzamos a que se cree de nuevo la próxima vez
+    this.marcador = null;
     this.coordenadas = null;
     this.datosCliente = {
       nombre: "",

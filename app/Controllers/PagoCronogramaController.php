@@ -456,6 +456,8 @@ class PagoCronogramaController extends Controller
                             ],
                             'datos_cliente' => $datosClienteNubefact,
                             'enviar_al_cliente' => $enviarCorreoCliente,
+                          
+                            'condicion_de_pago' => 'CONTADO',
                             'observaciones' => "Cuota {$nroCuotaActual} de {$totalCuotas}. " . $observacion
                         ];
 

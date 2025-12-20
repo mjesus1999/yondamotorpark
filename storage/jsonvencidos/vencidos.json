@@ -1,6 +1,6 @@
 {
     "query": "vencidos",
-    "date": "2025-12-19 22:50:12",
+    "date": "2025-12-20 14:36:55",
     "total_registros": 7,
     "data": [
         {
@@ -8,7 +8,12 @@
             "cliente": "CABREJOS BALTAZAR FLOR ANGELICA",
             "documento": "74565565",
             "telefono": "954787878",
-            "vehiculo": "KIA Soluto",
+            "ubicacion_cliente": "Cañete \/ Nuevo Imperial \/ Cerro Azul, Cañete, Lima, Perú",
+            "provincia_cliente": "Cañete",
+            "distrito_cliente": "Nuevo Imperial",
+            "latitud": "-13.024069",
+            "longitud": "-76.479844",
+            "vehiculo": "KIA \/ Soluto \/ MORADO \/ ",
             "tienda": "Chincha Alta",
             "cuotas_totales": 36,
             "monto_primera_vencida": "1850.46",
@@ -17,46 +22,61 @@
             "cuotas_pagadas": "0",
             "estado_pagos": "2 vencidas de 36",
             "fecha_vencida_mas_antigua": "2025-11-10",
-            "dias_atraso": 39
+            "dias_atraso": 40
         },
         {
             "idcontrato": 22,
             "cliente": "GIL VALENTIN LISBETH MARIBEL",
             "documento": "75454848",
             "telefono": "956569565",
-            "vehiculo": "TOYOTA Yaris",
+            "ubicacion_cliente": "Camana \/ Mariano Nicolas Valcarcel \/ Santa Catalina, #105, 7 Esquinas",
+            "provincia_cliente": "Camana",
+            "distrito_cliente": "Mariano Nicolas Valcarcel",
+            "latitud": "-16.397953",
+            "longitud": "-71.537229",
+            "vehiculo": "TOYOTA \/ Yaris \/ Negro \/ ",
             "tienda": "Chincha Alta",
             "cuotas_totales": 36,
-            "monto_primera_vencida": "2660.21",
+            "monto_primera_vencida": "2418.37",
             "deuda_vencida": "5078.58",
             "cuotas_vencidas": "2",
             "cuotas_pagadas": "0",
             "estado_pagos": "2 vencidas de 36",
             "fecha_vencida_mas_antigua": "2025-11-13",
-            "dias_atraso": 36
+            "dias_atraso": 37
         },
         {
             "idcontrato": 21,
             "cliente": "ALVITRES BARRANTES VALERIE ANTONELLA",
             "documento": "71454545",
             "telefono": "965545787",
-            "vehiculo": "HYUNDAI Santa Fe",
+            "ubicacion_cliente": "Ocros \/ San Pedro \/ Jirón Los Pacaes, #180, Condevilla Señor Etapa 2",
+            "provincia_cliente": "Ocros",
+            "distrito_cliente": "San Pedro",
+            "latitud": "-12.023959",
+            "longitud": "-77.067736",
+            "vehiculo": "HYUNDAI \/ Santa Fe \/ VERDE \/ YTFG-DG633",
             "tienda": "Chincha Alta",
             "cuotas_totales": 36,
-            "monto_primera_vencida": "2192.83",
+            "monto_primera_vencida": "1993.48",
             "deuda_vencida": "4186.31",
             "cuotas_vencidas": "2",
             "cuotas_pagadas": "0",
             "estado_pagos": "2 vencidas de 36",
             "fecha_vencida_mas_antigua": "2025-11-13",
-            "dias_atraso": 36
+            "dias_atraso": 37
         },
         {
             "idcontrato": 31,
             "cliente": "FLORES VILELA VICTOR DAYHIRO YONCEL",
             "documento": "74520650",
             "telefono": "963736445",
-            "vehiculo": "KIA Soluto",
+            "ubicacion_cliente": "Ferreñafe \/ Incahuasi \/ Jirón Quilca, #213, Urbanización Cercado de Lima",
+            "provincia_cliente": "Ferreñafe",
+            "distrito_cliente": "Incahuasi",
+            "latitud": "-12.050792",
+            "longitud": "-77.040709",
+            "vehiculo": "KIA \/ Soluto \/  \/ ",
             "tienda": "Chincha Alta",
             "cuotas_totales": 36,
             "monto_primera_vencida": "2766.01",
@@ -65,14 +85,19 @@
             "cuotas_pagadas": "0",
             "estado_pagos": "1 vencidas de 36",
             "fecha_vencida_mas_antigua": "2025-11-21",
-            "dias_atraso": 28
+            "dias_atraso": 29
         },
         {
             "idcontrato": 33,
             "cliente": "RODA GUTIERREZ JAVIER",
             "documento": "74501481",
             "telefono": "919482381",
-            "vehiculo": "HYUNDAI Grand i10 Sedan",
+            "ubicacion_cliente": "Huarmey \/ Cochapeti \/ Auxiliar Avenida Nicolás Arriola, Fortis",
+            "provincia_cliente": "Huarmey",
+            "distrito_cliente": "Cochapeti",
+            "latitud": "-12.070629",
+            "longitud": "-77.001304",
+            "vehiculo": "HYUNDAI \/ Grand i10 Sedan \/ PLOMO \/ AFD-343645",
             "tienda": "Chincha Alta",
             "cuotas_totales": 24,
             "monto_primera_vencida": "740.89",
@@ -81,14 +106,19 @@
             "cuotas_pagadas": "0",
             "estado_pagos": "1 vencidas de 24",
             "fecha_vencida_mas_antigua": "2025-11-22",
-            "dias_atraso": 27
+            "dias_atraso": 28
         },
         {
             "idcontrato": 36,
             "cliente": "YONDA &amp; GRUPO HUARACA E.I.R.L.",
             "documento": "20609396866",
             "telefono": "946466466",
-            "vehiculo": "KIA K3 Cross",
+            "ubicacion_cliente": "Nazca \/ Vista Alegre \/ SECTOR PAGO DE ACEQUIA GR NRO S\/N URB. BARRIO AMERICA",
+            "provincia_cliente": "Nazca",
+            "distrito_cliente": "Vista Alegre",
+            "latitud": null,
+            "longitud": null,
+            "vehiculo": "KIA \/ K3 Cross \/ NEGRO \/ ",
             "tienda": "Chincha Alta",
             "cuotas_totales": 36,
             "monto_primera_vencida": "2108.93",
@@ -97,14 +127,19 @@
             "cuotas_pagadas": "0",
             "estado_pagos": "1 vencidas de 36",
             "fecha_vencida_mas_antigua": "2025-11-23",
-            "dias_atraso": 26
+            "dias_atraso": 27
         },
         {
             "idcontrato": 37,
             "cliente": "AUTOPARTES GM RAUL S.A.C.",
             "documento": "20600417291",
             "telefono": "945745784",
-            "vehiculo": "KIA All-new K3",
+            "ubicacion_cliente": "Antonio Raymondi \/ Chingas \/ Av Siempre Viva #432",
+            "provincia_cliente": "Antonio Raymondi",
+            "distrito_cliente": "Chingas",
+            "latitud": "-12.026369",
+            "longitud": "-77.059522",
+            "vehiculo": "KIA \/ All-new K3 \/ NEGRO \/ ",
             "tienda": "Chincha Alta",
             "cuotas_totales": 36,
             "monto_primera_vencida": "2108.93",
@@ -113,7 +148,7 @@
             "cuotas_pagadas": "0",
             "estado_pagos": "1 vencidas de 36",
             "fecha_vencida_mas_antigua": "2025-11-23",
-            "dias_atraso": 26
+            "dias_atraso": 27
         }
     ]
 }

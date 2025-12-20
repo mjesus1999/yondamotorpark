@@ -131,6 +131,7 @@
                     const text = await response.text();
                     try {
                         const data = JSON.parse(text);
+                        
                         if (response.ok && data.success) {
                             const fechaDatos = data.fecha_datos || '';
                             if (fechaDatos) {

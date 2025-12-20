@@ -361,7 +361,7 @@
             }
             
             const data = await response.json();
-            console.log('Estadísticas data:', data);
+
             renderizarEstadisticas(data);
         } catch (error) {
             console.error('Error:', error);
@@ -681,7 +681,7 @@
             cargarMorosos()
         ])
             .then(() => {
-                console.log('Datos cargados exitosamente');
+                
             })
             .catch(error => {
                 console.error('Error al cargar datos:', error);

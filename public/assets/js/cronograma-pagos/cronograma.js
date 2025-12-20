@@ -75,7 +75,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         btnGuardarRucCliente: document.getElementById('btn-gurdar-ruc-cliente'),
 
 
-    }; async function getContribuyenteBySunat() {
+    };
+
+    elements.inputRucCliente.addEventListener('keydown', (e) => {
+
+        if (e.target.value.length >= 11) {
+            if (e.keyCode === 13) {
+                getContribuyenteBySunat();
+            }
+        }
+    });
+
+    async function getContribuyenteBySunat() {
         const rucInput = elements.inputRucCliente.value.trim();
 
         if (rucInput.length !== 11) {

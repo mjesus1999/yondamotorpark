@@ -153,6 +153,7 @@
             cache: 'no-store'
         });
         const data = await res.json();
+        // console.log('Respuesta de getClientesNotificar:', data);
         if (!data.success) throw new Error(data.message || 'Error al cargar datos');
         return data.data || [];
     }
@@ -179,6 +180,7 @@
 
         try {
             const datos = await cargarClientes();
+         
             if (spinner) spinner.remove();
 
             if (!Array.isArray(datos) || datos.length === 0) {
