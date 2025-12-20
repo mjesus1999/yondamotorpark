@@ -298,7 +298,7 @@
                                             </span>
                                         </td>
                                         <td class="text-muted">
-                                            <small><?= htmlspecialchars($pago['numerotransaccion'] ?? 'N/A')  ?></small>
+                                            <small><?= htmlspecialchars($pago['numerotransaccion'] ?? '-------')  ?></small>
                                         </td>
                                         <td class="text-center">
                                             <button type="button"
@@ -427,7 +427,7 @@
                                     <li class="list-group-item"><strong>Saldo restante:</strong> <?= htmlspecialchars($pago['saldorestante'] ?? '0.00') ?></li>
                                     <li class="list-group-item"><strong>Medio de pago:</strong> <span class="badge bg-success text-white"><?= htmlspecialchars($pago['mediopago']) ?></span></li>
                                     <li class="list-group-item"><strong>Concepto:</strong> <span class="badge <?= trim($pago['tipo']) === 'Cuota' ? 'bg-primary text-white' : 'bg-danger text-white' ?>"><?= htmlspecialchars($pago['tipo']) ?></span></li>
-                                    <li class="list-group-item"><strong>Transacción:</strong> <?= htmlspecialchars($pago['numerotransaccion'] ?? 'N/A') ?></li>
+                                    <li class="list-group-item"><strong>Transacción:</strong> <?= htmlspecialchars($pago['numerotransaccion'] ?? '----') ?></li>
                                     <li class="list-group-item">
                                         <strong>Observaciones:</strong>
                                         <button type="button" class="btn btn-sm btn-outline-secondary ver-observacion mt-1"

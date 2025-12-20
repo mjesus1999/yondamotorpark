@@ -38,7 +38,7 @@ function obtenerIGV() {
     }
 
     if ($igv) {
-        return ["igv" => $igv];
+        return ["igv" => round($igv, 2)];
     } else {
         return ["error" => "No se encontró el IGV"];
     }

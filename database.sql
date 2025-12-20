@@ -88,10 +88,6 @@ CREATE TABLE empresas (
 ) ENGINE = INNODB;
 
 
--- ALTER TABLE empresas MODIFY COLUMN direccion VARCHAR(300) NULL;
--- ALTER TABLE empresas MODIFY COLUMN telprimario VARCHAR(12) NOT NULL UNIQUE;
--- ALTER TABLE empresas MODIFY COLUMN telsecundario VARCHAR(12) NULL UNIQUE;
-
 CREATE TABLE clientes (
     idcliente INT PRIMARY KEY AUTO_INCREMENT,
     idpersona INT NULL,
@@ -105,7 +101,6 @@ CREATE TABLE clientes (
     CONSTRAINT fk_idcolactualiza_client FOREIGN KEY (idcolactualiza) REFERENCES colaboradores (idcolaborador)
 ) ENGINE = INNODB;
 
-/* ALTER TABLE clientes ADD COLUMN estado ENUM('ACT', 'INACT') DEFAULT 'ACT' NOT NULL; */
 
 CREATE TABLE areas (
     idarea INT AUTO_INCREMENT PRIMARY KEY,
@@ -155,9 +150,6 @@ CREATE TABLE colaboradores (
 ) ENGINE = INNODB;
 
 
--- AFTER ES PARA INDICAR EN QUE ORDEN VA.
---  ALTER TABLE colaboradores ADD COLUMN  AFTER `habilitado`;
--- ALTER TABLE colaboradores ADD COLUMN estado ENUM('0', '1') NULL DEFAULT '1' AFTER `restriccionhoraria`;
 
 CREATE TABLE concesionarios (
     idconcesionario INT AUTO_INCREMENT PRIMARY KEY,
@@ -251,7 +243,7 @@ CREATE TABLE locales (
     CONSTRAINT fk_idmotorpark_loc FOREIGN KEY (idmotorpark) REFERENCES motorpark (idmotorpark)
 ) ENGINE = INNODB;
 
--- La moneda y precio de compra están definidos en el proceso de COMPRA
+
 CREATE TABLE vehiculos (
     idvehiculo INT AUTO_INCREMENT PRIMARY KEY,
     idmodelo INT NOT NULL,
@@ -286,21 +278,6 @@ CREATE TABLE vehiculos (
 ) ENGINE = INNODB;
 
 
-
--- ALTER TABLE vehiculos ADD COLUMN estado ENUM('0', '1') NULL DEFAULT '1';
-
---ALTER TABLE vehiculos ADD COLUMN eliminado DATETIME NULL;
---SHOW COLUMNS FROM vehiculos;
--- ALTER TABLE vehiculos MODIFY COLUMN idlogistica INT NULL;
--- ALTER TABLE vehiculos DROP CONSTRAINT fk_idmodelo_veh;
-
--- ALTER TABLE vehiculos DROP CONSTRAINT fk_idmodelo_veh;
--- ALTER TABLE vehiculos
--- ADD CONSTRAINT fk_idmodelo_veh FOREIGN KEY (idmodelo) REFERENCES modelos (idmodelo);
-
--- Cuando se compra un vehículo, este además de su valor, supone pagos adicioanles como:
--- Tarjeta de propiedad y placa, Flete picanto, gastos administrativos
--- No se requiere indiciar la moneda porque esto se especifica al momento de realizar la comrpa
 
 CREATE TABLE gastos (
     idgasto INT AUTO_INCREMENT PRIMARY KEY,
@@ -337,12 +314,6 @@ CREATE TABLE ordenescompra (
     CONSTRAINT fk_idlogistica_ocp FOREIGN KEY (idlogistica) REFERENCES colaboradores (idcolaborador)
 ) ENGINE = INNODB;
 
-
---ALTER TABLE ordenescompra ADD COLUMN  facturado ENUM('S','N') NOT NULL DEFAULT 'N' ;
--- ALTER TABLE ordenescompra ADD COLUMN creado DATETIME NOT NULL DEFAULT NOW();
--- ALTER TABLE ordenescompra ADD COLUMN fechanulado DATETIME NULL;
---ALTER TABLE ordenescompra MODIFY COLUMN estado ENUM('emitido','proceso','anulado','pagado') NOT NULL DEFAULT 'emitido';
-
 CREATE TABLE pagosOC (
     idpagooc INT AUTO_INCREMENT NOT NULL PRIMARY KEY,
     idorden INT NOT NULL, -- ID OC
@@ -364,14 +335,6 @@ CREATE TABLE pagosOC (
     CONSTRAINT fk_identidadpago_pagosOC FOREIGN KEY (identidadpago) REFERENCES entidadespago (identidadpago);
 ) ENGINE = InnoDB;
 
--- ALTER TABLE pagosOC CHANGE COLUMN valorSoles valorUSD DECIMAL(10,2) NULL AFTER tipocambio;
--- UPDATE pagosOC SET identidadpago = 1;
--- ALTER TABLE pagosOC ADD COLUMN identidadpago INT NOT NULL AFTER idlogistica;
--- 
--- ALTER TABLE pagoSoc ADD COLUMN numtransaccion VARCHAR(20) NOT NULL AFTER fecharealpago;
--- ALTER TABLE pagosOC ADD COLUMN moneda ENUM('USD', 'PEN') NOT NULL AFTER numtransaccion;
--- ALTER TABLE pagosOC ADD COLUMN tipocambio DECIMAL(5,2) NULL AFTER moneda;
--- ALTER TABLE pagosOC ADD COLUMN observaciones VARCHAR(400) NULL AFTER comprobante;
 
 
 
@@ -391,16 +354,6 @@ CONSTRAINT fk_idvehiculo_doc FOREIGN KEY (idvehiculo) REFERENCES vehiculos (idve
     CONSTRAINT uk_idvehiculo_doc UNIQUE (idvehiculo) -- Relación uno a uno
 ) ENGINE = INNODB;
 
--- ALTER TABLE detordencompra
--- ADD COLUMN estado ENUM('0', '1') NOT NULL DEFAULT '1';
-
---ALTER TABLE detordencompra ADD COLUMN creado   DATETIME        NOT NULL DEFAULT NOW();
-
---ALTER TABLE detordencompra ADD COLUMN modificado  DATETIME        NULL;
-
--- show COLUMNS FROM detordencompra;
-
--- SELECT * FROM detordencompra;
 
 CREATE TABLE compras (
     idcompra INT AUTO_INCREMENT PRIMARY KEY,
@@ -419,14 +372,6 @@ CREATE TABLE compras (
 ) ENGINE = INNODB;
 
 
-
--- SELECT * FROM COMPRAS;
--- SELECT * FROM pagos;
---SHOW COLUMNS FROM compras
-
---ALTER TABLE compras DROP COLUMN pathxml
-
---ALTER TABLE compras ADD COLUMN rutadoc VARCHAR(200) NULL;
 CREATE TABLE formatocotizacion (
     idformato INT PRIMARY KEY AUTO_INCREMENT,
     tipocotizacion VARCHAR(200) NOT NULL,
@@ -479,16 +424,7 @@ CREATE TABLE cotizaciones (
     CONSTRAINT fk_idcolventa_cot FOREIGN KEY (idasesor) REFERENCES colaboradores (idcolaborador)
 ) ENGINE = INNODB;
 
---  ALTER TABLE cotizaciones MODIFY COLUMN estadocotizacion ENUM('P', 'O', 'A', 'C', 'R','CONT') NOT NULL DEFAULT 'P' COMMENT 'Pendiente | OBSERVADA | Aprobada |  Rechazada (Analista crédito) | CONTRATO';
 
--- ALTER TABLE cotizaciones ADD COLUMN comentarios TEXT AFTER estadocotizacion;
--- --  ALTER TABLE cotizaciones ADD COLUMN fechaseguimiento DATETIME NULL AFTER comentarios;
-
-
--- ALTER TABLE cotizaciones ADD COLUMN gastosadministrativos DECIMAL(9,2) NOT NULL DEFAULT 0.00 COMMENT 'Gastos administrativos de la cotización' AFTER valorcuota;
---  ALTER TABLE cotizaciones ADD COLUMN fechareactivacion DATETIME NULL AFTER modificado;
-
-CREATE TABLE fichasolicitud (
     idficha         INT PRIMARY KEY AUTO_INCREMENT,
     idcotizacion    INT NOT NULL UNIQUE,
     idcolcredito    INT NOT NULL,
@@ -681,23 +617,11 @@ ALTER TABLE pagos ADD COLUMN enlace_del_cdr VARCHAR(500) NULL AFTER enlace_xml_n
      
 ) ENGINE=InnoDB;
 
--- -
--- INSERT INTO series_nubefact (serie, ultimo_numero) VALUES ('BBB1', 0);
-
-USE motorpark;
-INSERT INTO series_nubefact(serie,ultimo_numero) VALUES('FFF1',0);
 
 -- SELECT * FROM series_nubefact;
 
 
 -- SELECT * FROM PAGOS
-
-
-
-
-
-
-
 
 -- ALTER TABLE pagos ADD COLUMN  moneda ENUM('USD', 'PEN')  NULL AFTER saldorestante;
 -- ALTER TABLE pagos ADD COLUMN montomonedaoriginal DECIMAL(10,2) NULL AFTER amortizacion;
@@ -896,11 +820,3 @@ CREATE TABLE entregasdinero_destinos (
     monto DECIMAL(10, 2) NOT NULL,
     CONSTRAINT fk_entrega_destino FOREIGN KEY (identrega) REFERENCES entregasdinero(identrega)
 ) ENGINE = InnoDB;
-
-
-
-
-
-USE motorpark;
-
-
