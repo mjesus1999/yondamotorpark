@@ -31,7 +31,12 @@
         <div class="d-flex justify-content-end align-items-end">
             <button class="btn btn-sm btn-outline-success mb-2" id="btnExportExcel">Exportar Excel</button>
         </div>
-        <div id="tabla-vehiculos-recepcion"></div>
+        <div class="card">
+            <div class="card-body">
+
+                <div id="tabla-vehiculos-recepcion"></div>
+            </div>
+        </div>
     </div>
 
     <div class="row d-md-none">
@@ -97,6 +102,7 @@
         paginationSize: 10,
         paginationSizeSelector: [5, 10, 20],
         responsiveLayout: "collapse",
+        placeholder: "<i class='fas fa-info-circle'></i> No hay vehículos por recepcionar",
         columns: [{
                 title: "#",
                 field: "num_fila",

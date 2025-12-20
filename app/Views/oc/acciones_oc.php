@@ -24,9 +24,9 @@
 
 <?php elseif ($estadoActual == 'pagado'): ?>
     <!-- Pagado -->
-    <a href="#" data-idocmodal="<?= $ordenCompra['idordencompra'] ?>" title="Verificar estado de autos">
+    <!-- <a href="#" data-idocmodal="<?= $ordenCompra['idordencompra'] ?>" title="Verificar estado de autos">
         <i class="bi bi-bookmark-check text-success fs-5 me-2"></i>
-    </a>
+    </a> -->
     <a href="#" class="show-details" data-idoc="<?= $ordenCompra['idordencompra'] ?>" title="Ver detalle">
         <i class="bi bi-info-circle text-primary fs-5 me-2"></i>
     </a>

@@ -39,7 +39,12 @@
 
 
 
-    <div id="tabla-contratos">
+    <div class="card">
+        <div class="card-body">
+            <div id="tabla-contratos">
+
+        </div>
+    </div>
 
     </div>
 </div>

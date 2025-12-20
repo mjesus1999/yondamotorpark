@@ -7,7 +7,7 @@ document.getElementById('btn-generar-pdf').addEventListener('click', () => {
 
     function formatNumber(num) {
         let cleanNum = String(num).replace(/[^\d.-]/g, '');
-        if (!cleanNum || cleanNum === '' || isNaN(cleanNum)) {
+        if (!cleanNum || cleanNum === '' || isNaN(cleanNum)) {                 
             return '';
         }
         return Number(cleanNum).toLocaleString('en-US', {
@@ -21,11 +21,9 @@ document.getElementById('btn-generar-pdf').addEventListener('click', () => {
     const numeroIdentificadorOC = document.getElementById('numeroIdentificadorOC') ? document.getElementById('numeroIdentificadorOC').textContent.trim() : 'N/A';
     const concesionario = document.getElementById('concesionario') ? document.getElementById('concesionario').textContent.trim() : 'N/A';
 
-    // ----------------------------
-    // Tabla Vehículos
-    // ----------------------------
+
     const headersVehiculos = [
-        { text: 'Marca / Modelo', style: 'tableHeader'},
+        { text: 'Marca / Modelo', style: 'tableHeader' },
         { text: 'Características', style: 'tableHeader', alignment: 'left' },
         { text: 'Chasis', style: 'tableHeader' },
         { text: 'Placa', style: 'tableHeader' },
@@ -92,7 +90,7 @@ document.getElementById('btn-generar-pdf').addEventListener('click', () => {
         for (let i = 0; i < Math.min(cols.length, 9); i++) {
             const td = cols[i];
             let textContent = td.textContent.trim();
-            if ([5, 6, 7, 8].includes(i)) {
+            if ([5, 6, 8].includes(i)) {
                 let simbolo = '';
                 if (textContent.startsWith('$')) simbolo = '$';
                 else if (textContent.startsWith('S/')) simbolo = 'S/';
@@ -158,14 +156,30 @@ document.getElementById('btn-generar-pdf').addEventListener('click', () => {
     ];
     bodyPagos.push(totalRow);
 
+    const layoutConPadding = {
+        hLineWidth: function (i, node) {
+
+            return (i === 0 || i === node.table.body.length) ? 0 : 1;
+        },
+        vLineWidth: function (i, node) {
+            return 0;
+        },
+        hLineColor: function (i, node) {
+            return '#E0E0E0';
+        },
+
+        paddingLeft: function (i, node) { return 3; },
+        paddingRight: function (i, node) { return 3; },
+        paddingTop: function (i, node) { return 3; },
+        paddingBottom: function (i, node) { return 3; }
+    };
+
     const documento = {
         pageSize: 'A4',
         pageOrientation: 'portrait',
-        pageMargins: [40, 25, 25, 25],
-        defaultStyle: { fontSize: 7.2, alignment: 'center' },
-
+        pageMargins: [45, 25, 25, 25],
+        defaultStyle: { fontSize: 7.8, alignment: 'center' },
         content: [
-
             {
                 columns: [
                     { image: logo, width: 80, alignment: 'left', margin: [0, 0, 0, 0] },
@@ -173,7 +187,6 @@ document.getElementById('btn-generar-pdf').addEventListener('click', () => {
                         stack: [
                             { text: 'YONDA & GRUPO HUARACA E.I.R.L', fontSize: 12, bold: true, color: '#2c3e50', alignment: 'right' },
                             { text: 'RUC: 20609396866', fontSize: 10, bold: true, alignment: 'right' },
-
                         ],
                         margin: [10, 0, 0, 0]
                     }
@@ -187,6 +200,8 @@ document.getElementById('btn-generar-pdf').addEventListener('click', () => {
                 ],
                 margin: [0, 10, 0, 20]
             },
+
+
             {
                 style: 'tableVehiculos',
                 table: {
@@ -194,9 +209,12 @@ document.getElementById('btn-generar-pdf').addEventListener('click', () => {
                     widths: ['auto', '*', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto'],
                     body: bodyVehiculos
                 },
-                layout: 'lightHorizontalLines'
+                layout: layoutConPadding
             },
+
             { text: 'PAGOS REALIZADOS', style: 'subheader', alignment: 'center', margin: [0, 20, 0, 10], decoration: 'underline', bold: true, fontSize: 10 },
+
+
             {
                 style: 'tablePagos',
                 table: {
@@ -204,9 +222,10 @@ document.getElementById('btn-generar-pdf').addEventListener('click', () => {
                     widths: ['auto', 'auto', '*', '*', 'auto', 'auto', 'auto', '*', 'auto'],
                     body: bodyPagos
                 },
-                layout: 'lightHorizontalLines'
+                layout: layoutConPadding
             },
-            // Lógica condicional para mostrar u ocultar la sección de observaciones
+
+
             ...(bodyObservaciones.length > 0 ? [
                 { text: 'OBSERVACIONES DETALLADAS', style: 'subheader', alignment: 'center', margin: [0, 20, 0, 10], decoration: 'underline', bold: true, fontSize: 10 },
                 {
@@ -219,7 +238,7 @@ document.getElementById('btn-generar-pdf').addEventListener('click', () => {
                             ...bodyObservaciones
                         ]
                     },
-                    layout: 'lightHorizontalLines'
+                    layout: layoutConPadding
                 }
             ] : []),
         ],

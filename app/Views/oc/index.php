@@ -650,7 +650,7 @@
                 const capitalizar = (str) => str.charAt(0).toUpperCase() + str.slice(1);
 
 
-                
+
                 btnExportarGeneralEstados.addEventListener('click', async () => {
                     btnExportarGeneralEstados.disabled = true;
                     btnExportarGeneralEstados.innerHTML = '<i class="bi bi-arrow-clockwise me-1"></i> Generando...';
@@ -725,15 +725,15 @@
                                         maxLength = columnLength;
                                     }
                                 });
-                          
-                                column.width = Math.min(60, maxLength + 2); 
+
+                                column.width = Math.min(60, maxLength + 2);
                             });
 
-                          
+
                             worksheet.getColumn(7).width = 18; // Ancho para 'Total OC'
                             worksheet.getColumn(8).width = 18; // Ancho para 'Total Pagado'
                             worksheet.getColumn(9).width = 18; // Ancho para 'Saldo'
-                           
+
                         }
 
                         //  Generar y Descargar el Archivo 
@@ -1070,7 +1070,7 @@
                                     margin: [0, 10]
                                 },
 
-                                // Sección de Concesionario
+                             
                                 {
                                     table: {
                                         widths: ['*'],
@@ -1161,11 +1161,36 @@
                                             }],
                                         ],
                                     },
-                                    layout: 'lightHorizontalLines',
+                                  
+                                    layout: {
+                                        hLineWidth: function(i, node) {
+                                            return (i === 0 || i === node.table.body.length) ? 0 : 1;
+                                        },
+                                        vLineWidth: function(i, node) {
+                                            return 0;
+                                        },
+                                        hLineColor: function(i, node) {
+                                            return '#E0E0E0';
+                                        },
+                                        paddingLeft: function(i, node) {
+                                            return 3;
+                                        },
+                                        paddingRight: function(i, node) {
+                                            return 3;
+                                        },
+                                        paddingTop: function(i, node) {
+                                            return 2;
+                                        },
+                                        paddingBottom: function(i, node) {
+                                            return 2;
+                                        }
+                                    },
                                     margin: [0, 0, 0, 10],
                                 },
 
-                                // Sección de Asociado
+                                // ==========================================
+                                // 2. Sección de Asociado (CORREGIDA)
+                                // ==========================================
                                 {
                                     table: {
                                         widths: ['*'],
@@ -1226,11 +1251,34 @@
                                             }, {}, {}],
                                         ],
                                     },
-                                    layout: 'lightHorizontalLines',
+                                   
+                                    layout: {
+                                        hLineWidth: function(i, node) {
+                                            return (i === 0 || i === node.table.body.length) ? 0 : 1;
+                                        },
+                                        vLineWidth: function(i, node) {
+                                            return 0;
+                                        },
+                                        hLineColor: function(i, node) {
+                                            return '#E0E0E0';
+                                        },
+                                        paddingLeft: function(i, node) {
+                                            return 3;
+                                        },
+                                        paddingRight: function(i, node) {
+                                            return 3;
+                                        },
+                                        paddingTop: function(i, node) {
+                                            return 2;
+                                        },
+                                        paddingBottom: function(i, node) {
+                                            return 2;
+                                        }
+                                    },
                                     margin: [0, 0, 0, 10],
                                 },
 
-                                // Sección de Vehículos
+                          
                                 {
                                     table: {
                                         widths: ['*'],
@@ -1249,6 +1297,7 @@
                                 {
                                     table: {
                                         headerRows: 1,
+                                     
                                         widths: ['auto', 'auto', 'auto', 'auto', 'auto', '*', 'auto', 'auto', 'auto', 'auto'],
                                         body: [
                                             ['MARCA', 'MODELO', 'VERSIÓN', 'AÑO', 'COLOR', 'CHASIS', 'PLACA', 'PLACA R.', 'SERIE MOTOR', 'PRECIO INDIVIDUAL'].map(text => ({
@@ -1273,23 +1322,23 @@
                                                     alignment: 'center'
                                                 },
                                                 {
-                                                    text: v.color || '',
+                                                    text: v.color || '---',
                                                     alignment: 'center'
                                                 },
                                                 {
-                                                    text: v.chasis || '',
+                                                    text: v.chasis || '---',
                                                     alignment: 'center'
                                                 },
                                                 {
-                                                    text: v.placa || '',
+                                                    text: v.placa || '---',
                                                     alignment: 'center'
                                                 },
                                                 {
-                                                    text: v.placa_rotativa || '',
+                                                    text: v.placa_rotativa || '---',
                                                     alignment: 'center'
                                                 },
                                                 {
-                                                    text: v.serie_motor || '',
+                                                    text: v.serie_motor || '---',
                                                     alignment: 'center'
                                                 },
                                                 {
@@ -1299,7 +1348,31 @@
                                             ]),
                                         ],
                                     },
-                                    layout: 'lightHorizontalLines',
+                               
+                                    layout: {
+                                        hLineWidth: function(i, node) {
+                                            return (i === 0 || i === node.table.body.length) ? 0 : 1;
+                                        },
+                                        vLineWidth: function(i, node) {
+                                            return 0;
+                                        },
+                                        hLineColor: function(i, node) {
+                                            return '#E0E0E0';
+                                        },
+                                        paddingLeft: function(i, node) {
+                                            return 3;
+                                        },
+                                        paddingRight: function(i, node) {
+                                            return 3;
+                                        },
+                                        paddingTop: function(i, node) {
+                                            return 2;
+                                        },
+                                        paddingBottom: function(i, node) {
+                                            return 2;
+                                        }
+                                    },
+                                    
                                 },
                                 {
                                     text: '',
@@ -1357,6 +1430,8 @@
                                                         alignment: 'right'
                                                     }],
                                                 ],
+
+                                                
                                             },
                                             width: 'auto',
                                         },

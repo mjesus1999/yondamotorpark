@@ -34,7 +34,13 @@
         <button class="btn btn-sm btn-outline-success mb-2" id="btnExportExcel">Exportar Excel</button>
     </div>
 
-    <div id="tabla-vehiculos"></div>
+    <div class="card">
+        <div class="card-body">
+            <div id="tabla-vehiculos"></div>
+
+        </div>
+    </div>
+
 
     <div class="modal fade" id="ventaModal" tabindex="-1" aria-labelledby="modalVentaTitle" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
