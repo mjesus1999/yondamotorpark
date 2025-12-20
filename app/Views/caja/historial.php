@@ -251,8 +251,8 @@
                                 <th>Concepto</th>
                                 <th>Transacción</th>
                                 <th class="text-center">Observaciones</th>
-                                <th class="no-imprimir text-center" width="150">Comprobante</th>
-                                <th>Boleta</th>
+                                <th class="no-imprimir text-center" width="150">Voucher</th>
+                                <th>Boleta / Factura</th>
                             </tr>
                         </thead>
                         <tbody id="tabla-body">
@@ -316,17 +316,17 @@
                                                 <?php $urlSegura = "/archivos/" . htmlspecialchars($pago['comprobante']); ?>
                                                 <?php if ($esPdf): ?>
                                                     <a href="<?= $urlSegura ?>" target="_blank"
-                                                        class="btn btn-sm btn-danger rounded-pill" title="Ver comprobante">
+                                                        class="btn btn-sm btn-danger rounded-pill" title="Ver voucher">
                                                         <i class="fas fa-file-pdf me-1"></i>PDF
                                                     </a>
                                                 <?php else: ?>
                                                     <button type="button" class="btn btn-sm btn-primary rounded-pill ver-comprobante-img"
-                                                        data-img="<?= htmlspecialchars($urlSegura) ?>" title="Ver comprobante">
+                                                        data-img="<?= htmlspecialchars($urlSegura) ?>" title="Ver voucher">
                                                         <i class="fas fa-image me-1"></i>Imagen
                                                     </button>
                                                 <?php endif; ?>
                                             <?php else: ?>
-                                                <span class="badge bg-light text-muted px-3 py-2">Sin comprobante</span>
+                                                <span class="badge bg-light text-muted px-3 py-2">Sin voucher</span>
                                             <?php endif; ?>
                                         </td>
                                         <td>
@@ -335,12 +335,12 @@
                                                     <a class="text-white small"
                                                         href="<?= htmlspecialchars($pago['enlace_pdf_nubefact']) ?>"
                                                         target="_blank">
-                                                        Boleta
+                                                        Comprobante
                                                     </a>
                                                 </span>
                                             <?php else: ?>
                                                 <span class="bg-primary-custom rounded p-1 text-white small">
-                                                    N/A
+                                                    Sin comprobante
                                                 </span>
                                             <?php endif; ?>
                                         </td>
@@ -458,7 +458,7 @@
                                                     class="btn btn-sm btn-primary ver-comprobante-img mt-1"
                                                     data-img="<?= htmlspecialchars($urlSegura) ?>"
                                                     title="Ver comprobante">
-                                                    <i class="fas fa-image me-1"></i>Comprobante
+                                                    <i class="fas fa-image me-1"></i>Voucher
                                                 </button>
 
                                             <?php else: ?>
@@ -528,7 +528,7 @@
     </div>
 </div>
 
-
+<?php include __DIR__ . '/../layout/footer.php'; ?>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js" defer></script>
 <script src="/assets/js/logoBase64.js"></script>
@@ -854,4 +854,3 @@
     });
 </script>
 
-<?php include __DIR__ . '/../layout/footer.php'; ?>

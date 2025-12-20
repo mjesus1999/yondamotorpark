@@ -558,10 +558,7 @@ include __DIR__ . '/../layout/header.php';
         }
 
 
-
         async function generarPDFConDatos(datosReporte) {
-
-
             const fechaHoy = new Date().toLocaleDateString('es-PE');
             const horaGeneracion = new Date().toLocaleTimeString('es-PE');
             const totalGeneral = datosReporte.total_general || 0;
@@ -571,9 +568,34 @@ include __DIR__ . '/../layout/header.php';
             const ruc = '20609396866';
             const nombreEmpresa = 'YONDA & GRUPO HUARACA E.I.R.L';
 
+
+            const layoutTabla = {
+                hLineWidth: function(i, node) {
+                    return (i === 0 || i === node.table.body.length) ? 0 : 1;
+                },
+                vLineWidth: function(i, node) {
+                    return 0;
+                },
+                hLineColor: function(i, node) {
+                    return '#E0E0E0';
+                },
+                paddingLeft: function(i, node) {
+                    return 8;
+                },
+                paddingRight: function(i, node) {
+                    return 8;
+                },
+                paddingTop: function(i, node) {
+                    return 5;
+                },
+                paddingBottom: function(i, node) {
+                    return 5;
+                }
+            };
+
             const styles = {
                 headerPrincipal: {
-                    fontSize: 24,
+                    fontSize: 20,
                     bold: true,
                     color: '#2C3E50',
                     alignment: 'center',
@@ -585,62 +607,35 @@ include __DIR__ . '/../layout/header.php';
                     alignment: 'right',
                     margin: [0, 0, 0, 2]
                 },
-                infoRuc: {
-                    fontSize: 8,
-                    bold: true,
-                    alignment: 'right',
-                },
+
                 tableHeader: {
                     bold: true,
                     fontSize: 9,
                     color: '#2C3E50',
-                    fillColor: '#EAECEE',
+                    fillColor: '#F2F3F4',
                     alignment: 'center'
                 },
                 tableSubHeader: {
                     bold: true,
-                    fontSize: 12,
+                    fontSize: 11,
                     color: '#2C3E50',
                     alignment: 'left',
-                    margin: [0, 0, 0, 5]
+                    margin: [0, 15, 0, 5]
                 },
                 tableSubtotal: {
                     bold: true,
                     fontSize: 9,
                     color: '#27AE60',
-                    fillColor: '#EBF5F1',
-                    alignment: 'right'
-                },
-                footer: {
-                    fontSize: 8,
-                    color: '#7F8C8D',
-                    alignment: 'center',
-                    margin: [0, 20, 0, 0]
-                },
-
-                totalSection: {
-                    margin: [0, 10, 0, 20]
-                },
-                totalRecaudado: {
-                    fontSize: 16,
-                    bold: true,
-                    color: '#2C3E50',
-                    alignment: 'left',
-                    margin: [0, 5, 0, 0]
-                },
-                totalTransacciones: {
-                    fontSize: 12,
-                    color: '#555',
-                    alignment: 'right',
+                    fillColor: '#F8FDF9',
                 }
             };
 
             const documento = {
                 pageSize: 'A4',
                 pageOrientation: 'portrait',
-                pageMargins: [40, 25, 25, 45],
+                pageMargins: [40, 30, 40, 40],
                 defaultStyle: {
-                    fontSize: 7.2,
+                    fontSize: 9,
                     alignment: 'center'
                 },
                 styles: styles,
@@ -655,7 +650,8 @@ include __DIR__ . '/../layout/header.php';
                         }, {
                             text: `© ${new Date().getFullYear()} Sistema de Gestión de Caja. Reporte generado automáticamente.`,
                             color: '#7F8C8D',
-                            bold: true
+                            bold: true,
+                            fontSize: 7
                         }]
                     };
                 }
@@ -666,9 +662,8 @@ include __DIR__ . '/../layout/header.php';
                 columns: [
                     logoBase64 ? {
                         image: logoBase64,
-                        width: 80,
-                        alignment: 'left',
-                        margin: [0, 0, 0, 0]
+                        width: 90,
+                        alignment: 'left'
                     } : {},
                     {
                         stack: [{
@@ -687,56 +682,53 @@ include __DIR__ . '/../layout/header.php';
                             {
                                 margin: [0, 5, 0, 0],
                                 text: `Generado el ${fechaHoy} a las ${horaGeneracion}`,
-                                alignment: 'right'
+                                alignment: 'right',
+                                fontSize: 8,
+                                color: '#555'
                             }
-
                         ],
                         alignment: 'right',
                         margin: [10, 0, 0, 0]
                     }
                 ],
-                margin: [0, 0, 0, 20]
+                margin: [0, 0, 0, 30]
             });
-
 
             documento.content.push({
                 text: 'REPORTE DIARIO DE PAGOS',
                 style: 'headerPrincipal',
-                fontSize: 13,
-                alignment: 'center',
-                margin: [0, 7, 0, 20]
+                margin: [0, 0, 0, 20]
             });
-
 
             const totalTransacciones = datosTransacciones.reduce((sum, item) => sum + (item.transacciones?.length || 0), 0);
             documento.content.push({
                 columns: [{
                         text: 'TOTAL RECAUDADO HOY: ' + `S/ ${formatearMoneda(totalGeneral)}`,
-                        fontSize: 10,
+                        fontSize: 11,
                         bold: true,
-                        color: '#555',
+                        color: '#2C3E50',
                         alignment: 'left',
                         margin: [0, 0, 0, 0]
                     },
                     {
                         text: `TOTAL DE TRANSACCIONES: ${totalTransacciones}`,
-                        fontSize: 10,
+                        fontSize: 11,
                         color: '#555',
                         bold: true,
                         alignment: 'right',
                         margin: [0, 0, 0, 0]
                     }
                 ],
-                margin: [0, 0, 0, 20]
+                margin: [0, 0, 0, 30]
             });
 
 
             documento.content.push({
                 text: 'RESUMEN EJECUTIVO',
-                style: 'resumenTitulo',
-                bold: true,
-                fontSize: 10,
-                margin: [0, 0, 0, 5]
+                style: 'tableSubHeader',
+                fontSize: 12,
+                decoration: 'underline',
+                margin: [0, 0, 0, 10]
             });
 
             const resumenBody = [
@@ -772,23 +764,24 @@ include __DIR__ . '/../layout/header.php';
                     alignment: 'right'
                 }]);
             });
+
             documento.content.push({
                 table: {
                     headerRows: 1,
                     widths: ['*', 'auto', 'auto', 'auto'],
                     body: resumenBody
                 },
-                layout: 'lightHorizontalLines',
-                margin: [0, 5, 0, 20]
+                layout: layoutTabla,
+                margin: [0, 0, 0, 30]
             });
 
 
             documento.content.push({
                 text: 'DETALLES POR MÉTODO DE PAGO',
-                style: 'resumenTitulo',
-                bold: true,
-                fontSize: 10,
-                margin: [0, 0, 0, 9]
+                style: 'tableSubHeader',
+                fontSize: 12,
+                decoration: 'underline',
+                margin: [0, 0, 0, 15]
             });
 
             datosTransacciones.forEach(item => {
@@ -797,7 +790,9 @@ include __DIR__ . '/../layout/header.php';
                     documento.content.push({
                         text: item.metodo_pago.toUpperCase(),
                         style: 'tableSubHeader',
-                        fontSize: 11
+                        fontSize: 10,
+                        color: '#555',
+                        margin: [0, 10, 0, 5]
                     });
 
                     const headers = ['Fecha', 'N° Operación', 'Entidad', 'N° Cuenta', 'Monto (S/)'];
@@ -811,11 +806,11 @@ include __DIR__ . '/../layout/header.php';
                         tableBody.push([{
                             text: new Date(t.fecha).toLocaleDateString('es-PE')
                         }, {
-                            text: t.numero_operacion || ''
+                            text: t.numero_operacion || '-'
                         }, {
-                            text: t.entidad_bancaria || ''
+                            text: t.entidad_bancaria || '-'
                         }, {
-                            text: t.numero_cuenta || ''
+                            text: t.numero_cuenta || '-'
                         }, {
                             text: `S/ ${formatearMoneda(t.monto)}`,
                             alignment: 'right'
@@ -828,7 +823,6 @@ include __DIR__ . '/../layout/header.php';
                         style: 'tableSubtotal',
                         colSpan: 4,
                         alignment: 'right',
-                        fillColor: '#EBF5F1'
                     }, {}, {}, {}, {
                         text: `S/ ${formatearMoneda(subtotal)}`,
                         style: 'tableSubtotal'
@@ -840,16 +834,14 @@ include __DIR__ . '/../layout/header.php';
                             widths: ['auto', '*', '*', '*', 'auto'],
                             body: tableBody
                         },
-                        layout: 'lightHorizontalLines',
-                        margin: [0, 5, 0, 15]
+                        layout: layoutTabla,
+                        margin: [0, 0, 0, 20]
                     });
                 }
             });
 
-
             pdfMake.createPdf(documento).open();
         }
-
 
         function formatearMoneda(monto) {
             return new Intl.NumberFormat('es-PE', {

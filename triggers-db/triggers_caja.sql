@@ -1,5 +1,5 @@
 
-USE motorpark2;
+USE motorpark;
 -- DELIMITER $$
 
 -- CREATE TRIGGER tr_calcular_saldorestante_before_insert
@@ -61,34 +61,37 @@ DELIMITER ;
 
 
 
+DELIMITER $$
+
+CREATE TRIGGER trg_verificar_fin_contrato
+AFTER UPDATE ON cronogramas
+FOR EACH ROW
+BEGIN
+    DECLARE cuotas_restantes INT;
 
 
-INSERT INTO
-    pagos (
-        idcronograma,
-        idcuentapago,
-        idcolcaja,
-        mediopago,
-        numerotransaccion,
-        fechapago,
-        amortizacion,
-        comprobante
-    )
-VALUES (
-        45,
-        3,
-        2,
-        'Yape',
-        '458585858558',
-        now(),
-        1096,
-        'hghfd/ghfghdf'
-    );
+    IF NEW.estado = 'Pagado' AND OLD.estado != 'Pagado' THEN
+        
+        -- Contamos cuántas cuotas quedan pendientes o vencidas para este contrato
+        SELECT COUNT(*) INTO cuotas_restantes
+        FROM cronogramas
+        WHERE idcontrato = NEW.idcontrato 
+          AND estado != 'Pagado'; -- Buscamos cualquier cosa que no esté pagada
 
+        -- Si ya no queda ninguna cuota pendiente (es decir, es 0)
+        IF cuotas_restantes = 0 THEN
+            UPDATE contratos 
+            SET estado = 'FIN' 
+            WHERE idcontrato = NEW.idcontrato;
+        END IF;
+        
+    END IF;
+END$$
 
+DELIMITER ;
 
-SHOW TRIGGERS;
-SHOW EVENTS;
+-- SELECT * FROM cronogramas;
 
+-- select count(numcuota) FROM cronogramas WHERE idcontrato = 16;
 
 

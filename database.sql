@@ -490,11 +490,14 @@ CREATE TABLE contratos (
     fecharevision DATE NULL,
     penalidadbase DECIMAL(10, 2) NOT NULL DEFAULT 0.1,
     observaciones VARCHAR(350) NULL,
-    estado ENUM('ACT', 'INACT') DEFAULT 'ACT',
+    estado ENUM('ACT', 'INACT', 'FIN') DEFAULT 'ACT',
     CONSTRAINT fk_idlocal_contrato FOREIGN KEY (idlocal) REFERENCES locales (idlocal),
     CONSTRAINT fk_idcotizacion_contrato FOREIGN KEY (idcotizacion) REFERENCES cotizaciones (idcotizacion),
     CONSTRAINT fk_idlogistica_contrato FOREIGN KEY (idlogistica) REFERENCES colaboradores (idcolaborador)
 ) ENGINE = InnoDB;
+
+ALTER TABLE contratos MODIFY COLUMN estado ENUM('ACT', 'INACT','FIN') DEFAULT 'ACT';
+SHOW COLUMNS FROM contratos;
 
 -- ALTER TABLE contratos
 -- ADD COLUMN penalidadbase DECIMAL(10, 2) NOT NULL DEFAULT 0.1;
@@ -578,7 +581,6 @@ CREATE TABLE pagos (
     CONSTRAINT fk_idasesorvendedor_pagos FOREIGN KEY(idasesorvendedor) REFERENCES colaboradores(idcolaborador),
     CONSTRAINT fk_idcliente_pagos  FOREIGN KEY(idcliente) REFERENCES clientes(idcliente)
 ) ENGINE = InnoDB;
-
 
 
 
