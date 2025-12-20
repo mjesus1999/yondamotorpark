@@ -99,8 +99,8 @@
         data,
         layout: "fitColumns",
         pagination: "local",
-        paginationSize: 10,
-        paginationSizeSelector: [5, 10, 20],
+        paginationSize: 20,
+        paginationSizeSelector: [5, 10, 15, 25],
         responsiveLayout: "collapse",
         placeholder: "<i class='fas fa-info-circle'></i> No hay vehículos por recepcionar",
         columns: [{
@@ -183,3 +183,6 @@
         });
     });
 </script>
+
+
+
