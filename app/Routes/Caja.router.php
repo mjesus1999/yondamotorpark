@@ -5,6 +5,7 @@ use App\Controllers\CajaController;
 $router->add('GET', '/caja', 'CajaController', 'index');
 $router->add('GET', '/caja/cronograma/{id}', 'CajaController', 'cronogramaByContrato');
 $router->add('GET','/caja/reporte/by/fecha','CajaController','indexReporteByFecha');
+$router->add('GET','/caja/contratos/completados','CajaController','indexContratosCompletados');
 
 
 $router->add('GET', '/api/reporte/hoy', 'CajaController', 'getReporteIngresosCajaHoy');
@@ -20,6 +21,7 @@ $router->add('POST','/api/storePagoCompuesto','CajaController','storePagoCompues
 
 
 $router->add('GET','/api/clienteByDNI/{dni}','CajaController','searchClienteByDNI');
+$router->add('GET','/api/contratos/completados','CajaController','getContratosCompletados');
 
 
 

@@ -89,6 +89,21 @@ class Caja
         }
     }
 
+    public function getContratosCompletados(): ?array
+    {
+        $query = "CALL sp_get_contratos_completados()";
+        try {
+
+            $stmt = $this->db->prepare($query);
+            $stmt->execute();
+            $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            return $results;
+        } catch (PDOException $error) {
+            error_log($error->getMessage());
+            return [];
+        }
+    }
+
 
 
 

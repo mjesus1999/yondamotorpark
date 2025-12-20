@@ -60,7 +60,6 @@ END$$
 DELIMITER ;
 
 
-
 DELIMITER $$
 
 CREATE TRIGGER trg_verificar_fin_contrato

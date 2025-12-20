@@ -496,8 +496,8 @@ CREATE TABLE contratos (
     CONSTRAINT fk_idlogistica_contrato FOREIGN KEY (idlogistica) REFERENCES colaboradores (idcolaborador)
 ) ENGINE = InnoDB;
 
-ALTER TABLE contratos MODIFY COLUMN estado ENUM('ACT', 'INACT','FIN') DEFAULT 'ACT';
-SHOW COLUMNS FROM contratos;
+-- ALTER TABLE contratos MODIFY COLUMN estado ENUM('ACT', 'INACT','FIN') DEFAULT 'ACT';
+-- SHOW COLUMNS FROM contratos;
 
 -- ALTER TABLE contratos
 -- ADD COLUMN penalidadbase DECIMAL(10, 2) NOT NULL DEFAULT 0.1;

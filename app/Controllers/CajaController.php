@@ -75,6 +75,12 @@ class CajaController extends Controller
         // error_log("Tiempo de ejecución de CAJA/Contratos: " . number_format($tiempoEjecucion, 2) . " segundos.");
     }
 
+    public function indexContratosCompletados(): void
+    {
+        $this->authRequired();
+        $this->view('caja.contratosCompletados');
+    }
+
     /**
      * Muestra la vista de reportes por fechas personalizadas
      * 
@@ -459,5 +465,31 @@ class CajaController extends Controller
             error_log($th->getMessage());
             echo json_encode(['success' => false, 'message' => 'Error: ' . $th->getMessage()]);
         }
+    }
+
+
+
+    public function getContratosCompletados(): void
+    {
+        // $this->authRequired();
+        header('Content-Type: application/json');
+
+        $contratos = $this->cajaModel->getContratosCompletados();
+
+        if (!$contratos) {
+            http_response_code(404);
+            echo json_encode([
+                'success' => false,
+                'data' => [],
+                'message' => 'No se encontraron contratos completados.'
+            ]);
+            exit();
+        }
+
+        echo json_encode([
+            'success' => true,
+            'data' => $contratos
+        ]);
+        exit();
     }
 }

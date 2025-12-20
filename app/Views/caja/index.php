@@ -34,6 +34,10 @@ include __DIR__ . '/../layout/header.php';
                 Cobros por denominación
             </a>
 
+              <a class="btn btn-warning text-white fw-bold btn-sm rounded-0" href="/caja/contratos/completados" style="margin-left: 10px; border-left: 1px solid rgba(255, 255, 255, 0.1);">
+                <i class="bi bi-clock-history"></i> Contratos completados
+            </a>
+
         </div>
     </div>
 
