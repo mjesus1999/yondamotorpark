@@ -391,58 +391,70 @@ END
 
 SHOW CREATE PROCEDURE sp_registrar_pago_compuesto;
 
+DROP PROCEDURE IF EXISTS sp_get_contratos_completados;
 
 DELIMITER $$
 CREATE PROCEDURE sp_get_contratos_completados()
 BEGIN
+    SELECT
+        con.idcontrato,
+        CONCAT(p.apellidos, ' ', p.nombres) AS cliente,
+        p.tipodoc AS documento,
+        p.nrodoc AS ndocumento,
+        p.telprimario,
+        CONCAT(
+            IFNULL(dep.departamento, 'Sin departamento'), ' / ',
+            IFNULL(pro.provincia, 'Sin provincia'), ' / ',
+            IFNULL(d.distrito, 'Sin distrito')
+        ) AS ubigeo,
+        IFNULL(p.direccion, 'Sin dirección') AS direccion,
+        CONCAT(
+            l.tienda, ' / ',
+            dep.departamento,' / ',
+            d.distrito, ' / ',
+            pro.provincia
+        ) AS tienda,
+        CONCAT(
+            IFNULL(mar.marca, 'Sin marca'), ' / ',
+            IFNULL(model.modelo, 'Sin modelo'), ' / ',
+            IFNULL(c.combustible, 'Sin combustible'), ' / ',
+            IFNULL(v.color, 'Sin color')
+        ) AS vehiculo,
+        cot.numcuotas AS meses,
+        cot.valorcuota AS cuota,
+        SUM(cot.valorcuota) AS totalPagado
+    FROM cotizaciones AS cot
+    JOIN clientes AS cli ON cot.idcliente = cli.idcliente
+    JOIN personas AS p ON cli.idpersona = p.idpersona
+    JOIN vehiculos AS v ON cot.idvehiculo = v.idvehiculo
+    JOIN modelos AS model ON v.idmodelo = model.idmodelo
+    JOIN marcas AS mar ON model.idmarca = mar.idmarca
+    JOIN combustibles AS c ON v.idcombustible = c.idcombustible
+    LEFT JOIN contratos AS con ON cot.idcotizacion = con.idcotizacion
+    LEFT JOIN locales AS l ON con.idlocal = l.idlocal
+    JOIN distritos AS d ON l.iddistrito = d.iddistrito
+    JOIN provincias AS pro ON d.idprovincia = pro.idprovincia
+    JOIN departamentos AS dep ON pro.iddepartamento = dep.iddepartamento
+    JOIN cronogramas cro ON con.idcontrato = cro.idcontrato
+    WHERE cro.estado = 'Pagado'
+      AND con.estado = 'FIN'
+    GROUP BY
+        con.idcontrato,
+        p.apellidos, p.nombres,
+        p.tipodoc, p.nrodoc,
+        l.tienda,
+        dep.departamento,
+        d.distrito,
+        pro.provincia,
+        mar.marca,
+        model.modelo,
+        c.combustible,
+        v.color,
+        cot.numcuotas,
+        cot.valorcuota
+    ORDER BY con.idcontrato ASC;
+END $$
 
- SELECT
-                    con.idcontrato,
-                    CONCAT(p.apellidos, ' ', p.nombres) AS cliente,
-                    p.tipodoc AS documento,
-                    p.nrodoc AS ndocumento,
-				    CONCAT(
-                    l.tienda, ' / ',
-                    dep.departamento,' / ',
-                    d.distrito, ' / ',
-                    pro.provincia) AS tienda,
-                    CONCAT(
-                        IFNULL(mar.marca, 'Sin marca'), ' / ',
-                        IFNULL(model.modelo, 'Sin modelo'),
-                        ' / ',
-                        IFNULL(c.combustible, 'Sin combustible'),
-                        ' / ',
-                        IFNULL(v.color, 'Sin color')
-                    ) AS vehiculo,
-
-                    cot.numcuotas AS meses,
-                    cot.valorcuota AS cuota
-                FROM
-                    cotizaciones AS cot
-                JOIN
-                    clientes AS cli ON cot.idcliente = cli.idcliente
-                JOIN
-                    personas AS p ON cli.idpersona = p.idpersona
-                JOIN
-                    vehiculos AS v ON cot.idvehiculo = v.idvehiculo
-                JOIN
-                    modelos AS model ON v.idmodelo = model.idmodelo
-                JOIN
-                    marcas AS mar ON model.idmarca = mar.idmarca
-                JOIN
-                    combustibles AS c ON v.idcombustible = c.idcombustible
-                LEFT JOIN
-                    contratos AS con ON cot.idcotizacion = con.idcotizacion
-                LEFT JOIN
-                    locales AS l ON con.idlocal = l.idlocal
-				JOIN distritos AS d ON l.iddistrito = d.iddistrito
-                JOIN provincias AS pro ON d.idprovincia = pro.idprovincia
-                JOIN departamentos AS dep ON pro.iddepartamento = dep.iddepartamento
-                WHERE con.estado  = 'ACT'
-                ORDER BY con.idcontrato ASC;
-
-
-END //
 DELIMITER ;
 
 CALL sp_get_contratos_completados();
@@ -452,3 +464,14 @@ CALL sp_get_contratos_completados();
 -- WHERE estado = 'FIN';
 
 -- SELECT * FROM contratos;
+
+
+UPDATE contratos SET estado = 'FIN' WHERE idcontrato = 40;
+
+SELECT * FROM contratos;
+
+SELECT * FROM cronogramas;
+
+select * from pagos;
+
+SELECT * FROM cotizaciones WHERE idcotizacion = 113;

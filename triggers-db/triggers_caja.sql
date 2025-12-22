@@ -77,7 +77,7 @@ BEGIN
         WHERE idcontrato = NEW.idcontrato 
           AND estado != 'Pagado'; -- Buscamos cualquier cosa que no esté pagada
 
-        -- Si ya no queda ninguna cuota pendiente (es decir, es 0)
+        -- Si ya no queda ninguna cuota pendiente 
         IF cuotas_restantes = 0 THEN
             UPDATE contratos 
             SET estado = 'FIN' 
