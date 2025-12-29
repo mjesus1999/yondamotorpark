@@ -171,19 +171,31 @@ class Usuario
    * @return array|null Array con los datos del usuario o null si no se encuentra
    */
   public function searchByUsernick(string $usernick): ?array
-  {
-    $query = "SELECT * FROM vwSearchUsernick WHERE BINARY usernick = :usernick LIMIT 1";
+{
+    
+    $query = "SELECT * FROM vwsearchusernick WHERE usernick = :usernick LIMIT 1";
+    
     try {
-      $stmt = $this->db->prepare($query);
-      $stmt->bindValue(':usernick', $usernick, PDO::PARAM_STR);
-      $stmt->execute();
-      $row = $stmt->fetch(PDO::FETCH_ASSOC);
-      return $row ?: null;
+        $stmt = $this->db->prepare($query);
+        $stmt->bindValue(':usernick', $usernick, PDO::PARAM_STR);
+        $stmt->execute();
+        
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        
+        if ($row) {
+            error_log("Usuario encontrado: " . print_r($row, true));
+        } else {
+            error_log("Usuario NO encontrado para el nick: " . $usernick);
+        }
+
+        return $row ?: null;
     } catch (Exception $e) {
-      // log $e->getMessage()
-      return null;
+        
+        error_log("Error en searchByUsernick: " . $e->getMessage());
+        return null;
     }
-  }
+}
 
   /**
    * Obtiene un usuario por su ID
