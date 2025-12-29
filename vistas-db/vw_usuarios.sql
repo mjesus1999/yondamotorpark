@@ -178,6 +178,7 @@ LEFT JOIN distritos d      ON d.iddistrito         = p.iddistrito;
 */
 
 -- VISTA DE BUSCAR POR USERNICK
+DROP VIEW IF EXISTS vwSearchUsernick;
 CREATE VIEW vwSearchUsernick AS
 SELECT
   col.idcolaborador,
