@@ -172,7 +172,7 @@ class Usuario
    */
   public function searchByUsernick(string $usernick): ?array
   {
-    $query = "SELECT * FROM vwSearchUsernick WHERE BINARY usernick = :usernick LIMIT 1";
+    $query = "SELECT * FROM vwsearchusernick WHERE BINARY usernick = :usernick LIMIT 1";
     try {
       $stmt = $this->db->prepare($query);
       $stmt->bindValue(':usernick', $usernick, PDO::PARAM_STR);
