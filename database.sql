@@ -314,7 +314,7 @@ CREATE TABLE ordenescompra (
     CONSTRAINT fk_idlogistica_ocp FOREIGN KEY (idlogistica) REFERENCES colaboradores (idcolaborador)
 ) ENGINE = INNODB;
 
-CREATE TABLE pagosOC (
+CREATE TABLE pagosoc (
     idpagooc INT AUTO_INCREMENT NOT NULL PRIMARY KEY,
     idorden INT NOT NULL, -- ID OC
     idlogistica INT NOT NULL, -- Persona que registro el pago
