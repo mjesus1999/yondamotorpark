@@ -61,7 +61,7 @@ class Cotizacion
     public function getAll(string $estado): array
     {
 
-        $query = "SELECT * FROM vwGetAllCotizacion WHERE estadocotizacion = :estado 
+        $query = "SELECT * FROM vwgetallcotizacion WHERE estadocotizacion = :estado 
               ORDER BY fechaRegistro DESC";
 
         $stmt = $this->db->prepare($query);
@@ -109,7 +109,7 @@ class Cotizacion
      */
     public function getAllByAsesor(int $idasesor, string $estado): array
     {
-        $query = "SELECT * FROM vwGetAllCotizacion 
+        $query = "SELECT * FROM vwgetallcotizacion
               WHERE idasesor = :idasesor AND estadocotizacion = :estado 
               ORDER BY fechaRegistro DESC";
 
@@ -214,7 +214,7 @@ class Cotizacion
               numcuotas,
               valorcuota,
               estadocotizacion
-            FROM vwGetAllCotizacion
+            FROM vwgetallcotizacion
             WHERE idcotizacion = :idcotizacion LIMIT 1;";
 
         $stmt = $this->db->prepare($query);
@@ -232,7 +232,7 @@ class Cotizacion
                         documento,
                         direccion,
                         email
-                    FROM vwGetAllCotizacion
+                    FROM vwgetallcotizacion
                     WHERE idcotizacion = :idcotizacion LIMIT 1;";
 
         try {
@@ -782,7 +782,7 @@ class Cotizacion
      */
     public function getById(int $idcotizacion): ?array
     {
-        $query = "SELECT * FROM vwGetCotizacionDetail WHERE idcotizacion = :id LIMIT 1";
+        $query = "SELECT * FROM vwgetcotizaciondetail WHERE idcotizacion = :id LIMIT 1";
         try {
             $stmt = $this->db->prepare($query);
             $stmt->bindValue(':id', $idcotizacion, PDO::PARAM_INT);
@@ -807,7 +807,7 @@ class Cotizacion
      */
     public function getAllVencidas(): array
     {
-        $query = "SELECT * FROM vwGetAllCotizacionVencidas";
+        $query = "SELECT * FROM vwgetallcotizacionvencidas";
         $stmt = $this->db->query($query);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
@@ -823,7 +823,7 @@ class Cotizacion
      */
     public function getAllVencidasByAsesor(int $idasesor): array
     {
-        $query = "SELECT * FROM vwGetAllCotizacionVencidas WHERE idasesor = :idasesor ORDER BY fechaRegistro DESC";
+        $query = "SELECT * FROM vwgetallcotizacionvencidas WHERE idasesor = :idasesor ORDER BY fechaRegistro DESC";
         $stmt = $this->db->prepare($query);
         $stmt->bindValue(':idasesor', $idasesor, PDO::PARAM_INT);
         $stmt->execute();

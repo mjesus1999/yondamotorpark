@@ -6,7 +6,7 @@ namespace App\Config;
 
 class Credencialesnubefact
 {
-    const string NUBEFACT_RUTA = "https://api.nubefact.com/api/v1/2445c993-743e-4c7a-9da2-12f84013a975";
-    const string NUBEFACT_TOKEN = "63b98d65c2294aada089cc71db55f585bb49b20fe50b4cedb7efe66da359e3d1";
+    const string NUBEFACT_RUTA = "https://api.nubefact.com/api/v1/46483739-a800-43d4-be51-45cd0c5a97ee";
+    const string NUBEFACT_TOKEN = "e4823c34cc29491fa1730cce976929d8b27415bf9b1c41238eeff01b7624a595";
      
 }
