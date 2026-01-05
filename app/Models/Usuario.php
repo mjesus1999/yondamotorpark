@@ -58,7 +58,7 @@ class Usuario
    */
   public function getAll(): array
   {
-    $query = "SELECT * FROM vwGetAllUser ORDER BY idcolaborador DESC LIMIT 1000";
+    $query = "SELECT * FROM vwgetalluser ORDER BY idcolaborador DESC LIMIT 1000";
     try {
       $stmt = $this->db->prepare($query);
       $stmt->execute();
@@ -207,7 +207,7 @@ class Usuario
    */
   public function getById(int $idColab): ?array
   {
-    $query = "SELECT * FROM vwGetUserDetail WHERE idcolaborador = :id";
+    $query = "SELECT * FROM vwgetuserdetail WHERE idcolaborador = :id";
     try {
       $stmt = $this->db->prepare($query);
       $stmt->bindValue(':id', $idColab, PDO::PARAM_INT);
@@ -307,7 +307,7 @@ class Usuario
    */
   public function getContractsWithoutColaborador(): array
   {
-    $query = "SELECT * FROM vwContractsWithoutColaborador ORDER BY fechainicio DESC LIMIT 0,1000";
+    $query = "SELECT * FROM vwcontractswithoutcolaborador ORDER BY fechainicio DESC LIMIT 0,1000";
     try {
       $stmt = $this->db->prepare($query);
       $stmt->execute();

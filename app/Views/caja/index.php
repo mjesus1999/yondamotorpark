@@ -191,6 +191,7 @@ include __DIR__ . '/../layout/header.php';
             paginationSize: 20,
             paginationSizeSelector: [5, 10, 15, 25],
             movableRows: true,
+             placeholder: "No hay contratos con cronogramas para mostrar.",
 
             columns: [{
                     title: "#",
