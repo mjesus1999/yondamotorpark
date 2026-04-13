@@ -468,4 +468,36 @@ class Caja
             return [];
         }
     }
+
+    /**
+     * Contratos ACT de un cliente (para caja: localizar cuotas sin depender solo del listado general).
+     */
+    public function getContratosActivosPorIdCliente(int $idcliente): array
+    {
+        $sql = "
+            SELECT
+                c.idcontrato,
+                cot.idcotizacion,
+                TRIM(CONCAT(
+                    IFNULL(ma.marca, ''), ' / ',
+                    IFNULL(mo.modelo, ''),
+                    IF(mo.anio IS NOT NULL AND mo.anio > 0, CONCAT(' / ', mo.anio), '')
+                )) AS vehiculo_resumen
+            FROM contratos c
+            INNER JOIN cotizaciones cot ON cot.idcotizacion = c.idcotizacion
+            LEFT JOIN vehiculos v ON v.idvehiculo = cot.idvehiculo
+            LEFT JOIN modelos mo ON mo.idmodelo = v.idmodelo
+            LEFT JOIN marcas ma ON ma.idmarca = mo.idmarca
+            WHERE cot.idcliente = :idcliente AND c.estado = 'ACT'
+            ORDER BY c.idcontrato DESC
+        ";
+        try {
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([':idcliente' => $idcliente]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log('getContratosActivosPorIdCliente: ' . $e->getMessage());
+            return [];
+        }
+    }
 }

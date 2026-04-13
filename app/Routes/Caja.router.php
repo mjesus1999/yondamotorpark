@@ -11,6 +11,8 @@ $router->add('GET','/caja/contratos/completados','CajaController','indexContrato
 $router->add('GET', '/api/reporte/hoy', 'CajaController', 'getReporteIngresosCajaHoy');
 $router->add('GET', '/api/reporte/by/fecha', 'CajaController', 'reportePagosByFecha');
 $router->add('GET','/caja/pagos/denominacion','CajaController','indexPagosDenominacion');
+$router->add('GET', '/caja/buscar-cliente', 'CajaController', 'indexBuscarCliente');
+$router->add('GET', '/api/caja/contratos-por-cliente/{id}', 'CajaController', 'apiContratosPorCliente');
 
 $router->add('GET', '/api/reporte/hoy', 'CajaController', 'getReporteIngresosCajaHoy');
 

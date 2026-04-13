@@ -237,6 +237,11 @@ function tienePermisoGrupo($modulos, $modulosPermitidos)
                       <i class="fa-solid fa-cash-register pe-2"></i> Caja
                     </a>
                   </li>
+                  <li class="sidebar-item">
+                    <a href="/caja/buscar-cliente" class="sidebar-link">
+                      <i class="bi bi-person-search pe-2"></i> Buscar cliente (caja)
+                    </a>
+                  </li>
                 <?php endif; ?>
                 <?php if (tienePermiso('creditos', $modulosPermitidos)): ?>
                   <li class="sidebar-item">
