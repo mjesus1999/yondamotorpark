@@ -306,52 +306,26 @@
         emptyMessage.style.display = (montoInputs.length === 0) ? 'block' : 'none';
     }
 
+    /**
+     * Para conceptos escritos a mano no hace falta INSERT en conceptospago (fallaba en varios servidores).
+     * El SP usa idconcepto solo como FK; el texto cobrado va en "nombre" del JSON (nombre_concepto_manual).
+     */
+    function primerIdConceptoDelCatalogo() {
+        const sel = document.getElementById('conceptos-db');
+        if (!sel) return 1;
+        for (let i = 0; i < sel.options.length; i++) {
+            const v = parseInt(sel.options[i].value, 10);
+            if (!Number.isNaN(v) && v > 0) return v;
+        }
+        return 1;
+    }
 
     async function addConceptoRow(concepto, monto, idConcepto = 0) {
         let idFinal = idConcepto;
 
         if (idConcepto === 0) {
-            try {
-                const formData = new FormData();
-                formData.append('concepto', concepto);
-                formData.append('descripcion', document.getElementById('descripcion-concepto').value || '');
-                formData.append('montosugerido', monto);
-
-                const req = await fetch('/store/conceptoPago', {
-                    method: 'POST',
-                    body: formData,
-                    credentials: 'same-origin',
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
-                });
-
-                const raw = await req.text();
-                let res;
-                try {
-                    res = raw ? JSON.parse(raw) : {};
-                } catch (parseErr) {
-                    console.error(parseErr, raw);
-                    showToast('El servidor no devolvió JSON (¿sesión vencida?). Recargá la página o volvé a iniciar sesión.', 'ERROR', 5000);
-                    return;
-                }
-
-                if (!req.ok) {
-                    showToast(res.message || ('Error HTTP ' + req.status + ' al guardar el concepto'), 'ERROR', 4000);
-                    return;
-                }
-
-                if (res.success) {
-                    showToast(res.message, 'SUCCESS', 1250);
-                    idFinal = res.id;
-                } else {
-                    showToast(res.message || 'Error al registrar el concepto', 'ERROR', 3500);
-                    return;
-                }
-
-            } catch (error) {
-                console.error(error);
-                showToast('Error al guardar el concepto: ' + (error.message || 'red'), 'ERROR', 4000);
-                return;
-            }
+            idFinal = primerIdConceptoDelCatalogo();
+            showToast('Concepto agregado. El nombre que ingresaste es el que verá el cliente en el detalle del pago.', 'SUCCESS', 2200);
         }
 
 
@@ -460,7 +434,8 @@
             if (!req.ok) throw new Error('Error en la solicitud ' + req.status);
 
             const res = await req.json();
-            res.conceptos.forEach(concepto => {
+            const lista = res.conceptos || [];
+            lista.forEach(concepto => {
                 conceptosDB.innerHTML += `
                     <option 
                         value="${concepto.idconcepto}" 

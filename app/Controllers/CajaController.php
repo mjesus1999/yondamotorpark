@@ -268,7 +268,7 @@ class CajaController extends Controller
         $conceptos = $this->cajaModel->getConceptosPagos();
 
         if ($conceptos) {
-            echo json_encode(["succees" => true, "conceptos" => $conceptos]);
+            echo json_encode(['success' => true, 'conceptos' => $conceptos]);
         } else {
             http_response_code(404);
             echo json_encode([
