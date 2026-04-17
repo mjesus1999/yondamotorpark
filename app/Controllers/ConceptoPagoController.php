@@ -70,23 +70,31 @@ class ConceptoPagoController extends Controller
     
     public function store()
     {
-
-        header('Content-Type: application/json');
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             http_response_code(405);
+            header('Content-Type: application/json');
             echo json_encode(['success' => false, 'message' => 'Método no permitido']);
             exit;
         }
 
         header('Content-Type: application/json');
 
+        // Respuesta JSON (no redirección HTML): el fetch de cobros por denominación espera JSON.
+        if (empty($_SESSION['user']['id'])) {
+            http_response_code(401);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Sesión no válida o expirada. Volvé a iniciar sesión e intentá de nuevo.',
+            ]);
+            exit;
+        }
+
         $data = array_map([Validador::class, 'limpiar'], $_POST);
 
         $registro = [
             'concepto' => empty($data['concepto']) ? null : $data['concepto'],
-            'montosugerido' => empty($data['montosugerido']) ? null : $data['montosugerido'],
-            'descripcion' => $data['descripcion'] ? null : $data['descripcion'],
-
+            'montosugerido' => $data['montosugerido'] === '' || $data['montosugerido'] === null ? null : $data['montosugerido'],
+            'descripcion' => empty($data['descripcion']) ? null : $data['descripcion'],
         ];
 
         try {

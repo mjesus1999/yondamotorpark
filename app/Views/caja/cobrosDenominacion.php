@@ -223,11 +223,7 @@
 
 
 <script>
-    function showToast(message, type = 'INFO', duration = 3000) {
-        console.log(`[${type}] ${message}`);
-
-    }
-
+    // Notificaciones: usa showToast de /assets/js/swalcustom.js (cargado en el footer).
 
     const clienteNombre = document.getElementById('nombrecompleto');
     const clienteIDSpan = document.getElementById('cliente-id');
@@ -323,24 +319,37 @@
 
                 const req = await fetch('/store/conceptoPago', {
                     method: 'POST',
-                    body: formData
+                    body: formData,
+                    credentials: 'same-origin',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
                 });
 
-                if (!req.ok) throw new Error('Error en la solicitud: ' + req.status);
+                const raw = await req.text();
+                let res;
+                try {
+                    res = raw ? JSON.parse(raw) : {};
+                } catch (parseErr) {
+                    console.error(parseErr, raw);
+                    showToast('El servidor no devolvió JSON (¿sesión vencida?). Recargá la página o volvé a iniciar sesión.', 'ERROR', 5000);
+                    return;
+                }
 
-                const res = await req.json();
+                if (!req.ok) {
+                    showToast(res.message || ('Error HTTP ' + req.status + ' al guardar el concepto'), 'ERROR', 4000);
+                    return;
+                }
 
                 if (res.success) {
                     showToast(res.message, 'SUCCESS', 1250);
                     idFinal = res.id;
                 } else {
-                    showToast(res.message, 'ERROR', 1350);
+                    showToast(res.message || 'Error al registrar el concepto', 'ERROR', 3500);
                     return;
                 }
 
             } catch (error) {
                 console.error(error);
-                showToast('Error al guardar el concepto', 'ERROR');
+                showToast('Error al guardar el concepto: ' + (error.message || 'red'), 'ERROR', 4000);
                 return;
             }
         }
