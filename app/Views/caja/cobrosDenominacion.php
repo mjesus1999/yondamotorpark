@@ -1,5 +1,5 @@
 <?php include __DIR__ . '/../layout/header.php'; ?>
-<!-- yonda:cobros-denom build=2026-04-17-v3 (sin POST /store/conceptoPago en concepto manual) -->
+<!-- yonda:cobros-denom build=2026-04-17-v4 resumen-credito + cliente arriba del resumen -->
 
 <style>
     .monto-input {
@@ -127,6 +127,65 @@
     </div>
 
     <div class="col-lg-4 mt-4 mt-lg-0">
+        <!-- Cliente primero: así se ve el resumen de crédito sin quedar debajo del botón de pago -->
+        <div class="card border-primary shadow-lg mb-4" id="card-cliente" style="display: none;">
+            <div class="card-header bg-primary text-white d-flex align-items-center">
+                <h5 class="mb-0"><i class="bi bi-person-circle me-2" style="font-size: 1.2rem;"></i> Cliente Seleccionado</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="fw-normal text-muted">ID Cliente:</span>
+                    <span id="cliente-id" class="fw-bold text-danger fs-5"></span>
+                </div>
+
+                <div class="d-flex justify-content-between mb-3">
+                    <span class="fw-normal text-muted">Nombre completo:</span>
+                    <span id="nombrecompleto" class="fw-bold"></span>
+                </div>
+
+                <hr class="my-3">
+
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <span class="fw-bold d-flex align-items-center">
+                        <i class="bi bi-person-vcard-fill text-primary me-2" style="font-size: 1.2rem;"></i> DNI:
+                    </span>
+                    <span id="cliente-dni" class="text-muted fw-semibold"></span>
+                </div>
+
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <span class="fw-bold d-flex align-items-center">
+                        <i class="bi bi-envelope-at-fill text-success me-2" style="font-size: 1.2rem;"></i> Correo:
+                    </span>
+                    <span id="cliente-correo" class="text-muted fw-semibold"></span>
+                </div>
+
+                <div class="d-flex align-items-start justify-content-between mb-2">
+                    <span class="fw-bold d-flex align-items-center">
+                        <i class="bi bi-geo-alt-fill text-danger me-2" style="font-size: 1.2rem;"></i> Dirección:
+                    </span>
+                    <span id="cliente-direccion" class="text-muted text-end fw-semibold"></span>
+                </div>
+
+                <hr class="my-3" id="credito-sep" style="display: none;">
+
+                <div id="credito-resumen" class="small" style="display: none;">
+                    <div class="fw-bold text-info mb-2"><i class="bi bi-calendar2-week me-1"></i> Crédito / cronograma (contrato ACT)</div>
+                    <div class="d-flex justify-content-between mb-1"><span class="text-muted">Contrato:</span><span id="cred-idcontrato" class="fw-semibold"></span></div>
+                    <div class="d-flex justify-content-between mb-1"><span class="text-muted">Cuotas del plan:</span><span id="cred-numcuotas" class="fw-semibold"></span></div>
+                    <div class="d-flex justify-content-between mb-1"><span class="text-muted">Valor cuota:</span><span id="cred-valorcuota" class="fw-semibold"></span></div>
+                    <div class="d-flex justify-content-between mb-1"><span class="text-muted">Pagadas / pend. / venc.:</span><span id="cred-contadores" class="fw-semibold"></span></div>
+                    <div class="d-flex justify-content-between mb-1"><span class="text-muted">Próxima cuota (nº):</span><span id="cred-sig-num" class="fw-semibold"></span></div>
+                    <div class="d-flex justify-content-between mb-1"><span class="text-muted">Fecha próx. cuota:</span><span id="cred-sig-fecha" class="fw-semibold"></span></div>
+                    <div class="d-flex justify-content-between mb-0"><span class="text-muted">Estado próx. cuota:</span><span id="cred-sig-estado" class="fw-semibold"></span></div>
+                </div>
+
+                <div id="credito-sin-datos" class="small text-warning mt-2" style="display: none;">
+                    <i class="bi bi-info-circle me-1"></i> Sin contrato activo o sin cronograma cargado para este cliente.
+                </div>
+
+            </div>
+        </div>
+
         <div class="card border-primary shadow-lg sticky-top" style="top: 20px;">
             <div class="card-header bg-primary text-white">
                 <h5 class="mb-0">S/ Resumen Total</h5>
@@ -176,56 +235,13 @@
             </div>
         </div>
 
-
-
-        <div class="card border-primary shadow-lg mt-4" id="card-cliente" style="display: none;">
-            <div class="card-header bg-primary text-white d-flex align-items-center">
-                <h5 class="mb-0"><i class="bi bi-person-circle me-2" style="font-size: 1.2rem;"></i> Cliente Seleccionado</h5>
-            </div>
-            <div class="card-body">
-                <div class="d-flex justify-content-between mb-2">
-                    <span class="fw-normal text-muted">ID Cliente:</span>
-                    <span id="cliente-id" class="fw-bold text-danger fs-5"></span>
-                </div>
-
-                <div class="d-flex justify-content-between mb-3">
-                    <span class="fw-normal text-muted">Nombre completo:</span>
-                    <span id="nombrecompleto" class="fw-bold"></span>
-                </div>
-
-                <hr class="my-3">
-
-                <div class="d-flex align-items-center justify-content-between mb-3">
-                    <span class="fw-bold d-flex align-items-center">
-                        <i class="bi bi-person-vcard-fill text-primary me-2" style="font-size: 1.2rem;"></i> DNI:
-                    </span>
-                    <span id="cliente-dni" class="text-muted fw-semibold"></span>
-                </div>
-
-                <div class="d-flex align-items-center justify-content-between mb-3">
-                    <span class="fw-bold d-flex align-items-center">
-                        <i class="bi bi-envelope-at-fill text-success me-2" style="font-size: 1.2rem;"></i> Correo:
-                    </span>
-                    <span id="cliente-correo" class="text-muted fw-semibold"></span>
-                </div>
-
-                <div class="d-flex align-items-start justify-content-between mb-2">
-                    <span class="fw-bold d-flex align-items-center">
-                        <i class="bi bi-geo-alt-fill text-danger me-2" style="font-size: 1.2rem;"></i> Dirección:
-                    </span>
-                    <span id="cliente-direccion" class="text-muted text-end fw-semibold"></span>
-                </div>
-
-            </div>
-        </div>
-
     </div>
 </div>
 
 
 <script>
     // Notificaciones: usa showToast de /assets/js/swalcustom.js (cargado en el footer).
-    console.info('[Yonda] cobros-denominacion JS build 2026-04-17-v3');
+    console.info('[Yonda] cobros-denominacion JS build 2026-04-17-v4-credito-ui');
 
     const clienteNombre = document.getElementById('nombrecompleto');
     const clienteIDSpan = document.getElementById('cliente-id');
@@ -233,6 +249,9 @@
     const clienteCorreo = document.getElementById('cliente-correo');
     const clienteDireccion = document.getElementById('cliente-direccion');
     const clienteCard = document.getElementById('card-cliente');
+    const credSep = document.getElementById('credito-sep');
+    const credBox = document.getElementById('credito-resumen');
+    const credSin = document.getElementById('credito-sin-datos');
 
     const selectMedioPago = document.getElementById('mediopago');
     const contenedorComprobante = document.getElementById('contenedor-comprobante');
@@ -274,7 +293,13 @@
     /**
      * Muestra los datos del cliente en la tarjeta lateral y asigna el ID global.
      */
-    function displayClienteData(data) {
+    function limpiarBloqueCredito() {
+        if (credSep) credSep.style.display = 'none';
+        if (credBox) credBox.style.display = 'none';
+        if (credSin) credSin.style.display = 'none';
+    }
+
+    function displayClienteData(data, credito) {
         idCliente = data.idcliente;
         clienteCard.style.display = 'block';
 
@@ -283,6 +308,37 @@
         clienteDNI.textContent = data.nrodoc ?? 'N/A';
         clienteCorreo.textContent = data.email ?? 'N/A';
         clienteDireccion.textContent = data.direccion ?? 'N/A';
+
+        limpiarBloqueCredito();
+        const tieneCred = credito && (credito.idcontrato != null && String(credito.idcontrato) !== '');
+        if (tieneCred && credSep && credBox) {
+            credSep.style.display = '';
+            credBox.style.display = 'block';
+            const el = (id) => document.getElementById(id);
+            if (el('cred-idcontrato')) el('cred-idcontrato').textContent = String(credito.idcontrato);
+            if (el('cred-numcuotas')) el('cred-numcuotas').textContent = String(credito.numcuotas ?? '—');
+            const vc = credito.valorcuota != null ? Number(credito.valorcuota) : null;
+            if (el('cred-valorcuota')) {
+                el('cred-valorcuota').textContent =
+                    vc != null && !Number.isNaN(vc) ? `S/ ${vc.toFixed(2)}` : '—';
+            }
+            const cp = Number(credito.cuotas_pagadas ?? 0);
+            const cpe = Number(credito.cuotas_pendientes ?? 0);
+            const cv = Number(credito.cuotas_vencidas ?? 0);
+            if (el('cred-contadores')) el('cred-contadores').textContent = `${cp} / ${cpe} / ${cv}`;
+            const sn = credito.siguiente_cuota_num;
+            if (el('cred-sig-num')) {
+                el('cred-sig-num').textContent =
+                    sn != null && sn !== '' ? String(sn) : '— (al día o sin filas en cronograma)';
+            }
+            if (el('cred-sig-fecha')) el('cred-sig-fecha').textContent =
+                credito.siguiente_cuota_fecha ? String(credito.siguiente_cuota_fecha) : '—';
+            if (el('cred-sig-estado')) el('cred-sig-estado').textContent =
+                credito.siguiente_cuota_estado ? String(credito.siguiente_cuota_estado) : '—';
+        } else if (credSep && credSin) {
+            credSep.style.display = '';
+            credSin.style.display = 'block';
+        }
 
         updateTotals(); // Actualizar el estado del botón
     }
@@ -387,6 +443,7 @@
         if (dni.length !== 8) {
             showToast('El DNI debe tener 8 dígitos.', 'ERROR', 1800);
             clienteCard.style.display = 'none';
+            limpiarBloqueCredito();
             idCliente = null;
             updateTotals();
             return;
@@ -400,6 +457,7 @@
             if (req.status === 404) {
                 showToast('Cliente no encontrado.', 'WARNING', 1400);
                 clienteCard.style.display = 'none';
+                limpiarBloqueCredito();
                 idCliente = null;
                 updateTotals();
                 return;
@@ -413,10 +471,11 @@
 
             if (res.success && res.cliente) {
                 showToast('Cliente encontrado', 'SUCCESS', 1400);
-                displayClienteData(res.cliente);
+                displayClienteData(res.cliente, res.credito ?? null);
             } else {
                 showToast('Cliente no encontrado', 'ERROR', 1400);
                 clienteCard.style.display = 'none';
+                limpiarBloqueCredito();
                 idCliente = null;
                 updateTotals();
             }
@@ -561,6 +620,7 @@
                 contenedorCuenta.style.display = 'none';
                 idCliente = null;
                 clienteCard.style.display = 'none';
+                limpiarBloqueCredito();
                 inputComprobante.value = '';
                 updateTotals();
 

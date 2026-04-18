@@ -287,7 +287,15 @@ class CajaController extends Controller
         $cliente = $this->cajaModel->getClienteByDni($dni);
 
         if ($cliente) {
-            echo json_encode(["success" => true, "cliente" => $cliente]);
+            $idCliente = (int) ($cliente['idcliente'] ?? 0);
+            $credito = $idCliente > 0
+                ? $this->cajaModel->getResumenCreditoActivoPorIdCliente($idCliente)
+                : null;
+            echo json_encode([
+                'success' => true,
+                'cliente' => $cliente,
+                'credito' => $credito,
+            ]);
         } else {
             http_response_code(404);
             echo json_encode([

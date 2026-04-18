@@ -362,6 +362,57 @@ class Caja
         }
     }
 
+    /**
+     * Resumen del contrato ACT más reciente del cliente (cuotas / cronograma agregado).
+     * No sustituye al cronograma completo; sirve para mostrar contexto en caja por DNI.
+     */
+    public function getResumenCreditoActivoPorIdCliente(int $idCliente): ?array
+    {
+        $sql = "
+            SELECT
+                c.idcontrato,
+                cot.numcuotas,
+                cot.valorcuota,
+                COALESCE(SUM(CASE WHEN cr.estado = 'Pagado' THEN 1 ELSE 0 END), 0) AS cuotas_pagadas,
+                COALESCE(SUM(CASE WHEN cr.estado = 'Pendiente' THEN 1 ELSE 0 END), 0) AS cuotas_pendientes,
+                COALESCE(SUM(CASE WHEN cr.estado = 'Vencido' THEN 1 ELSE 0 END), 0) AS cuotas_vencidas,
+                (
+                    SELECT cr2.numcuota FROM cronogramas cr2
+                    WHERE cr2.idcontrato = c.idcontrato AND cr2.estado <> 'Pagado'
+                    ORDER BY cr2.numcuota ASC
+                    LIMIT 1
+                ) AS siguiente_cuota_num,
+                (
+                    SELECT DATE_FORMAT(cr2.fechapago, '%Y-%m-%d') FROM cronogramas cr2
+                    WHERE cr2.idcontrato = c.idcontrato AND cr2.estado <> 'Pagado'
+                    ORDER BY cr2.numcuota ASC
+                    LIMIT 1
+                ) AS siguiente_cuota_fecha,
+                (
+                    SELECT cr2.estado FROM cronogramas cr2
+                    WHERE cr2.idcontrato = c.idcontrato AND cr2.estado <> 'Pagado'
+                    ORDER BY cr2.numcuota ASC
+                    LIMIT 1
+                ) AS siguiente_cuota_estado
+            FROM contratos c
+            INNER JOIN cotizaciones cot ON cot.idcotizacion = c.idcotizacion
+            LEFT JOIN cronogramas cr ON cr.idcontrato = c.idcontrato
+            WHERE cot.idcliente = :idcliente AND c.estado = 'ACT'
+            GROUP BY c.idcontrato, cot.numcuotas, cot.valorcuota
+            ORDER BY c.idcontrato DESC
+            LIMIT 1
+        ";
+        try {
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([':idcliente' => $idCliente]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $row ?: null;
+        } catch (PDOException $e) {
+            error_log('Error en getResumenCreditoActivoPorIdCliente: ' . $e->getMessage());
+            return null;
+        }
+    }
+
 
 
 
