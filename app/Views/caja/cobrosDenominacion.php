@@ -605,16 +605,22 @@
 
 
     btnAddManual.addEventListener('click', () => {
-        const concepto = conceptoManual.value.trim();
+        const tituloConcepto = conceptoManual.value.trim() || descripcionManual.value.trim();
         const monto = parseFloat(montoManual.value);
 
-        if (concepto && monto > 0) {
-            addConceptoRow(concepto, monto, 0);
-            conceptoManual.value = '';
-            montoManual.value = '0.00';
-        } else {
-            showToast('Por favor, ingrese un concepto válido y un monto mayor a cero.', 'WARNING', 2000);
+        if (!tituloConcepto) {
+            showToast('Ingresá el nombre del concepto o una descripción.', 'WARNING', 2500);
+            return;
         }
+        if (!(monto > 0)) {
+            showToast('El monto debe ser mayor a cero (S/).', 'WARNING', 2500);
+            return;
+        }
+
+        addConceptoRow(tituloConcepto, monto, 0);
+        conceptoManual.value = '';
+        descripcionManual.value = '';
+        montoManual.value = '0.00';
     });
 
 
