@@ -1,4 +1,5 @@
 <?php include __DIR__ . '/../layout/header.php'; ?>
+<!-- yonda:cobros-denom build=2026-04-17-v3 (sin POST /store/conceptoPago en concepto manual) -->
 
 <style>
     .monto-input {
@@ -224,6 +225,7 @@
 
 <script>
     // Notificaciones: usa showToast de /assets/js/swalcustom.js (cargado en el footer).
+    console.info('[Yonda] cobros-denominacion JS build 2026-04-17-v3');
 
     const clienteNombre = document.getElementById('nombrecompleto');
     const clienteIDSpan = document.getElementById('cliente-id');
