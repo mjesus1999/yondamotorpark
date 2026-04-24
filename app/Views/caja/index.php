@@ -30,6 +30,10 @@ include __DIR__ . '/../layout/header.php';
                 <i class="far fa-file-excel"></i> Reporte diario
             </button>
 
+            <a class="btn btn-secondary btn-sm rounded-0 text-white" href="/caja/buscar-cliente" style="margin-left: 10px; border-left: 1px solid rgba(255, 255, 255, 0.1);" title="Buscar por DNI y ver contratos activos">
+                <i class="bi bi-person-search me-1"></i> Buscar cliente
+            </a>
+
             <a class="btn btn-dark btn-sm rounded-0" href="/caja/pagos/denominacion" style="margin-left: 10px; border-left: 1px solid rgba(255, 255, 255, 0.1);">
                 Cobros por denominación
             </a>
@@ -191,6 +195,7 @@ include __DIR__ . '/../layout/header.php';
             paginationSize: 20,
             paginationSizeSelector: [5, 10, 15, 25],
             movableRows: true,
+             placeholder: "No hay contratos con cronogramas para mostrar.",
 
             columns: [{
                     title: "#",

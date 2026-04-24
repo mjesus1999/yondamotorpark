@@ -28,7 +28,7 @@ BEGIN
                     ELSE amortizacion
                 END
             ),0)
-            FROM pagosOC
+            FROM pagosoc
             WHERE idorden = oc.idordencompra
         ), 2) AS totalPagado,
 
@@ -43,7 +43,7 @@ BEGIN
                     ELSE amortizacion
                 END
             ),0)
-             FROM pagosOC 
+             FROM pagosoc
              WHERE idorden = oc.idordencompra)
         ), 2) AS saldoRestante
 
@@ -95,7 +95,7 @@ BEGIN
                     ELSE amortizacion
                 END
             ), 2) AS totalPagado
-        FROM pagosOC
+        FROM pagosoc
         GROUP BY idorden
     )
  
@@ -273,7 +273,7 @@ BEGIN
  INTO
   v_total_amortizado_usd
  FROM
-  pagosOC AS pagos
+  pagosoc AS pagos
  WHERE
   pagos.idorden = v_idorden;
 
@@ -406,7 +406,7 @@ BEGIN
                 ELSE poc.amortizacion
             END
         ) AS totalPagado
-        FROM pagosOC poc
+        FROM pagosoc poc
         INNER JOIN ordenescompra oc ON poc.idorden = oc.idordencompra
         WHERE oc.estado = 'proceso'
         GROUP BY oc.idordencompra
@@ -449,7 +449,7 @@ BEGIN
                     ELSE amortizacion
                 END
             ), 0)
-            FROM pagosOC
+            FROM pagosoc
             WHERE idorden = oc.idordencompra
         ), 2) AS 'pagado',
         ROUND((
@@ -459,7 +459,7 @@ BEGIN
                     WHEN moneda = 'PEN' AND tipocambio > 0 THEN amortizacion / tipocambio
                     ELSE amortizacion
                 END
-            ), 0) FROM pagosOC WHERE idorden = oc.idordencompra)
+            ), 0) FROM pagosoc WHERE idorden = oc.idordencompra)
         ), 2) AS 'saldo',
         IF(
             (SELECT IFNULL(SUM(preciocompra * 1.18), 0) FROM detordencompra WHERE idordencompra = oc.idordencompra) > 0,
@@ -613,7 +613,7 @@ BEGIN
       ELSE poc.amortizacion 
     END AS 'valordolares'
   FROM
-    pagosOC poc
+    pagosoc poc
   INNER JOIN ordenescompra oc ON poc.idorden = oc.idordencompra
   INNER JOIN tiendas t ON oc.idtienda = t.idtienda
   INNER JOIN concesionarios con ON t.idconcesionario = con.idconcesionario
@@ -662,7 +662,9 @@ BEGIN
 
 END //
 DELIMITER ;
-CALL sp_reporte_concesionario_detallado(25);
+
+
+CALL sp_reporte_concesionario_detallado(1);
 
 
 

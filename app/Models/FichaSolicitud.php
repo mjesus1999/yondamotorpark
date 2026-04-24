@@ -92,7 +92,7 @@ class FichaSolicitud
               numcuotas,
               valorcuota,
               estadocotizacion
-            FROM vwGetAllCotizacion
+            FROM vwgetallcotizacion
             WHERE idcotizacion = :idcotizacion LIMIT 1;";
 
         $stmt = $this->db->prepare($query);

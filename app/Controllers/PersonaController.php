@@ -81,6 +81,9 @@ class PersonaController extends Controller
         $this->view('clientes.create');
     }
 
+
+
+    
     /**
      * Procesa el registro de un nuevo cliente persona
      * 
@@ -95,16 +98,16 @@ class PersonaController extends Controller
     {
         $this->authRequired();
         // Detectar si la petición es AJAX
-        $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
+        // $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
 
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            if ($isAjax) {
-                $this->jsonResponse(['success' => false, 'message' => 'Método no permitido'], 405);
-            } else {
-                $this->redirect('/clientes/create');
-            }
-            return;
-        }
+        // if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        //     if ($isAjax) {
+        //         $this->jsonResponse(['success' => false, 'message' => 'Método no permitido'], 405);
+        //     } else {
+        //         $this->redirect('/clientes/create');
+        //     }
+        //     return;
+        // }
 
         $data = array_map([Validador::class, 'limpiar'], $_POST);
 

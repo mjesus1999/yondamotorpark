@@ -681,291 +681,166 @@
                 return null;
             }
         }
+function generarPDFActaSeparacion(data) {
+    if (!data) {
+        showToast('No se encontraron datos para el acta de separación.', 'ERROR', 2000);
+        return;
+    }
 
-        function generarPDFActaSeparacion(data) {
+    
+    const clienteNombre = (data.cliente || 'N/D').toUpperCase();
+    const nroDocumento = data.nrodoc || 'N/D';
+    const telefono = data.telprimario || 'N/D';
+    const fechaPago = data.fechapago || 'N/D';
+    const montoAmortizacion = parseFloat(data.amortizacion || 0).toFixed(2);
+    
+    
+    const dirPartes = [
+        data.direccion || 'DIRECCIÓN NO ESPECIFICADA',
+        data.distrito || '',
+        data.provincia || '',
+        data.departamento || ''
+    ].filter(part => part.length > 0); 
+    const direccionCompleta = dirPartes.join(', ').toUpperCase();
 
-            if (!data) {
+    
+    const vMarca = (data.marca || 'N/D').toUpperCase();
+    const vModelo = (data.modelo || 'N/D').toUpperCase();
+    const vColor = (data.color || 'N/D').toUpperCase();
+    const vAnio = data.anio || 'N/D';
+    const vCombustible = (data.combustible || 'N/D').toUpperCase();
 
-                showToast('No se encontraron datos para el acta de separación.', 'ERROR', 2000);
-                return;
-            }
+    
+    const fechaObj = new Date();
+    const dia = fechaObj.getDate();
+    const anio = fechaObj.getFullYear();
+    const mes = fechaObj.toLocaleString('es-ES', { month: 'long' });
+    const fechaFormateada = `Chincha, ${dia} de ${mes} del ${anio}`;
+    
+    const simboloMoneda = data.moneda == 'PEN' ? 'S/' : '$';
+    const tipoDoc = data.tipocliente == 'P' ? 'DNI' : 'RUC';
 
-            const fechaObj = new Date();
-            const dia = fechaObj.getDate();
-            const anio = fechaObj.getFullYear();
-            const mes = fechaObj.toLocaleString('es-ES', {
-                month: 'long'
-            });
-            const fechaFormateada = `Chincha, ${dia} de ${mes} del ${anio}`;
-            const simboloMoneda = data.moneda == 'PEN' ? 'S/' : '$/';
-            const tipoDoc = data.tipocliente == 'P' ? 'DNI' : 'RUC';
+    let textoPago = '';
+    const medio = data.mediopago || 'N/D';
+    if (medio === 'Efectivo') {
+        textoPago = `EFECTIVO`;
+    } else if (medio === 'Yape' || medio === 'Plin') {
+        textoPago = `pago por ${medio} con N° de operación ${data.numerotransaccion || 'S/N'}`;
+    } else if (medio === 'Transferencia Bancaria') {
+        textoPago = `pago por ${medio} a la cuenta de ${data.entidad || 'N/D'} con N° de operación ${data.numerotransaccion || 'S/N'}`;
+    } else {
+        textoPago = medio;
+    }
 
-            let textoPago = '';
-            if (data.mediopago === 'Efectivo') {
-                textoPago = `EFECTIVO`;
-            } else if (data.mediopago === 'Yape' || data.mediopago === 'Plin') {
-                textoPago = `pago por ${data.mediopago} con N° de operación ${data.numerotransaccion || 'S/N'}`;
-            } else if (data.mediopago === 'Transferencia Bancaria') {
-                textoPago = `pago por ${data.mediopago} a la cuenta de ${data.entidad || 'N/D'} con N° de operación ${data.numerotransaccion || 'S/N'}`;
-            }
-
-            const docDefinition = {
-                pageSize: 'A4',
-                pageOrientation: 'portrait',
-                pageMargins: [70, 100, 70, 40],
-                defaultStyle: {
-                    fontSize: 9.3,
-                    lineHeight: 1.15,
-                    color: '#333333'
-
+    const docDefinition = {
+        pageSize: 'A4',
+        pageOrientation: 'portrait',
+        pageMargins: [70, 100, 70, 40],
+        defaultStyle: {
+            fontSize: 9.3,
+            lineHeight: 1.15,
+            color: '#333333'
+        },
+        header: {
+            image: window.cabeceraYonda,
+            width: 595,
+            alignment: 'center',
+            margin: [0, 25, 0, 0]
+        },
+        content: [
+            { text: fechaFormateada, alignment: 'right', margin: [0, 2, 0, 20], fontSize: 10 },
+            { text: 'CONSTANCIA DE SEPARACIÓN DE VEHÍCULO', bold: true, alignment: 'center', margin: [0, 0, 0, 15], fontSize: 12, decoration: 'underline' },
+            {
+                stack: [
+                    { text: window.nombreEmpresa, style: 'datosEmpresa' },
+                    { text: `RUC: ${window.rucEmpresa}`, style: 'infoContacto' },
+                    { text: 'Dirección: Carretera Panamericana km 201 – Chincha', style: 'infoContacto' },
+                    { text: 'Teléfonos: 927 676 338 / 971 027 612', style: 'infoContacto' }
+                ],
+                margin: [0, 0, 0, 10]
+            },
+            {
+                text: [
+                    'Conste por el presente documento que la empresa ',
+                    { text: window.nombreEmpresa, bold: true },
+                    ', ha recibido del Sr. ',
+                    { text: clienteNombre, bold: true },
+                    `, identificado con ${tipoDoc} N.º `,
+                    { text: nroDocumento, bold: true },
+                    ', con domicilio en ',
+                    { text: direccionCompleta },
+                    ', y número de celular ',
+                    { text: telefono, bold: true },
+                    `, la suma de ${simboloMoneda} `,
+                    { text: montoAmortizacion, bold: true },
+                    ', mediante ',
+                    { text: textoPago, bold: true },
+                    ' con fecha ',
+                    { text: fechaPago, bold: true },
+                    '.'
+                ],
+                style: 'bodyText',
+                margin: [0, 0, 0, 10]
+            },
+            { text: 'Este monto corresponde a la cuota inicial por concepto de separación del siguiente vehículo:', style: 'bodyText', margin: [0, 0, 0, 10] },
+            {
+                table: {
+                    headerRows: 1,
+                    widths: ['auto', 250],
+                    body: [
+                        [{ text: 'CONCEPTO', bold: true, fillColor: '#eeeeee' }, { text: 'DETALLE', alignment: 'center', bold: true, fillColor: '#eeeeee' }],
+                        [{ text: 'Marca', bold: true }, { text: vMarca }],
+                        [{ text: 'Modelo', bold: true }, { text: vModelo }],
+                        [{ text: 'Color', bold: true }, { text: vColor }],
+                        [{ text: 'Año Modelo', bold: true }, { text: vAnio }],
+                        [{ text: 'Combustible', bold: true }, { text: vCombustible }]
+                    ]
                 },
-                header: {
-                    image: window.cabeceraYonda,
-                    width: 595,
-                    alignment: 'center',
-                    margin: [0, 25, 0, 0]
-                },
-
-                styles: {
-                    subheader: {
-                        bold: true,
-                        margin: [0, 10, 0, 3]
-                    },
-                    bodyText: {
-                        alignment: 'justify',
-                        lineHeight: 1.2
-                    },
-                    firma: {
-                        alignment: 'center',
-                        margin: [0, 2, 0, 0],
-                        bold: true
-                    },
-                    datosEmpresa: {
-                        bold: true,
-                        margin: [0, 0, 0, 2]
-                    },
-                    infoContacto: {
-                        margin: [0, 0, 0, 2]
-                    },
-                    notaImportante: {
-                        bold: true,
-                        fontSize: 8,
-                        margin: [0, 10, 0, 5]
-                    },
-                    textoPequeno: {
-                        alignment: 'justify',
-                    }
-                },
-
-                content: [{
-                        text: fechaFormateada,
-                        alignment: 'right',
-                        margin: [0, 2, 0, 20],
-                        fontSize: 10
-                    },
+                margin: [50, 0, 0, 10]
+            },
+            
+            {
+                columns: [
                     {
-                        text: 'CONSTANCIA DE SEPARACIÓN DE VEHÍCULO',
-                        bold: true,
-                        alignment: 'center',
-                        margin: [0, 0, 0, 15],
-                        fontSize: 12,
-                        decoration: 'underline'
-                    },
-                    {
-                        stack: [{
-                                text: window.nombreEmpresa,
-                                style: 'datosEmpresa'
-                            },
-                            {
-                                text: `RUC: ${window.rucEmpresa}`,
-                                style: 'infoContacto'
-                            },
-                            {
-                                text: 'Dirección: Carretera Panamericana km 201 – Chincha',
-                                style: 'infoContacto'
-                            },
-                            {
-                                text: 'Teléfonos: 927 676 338 / 971 027 612',
-                                style: 'infoContacto'
-                            }
+                        stack: [
+                            { text: '____________________________________________', style: 'firma', margin: [0, 50, 0, 0] },
+                            { text: window.nombreEmpresa, style: ['firma', 'datosEmpresa'] },
+                            { text: `RUC: ${window.rucEmpresa}`, style: 'firma' }
                         ],
-                        margin: [0, 0, 0, 10]
+                        width: '*'
                     },
                     {
-                        text: [
-                            'Conste por el presente documento que la empresa ',
-                            {
-                                text: window.nombreEmpresa,
-                                bold: true
-                            },
-                            ', ha recibido del Sr. ',
-                            {
-                                text: data.cliente.toUpperCase(),
-                                bold: true
-                            }, `, identificado con ${tipoDoc} N.º `,
-                            {
-                                text: data.nrodoc,
-                                bold: true
-                            }, ', con domicilio en ',
-                            {
-                                text: `${data.direccion || 'N/D'}, distrito de ${data.distrito}, provincia de ${data.provincia}, departamento de ${data.departamento}`.toUpperCase()
-                            },
-                            ', y número de celular ', {
-                                text: data.telprimario,
-                                bold: true
-                            },
-                            `, la suma de ${simboloMoneda} `, {
-                                text: parseFloat(data.amortizacion).toFixed(2),
-                                bold: true
-                            }, // Corregido: data.amortizacion
-                            ', mediante ', {
-                                text: textoPago,
-                                bold: true
-                            }, ' con fecha ', {
-                                text: data.fechapago,
-                                bold: true
-                            }, '.'
+                        stack: [
+                            { text: '______________________________________________', style: 'firma', margin: [0, 50, 0, 0] },
+                            { text: clienteNombre, style: 'firma' },
+                            { text: `${tipoDoc}: ${nroDocumento}`, style: 'firma' }
                         ],
-                        style: 'bodyText',
-                        margin: [0, 0, 0, 10]
-                    },
-                    {
-                        text: 'Este monto corresponde a la cuota inicial por concepto de separación del siguiente vehículo:',
-                        style: 'bodyText',
-                        margin: [0, 0, 0, 10]
-                    },
-
-                    {
-
-                        table: {
-                            headerRows: 1,
-                            widths: ['auto', 250],
-                            body: [
-                                [{
-                                    text: 'CONCEPTO',
-                                    bold: true,
-                                    fillColor: '#eeeeee'
-                                }, {
-                                    text: 'DETALLE',
-                                    alignment: 'center',
-                                    bold: true,
-                                    fillColor: '#eeeeee'
-                                }],
-
-                                [{
-                                    text: 'Marca',
-                                    bold: true
-                                }, {
-                                    text: data.marca.toUpperCase(),
-                                }],
-                                [{
-                                    text: 'Modelo',
-                                    bold: true,
-                                }, {
-                                    text: data.modelo.toUpperCase(),
-                                }],
-                                [{
-                                    text: 'Color',
-                                    bold: true,
-                                }, {
-                                    text: data.color.toUpperCase(),
-                                }],
-                                [{
-                                    text: 'Año Modelo',
-                                    bold: true,
-                                }, {
-                                    text: data.anio,
-                                }],
-                                [{
-                                    text: 'Combustible',
-                                    bold: true,
-                                }, {
-                                    text: data.combustible.toUpperCase(),
-                                }]
-                            ]
-                        },
-                        margin: [50, 0, 0, 10]
-                    },
-
-                    {
-                        text: 'NOTA IMPORTANTE:',
-                        style: 'notaImportante'
-                    },
-                    {
-                        text: [
-                            'En caso de desistimiento por parte del cliente respecto a la compra del vehículo separado, la ',
-                            {
-                                text: 'empresa aplicará una penalidad de $ 1,000.00 (mil dólares americanos)',
-                                bold: true
-                            },
-                            ' por vehículos de 4 ruedas y $ 500.00 (quinientos dólares americanos) por vehículos de 2 o 3 ruedas, correspondiente a gastos administrativos, traslado y costos logísticos, los serán descontados del monto abonado; en el caso los vehículos de 2 o 3 ruedas superen el costo de S/ 25,000.00 soles, la penalidad será la misma que se aplica a los vehículos de 4 ruedas.'
-                        ],
-                        style: 'textoPequeno',
-                        margin: [0, 0, 0, 10]
-                    },
-                    {
-                        text: [
-                            'Asimismo, el cliente declara conocer y aceptar que, una vez efectuada la separación de la unidad, no podrá acogerse a promociones o campañas de descuentos posteriores. ',
-                            'En señal de conformidad y aceptación de las condiciones, ambas partes suscriben la presente constancia en dos ejemplares de igual valor legal, quedando una copia en poder del cliente y otra en los archivos de la empresa.'
-                        ],
-                        style: 'textoPequeno'
-                    },
-
-
-                    {
-                        columns: [{
-                                stack: [{
-                                        text: '____________________________________________',
-                                        style: 'firma',
-                                        margin: [0, 50, 0, 0]
-                                    },
-                                    {
-                                        text: window.nombreEmpresa,
-                                        style: ['firma', 'datosEmpresa']
-                                    },
-                                    {
-                                        text: `RUC: ${window.rucEmpresa}`,
-                                        style: 'firma'
-                                    }
-                                ],
-                                width: '*'
-                            },
-                            {
-                                stack: [{
-                                        text: '______________________________________________',
-                                        style: 'firma',
-                                        margin: [0, 50, 0, 0]
-                                    },
-                                    {
-                                        text: data.cliente.toUpperCase(),
-                                        style: 'firma'
-                                    },
-                                    {
-                                        text: `${tipoDoc}: ${data.nrodoc}`,
-                                        style: 'firma'
-                                    }
-                                ],
-                                width: '*'
-                            }
-                        ],
-                        margin: [0, 20, 0, 0]
+                        width: '*'
                     }
                 ],
-
-                footer: function() {
-                    return {
-                        columns: [{
-                            image: window.footerYonda,
-                            width: 600,
-                            alignment: 'center',
-                        }]
-                    };
-                }
+                margin: [0, 20, 0, 0]
+            }
+        ],
+        styles: {
+            datosEmpresa: { bold: true, margin: [0, 0, 0, 2] },
+            infoContacto: { margin: [0, 0, 0, 2] },
+            bodyText: { alignment: 'justify', lineHeight: 1.2 },
+            firma: { alignment: 'center', bold: true },
+            notaImportante: { bold: true, fontSize: 8, margin: [0, 10, 0, 5] },
+            textoPequeno: { alignment: 'justify', fontSize: 8.5 }
+        },
+        footer: function() {
+            return {
+                image: window.footerYonda,
+                width: 600,
+                alignment: 'center'
             };
-
-
-            pdfMake.createPdf(docDefinition).open();
         }
+    };
+
+    pdfMake.createPdf(docDefinition).open();
+}
+
 
         async function generarExcel() {
             if (btnExcelReporteGeneral) {

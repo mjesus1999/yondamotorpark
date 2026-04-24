@@ -4,7 +4,7 @@ DROP TRIGGER IF EXISTS tr_set_saldo_pagoOC;
 
 DELIMITER //
 CREATE TRIGGER tr_set_saldo_pagoOC
-BEFORE INSERT ON pagosOC
+BEFORE INSERT ON pagosoc
 FOR EACH ROW
 BEGIN
     DECLARE totalOC DECIMAL(10,2);
@@ -23,7 +23,7 @@ BEGIN
             ELSE amortizacion
         END
     ), 0) INTO totalPagosUSD
-    FROM pagosOC
+    FROM pagosoc
     WHERE idorden = NEW.idorden;
 
     SET totalPagosUSD = totalPagosUSD + (
@@ -50,16 +50,16 @@ DELIMITER ;
 
 
 
-SELECT * FROM pagosOc;
+SELECT * FROM pagosoc;
 
-SHOW COLUMNS FROM pagosOC;
+SHOW COLUMNS FROM pagosoc;
 
 
 -- TRIGGER PARA CUABDO EL SALDO SEA 0, OC PASA A PAGADO 
 DROP TRIGGER IF EXISTS tr_update_estado_oc_pagado;
 DELIMITER $$
 CREATE TRIGGER tr_update_estado_oc_pagado
-AFTER INSERT ON pagosOC
+AFTER INSERT ON pagosoc
 FOR EACH ROW
 BEGIN
     DECLARE totalOC DECIMAL(10,2);
@@ -75,7 +75,7 @@ BEGIN
             ELSE amortizacion
         END
     ),0) INTO totalPagado
-    FROM pagosOC
+    FROM pagosoc
     WHERE idorden = NEW.idorden;
 
     IF totalPagado >= totalOC AND totalOC > 0 THEN

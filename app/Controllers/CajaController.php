@@ -492,4 +492,30 @@ class CajaController extends Controller
         ]);
         exit();
     }
+
+    /**
+     * Pantalla de caja: buscar cliente por DNI y ver contratos ACT para ir al cronograma.
+     */
+    public function indexBuscarCliente(): void
+    {
+        $this->authRequired();
+        $this->view('caja.buscarCliente');
+    }
+
+    /**
+     * API JSON: contratos activos de un cliente (idcliente).
+     */
+    public function apiContratosPorCliente(string $id): void
+    {
+        $this->authRequired();
+        header('Content-Type: application/json; charset=utf-8');
+        $idcliente = (int) $id;
+        if ($idcliente <= 0) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'Cliente inválido', 'data' => []]);
+            return;
+        }
+        $rows = $this->cajaModel->getContratosActivosPorIdCliente($idcliente);
+        echo json_encode(['success' => true, 'data' => $rows]);
+    }
 }

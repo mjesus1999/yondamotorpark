@@ -65,7 +65,7 @@ class PagosOC
      */
     public function create($params = []): int
     {
-        $query = 'INSERT INTO pagosOC(idorden, idlogistica,identidadpago,fecharealpago,numtransaccion,moneda,tipocambio,valorUSD, amortizacion, comprobante,observaciones) 
+        $query = 'INSERT INTO pagosoc(idorden, idlogistica,identidadpago,fecharealpago,numtransaccion,moneda,tipocambio,valorUSD, amortizacion, comprobante,observaciones) 
                       VALUES(:idorden, :idlogistica,:identidadpago,:fecharealpago,:numtransaccion,:moneda,:tipocambio,:valorUSD,:amortizacion, :comprobante,:observaciones)';
 
         try {
@@ -121,7 +121,7 @@ class PagosOC
                     ep.entidad,
 
                     CONCAT(per.apellidos, ' ', per.nombres) AS logistica
-                FROM pagosOC p
+                FROM pagosoc p
                 INNER JOIN colaboradores col ON p.idlogistica = col.idcolaborador
                 INNER JOIN contratoslaborales cl ON col.idcontratolaboral = cl.idcontratolaboral
                 INNER JOIN personas per ON cl.idpersona = per.idpersona
@@ -198,7 +198,7 @@ class PagosOC
         // Obtener el saldo del último pago si existe
         $query_saldo_existente = '
                 SELECT saldo
-                FROM pagosOC
+                FROM pagosoc
                 WHERE idorden = :idorden
                 ORDER BY fecharealpago DESC, idpagooc DESC
                 LIMIT 1;

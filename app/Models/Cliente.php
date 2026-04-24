@@ -122,6 +122,7 @@ class Cliente
             return -1;
         }
     }
+    
 
     /**
      * Deshabilita un cliente
