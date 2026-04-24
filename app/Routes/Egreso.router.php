@@ -17,6 +17,7 @@ $router->add('POST', '/egreso/validarComprobante/{id}', 'EgresoController', 'Val
 
 
 $router->add('GET', '/api/egreso/conceptos', 'EgresoController', 'getConceptosEgreso');
+$router->add('POST', '/api/egreso/conceptos', 'EgresoController', 'storeConceptoEgreso');
 $router->add('GET', '/api/egreso/colaboradores', 'EgresoController', 'getColaboradores');
 $router->add('GET', '/api/egreso/proovedores', 'EgresoController', 'getProovedores');
 $router->add('GET', '/api/egreso/detalle/{id}', 'EgresoController', 'getDetalleEgreso');

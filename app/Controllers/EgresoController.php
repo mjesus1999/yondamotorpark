@@ -150,6 +150,14 @@ class EgresoController extends Controller
             'requierecomprobante' => empty($data['requierecomprobante']) ? 'N' : $data['requierecomprobante']
         ];
 
+        $solicitanteLibre = empty($data['solicitante_nombre']) ? '' : trim((string) $data['solicitante_nombre']);
+        if ($solicitanteLibre !== '') {
+            // Mantener FK válida: si no se selecciona colaborador, usar el usuario logueado como solicitante técnico
+            if (empty($registroEgreso['idsolicitante'])) {
+                $registroEgreso['idsolicitante'] = (int) ($_SESSION['user']['id'] ?? 0);
+            }
+        }
+
         $errores = [];
         $errores[] = Validador::campoObligatorio($registroEgreso['idconceptoegreso'], 'Concepto de Egreso');
         $errores[] = Validador::campoObligatorio($registroEgreso['idsolicitante'], 'Solicitante');
@@ -165,6 +173,11 @@ class EgresoController extends Controller
         if ($newId <= 0) {
             echo json_encode(['success' => false, 'message' => 'Error al registrar el egreso. Intente nuevamente.', 'id' => 0]);
             exit;
+        }
+
+        if ($solicitanteLibre !== '') {
+            // Guardar persona libre en columna dedicada (para reportes/listados)
+            $this->egresoModel->setSolicitanteNombre($newId, $solicitanteLibre);
         }
 
         // Si el egreso no requiere comprobante, la operación termina aquí.
@@ -262,6 +275,37 @@ class EgresoController extends Controller
             $this->egresoModel->deleteEgreso($newId);
             echo json_encode(['success' => false, 'message' => 'Error al guardar el comprobante. El egreso fue revertido.', 'id' => 0]);
         }
+    }
+
+    public function storeConceptoEgreso(): void
+    {
+        $this->authRequired();
+        header('Content-Type: application/json');
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            echo json_encode(['status' => 'error', 'message' => 'Método no permitido.']);
+            exit;
+        }
+
+        $data = array_map([Validador::class, 'limpiar'], $_POST);
+        $descripcion = trim((string) ($data['descripcion'] ?? ''));
+
+        if ($descripcion === '') {
+            http_response_code(400);
+            echo json_encode(['status' => 'error', 'message' => 'La descripción es obligatoria.']);
+            exit;
+        }
+
+        $id = $this->egresoModel->addConceptoEgreso($descripcion);
+        if ($id > 0) {
+            echo json_encode(['status' => 'success', 'idconceptoegreso' => $id, 'descripcion' => $descripcion]);
+            exit;
+        }
+
+        http_response_code(500);
+        echo json_encode(['status' => 'error', 'message' => 'No se pudo registrar el concepto.']);
+        exit;
     }
 
     /**

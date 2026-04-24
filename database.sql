@@ -721,6 +721,7 @@ CREATE TABLE egresos(
     idconceptoegreso INT NOT NULL,
     idcolacaja INT NOT NULL COMMENT 'Colaborador que registra el egreso',
     idcolsolicitante INT NOT NULL COMMENT 'Colaborador que solicita el egreso',
+    solicitante_nombre VARCHAR(150) NULL COMMENT 'Nombre libre de la persona que solicita (opcional)',
     monto DECIMAL(10,2) NOT NULL,
     comentario VARCHAR(300) NULL,
     requierecomprobante ENUM('S','N') NOT NULL DEFAULT 'N',

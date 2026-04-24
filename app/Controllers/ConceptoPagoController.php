@@ -70,7 +70,7 @@ class ConceptoPagoController extends Controller
     
     public function store()
     {
-
+        $this->authRequired();
         header('Content-Type: application/json');
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             http_response_code(405);
@@ -78,14 +78,12 @@ class ConceptoPagoController extends Controller
             exit;
         }
 
-        header('Content-Type: application/json');
-
         $data = array_map([Validador::class, 'limpiar'], $_POST);
 
         $registro = [
             'concepto' => empty($data['concepto']) ? null : $data['concepto'],
             'montosugerido' => empty($data['montosugerido']) ? null : $data['montosugerido'],
-            'descripcion' => $data['descripcion'] ? null : $data['descripcion'],
+            'descripcion' => empty($data['descripcion']) ? null : $data['descripcion'],
 
         ];
 
@@ -115,5 +113,6 @@ class ConceptoPagoController extends Controller
                 'id' => 0
             ]);
         }
+        exit;
     }
 }

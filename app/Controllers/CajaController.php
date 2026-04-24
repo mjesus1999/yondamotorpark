@@ -263,12 +263,12 @@ class CajaController extends Controller
 
     public function searchConceptosPagos(): void
     {
-
+        $this->authRequired();
         header('Content-Type: application/json');
         $conceptos = $this->cajaModel->getConceptosPagos();
 
         if ($conceptos) {
-            echo json_encode(["succees" => true, "conceptos" => $conceptos]);
+            echo json_encode(["success" => true, "conceptos" => $conceptos]);
         } else {
             http_response_code(404);
             echo json_encode([
@@ -282,7 +282,7 @@ class CajaController extends Controller
 
     public function searchClienteByDNI(string $dni): void
     {
-
+        $this->authRequired();
         header('Content-Type: application/json');
         $cliente = $this->cajaModel->getClienteByDni($dni);
 

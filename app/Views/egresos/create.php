@@ -114,10 +114,17 @@
                                 <select id="concepto" name="idconceptoegreso" class="form-select" required>
                                     <option value="">Seleccione un concepto</option>
                                 </select>
+                                <div class="form-text">
+                                    Puedes escribir un concepto nuevo en el selector (se guardará automáticamente).
+                                </div>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="colaborador" class="form-label fw-semibold">Colaborador que Solicita <span class="text-danger">*</span></label>
-                                <select id="colaborador" name="idsolicitante" class="form-select" required></select>
+                                <label for="solicitante_nombre" class="form-label fw-semibold">Persona que Solicita <span class="text-danger">*</span></label>
+                                <input id="solicitante_nombre" name="solicitante_nombre" class="form-control" placeholder="Ej: Juan Pérez" required />
+                                <div class="form-text">
+                                    Si corresponde a un colaborador, puedes seleccionarlo opcionalmente para el registro interno.
+                                </div>
+                                <select id="colaborador" name="idsolicitante" class="form-select mt-2"></select>
                             </div>
                         </div>
 
@@ -210,6 +217,7 @@
         const comprobanteFormContainer = document.getElementById('comprobanteFormContainer');
         const montoEgresoInput = document.getElementById('monto');
         const montoComprobanteInput = document.getElementById('monto_comprobante');
+        const solicitanteNombreInput = document.getElementById('solicitante_nombre');
         const tomSelects = {};
 
         requiereComprobanteCheckbox.addEventListener('change', () => {
@@ -229,7 +237,7 @@
             try {
                 const response = await fetch(url);
                 const result = await response.json();
-                if (result.status) {
+                if (result.status === 'success' && Array.isArray(result.data)) {
                     const selectElement = document.getElementById(selectId);
                     const config = {
                         create: false,
@@ -278,7 +286,7 @@
             try {
                 const response = await fetch('/api/egreso/conceptos');
                 const result = await response.json();
-                if (result.status) {
+                if (result.status === 'success' && Array.isArray(result.data)) {
                     const selectConcepto = document.getElementById('concepto');
                     result.data.forEach(item => {
                         const option = document.createElement('option');
@@ -286,6 +294,17 @@
                         option.textContent = item.descripcion;
                         selectConcepto.appendChild(option);
                     });
+
+                    if (!tomSelects['concepto']) {
+                        tomSelects['concepto'] = new TomSelect(selectConcepto, {
+                            create: true,
+                            persist: false,
+                            sortField: { field: "$score", direction: "desc" },
+                            onItemAdd: function () {
+                                // no-op
+                            },
+                        });
+                    }
                 }
             } catch (error) {
                 console.error('Error al cargar conceptos:', error);
@@ -296,20 +315,48 @@
 
         egresoForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const conceptoId = document.getElementById('concepto').value;
+            const conceptoRaw = document.getElementById('concepto').value;
             const colaboradorId = document.getElementById('colaborador').value;
             const monto = montoEgresoInput.value.trim();
             const observaciones = document.getElementById('observaciones').value.trim();
             const requiereComprobante = requiereComprobanteCheckbox.checked;
+            const solicitanteNombre = solicitanteNombreInput.value.trim();
 
-            if (!conceptoId || !colaboradorId || !monto || isNaN(monto) || parseFloat(monto) <= 0) {
+            if (!conceptoRaw || !solicitanteNombre || !monto || isNaN(monto) || parseFloat(monto) <= 0) {
                 showToast('Por favor, complete los campos principales de egreso.', 'WARNING', 1300);
                 return;
             }
 
+            let conceptoId = conceptoRaw;
+            // Si el valor no es numérico, es un concepto nuevo escrito por el usuario → crear en BD
+            if (isNaN(Number(conceptoRaw))) {
+                try {
+                    const fdConcepto = new FormData();
+                    fdConcepto.append('descripcion', conceptoRaw);
+                    const resp = await fetch('/api/egreso/conceptos', { method: 'POST', body: fdConcepto });
+                    const resConcepto = await resp.json();
+                    if (resConcepto.status === 'success' && resConcepto.idconceptoegreso) {
+                        conceptoId = String(resConcepto.idconceptoegreso);
+                        // Actualizar el selector con el ID real para futuras selecciones
+                        if (tomSelects['concepto']) {
+                            tomSelects['concepto'].addOption({ value: conceptoId, text: resConcepto.descripcion });
+                            tomSelects['concepto'].setValue(conceptoId, true);
+                        }
+                    } else {
+                        showToast(resConcepto.message || 'No se pudo crear el concepto.', 'ERROR', 2000);
+                        return;
+                    }
+                } catch (err) {
+                    console.error(err);
+                    showToast('Error al crear el concepto nuevo.', 'ERROR', 2000);
+                    return;
+                }
+            }
+
             const formData = new FormData();
             formData.append('idconceptoegreso', conceptoId);
-            formData.append('idsolicitante', colaboradorId);
+            if (colaboradorId) formData.append('idsolicitante', colaboradorId);
+            formData.append('solicitante_nombre', solicitanteNombre);
             formData.append('monto', parseFloat(monto).toFixed(2));
             formData.append('comentario', observaciones);
             formData.append('requierecomprobante', requiereComprobante ? 'S' : 'N');
@@ -347,6 +394,7 @@
                         showToast(result.message, 'SUCCESS', 1200);
                         if (tomSelects['colaborador']) tomSelects['colaborador'].clear();
                         if (tomSelects['proovedor']) tomSelects['proovedor'].clear();
+                        if (tomSelects['concepto']) tomSelects['concepto'].clear();
                         egresoForm.reset();
                         comprobanteFormContainer.style.display = 'none';
                     } else {

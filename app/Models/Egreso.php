@@ -104,6 +104,51 @@ class Egreso
         }
     }
 
+    public function addConceptoEgreso(string $descripcion): int
+    {
+        $descripcion = trim($descripcion);
+        if ($descripcion === '') {
+            return 0;
+        }
+
+        $concepto = mb_strtoupper(mb_substr($descripcion, 0, 45));
+
+        try {
+            // Evitar duplicados por descripción exacta (case-insensitive)
+            $stmtSel = $this->db->prepare("SELECT idconceptoegreso FROM conceptoegreso WHERE LOWER(descripcion) = LOWER(:descripcion) LIMIT 1");
+            $stmtSel->execute([':descripcion' => $descripcion]);
+            $existente = $stmtSel->fetch(PDO::FETCH_ASSOC);
+            if ($existente && !empty($existente['idconceptoegreso'])) {
+                return (int) $existente['idconceptoegreso'];
+            }
+
+            $stmt = $this->db->prepare("INSERT INTO conceptoegreso (concepto, descripcion) VALUES (:concepto, :descripcion)");
+            $stmt->execute([
+                ':concepto' => $concepto,
+                ':descripcion' => $descripcion,
+            ]);
+
+            return (int) $this->db->lastInsertId();
+        } catch (PDOException $e) {
+            error_log("Error al agregar concepto de egreso: " . $e->getMessage());
+            return 0;
+        }
+    }
+
+    public function setSolicitanteNombre(int $idEgreso, string $nombre): bool
+    {
+        $nombre = trim($nombre);
+        if ($idEgreso <= 0) return false;
+
+        try {
+            $stmt = $this->db->prepare("UPDATE egresos SET solicitante_nombre = :nombre WHERE idegreso = :id");
+            return $stmt->execute([':nombre' => ($nombre === '' ? null : $nombre), ':id' => $idEgreso]);
+        } catch (PDOException $e) {
+            error_log("Error al actualizar solicitante_nombre: " . $e->getMessage());
+            return false;
+        }
+    }
+
     /**
      * Obtiene la lista de colaboradores activos
      * 
