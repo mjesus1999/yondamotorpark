@@ -100,7 +100,9 @@ class CajaController extends Controller
     public function indexPagosDenominacion()
     {
         $this->authRequired();
-        $this->view('caja.cobrosDenominacion');
+        $this->view('caja.cobrosDenominacion', [
+            'idConceptoVarios' => $this->cajaModel->getIdConceptoVariosCaja()
+        ]);
     }
 
     /**
@@ -266,17 +268,13 @@ class CajaController extends Controller
         $this->authRequired();
         header('Content-Type: application/json');
         $conceptos = $this->cajaModel->getConceptosPagos();
+        $list = is_array($conceptos) ? $conceptos : [];
 
-        if ($conceptos) {
-            echo json_encode(["success" => true, "conceptos" => $conceptos]);
-        } else {
-            http_response_code(404);
-            echo json_encode([
-                'success' => false,
-                'data' => [],
-                'message' => 'No se encontraron datos para el rango de fechas proporcionado.'
-            ]);
-        }
+        echo json_encode([
+            'success' => true,
+            'conceptos' => $list,
+            'message' => $list === [] ? 'Catálogo de conceptos vacío' : null
+        ], JSON_UNESCAPED_UNICODE);
         exit();
     }
 
@@ -284,17 +282,27 @@ class CajaController extends Controller
     {
         $this->authRequired();
         header('Content-Type: application/json');
-        $cliente = $this->cajaModel->getClienteByDni($dni);
+        $documento = preg_replace('/\D+/', '', $dni);
+        if (strlen($documento) !== 8 && strlen($documento) !== 11) {
+            http_response_code(400);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Documento inválido. Use 8 dígitos (DNI) u 11 (RUC).'
+            ], JSON_UNESCAPED_UNICODE);
+            return;
+        }
+
+        $cliente = $this->cajaModel->getClienteByDni($documento);
 
         if ($cliente) {
-            echo json_encode(["success" => true, "cliente" => $cliente]);
+            echo json_encode(['success' => true, 'cliente' => $cliente], JSON_UNESCAPED_UNICODE);
         } else {
             http_response_code(404);
             echo json_encode([
                 'success' => false,
                 'data' => [],
-                'message' => 'No se encontró al cliente'
-            ]);
+                'message' => 'No se encontró al cliente con ese documento.'
+            ], JSON_UNESCAPED_UNICODE);
         }
         exit();
     }
@@ -327,6 +335,7 @@ class CajaController extends Controller
             $montoTotal = (float) ($data['monto_total'] ?? 0);
 
             $idCuentaPago = null;
+            $cuentaEspecifica = null;
             if ($medioPago === 'Transferencia Bancaria' && !empty($data['idcuentapago'])) {
                 $idCuentaPago = (int) $data['idcuentapago'];
                 $cuentaEspecifica = $this->cajaModel->getNumCuentaPagoById($idCuentaPago);
@@ -365,6 +374,8 @@ class CajaController extends Controller
             $enlaceXml = null;
             $enlaceCdr = null;
             $nuevoNumero = null;
+            $facturado = false;
+            $mensajeFacturacion = null;
 
             try {
                 $clienteData = $this->cajaModel->getDatosCliente($idCliente);
@@ -410,13 +421,18 @@ class CajaController extends Controller
                     }
 
 
+                    $textoMedioPago = $medioPago;
+                    if ($medioPago === 'Transferencia Bancaria' && is_array($cuentaEspecifica) && !empty($cuentaEspecifica['nombrecuenta'])) {
+                        $textoMedioPago = $cuentaEspecifica['nombrecuenta'];
+                    }
+
                     $datosFacturacion = [
                         'tipo_comprobante' => 2,
                         'tipo_de_comprobante' => $tipoComprobante,
                         'serie' => $serieBoleta,
                         'numero_comprobante' => $nuevoNumero,
                         'items' => $itemsFacturacion,
-                        'mediopago' => $medioPago == 'Transferencia Bancaria' ? $cuentaEspecifica['nombrecuenta'] : $medioPago,
+                        'mediopago' => $textoMedioPago,
                         'totales' => [
                             'total_gravada' => round($totalGravada, 2),
                             'total_igv' => round($totalIGV, 2),
@@ -442,24 +458,33 @@ class CajaController extends Controller
                         $enlaceCdr = $respNube['enlace_cdr'] ?? null;
 
                         $this->cajaModel->actualizarDatosFacturacion($idPago, $enlacePdf, $enlaceXml, $enlaceCdr, $nuevoNumero);
+                        $facturado = true;
                     } else {
-                        error_log("Error NubeFact: " . $respNube['message']);
-                        $mensajeExtra = " (Sin Boleta: " . $respNube['message'] . ")";
+                        $msgNube = $respNube['message'] ?? 'Error al emitir comprobante';
+                        error_log("Error NubeFact: " . $msgNube);
+                        $mensajeExtra = " (Sin Boleta: " . $msgNube . ")";
+                        $mensajeFacturacion = $msgNube;
                     }
+                } else {
+                    $mensajeExtra = " (No se pudo facturar: sin datos de cliente en BD.)";
+                    $mensajeFacturacion = 'No hay datos de cliente para emitir comprobante.';
                 }
             } catch (Exception $ex) {
                 error_log("Excepción Facturación: " . $ex->getMessage());
                 $mensajeExtra = " (Error interno de facturación)";
+                $mensajeFacturacion = 'Error interno al emitir comprobante.';
             }
 
             echo json_encode([
                 'success' => true,
                 'message' => 'Pago registrado.' . $mensajeExtra,
+                'facturado' => $facturado,
+                'mensaje_facturacion' => $mensajeFacturacion,
                 'enlace_pdf' => $enlacePdf,
                 'enlace_xml' => $enlaceXml,
                 'enlace_cdr' => $enlaceCdr,
                 'id_pago' => $idPago
-            ]);
+            ], JSON_UNESCAPED_UNICODE);
         } catch (\Throwable $th) {
             http_response_code(500);
             error_log($th->getMessage());

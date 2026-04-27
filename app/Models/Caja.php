@@ -362,6 +362,23 @@ class Caja
         }
     }
 
+    /**
+     * ID del concepto reservado para líneas manuales en Caja (evita forzar idconcepto=1).
+     * Requiere fila creada con datos-inserts/caja_concepto_varios.sql
+     */
+    public function getIdConceptoVariosCaja(): int
+    {
+        $sql = "SELECT idconcepto FROM conceptospago WHERE concepto = 'Varios caja (manual)' LIMIT 1";
+        try {
+            $stmt = $this->db->query($sql);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $row ? (int) $row['idconcepto'] : 0;
+        } catch (PDOException $e) {
+            error_log('getIdConceptoVariosCaja: ' . $e->getMessage());
+            return 0;
+        }
+    }
+
 
 
 
@@ -424,23 +441,35 @@ class Caja
 
     public function getDatosCliente(int $idCliente): ?array
     {
-
         $sql = "
-    
             SELECT
                 cli.idcliente,
-                p.nrodoc,
-                CONCAT(p.nombres, ' ', p.apellidos) AS razon_social,
-                p.direccion,
-                p.email
+                CASE
+                    WHEN cli.tipocliente = 'P' THEN p.nrodoc
+                    ELSE e.ruc
+                END AS nrodoc,
+                CASE
+                    WHEN cli.tipocliente = 'P' THEN CONCAT(p.nombres, ' ', p.apellidos)
+                    ELSE e.razonsocial
+                END AS razon_social,
+                CASE
+                    WHEN cli.tipocliente = 'P' THEN p.direccion
+                    ELSE e.direccion
+                END AS direccion,
+                CASE
+                    WHEN cli.tipocliente = 'P' THEN p.email
+                    ELSE e.email
+                END AS email
             FROM clientes cli
-            JOIN personas p ON cli.idpersona = p.idpersona
-            WHERE cli.idcliente = :id AND cli.tipocliente = 'P' AND cli.estado = 'ACT'; 
-    ";
+            LEFT JOIN personas p ON cli.idpersona = p.idpersona AND cli.tipocliente = 'P'
+            LEFT JOIN empresas e ON cli.idempresa = e.idempresa AND cli.tipocliente = 'E'
+            WHERE cli.idcliente = :id AND cli.estado = 'ACT'
+        ";
 
         $stmt = $this->db->prepare($sql);
         $stmt->execute([':id' => $idCliente]);
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row ?: null;
     }
 
 

@@ -55,9 +55,9 @@
                     </div>
 
                     <div class="col-md-6">
-                        <label for="input-dni" class="form-label">Buscar Cliente por DNI</label>
+                        <label for="input-dni" class="form-label">Buscar cliente (DNI o RUC)</label>
                         <div class="input-group">
-                            <input type="text" id="input-dni" class="form-control" placeholder="Ingrese el DNI del cliente" maxlength="8">
+                            <input type="text" id="input-dni" class="form-control" placeholder="8 dígitos (DNI) o 11 (RUC)" maxlength="11" inputmode="numeric" autocomplete="off">
                             <button class="btn btn-info" id="btn-dni" title="Buscar Cliente">
                                 <i class="bi bi-search"></i>
                             </button>
@@ -221,12 +221,43 @@
     </div>
 </div>
 
+<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1080" aria-live="polite" aria-atomic="true">
+    <div id="caja-toast" class="toast align-items-center border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex w-100">
+            <div class="toast-body flex-grow-1" id="caja-toast-body"></div>
+            <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Cerrar"></button>
+        </div>
+    </div>
+</div>
+<?php
+$idVariosCaja = isset($idConceptoVarios) ? (int) $idConceptoVarios : 0;
+?>
+<div id="caja-config" class="d-none" data-id-concepto-varios="<?= $idVariosCaja ?>"></div>
 
 <script>
-    function showToast(message, type = 'INFO', duration = 3000) {
-        console.log(`[${type}] ${message}`);
-
+    function showToast(message, type = 'INFO', duration = 3600) {
+        const el = document.getElementById('caja-toast');
+        const body = document.getElementById('caja-toast-body');
+        if (!el || !body) {
+            console.log(`[${type}] ${message}`);
+            return;
+        }
+        const classMap = {
+            SUCCESS: 'text-white bg-success',
+            ERROR: 'text-white bg-danger',
+            WARNING: 'text-dark bg-warning',
+            INFO: 'text-white bg-info'
+        };
+        el.className = 'toast align-items-center border-0 ' + (classMap[type] || classMap.INFO);
+        body.textContent = message;
+        const t = bootstrap.Toast.getOrCreateInstance(el, { autohide: true, delay: Math.max(2000, duration) });
+        t.show();
     }
+
+    const ID_CONCEPTO_VARIOS = (function () {
+        const n = parseInt(document.getElementById('caja-config')?.dataset.idConceptoVarios || '0', 10);
+        return n > 0 ? n : 0;
+    })();
 
 
     const clienteNombre = document.getElementById('nombrecompleto');
@@ -397,10 +428,11 @@
     }
 
     async function searchClienteDB() {
-        const dni = inputDNI.value.trim();
+        const documento = inputDNI.value.trim().replace(/\D/g, '');
+        inputDNI.value = documento;
 
-        if (dni.length !== 8) {
-            showToast('El DNI debe tener 8 dígitos.', 'ERROR', 1800);
+        if (!/^\d{8}$/.test(documento) && !/^\d{11}$/.test(documento)) {
+            showToast('Ingrese DNI (8 dígitos) o RUC (11 dígitos).', 'ERROR', 2200);
             clienteCard.style.display = 'none';
             idCliente = null;
             updateTotals();
@@ -408,12 +440,21 @@
         }
 
         try {
-            const req = await fetch(`/api/clienteByDNI/${dni}`, {
+            const req = await fetch(`/api/clienteByDNI/${encodeURIComponent(documento)}`, {
                 method: 'GET'
             });
 
+            if (req.status === 400) {
+                const err = await req.json().catch(() => ({}));
+                showToast(err.message || 'Documento no válido.', 'WARNING', 3000);
+                clienteCard.style.display = 'none';
+                idCliente = null;
+                updateTotals();
+                return;
+            }
             if (req.status === 404) {
-                showToast('Cliente no encontrado.', 'WARNING', 1400);
+                const err = await req.json().catch(() => ({}));
+                showToast(err.message || 'Cliente no encontrado.', 'WARNING', 3000);
                 clienteCard.style.display = 'none';
                 idCliente = null;
                 updateTotals();
@@ -451,6 +492,15 @@
             if (!req.ok) throw new Error('Error en la solicitud ' + req.status);
 
             const res = await req.json();
+            if (!res.success || !Array.isArray(res.conceptos)) {
+                showToast(res.message || 'No se pudieron cargar los conceptos sugeridos.', 'WARNING', 5000);
+                return;
+            }
+            if (res.conceptos.length === 0) {
+                conceptosDB.innerHTML = '<option value="" disabled selected>No hay conceptos en catálogo</option>';
+                showToast('No hay conceptos sugeridos en la base de datos. Puede usar concepto personalizado o cargar conceptospago.', 'WARNING', 7000);
+                return;
+            }
             res.conceptos.forEach(concepto => {
                 conceptosDB.innerHTML += `
                     <option 
@@ -464,6 +514,7 @@
 
         } catch (error) {
             console.error("Error al cargar conceptos:", error);
+            showToast('Error al cargar conceptos. Revise conexión o permisos.', 'ERROR', 5000);
         }
     }
 
@@ -483,7 +534,10 @@
             const idConcepto = parseInt(row.getAttribute('data-idconcepto'));
 
 
-            const idConceptoFinal = idConcepto > 0 ? idConcepto : 1;
+            const idConceptoFinal = idConcepto > 0 ? idConcepto : (ID_CONCEPTO_VARIOS > 0 ? ID_CONCEPTO_VARIOS : 1);
+            if (idConcepto <= 0 && ID_CONCEPTO_VARIOS <= 0) {
+                console.warn('Caja: configure el concepto "Varios caja (manual)" en MySQL (ver datos-inserts/caja_concepto_varios.sql).');
+            }
 
             data.push({
                 idconcepto: idConceptoFinal,
@@ -558,8 +612,15 @@
             const res = await req.json();
 
             if (res.success) {
-                showToast(res.message, 'SUCCESS', 1250);
-
+                const okFact = Object.prototype.hasOwnProperty.call(res, 'facturado')
+                    ? (res.facturado === true)
+                    : !!res.enlace_pdf;
+                if (!okFact) {
+                    const extra = res.mensaje_facturacion ? ' ' + res.mensaje_facturacion : '';
+                    showToast((res.message || 'Pago registrado.') + extra, 'WARNING', 9000);
+                } else {
+                    showToast(res.message || 'Pago y comprobante OK.', 'SUCCESS', 4000);
+                }
 
                 if (res.enlace_pdf) {
                     setTimeout(() => {

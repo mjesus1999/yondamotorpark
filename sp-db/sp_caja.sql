@@ -255,28 +255,45 @@ SHOW TRIGGERS;
 
 
 
-DROP PROCEDURE  sp_getClienteBy_DNI;
+DROP PROCEDURE  IF EXISTS sp_getClienteBy_DNI;
 
 
 DELIMITER //
 CREATE PROCEDURE sp_getClienteBy_DNI(
-    IN dni_ CHAR(8)
+    IN dni_ VARCHAR(11)
 )
 BEGIN
-    SELECT
-        cl.idcliente,
-        CONCAT(p.apellidos, ' ' COLLATE utf8mb4_general_ci, p.nombres ) AS cliente,
-        p.nrodoc,
-        p.direccion,
-        p.email
-    FROM clientes cl
-        INNER JOIN personas p ON cl.idpersona = p.idpersona
-        WHERE p.nrodoc = dni_ COLLATE utf8mb4_general_ci 
-        AND cl.tipocliente = 'P' COLLATE utf8mb4_general_ci; 
-           
+    IF CHAR_LENGTH(TRIM(dni_)) = 8 THEN
+        SELECT
+            cl.idcliente,
+            CONCAT(p.apellidos, ' ' COLLATE utf8mb4_general_ci, p.nombres) AS cliente,
+            p.nrodoc,
+            p.direccion,
+            p.email
+        FROM clientes cl
+            INNER JOIN personas p ON cl.idpersona = p.idpersona
+        WHERE p.nrodoc = TRIM(dni_) COLLATE utf8mb4_general_ci
+          AND cl.tipocliente = 'P' COLLATE utf8mb4_unicode_ci
+          AND cl.estado = 'ACT' COLLATE utf8mb4_unicode_ci
+        LIMIT 1;
+    ELSEIF CHAR_LENGTH(TRIM(dni_)) = 11 THEN
+        SELECT
+            cl.idcliente,
+            e.razonsocial AS cliente,
+            e.ruc AS nrodoc,
+            e.direccion,
+            e.email
+        FROM clientes cl
+            INNER JOIN empresas e ON cl.idempresa = e.idempresa
+        WHERE e.ruc = TRIM(dni_) COLLATE utf8mb4_general_ci
+          AND cl.tipocliente = 'E' COLLATE utf8mb4_unicode_ci
+          AND cl.estado = 'ACT' COLLATE utf8mb4_unicode_ci
+        LIMIT 1;
+    END IF;
 END //
 DELIMITER ;
-CALL sp_getClienteBy_DNI('71882015');
+-- CALL sp_getClienteBy_DNI('71882015');
+-- CALL sp_getClienteBy_DNI('20123456789');
 
 
 
