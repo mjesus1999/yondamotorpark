@@ -282,40 +282,63 @@
             proveedorRenderOptions
         );
 
+        function ensureConceptoTomSelect() {
+            const selectConcepto = document.getElementById('concepto');
+            if (!selectConcepto) return null;
+
+            // Evitar doble init (TomSelect ya montado)
+            if (tomSelects['concepto']) return tomSelects['concepto'];
+            if (selectConcepto.tomselect) {
+                tomSelects['concepto'] = selectConcepto.tomselect;
+                return tomSelects['concepto'];
+            }
+
+            if (typeof TomSelect === 'undefined') {
+                console.error('TomSelect no está disponible (concepto). Revisa el CDN.');
+                return null;
+            }
+
+            tomSelects['concepto'] = new TomSelect(selectConcepto, {
+                create: true,
+                createOnBlur: true,
+                persist: false,
+                maxItems: 1,
+                placeholder: 'Seleccione o escriba un concepto',
+                sortField: { field: "$score", direction: "desc" },
+            });
+            return tomSelects['concepto'];
+        }
+
         async function loadConceptos() {
+            const ts = ensureConceptoTomSelect();
             try {
                 const response = await fetch('/api/egreso/conceptos');
                 const result = await response.json();
-                if (result.status === 'success' && Array.isArray(result.data)) {
-                    const selectConcepto = document.getElementById('concepto');
-                    result.data.forEach(item => {
-                        const option = document.createElement('option');
-                        option.value = item.idconceptoegreso;
-                        option.textContent = item.descripcion;
-                        selectConcepto.appendChild(option);
-                    });
-
-                    if (!tomSelects['concepto']) {
-                        tomSelects['concepto'] = new TomSelect(selectConcepto, {
-                            create: true,
-                            persist: false,
-                            sortField: { field: "$score", direction: "desc" },
-                            onItemAdd: function () {
-                                // no-op
-                            },
-                        });
-                    }
+                if (result.status === 'success' && Array.isArray(result.data) && ts) {
+                    ts.clearOptions();
+                    ts.addOption(
+                        result.data.map(item => ({
+                            value: String(item.idconceptoegreso),
+                            text: item.descripcion
+                        }))
+                    );
+                    ts.refreshOptions(false);
+                } else if (result.status !== 'success') {
+                    console.error('Error al cargar conceptos:', result.message);
                 }
             } catch (error) {
                 console.error('Error al cargar conceptos:', error);
             }
         }
 
+        // Inicializa TomSelect incluso si falla la carga remota,
+        // para que el usuario pueda escribir conceptos libres.
+        ensureConceptoTomSelect();
         loadConceptos();
 
         egresoForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const conceptoRaw = document.getElementById('concepto').value;
+            const conceptoRaw = (tomSelects['concepto']?.getValue?.() ?? document.getElementById('concepto').value);
             const colaboradorId = document.getElementById('colaborador').value;
             const monto = montoEgresoInput.value.trim();
             const observaciones = document.getElementById('observaciones').value.trim();
