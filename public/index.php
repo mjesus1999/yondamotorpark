@@ -9,6 +9,9 @@ define('APP_ROOT', dirname(__DIR__));
 require APP_ROOT . '/app/Core/Autoloader.php';
 require APP_ROOT . '/vendor/autoload.php';
 
+// Registrar autoload propio (namespace App\*)
+Autoloader::register();
+
 //Variable de entorno desde .env
 $dotenv = Dotenv\Dotenv::createImmutable(APP_ROOT);
 $dotenv->load();
