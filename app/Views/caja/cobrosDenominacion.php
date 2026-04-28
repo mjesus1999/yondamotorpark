@@ -319,6 +319,113 @@ $idVariosCaja = isset($idConceptoVarios) ? (int) $idConceptoVarios : 0;
         return String(v);
     }
 
+    function parseIsoDate(d) {
+        if (!d) return null;
+        // d viene como YYYY-MM-DD desde MySQL
+        const dt = new Date(String(d) + 'T00:00:00');
+        return isNaN(dt.getTime()) ? null : dt;
+    }
+
+    function daysInMonth(year, monthIndex0) {
+        return new Date(year, monthIndex0 + 1, 0).getDate();
+    }
+
+    /**
+     * Calcula el monto de cuota a pagar HOY basado en:
+     * - fecha_inicio_credito: define el día de pago del mes
+     * - cuota_base: monto normal
+     * - tolerancia: 3 días
+     * - mora: % (usa tasa_interes si está, sino 10)
+     */
+    function calcularMontoCuotaHoy(r) {
+        const start = parseIsoDate(r?.fecha_inicio_credito);
+        const cuota = parseFloat(r?.cuota_base ?? r?.pago_de_cuota ?? '0') || 0;
+        const moraPct = parseFloat(r?.tasa_interes ?? '10') || 10;
+        const totalConMoraFromDb = parseFloat(r?.total_con_mora ?? r?.cuota_total_mensual ?? '0') || 0;
+
+        if (!start || cuota <= 0) {
+            return {
+                ok: false,
+                monto: cuota,
+                aplicaMora: false,
+                dueDate: null,
+                daysLate: null,
+                moraPct,
+                montoConMora: totalConMoraFromDb > 0 ? totalConMoraFromDb : (cuota > 0 ? cuota * (1 + moraPct / 100) : 0),
+            };
+        }
+
+        const today = new Date();
+        const dueDay = start.getDate();
+        const y = today.getFullYear();
+        const m = today.getMonth();
+        const dom = Math.min(dueDay, daysInMonth(y, m));
+        const due = new Date(y, m, dom, 0, 0, 0, 0);
+
+        const msPerDay = 24 * 60 * 60 * 1000;
+        const diffDays = Math.floor((today.setHours(0, 0, 0, 0) - due.getTime()) / msPerDay);
+        const daysLate = diffDays > 0 ? diffDays : 0;
+        const aplicaMora = daysLate > 3;
+
+        const montoConMora = totalConMoraFromDb > 0
+            ? totalConMoraFromDb
+            : Math.round((cuota * (1 + moraPct / 100)) * 100) / 100;
+
+        return {
+            ok: true,
+            monto: aplicaMora ? montoConMora : cuota,
+            aplicaMora,
+            dueDate: due,
+            daysLate,
+            moraPct,
+            montoConMora,
+        };
+    }
+
+    function fmtDate(d) {
+        if (!d) return '—';
+        const dd = String(d.getDate()).padStart(2, '0');
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const yy = d.getFullYear();
+        return `${dd}/${mm}/${yy}`;
+    }
+
+    function hasCuotaRow() {
+        return !!conceptosBody.querySelector('tr[data-caja-cuota="1"]');
+    }
+
+    function addCuotaRowNoSave(monto, texto) {
+        // NO crea concepto en DB. Se registra como "Varios" al cobrar (ver collectConceptsData).
+        const newRow = conceptosBody.insertRow();
+        newRow.setAttribute('data-idconcepto', '0');
+        newRow.setAttribute('data-nombre-concepto', texto);
+        newRow.setAttribute('data-caja-cuota', '1');
+        newRow.insertCell(0).textContent = texto.toUpperCase();
+
+        const montoCell = newRow.insertCell(1);
+        montoCell.classList.add('text-end');
+        const montoInput = document.createElement('input');
+        montoInput.type = 'number';
+        montoInput.className = 'form-control monto-input d-inline-block';
+        montoInput.min = '0';
+        montoInput.step = '0.01';
+        montoInput.value = (parseFloat(monto) || 0).toFixed(2);
+        montoInput.addEventListener('input', updateTotals);
+        montoCell.appendChild(montoInput);
+
+        const actionCell = newRow.insertCell(2);
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'btn btn-outline-danger btn-sm';
+        deleteBtn.innerHTML = '<i class="bi bi-trash"></i>';
+        deleteBtn.addEventListener('click', () => {
+            newRow.remove();
+            updateTotals();
+        });
+        actionCell.appendChild(deleteBtn);
+
+        updateTotals();
+    }
+
     function renderRegistroVentas(rows) {
         if (!registroVentasCard || !registroVentasTbody) return;
         registroVentasTbody.innerHTML = '';
@@ -329,6 +436,7 @@ $idVariosCaja = isset($idConceptoVarios) ? (int) $idConceptoVarios : 0;
         }
 
         const r = rows[0]; // mostrar la venta más reciente
+        const cuotaInfo = calcularMontoCuotaHoy(r);
         const items = [
             ['ID', r.id],
             ['DNI', r.dni_cliente],
@@ -358,6 +466,29 @@ $idVariosCaja = isset($idConceptoVarios) ? (int) $idConceptoVarios : 0;
             ['Total con mora', r.total_con_mora],
             ['Número de cuota pagada', r.numero_cuota_pagada],
         ];
+
+        // Info de cuota sugerida (y auto-agregar si aplica)
+        if (cuotaInfo.ok) {
+            const trInfo = document.createElement('tr');
+            const badge = cuotaInfo.aplicaMora
+                ? `<span class="badge bg-danger">MORA</span>`
+                : `<span class="badge bg-success">NORMAL</span>`;
+            trInfo.innerHTML = `
+                <td colspan="2" class="small">
+                    ${badge}
+                    Día de pago: <strong>${escapeHtml(fmtDate(cuotaInfo.dueDate))}</strong>
+                    ${cuotaInfo.daysLate ? `| Atraso: <strong>${escapeHtml(cuotaInfo.daysLate)}</strong> días` : ''}
+                    | Monto a pagar hoy: <strong>S/ ${escapeHtml((cuotaInfo.monto || 0).toFixed(2))}</strong>
+                </td>`;
+            registroVentasTbody.appendChild(trInfo);
+
+            // Auto-agregar una fila de pago si ya hay cliente seleccionado y no hay filas aún.
+            if (idCliente !== null && idCliente > 0 && !hasCuotaRow() && conceptosBody.querySelectorAll('tr').length === 0) {
+                const cuotaN = r.numero_cuota_pagada ? ` (cuota ${r.numero_cuota_pagada})` : '';
+                const txt = `Cuota mensual${cuotaN} - DNI ${r.dni_cliente}`;
+                addCuotaRowNoSave(cuotaInfo.monto, txt);
+            }
+        }
 
         if (rows.length > 1) {
             registroVentasTbody.insertAdjacentHTML(
