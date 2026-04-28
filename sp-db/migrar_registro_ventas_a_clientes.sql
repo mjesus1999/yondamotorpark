@@ -37,14 +37,14 @@ INSERT INTO personas (
 SELECT
     NULL AS iddistrito,
     '-' AS apellidos,
-    LEFT(TRIM(r.nombre_cliente), 70) AS nombres,
+    LEFT(TRIM(MAX(r.nombre_cliente)), 70) AS nombres,
     'DNI' AS tipodoc,
     r.dni_cliente AS nrodoc,
     'M' AS genero,
-    LEFT(TRIM(r.direccion), 200) AS direccion,
+    LEFT(TRIM(MAX(r.direccion)), 200) AS direccion,
     NULL AS referencia,
     -- limpiar espacios; si no queda en 9 dígitos, se filtra en WHERE
-    REPLACE(REPLACE(REPLACE(TRIM(r.telefono_1), ' ', ''), '-', ''), '+', '') AS telprimario,
+    REPLACE(REPLACE(REPLACE(TRIM(MAX(r.telefono_1)), ' ', ''), '-', ''), '+', '') AS telprimario,
     NULL AS telalternativo,
     NULL AS latitud,
     NULL AS longitud
