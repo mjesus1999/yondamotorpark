@@ -97,6 +97,8 @@
     const cardRegistroVentas = document.getElementById('card-registro-ventas');
     const tbodyRegistroVentas = document.getElementById('tbody-registro-ventas');
     const tbody = document.getElementById('tbody-contratos');
+    let lastVentas = [];
+    let lastDni = '';
 
     function setMsg(text, cls) {
         msg.className = 'small ' + (cls || 'text-muted');
@@ -106,7 +108,21 @@
     function renderContratos(rows) {
         tbody.innerHTML = '';
         if (!rows.length) {
-            tbody.innerHTML = '<tr><td colspan="3" class="text-center text-warning py-3">Sin contrato ACT para este cliente. Podés usar <a href="/caja/pagos/denominacion">Cobros por denominación</a> para cobrar por conceptos.</td></tr>';
+            const link = lastDni ? `/caja/pagos/denominacion?dni=${encodeURIComponent(lastDni)}` : '/caja/pagos/denominacion';
+            let extra = '';
+            if (lastVentas && lastVentas.length) {
+                const r = lastVentas[0];
+                extra = `
+                  <div class="mt-2 small text-muted">
+                    <strong>Contrato (Excel):</strong> ${escapeHtml(r.marca || '—')} ${escapeHtml(r.modelo || '—')} / Chasis: <strong>${escapeHtml(r.chasis || '—')}</strong>
+                    <br>
+                    Cuota: <strong>${escapeHtml(fmt(r.cuota_base))}</strong> | Cuota actual: <strong>${escapeHtml(fmt(r.numero_cuota_pagada))}</strong> | Total con mora: <strong>${escapeHtml(fmt(r.total_con_mora))}</strong>
+                  </div>`;
+            }
+            tbody.innerHTML = `<tr><td colspan="3" class="text-center text-warning py-3">
+              Sin contrato ACT para este cliente. Podés usar <a href="${link}">Cobros por denominación</a> para cobrar por conceptos.
+              ${extra}
+            </td></tr>`;
             return;
         }
         rows.forEach(r => {
@@ -130,11 +146,12 @@
 
     function renderRegistroVentas(rows) {
         tbodyRegistroVentas.innerHTML = '';
-        if (!rows || !rows.length) {
+        lastVentas = Array.isArray(rows) ? rows : [];
+        if (!lastVentas.length) {
             cardRegistroVentas.classList.add('d-none');
             return;
         }
-        const r = rows[0]; // si hay varias ventas, mostramos la más reciente y avisamos
+        const r = lastVentas[0]; // si hay varias ventas, mostramos la más reciente y avisamos
         const items = [
             ['ID', r.id],
             ['DNI', r.dni_cliente],
@@ -165,9 +182,9 @@
             ['Número de cuota pagada', r.numero_cuota_pagada],
         ];
 
-        if (rows.length > 1) {
+        if (lastVentas.length > 1) {
             const trInfo = document.createElement('tr');
-            trInfo.innerHTML = `<td colspan="2" class="small text-warning p-2">Este DNI tiene <strong>${rows.length}</strong> ventas. Mostrando la más reciente (por fecha).</td>`;
+            trInfo.innerHTML = `<td colspan="2" class="small text-warning p-2">Este DNI tiene <strong>${lastVentas.length}</strong> ventas. Mostrando la más reciente (por fecha).</td>`;
             tbodyRegistroVentas.appendChild(trInfo);
         }
 
@@ -188,16 +205,19 @@
 
     async function buscar() {
         const dni = (inputDni.value || '').trim();
+        lastDni = dni;
         if (dni.length !== 8 || !/^\d+$/.test(dni)) {
             setMsg('Ingresá un DNI de 8 dígitos.', 'text-danger');
             cardCliente.classList.add('d-none');
             cardRegistroVentas.classList.add('d-none');
+            lastVentas = [];
             tbody.innerHTML = '<tr><td colspan="3" class="text-center text-muted py-3">—</td></tr>';
             return;
         }
         setMsg('Buscando…', 'text-info');
         cardCliente.classList.add('d-none');
         cardRegistroVentas.classList.add('d-none');
+        lastVentas = [];
         tbody.innerHTML = '<tr><td colspan="3" class="text-center py-3"><span class="spinner-border spinner-border-sm"></span></td></tr>';
 
         try {
