@@ -51,6 +51,58 @@ class Caja
     }
 
     /**
+     * Obtiene registro(s) de ventas vehiculares por DNI del cliente.
+     * Puede retornar múltiples filas si el DNI tiene varias ventas.
+     */
+    public function getRegistroVentasVehicularesByDni(string $dni): array
+    {
+        $sql = "SELECT
+                    id,
+                    fecha_venta,
+                    dni_cliente,
+                    nombre_cliente,
+                    aval,
+                    dni_aval,
+                    direccion,
+                    modelo,
+                    marca,
+                    chasis,
+                    motor,
+                    color,
+                    estado_tramite,
+                    placa,
+                    telefono_1,
+                    telefono_2,
+                    precio_total,
+                    pago_inicial,
+                    deudas_pendientes,
+                    deudas_pendientes_detalle,
+                    fecha_inicio_credito,
+                    plazo_meses,
+                    fecha_fin_credito,
+                    cuota_base,
+                    tasa_interes,
+                    monto_interes,
+                    cuota_total_mensual,
+                    mora_3_dias,
+                    total_con_mora,
+                    numero_cuota_pagada
+                FROM registro_ventas_vehiculares
+                WHERE dni_cliente = :dni
+                ORDER BY fecha_venta DESC, id DESC";
+
+        try {
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([':dni' => $dni]);
+            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            return is_array($rows) ? $rows : [];
+        } catch (PDOException $error) {
+            error_log($error->getMessage());
+            return [];
+        }
+    }
+
+    /**
      * Obtiene todos los contratos con sus datos financieros para caja
      * 
      * Ejecuta procedimiento almacenado que retorna el listado completo de

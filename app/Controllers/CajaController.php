@@ -543,4 +543,30 @@ class CajaController extends Controller
         $rows = $this->cajaModel->getContratosActivosPorIdCliente($idcliente);
         echo json_encode(['success' => true, 'data' => $rows]);
     }
+
+    /**
+     * API JSON: registro ventas vehiculares por DNI (8 dígitos).
+     */
+    public function apiRegistroVentasVehicularesByDNI(string $dni): void
+    {
+        $this->authRequired();
+        header('Content-Type: application/json; charset=utf-8');
+
+        $documento = preg_replace('/\D+/', '', $dni);
+        if (strlen($documento) !== 8) {
+            http_response_code(400);
+            echo json_encode([
+                'success' => false,
+                'message' => 'DNI inválido. Use 8 dígitos.',
+                'data' => []
+            ], JSON_UNESCAPED_UNICODE);
+            return;
+        }
+
+        $rows = $this->cajaModel->getRegistroVentasVehicularesByDni($documento);
+        echo json_encode([
+            'success' => true,
+            'data' => $rows
+        ], JSON_UNESCAPED_UNICODE);
+    }
 }
