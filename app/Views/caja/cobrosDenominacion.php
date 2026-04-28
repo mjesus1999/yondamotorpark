@@ -218,6 +218,23 @@
             </div>
         </div>
 
+        <div class="card border-primary shadow-lg mt-4" id="card-registro-ventas" style="display: none;">
+            <div class="card-header bg-secondary text-white d-flex align-items-center">
+                <h5 class="mb-0"><i class="bi bi-truck-front-fill me-2" style="font-size: 1.2rem;"></i> Registro ventas vehiculares</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-sm table-striped mb-0">
+                        <tbody id="tbody-registro-ventas"></tbody>
+                    </table>
+                </div>
+                <div class="small text-muted p-3">
+                    Si este DNI no existe como <strong>cliente</strong> en el sistema, igual podés ver aquí los datos del Excel.
+                    Para <strong>cobrar</strong> (generar boleta), necesitás que el cliente exista y tenga <strong>ID cliente</strong>.
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
 
@@ -266,6 +283,8 @@ $idVariosCaja = isset($idConceptoVarios) ? (int) $idConceptoVarios : 0;
     const clienteCorreo = document.getElementById('cliente-correo');
     const clienteDireccion = document.getElementById('cliente-direccion');
     const clienteCard = document.getElementById('card-cliente');
+    const registroVentasCard = document.getElementById('card-registro-ventas');
+    const registroVentasTbody = document.getElementById('tbody-registro-ventas');
 
     const selectMedioPago = document.getElementById('mediopago');
     const contenedorComprobante = document.getElementById('contenedor-comprobante');
@@ -288,6 +307,74 @@ $idVariosCaja = isset($idConceptoVarios) ? (int) $idConceptoVarios : 0;
     const inputDNI = document.getElementById('input-dni');
 
     let idCliente = null;
+
+    function escapeHtml(s) {
+        const d = document.createElement('div');
+        d.textContent = String(s ?? '');
+        return d.innerHTML;
+    }
+
+    function fmt(v) {
+        if (v === null || v === undefined || v === '') return '—';
+        return String(v);
+    }
+
+    function renderRegistroVentas(rows) {
+        if (!registroVentasCard || !registroVentasTbody) return;
+        registroVentasTbody.innerHTML = '';
+
+        if (!rows || !rows.length) {
+            registroVentasCard.style.display = 'none';
+            return;
+        }
+
+        const r = rows[0]; // mostrar la venta más reciente
+        const items = [
+            ['ID', r.id],
+            ['DNI', r.dni_cliente],
+            ['Nombre', r.nombre_cliente],
+            ['Aval', r.aval],
+            ['DNI Aval', r.dni_aval],
+            ['Dirección', r.direccion],
+            ['Modelo', r.modelo],
+            ['Marca', r.marca],
+            ['Chasis', r.chasis],
+            ['Motor', r.motor],
+            ['Color', r.color],
+            ['Placa', r.placa],
+            ['Estado', r.estado_tramite],
+            ['Celular', r.telefono_1],
+            ['Celular respaldo', r.telefono_2],
+            ['Monto total', r.precio_total],
+            ['Inicial', r.pago_inicial],
+            ['Deudas pendientes (monto)', r.deudas_pendientes],
+            ['Deudas pendientes (detalle)', r.deudas_pendientes_detalle],
+            ['Inicio contrato', r.fecha_inicio_credito],
+            ['Número de cuotas', r.plazo_meses],
+            ['Término contrato', r.fecha_fin_credito],
+            ['Pago de cuota', r.cuota_base],
+            ['%', r.tasa_interes],
+            ['Mora (3 días)', r.mora_3_dias],
+            ['Total con mora', r.total_con_mora],
+            ['Número de cuota pagada', r.numero_cuota_pagada],
+        ];
+
+        if (rows.length > 1) {
+            registroVentasTbody.insertAdjacentHTML(
+                'beforeend',
+                `<tr><td colspan="2" class="small text-warning">Este DNI tiene <strong>${rows.length}</strong> ventas. Mostrando la más reciente.</td></tr>`
+            );
+        }
+
+        items.forEach(([k, v]) => {
+            registroVentasTbody.insertAdjacentHTML(
+                'beforeend',
+                `<tr><th class="text-nowrap" style="width:40%;">${escapeHtml(k)}</th><td class="small">${escapeHtml(fmt(v))}</td></tr>`
+            );
+        });
+
+        registroVentasCard.style.display = 'block';
+    }
 
 
 
@@ -458,6 +545,29 @@ $idVariosCaja = isset($idConceptoVarios) ? (int) $idConceptoVarios : 0;
                 clienteCard.style.display = 'none';
                 idCliente = null;
                 updateTotals();
+
+                // Fallback: buscar en registro ventas vehiculares (solo para DNI 8)
+                if (/^\d{8}$/.test(documento)) {
+                    try {
+                        const rvReq = await fetch(`/api/caja/registro-ventas-vehiculares/${encodeURIComponent(documento)}`);
+                        if (rvReq.ok) {
+                            const rv = await rvReq.json().catch(() => null);
+                            if (rv && rv.success && Array.isArray(rv.data) && rv.data.length) {
+                                renderRegistroVentas(rv.data);
+                                showToast('Encontrado en registro vehicular (Excel). Para cobrar, primero registra al cliente.', 'INFO', 5500);
+                            } else {
+                                renderRegistroVentas([]);
+                            }
+                        } else {
+                            renderRegistroVentas([]);
+                        }
+                    } catch (e) {
+                        console.error(e);
+                        renderRegistroVentas([]);
+                    }
+                } else {
+                    renderRegistroVentas([]);
+                }
                 return;
             }
             if (!req.ok) {
@@ -470,11 +580,24 @@ $idVariosCaja = isset($idConceptoVarios) ? (int) $idConceptoVarios : 0;
             if (res.success && res.cliente) {
                 showToast('Cliente encontrado', 'SUCCESS', 1400);
                 displayClienteData(res.cliente);
+                // Si existe como cliente, igual mostramos (si hay) el registro vehicular
+                if (/^\d{8}$/.test(documento)) {
+                    try {
+                        const rvReq = await fetch(`/api/caja/registro-ventas-vehiculares/${encodeURIComponent(documento)}`);
+                        if (rvReq.ok) {
+                            const rv = await rvReq.json().catch(() => null);
+                            if (rv && rv.success) renderRegistroVentas(rv.data || []);
+                        }
+                    } catch (e) {
+                        console.error(e);
+                    }
+                }
             } else {
                 showToast('Cliente no encontrado', 'ERROR', 1400);
                 clienteCard.style.display = 'none';
                 idCliente = null;
                 updateTotals();
+                renderRegistroVentas([]);
             }
 
         } catch (error) {
