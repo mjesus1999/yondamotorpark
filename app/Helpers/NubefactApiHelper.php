@@ -49,7 +49,12 @@ class NubefactApiHelper {
         curl_close($ch);
 
         $leer_respuesta = json_decode($respuesta, true);
-        
+        if (!is_array($leer_respuesta)) {
+            throw new Exception(
+                'Nubefact devolvió una respuesta que no es JSON (¿error HTTP/HTML?). Revise ruta y token.'
+            );
+        }
+
         //  Manejo de errores HTTP
         if ($http_code !== 200) {
             $error_desc = isset($leer_respuesta['errors']) ? $leer_respuesta['errors'] : "Error HTTP $http_code. Revise el Token o la Ruta.";
