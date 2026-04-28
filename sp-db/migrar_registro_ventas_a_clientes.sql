@@ -50,7 +50,8 @@ SELECT
     NULL AS longitud
 FROM registro_ventas_vehiculares r
 LEFT JOIN personas p
-    ON p.tipodoc = 'DNI' AND p.nrodoc = r.dni_cliente
+    ON p.tipodoc = 'DNI'
+   AND (p.nrodoc COLLATE utf8mb4_unicode_ci) = (r.dni_cliente COLLATE utf8mb4_unicode_ci)
 WHERE p.idpersona IS NULL
   AND r.dni_cliente IS NOT NULL
   AND r.dni_cliente REGEXP '^[0-9]{8}$'
@@ -76,7 +77,8 @@ SELECT
     'ACT' AS estado
 FROM registro_ventas_vehiculares r
 INNER JOIN personas p
-    ON p.tipodoc = 'DNI' AND p.nrodoc = r.dni_cliente
+    ON p.tipodoc = 'DNI'
+   AND (p.nrodoc COLLATE utf8mb4_unicode_ci) = (r.dni_cliente COLLATE utf8mb4_unicode_ci)
 LEFT JOIN clientes c
     ON c.idpersona = p.idpersona AND c.tipocliente = 'P'
 WHERE c.idcliente IS NULL
@@ -91,7 +93,8 @@ FROM (
   WHERE r.dni_cliente REGEXP '^[0-9]{8}$'
   GROUP BY r.dni_cliente
 ) x
-LEFT JOIN personas p ON p.tipodoc='DNI' AND p.nrodoc=x.dni_cliente
+-- Forzar misma collation en comparación de DNI (algunas tablas vienen con utf8mb4_general_ci).
+LEFT JOIN personas p ON p.tipodoc='DNI' AND (p.nrodoc COLLATE utf8mb4_unicode_ci)=(x.dni_cliente COLLATE utf8mb4_unicode_ci)
 LEFT JOIN clientes c ON c.idpersona=p.idpersona AND c.tipocliente='P'
 WHERE c.idcliente IS NULL;
 
