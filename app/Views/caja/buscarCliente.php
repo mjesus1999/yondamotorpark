@@ -1,5 +1,28 @@
 <?php include __DIR__ . '/../layout/header.php'; ?>
 
+<style>
+    /* Mejor legibilidad en modo oscuro/claro */
+    .caja-card-readable {
+        background: var(--bs-body-bg);
+        color: var(--bs-body-color);
+        border-color: rgba(255, 255, 255, 0.12);
+    }
+
+    .caja-card-readable strong,
+    .caja-card-readable th {
+        color: var(--bs-body-color);
+        font-weight: 700;
+    }
+
+    .caja-card-readable td {
+        color: var(--bs-body-color);
+    }
+
+    .caja-card-readable .small {
+        font-size: 0.95rem;
+    }
+</style>
+
 <div class="container-fluid p-4">
     <div class="alert alert-info mt-2 text-primary p-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
         <nav aria-label="breadcrumb" class="mb-0">
@@ -36,7 +59,7 @@
                         </button>
                     </div>
                     <div id="msg-cliente" class="small"></div>
-                    <div id="card-cliente" class="card border mt-3 d-none bg-light">
+                    <div id="card-cliente" class="card border mt-3 d-none caja-card-readable">
                         <div class="card-body py-2">
                             <div><strong>ID cliente:</strong> <span id="c-id"></span></div>
                             <div><strong>Nombre:</strong> <span id="c-nombre"></span></div>
@@ -44,8 +67,8 @@
                         </div>
                     </div>
 
-                    <div id="card-registro-ventas" class="card border mt-3 d-none">
-                        <div class="card-header bg-light">
+                    <div id="card-registro-ventas" class="card border mt-3 d-none caja-card-readable">
+                        <div class="card-header">
                             <strong>Registro ventas vehiculares</strong>
                             <div class="small text-muted">Datos del Excel (por DNI) desde base de datos.</div>
                         </div>
