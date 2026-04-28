@@ -484,7 +484,9 @@ $idVariosCaja = isset($idConceptoVarios) ? (int) $idConceptoVarios : 0;
 
             // Auto-agregar una fila de pago si ya hay cliente seleccionado y no hay filas aún.
             if (idCliente !== null && idCliente > 0 && !hasCuotaRow() && conceptosBody.querySelectorAll('tr').length === 0) {
-                const cuotaN = r.numero_cuota_pagada ? ` (cuota ${r.numero_cuota_pagada})` : '';
+                const pagada = parseInt(r.numero_cuota_pagada, 10);
+                const siguiente = Number.isFinite(pagada) ? (pagada + 1) : null;
+                const cuotaN = siguiente ? ` (cuota ${siguiente})` : '';
                 const txt = `Cuota mensual${cuotaN} - DNI ${r.dni_cliente}`;
                 addCuotaRowNoSave(cuotaInfo.monto, txt);
             }
