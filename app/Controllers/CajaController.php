@@ -570,11 +570,15 @@ class CajaController extends Controller
             return;
         }
 
+        // Preferimos ACT, pero si no hay, tomamos el contrato más reciente (FIN/INACT) para poder mostrar cronograma.
         $contratos = $this->cajaModel->getContratosActivosPorIdCliente($idcliente);
+        if (empty($contratos)) {
+            $contratos = $this->cajaModel->getContratosPorIdCliente($idcliente);
+        }
         if (empty($contratos)) {
             echo json_encode([
                 'success' => true,
-                'message' => 'Sin contrato ACT para este cliente.',
+                'message' => 'Sin contrato para este cliente.',
                 'data' => [],
                 'gps' => 0
             ], JSON_UNESCAPED_UNICODE);
@@ -632,7 +636,8 @@ class CajaController extends Controller
             'data' => $rows,
             'gps' => $gps,
             'idcontrato' => $idContrato,
-            'vehiculo' => $contratos[0]['vehiculo_resumen'] ?? null
+            'vehiculo' => $contratos[0]['vehiculo_resumen'] ?? null,
+            'contrato_estado' => $contratos[0]['estado'] ?? null
         ], JSON_UNESCAPED_UNICODE);
     }
 

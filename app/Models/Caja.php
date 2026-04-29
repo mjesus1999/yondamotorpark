@@ -599,4 +599,38 @@ class Caja
             return 0.0;
         }
     }
+
+    /**
+     * Contratos de un cliente (sin filtrar por estado).
+     * Útil para mostrar cronograma incluso si el contrato está FIN/INACT.
+     */
+    public function getContratosPorIdCliente(int $idcliente): array
+    {
+        $sql = "
+            SELECT
+                c.idcontrato,
+                c.estado,
+                cot.idcotizacion,
+                TRIM(CONCAT(
+                    IFNULL(ma.marca, ''), ' / ',
+                    IFNULL(mo.modelo, ''),
+                    IF(mo.anio IS NOT NULL AND mo.anio > 0, CONCAT(' / ', mo.anio), '')
+                )) AS vehiculo_resumen
+            FROM contratos c
+            INNER JOIN cotizaciones cot ON cot.idcotizacion = c.idcotizacion
+            LEFT JOIN vehiculos v ON v.idvehiculo = cot.idvehiculo
+            LEFT JOIN modelos mo ON mo.idmodelo = v.idmodelo
+            LEFT JOIN marcas ma ON ma.idmarca = mo.idmarca
+            WHERE cot.idcliente = :idcliente
+            ORDER BY c.idcontrato DESC
+        ";
+        try {
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([':idcliente' => $idcliente]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log('getContratosPorIdCliente: ' . $e->getMessage());
+            return [];
+        }
+    }
 }

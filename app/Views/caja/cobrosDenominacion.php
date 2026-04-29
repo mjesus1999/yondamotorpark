@@ -600,16 +600,17 @@ $idVariosCaja = isset($idConceptoVarios) ? (int) $idConceptoVarios : 0;
         if (!cronogramaCard || !cronogramaTbody) return;
         cronogramaTbody.innerHTML = '';
 
-        if (!rows || !rows.length) {
-            cronogramaCard.style.display = 'none';
-            return;
-        }
-
         cronogramaCard.style.display = 'block';
         if (cronogramaFootnote) {
             const veh = meta?.vehiculo ? ` — ${meta.vehiculo}` : '';
             const gps = (meta?.gps ?? null) !== null ? ` (GPS: S/ ${Number(meta.gps || 0).toFixed(2)})` : '';
-            cronogramaFootnote.textContent = `Mostrando cronograma del contrato activo más reciente del cliente${veh}${gps}.`;
+            const est = meta?.contrato_estado ? ` [Contrato: ${meta.contrato_estado}]` : '';
+            cronogramaFootnote.textContent = `Mostrando cronograma del contrato más reciente del cliente${veh}${gps}.${est}`;
+        }
+
+        if (!rows || !rows.length) {
+            cronogramaTbody.innerHTML = `<tr><td colspan="4" class="small text-muted text-center p-3">Sin cronograma para mostrar.</td></tr>`;
+            return;
         }
 
         rows.forEach(r => {
@@ -640,7 +641,7 @@ $idVariosCaja = isset($idConceptoVarios) ? (int) $idConceptoVarios : 0;
             if (!req.ok) throw new Error('Fallo al cargar cronograma: ' + req.status);
             const res = await req.json().catch(() => null);
             if (res && res.success) {
-                renderCronograma(res.data || [], { vehiculo: res.vehiculo, gps: res.gps });
+                renderCronograma(res.data || [], { vehiculo: res.vehiculo, gps: res.gps, contrato_estado: res.contrato_estado });
             } else {
                 renderCronograma([]);
             }
