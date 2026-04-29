@@ -13,6 +13,7 @@ $router->add('GET', '/api/reporte/by/fecha', 'CajaController', 'reportePagosByFe
 $router->add('GET','/caja/pagos/denominacion','CajaController','indexPagosDenominacion');
 $router->add('GET', '/caja/buscar-cliente', 'CajaController', 'indexBuscarCliente');
 $router->add('GET', '/api/caja/contratos-por-cliente/{id}', 'CajaController', 'apiContratosPorCliente');
+$router->add('GET', '/api/caja/cronograma-por-cliente/{id}', 'CajaController', 'apiCronogramaPorCliente');
 $router->add('GET', '/api/caja/registro-ventas-vehiculares/{dni}', 'CajaController', 'apiRegistroVentasVehicularesByDNI');
 
 $router->add('GET', '/api/reporte/hoy', 'CajaController', 'getReporteIngresosCajaHoy');

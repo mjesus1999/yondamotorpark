@@ -235,6 +235,30 @@
             </div>
         </div>
 
+        <div class="card border-primary shadow-lg mt-4" id="card-cronograma" style="display: none;">
+            <div class="card-header bg-primary text-white d-flex align-items-center">
+                <h5 class="mb-0"><i class="bi bi-calendar-check me-2" style="font-size: 1.2rem;"></i> Cronograma de pagos</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-sm table-striped mb-0">
+                        <thead>
+                            <tr>
+                                <th style="width: 12%;">Cuota</th>
+                                <th>Fecha</th>
+                                <th class="text-end">Monto (Cuota + GPS)</th>
+                                <th style="width: 28%;">Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-cronograma"></tbody>
+                    </table>
+                </div>
+                <div class="small text-muted p-3" id="cronograma-footnote">
+                    Mostrando cronograma del contrato activo más reciente del cliente.
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
 
@@ -312,6 +336,9 @@ $idVariosCaja = isset($idConceptoVarios) ? (int) $idConceptoVarios : 0;
     const clienteCard = document.getElementById('card-cliente');
     const registroVentasCard = document.getElementById('card-registro-ventas');
     const registroVentasTbody = document.getElementById('tbody-registro-ventas');
+    const cronogramaCard = document.getElementById('card-cronograma');
+    const cronogramaTbody = document.getElementById('tbody-cronograma');
+    const cronogramaFootnote = document.getElementById('cronograma-footnote');
 
     const selectMedioPago = document.getElementById('mediopago');
     const contenedorComprobante = document.getElementById('contenedor-comprobante');
@@ -566,6 +593,61 @@ $idVariosCaja = isset($idConceptoVarios) ? (int) $idConceptoVarios : 0;
         clienteDireccion.textContent = data.direccion ?? 'N/A';
 
         updateTotals(); // Actualizar el estado del botón
+        loadCronogramaCliente(idCliente);
+    }
+
+    function renderCronograma(rows, meta = {}) {
+        if (!cronogramaCard || !cronogramaTbody) return;
+        cronogramaTbody.innerHTML = '';
+
+        if (!rows || !rows.length) {
+            cronogramaCard.style.display = 'none';
+            return;
+        }
+
+        cronogramaCard.style.display = 'block';
+        if (cronogramaFootnote) {
+            const veh = meta?.vehiculo ? ` — ${meta.vehiculo}` : '';
+            const gps = (meta?.gps ?? null) !== null ? ` (GPS: S/ ${Number(meta.gps || 0).toFixed(2)})` : '';
+            cronogramaFootnote.textContent = `Mostrando cronograma del contrato activo más reciente del cliente${veh}${gps}.`;
+        }
+
+        rows.forEach(r => {
+            const tr = document.createElement('tr');
+            const estado = String(r.estado || '');
+            const badge =
+                estado === 'Pagado' ? 'bg-success' :
+                    (estado === 'Por saldar' ? 'bg-warning text-dark' : 'bg-secondary');
+            const fecha = r.fechapago ? fmtDate(parseIsoDate(r.fechapago)) : '—';
+            tr.innerHTML = `
+                <td class="fw-bold">#${escapeHtml(r.numcuota)}</td>
+                <td class="small">${escapeHtml(fecha)}</td>
+                <td class="text-end fw-semibold">S/ ${escapeHtml(Number(r.total || 0).toFixed(2))}</td>
+                <td><span class="badge ${badge}">${escapeHtml(estado)}</span></td>
+            `;
+            cronogramaTbody.appendChild(tr);
+        });
+    }
+
+    async function loadCronogramaCliente(idcliente) {
+        if (!idcliente || idcliente <= 0) {
+            if (cronogramaCard) cronogramaCard.style.display = 'none';
+            if (cronogramaTbody) cronogramaTbody.innerHTML = '';
+            return;
+        }
+        try {
+            const req = await fetch(`/api/caja/cronograma-por-cliente/${encodeURIComponent(String(idcliente))}`);
+            if (!req.ok) throw new Error('Fallo al cargar cronograma: ' + req.status);
+            const res = await req.json().catch(() => null);
+            if (res && res.success) {
+                renderCronograma(res.data || [], { vehiculo: res.vehiculo, gps: res.gps });
+            } else {
+                renderCronograma([]);
+            }
+        } catch (e) {
+            console.error(e);
+            renderCronograma([]);
+        }
     }
 
     /**
@@ -697,6 +779,7 @@ $idVariosCaja = isset($idConceptoVarios) ? (int) $idConceptoVarios : 0;
          */
         conceptosBody.innerHTML = '';
         renderRegistroVentas([]);
+        renderCronograma([]);
         idCliente = null;
         updateTotals();
 

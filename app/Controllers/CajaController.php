@@ -555,6 +555,88 @@ class CajaController extends Controller
     }
 
     /**
+     * API JSON: cronograma de pagos por idcliente (usa contrato ACT más reciente).
+     * Retorna cuotas con estado amigable: Pagado / Por saldar / Por abonar.
+     */
+    public function apiCronogramaPorCliente(string $id): void
+    {
+        $this->authRequired();
+        header('Content-Type: application/json; charset=utf-8');
+
+        $idcliente = (int) $id;
+        if ($idcliente <= 0) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'Cliente inválido', 'data' => []], JSON_UNESCAPED_UNICODE);
+            return;
+        }
+
+        $contratos = $this->cajaModel->getContratosActivosPorIdCliente($idcliente);
+        if (empty($contratos)) {
+            echo json_encode([
+                'success' => true,
+                'message' => 'Sin contrato ACT para este cliente.',
+                'data' => [],
+                'gps' => 0
+            ], JSON_UNESCAPED_UNICODE);
+            return;
+        }
+
+        $idContrato = (int) ($contratos[0]['idcontrato'] ?? 0);
+        if ($idContrato <= 0) {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => 'Contrato inválido.'], JSON_UNESCAPED_UNICODE);
+            return;
+        }
+
+        $gps = $this->cajaModel->getMontoConceptoPagoByNombre('GPS');
+        $cronograma = $this->cajaModel->getCronogramaByIdContrato($idContrato);
+
+        // localizar primera cuota pendiente (para marcar "Por saldar")
+        $primeraPendienteNum = null;
+        foreach ($cronograma as $c) {
+            $pendCuota = (float) ($c['saldocuota_pendiente'] ?? 0);
+            $pendPen = (float) ($c['penalidad_pendiente'] ?? 0);
+            $estado = strtolower(trim((string) ($c['estado'] ?? '')));
+            if ($estado !== 'pagado' && ($pendCuota > 0 || $pendPen > 0)) {
+                $primeraPendienteNum = (int) ($c['numcuota'] ?? 0);
+                if ($primeraPendienteNum > 0) break;
+            }
+        }
+
+        $rows = [];
+        foreach ($cronograma as $c) {
+            $num = (int) ($c['numcuota'] ?? 0);
+            $estadoRaw = strtolower(trim((string) ($c['estado'] ?? '')));
+            $estadoLabel = 'Por abonar';
+
+            if ($estadoRaw === 'pagado') {
+                $estadoLabel = 'Pagado';
+            } elseif ($primeraPendienteNum !== null && $num === $primeraPendienteNum) {
+                $estadoLabel = 'Por saldar';
+            }
+
+            $valorCuota = (float) ($c['valorcuota'] ?? 0);
+            $rows[] = [
+                'numcuota' => $num,
+                'fechapago' => $c['fechapago'] ?? null,
+                'valorcuota' => round($valorCuota, 2),
+                'gps' => round($gps, 2),
+                'total' => round($valorCuota + $gps, 2),
+                'estado' => $estadoLabel,
+                'estado_raw' => $c['estado'] ?? null,
+            ];
+        }
+
+        echo json_encode([
+            'success' => true,
+            'data' => $rows,
+            'gps' => $gps,
+            'idcontrato' => $idContrato,
+            'vehiculo' => $contratos[0]['vehiculo_resumen'] ?? null
+        ], JSON_UNESCAPED_UNICODE);
+    }
+
+    /**
      * API JSON: registro ventas vehiculares por DNI (8 dígitos).
      */
     public function apiRegistroVentasVehicularesByDNI(string $dni): void

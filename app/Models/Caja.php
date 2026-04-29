@@ -581,4 +581,22 @@ class Caja
             return [];
         }
     }
+
+    /**
+     * Obtiene el monto sugerido de un concepto por nombre (ej: "GPS").
+     */
+    public function getMontoConceptoPagoByNombre(string $nombreConcepto): float
+    {
+        $sql = "SELECT montosugerido FROM conceptospago WHERE concepto = :c LIMIT 1";
+        try {
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([':c' => $nombreConcepto]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            $m = $row ? (float) ($row['montosugerido'] ?? 0) : 0.0;
+            return $m > 0 ? $m : 0.0;
+        } catch (PDOException $e) {
+            error_log('getMontoConceptoPagoByNombre: ' . $e->getMessage());
+            return 0.0;
+        }
+    }
 }
