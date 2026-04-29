@@ -587,7 +587,7 @@ class Caja
      */
     public function getMontoConceptoPagoByNombre(string $nombreConcepto): float
     {
-        $sql = "SELECT montosugerido FROM conceptospago WHERE concepto = :c LIMIT 1";
+        $sql = "SELECT montosugerido FROM conceptospago WHERE UPPER(concepto) = UPPER(:c) LIMIT 1";
         try {
             $stmt = $this->db->prepare($sql);
             $stmt->execute([':c' => $nombreConcepto]);

@@ -575,12 +575,74 @@ class CajaController extends Controller
         if (empty($contratos)) {
             $contratos = $this->cajaModel->getContratosPorIdCliente($idcliente);
         }
+        $gps = $this->cajaModel->getMontoConceptoPagoByNombre('GPS');
+
+        // Fallback si no hay contrato: usar registro_ventas_vehiculares (Excel) para construir un cronograma estimado.
         if (empty($contratos)) {
+            $cli = $this->cajaModel->getDatosCliente($idcliente);
+            $dni = is_array($cli) ? preg_replace('/\\D+/', '', (string) ($cli['nrodoc'] ?? '')) : '';
+            if (strlen($dni) === 8) {
+                $rowsVeh = $this->cajaModel->getRegistroVentasVehicularesByDni($dni);
+                if (!empty($rowsVeh)) {
+                    $r = $rowsVeh[0];
+                    $plazo = (int) ($r['plazo_meses'] ?? 0);
+                    $pagada = (int) ($r['numero_cuota_pagada'] ?? 0);
+                    $startRaw = (string) ($r['fecha_inicio_credito'] ?? '');
+                    $cuotaTotal = (float) ($r['cuota_total_mensual'] ?? 0);
+                    $cuotaBase = (float) ($r['cuota_base'] ?? 0);
+
+                    // Si el Excel ya trae cuota_total_mensual, usamos eso como "total" (suele incluir GPS y/o mora).
+                    // Si no, usamos cuota_base + GPS.
+                    $totalDefault = $cuotaTotal > 0 ? $cuotaTotal : ($cuotaBase + $gps);
+
+                    $start = null;
+                    try {
+                        if ($startRaw) $start = new \DateTimeImmutable($startRaw);
+                    } catch (\Throwable $e) {
+                        $start = null;
+                    }
+                    if (!$start) {
+                        $start = new \DateTimeImmutable('today');
+                    }
+
+                    $data = [];
+                    for ($i = 1; $i <= max(0, $plazo); $i++) {
+                        $estado = 'Por abonar';
+                        if ($pagada > 0 && $i <= $pagada) $estado = 'Pagado';
+                        elseif ($i === ($pagada + 1)) $estado = 'Por saldar';
+
+                        $fecha = $start->modify('+' . ($i - 1) . ' month')->format('Y-m-d');
+                        $data[] = [
+                            'numcuota' => $i,
+                            'fechapago' => $fecha,
+                            'valorcuota' => round($cuotaBase, 2),
+                            'gps' => round($gps, 2),
+                            'total' => round($totalDefault, 2),
+                            'estado' => $estado,
+                            'estado_raw' => null,
+                        ];
+                    }
+
+                    echo json_encode([
+                        'success' => true,
+                        'data' => $data,
+                        'gps' => $gps,
+                        'idcontrato' => null,
+                        'vehiculo' => trim((string) (($r['marca'] ?? '') . ' / ' . ($r['modelo'] ?? ''))),
+                        'contrato_estado' => null,
+                        'source' => 'registro_ventas_vehiculares',
+                        'message' => 'Cronograma estimado desde registro vehicular (Excel).',
+                    ], JSON_UNESCAPED_UNICODE);
+                    return;
+                }
+            }
+
             echo json_encode([
                 'success' => true,
-                'message' => 'Sin contrato para este cliente.',
+                'message' => 'Sin contrato ni registro vehicular para este cliente.',
                 'data' => [],
-                'gps' => 0
+                'gps' => $gps,
+                'source' => 'none'
             ], JSON_UNESCAPED_UNICODE);
             return;
         }
@@ -592,7 +654,6 @@ class CajaController extends Controller
             return;
         }
 
-        $gps = $this->cajaModel->getMontoConceptoPagoByNombre('GPS');
         $cronograma = $this->cajaModel->getCronogramaByIdContrato($idContrato);
 
         // localizar primera cuota pendiente (para marcar "Por saldar")
@@ -637,7 +698,8 @@ class CajaController extends Controller
             'gps' => $gps,
             'idcontrato' => $idContrato,
             'vehiculo' => $contratos[0]['vehiculo_resumen'] ?? null,
-            'contrato_estado' => $contratos[0]['estado'] ?? null
+            'contrato_estado' => $contratos[0]['estado'] ?? null,
+            'source' => 'contrato'
         ], JSON_UNESCAPED_UNICODE);
     }
 
