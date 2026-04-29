@@ -15,8 +15,8 @@ class ComprobanteNubefactController extends Controller
     {
         date_default_timezone_set('America/Lima');
         $this->nubefactModel = new NubefactApiHelper(
-            Credencialesnubefact::NUBEFACT_RUTA,
-            Credencialesnubefact::NUBEFACT_TOKEN
+            Credencialesnubefact::getRuta(),
+            Credencialesnubefact::getToken()
         );
     }
 

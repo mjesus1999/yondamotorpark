@@ -4,6 +4,30 @@ namespace App\Config;
 
 class Credencialesnubefact
 {
-    public const NUBEFACT_RUTA = "https://api.nubefact.com/api/v1/46483739-a800-43d4-be51-45cd0c5a97ee";
-    public const NUBEFACT_TOKEN = "e4823c34cc29491fa1730cce976929d8b27415bf9b1c41238eeff01b7624a595";
+    /**
+     * Importante: no commitear credenciales reales.
+     * Configurar en el servidor con variables de entorno (.env):
+     * - NUBEFACT_RUTA
+     * - NUBEFACT_TOKEN
+     */
+    private const DEFAULT_NUBEFACT_RUTA = '';
+    private const DEFAULT_NUBEFACT_TOKEN = '';
+
+    public static function getRuta(): string
+    {
+        $ruta = getenv('NUBEFACT_RUTA');
+        if (is_string($ruta) && trim($ruta) !== '') {
+            return trim($ruta);
+        }
+        return self::DEFAULT_NUBEFACT_RUTA;
+    }
+
+    public static function getToken(): string
+    {
+        $token = getenv('NUBEFACT_TOKEN');
+        if (is_string($token) && trim($token) !== '') {
+            return trim($token);
+        }
+        return self::DEFAULT_NUBEFACT_TOKEN;
+    }
 }
