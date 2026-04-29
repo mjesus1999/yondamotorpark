@@ -118,4 +118,38 @@ class ComprobanteNubefactController extends Controller
             ];
         }
     }
+
+    /**
+     * Consulta estado SUNAT/retorna CDR en Nubefact.
+     * @return array{success:bool,status?:string,message?:string,enlace_cdr?:string|null,enlace_pdf?:string|null,respuesta_completa_nubefact?:array}
+     */
+    public function consultarEstadoComprobante(int $tipoComprobante, string $serie, int $numero): array
+    {
+        try {
+            $respuesta_api = $this->nubefactModel->consultarComprobante($tipoComprobante, $serie, $numero);
+            $aceptada = !empty($respuesta_api['aceptada_por_sunat']);
+            $estado_sunat = $aceptada ? 'ACEPTADA' : 'PENDIENTE';
+
+            $enlacePdf = $respuesta_api['enlace_del_pdf'] ?? $respuesta_api['url_pdf'] ?? null;
+            if ($enlacePdf === '') $enlacePdf = null;
+
+            $enlaceCdr = $respuesta_api['enlace_del_cdr'] ?? null;
+            if ($enlaceCdr === '') $enlaceCdr = null;
+
+            return [
+                'success' => true,
+                'status' => $estado_sunat,
+                'message' => $respuesta_api['sunat_description'] ?? 'Consulta OK.',
+                'enlace_pdf' => $enlacePdf,
+                'enlace_cdr' => $enlaceCdr,
+                'respuesta_completa_nubefact' => $respuesta_api,
+            ];
+        } catch (Exception $e) {
+            return [
+                'success' => false,
+                'status' => 'ERROR',
+                'message' => "Fallo al consultar comprobante: " . $e->getMessage()
+            ];
+        }
+    }
 }

@@ -1069,6 +1069,31 @@ $idVariosCaja = isset($idConceptoVarios) ? (int) $idConceptoVarios : 0;
                     }
                 }
 
+                // Si no hay CDR aún, consultar a Nubefact (puede tardar unos segundos/minutos en devolverlo).
+                if (res.facturado === true && !res.enlace_cdr && res.comprobante_serie && res.comprobante_numero && res.comprobante_tipo) {
+                    setTimeout(async () => {
+                        try {
+                            const fd = new FormData();
+                            fd.append('idpago', String(res.id_pago || '0'));
+                            fd.append('serie', String(res.comprobante_serie));
+                            fd.append('numero', String(res.comprobante_numero));
+                            // 1 factura, 2 boleta
+                            fd.append('tipo_comprobante', res.comprobante_tipo === 'F' ? '1' : '2');
+                            const q = await fetch('/api/nubefact/consultar-estado-sunat', { method: 'POST', body: fd });
+                            const r2 = await q.json().catch(() => null);
+                            if (r2 && r2.success) {
+                                if (r2.enlace_cdr) {
+                                    showToastWithPdfLink('SUNAT: ' + (r2.status || 'OK') + '. CDR disponible:', String(r2.enlace_cdr), 'SUCCESS', 12000);
+                                } else {
+                                    showToast('SUNAT: ' + (r2.status || 'PENDIENTE') + '. Aún sin CDR.', 'INFO', 7000);
+                                }
+                            }
+                        } catch (e) {
+                            // silencioso
+                        }
+                    }, 5000);
+                }
+
                 conceptosBody.innerHTML = '';
                 inputDNI.value = '';
                 selectMedioPago.selectedIndex = 0;

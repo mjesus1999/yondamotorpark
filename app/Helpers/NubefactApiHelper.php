@@ -68,4 +68,18 @@ class NubefactApiHelper {
 
         return $leer_respuesta;
     }
+
+    /**
+     * Consulta un comprobante ya emitido (revisar estado SUNAT / CDR).
+     * Nubefact acepta esta operación usando la misma RUTA/TOKEN (POST JSON).
+     */
+    public function consultarComprobante(int $tipoComprobante, string $serie, int $numero): array
+    {
+        return $this->enviarComprobante([
+            'operacion' => 'consultar_comprobante',
+            'tipo_de_comprobante' => $tipoComprobante,
+            'serie' => $serie,
+            'numero' => $numero,
+        ]);
+    }
 }

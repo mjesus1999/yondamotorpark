@@ -801,4 +801,43 @@ class CajaController extends Controller
             'data' => $rows
         ], JSON_UNESCAPED_UNICODE);
     }
+
+    /**
+     * API JSON: consultar estado SUNAT en Nubefact y actualizar CDR en pagos.
+     * body: { idpago, tipo_comprobante, serie, numero }
+     */
+    public function apiConsultarEstadoSunatNubefact(): void
+    {
+        $this->authRequired();
+        header('Content-Type: application/json; charset=utf-8');
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            echo json_encode(['success' => false, 'message' => 'Método no permitido'], JSON_UNESCAPED_UNICODE);
+            return;
+        }
+
+        $idpago = (int) ($_POST['idpago'] ?? 0);
+        $tipo = (int) ($_POST['tipo_comprobante'] ?? 0);
+        $serie = trim((string) ($_POST['serie'] ?? ''));
+        $numero = (int) ($_POST['numero'] ?? 0);
+
+        if ($idpago <= 0 || $tipo <= 0 || $serie === '' || $numero <= 0) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'Parámetros inválidos'], JSON_UNESCAPED_UNICODE);
+            return;
+        }
+
+        $nubefact = new ComprobanteNubefactController();
+        $res = $nubefact->consultarEstadoComprobante($tipo, $serie, $numero);
+
+        if (!empty($res['success'])) {
+            $cdr = $res['enlace_cdr'] ?? null;
+            if ($cdr) {
+                $this->cajaModel->actualizarCdrFacturacion($idpago, $cdr);
+            }
+        }
+
+        echo json_encode($res, JSON_UNESCAPED_UNICODE);
+    }
 }

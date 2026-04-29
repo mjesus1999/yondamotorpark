@@ -15,6 +15,7 @@ $router->add('GET', '/caja/buscar-cliente', 'CajaController', 'indexBuscarClient
 $router->add('GET', '/api/caja/contratos-por-cliente/{id}', 'CajaController', 'apiContratosPorCliente');
 $router->add('GET', '/api/caja/cronograma-por-cliente/{id}', 'CajaController', 'apiCronogramaPorCliente');
 $router->add('GET', '/api/caja/registro-ventas-vehiculares/{dni}', 'CajaController', 'apiRegistroVentasVehicularesByDNI');
+$router->add('POST', '/api/nubefact/consultar-estado-sunat', 'CajaController', 'apiConsultarEstadoSunatNubefact');
 
 $router->add('GET', '/api/reporte/hoy', 'CajaController', 'getReporteIngresosCajaHoy');
 

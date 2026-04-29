@@ -489,6 +489,21 @@ class Caja
          ]);
      }
 
+     public function actualizarCdrFacturacion(int $idPago, ?string $cdr): bool
+     {
+         $sql = "UPDATE pagos SET enlace_del_cdr = :cdr WHERE idpago = :idpago";
+         try {
+             $stmt = $this->db->prepare($sql);
+             return $stmt->execute([
+                 ':cdr' => $cdr,
+                 ':idpago' => $idPago,
+             ]);
+         } catch (PDOException $e) {
+             error_log('actualizarCdrFacturacion: ' . $e->getMessage());
+             return false;
+         }
+     }
+
 
 
     public function getDatosCliente(int $idCliente): ?array
