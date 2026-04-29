@@ -47,10 +47,18 @@
                     <div class="col-md-6">
                         <label for="conceptos-db" class="form-label">Añadir Concepto Sugerido</label>
                         <div class="input-group">
-                            <select id="conceptos-db" class="form-select">
-                                <option value="" disabled selected>Seleccione un concepto de la lista...</option>
-                            </select>
+                            <input
+                                id="conceptos-db"
+                                class="form-control"
+                                list="conceptos-db-list"
+                                placeholder="Escribe para buscar (ej: GPS, carta, duplicado...)"
+                                autocomplete="off"
+                            >
+                            <datalist id="conceptos-db-list"></datalist>
                             <button class="btn btn-primary" id="btn-add-db" disabled>Añadir</button>
+                        </div>
+                        <div class="form-text">
+                            Puedes escribir para buscar en el catálogo. Si necesitas un concepto totalmente libre y con monto variable, usa el bloque “Ingreso de Concepto Personalizado”.
                         </div>
                     </div>
 
@@ -350,7 +358,8 @@ $idVariosCaja = isset($idConceptoVarios) ? (int) $idConceptoVarios : 0;
     const subtotalSpan = document.getElementById('subtotal');
     const totalPagarSpan = document.getElementById('total-pagar');
     const btnGenerar = document.getElementById('btn-generar-boleta');
-    const conceptosDB = document.getElementById('conceptos-db');
+    const conceptosDB = document.getElementById('conceptos-db'); // input (datalist)
+    const conceptosDBList = document.getElementById('conceptos-db-list');
     const btnAddDB = document.getElementById('btn-add-db');
     const conceptoManual = document.getElementById('concepto-manual');
     const montoManual = document.getElementById('monto-manual');
@@ -361,6 +370,8 @@ $idVariosCaja = isset($idConceptoVarios) ? (int) $idConceptoVarios : 0;
     const inputDNI = document.getElementById('input-dni');
 
     let idCliente = null;
+    let conceptosCatalogo = [];
+    let conceptosCatalogoByKey = new Map();
 
     function escapeHtml(s) {
         const d = document.createElement('div');
@@ -880,20 +891,36 @@ $idVariosCaja = isset($idConceptoVarios) ? (int) $idConceptoVarios : 0;
                 return;
             }
             if (res.conceptos.length === 0) {
-                conceptosDB.innerHTML = '<option value="" disabled selected>No hay conceptos en catálogo</option>';
+                if (conceptosDBList) conceptosDBList.innerHTML = '';
+                conceptosDB.value = '';
+                btnAddDB.disabled = true;
                 showToast('No hay conceptos sugeridos en la base de datos. Puede usar concepto personalizado o cargar conceptospago.', 'WARNING', 7000);
                 return;
             }
-            res.conceptos.forEach(concepto => {
-                conceptosDB.innerHTML += `
-                    <option 
-                        value="${concepto.idconcepto}" 
-                        data-concepto="${concepto.concepto}"  
-                        data-monto="${concepto.montosugerido}">
-                        ${concepto.concepto} - S/${concepto.montosugerido}
-                    </option>
-                `;
+            conceptosCatalogo = res.conceptos.map(c => ({
+                idconcepto: parseInt(c.idconcepto, 10),
+                concepto: String(c.concepto ?? '').trim(),
+                montosugerido: parseFloat(c.montosugerido ?? 0) || 0,
+            })).filter(c => c.concepto);
+
+            // Index por "concepto" y por "concepto - S/x" para poder pegar cualquiera.
+            conceptosCatalogoByKey = new Map();
+            conceptosCatalogo.forEach(c => {
+                const label = `${c.concepto} - S/${c.montosugerido.toFixed(2)}`;
+                conceptosCatalogoByKey.set(c.concepto.toLowerCase(), c);
+                conceptosCatalogoByKey.set(label.toLowerCase(), c);
             });
+
+            if (conceptosDBList) {
+                conceptosDBList.innerHTML = '';
+                conceptosCatalogo.forEach(c => {
+                    const opt = document.createElement('option');
+                    opt.value = `${c.concepto} - S/${c.montosugerido.toFixed(2)}`;
+                    conceptosDBList.appendChild(opt);
+                });
+            }
+            conceptosDB.value = '';
+            btnAddDB.disabled = true;
 
         } catch (error) {
             console.error("Error al cargar conceptos:", error);
@@ -1080,23 +1107,35 @@ $idVariosCaja = isset($idConceptoVarios) ? (int) $idConceptoVarios : 0;
         }
     });
 
+    function getSelectedConceptoFromInput() {
+        const raw = (conceptosDB?.value || '').trim();
+        if (!raw) return null;
+        const c = conceptosCatalogoByKey.get(raw.toLowerCase());
+        return c || null;
+    }
+
+    function syncConceptoAddButton() {
+        btnAddDB.disabled = !getSelectedConceptoFromInput();
+    }
+
     btnAddDB.addEventListener('click', () => {
-        const selectedOption = conceptosDB.options[conceptosDB.selectedIndex];
-
-        if (selectedOption && selectedOption.value) {
-            const idConcepto = parseInt(selectedOption.value);
-            const conceptoTexto = selectedOption.getAttribute('data-concepto');
-            const monto = selectedOption.getAttribute('data-monto');
-
-            addConceptoRow(conceptoTexto, monto, idConcepto); // Pasa el ID
-
-            conceptosDB.selectedIndex = 0;
-            btnAddDB.disabled = true;
+        const c = getSelectedConceptoFromInput();
+        if (!c) {
+            showToast('Escribe y selecciona un concepto del catálogo.', 'WARNING', 2500);
+            return;
         }
+        addConceptoRow(c.concepto, c.montosugerido, c.idconcepto);
+        conceptosDB.value = '';
+        btnAddDB.disabled = true;
     });
 
-    conceptosDB.addEventListener('change', () => {
-        btnAddDB.disabled = conceptosDB.selectedIndex === 0;
+    conceptosDB.addEventListener('input', syncConceptoAddButton);
+    conceptosDB.addEventListener('change', syncConceptoAddButton);
+    conceptosDB.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            if (!btnAddDB.disabled) btnAddDB.click();
+        }
     });
 
 
