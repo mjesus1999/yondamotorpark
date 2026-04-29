@@ -1107,11 +1107,27 @@ $idVariosCaja = isset($idConceptoVarios) ? (int) $idConceptoVarios : 0;
         }
     });
 
+    function parseManualConceptoFromInput(raw) {
+        // Permite escribir manualmente: "CONCEPTO - S/14.00"
+        // Se añade como línea manual (no se guarda en catálogo).
+        const m = String(raw || '').match(/^\s*(.+?)\s*-\s*S\/\s*(\d+(?:[.,]\d+)?)\s*$/i);
+        if (!m) return null;
+        const concepto = String(m[1] || '').trim();
+        const monto = parseFloat(String(m[2]).replace(',', '.'));
+        if (!concepto || !isFinite(monto) || monto <= 0) return null;
+        return { idconcepto: 0, concepto, montosugerido: monto, __manual: true };
+    }
+
     function getSelectedConceptoFromInput() {
         const raw = (conceptosDB?.value || '').trim();
         if (!raw) return null;
+
+        // 1) Match exacto a catálogo (por concepto o "concepto - S/x")
         const c = conceptosCatalogoByKey.get(raw.toLowerCase());
-        return c || null;
+        if (c) return c;
+
+        // 2) Si no existe en catálogo, permitir manual si viene con monto " - S/xx"
+        return parseManualConceptoFromInput(raw);
     }
 
     function syncConceptoAddButton() {
@@ -1121,7 +1137,7 @@ $idVariosCaja = isset($idConceptoVarios) ? (int) $idConceptoVarios : 0;
     btnAddDB.addEventListener('click', () => {
         const c = getSelectedConceptoFromInput();
         if (!c) {
-            showToast('Escribe y selecciona un concepto del catálogo.', 'WARNING', 2500);
+            showToast('Escribe un concepto del catálogo o usa el formato "CONCEPTO - S/14.00" para añadirlo manualmente.', 'WARNING', 3500);
             return;
         }
         addConceptoRow(c.concepto, c.montosugerido, c.idconcepto);
