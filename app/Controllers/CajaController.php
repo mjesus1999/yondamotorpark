@@ -623,6 +623,8 @@ class CajaController extends Controller
                     $startRaw = (string) ($r['fecha_inicio_credito'] ?? '');
                     $cuotaTotal = (float) ($r['cuota_total_mensual'] ?? 0);
                     $cuotaBase = (float) ($r['cuota_base'] ?? 0);
+                    $moraPct = (float) ($r['tasa_interes'] ?? 10);
+                    if ($moraPct <= 0) $moraPct = 10;
 
                     // Si el Excel ya trae cuota_total_mensual, usamos eso como "total" (suele incluir GPS y/o mora).
                     // Si no, usamos cuota_base + GPS.
@@ -638,19 +640,35 @@ class CajaController extends Controller
                         $start = new \DateTimeImmutable('today');
                     }
 
+                    $today = new \DateTimeImmutable('today');
                     $data = [];
                     for ($i = 1; $i <= max(0, $plazo); $i++) {
                         $estado = 'Por abonar';
                         if ($pagada > 0 && $i <= $pagada) $estado = 'Pagado';
                         elseif ($i === ($pagada + 1)) $estado = 'Por saldar';
 
-                        $fecha = $start->modify('+' . ($i - 1) . ' month')->format('Y-m-d');
+                        // Regla negocio: la cuota #1 vence el mes siguiente a la fecha de inicio.
+                        $venc = $start->modify('+' . $i . ' month');
+                        $fecha = $venc->format('Y-m-d');
+
+                        // tolerancia: 3 días; mora desde el 4to día
+                        $toleranciaFin = $venc->modify('+3 day');
+                        $conMora = ($estado === 'Por saldar') && ($today > $toleranciaFin);
+                        if ($conMora) {
+                            $estado = 'Por saldar (MORA)';
+                        }
+
+                        $totalNormal = round($totalDefault, 2);
+                        $totalMora = round($totalNormal * (1 + ($moraPct / 100)), 2);
+                        $totalMostrar = $conMora ? $totalMora : $totalNormal;
                         $data[] = [
                             'numcuota' => $i,
                             'fechapago' => $fecha,
                             'valorcuota' => round($cuotaBase, 2),
                             'gps' => round($gps, 2),
-                            'total' => round($totalDefault, 2),
+                            'total_normal' => $totalNormal,
+                            'total_con_mora' => $totalMora,
+                            'total' => $totalMostrar,
                             'estado' => $estado,
                             'estado_raw' => null,
                         ];
@@ -702,6 +720,7 @@ class CajaController extends Controller
         }
 
         $rows = [];
+        $today = new \DateTimeImmutable('today');
         foreach ($cronograma as $c) {
             $num = (int) ($c['numcuota'] ?? 0);
             $estadoRaw = strtolower(trim((string) ($c['estado'] ?? '')));
@@ -714,12 +733,33 @@ class CajaController extends Controller
             }
 
             $valorCuota = (float) ($c['valorcuota'] ?? 0);
+            $penalidad = (float) ($c['penalidad'] ?? 0);
+            $totalNormal = round($valorCuota + $gps, 2);
+            $totalMora = round($totalNormal + max(0, $penalidad), 2);
+
+            $conMora = false;
+            $fechaDb = $c['fechapago'] ?? null;
+            if ($estadoLabel === 'Por saldar' && $fechaDb) {
+                try {
+                    $venc = new \DateTimeImmutable((string) $fechaDb);
+                    $toleranciaFin = $venc->modify('+3 day');
+                    $conMora = $today > $toleranciaFin;
+                } catch (\Throwable $e) {
+                    $conMora = false;
+                }
+            }
+            if ($conMora && $estadoLabel === 'Por saldar') {
+                $estadoLabel = 'Por saldar (MORA)';
+            }
+
             $rows[] = [
                 'numcuota' => $num,
                 'fechapago' => $c['fechapago'] ?? null,
                 'valorcuota' => round($valorCuota, 2),
                 'gps' => round($gps, 2),
-                'total' => round($valorCuota + $gps, 2),
+                'total_normal' => $totalNormal,
+                'total_con_mora' => $totalMora,
+                'total' => $conMora ? $totalMora : $totalNormal,
                 'estado' => $estadoLabel,
                 'estado_raw' => $c['estado'] ?? null,
             ];

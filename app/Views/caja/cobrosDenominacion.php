@@ -631,7 +631,8 @@ $idVariosCaja = isset($idConceptoVarios) ? (int) $idConceptoVarios : 0;
             const estado = String(r.estado || '');
             const badge =
                 estado === 'Pagado' ? 'bg-success' :
-                    (estado === 'Por saldar' ? 'bg-warning text-dark' : 'bg-secondary');
+                    (estado === 'Por saldar' ? 'bg-warning text-dark' :
+                        (estado.includes('MORA') ? 'bg-danger' : 'bg-secondary'));
             const fecha = r.fechapago ? fmtDate(parseIsoDate(r.fechapago)) : '—';
             tr.innerHTML = `
                 <td class="fw-bold">#${escapeHtml(r.numcuota)}</td>
