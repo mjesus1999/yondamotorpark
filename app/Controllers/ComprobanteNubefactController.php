@@ -93,13 +93,19 @@ class ComprobanteNubefactController extends Controller
             $json_data['items'] = $datos['items'];
             $respuesta_api = $this->nubefactModel->enviarComprobante($json_data);
 
-            $estado_sunat = $respuesta_api['aceptada_por_sunat'] ? 'ACEPTADA' : 'PENDIENTE';
+            $aceptada = !empty($respuesta_api['aceptada_por_sunat']);
+            $estado_sunat = $aceptada ? 'ACEPTADA' : 'PENDIENTE';
+
+            $enlacePdf = $respuesta_api['enlace_del_pdf'] ?? $respuesta_api['url_pdf'] ?? null;
+            if ($enlacePdf === '') {
+                $enlacePdf = null;
+            }
 
             return [
                 'success' => true,
                 'status' => $estado_sunat,
                 'message' => $respuesta_api['sunat_description'] ?? 'Comprobante enviado con éxito.',
-                'enlace_pdf' => $respuesta_api['enlace_del_pdf'] ?? null,
+                'enlace_pdf' => $enlacePdf,
                 'enlace_xml' => $respuesta_api['enlace_del_xml'] ?? null,
                 'enlace_cdr' => $respuesta_api['enlace_del_cdr'] ?? null,
                 'respuesta_completa_nubefact' => $respuesta_api

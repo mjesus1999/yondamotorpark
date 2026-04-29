@@ -376,15 +376,20 @@ class CajaController extends Controller
             $nuevoNumero = null;
             $facturado = false;
             $mensajeFacturacion = null;
+            $comprobanteSerie = null;
+            $comprobanteNumero = null;
+            $comprobanteTipoLetra = null;
 
             try {
                 $clienteData = $this->cajaModel->getDatosCliente($idCliente);
 
                 if ($clienteData) {
                     $esRUC = (strlen($clienteData['nrodoc'] ?? '') == 11);
+                    // 1=Factura (RUC), 2=Boleta (DNI) — debe coincidir con Nubefact y con la serie FFF1/BBB1
                     $tipoComprobante = $esRUC ? 1 : 2;
                     $serieBoleta = $esRUC ? 'FFF1' : 'BBB1';
                     $tipoDocCliente = $esRUC ? 6 : 1;
+                    $comprobanteTipoLetra = $esRUC ? 'F' : 'B';
 
                     $nuevoNumero = $this->cajaModel->obtenerNuevoCorrelativo($serieBoleta);
 
@@ -426,9 +431,11 @@ class CajaController extends Controller
                         $textoMedioPago = $cuentaEspecifica['nombrecuenta'];
                     }
 
+                    $comprobanteSerie = $serieBoleta;
+                    $comprobanteNumero = $nuevoNumero;
+
                     $datosFacturacion = [
-                        'tipo_comprobante' => 2,
-                        'tipo_de_comprobante' => $tipoComprobante,
+                        'tipo_comprobante' => $tipoComprobante,
                         'serie' => $serieBoleta,
                         'numero_comprobante' => $nuevoNumero,
                         'items' => $itemsFacturacion,
@@ -483,7 +490,10 @@ class CajaController extends Controller
                 'enlace_pdf' => $enlacePdf,
                 'enlace_xml' => $enlaceXml,
                 'enlace_cdr' => $enlaceCdr,
-                'id_pago' => $idPago
+                'id_pago' => $idPago,
+                'comprobante_serie' => $comprobanteSerie,
+                'comprobante_numero' => $comprobanteNumero,
+                'comprobante_tipo' => $comprobanteTipoLetra,
             ], JSON_UNESCAPED_UNICODE);
         } catch (\Throwable $th) {
             http_response_code(500);

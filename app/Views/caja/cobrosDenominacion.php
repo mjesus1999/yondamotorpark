@@ -271,6 +271,33 @@ $idVariosCaja = isset($idConceptoVarios) ? (int) $idConceptoVarios : 0;
         t.show();
     }
 
+    /** Respaldo: enlace clicable (útil si el bloqueo de pop-ups impidió abrir about:blank). */
+    function showToastWithPdfLink(message, url, type = 'INFO', duration = 10000) {
+        const el = document.getElementById('caja-toast');
+        const body = document.getElementById('caja-toast-body');
+        if (!el || !body) return;
+        const classMap = {
+            SUCCESS: 'text-white bg-success',
+            ERROR: 'text-white bg-danger',
+            WARNING: 'text-dark bg-warning',
+            INFO: 'text-white bg-info'
+        };
+        el.className = 'toast align-items-center border-0 ' + (classMap[type] || classMap.INFO);
+        body.replaceChildren();
+        body.appendChild(document.createTextNode(message + ' '));
+        const a = document.createElement('a');
+        a.href = url;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        a.textContent = 'Abrir comprobante (PDF)';
+        a.className =
+            type === 'SUCCESS' ? 'text-white fw-bold text-decoration-underline' :
+            (type === 'WARNING' ? 'text-dark fw-bold text-decoration-underline' : 'text-white fw-bold text-decoration-underline');
+        body.appendChild(a);
+        const t = bootstrap.Toast.getOrCreateInstance(el, { autohide: true, delay: Math.max(4000, duration) });
+        t.show();
+    }
+
     const ID_CONCEPTO_VARIOS = (function () {
         const n = parseInt(document.getElementById('caja-config')?.dataset.idConceptoVarios || '0', 10);
         return n > 0 ? n : 0;
@@ -489,6 +516,7 @@ $idVariosCaja = isset($idConceptoVarios) ? (int) $idConceptoVarios : 0;
                 const cuotaN = siguiente ? ` (cuota ${siguiente})` : '';
                 const txt = `Cuota mensual${cuotaN} - DNI ${r.dni_cliente}`;
                 addCuotaRowNoSave(cuotaInfo.monto, txt);
+                showToast('Se añadió un concepto sugerido (cuota). Revisá la lista: podés editar, borrar filas o agregar otros. La boleta y el PDF usan esos textos exactamente.', 'INFO', 8000);
             }
         }
 
@@ -857,7 +885,8 @@ $idVariosCaja = isset($idConceptoVarios) ? (int) $idConceptoVarios : 0;
         btnGenerar.disabled = true;
         btnGenerar.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Generando Boleta...';
 
-
+        // Misma acción de clic: abrir pestaña vacía ya (así el navegador no bloquea al llegar el PDF tras await fetch).
+        const pdfWindow = window.open('about:blank', '_blank');
 
         try {
             const req = await fetch('/api/storePagoCompuesto', {
@@ -875,13 +904,42 @@ $idVariosCaja = isset($idConceptoVarios) ? (int) $idConceptoVarios : 0;
                     const extra = res.mensaje_facturacion ? ' ' + res.mensaje_facturacion : '';
                     showToast((res.message || 'Pago registrado.') + extra, 'WARNING', 9000);
                 } else {
-                    showToast(res.message || 'Pago y comprobante OK.', 'SUCCESS', 4000);
+                    let msgOk = res.message || 'Pago y comprobante OK.';
+                    if (res.comprobante_serie && res.comprobante_numero != null && res.comprobante_numero !== '') {
+                        const tipo = res.comprobante_tipo === 'F' ? 'Factura' : 'Boleta';
+                        const n = parseInt(res.comprobante_numero, 10);
+                        const nStr = Number.isFinite(n) ? String(n).padStart(6, '0') : String(res.comprobante_numero);
+                        msgOk += ' — ' + res.comprobante_serie + '-' + nStr + ' (' + tipo + '). El PDF debe mostrar el mismo número y descripciones de la grilla.';
+                    }
+                    showToast(msgOk, 'SUCCESS', 7000);
                 }
 
                 if (res.enlace_pdf) {
-                    setTimeout(() => {
-                        window.open(res.enlace_pdf, '_blank');
-                    }, 500);
+                    const url = String(res.enlace_pdf);
+                    if (pdfWindow) {
+                        try {
+                            pdfWindow.opener = null;
+                            pdfWindow.location.href = url;
+                        } catch (e) {
+                            const a = document.createElement('a');
+                            a.href = url;
+                            a.target = '_blank';
+                            a.rel = 'noopener noreferrer';
+                            a.click();
+                            showToastWithPdfLink('Si no se abre el comprobante, usá el enlace:', url, 'INFO', 12000);
+                        }
+                    } else {
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.target = '_blank';
+                        a.rel = 'noopener noreferrer';
+                        a.click();
+                        showToastWithPdfLink('Permití ventanas emergentes o abrí el comprobante aquí:', url, 'INFO', 12000);
+                    }
+                } else {
+                    if (pdfWindow) {
+                        try { pdfWindow.close(); } catch (e) { /* no-op */ }
+                    }
                 }
 
                 conceptosBody.innerHTML = '';
@@ -896,10 +954,16 @@ $idVariosCaja = isset($idConceptoVarios) ? (int) $idConceptoVarios : 0;
                 updateTotals();
 
             } else {
+                if (pdfWindow) {
+                    try { pdfWindow.close(); } catch (e) { /* no-op */ }
+                }
                 showToast(' Error: ' + res.message, 'ERROR', 6000);
             }
 
         } catch (error) {
+            if (pdfWindow) {
+                try { pdfWindow.close(); } catch (e) { /* no-op */ }
+            }
             console.error("Error al registrar pago:", error);
             showToast('Error de conexión o JSON inválido en la respuesta del servidor.', 'ERROR', 4000);
         } finally {
