@@ -123,6 +123,30 @@
                 </div>
             </div>
         </div>
+
+        <div class="card border-primary shadow-lg mt-4" id="card-cronograma" style="display: none;">
+            <div class="card-header bg-primary text-white d-flex align-items-center">
+                <h5 class="mb-0"><i class="bi bi-calendar-check me-2" style="font-size: 1.2rem;"></i> Cronograma de pagos</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-sm table-striped mb-0">
+                        <thead>
+                            <tr>
+                                <th style="width: 12%;">Cuota</th>
+                                <th>Fecha</th>
+                                <th class="text-end">Monto (Cuota + GPS)</th>
+                                <th style="width: 28%;">Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-cronograma"></tbody>
+                    </table>
+                </div>
+                <div class="small text-muted p-3" id="cronograma-footnote">
+                    Mostrando cronograma del contrato activo más reciente del cliente.
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="col-lg-4 mt-4 mt-lg-0">
@@ -231,30 +255,6 @@
                 <div class="small text-muted p-3">
                     Si este DNI no existe como <strong>cliente</strong> en el sistema, igual podés ver aquí los datos del Excel.
                     Para <strong>cobrar</strong> (generar boleta), necesitás que el cliente exista y tenga <strong>ID cliente</strong>.
-                </div>
-            </div>
-        </div>
-
-        <div class="card border-primary shadow-lg mt-4" id="card-cronograma" style="display: none;">
-            <div class="card-header bg-primary text-white d-flex align-items-center">
-                <h5 class="mb-0"><i class="bi bi-calendar-check me-2" style="font-size: 1.2rem;"></i> Cronograma de pagos</h5>
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-sm table-striped mb-0">
-                        <thead>
-                            <tr>
-                                <th style="width: 12%;">Cuota</th>
-                                <th>Fecha</th>
-                                <th class="text-end">Monto (Cuota + GPS)</th>
-                                <th style="width: 28%;">Estado</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tbody-cronograma"></tbody>
-                    </table>
-                </div>
-                <div class="small text-muted p-3" id="cronograma-footnote">
-                    Mostrando cronograma del contrato activo más reciente del cliente.
                 </div>
             </div>
         </div>
