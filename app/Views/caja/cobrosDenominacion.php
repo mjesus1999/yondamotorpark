@@ -687,6 +687,19 @@ $idVariosCaja = isset($idConceptoVarios) ? (int) $idConceptoVarios : 0;
             return;
         }
 
+        /**
+         * A partir de aquí el documento es formalmente válido (8 o 11 dígitos).
+         * Limpiamos SIEMPRE los conceptos y el registro de ventas antes de buscar,
+         * para evitar que queden filas (y montos) de un cliente anterior.
+         * Así garantizamos que:
+         * - Cada boleta se genera sólo con conceptos añadidos después de elegir cliente.
+         * - No se arrastran cuotas sugeridas de otro DNI.
+         */
+        conceptosBody.innerHTML = '';
+        renderRegistroVentas([]);
+        idCliente = null;
+        updateTotals();
+
         try {
             const req = await fetch(`/api/clienteByDNI/${encodeURIComponent(documento)}`, {
                 method: 'GET'
