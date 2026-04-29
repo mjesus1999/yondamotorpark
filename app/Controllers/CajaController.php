@@ -270,6 +270,39 @@ class CajaController extends Controller
         $conceptos = $this->cajaModel->getConceptosPagos();
         $list = is_array($conceptos) ? $conceptos : [];
 
+        // Catálogo permitido para el combo de Caja (conceptos sugeridos).
+        // Importante: no eliminamos conceptos en BD (pueden estar en pagos históricos),
+        // solo los ocultamos del combo para evitar usar precios equivocados.
+        $permitidos = [
+            'RECOJO VEHICULAR',
+            'BUSQUEDA DE LLAVE',
+            'DUPLICADO DE CONTRATO',
+            'DUPLICADO DE TARJETA',
+            'CARTA PODER',
+            'VIGENCIA DE PODER',
+            'GPS',
+            'VARIOS CAJA (MANUAL)', // mantener para montos variables
+        ];
+        $permitidosMap = array_fill_keys($permitidos, true);
+
+        $normalizar = static function (?string $s): string {
+            $s = trim((string) ($s ?? ''));
+            $s = mb_strtoupper($s, 'UTF-8');
+            // quitar tildes/acentos para comparar ("VEHÍCULAR" ~ "VEHICULAR")
+            $t = @iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $s);
+            if (is_string($t) && $t !== '') {
+                $s = $t;
+            }
+            // normalizar espacios
+            $s = preg_replace('/\s+/', ' ', $s) ?: $s;
+            return $s;
+        };
+
+        $list = array_values(array_filter($list, static function ($row) use ($permitidosMap, $normalizar) {
+            $c = is_array($row) ? ($row['concepto'] ?? '') : '';
+            return isset($permitidosMap[$normalizar((string) $c)]);
+        }));
+
         echo json_encode([
             'success' => true,
             'conceptos' => $list,
