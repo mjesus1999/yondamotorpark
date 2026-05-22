@@ -10,14 +10,18 @@ $router->add('GET','/caja/contratos/completados','CajaController','indexContrato
 
 $router->add('GET', '/api/reporte/hoy', 'CajaController', 'getReporteIngresosCajaHoy');
 $router->add('GET', '/api/reporte/by/fecha', 'CajaController', 'reportePagosByFecha');
-$router->add('GET','/caja/pagos/denominacion','CajaController','indexPagosDenominacion');
-$router->add('GET', '/caja/buscar-cliente', 'CajaController', 'indexBuscarCliente');
+
+// Rutas canónicas (menú lateral y breadcrumbs)
+$router->add('GET', '/caja/buscar-documento', 'CajaController', 'indexBuscarCliente');
+$router->add('GET', '/caja/cobro-conceptos', 'CajaController', 'indexPagosDenominacion');
+
+// Compatibilidad: enlaces antiguos → redirección 301 (no rompe favoritos ni bookmarks)
+$router->add('GET', '/caja/buscar-cliente', 'CajaController', 'redirectLegacyBuscarCliente');
+$router->add('GET', '/caja/pagos/denominacion', 'CajaController', 'redirectLegacyPagosDenominacion');
 $router->add('GET', '/api/caja/contratos-por-cliente/{id}', 'CajaController', 'apiContratosPorCliente');
 $router->add('GET', '/api/caja/cronograma-por-cliente/{id}', 'CajaController', 'apiCronogramaPorCliente');
 $router->add('GET', '/api/caja/registro-ventas-vehiculares/{dni}', 'CajaController', 'apiRegistroVentasVehicularesByDNI');
 $router->add('POST', '/api/nubefact/consultar-estado-sunat', 'CajaController', 'apiConsultarEstadoSunatNubefact');
-
-$router->add('GET', '/api/reporte/hoy', 'CajaController', 'getReporteIngresosCajaHoy');
 
 $router->add('GET', '/api/conceptoPagos', 'CajaController', 'searchConceptosPagos');
 $router->add('POST','/api/storePagoCompuesto','CajaController','storePagoCompuesto');

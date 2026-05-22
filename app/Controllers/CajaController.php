@@ -17,9 +17,11 @@
 
 namespace App\Controllers;
 
+use App\Config\CajaRoutes;
+use App\Config\MediosPago;
 use App\Core\Controller;
-use App\Helpers\Validador;
 use App\Models\Caja;
+use App\Models\PagoCronograma;
 use Exception;
 
 /**
@@ -40,6 +42,30 @@ class CajaController extends Controller
      */
     private Caja $cajaModel;
 
+    private PagoCronograma $pagoCronogramaModel;
+
+    private function limpiarCacheCronogramaPorContrato(int $idContrato): void
+    {
+        if ($idContrato <= 0) {
+            return;
+        }
+        $cacheFile = __DIR__ . "/../../storage/cache/cronograma-contratos/cronograma-contrato{$idContrato}.json";
+        if (file_exists($cacheFile)) {
+            @unlink($cacheFile);
+        }
+    }
+
+    private function limpiarCacheCronogramaPorCliente(int $idCliente): void
+    {
+        if ($idCliente <= 0) {
+            return;
+        }
+        $ids = $this->cajaModel->getIdsContratosPorCliente($idCliente);
+        foreach ($ids as $idContrato) {
+            $this->limpiarCacheCronogramaPorContrato((int) $idContrato);
+        }
+    }
+
     /**
      * Constructor del controlador
      * 
@@ -49,6 +75,7 @@ class CajaController extends Controller
     public function __construct()
     {
         $this->cajaModel = new Caja();
+        $this->pagoCronogramaModel = new PagoCronograma();
     }
 
     /**
@@ -63,10 +90,11 @@ class CajaController extends Controller
      */
     public function index(): void
     {
-        // $tiempoInicio = microtime(true);
-        $datos = $this->cajaModel->getAllContratosDatos();
-
         $this->authRequired();
+        $datos = $this->cajaModel->getAllContratosDatos();
+        if (!is_array($datos)) {
+            $datos = [];
+        }
         $this->view('caja.index', ['contratos' => $datos]);
 
         // $tiempoFin = microtime(true);
@@ -101,8 +129,36 @@ class CajaController extends Controller
     {
         $this->authRequired();
         $this->view('caja.cobrosDenominacion', [
-            'idConceptoVarios' => $this->cajaModel->getIdConceptoVariosCaja()
+            'idConceptoVarios' => $this->cajaModel->getIdConceptoVariosCaja(),
+            'mediosPago' => MediosPago::opciones(),
+            'cajaRoutes' => [
+                'lista' => CajaRoutes::LISTA_CONTRATOS,
+                'buscar' => CajaRoutes::BUSCAR_DOCUMENTO,
+                'cobro' => CajaRoutes::COBRO_CONCEPTOS,
+            ],
         ]);
+    }
+
+    /** Redirección permanente desde /caja/buscar-cliente */
+    public function redirectLegacyBuscarCliente(): void
+    {
+        $this->authRequired();
+        $this->redirectPreservandoQuery(CajaRoutes::BUSCAR_DOCUMENTO);
+    }
+
+    /** Redirección permanente desde /caja/pagos/denominacion */
+    public function redirectLegacyPagosDenominacion(): void
+    {
+        $this->authRequired();
+        $this->redirectPreservandoQuery(CajaRoutes::COBRO_CONCEPTOS);
+    }
+
+    private function redirectPreservandoQuery(string $ruta): void
+    {
+        $qs = $_SERVER['QUERY_STRING'] ?? '';
+        $destino = $ruta . ($qs !== '' ? '?' . $qs : '');
+        header('Location: ' . $destino, true, 301);
+        exit;
     }
 
     /**
@@ -152,7 +208,10 @@ class CajaController extends Controller
         }
 
         // Renderizar la vista con los datos
-        $this->view('caja.cronograma', ['cronograma' => $datos]);
+        $this->view('caja.cronograma', [
+            'cronograma' => $datos,
+            'mediosPago' => \App\Config\MediosPago::opciones(),
+        ]);
 
         // Detener el cronómetro y calcular el tiempo
         // $tiempoFin = microtime(true);
@@ -326,6 +385,30 @@ class CajaController extends Controller
         }
 
         $cliente = $this->cajaModel->getClienteByDni($documento);
+        if (!$cliente) {
+            $docsSync = [$documento];
+            if (strlen($documento) === 11) {
+                $last8 = substr($documento, -8);
+                if ($last8 !== '' && $last8 !== $documento) {
+                    $docsSync[] = $last8;
+                }
+            }
+            foreach ($docsSync as $docSync) {
+                if (strlen($docSync) !== 8) {
+                    continue;
+                }
+                $syncOk = $this->cajaModel->sincronizarClienteDesdeRegistroVentasByDni($docSync);
+                if ($syncOk) {
+                    $cliente = $this->cajaModel->getClienteByDni($documento);
+                    if (!$cliente) {
+                        $cliente = $this->cajaModel->getClienteByDni($docSync);
+                    }
+                    if ($cliente) {
+                        break;
+                    }
+                }
+            }
+        }
 
         if ($cliente) {
             echo json_encode(['success' => true, 'cliente' => $cliente], JSON_UNESCAPED_UNICODE);
@@ -356,36 +439,115 @@ class CajaController extends Controller
                 return;
             }
 
-
-
             $detallesJsonRaw = $_POST['detalles_json'] ?? '[]';
-            $data = array_map([Validador::class, 'limpiar'], $_POST);
+            $data = $_POST;
             $errores = [];
 
-            $idCliente = (int) ($data['idcliente'] ?? 0);
-            $medioPago = $data['mediopago'] ?? 'Efectivo';
-            $numTransaccion = $data['numerotransaccion'] ?? null;
+            $idCliente = (int) (($data['idcliente'] ?? 0));
+            $medioPago = trim((string) ($data['mediopago'] ?? 'Efectivo'));
+            $numTransaccion = trim((string) ($data['numerotransaccion'] ?? ''));
             $montoTotal = (float) ($data['monto_total'] ?? 0);
+            $requestId = trim((string) ($data['request_id'] ?? ''));
 
             $idCuentaPago = null;
             $cuentaEspecifica = null;
-            if ($medioPago === 'Transferencia Bancaria' && !empty($data['idcuentapago'])) {
-                $idCuentaPago = (int) $data['idcuentapago'];
-                $cuentaEspecifica = $this->cajaModel->getNumCuentaPagoById($idCuentaPago);
+            if (MediosPago::requiereCuenta($medioPago)) {
+                if (empty($data['idcuentapago'])) {
+                    $errores[] = $medioPago === MediosPago::INTERBANCARIO
+                        ? 'Seleccione la cuenta destino (CCI) para el pago interbancario.'
+                        : 'Seleccione una cuenta bancaria para la transferencia.';
+                } else {
+                    $idCuentaPago = (int) $data['idcuentapago'];
+                    if (!$this->pagoCronogramaModel->cuentaValidaParaMedio($idCuentaPago, $medioPago)) {
+                        $errores[] = 'La cuenta seleccionada no corresponde al medio de pago.';
+                    } else {
+                        $cuentaEspecifica = $this->cajaModel->getNumCuentaPagoById($idCuentaPago);
+                    }
+                }
             }
 
             $idColCaja = $_SESSION['user']['id'] ?? 0;
 
+            $detallesArray = json_decode($detallesJsonRaw, true);
+            if (!is_array($detallesArray)) {
+                $detallesArray = [];
+            }
 
             if ($idCliente <= 0) $errores[] = 'El ID de cliente es inválido.';
             if ($montoTotal <= 0) $errores[] = 'El monto total debe ser mayor a 0.';
             if (empty($detallesJsonRaw) || $detallesJsonRaw === '[]') $errores[] = 'No se han añadido conceptos.';
+            if (empty($detallesArray)) $errores[] = 'El detalle de conceptos es inválido.';
+            if ($requestId === '' || !preg_match('/^[A-Za-z0-9_-]{16,120}$/', $requestId)) {
+                $errores[] = 'request_id inválido.';
+            }
+            if ($medioPago !== 'Efectivo' && $numTransaccion === '') {
+                $errores[] = 'Ingrese el número de transacción para el medio de pago seleccionado.';
+            }
+            if ($medioPago === 'Efectivo') {
+                $numTransaccion = null;
+            }
+
+            $sumaDetalles = 0.0;
+            foreach ($detallesArray as $det) {
+                $monto = (float) ($det['monto'] ?? 0);
+                if ($monto < 0) {
+                    $errores[] = 'Hay conceptos con monto negativo.';
+                    break;
+                }
+                $sumaDetalles += $monto;
+            }
+            $sumaDetalles = round($sumaDetalles, 2);
+            if (abs($sumaDetalles - round($montoTotal, 2)) > 0.01) {
+                $errores[] = "El total no coincide con el detalle (detalle: {$sumaDetalles}, total: " . round($montoTotal, 2) . ").";
+            }
 
             if (!empty($errores)) {
                 echo json_encode(['success' => false, 'message' => implode('<br>', $errores)]);
                 return;
             }
 
+            $payloadHash = hash('sha256', json_encode([
+                'idcliente' => $idCliente,
+                'mediopago' => $medioPago,
+                'numerotransaccion' => $numTransaccion,
+                'idcuentapago' => $idCuentaPago,
+                'monto_total' => round($montoTotal, 2),
+                'detalles' => $detallesArray,
+            ], JSON_UNESCAPED_UNICODE));
+
+            $idem = $this->cajaModel->getIdempotenciaByRequestId($requestId);
+            if ($idem && strtoupper((string) ($idem['estado'] ?? '')) === 'COMPLETED' && !empty($idem['idpago'])) {
+                $pagoExistente = $this->cajaModel->getPagoById((int) $idem['idpago']);
+                echo json_encode([
+                    'success' => true,
+                    'message' => 'Operación ya procesada anteriormente.',
+                    'facturado' => !empty($pagoExistente['enlace_pdf_nubefact']),
+                    'enlace_pdf' => $pagoExistente['enlace_pdf_nubefact'] ?? null,
+                    'enlace_xml' => $pagoExistente['enlace_xml_nubefact'] ?? null,
+                    'enlace_cdr' => $pagoExistente['enlace_del_cdr'] ?? null,
+                    'id_pago' => (int) $idem['idpago'],
+                ], JSON_UNESCAPED_UNICODE);
+                return;
+            }
+            if ($idem && strtoupper((string) ($idem['estado'] ?? '')) === 'PROCESSING') {
+                http_response_code(409);
+                echo json_encode(['success' => false, 'message' => 'Existe una operación en proceso para este request_id.'], JSON_UNESCAPED_UNICODE);
+                return;
+            }
+            if (!$idem) {
+                $okIdem = $this->cajaModel->crearIdempotenciaEnProceso($requestId, $idCliente, $montoTotal, $payloadHash);
+                if (!$okIdem) {
+                    $idemNow = $this->cajaModel->getIdempotenciaByRequestId($requestId);
+                    if ($idemNow && strtoupper((string) ($idemNow['estado'] ?? '')) === 'PROCESSING') {
+                        http_response_code(409);
+                        echo json_encode(['success' => false, 'message' => 'Existe una operación en proceso para este request_id.'], JSON_UNESCAPED_UNICODE);
+                        return;
+                    }
+                    http_response_code(500);
+                    echo json_encode(['success' => false, 'message' => 'No se pudo registrar idempotencia. Aplique el patch de BD de caja.'], JSON_UNESCAPED_UNICODE);
+                    return;
+                }
+            }
 
             $idPago = $this->cajaModel->registrarPagoCompuesto(
                 $idCliente,
@@ -398,6 +560,7 @@ class CajaController extends Controller
             );
 
             if ($idPago <= 0) {
+                $this->cajaModel->fallarIdempotencia($requestId, 'Fallo al guardar pago');
                 throw new Exception('Fallo al guardar el pago en la base de datos.');
             }
 
@@ -423,11 +586,6 @@ class CajaController extends Controller
                     $serieBoleta = $esRUC ? 'FFF1' : 'BBB1';
                     $tipoDocCliente = $esRUC ? 6 : 1;
                     $comprobanteTipoLetra = $esRUC ? 'F' : 'B';
-
-                    $nuevoNumero = $this->cajaModel->obtenerNuevoCorrelativo($serieBoleta);
-
-
-                    $detallesArray = json_decode($detallesJsonRaw, true);
                     $itemsFacturacion = [];
                     $totalGravada = 0.00;
                     $totalIGV = 0.00;
@@ -435,75 +593,87 @@ class CajaController extends Controller
                     $factorIGV = 1.18;
 
                     foreach ($detallesArray as $det) {
-                        $montoItem = (float)$det['monto'];
-                        $nombreItem = $det['nombre'] ?? 'Concepto';
+                        $montoItem = round((float) ($det['monto'] ?? 0), 2);
+                        $nombreItem = trim((string) ($det['nombre'] ?? 'Concepto'));
+                        if ($nombreItem === '') {
+                            $nombreItem = 'Concepto';
+                        }
+                        // SUNAT/Nubefact: evitar descripciones excesivas o con espacios raros.
+                        $nombreItem = mb_substr(preg_replace('/\s+/', ' ', $nombreItem) ?: $nombreItem, 0, 250);
                         if ($montoItem > 0) {
-                            $valorUnitario = round($montoItem / $factorIGV, 10);
+                            $valorUnitario = round($montoItem / $factorIGV, 2);
                             $igvItem = round($montoItem - $valorUnitario, 2);
+                            $totalItem = round($valorUnitario + $igvItem, 2);
 
                             $itemsFacturacion[] = [
                                 "unidad_de_medida" => "ZZ",
                                 "descripcion" => $nombreItem,
                                 "cantidad" => 1,
                                 "valor_unitario" => $valorUnitario,
-                                "precio_unitario" => $montoItem,
+                                "precio_unitario" => $totalItem,
                                 "subtotal" => $valorUnitario,
                                 "tipo_de_igv" => 1,
                                 "igv" => $igvItem,
-                                "total" => $montoItem,
+                                "total" => $totalItem,
                             ];
                             $totalGravada += $valorUnitario;
                             $totalIGV += $igvItem;
-                            $totalVenta += $montoItem;
+                            $totalVenta += $totalItem;
                         }
                     }
 
 
                     $textoMedioPago = $medioPago;
-                    if ($medioPago === 'Transferencia Bancaria' && is_array($cuentaEspecifica) && !empty($cuentaEspecifica['nombrecuenta'])) {
+                    if (MediosPago::requiereCuenta($medioPago) && is_array($cuentaEspecifica) && !empty($cuentaEspecifica['nombrecuenta'])) {
                         $textoMedioPago = $cuentaEspecifica['nombrecuenta'];
                     }
 
                     $comprobanteSerie = $serieBoleta;
-                    $comprobanteNumero = $nuevoNumero;
+                    try {
+                        $nuevoNumero = $this->cajaModel->obtenerSiguienteCorrelativoBloqueado($serieBoleta);
+                        $comprobanteNumero = $nuevoNumero;
 
-                    $datosFacturacion = [
-                        'tipo_comprobante' => $tipoComprobante,
-                        'serie' => $serieBoleta,
-                        'numero_comprobante' => $nuevoNumero,
-                        'items' => $itemsFacturacion,
-                        'mediopago' => $textoMedioPago,
-                        'totales' => [
-                            'total_gravada' => round($totalGravada, 2),
-                            'total_igv' => round($totalIGV, 2),
-                            'total_venta' => round($totalVenta, 2)
-                        ],
-                        'datos_cliente' => [
-                            'tipo_documento' => $tipoDocCliente,
-                            'numero_documento' => $clienteData['nrodoc'],
-                            'denominacion' => $clienteData['razon_social'] ?? 'CLIENTE',
-                            'direccion' => $clienteData['direccion'] ?? '-',
-                            'email' => $clienteData['email'] ?? ''
-                        ]
-                    ];
+                        $datosFacturacion = [
+                            'tipo_comprobante' => $tipoComprobante,
+                            'serie' => $serieBoleta,
+                            'numero_comprobante' => $nuevoNumero,
+                            'items' => $itemsFacturacion,
+                            'mediopago' => $textoMedioPago,
+                            'totales' => [
+                                'total_gravada' => round($totalGravada, 2),
+                                'total_igv' => round($totalIGV, 2),
+                                'total_venta' => round($totalVenta, 2)
+                            ],
+                            'datos_cliente' => [
+                                'tipo_documento' => $tipoDocCliente,
+                                'numero_documento' => $clienteData['nrodoc'],
+                                'denominacion' => $clienteData['razon_social'] ?? 'CLIENTE',
+                                'direccion' => $clienteData['direccion'] ?? '-',
+                                'email' => $clienteData['email'] ?? ''
+                            ]
+                        ];
 
-                    $nubefactController = new ComprobanteNubefactController();
-                    $respNube = $nubefactController->procesarPagoYEmitirComprobante($datosFacturacion);
+                        $nubefactController = new ComprobanteNubefactController();
+                        $respNube = $nubefactController->procesarPagoYEmitirComprobante($datosFacturacion);
 
-                    if ($respNube['success']) {
-                        $enlacePdf = $respNube['enlace_pdf'];
-                        $enlaceXml = $respNube['enlace_xml'];
+                        if ($respNube['success']) {
+                            $enlacePdf = $respNube['enlace_pdf'];
+                            $enlaceXml = $respNube['enlace_xml'];
+                            $enlaceCdr = $respNube['enlace_cdr'] ?? null;
+                            $this->cajaModel->confirmarCorrelativoBloqueado($serieBoleta, (int) $nuevoNumero);
 
-
-                        $enlaceCdr = $respNube['enlace_cdr'] ?? null;
-
-                        $this->cajaModel->actualizarDatosFacturacion($idPago, $enlacePdf, $enlaceXml, $enlaceCdr, $nuevoNumero);
-                        $facturado = true;
-                    } else {
-                        $msgNube = $respNube['message'] ?? 'Error al emitir comprobante';
-                        error_log("Error NubeFact: " . $msgNube);
-                        $mensajeExtra = " (Sin Boleta: " . $msgNube . ")";
-                        $mensajeFacturacion = $msgNube;
+                            $this->cajaModel->actualizarDatosFacturacion($idPago, $enlacePdf, $enlaceXml, $enlaceCdr, (int) $nuevoNumero);
+                            $facturado = true;
+                        } else {
+                            $this->cajaModel->cancelarCorrelativoBloqueado();
+                            $msgNube = $respNube['message'] ?? 'Error al emitir comprobante';
+                            error_log("Error NubeFact: " . $msgNube);
+                            $mensajeExtra = " (Sin Boleta: " . $msgNube . ")";
+                            $mensajeFacturacion = $msgNube;
+                        }
+                    } catch (\Throwable $tCorrelativo) {
+                        $this->cajaModel->cancelarCorrelativoBloqueado();
+                        throw $tCorrelativo;
                     }
                 } else {
                     $mensajeExtra = " (No se pudo facturar: sin datos de cliente en BD.)";
@@ -514,6 +684,29 @@ class CajaController extends Controller
                 $mensajeExtra = " (Error interno de facturación)";
                 $mensajeFacturacion = 'Error interno al emitir comprobante.';
             }
+
+            foreach ($detallesArray as $det) {
+                $source = strtolower(trim((string) ($det['source'] ?? '')));
+                $dniMeta = preg_replace('/\D+/', '', (string) ($det['dni'] ?? ''));
+                $numCuotaMeta = (int) ($det['numero_cuota'] ?? 0);
+                $fuentesCuota = ['registro_ventas_vehiculares', 'import_excel'];
+                if (
+                    in_array($source, $fuentesCuota, true)
+                    && strlen($dniMeta) >= 8
+                    && $numCuotaMeta > 0
+                ) {
+                    $chasisMeta = trim((string) ($det['chasis'] ?? ''));
+                    $this->cajaModel->marcarCuotaPagadaVentasPorDocumento(
+                        $dniMeta,
+                        $numCuotaMeta,
+                        $idPago,
+                        $chasisMeta !== '' ? $chasisMeta : null
+                    );
+                }
+            }
+
+            $this->limpiarCacheCronogramaPorCliente($idCliente);
+            $this->cajaModel->completarIdempotencia($requestId, $idPago);
 
             echo json_encode([
                 'success' => true,
@@ -529,6 +722,10 @@ class CajaController extends Controller
                 'comprobante_tipo' => $comprobanteTipoLetra,
             ], JSON_UNESCAPED_UNICODE);
         } catch (\Throwable $th) {
+            $requestId = trim((string) ($_POST['request_id'] ?? ''));
+            if ($requestId !== '') {
+                $this->cajaModel->fallarIdempotencia($requestId, $th->getMessage());
+            }
             http_response_code(500);
             error_log($th->getMessage());
             echo json_encode(['success' => false, 'message' => 'Error: ' . $th->getMessage()]);
@@ -539,7 +736,7 @@ class CajaController extends Controller
 
     public function getContratosCompletados(): void
     {
-        // $this->authRequired();
+        $this->authRequired();
         header('Content-Type: application/json');
 
         $contratos = $this->cajaModel->getContratosCompletados();
@@ -567,7 +764,13 @@ class CajaController extends Controller
     public function indexBuscarCliente(): void
     {
         $this->authRequired();
-        $this->view('caja.buscarCliente');
+        $this->view('caja.buscarCliente', [
+            'cajaRoutes' => [
+                'lista' => CajaRoutes::LISTA_CONTRATOS,
+                'buscar' => CajaRoutes::BUSCAR_DOCUMENTO,
+                'cobro' => CajaRoutes::COBRO_CONCEPTOS,
+            ],
+        ]);
     }
 
     /**
@@ -614,7 +817,7 @@ class CajaController extends Controller
         if (empty($contratos)) {
             $cli = $this->cajaModel->getDatosCliente($idcliente);
             $dni = is_array($cli) ? preg_replace('/\\D+/', '', (string) ($cli['nrodoc'] ?? '')) : '';
-            if (strlen($dni) === 8) {
+            if (strlen($dni) === 8 || strlen($dni) === 11) {
                 $rowsVeh = $this->cajaModel->getRegistroVentasVehicularesByDni($dni);
                 if (!empty($rowsVeh)) {
                     $r = $rowsVeh[0];
@@ -777,7 +980,7 @@ class CajaController extends Controller
     }
 
     /**
-     * API JSON: registro ventas vehiculares por DNI (8 dígitos).
+     * API JSON: registro ventas vehiculares por DNI (8) o RUC (11).
      */
     public function apiRegistroVentasVehicularesByDNI(string $dni): void
     {
@@ -785,11 +988,11 @@ class CajaController extends Controller
         header('Content-Type: application/json; charset=utf-8');
 
         $documento = preg_replace('/\D+/', '', $dni);
-        if (strlen($documento) !== 8) {
+        if (strlen($documento) !== 8 && strlen($documento) !== 11) {
             http_response_code(400);
             echo json_encode([
                 'success' => false,
-                'message' => 'DNI inválido. Use 8 dígitos.',
+                'message' => 'Documento inválido. Use 8 dígitos (DNI) u 11 (RUC).',
                 'data' => []
             ], JSON_UNESCAPED_UNICODE);
             return;

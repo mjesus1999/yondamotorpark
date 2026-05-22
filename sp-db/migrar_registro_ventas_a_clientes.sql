@@ -1,102 +1,73 @@
--- Migración: registrar como PERSONA/CLIENTE los DNIs que existen en
--- registro_ventas_vehiculares pero NO existen en personas/clientes.
+-- Migración masiva: crear/activar clientes desde registro_ventas_vehiculares (DNI).
+-- Esto evita registrar cliente manualmente uno por uno en Caja.
 --
--- IMPORTANTE:
--- - Esto NO crea contratos ni cronogramas reales del sistema (tablas contratos/cronogramas).
--- - Solo crea el "cliente" para que Caja lo encuentre por DNI y puedas cobrar por conceptos.
---
--- Ejecutar en VPS:
---   mysql -u yhondb -p motorpark < /var/www/yondamotorpark/sp-db/migrar_registro_ventas_a_clientes.sql
---
--- Notas de calidad de datos:
--- - personas.telprimario es NOT NULL y exige 9 dígitos. Si el Excel no trae 9 dígitos, el DNI se omite.
--- - personas.genero es NOT NULL: se pone 'M' por defecto (luego se puede editar en UI).
--- - apellidos/nombres: como el Excel viene con "nombre completo" en un solo campo,
---   guardamos todo en nombres y apellidos='-' para cumplir NOT NULL.
-
-SET NAMES utf8mb4;
-SET CHARACTER SET utf8mb4;
+-- Ejecutar en phpMyAdmin sobre BD motorpark.
 
 START TRANSACTION;
 
--- 1) Insertar PERSONAS faltantes (solo DNIs con teléfono_1 de 9 dígitos).
+-- 1) Personas faltantes por DNI (toma la venta más reciente por DNI).
 INSERT INTO personas (
-    iddistrito,
-    apellidos,
-    nombres,
-    tipodoc,
-    nrodoc,
-    genero,
-    direccion,
-    referencia,
-    telprimario,
-    telalternativo,
-    latitud,
-    longitud
+    iddistrito, apellidos, nombres, tipodoc, nrodoc, genero,
+    fechanac, estadocivil, email, direccion, referencia, latitud, longitud,
+    telprimario, telalternativo
 )
 SELECT
-    NULL AS iddistrito,
-    '-' AS apellidos,
-    LEFT(TRIM(MAX(r.nombre_cliente)), 70) AS nombres,
-    'DNI' AS tipodoc,
-    r.dni_cliente AS nrodoc,
-    'M' AS genero,
-    LEFT(TRIM(MAX(r.direccion)), 200) AS direccion,
-    NULL AS referencia,
-    -- limpiar espacios; si no queda en 9 dígitos, se filtra en WHERE
-    REPLACE(REPLACE(REPLACE(TRIM(MAX(r.telefono_1)), ' ', ''), '-', ''), '+', '') AS telprimario,
-    NULL AS telalternativo,
-    NULL AS latitud,
-    NULL AS longitud
+    NULL,
+    '-',
+    LEFT(TRIM(r.nombre_cliente), 70),
+    'DNI',
+    r.dni_cliente,
+    'M',
+    NULL, NULL, NULL,
+    LEFT(TRIM(COALESCE(r.direccion, 'SIN DIRECCION')), 200),
+    NULL, NULL, NULL,
+    CASE
+      WHEN LENGTH(REGEXP_REPLACE(COALESCE(r.telefono_1, ''), '[^0-9]', '')) >= 9
+        THEN RIGHT(REGEXP_REPLACE(COALESCE(r.telefono_1, ''), '[^0-9]', ''), 9)
+      ELSE '999999999'
+    END,
+    NULL
 FROM registro_ventas_vehiculares r
 LEFT JOIN personas p
-    ON p.tipodoc = 'DNI'
-   AND (p.nrodoc COLLATE utf8mb4_unicode_ci) = (r.dni_cliente COLLATE utf8mb4_unicode_ci)
-WHERE p.idpersona IS NULL
-  AND r.dni_cliente IS NOT NULL
-  AND r.dni_cliente REGEXP '^[0-9]{8}$'
-  AND r.telefono_1 IS NOT NULL
-  AND REPLACE(REPLACE(REPLACE(TRIM(r.telefono_1), ' ', ''), '-', ''), '+', '') REGEXP '^[0-9]{9}$'
-GROUP BY r.dni_cliente;
-
--- 2) Insertar CLIENTES faltantes para esas personas (tipocliente='P').
-INSERT INTO clientes (
-    idpersona,
-    idempresa,
-    idcolregistra,
-    idcolactualiza,
-    tipocliente,
-    estado
+  ON p.tipodoc = 'DNI'
+ AND p.nrodoc = r.dni_cliente
+WHERE r.id = (
+    SELECT x.id
+    FROM registro_ventas_vehiculares x
+    WHERE x.dni_cliente = r.dni_cliente
+    ORDER BY x.fecha_venta DESC, x.id DESC
+    LIMIT 1
 )
-SELECT
-    p.idpersona,
-    NULL AS idempresa,
-    NULL AS idcolregistra,
-    NULL AS idcolactualiza,
-    'P' AS tipocliente,
-    'ACT' AS estado
-FROM registro_ventas_vehiculares r
-INNER JOIN personas p
-    ON p.tipodoc = 'DNI'
-   AND (p.nrodoc COLLATE utf8mb4_unicode_ci) = (r.dni_cliente COLLATE utf8mb4_unicode_ci)
-LEFT JOIN clientes c
-    ON c.idpersona = p.idpersona AND c.tipocliente = 'P'
-WHERE c.idcliente IS NULL
-GROUP BY p.idpersona;
+AND r.dni_cliente REGEXP '^[0-9]{8}$'
+AND p.idpersona IS NULL;
 
--- 3) Reporte rápido (cuántos DNIs del Excel siguen sin existir como cliente).
-SELECT
-  COUNT(*) AS dnIs_excel_sin_cliente
-FROM (
-  SELECT r.dni_cliente
-  FROM registro_ventas_vehiculares r
-  WHERE r.dni_cliente REGEXP '^[0-9]{8}$'
-  GROUP BY r.dni_cliente
-) x
--- Forzar misma collation en comparación de DNI (algunas tablas vienen con utf8mb4_general_ci).
-LEFT JOIN personas p ON p.tipodoc='DNI' AND (p.nrodoc COLLATE utf8mb4_unicode_ci)=(x.dni_cliente COLLATE utf8mb4_unicode_ci)
-LEFT JOIN clientes c ON c.idpersona=p.idpersona AND c.tipocliente='P'
-WHERE c.idcliente IS NULL;
+-- 2) Clientes faltantes.
+INSERT INTO clientes (idpersona, idempresa, idcolregistra, idcolactualiza, tipocliente, estado)
+SELECT p.idpersona, NULL, NULL, NULL, 'P', 'ACT'
+FROM personas p
+LEFT JOIN clientes c ON c.idpersona = p.idpersona
+WHERE p.tipodoc = 'DNI'
+  AND EXISTS (SELECT 1 FROM registro_ventas_vehiculares r WHERE r.dni_cliente = p.nrodoc)
+  AND c.idcliente IS NULL;
+
+-- 3) Activar clientes existentes de esos DNIs.
+UPDATE clientes c
+JOIN personas p ON p.idpersona = c.idpersona
+SET c.estado = 'ACT',
+    c.tipocliente = 'P',
+    c.idempresa = NULL
+WHERE p.tipodoc = 'DNI'
+  AND EXISTS (SELECT 1 FROM registro_ventas_vehiculares r WHERE r.dni_cliente = p.nrodoc);
 
 COMMIT;
 
+-- Verificación: DNIs del registro que todavía no tienen cliente ACT.
+SELECT COUNT(*) AS dnis_sin_cliente_activo
+FROM (
+    SELECT DISTINCT r.dni_cliente
+    FROM registro_ventas_vehiculares r
+    WHERE r.dni_cliente REGEXP '^[0-9]{8}$'
+) x
+LEFT JOIN personas p ON p.tipodoc = 'DNI' AND p.nrodoc = x.dni_cliente
+LEFT JOIN clientes c ON c.idpersona = p.idpersona AND c.estado = 'ACT'
+WHERE c.idcliente IS NULL;

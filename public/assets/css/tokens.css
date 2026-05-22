@@ -1,0 +1,20 @@
+/**
+ * Tokens de marca — Yonda Motor Park
+ */
+:root,
+[data-bs-theme="dark"] {
+  --yonda-orange: #f97316;
+  --yonda-orange-dark: #ea580c;
+  --yonda-orange-light: #fb923c;
+  --yonda-slate-950: #0b1220;
+  --yonda-slate-900: #0f172a;
+  --yonda-slate-800: #1e293b;
+  --yonda-text: #e5e7eb;
+  --yonda-text-muted: #94a3b8;
+
+  --bs-primary: #f97316;
+  --bs-primary-rgb: 249, 115, 22;
+  --bs-link-color: #fb923c;
+  --bs-link-hover-color: #fdba74;
+  --bs-focus-ring-color: rgba(249, 115, 22, 0.35);
+}

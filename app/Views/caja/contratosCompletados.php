@@ -2,11 +2,11 @@
 
 include __DIR__ . '/../layout/header.php';
 ?>
-<link href="https://unpkg.com/tabulator-tables@5.5.2/dist/css/tabulator_simple.min.css" rel="stylesheet">
+<link href="https://unpkg.com/tabulator-tables@6.3.1/dist/css/tabulator_simple.min.css" rel="stylesheet">
 <link rel="stylesheet" href="/assets/css/tabulator.css">
-<div class="container-fluid">
+<div class="container-fluid caja-ui">
 
-    <div class="alert alert-info mt-2" role="alert" style="border-left: 4px solid #3498db; border-radius: 0 8px 8px 0;">
+    <div class="alert alert-info mt-2 caja-topbar" role="alert" style="border-left: 4px solid #3498db; border-radius: 0 8px 8px 0;">
         <div class="row align-items-center">
             <div class="col-md-6 d-flex align-items-center">
                 <nav aria-label="breadcrumb">
@@ -18,7 +18,7 @@ include __DIR__ . '/../layout/header.php';
                     </ol>
                 </nav>
             </div>
-            <div class="col-md-6 d-flex justify-content-end">
+            <div class="col-md-6 d-flex justify-content-end caja-actions">
                 <a href="/caja/" class="btn btn-outline-primary btn-sm">
                     <i class="fas fa-list me-1"></i> Lista
                 </a>

@@ -1,17 +1,21 @@
 <?php
 
+use App\Config\CajaRoutes;
 use App\Models\Permisos;
 
 if (session_status() !== PHP_SESSION_ACTIVE) {
   session_start();
 }
 
-$permisosModel = new Permisos();
+$modulosPermitidos = [];
 
-if (!empty($_SESSION['user']['idcargo'])) {
-  $modulosPermitidos = $permisosModel->getPermisosByCargo((int) $_SESSION['user']['idcargo']);
-} else {
-  $modulosPermitidos = [];
+try {
+  $permisosModel = new Permisos();
+  if (!empty($_SESSION['user']['idcargo'])) {
+    $modulosPermitidos = $permisosModel->getPermisosByCargo((int) $_SESSION['user']['idcargo']);
+  }
+} catch (\Throwable $e) {
+  error_log('Permisos no disponibles (¿BD?): ' . $e->getMessage());
 }
 
 // Función helper para verificar si tiene permiso
@@ -32,18 +36,6 @@ function tienePermisoGrupo($modulos, $modulosPermitidos)
 }
 ?>
 
-<style>
-  .sidebar-link.active {
-    background-color: #007bff;
-    color: white;
-    font-weight: bold;
-  }
-
-  .sidebar-item .collapse.show {
-    display: block;
-  }
-</style>
-
 <!DOCTYPE html>
 <html lang="es" data-bs-theme="dark">
 
@@ -52,13 +44,18 @@ function tienePermisoGrupo($modulos, $modulosPermitidos)
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Motorpark Yonda</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet"
     crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
     crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="/assets/css/tokens.css">
   <link rel="stylesheet" href="/assets/css/style-dashboard.css">
   <link rel="stylesheet" href="/assets/css/motorpark-style.css">
+  <link rel="stylesheet" href="/assets/css/components-ui.css">
   <link rel="stylesheet" href="https://cdn.datatables.net/2.2.2/css/dataTables.bootstrap5.min.css">
 </head>
 
@@ -70,7 +67,7 @@ function tienePermisoGrupo($modulos, $modulosPermitidos)
       <div class="h-100 sticky-top">
         <div class="sidebar-logo">
           <a href="/">
-            <img src="/assets/images/motoropark-logo-blanco.png" class="img-fluid" alt="">
+            <img src="/assets/images/motoropark-logo-blanco.png" class="img-fluid" alt="Yonda Motor Park">
           </a>
         </div>
         <ul class="sidebar-nav">
@@ -232,15 +229,26 @@ function tienePermisoGrupo($modulos, $modulosPermitidos)
               </a>
               <ul id="gestionCreditoCaja" class="sidebar-dropdown list-unstyled collapse ms-4" data-bs-parent="#sidebar">
                 <?php if (tienePermiso('caja', $modulosPermitidos)): ?>
+                  <li class="sidebar-divider-label" aria-hidden="true">Contratos en sistema</li>
                   <li class="sidebar-item">
-                    <a href="/caja" class="sidebar-link">
-                      <i class="fa-solid fa-cash-register pe-2"></i> Caja
+                    <a href="<?= CajaRoutes::LISTA_CONTRATOS ?>" class="sidebar-link" data-nav-exact="1">
+                      <i class="fa-solid fa-cash-register pe-2"></i> Lista contratos (ACT)
+                    </a>
+                  </li>
+                  <li class="sidebar-divider-label" aria-hidden="true">Atención por documento</li>
+                  <li class="sidebar-item">
+                    <a href="<?= CajaRoutes::BUSCAR_DOCUMENTO ?>" class="sidebar-link">
+                      <i class="bi bi-person-search pe-2"></i> Buscar DNI / RUC
                     </a>
                   </li>
                   <li class="sidebar-item">
-                    <a href="/caja/buscar-cliente" class="sidebar-link">
-                      <i class="bi bi-person-search pe-2"></i> Buscar cliente (caja)
-                    </a>
+                    <ul class="sidebar-submenu list-unstyled mb-2">
+                      <li>
+                        <a href="<?= CajaRoutes::COBRO_CONCEPTOS ?>" class="sidebar-link">
+                          <i class="bi bi-cash-coin pe-2"></i> Cobro por conceptos
+                        </a>
+                      </li>
+                    </ul>
                   </li>
                 <?php endif; ?>
                 <?php if (tienePermiso('creditos', $modulosPermitidos)): ?>
@@ -290,7 +298,7 @@ function tienePermisoGrupo($modulos, $modulosPermitidos)
             <li class="sidebar-item">
               <a href="#" class="sidebar-link collapsed" data-bs-target="#auth" data-bs-toggle="collapse"
                 aria-expanded="false">
-                <i class="fa-regular fa-user pe-2"></i> Auth
+                <i class="fa-regular fa-user pe-2"></i> Cuentas de acceso
               </a>
               <ul id="auth" class="sidebar-dropdown list-unstyled collapse ms-4" data-bs-parent="#sidebar">
                 <li class="sidebar-item">
@@ -312,12 +320,12 @@ function tienePermisoGrupo($modulos, $modulosPermitidos)
         </button>
         <div class="navbar-collapse navbar">
           <ul class="navbar-nav">
-            <li class="nav-item dropdown">
+            <li class="nav-item dropdown user-menu-dropdown">
               <a href="#" data-bs-toggle="dropdown" class="nav-icon pe-md-0">
                 <img src="<?= htmlspecialchars($_SESSION['user']['avatar'] ?? '/assets/images/profile.jpg') ?>"
                   class="avatar img-fluid rounded" alt="Avatar" />
               </a>
-              <div class="dropdown-menu dropdown-menu-end">
+              <div class="dropdown-menu dropdown-menu-end user-dropdown-menu">
                 <?php if (!empty($_SESSION['user'])): ?>
                   <a href="/usuarios/profile/<?= $_SESSION['user']['id'] ?>" class="dropdown-item">
                     <?php
@@ -327,9 +335,18 @@ function tienePermisoGrupo($modulos, $modulosPermitidos)
                     ?>
                   </a>
                 <?php endif; ?>
-                <a href="#" class="dropdown-item">Configuración</a>
-                <a href="#" class="dropdown-item">Cambiar contraseña</a>
-                <a href="/logout" class="dropdown-item">Cerrar sesión</a>
+                <?php if (!empty($_SESSION['user']['id'])): ?>
+                  <a href="/usuarios/edit/<?= (int) $_SESSION['user']['id'] ?>" class="dropdown-item">
+                    <i class="bi bi-gear me-2"></i>Mi perfil
+                  </a>
+                  <a href="/recoverAccount" class="dropdown-item">
+                    <i class="bi bi-key me-2"></i>Recuperar contraseña
+                  </a>
+                <?php endif; ?>
+                <hr class="dropdown-divider">
+                <a href="/logout" class="dropdown-item text-danger">
+                  <i class="bi bi-box-arrow-right me-2"></i>Cerrar sesión
+                </a>
               </div>
             </li>
           </ul>
@@ -339,32 +356,60 @@ function tienePermisoGrupo($modulos, $modulosPermitidos)
 
         <script>
           document.addEventListener('DOMContentLoaded', function () {
-            const currentPath = window.location.pathname;
+            const currentPath = window.location.pathname.replace(/\/+$/, '') || '/';
             const sidebarLinks = document.querySelectorAll('.sidebar-link');
             const collapseElements = document.querySelectorAll('.collapse');
 
             const rutasCobranza = ['/Cobranza', '/Recordatorios', '/Vencidos'];
             const esRutaCobranza = rutasCobranza.some(ruta => currentPath.startsWith(ruta));
 
+            function rutaCoincide(href, path) {
+              if (!href || href === '#') return false;
+              const h = href.replace(/\/+$/, '') || '/';
+              if (path === h) return true;
+              if (path.startsWith(h + '/')) return true;
+              return false;
+            }
+
+            let mejorEnlace = null;
+            let mejorLongitud = -1;
             sidebarLinks.forEach(link => {
               const href = link.getAttribute('href');
-
-              if (href && href !== '#' && currentPath.startsWith(href)) {
-                link.classList.add('active');
-                const parentCollapse = link.closest('.sidebar-item').querySelector('.collapse');
-                if (parentCollapse) {
-                  parentCollapse.classList.add('show');
-                }
+              if (!rutaCoincide(href, currentPath)) return;
+              if (link.dataset.navExact === '1' && currentPath !== (href || '').replace(/\/+$/, '')) {
+                return;
               }
-
-              if (esRutaCobranza && href === '/Cobranza') {
-                link.classList.add('active');
-                const cobranzaMenu = document.getElementById('gestionCobranza');
-                if (cobranzaMenu) {
-                  cobranzaMenu.classList.add('show');
-                }
+              const len = (href || '').length;
+              if (len > mejorLongitud) {
+                mejorLongitud = len;
+                mejorEnlace = link;
               }
             });
+
+            if (mejorEnlace) {
+              mejorEnlace.classList.add('active');
+              const menuCaja = document.getElementById('gestionCreditoCaja');
+              if (menuCaja && mejorEnlace.closest('#gestionCreditoCaja')) {
+                menuCaja.classList.add('show');
+                const toggleCaja = document.querySelector('[data-bs-target="#gestionCreditoCaja"]');
+                if (toggleCaja) {
+                  toggleCaja.classList.remove('collapsed');
+                  toggleCaja.setAttribute('aria-expanded', 'true');
+                }
+              }
+            }
+
+            if (esRutaCobranza) {
+              sidebarLinks.forEach(link => {
+                if (link.getAttribute('href') === '/Cobranza') {
+                  link.classList.add('active');
+                }
+              });
+              const cobranzaMenu = document.getElementById('gestionCobranza');
+              if (cobranzaMenu) {
+                cobranzaMenu.classList.add('show');
+              }
+            }
 
             document.body.addEventListener('shown.bs.collapse', function (event) {
               const openedCollapseId = event.target.id;

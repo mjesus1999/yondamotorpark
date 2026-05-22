@@ -119,6 +119,7 @@ include __DIR__ . '/../layout/header.php';
                                     <th class="text-center">Yape</th>
                                     <th class="text-center">Plin</th>
                                     <th class="text-center">Transferencia</th>
+                                    <th class="text-center">Interbancario</th>
                                     <th class="text-center bg-primary">Total Diario</th>
                                 </tr>
                             </thead>
@@ -131,6 +132,7 @@ include __DIR__ . '/../layout/header.php';
                                     <td class="text-center" id="total-yape">S/ 0.00</td>
                                     <td class="text-center" id="total-plin">S/ 0.00</td>
                                     <td class="text-center" id="total-transferencia">S/ 0.00</td>
+                                    <td class="text-center" id="total-interbancario">S/ 0.00</td>
                                     <td class="text-center bg-primary text-white" id="total-global">S/ 0.00</td>
                                 </tr>
                             </tfoot>
@@ -163,6 +165,7 @@ include __DIR__ . '/../layout/header.php';
                                         <li class="list-group-item"><strong>Total Yape:</strong> <span id="total-yape-acordion">S/ 0.00</span></li>
                                         <li class="list-group-item"><strong>Total Plin:</strong> <span id="total-plin-acordion">S/ 0.00</span></li>
                                         <li class="list-group-item"><strong>Total Transferencia:</strong> <span id="total-transferencia-acordion">S/ 0.00</span></li>
+                                        <li class="list-group-item"><strong>Total Interbancario:</strong> <span id="total-interbancario-acordion">S/ 0.00</span></li>
                                     </ul>
                                 </div>
                             </div>
@@ -232,6 +235,7 @@ include __DIR__ . '/../layout/header.php';
         const totalYapeEl = document.getElementById('total-yape');
         const totalPlinEl = document.getElementById('total-plin');
         const totalTransferenciaEl = document.getElementById('total-transferencia');
+        const totalInterbancarioEl = document.getElementById('total-interbancario');
 
         // Elementos de totales del acordeón
         const totalGlobalAcordionEl = document.getElementById('total-global-acordion');
@@ -239,6 +243,7 @@ include __DIR__ . '/../layout/header.php';
         const totalYapeAcordionEl = document.getElementById('total-yape-acordion');
         const totalPlinAcordionEl = document.getElementById('total-plin-acordion');
         const totalTransferenciaAcordionEl = document.getElementById('total-transferencia-acordion');
+        const totalInterbancarioAcordionEl = document.getElementById('total-interbancario-acordion');
 
         const btnGenerar = document.getElementById('btn-generar');
         const btnPDF = document.getElementById('btn-pdf');
@@ -323,6 +328,7 @@ include __DIR__ . '/../layout/header.php';
             let totalYape = 0;
             let totalPlin = 0;
             let totalTransferencia = 0;
+            let totalInterbancario = 0;
 
             resultadosContainer.style.display = 'block';
             tbody.innerHTML = '';
@@ -335,12 +341,14 @@ include __DIR__ . '/../layout/header.php';
                 mensajeInicial.classList.add('d-none');
 
                 datos.forEach((row, index) => {
-                    const totalDiario = parseFloat(row.total_efectivo) + parseFloat(row.total_yape) + parseFloat(row.total_plin) + parseFloat(row.total_transferencia);
+                    const interbancario = parseFloat(row.total_interbancario || 0);
+                    const totalDiario = parseFloat(row.total_efectivo) + parseFloat(row.total_yape) + parseFloat(row.total_plin) + parseFloat(row.total_transferencia) + interbancario;
                     totalGlobal += totalDiario;
                     totalEfectivo += parseFloat(row.total_efectivo);
                     totalYape += parseFloat(row.total_yape);
                     totalPlin += parseFloat(row.total_plin);
                     totalTransferencia += parseFloat(row.total_transferencia);
+                    totalInterbancario += interbancario;
 
                     // Crear la fila de la tabla
                     const newRow = document.createElement('tr');
@@ -350,6 +358,7 @@ include __DIR__ . '/../layout/header.php';
                 <td class="text-end">S/ ${formatearMoneda(row.total_yape)}</td>
                 <td class="text-end">S/ ${formatearMoneda(row.total_plin)}</td>
                 <td class="text-end">S/ ${formatearMoneda(row.total_transferencia)}</td>
+                <td class="text-end">S/ ${formatearMoneda(interbancario)}</td>
                 <td class="text-end fw-bold">S/ ${formatearMoneda(totalDiario)}</td>
             `;
                     tbody.appendChild(newRow);
@@ -380,6 +389,7 @@ include __DIR__ . '/../layout/header.php';
                             <li class="list-group-item"><strong>Yape:</strong> S/ ${formatearMoneda(row.total_yape)}</li>
                             <li class="list-group-item"><strong>Plin:</strong> S/ ${formatearMoneda(row.total_plin)}</li>
                             <li class="list-group-item"><strong>Transferencia:</strong> S/ ${formatearMoneda(row.total_transferencia)}</li>
+                            <li class="list-group-item"><strong>Interbancario:</strong> S/ ${formatearMoneda(interbancario)}</li>
                             <li class="list-group-item bg-body fw-bold"><strong>Total Diario:</strong> S/ ${formatearMoneda(totalDiario)}</li>
                         </ul>
                     </div>
@@ -395,6 +405,7 @@ include __DIR__ . '/../layout/header.php';
                 totalYapeEl.textContent = `S/ ${formatearMoneda(totalYape)}`;
                 totalPlinEl.textContent = `S/ ${formatearMoneda(totalPlin)}`;
                 totalTransferenciaEl.textContent = `S/ ${formatearMoneda(totalTransferencia)}`;
+                if (totalInterbancarioEl) totalInterbancarioEl.textContent = `S/ ${formatearMoneda(totalInterbancario)}`;
 
                 // Actualizar los totales del acordeón
                 if (totalGlobalAcordionEl) totalGlobalAcordionEl.textContent = `${formatearMoneda(totalGlobal)}`;
@@ -402,6 +413,7 @@ include __DIR__ . '/../layout/header.php';
                 if (totalYapeAcordionEl) totalYapeAcordionEl.textContent = `S/ ${formatearMoneda(totalYape)}`;
                 if (totalPlinAcordionEl) totalPlinAcordionEl.textContent = `S/ ${formatearMoneda(totalPlin)}`;
                 if (totalTransferenciaAcordionEl) totalTransferenciaAcordionEl.textContent = `S/ ${formatearMoneda(totalTransferencia)}`;
+                if (totalInterbancarioAcordionEl) totalInterbancarioAcordionEl.textContent = `S/ ${formatearMoneda(totalInterbancario)}`;
 
                 btnPDF.style.display = 'inline-block';
 
@@ -418,6 +430,7 @@ include __DIR__ . '/../layout/header.php';
             totalYapeEl.textContent = 'S/ 0.00';
             totalPlinEl.textContent = 'S/ 0.00';
             totalTransferenciaEl.textContent = 'S/ 0.00';
+            if (totalInterbancarioEl) totalInterbancarioEl.textContent = 'S/ 0.00';
 
             // Limpiar los totales del acordeón
             if (totalGlobalAcordionEl) totalGlobalAcordionEl.textContent = '0.00';
@@ -425,6 +438,7 @@ include __DIR__ . '/../layout/header.php';
             if (totalYapeAcordionEl) totalYapeAcordionEl.textContent = 'S/ 0.00';
             if (totalPlinAcordionEl) totalPlinAcordionEl.textContent = 'S/ 0.00';
             if (totalTransferenciaAcordionEl) totalTransferenciaAcordionEl.textContent = 'S/ 0.00';
+            if (totalInterbancarioAcordionEl) totalInterbancarioAcordionEl.textContent = 'S/ 0.00';
         }
 
         
@@ -524,7 +538,7 @@ include __DIR__ . '/../layout/header.php';
             };
 
             worksheet.addRow([]);
-            const columns = ['Fecha', 'Efectivo', 'Yape', 'Plin', 'Transferencia', 'Total Diario'];
+            const columns = ['Fecha', 'Efectivo', 'Yape', 'Plin', 'Transferencia', 'Interbancario', 'Total Diario'];
             worksheet.addRow(columns).eachCell(cell => {
                 Object.assign(cell, headerStyle);
             });
@@ -533,10 +547,12 @@ include __DIR__ . '/../layout/header.php';
             let totalYape = 0;
             let totalPlin = 0;
             let totalTransferencia = 0;
+            let totalInterbancario = 0;
             let totalGlobal = 0;
 
             data.forEach(row => {
-                const totalDiario = parseFloat(row.total_efectivo) + parseFloat(row.total_yape) + parseFloat(row.total_plin) + parseFloat(row.total_transferencia);
+                const interbancario = parseFloat(row.total_interbancario || 0);
+                const totalDiario = parseFloat(row.total_efectivo) + parseFloat(row.total_yape) + parseFloat(row.total_plin) + parseFloat(row.total_transferencia) + interbancario;
 
                 const newRow = [
 
@@ -545,6 +561,7 @@ include __DIR__ . '/../layout/header.php';
                     parseFloat(row.total_yape),
                     parseFloat(row.total_plin),
                     parseFloat(row.total_transferencia),
+                    interbancario,
                     totalDiario
                 ];
                 const addedRow = worksheet.addRow(newRow);
@@ -560,6 +577,7 @@ include __DIR__ . '/../layout/header.php';
                 totalYape += parseFloat(row.total_yape);
                 totalPlin += parseFloat(row.total_plin);
                 totalTransferencia += parseFloat(row.total_transferencia);
+                totalInterbancario += interbancario;
                 totalGlobal += totalDiario;
             });
 
@@ -571,7 +589,7 @@ include __DIR__ . '/../layout/header.php';
                 }
             };
 
-            const totalsRow = worksheet.addRow(['Totales:', totalEfectivo, totalYape, totalPlin, totalTransferencia, totalGlobal]);
+            const totalsRow = worksheet.addRow(['Totales:', totalEfectivo, totalYape, totalPlin, totalTransferencia, totalInterbancario, totalGlobal]);
             totalsRow.getCell(1).style = {
                 font: {
                     bold: true

@@ -460,12 +460,13 @@
                                             <div class="valid-feedback">Correcto.</div>
                                         </div>
                                         <div class="col-md-6 form-floating" id="group-medioPagoCuota">
-                                            <select class="form-select" id="mediopago" name="mediopago">
+                                            <select class="form-select" id="mediopago" name="mediopago" data-medios-version="2026-05-interbancario">
                                                 <option value="">Seleccione un medio de pago</option>
-                                                <option value="Efectivo">Efectivo</option>
-                                                <option value="Yape">Yape</option>
-                                                <option value="Transferencia Bancaria">Transferencia Bancaria</option>
-                                                <option value="Plin">Plin</option>
+                                                <?php foreach (($mediosPago ?? \App\Config\MediosPago::opciones()) as $valor => $etiqueta): ?>
+                                                    <option value="<?= htmlspecialchars((string) $valor, ENT_QUOTES, 'UTF-8') ?>">
+                                                        <?= htmlspecialchars((string) $etiqueta, ENT_QUOTES, 'UTF-8') ?>
+                                                    </option>
+                                                <?php endforeach; ?>
                                             </select>
                                             <label for="mediopago">Modalidad (cuota)</label>
                                         </div>
@@ -506,12 +507,13 @@
                                             <div class="valid-feedback">Comprobante válido</div>
                                         </div>
                                         <div class="col-md-6 form-floating" id="group-medioPagoPenalidad">
-                                            <select class="form-select" id="mediopagopenalidad" name="mediopagopenalidad">
+                                            <select class="form-select" id="mediopagopenalidad" name="mediopagopenalidad" data-medios-version="2026-05-interbancario">
                                                 <option value="">Seleccione un medio de pago</option>
-                                                <option value="Efectivo">Efectivo</option>
-                                                <option value="Yape">Yape</option>
-                                                <option value="Transferencia Bancaria">Transferencia Bancaria</option>
-                                                <option value="Plin">Plin</option>
+                                                <?php foreach (($mediosPago ?? \App\Config\MediosPago::opciones()) as $valor => $etiqueta): ?>
+                                                    <option value="<?= htmlspecialchars((string) $valor, ENT_QUOTES, 'UTF-8') ?>">
+                                                        <?= htmlspecialchars((string) $etiqueta, ENT_QUOTES, 'UTF-8') ?>
+                                                    </option>
+                                                <?php endforeach; ?>
                                             </select>
                                             <label class="form-label small text-muted" for="mediopagopenalidad">Modalidad</label>
                                         </div>

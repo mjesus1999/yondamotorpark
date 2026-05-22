@@ -1,55 +1,57 @@
 <?php
 
+use App\Config\CajaRoutes;
+
 include __DIR__ . '/../layout/header.php';
 ?>
-<link href="https://unpkg.com/tabulator-tables@5.5.2/dist/css/tabulator_simple.min.css" rel="stylesheet">
+<link href="https://unpkg.com/tabulator-tables@6.3.1/dist/css/tabulator_simple.min.css" rel="stylesheet">
 <link rel="stylesheet" href="/assets/css/tabulator.css">
-<div class="container-fluid">
+<div class="container-fluid caja-ui">
 
-    <div class="alert alert-info mt-2 text-primary p-3 d-flex justify-content-between align-items-center">
-
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb mb-0" style="background-color: transparent; padding: 0;">
-                <li class="breadcrumb-item"><a href="#" class="text-info"><i class="fas fa-home"></i></a></li>
-                <li class="breadcrumb-item"><a href="#" class="text-info">Caja</a></li>
-                <li class="breadcrumb-item active " aria-current="page">Listar</li>
-            </ol>
-        </nav>
-
-        <div class="d-flex">
-
-            <a href="/caja/reporte/by/fecha" class="btn btn-sm text-white border border-info bg-info" style="border-radius: 0;">
-                <i class="fas fa-calendar-alt"></i> Reporte por fecha
-            </a>
-
-            <button class="btn btn-danger btn-sm rounded-0" id="btn-pdf" title="Generar reporte de pagos del día" style="margin-left: -1px;">
-                <i class="far fa-file-pdf"></i> Reporte diario
-            </button>
-
-            <button class="btn btn-success btn-sm rounded-0" id="btn-excel" title="Generar reporte de pagos del día en Excel" style="margin-left: -1px;">
-                <i class="far fa-file-excel"></i> Reporte diario
-            </button>
-
-            <a class="btn btn-secondary btn-sm rounded-0 text-white" href="/caja/buscar-cliente" style="margin-left: 10px; border-left: 1px solid rgba(255, 255, 255, 0.1);" title="Buscar por DNI y ver contratos activos">
-                <i class="bi bi-person-search me-1"></i> Buscar cliente
-            </a>
-
-            <a class="btn btn-dark btn-sm rounded-0" href="/caja/pagos/denominacion" style="margin-left: 10px; border-left: 1px solid rgba(255, 255, 255, 0.1);">
-                Cobros por denominación
-            </a>
-
-              <a class="btn btn-warning text-white fw-bold btn-sm rounded-0" href="/caja/contratos/completados" style="margin-left: 10px; border-left: 1px solid rgba(255, 255, 255, 0.1);">
-                <i class="bi bi-clock-history"></i> Contratos completados
-            </a>
-
-        </div>
-    </div>
+    <?php
+    $pageHeaderBreadcrumbs = [
+        ['label' => 'Inicio', 'url' => '/'],
+        ['label' => 'Caja', 'url' => CajaRoutes::LISTA_CONTRATOS],
+        ['label' => 'Lista contratos (ACT)', 'url' => null],
+    ];
+    ob_start();
+    ?>
+    <a href="<?= CajaRoutes::BUSCAR_DOCUMENTO ?>" class="btn btn-primary btn-sm">
+        <i class="bi bi-person-search me-1"></i> Buscar DNI / RUC
+    </a>
+    <a href="/caja/reporte/by/fecha" class="btn btn-info btn-sm">
+        <i class="bi bi-calendar3 me-1"></i> Reporte por fecha
+    </a>
+    <button type="button" class="btn btn-danger btn-sm" id="btn-pdf" title="Reporte diario PDF">
+        <i class="bi bi-file-earmark-pdf me-1"></i> PDF
+    </button>
+    <button type="button" class="btn btn-success btn-sm" id="btn-excel" title="Reporte diario Excel">
+        <i class="bi bi-file-earmark-excel me-1"></i> Excel
+    </button>
+    <a href="/caja/contratos/completados" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-clock-history me-1"></i> Completados
+    </a>
+    <?php
+    $pageHeaderActionsHtml = ob_get_clean();
+    $pageHeaderClass = 'caja-ui';
+    include __DIR__ . '/../components/page-header.php';
+    ?>
 
 
     <div class="row">
         <div class="col-md-12">
             <div class="card">
                 <div class="card-body">
+                    <?php if (empty($contratos)) : ?>
+                    <div class="alert alert-warning mb-3">
+                        <strong>No hay contratos activos (ACT) con cronograma en el sistema.</strong>
+                        Esta lista viene de MySQL (<code>sp_getAll_contratos_caja</code>), no del Excel importado.
+                        Para clientes del Excel: menú <strong>Buscar DNI / RUC</strong> →
+                        <strong>Cobro por conceptos</strong> (submenú anidado).
+                        <a href="<?= CajaRoutes::BUSCAR_DOCUMENTO ?>" class="alert-link">Ir a buscar</a>
+                        · <a href="<?= CajaRoutes::COBRO_CONCEPTOS ?>" class="alert-link">Ir a cobro por conceptos</a>.
+                    </div>
+                    <?php endif; ?>
                     <!-- SOLO ESCRITORIO -->
                     <div class="table-responsive d-none d-md-block">
                         <div class="mb-3">
@@ -176,12 +178,12 @@ include __DIR__ . '/../layout/header.php';
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js" defer></script>
 <script src="/assets/js/logoBase64.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js" defer></script>
-<script src="https://unpkg.com/tabulator-tables@5.5.2/dist/js/tabulator.min.js"></script>
+<script src="https://unpkg.com/tabulator-tables@6.3.1/dist/js/tabulator.min.js"></script>
 
 <script>
     const btnPdf = document.getElementById('btn-pdf');
     const btnExcel = document.querySelector('#btn-excel');
-    const datos = <?= json_encode($contratos) ?>
+    const datos = <?= json_encode($contratos ?? [], JSON_UNESCAPED_UNICODE) ?>
 
 
 
@@ -251,18 +253,21 @@ include __DIR__ . '/../layout/header.php';
                     widthGrow: 2,
                     headerSort: false,
 
-                    formatter: function(cell, formatterParams) {
+                    formatter: function(cell) {
                         const data = cell.getRow().getData();
+                        const id = data.idcontrato;
+                        if (!id) {
+                            return '<span class="text-muted small">—</span>';
+                        }
                         return `
-                        
-                             <a href="/caja/cronograma/${data.idcontrato}" title="Ver Cronograma">
-                                                    <i class="bi-receipt fs-5 text-info"></i>
-                            </a>
-                            <a href="/caja/historial/pagos/${data.idcontrato}" title="Ver historial de pagos">
-                                <i class="bi bi-clock-history fs-5"></i>
-                            </a>
-                            
-                                 `;
+                            <div class="d-flex flex-wrap gap-1">
+                                <a href="/caja/cronograma/${id}" class="btn btn-sm btn-info text-white" title="Cronograma y cobrar cuota">
+                                    <i class="bi-receipt"></i> Cuotas
+                                </a>
+                                <a href="/caja/historial/pagos/${id}" class="btn btn-sm btn-secondary text-white" title="Historial de pagos">
+                                    <i class="bi bi-clock-history"></i>
+                                </a>
+                            </div>`;
                     }
                 }
             ],

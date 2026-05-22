@@ -1,4 +1,14 @@
-<?php include __DIR__ . '/../layout/header.php'; ?>
+<?php
+use App\Config\CajaRoutes;
+
+$cajaRoutes = $cajaRoutes ?? [
+    'lista' => CajaRoutes::LISTA_CONTRATOS,
+    'buscar' => CajaRoutes::BUSCAR_DOCUMENTO,
+    'cobro' => CajaRoutes::COBRO_CONCEPTOS,
+];
+
+include __DIR__ . '/../layout/header.php';
+?>
 
 <style>
     /* Mejor legibilidad en modo oscuro/claro */
@@ -23,36 +33,44 @@
     }
 </style>
 
-<div class="container-fluid p-4">
-    <div class="alert alert-info mt-2 text-primary p-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
-        <nav aria-label="breadcrumb" class="mb-0">
-            <ol class="breadcrumb mb-0" style="background-color: transparent; padding: 0;">
-                <li class="breadcrumb-item"><a href="/caja" class="text-info">Caja</a></li>
-                <li class="breadcrumb-item active">Buscar cliente</li>
-            </ol>
-        </nav>
-        <div class="d-flex flex-wrap gap-2">
-            <a href="/caja" class="btn btn-outline-primary btn-sm"><i class="fas fa-list me-1"></i> Lista caja</a>
-            <a href="/caja/pagos/denominacion" class="btn btn-dark btn-sm">Cobros por denominación</a>
-            <a href="/clientes/createpersonclient" class="btn btn-success btn-sm" title="Requiere permiso módulo Clientes">
-                <i class="bi bi-person-plus me-1"></i> Nuevo cliente persona
-            </a>
-        </div>
-    </div>
+<div class="container-fluid p-4 caja-ui">
+    <?php
+    $pageHeaderBreadcrumbs = [
+        ['label' => 'Inicio', 'url' => '/'],
+        ['label' => 'Caja', 'url' => $cajaRoutes['lista']],
+        ['label' => 'Buscar DNI / RUC', 'url' => null],
+    ];
+    ob_start();
+    ?>
+    <a href="<?= htmlspecialchars($cajaRoutes['lista']) ?>" class="btn btn-outline-secondary btn-sm">
+        <i class="fas fa-list me-1"></i> Lista contratos (ACT)
+    </a>
+    <a href="<?= htmlspecialchars($cajaRoutes['cobro']) ?>" class="btn btn-warning btn-sm">
+        <i class="bi bi-cash-coin me-1"></i> Cobro por conceptos
+    </a>
+    <a href="/clientes/createpersonclient" class="btn btn-success btn-sm" title="Requiere permiso módulo Clientes">
+        <i class="bi bi-person-plus me-1"></i> Nuevo cliente
+    </a>
+    <?php
+    $pageHeaderActionsHtml = ob_get_clean();
+    $pageHeaderClass = 'caja-ui';
+    include __DIR__ . '/../components/page-header.php';
+    ?>
 
     <div class="row g-4">
         <div class="col-lg-5">
             <div class="card shadow-sm border-primary">
                 <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="bi bi-search me-2"></i>Buscar por DNI (8 dígitos)</h5>
+                    <h5 class="mb-0"><i class="bi bi-search me-2"></i>Buscar por DNI o RUC</h5>
                 </div>
                 <div class="card-body">
                     <p class="text-muted small mb-3">
-                        Busca al cliente en la base y muestra sus <strong>contratos activos</strong> para ir al cronograma y cobrar cuotas.
-                        Si no tiene contrato, podés usar <strong>Cobros por denominación</strong> para conceptos / boleta.
+                        Busca por documento y muestra <strong>contratos activos (ACT)</strong> para cobrar cuotas en el cronograma.
+                        Si solo aparece en el Excel importado o no tiene contrato ACT, usá
+                        <a href="<?= htmlspecialchars($cajaRoutes['cobro']) ?>">Cobro por conceptos</a> (submenú bajo Buscar DNI / RUC).
                     </p>
                     <div class="input-group mb-3">
-                        <input type="text" id="input-dni" class="form-control" maxlength="8" placeholder="DNI"
+                        <input type="text" id="input-dni" class="form-control" maxlength="11" placeholder="DNI (8) o RUC (11)"
                             inputmode="numeric" pattern="[0-9]*">
                         <button class="btn btn-primary" type="button" id="btn-buscar">
                             <i class="bi bi-search"></i> Buscar
@@ -70,7 +88,7 @@
                     <div id="card-registro-ventas" class="card border mt-3 d-none caja-card-readable">
                         <div class="card-header">
                             <strong>Registro ventas vehiculares</strong>
-                            <div class="small text-muted">Datos del Excel (por DNI) desde base de datos.</div>
+                            <div class="small text-muted">Datos del Excel (por documento) desde base de datos.</div>
                         </div>
                         <div class="card-body p-0">
                             <div class="table-responsive">
@@ -100,7 +118,7 @@
                             </thead>
                             <tbody id="tbody-contratos">
                                 <tr>
-                                    <td colspan="3" class="text-center text-muted py-4">Buscá un DNI para ver contratos.</td>
+                                    <td colspan="3" class="text-center text-muted py-4">Buscá un documento para ver contratos.</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -113,6 +131,7 @@
 
 <script>
 (function () {
+    const CAJA_RUTAS = <?= json_encode($cajaRoutes, JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
     const inputDni = document.getElementById('input-dni');
     const btnBuscar = document.getElementById('btn-buscar');
     const msg = document.getElementById('msg-cliente');
@@ -131,7 +150,9 @@
     function renderContratos(rows) {
         tbody.innerHTML = '';
         if (!rows.length) {
-            const link = lastDni ? `/caja/pagos/denominacion?dni=${encodeURIComponent(lastDni)}` : '/caja/pagos/denominacion';
+            const link = lastDni
+                ? `${CAJA_RUTAS.cobro}?dni=${encodeURIComponent(lastDni)}`
+                : CAJA_RUTAS.cobro;
             let extra = '';
             if (lastVentas && lastVentas.length) {
                 const r = lastVentas[0];
@@ -143,7 +164,7 @@
                   </div>`;
             }
             tbody.innerHTML = `<tr><td colspan="3" class="text-center text-warning py-3">
-              Sin contrato ACT para este cliente. Podés usar <a href="${link}">Cobros por denominación</a> para cobrar por conceptos.
+              Sin contrato ACT para este cliente. Podés usar <a href="${link}">Cobro por conceptos</a> para boleta y conceptos.
               ${extra}
             </td></tr>`;
             return;
@@ -203,6 +224,7 @@
             ['Mora (3 días)', r.mora_3_dias],
             ['Total con mora', r.total_con_mora],
             ['Número de cuota pagada', r.numero_cuota_pagada],
+            ['Fuente', r.fuente],
         ];
 
         if (lastVentas.length > 1) {
@@ -226,11 +248,16 @@
         return d.innerHTML;
     }
 
+    function documentoValido(doc) {
+        return /^\d+$/.test(doc) && (doc.length === 8 || doc.length === 11);
+    }
+
     async function buscar() {
-        const dni = (inputDni.value || '').trim();
+        const dni = (inputDni.value || '').trim().replace(/\D/g, '');
+        inputDni.value = dni;
         lastDni = dni;
-        if (dni.length !== 8 || !/^\d+$/.test(dni)) {
-            setMsg('Ingresá un DNI de 8 dígitos.', 'text-danger');
+        if (!documentoValido(dni)) {
+            setMsg('Ingresá un DNI de 8 dígitos o un RUC de 11 dígitos.', 'text-danger');
             cardCliente.classList.add('d-none');
             cardRegistroVentas.classList.add('d-none');
             lastVentas = [];

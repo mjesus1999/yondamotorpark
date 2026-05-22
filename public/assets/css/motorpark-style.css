@@ -1,12 +1,15 @@
 .bg-yonda {
-  background-color: #FF5F00;
-  color: #FFF
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+  color: #FFF;
 }
 /*  Estilos globales para SweetAlert2 */
 .swal2-popup {
-  font-family: 'Source Code Pro', monospace; 
+  font-family: "Inter", "Segoe UI", sans-serif;
   font-size: 16px;
   border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  background: #0f172a;
+  color: #e2e8f0;
 }
 .swal-personalizado .swal2-icon {
   margin-bottom: -15px;
@@ -15,12 +18,12 @@
 .swal2-title {
   font-size: 22px;
   font-weight: bold;
-  color: #2c3e50;
+  color: #f8fafc;
 }
 
 .swal2-html-container {
   font-size: 18px;
-  color: #34495e;
+  color: #cbd5e1;
 }
 
 .swal2-footer {
@@ -30,7 +33,7 @@
 
 .swal2-confirm {
   font-size: 16px !important;
-  background-color: #3498db !important;
+  background: linear-gradient(135deg, #f97316, #ea580c) !important;
   border-radius: 8px;
 }
 
@@ -47,15 +50,432 @@ select:focus {
   background-color: #e4e3d1 !important;
 } */
 
-.inactive{
-  background-color: #ebebeb;
+.inactive {
+  background-color: rgba(71, 85, 105, 0.45) !important;
+  color: #94a3b8 !important;
 }
 
 /* Estilos para la tabla */
 .table-hover-yonda {
-    --bs-table-hover-bg: rgba(25, 135, 84, 0.25) !important; /* Verde */
+    --bs-table-hover-bg: rgba(59, 130, 246, 0.22) !important;
 }
 
 /* Predeterminamos que las última columna esté alineada a la derecha */
 .table th:last-child { text-align: center; }
 .table td:last-child{ text-align: right; }
+
+/* Tablas operativas (Caja/Cobranzas/DataTables) */
+.table {
+  border-color: rgba(148, 163, 184, 0.18);
+}
+
+.table thead th {
+  background: linear-gradient(180deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.95));
+  color: #dbeafe;
+  border-bottom-color: rgba(148, 163, 184, 0.25);
+  font-weight: 600;
+}
+
+.table tbody tr:hover {
+  background-color: rgba(249, 115, 22, 0.1) !important;
+}
+
+.dataTables_wrapper .dataTables_filter input,
+.dataTables_wrapper .dataTables_length select {
+  background: rgba(15, 23, 42, 0.86);
+  color: #e2e8f0;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  border-radius: 8px;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.current,
+.dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+  background: #f97316 !important;
+  border: 1px solid #ea580c !important;
+  color: #fff !important;
+}
+
+/* Superficie consistente para formularios transaccionales (Caja/Cobranzas/etc.) */
+.card.shadow-sm,
+.card.shadow-lg,
+.card.border-primary {
+  border-radius: 14px;
+}
+
+.card-header.bg-primary,
+.card-header.bg-secondary {
+  border: none;
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%) !important;
+}
+
+.card-header.bg-secondary {
+  background: linear-gradient(135deg, #334155 0%, #1e293b 100%) !important;
+}
+
+.form-label {
+  color: #cbd5e1;
+  font-weight: 600;
+}
+
+.form-text {
+  color: #94a3b8 !important;
+}
+
+input.form-control::placeholder,
+textarea.form-control::placeholder {
+  color: #94a3b8;
+}
+
+.input-group-text {
+  background: rgba(30, 41, 59, 0.88);
+  color: #dbeafe;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+}
+
+.badge {
+  border-radius: 999px;
+  padding: .4rem .7rem;
+  font-weight: 600;
+}
+
+.toast {
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  background: rgba(15, 23, 42, 0.92);
+  color: #e2e8f0;
+}
+
+.toast .toast-header {
+  background: rgba(30, 41, 59, 0.95);
+  color: #dbeafe;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+}
+
+/* Botones de acciones en tablas */
+.btn.btn-sm {
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.container-fluid {
+  padding-top: .35rem;
+}
+
+.card {
+  overflow: hidden;
+}
+
+.nav-pills .nav-link,
+.nav-tabs .nav-link {
+  border-radius: 10px;
+  transition: all .2s ease;
+}
+
+.nav-pills .nav-link:hover,
+.nav-tabs .nav-link:hover {
+  background: rgba(37, 99, 235, 0.14);
+  color: #dbeafe;
+}
+
+.nav-pills .nav-link.active,
+.nav-tabs .nav-link.active {
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.22);
+}
+
+.badge.bg-primary,
+.badge.bg-secondary,
+.badge.bg-success,
+.badge.bg-danger,
+.badge.bg-warning,
+.badge.bg-info {
+  border-radius: 999px;
+  font-weight: 700;
+}
+
+.input-group .form-control:focus {
+  z-index: 3;
+}
+
+/* Caja visual polish (scoped) */
+.caja-ui .caja-topbar,
+.mp-page-header.caja-ui {
+  border-left: none !important;
+  border-radius: 14px !important;
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.16), rgba(15, 23, 42, 0.45)) !important;
+  border: 1px solid rgba(249, 115, 22, 0.32);
+}
+
+.caja-ui .breadcrumb-item,
+.caja-ui .breadcrumb-item a {
+  color: #bfdbfe !important;
+}
+
+.caja-ui .caja-actions .btn {
+  border-radius: 10px !important;
+  margin-left: 0 !important;
+}
+
+.caja-ui .card {
+  backdrop-filter: blur(6px);
+}
+
+.caja-ui .card-header h5,
+.caja-ui .card-header h6 {
+  font-weight: 700;
+  margin-bottom: 0;
+}
+
+.caja-ui .table td:last-child,
+.caja-ui .table th:last-child {
+  text-align: right;
+}
+
+.caja-ui .table tbody td {
+  vertical-align: middle;
+}
+
+.caja-ui .accordion-item {
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 12px !important;
+  overflow: hidden;
+}
+
+.caja-ui .accordion-button {
+  background: rgba(15, 23, 42, 0.76);
+  color: #e2e8f0;
+  font-weight: 600;
+}
+
+.caja-ui .accordion-button:not(.collapsed) {
+  background: rgba(37, 99, 235, 0.22);
+  color: #fff;
+}
+
+/* Cobranza visual polish (scoped) */
+.cobranza-ui .cobranza-topbar {
+  border-radius: 14px !important;
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.16), rgba(234, 88, 12, 0.12)) !important;
+  border: 1px solid rgba(56, 189, 248, 0.26);
+}
+
+.cobranza-ui .breadcrumb-item,
+.cobranza-ui .breadcrumb-item a {
+  color: #c7d2fe !important;
+}
+
+.cobranza-ui .cobranza-actions .btn {
+  border-radius: 10px;
+}
+
+.cobranza-ui .estadistica-card {
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.78);
+  box-shadow: 0 10px 24px rgba(2, 6, 23, 0.28);
+}
+
+.cobranza-ui .estadistica-card .card-title {
+  color: #f8fafc;
+  font-weight: 700;
+}
+
+.cobranza-ui .estadistica-card .card-text {
+  color: #cbd5e1;
+}
+
+.cobranza-ui .card-deuda {
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.72);
+}
+
+.cobranza-ui .card-deuda:hover {
+  box-shadow: 0 12px 26px rgba(2, 6, 23, 0.32);
+}
+
+.cobranza-ui .nav-tabs .nav-link {
+  color: #cbd5e1;
+  border-radius: 10px 10px 0 0;
+}
+
+.cobranza-ui .nav-tabs .nav-link.active {
+  color: #ffffff;
+  background: linear-gradient(135deg, #f97316, #ea580c);
+  border-color: #ea580c;
+}
+
+/* Cotizacion visual polish (scoped) */
+.cotizacion-ui .cotizacion-topbar,
+.mp-page-header.cotizacion-ui {
+  border-radius: 14px !important;
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.14), rgba(99, 102, 241, 0.12)) !important;
+  border: 1px solid rgba(249, 115, 22, 0.28);
+}
+
+.cotizacion-ui .breadcrumb-item,
+.cotizacion-ui .breadcrumb-item a {
+  color: #c7d2fe !important;
+}
+
+.cotizacion-ui .cotizacion-actions .btn {
+  border-radius: 10px;
+}
+
+.cotizacion-ui .cotizacion-filtros .btn {
+  border-radius: 10px !important;
+  font-weight: 600;
+}
+
+.cotizacion-ui .cotizacion-filtros .btn-warning {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  border-color: #d97706;
+  color: #fff !important;
+}
+
+.cotizacion-ui .cotizacion-filtros .btn-secondary {
+  background: linear-gradient(135deg, #64748b, #475569);
+  border-color: #475569;
+}
+
+.cotizacion-ui .cotizacion-filtros .btn-success {
+  background: linear-gradient(135deg, #16a34a, #15803d);
+  border-color: #15803d;
+}
+
+.cotizacion-ui #tabla-cotizacion {
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.cotizacion-ui .text-muted {
+  color: #94a3b8 !important;
+}
+
+/* Cotizacion pago-inicial visual polish (scoped) */
+.cotizacion-pago-ui .encabezado-principal {
+  border: 1px solid rgba(129, 140, 248, 0.25);
+  border-radius: 16px;
+  box-shadow: 0 12px 26px rgba(2, 6, 23, 0.25);
+}
+
+.cotizacion-pago-ui .tarjeta-resumen {
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.75);
+}
+
+.cotizacion-pago-ui #pestanasPrincipales {
+  background: rgba(15, 23, 42, 0.72) !important;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+}
+
+.cotizacion-pago-ui #pestanasPrincipales .nav-link {
+  color: #cbd5e1;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.cotizacion-pago-ui #pestanasPrincipales .nav-link.active {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #fff;
+}
+
+.cotizacion-pago-ui .info-item {
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 10px;
+  padding: .65rem .75rem;
+  margin-bottom: .6rem;
+  background: rgba(15, 23, 42, 0.5);
+}
+
+.cotizacion-pago-ui .alerta-saldo {
+  border: 1px solid rgba(16, 185, 129, 0.32);
+  border-radius: 12px;
+}
+
+.cotizacion-pago-ui .btn-gradient {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  border: 1px solid #1d4ed8;
+}
+
+.cotizacion-pago-ui .btn-gradient:hover {
+  filter: brightness(1.06);
+}
+
+/* Cotizacion ficha visual polish (scoped) */
+.cotizacion-ficha-ui .card-hover-effect {
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  box-shadow: 0 12px 26px rgba(2, 6, 23, 0.28);
+}
+
+.cotizacion-ficha-ui .vehiculo-title {
+  letter-spacing: .2px;
+}
+
+.cotizacion-ficha-ui .precio-box {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.cotizacion-ficha-ui .badge-premium {
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  background: rgba(15, 23, 42, 0.65);
+  color: #e2e8f0 !important;
+  border-radius: 999px;
+  padding: .45rem .85rem;
+}
+
+.cotizacion-ficha-ui .info-item {
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 10px;
+  padding: .65rem .75rem;
+  background: rgba(255, 255, 255, 0.65);
+}
+
+.cotizacion-ficha-ui .finance-card {
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  box-shadow: 0 6px 16px rgba(2, 6, 23, 0.12);
+}
+
+.cotizacion-ficha-ui .estado-badge {
+  border: 1px solid rgba(37, 99, 235, 0.35);
+  background: rgba(37, 99, 235, 0.18);
+  color: #1e3a8a;
+}
+
+.cotizacion-ficha-ui .modal-content {
+  border-radius: 14px;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+}
+
+/* Marca Yonda — botones y enlaces primarios */
+.btn-primary {
+  --bs-btn-bg: #f97316;
+  --bs-btn-border-color: #ea580c;
+  --bs-btn-hover-bg: #ea580c;
+  --bs-btn-hover-border-color: #c2410c;
+  --bs-btn-active-bg: #c2410c;
+  --bs-btn-active-border-color: #9a3412;
+  --bs-btn-disabled-bg: #fdba74;
+  --bs-btn-disabled-border-color: #fdba74;
+}
+
+.btn-outline-primary {
+  --bs-btn-color: #fb923c;
+  --bs-btn-border-color: #f97316;
+  --bs-btn-hover-bg: #f97316;
+  --bs-btn-hover-border-color: #ea580c;
+  --bs-btn-active-bg: #ea580c;
+}
+
+.pagination .page-item.active .page-link {
+  background-color: #f97316;
+  border-color: #ea580c;
+}
+
+.cobranza-ui .mp-page-header,
+.mp-page-header.cobranza-ui {
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.14), rgba(14, 165, 233, 0.1)) !important;
+  border: 1px solid rgba(249, 115, 22, 0.28);
+}

@@ -1,4 +1,15 @@
-<?php include __DIR__ . '/../layout/header.php'; ?>
+<?php
+use App\Config\CajaRoutes;
+
+$cajaRoutes = $cajaRoutes ?? [
+    'lista' => CajaRoutes::LISTA_CONTRATOS,
+    'buscar' => CajaRoutes::BUSCAR_DOCUMENTO,
+    'cobro' => CajaRoutes::COBRO_CONCEPTOS,
+];
+
+include __DIR__ . '/../layout/header.php';
+$mediosPago = $mediosPago ?? \App\Config\MediosPago::opciones();
+?>
 
 <style>
     .monto-input {
@@ -8,32 +19,29 @@
     }
 </style>
 
-<div class="container-fluid p-4 ">
+<div class="container-fluid p-4 caja-ui">
+    <?php
+    $pageHeaderBreadcrumbs = [
+        ['label' => 'Inicio', 'url' => '/'],
+        ['label' => 'Caja', 'url' => $cajaRoutes['lista']],
+        ['label' => 'Buscar DNI / RUC', 'url' => $cajaRoutes['buscar']],
+        ['label' => 'Cobro por conceptos', 'url' => null],
+    ];
+    ob_start();
+    ?>
+    <a href="<?= htmlspecialchars($cajaRoutes['buscar']) ?>" class="btn btn-outline-primary btn-sm">
+        <i class="bi bi-person-search me-1"></i> Buscar DNI / RUC
+    </a>
+    <a href="<?= htmlspecialchars($cajaRoutes['lista']) ?>" class="btn btn-outline-secondary btn-sm">
+        <i class="fas fa-list me-1"></i> Lista contratos (ACT)
+    </a>
+    <?php
+    $pageHeaderActionsHtml = ob_get_clean();
+    $pageHeaderClass = 'caja-ui';
+    include __DIR__ . '/../components/page-header.php';
+    ?>
 
-    <div class="alert alert-info mt-2" role="alert" style="border-left: 4px solid #3498db; border-radius: 0 8px 8px 0;">
-        <div class="row align-items-center">
-            <div class="col-md-6 d-flex align-items-center">
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb mb-0" style="background-color: transparent; padding: 0;">
-                        <li class="breadcrumb-item"><a href="#" class="text-primary"><i class="fas fa-home"></i></a>
-                        </li>
-                        <li class="breadcrumb-item"><a href="#" class="text-primary">Caja</a></li>
-                        <li class="breadcrumb-item active" aria-current="page">Pagos por conceptos</li>
-                    </ol>
-                </nav>
-            </div>
-            <div class="col-md-6 d-flex justify-content-end">
-                <a href="/caja/" class="btn btn-outline-primary btn-sm">
-                    <i class="fas fa-list me-1"></i> Lista
-                </a>
-
-            </div>
-        </div>
-    </div>
-
-</div>
-
-<div class="row mt-3">
+    <div class="row mt-3">
 
     <div class="col-lg-8">
 
@@ -166,27 +174,37 @@
 
                 <div class="col-md-12">
                     <label for="mediopago" class="mb-1">Medio de pago</label>
-                    <select class="form-select mb-2" id="mediopago" name="mediopago">
+                    <select class="form-select mb-2" id="mediopago" name="mediopago" data-medios-version="2026-05-interbancario">
                         <option value="">Seleccione medio de pago</option>
-                        <option value="Efectivo">Efectivo</option>
-                        <option value="Yape">Yape</option>
-                        <option value="Transferencia Bancaria">Transferencia Bancaria</option>
-                        <option value="Plin">Plin</option>
+                        <?php foreach (($mediosPago ?? []) as $valor => $etiqueta): ?>
+                            <option value="<?= htmlspecialchars((string) $valor, ENT_QUOTES, 'UTF-8') ?>">
+                                <?= htmlspecialchars((string) $etiqueta, ENT_QUOTES, 'UTF-8') ?>
+                            </option>
+                        <?php endforeach; ?>
                     </select>
                 </div>
 
                 <div class="col-md-12" id="contenedor-cuenta" style="display:none;">
-                    <label for="cuenta" class="mb-1">Cuenta Bancaria</label>
+                    <label for="cuenta" class="mb-1" id="label-cuenta-pago">Cuenta Bancaria</label>
                     <select class="form-select mb-2" id="cuenta" name="cuenta">
                         <option value="" disabled selected>Seleccione una cuenta de pago</option>
-
                     </select>
+                </div>
 
+                <div class="col-md-12 alert alert-secondary py-2 small mb-2" id="panel-detalle-cuenta" style="display:none;">
+                    <div class="fw-bold">YONDA Y GRUPO HUARACA</div>
+                    <div class="text-muted">RUC 20609396866 · Soles</div>
+                    <div id="detalle-cuenta-cci" class="mt-1"></div>
                 </div>
 
                 <div class="col-md-12 mb-3" style="display: none;" id="contenedor-comprobante">
                     <label class="form-label small text-muted">Comprobante de Pago</label>
                     <input id="comprobante" class="form-control" type="file" name="comprobante" accept="image/*,.pdf">
+                </div>
+
+                <div class="col-md-12 mb-3" style="display: none;" id="contenedor-transaccion">
+                    <label for="numerotransaccion" class="form-label small text-muted">Número de transacción</label>
+                    <input id="numerotransaccion" class="form-control" type="text" maxlength="30" placeholder="Ej: YP-938271 / TRF123456 / CCI">
                 </div>
 
                 <div class="d-flex justify-content-between mb-2">
@@ -267,6 +285,7 @@
             </div>
         </div>
 
+    </div>
     </div>
 </div>
 
@@ -351,8 +370,17 @@ $idVariosCaja = isset($idConceptoVarios) ? (int) $idConceptoVarios : 0;
     const selectMedioPago = document.getElementById('mediopago');
     const contenedorComprobante = document.getElementById('contenedor-comprobante');
     const inputComprobante = document.getElementById('comprobante'); // Input File
+    const contenedorTransaccion = document.getElementById('contenedor-transaccion');
+    const inputNumeroTransaccion = document.getElementById('numerotransaccion');
     const contenedorCuenta = document.getElementById('contenedor-cuenta');
-    const selectCuenta = document.getElementById('cuenta'); // Select de cuenta bancaria
+    const selectCuenta = document.getElementById('cuenta');
+    const labelCuentaPago = document.getElementById('label-cuenta-pago');
+    const panelDetalleCuenta = document.getElementById('panel-detalle-cuenta');
+    const detalleCuentaCci = document.getElementById('detalle-cuenta-cci');
+    const MEDIO_EFECTIVO = 'Efectivo';
+    const MEDIO_TRANSFERENCIA = 'Transferencia Bancaria';
+    const MEDIO_INTERBANCARIO = 'Interbancario';
+    let cuentasPagoCache = [];
 
     const conceptosBody = document.getElementById('conceptos-body');
     const subtotalSpan = document.getElementById('subtotal');
@@ -459,12 +487,16 @@ $idVariosCaja = isset($idConceptoVarios) ? (int) $idConceptoVarios : 0;
         return !!conceptosBody.querySelector('tr[data-caja-cuota="1"]');
     }
 
-    function addCuotaRowNoSave(monto, texto) {
+    function addCuotaRowNoSave(monto, texto, meta = {}) {
         // NO crea concepto en DB. Se registra como "Varios" al cobrar (ver collectConceptsData).
         const newRow = conceptosBody.insertRow();
         newRow.setAttribute('data-idconcepto', '0');
         newRow.setAttribute('data-nombre-concepto', texto);
         newRow.setAttribute('data-caja-cuota', '1');
+        if (meta?.source) newRow.setAttribute('data-source', String(meta.source));
+        if (meta?.dni) newRow.setAttribute('data-dni', String(meta.dni));
+        if (meta?.numero_cuota) newRow.setAttribute('data-numero-cuota', String(meta.numero_cuota));
+        if (meta?.chasis) newRow.setAttribute('data-chasis', String(meta.chasis));
         newRow.insertCell(0).textContent = texto.toUpperCase();
 
         const montoCell = newRow.insertCell(1);
@@ -530,6 +562,7 @@ $idVariosCaja = isset($idConceptoVarios) ? (int) $idConceptoVarios : 0;
             ['Mora (3 días)', r.mora_3_dias],
             ['Total con mora', r.total_con_mora],
             ['Número de cuota pagada', r.numero_cuota_pagada],
+            ['Fuente', r.fuente],
         ];
 
         // Info de cuota sugerida (y auto-agregar si aplica)
@@ -553,7 +586,12 @@ $idVariosCaja = isset($idConceptoVarios) ? (int) $idConceptoVarios : 0;
                 const siguiente = Number.isFinite(pagada) ? (pagada + 1) : null;
                 const cuotaN = siguiente ? ` (cuota ${siguiente})` : '';
                 const txt = `Cuota mensual${cuotaN} - DNI ${r.dni_cliente}`;
-                addCuotaRowNoSave(cuotaInfo.monto, txt);
+                addCuotaRowNoSave(cuotaInfo.monto, txt, {
+                    source: r.fuente || 'registro_ventas_vehiculares',
+                    dni: String(r.dni_cliente || ''),
+                    numero_cuota: siguiente || '',
+                    chasis: String(r.chasis || '')
+                });
                 showToast('Se añadió un concepto sugerido (cuota). Revisá la lista: podés editar, borrar filas o agregar otros. La boleta y el PDF usan esos textos exactamente.', 'INFO', 8000);
             }
         }
@@ -577,18 +615,57 @@ $idVariosCaja = isset($idConceptoVarios) ? (int) $idConceptoVarios : 0;
 
 
 
+    function requiereSeleccionCuenta(medio) {
+        return medio === MEDIO_TRANSFERENCIA || medio === MEDIO_INTERBANCARIO;
+    }
+
+    function tipoCuentaApi(medio) {
+        if (medio === MEDIO_TRANSFERENCIA) return 'Cuenta';
+        if (medio === MEDIO_INTERBANCARIO) return 'CCI';
+        return null;
+    }
+
+    function actualizarDetalleCuentaSeleccionada() {
+        const id = selectCuenta.value;
+        const cuenta = cuentasPagoCache.find((c) => String(c.idcuentapago) === String(id));
+        if (!cuenta || selectMedioPago.value !== MEDIO_INTERBANCARIO) {
+            panelDetalleCuenta.style.display = 'none';
+            return;
+        }
+        panelDetalleCuenta.style.display = 'block';
+        const cta = cuenta.cuenta_corriente
+            ? `<br><span class="text-muted">Cuenta:</span> <span class="user-select-all">${escapeHtml(cuenta.cuenta_corriente)}</span>`
+            : '';
+        detalleCuentaCci.innerHTML =
+            `<strong>${escapeHtml(cuenta.entidad || '')}</strong><br>` +
+            `<span class="text-muted">CCI:</span> <span class="user-select-all fw-bold">${escapeHtml(cuenta.numcuenta || '')}</span>${cta}`;
+    }
+
     selectMedioPago.addEventListener('change', (e) => {
         const medioSeleccionado = e.target.value;
-        const requiereComprobante = (medioSeleccionado !== 'Efectivo' && medioSeleccionado !== '');
-        const esTransferencia = (medioSeleccionado === 'Transferencia Bancaria');
+        const requiereComprobante = (medioSeleccionado !== MEDIO_EFECTIVO && medioSeleccionado !== '');
+        const necesitaCuenta = requiereSeleccionCuenta(medioSeleccionado);
 
         contenedorComprobante.style.display = requiereComprobante ? 'block' : 'none';
-        contenedorCuenta.style.display = esTransferencia ? 'block' : 'none';
+        contenedorTransaccion.style.display = requiereComprobante ? 'block' : 'none';
+        contenedorCuenta.style.display = necesitaCuenta ? 'block' : 'none';
+        if (!necesitaCuenta) {
+            panelDetalleCuenta.style.display = 'none';
+            selectCuenta.value = '';
+        }
+        if (!requiereComprobante) {
+            inputNumeroTransaccion.value = '';
+        }
 
-        if (esTransferencia) {
-            cargarCuentasBancarias();
+        if (necesitaCuenta) {
+            labelCuentaPago.textContent = medioSeleccionado === MEDIO_INTERBANCARIO
+                ? 'Banco destino (CCI)'
+                : 'Cuenta Bancaria';
+            cargarCuentasBancarias(tipoCuentaApi(medioSeleccionado));
         }
     });
+
+    selectCuenta.addEventListener('change', actualizarDetalleCuentaSeleccionada);
 
     /**
      * Muestra los datos del cliente en la tarjeta lateral y asigna el ID global.
@@ -754,21 +831,63 @@ $idVariosCaja = isset($idConceptoVarios) ? (int) $idConceptoVarios : 0;
 
 
 
-    async function cargarCuentasBancarias() {
+    async function cargarCuentasBancarias(tipoCuenta) {
         try {
-            const req = await fetch('/api/numcuentaspagos', {
-                method: 'GET'
-            });
+            const url = tipoCuenta
+                ? `/api/numcuentaspagos?tipo=${encodeURIComponent(tipoCuenta)}`
+                : '/api/numcuentaspagos';
+            const req = await fetch(url, { method: 'GET' });
             if (!req.ok) throw new Error('Fallo al cargar cuentas.');
 
             const res = await req.json();
-            selectCuenta.innerHTML = '<option value="" disabled selected>Seleccione una cuenta de pago</option>';
-            res.forEach(cuenta => {
+            if (res && res.error === 'migration_required') {
+                showToast(res.message || 'Ejecute sp-db/ejecutar_interbancario_ahora.sql en phpMyAdmin.', 'ERROR', 6000);
+                return;
+            }
+            cuentasPagoCache = Array.isArray(res) ? res.filter((c) => c.idcuentapago) : [];
+            const placeholder = tipoCuenta === 'CCI'
+                ? 'Seleccione banco destino (CCI)'
+                : 'Seleccione una cuenta de pago';
+            selectCuenta.innerHTML = `<option value="" disabled selected>${placeholder}</option>`;
+            cuentasPagoCache.forEach((cuenta) => {
                 selectCuenta.innerHTML += `<option value="${cuenta.idcuentapago}">${cuenta.nombrecuenta}</option>`;
             });
+            panelDetalleCuenta.style.display = 'none';
+            if (cuentasPagoCache.length === 0) {
+                showToast(
+                    tipoCuenta === 'CCI'
+                        ? 'No hay cuentas CCI en la BD. En phpMyAdmin ejecute el archivo: sp-db/ejecutar_interbancario_ahora.sql'
+                        : 'No hay cuentas bancarias configuradas.',
+                    'WARNING',
+                    6000
+                );
+            }
         } catch (error) {
             showToast('Error al cargar cuentas bancarias.', 'ERROR', 2000);
             console.error(error);
+        }
+    }
+
+    async function cargarRegistroVentasPorDocumento(documento) {
+        if (!/^\d{8}$/.test(documento) && !/^\d{11}$/.test(documento)) {
+            renderRegistroVentas([]);
+            return;
+        }
+        try {
+            const rvReq = await fetch(`/api/caja/registro-ventas-vehiculares/${encodeURIComponent(documento)}`);
+            if (!rvReq.ok) {
+                renderRegistroVentas([]);
+                return;
+            }
+            const rv = await rvReq.json().catch(() => null);
+            if (rv && rv.success && Array.isArray(rv.data) && rv.data.length) {
+                renderRegistroVentas(rv.data);
+            } else {
+                renderRegistroVentas([]);
+            }
+        } catch (e) {
+            console.error(e);
+            renderRegistroVentas([]);
         }
     }
 
@@ -818,27 +937,9 @@ $idVariosCaja = isset($idConceptoVarios) ? (int) $idConceptoVarios : 0;
                 idCliente = null;
                 updateTotals();
 
-                // Fallback: buscar en registro ventas vehiculares (solo para DNI 8)
-                if (/^\d{8}$/.test(documento)) {
-                    try {
-                        const rvReq = await fetch(`/api/caja/registro-ventas-vehiculares/${encodeURIComponent(documento)}`);
-                        if (rvReq.ok) {
-                            const rv = await rvReq.json().catch(() => null);
-                            if (rv && rv.success && Array.isArray(rv.data) && rv.data.length) {
-                                renderRegistroVentas(rv.data);
-                                showToast('Encontrado en registro vehicular (Excel). Para cobrar, primero registra al cliente.', 'INFO', 5500);
-                            } else {
-                                renderRegistroVentas([]);
-                            }
-                        } else {
-                            renderRegistroVentas([]);
-                        }
-                    } catch (e) {
-                        console.error(e);
-                        renderRegistroVentas([]);
-                    }
-                } else {
-                    renderRegistroVentas([]);
+                await cargarRegistroVentasPorDocumento(documento);
+                if (registroVentasCard && registroVentasCard.style.display !== 'none') {
+                    showToast('Encontrado en registro vehicular (Excel). Para cobrar, primero registra al cliente.', 'INFO', 5500);
                 }
                 return;
             }
@@ -852,18 +953,7 @@ $idVariosCaja = isset($idConceptoVarios) ? (int) $idConceptoVarios : 0;
             if (res.success && res.cliente) {
                 showToast('Cliente encontrado', 'SUCCESS', 1400);
                 displayClienteData(res.cliente);
-                // Si existe como cliente, igual mostramos (si hay) el registro vehicular
-                if (/^\d{8}$/.test(documento)) {
-                    try {
-                        const rvReq = await fetch(`/api/caja/registro-ventas-vehiculares/${encodeURIComponent(documento)}`);
-                        if (rvReq.ok) {
-                            const rv = await rvReq.json().catch(() => null);
-                            if (rv && rv.success) renderRegistroVentas(rv.data || []);
-                        }
-                    } catch (e) {
-                        console.error(e);
-                    }
-                }
+                await cargarRegistroVentasPorDocumento(documento);
             } else {
                 showToast('Cliente no encontrado', 'ERROR', 1400);
                 clienteCard.style.display = 'none';
@@ -943,6 +1033,10 @@ $idVariosCaja = isset($idConceptoVarios) ? (int) $idConceptoVarios : 0;
             const montoInput = row.cells[1].querySelector('input[type="number"]');
             const monto = parseFloat(montoInput.value) || 0;
             const idConcepto = parseInt(row.getAttribute('data-idconcepto'));
+            const source = row.getAttribute('data-source') || '';
+            const dni = (row.getAttribute('data-dni') || '').replace(/\D/g, '');
+            const numeroCuota = parseInt(row.getAttribute('data-numero-cuota') || '0', 10) || null;
+            const chasis = row.getAttribute('data-chasis') || '';
 
 
             const idConceptoFinal = idConcepto > 0 ? idConcepto : (ID_CONCEPTO_VARIOS > 0 ? ID_CONCEPTO_VARIOS : 1);
@@ -954,7 +1048,11 @@ $idVariosCaja = isset($idConceptoVarios) ? (int) $idConceptoVarios : 0;
                 idconcepto: idConceptoFinal,
                 monto: monto.toFixed(2),
                 nombre: conceptoTexto,
-                obs: ''
+                obs: '',
+                source: source,
+                dni: dni,
+                numero_cuota: numeroCuota,
+                chasis: chasis
             });
         });
 
@@ -980,16 +1078,27 @@ $idVariosCaja = isset($idConceptoVarios) ? (int) $idConceptoVarios : 0;
             showToast('Seleccione un medio de pago.', 'WARNING', 2000);
             return;
         }
-        if (medioPago === 'Transferencia Bancaria' && !idCuentaPago) {
-            showToast('Seleccione una cuenta bancaria para la transferencia.', 'ERROR', 2000);
+        const numeroTransaccion = (inputNumeroTransaccion.value || '').trim();
+        if (medioPago !== 'Efectivo' && !numeroTransaccion) {
+            showToast('Ingrese el número de transacción para continuar.', 'WARNING', 2200);
+            return;
+        }
+        if (requiereSeleccionCuenta(medioPago) && !idCuentaPago) {
+            showToast(
+                medioPago === MEDIO_INTERBANCARIO
+                    ? 'Seleccione el banco destino (CCI) para el pago interbancario.'
+                    : 'Seleccione una cuenta bancaria para la transferencia.',
+                'ERROR',
+                2500
+            );
             return;
         }
 
         const formData = new FormData();
         formData.append('idcliente', idCliente);
         formData.append('mediopago', medioPago);
-
-        formData.append('numerotransaccion', 'N/A');
+        formData.append('request_id', (window.crypto?.randomUUID?.() || ('req_' + Date.now() + '_' + Math.random().toString(36).slice(2))));
+        formData.append('numerotransaccion', medioPago === 'Efectivo' ? '' : numeroTransaccion);
         formData.append('idcuentapago', idCuentaPago);
         formData.append('monto_total', montoTotal.toFixed(2));
         formData.append('detalles_json', JSON.stringify(conceptosData));
@@ -1099,10 +1208,12 @@ $idVariosCaja = isset($idConceptoVarios) ? (int) $idConceptoVarios : 0;
                 selectMedioPago.selectedIndex = 0;
                 selectCuenta.selectedIndex = 0;
                 contenedorComprobante.style.display = 'none';
+                contenedorTransaccion.style.display = 'none';
                 contenedorCuenta.style.display = 'none';
                 idCliente = null;
                 clienteCard.style.display = 'none';
                 inputComprobante.value = '';
+                inputNumeroTransaccion.value = '';
                 updateTotals();
 
             } else {
@@ -1201,5 +1312,14 @@ $idVariosCaja = isset($idConceptoVarios) ? (int) $idConceptoVarios : 0;
 
     getConceptosPagos();
     window.onload = updateTotals;
+
+    (function initDniDesdeQuery() {
+        const params = new URLSearchParams(window.location.search);
+        const dni = (params.get('dni') || '').replace(/\D/g, '');
+        if (dni.length >= 8 && dni.length <= 11) {
+            inputDNI.value = dni;
+            searchClienteDB();
+        }
+    })();
 </script>
 <?php include __DIR__ . '/../layout/footer.php'; ?>
