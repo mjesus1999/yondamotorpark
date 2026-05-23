@@ -12,9 +12,15 @@ require APP_ROOT . '/vendor/autoload.php';
 // Registrar autoload propio (namespace App\*)
 Autoloader::register();
 
-//Variable de entorno desde .env
-$dotenv = Dotenv\Dotenv::createImmutable(APP_ROOT);
-$dotenv->load();
+// Variables de entorno desde .env (no tumbar el sitio si .env falla)
+try {
+  if (is_readable(APP_ROOT . '/.env')) {
+    $dotenv = Dotenv\Dotenv::createImmutable(APP_ROOT);
+    $dotenv->load();
+  }
+} catch (Throwable $e) {
+  error_log('Dotenv load: ' . $e->getMessage());
+}
 
 
 if (!ini_get('date.timezone')) {

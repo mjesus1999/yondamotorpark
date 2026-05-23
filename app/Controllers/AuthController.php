@@ -19,9 +19,6 @@ namespace App\Controllers;
 use App\Core\Controller;
 use App\Models\Usuario;
 
-require_once __DIR__ . '/../Helpers/ApiSms.php';
-use ApiSms;
-
 /**
  * Clase AuthController
  * 
@@ -34,21 +31,18 @@ use ApiSms;
  */
 class AuthController extends Controller
 {
-    /**
-     * Instancia del modelo de Usuario
-     * @var Usuario
-     */
-    private Usuario $usuarioModel;
+    /** @var Usuario|null */
+    private $usuarioModel = null;
 
     /**
-     * Constructor del controlador
-     * 
-     * Inicializa la instancia del modelo Usuario necesario para todas las
-     * operaciones de autenticación y gestión de cuentas.
+     * Conexión a BD solo cuando hace falta (login/recuperar), no al abrir /login.
      */
-    public function __construct()
+    private function getUsuarioModel(): Usuario
     {
-        $this->usuarioModel = new Usuario();
+        if ($this->usuarioModel === null) {
+            $this->usuarioModel = new Usuario();
+        }
+        return $this->usuarioModel;
     }
 
     /**
@@ -109,9 +103,9 @@ class AuthController extends Controller
 
         if ($usernick !== '') {
             // Buscar colaborador por usernick
-            $user = $this->usuarioModel->searchByUsernick($usernick);
+            $user = $this->getUsuarioModel()->searchByUsernick($usernick);
             if ($user) {
-                $full = $this->usuarioModel->getById((int) $user['idcolaborador']);
+                $full = $this->getUsuarioModel()->getById((int) $user['idcolaborador']);
                 $data['usernick'] = $usernick;
                 $data['email'] = $full['email'] ?? '';
                 $data['telprimario'] = $full['telprimario'] ?? '';
@@ -160,7 +154,7 @@ class AuthController extends Controller
         $password = $_POST['userpassword'] ?? '';
 
         // Buscar usuario
-        $user = $this->usuarioModel->searchByUsernick($usernick);
+        $user = $this->getUsuarioModel()->searchByUsernick($usernick);
 
         if (!$user || ($user['habilitado'] ?? 'N') !== 'S') {
             $_SESSION['login_error'] = 'Usuario no encontrado o inactivo.';
@@ -248,7 +242,7 @@ class AuthController extends Controller
         ];
 
         $_SESSION['last_activity'] = time();
-        $this->usuarioModel->updateLastAccess((int) $user['idcolaborador']);
+        $this->getUsuarioModel()->updateLastAccess((int) $user['idcolaborador']);
 
         header('Location: /');
         exit;
@@ -334,7 +328,7 @@ class AuthController extends Controller
             return;
         }
 
-        $user = $this->usuarioModel->searchByUsernick($usernick);
+        $user = $this->getUsuarioModel()->searchByUsernick($usernick);
         if (!$user) {
             $this->view('auth.recoverAccount', [
                 'error'         => 'Usuario no encontrado.',
@@ -344,7 +338,7 @@ class AuthController extends Controller
             return;
         }
 
-        $full = $this->usuarioModel->getById((int) $user['idcolaborador']);
+        $full = $this->getUsuarioModel()->getById((int) $user['idcolaborador']);
         $emailStored = $full['email'] ?? '';
         $telStored = $full['telprimario'] ?? '';
 
@@ -379,8 +373,8 @@ class AuthController extends Controller
         $_SESSION['recovery_time'] = time();
         $_SESSION['recovery_attempts'] = 0;
 
-        // Enviar SMS
-        $apiSms = new ApiSms();
+        require_once __DIR__ . '/../Helpers/ApiSms.php';
+        $apiSms = new \ApiSms();
         $message = "Motorpark Yonda - Tu codigo de recuperacion es: $code. Valido por 10 minutos.";
 
         $sent = $apiSms->sendMessage($telprimario, $message);
@@ -520,7 +514,7 @@ class AuthController extends Controller
             return;
         }
 
-        $user = $this->usuarioModel->searchByUsernick($usernick);
+        $user = $this->getUsuarioModel()->searchByUsernick($usernick);
         if (!$user) {
             $this->view('auth.recoverAccount', [
                 'error'         => 'Usuario no encontrado.',
@@ -530,7 +524,7 @@ class AuthController extends Controller
         }
 
         $newHash = password_hash($password, PASSWORD_DEFAULT);
-        $ok = $this->usuarioModel->updatePassword((int) $user['idcolaborador'], $newHash);
+        $ok = $this->getUsuarioModel()->updatePassword((int) $user['idcolaborador'], $newHash);
 
         if ($ok) {
             // Limpiar sesión de recuperación
