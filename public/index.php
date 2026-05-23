@@ -73,7 +73,10 @@ $router = new Router();
 // echo "Intentando cargar: " . APP_ROOT . '/app/Routes/ConceptoPagos.router.php' . "<br>";
 //RUTAS POR MÓDULO
 require APP_ROOT . '/app/Routes/Home.router.php';
-require APP_ROOT . '/app/Routes/Legacy.router.php';
+$legacyRouter = APP_ROOT . '/app/Routes/Legacy.router.php';
+if (is_readable($legacyRouter)) {
+  require $legacyRouter;
+}
 require APP_ROOT . '/app/Routes/Marca.router.php';
 require APP_ROOT . '/app/Routes/Local.router.php';
 require APP_ROOT . '/app/Routes/Ubigeo.router.php';
