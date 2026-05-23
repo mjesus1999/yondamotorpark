@@ -37,8 +37,12 @@ try {
 
     if (is_readable($root . '/.env')) {
         Dotenv\Dotenv::createImmutable($root)->load();
-        echo 'DB_HOST=' . (getenv('DB_HOST') ?: '(vacío)') . "\n";
-        echo 'DB_NAME=' . (getenv('DB_NAME') ?: '(vacío)') . "\n";
+        require_once $root . '/app/Config/Env.php';
+        echo 'putenv disponible: ' . (function_exists('putenv') ? 'sí' : 'NO (normal en Hostinger)') . "\n";
+        echo 'DB_HOST (Env)=' . (\App\Config\Env::get('DB_HOST', '(vacío)')) . "\n";
+        echo 'DB_NAME (Env)=' . (\App\Config\Env::get('DB_NAME', '(vacío)')) . "\n";
+        echo 'DB_HOST (getenv)=' . (getenv('DB_HOST') !== false && getenv('DB_HOST') !== '' ? getenv('DB_HOST') : '(vacío)') . "\n";
+        echo 'DB_HOST ($_ENV)=' . (isset($_ENV['DB_HOST']) ? $_ENV['DB_HOST'] : '(no definido)') . "\n";
     } else {
         echo "AVISO: no hay .env en el servidor\n";
     }

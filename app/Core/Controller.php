@@ -37,9 +37,16 @@ class Controller
       session_start();
     }
 
-    // Leer timeout desde .env
-    $rawTimeout = getenv('SESSION_TIMEOUT');
-    $timeoutSeconds = ($rawTimeout !== false && $rawTimeout !== '') ? (int) $rawTimeout : 60;
+    $timeoutSeconds = 600;
+    if (class_exists(\App\Config\Env::class)) {
+      $timeoutSeconds = (int) \App\Config\Env::get('SESSION_TIMEOUT', '600');
+    } else {
+      $rawTimeout = getenv('SESSION_TIMEOUT');
+      $timeoutSeconds = ($rawTimeout !== false && $rawTimeout !== '') ? (int) $rawTimeout : 600;
+    }
+    if ($timeoutSeconds < 60) {
+      $timeoutSeconds = 600;
+    }
 
     // Si existe last_activity, comprobar inactividad y destruir sesion si corresponde
     if (isset($_SESSION['last_activity'])) {

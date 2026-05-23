@@ -3,6 +3,7 @@
 
 namespace App\Core;
 
+use App\Config\Env;
 use PDO;
 use PDOException;
 
@@ -68,11 +69,11 @@ class Database
     //   'charset' => $_ENV['DB_CHARSET'] ?? 'utf8mb4'
     // ];
     $this->config = [
-      'host' => getenv('DB_HOST') !== false ? getenv('DB_HOST') : ($_ENV['DB_HOST'] ?? 'localhost'),
-      'dbname' => getenv('DB_NAME') !== false ? getenv('DB_NAME') : ($_ENV['DB_NAME'] ?? ''),
-      'user' => getenv('DB_USER') !== false ? getenv('DB_USER') : ($_ENV['DB_USER'] ?? ''),
-      'password' => getenv('DB_PASS') !== false ? getenv('DB_PASS') : ($_ENV['DB_PASS'] ?? ''),
-      'charset' => getenv('DB_CHARSET') !== false ? getenv('DB_CHARSET') : ($_ENV['DB_CHARSET'] ?? 'utf8mb4'),
+      'host' => Env::get('DB_HOST', 'localhost'),
+      'dbname' => Env::get('DB_NAME', Env::get('DB_DATABASE', '')),
+      'user' => Env::get('DB_USER', Env::get('DB_USERNAME', '')),
+      'password' => Env::get('DB_PASS', Env::get('DB_PASSWORD', '')),
+      'charset' => Env::get('DB_CHARSET', 'utf8mb4'),
     ];
     $this->connect();
   }

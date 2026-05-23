@@ -32,16 +32,21 @@ if (!ini_get('date.timezone')) {
  * como variables de entorno accesibles por getenv() y en $_SERVER.
  */
 foreach ($_ENV as $key => $value) {
-  //solo strings (evita arrays/objetos)
-  if (!is_string($value))
+  if (!is_string($value)) {
     continue;
-  // setear en entorno C-level si no existe
-  if (getenv($key) === false) {
-    putenv(sprintf('%s=%s', $key, $value));
   }
-  // mantener $_SERVER
   if (!isset($_SERVER[$key])) {
     $_SERVER[$key] = $value;
+  }
+  // putenv suele estar deshabilitado en Hostinger; si falla, $_ENV basta (ver App\Config\Env).
+  if (function_exists('putenv')) {
+    try {
+      if (getenv($key) === false) {
+        @putenv($key . '=' . $value);
+      }
+    } catch (Throwable $e) {
+      error_log('putenv omitido: ' . $e->getMessage());
+    }
   }
 }
 
