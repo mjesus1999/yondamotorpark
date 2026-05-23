@@ -1,6 +1,6 @@
 
 import { validarAmortizacionCuota, validarNumeroTransaccion, fechaEsFutura, fechaVacia, marcarInput } from './helpers-cronograma.js';
-import { TIPOS_PAGO, MEDIOS_PAGO } from "./constantes-cronograma.js";
+import { TIPOS_PAGO, MEDIOS_PAGO, medioRequiereCuenta, tipoCuentaParaMedio } from "./constantes-cronograma.js";
 import { configurarValidacionesFormulario } from './eventos-cronograma.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -326,7 +326,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         elements.groupMedioPagoPenalidad.classList.toggle('hidden', !isPenalidadFieldsVisible);
         elements.numeroTransaccionPenalidadGroup.classList.toggle('hidden', !isPenalidadFieldsVisible);
 
-        if (!isPenalidadFieldsVisible || elements.selectMedioPagoPenalidad.value !== MEDIOS_PAGO.transferenciaBancaria) {
+        if (!isPenalidadFieldsVisible || !medioRequiereCuenta(elements.selectMedioPagoPenalidad.value)) {
             elements.groupNumCuentaPenalidad.classList.add('hidden');
         }
 
@@ -344,14 +344,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     /**
      * Carga las cuentas bancarias desde la API y las llena en el select.
      */
-    async function cargarCuentasBancarias(selectElement) {
+    async function cargarCuentasBancarias(selectElement, tipoCuenta) {
         try {
-            const res = await fetch('/api/numcuentaspagos', { method: 'GET' });
+            const url = tipoCuenta
+                ? `/api/numcuentaspagos?tipo=${encodeURIComponent(tipoCuenta)}`
+                : '/api/numcuentaspagos';
+            const res = await fetch(url, { method: 'GET' });
             const data = await res.json();
-            selectElement.innerHTML = '<option value="">Selecciona una cuenta</option>';
-            data.forEach(cuenta => {
+            const placeholder = tipoCuenta === 'CCI' ? 'Selecciona banco destino (CCI)' : 'Selecciona una cuenta';
+            selectElement.innerHTML = `<option value="">${placeholder}</option>`;
+            (data || []).forEach(cuenta => {
                 selectElement.innerHTML += `<option value="${cuenta.idcuentapago}">${cuenta.nombrecuenta}</option>`;
             });
+            if (!data || data.length === 0) {
+                showToast(
+                    tipoCuenta === 'CCI'
+                        ? 'No hay cuentas CCI. Ejecute el script SQL de interbancario.'
+                        : 'No hay cuentas bancarias configuradas.',
+                    'WARNING',
+                    3000
+                );
+            }
         } catch (error) {
             showToast('Error al cargar cuentas bancarias.', 'ERROR', 2000);
         }
@@ -417,10 +430,24 @@ document.addEventListener('DOMContentLoaded', async () => {
             return false;
         }
 
-        if (elements.medioPagoSelect.value === MEDIOS_PAGO.transferenciaBancaria) {
+        if (medioRequiereCuenta(elements.medioPagoSelect.value)) {
             if (elements.numeroCuentaSelect.value === '') {
                 marcarInput(elements.numeroCuentaSelect, false);
-                showToast('Debe seleccionar un número de cuenta', 'WARNING', 1200);
+                const msg = elements.medioPagoSelect.value === MEDIOS_PAGO.interbancario
+                    ? 'Debe seleccionar el banco destino (CCI)'
+                    : 'Debe seleccionar un número de cuenta';
+                showToast(msg, 'WARNING', 1200);
+                return false;
+            }
+        }
+
+        if (medioRequiereCuenta(elements.selectMedioPagoPenalidad.value)) {
+            if (elements.idCuentaPagoPenalidadSelect.value === '') {
+                marcarInput(elements.idCuentaPagoPenalidadSelect, false);
+                const msg = elements.selectMedioPagoPenalidad.value === MEDIOS_PAGO.interbancario
+                    ? 'Debe seleccionar el banco destino (CCI) de penalidad'
+                    : 'Debe seleccionar la cuenta de penalidad';
+                showToast(msg, 'WARNING', 1200);
                 return false;
             }
         }
@@ -572,13 +599,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         formData.append('total_interes_prorrateado', prorrateo.interes.toFixed(2));
 
         // Cuentas bancarias
-        if (elements.medioPagoSelect.value === MEDIOS_PAGO.transferenciaBancaria) {
+        if (medioRequiereCuenta(elements.medioPagoSelect.value)) {
             formData.append('idcuentapago', elements.numeroCuentaSelect.value);
         }
 
         if (parseFloat(elements.amortizacionPenalidadInput.value) > 0) {
             formData.append('mediopagopenalidad', elements.selectMedioPagoPenalidad.value);
-            if (elements.selectMedioPagoPenalidad.value === MEDIOS_PAGO.transferenciaBancaria) {
+            if (medioRequiereCuenta(elements.selectMedioPagoPenalidad.value)) {
                 formData.append('idcuentapagopenalidad', elements.idCuentaPagoPenalidadSelect.value);
             }
             formData.append('numeroTransaccionPenalidad', elements.numeroTransaccionPenalidadInput.value);
@@ -748,11 +775,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     // CUOTA
     elements.medioPagoSelect.addEventListener('change', (e) => {
         elements.numeroTransaccionInput.value = '';
-
-        const isTransferencia = e.target.value === MEDIOS_PAGO.transferenciaBancaria;
-        elements.selectCuentas.classList.toggle('hidden', !isTransferencia);
-        if (isTransferencia) {
-            cargarCuentasBancarias(elements.numeroCuentaSelect);
+        const medio = e.target.value;
+        const necesitaCuenta = medioRequiereCuenta(medio);
+        elements.selectCuentas.classList.toggle('hidden', !necesitaCuenta);
+        if (necesitaCuenta) {
+            cargarCuentasBancarias(elements.numeroCuentaSelect, tipoCuentaParaMedio(medio));
         } else {
             elements.numeroCuentaSelect.innerHTML = '';
         }
@@ -761,11 +788,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     // PENALIDAD.
     elements.selectMedioPagoPenalidad.addEventListener('change', (e) => {
         elements.numeroTransaccionPenalidadInput.value = '';
-        const isTransferencia = e.target.value === MEDIOS_PAGO.transferenciaBancaria;
-        elements.groupNumCuentaPenalidad.classList.toggle('hidden', !isTransferencia);
-        if (isTransferencia) {
-            cargarCuentasBancarias(elements.idCuentaPagoPenalidadSelect);
-
+        const medio = e.target.value;
+        const necesitaCuenta = medioRequiereCuenta(medio);
+        elements.groupNumCuentaPenalidad.classList.toggle('hidden', !necesitaCuenta);
+        if (necesitaCuenta) {
+            cargarCuentasBancarias(elements.idCuentaPagoPenalidadSelect, tipoCuentaParaMedio(medio));
         } else {
             elements.idCuentaPagoPenalidadSelect.innerHTML = '';
         }
@@ -795,11 +822,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     // Evento para limpiar la paginación al cambiar de vista
-    document.querySelector('a[href="/caja/"]').addEventListener('click', function () {
-        localStorage.removeItem('pageCronograma');
-        elements.inputBuscar.value = '';
-        showPage(1);
-    });
+    const volverListaCaja = document.querySelector('[data-caja-volver-lista]');
+    if (volverListaCaja) {
+        volverListaCaja.addEventListener('click', function () {
+            localStorage.removeItem('pageCronograma');
+            if (elements.inputBuscar) {
+                elements.inputBuscar.value = '';
+            }
+            showPage(1);
+        });
+    }
 
     // Generar PDF
     elements.btnPdf.addEventListener('click', () => {

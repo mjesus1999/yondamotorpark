@@ -30,8 +30,9 @@
     </p>
     <div class="d-flex flex-wrap gap-2 justify-content-center">
       <a href="/" class="btn btn-primary">Ir al inicio</a>
-      <a href="/caja" class="btn btn-outline-primary">Caja</a>
+      <a href="/caja" class="btn btn-outline-primary">Caja (lista)</a>
       <a href="/caja/buscar-documento" class="btn btn-outline-primary">Buscar DNI / RUC</a>
+      <a href="javascript:history.back()" class="btn btn-outline-secondary">Volver</a>
       <a href="/login" class="btn btn-outline-secondary">Iniciar sesión</a>
     </div>
   </div>

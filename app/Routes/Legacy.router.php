@@ -1,8 +1,6 @@
 <?php
 
 /**
- * Rutas legacy: evitan 404 cuando un enlace antiguo sigue en favoritos o en el home.
+ * Rutas legacy movidas a Home.router.php (evita duplicar registros).
+ * Este archivo se mantiene por compatibilidad si index.php lo incluye.
  */
-$router->add('GET', '/ordencompra/emitido', 'RedirectController', 'ordenCompraEmitido');
-$router->add('GET', '/ordencompra/{estado}', 'RedirectController', 'ordenCompraEstado');
-$router->add('GET', '/egresos/{estado}', 'RedirectController', 'egresosEstado');

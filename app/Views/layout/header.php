@@ -410,14 +410,14 @@ function tienePermisoGrupo($modulos, $modulosPermitidos)
             }
 
             if (esRutaCobranza) {
-              sidebarLinks.forEach(link => {
-                if (link.getAttribute('href') === '/Cobranza') {
-                  link.classList.add('active');
-                }
-              });
               const cobranzaMenu = document.getElementById('gestionCobranza');
               if (cobranzaMenu) {
                 cobranzaMenu.classList.add('show');
+                const toggleCobranza = document.querySelector('[data-bs-target="#gestionCobranza"]');
+                if (toggleCobranza) {
+                  toggleCobranza.classList.remove('collapsed');
+                  toggleCobranza.setAttribute('aria-expanded', 'true');
+                }
               }
             }
 

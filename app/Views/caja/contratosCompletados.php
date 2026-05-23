@@ -1,5 +1,7 @@
 <?php
 
+use App\Config\CajaRoutes;
+
 include __DIR__ . '/../layout/header.php';
 ?>
 <link href="https://unpkg.com/tabulator-tables@6.3.1/dist/css/tabulator_simple.min.css" rel="stylesheet">
@@ -13,13 +15,13 @@ include __DIR__ . '/../layout/header.php';
                     <ol class="breadcrumb mb-0" style="background-color: transparent; padding: 0;">
                         <li class="breadcrumb-item"><a href="#" class="text-primary"><i class="fas fa-home"></i></a>
                         </li>
-                        <li class="breadcrumb-item"><a href="#" class="text-primary">Caja</a></li>
-                        <li class="breadcrumb-item active" aria-current="page">Contratos conpletados</li>
+                        <li class="breadcrumb-item"><a href="<?= CajaRoutes::LISTA_CONTRATOS ?>" class="text-primary">Caja</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Contratos completados</li>
                     </ol>
                 </nav>
             </div>
             <div class="col-md-6 d-flex justify-content-end caja-actions">
-                <a href="/caja/" class="btn btn-outline-primary btn-sm">
+                <a href="<?= CajaRoutes::LISTA_CONTRATOS ?>" class="btn btn-outline-primary btn-sm" data-caja-volver-lista="1">
                     <i class="fas fa-list me-1"></i> Lista
                 </a>
 

@@ -1,4 +1,7 @@
-<?php include __DIR__ . '/../layout/header.php';
+<?php
+use App\Config\CajaRoutes;
+
+include __DIR__ . '/../layout/header.php';
 
 $primerNombre = '';
 if (!empty($user['nombres'])) {
@@ -88,10 +91,17 @@ $dbOk = !empty($stats['db_disponible']);
       </a>
     </div>
     <div class="col-6 col-md-4 col-lg-3">
-      <a href="/caja" class="quick-link-card">
+      <a href="<?= CajaRoutes::LISTA_CONTRATOS ?>" class="quick-link-card">
         <i class="bi bi-cash-coin d-block"></i>
-        <strong>Caja</strong>
-        <div class="small text-muted">Pagos del día</div>
+        <strong>Caja (lista ACT)</strong>
+        <div class="small text-muted">Contratos activos</div>
+      </a>
+    </div>
+    <div class="col-6 col-md-4 col-lg-3">
+      <a href="<?= CajaRoutes::BUSCAR_DOCUMENTO ?>" class="quick-link-card">
+        <i class="bi bi-person-vcard d-block"></i>
+        <strong>Buscar DNI / RUC</strong>
+        <div class="small text-muted">Clientes y Excel</div>
       </a>
     </div>
     <div class="col-6 col-md-4 col-lg-3">
