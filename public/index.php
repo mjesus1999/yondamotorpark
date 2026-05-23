@@ -73,6 +73,7 @@ $router = new Router();
 // echo "Intentando cargar: " . APP_ROOT . '/app/Routes/ConceptoPagos.router.php' . "<br>";
 //RUTAS POR MÓDULO
 require APP_ROOT . '/app/Routes/Home.router.php';
+require APP_ROOT . '/app/Routes/Legacy.router.php';
 require APP_ROOT . '/app/Routes/Marca.router.php';
 require APP_ROOT . '/app/Routes/Local.router.php';
 require APP_ROOT . '/app/Routes/Ubigeo.router.php';
@@ -103,19 +104,9 @@ require APP_ROOT . '/app/Routes/Cotizacion.router.php';
 require APP_ROOT .'/app/Routes/Credito.router.php';
 require APP_ROOT .'/app/Routes/Cobranza.router.php';
 require APP_ROOT . '/app/Routes/Nubefact.router.php';
+require APP_ROOT . '/app/Routes/Producto.router.php';
 
 
 
-
-
-
-// Un controlador básico para la página de inicio
-class HomeController extends App\Core\Controller
-{
-  public function index()
-  {
-    $this->view('home.index');
-  }
-}
 
 $router->dispatch();

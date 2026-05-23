@@ -289,6 +289,16 @@ function tienePermisoGrupo($modulos, $modulosPermitidos)
                     <i class="fa-solid fa-money-bill-wave pe-2"></i> Cobranza
                   </a>
                 </li>
+                <li class="sidebar-item">
+                  <a href="/Recordatorios" class="sidebar-link">
+                    <i class="bi bi-bell pe-2"></i> Recordatorios
+                  </a>
+                </li>
+                <li class="sidebar-item">
+                  <a href="/Vencidos" class="sidebar-link">
+                    <i class="bi bi-exclamation-triangle pe-2"></i> Vencidos
+                  </a>
+                </li>
               </ul>
             </li>
           <?php endif; ?>
