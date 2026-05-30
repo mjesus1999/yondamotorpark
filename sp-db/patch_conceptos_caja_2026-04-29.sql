@@ -4,7 +4,7 @@
 -- Recomendación: NO borrar conceptos existentes (pueden estar referenciados por detpagos/pagos históricos).
 -- Este script solo ajusta montos y normaliza nombres si hace falta.
 
-USE motorpark;
+-- USE motorpark; -- hosting: seleccionar BD en phpMyAdmin
 
 -- RECOJO VEHICULAR
 UPDATE conceptospago SET concepto = 'RECOJO VEHICULAR', montosugerido = 350.00

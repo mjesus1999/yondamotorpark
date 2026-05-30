@@ -20,6 +20,7 @@ namespace App\Controllers;
 use App\Config\CajaRoutes;
 use App\Config\MediosPago;
 use App\Core\Controller;
+use App\Helpers\CronogramaAmortizacionHelper;
 use App\Models\Caja;
 use App\Models\PagoCronograma;
 use Exception;
@@ -662,7 +663,15 @@ class CajaController extends Controller
                             $enlaceCdr = $respNube['enlace_cdr'] ?? null;
                             $this->cajaModel->confirmarCorrelativoBloqueado($serieBoleta, (int) $nuevoNumero);
 
-                            $this->cajaModel->actualizarDatosFacturacion($idPago, $enlacePdf, $enlaceXml, $enlaceCdr, (int) $nuevoNumero);
+                            $this->cajaModel->actualizarDatosFacturacion(
+                                $idPago,
+                                $enlacePdf,
+                                $enlaceXml,
+                                $enlaceCdr,
+                                (int) $nuevoNumero,
+                                $serieBoleta,
+                                $tipoComprobante
+                            );
                             $facturado = true;
                         } else {
                             $this->cajaModel->cancelarCorrelativoBloqueado();
@@ -817,78 +826,8 @@ class CajaController extends Controller
         if (empty($contratos)) {
             $cli = $this->cajaModel->getDatosCliente($idcliente);
             $dni = is_array($cli) ? preg_replace('/\\D+/', '', (string) ($cli['nrodoc'] ?? '')) : '';
-            if (strlen($dni) === 8 || strlen($dni) === 11) {
-                $rowsVeh = $this->cajaModel->getRegistroVentasVehicularesByDni($dni);
-                if (!empty($rowsVeh)) {
-                    $r = $rowsVeh[0];
-                    $plazo = (int) ($r['plazo_meses'] ?? 0);
-                    $pagada = (int) ($r['numero_cuota_pagada'] ?? 0);
-                    $startRaw = (string) ($r['fecha_inicio_credito'] ?? '');
-                    $cuotaTotal = (float) ($r['cuota_total_mensual'] ?? 0);
-                    $cuotaBase = (float) ($r['cuota_base'] ?? 0);
-                    $moraPct = (float) ($r['tasa_interes'] ?? 10);
-                    if ($moraPct <= 0) $moraPct = 10;
-
-                    // Si el Excel ya trae cuota_total_mensual, usamos eso como "total" (suele incluir GPS y/o mora).
-                    // Si no, usamos cuota_base + GPS.
-                    $totalDefault = $cuotaTotal > 0 ? $cuotaTotal : ($cuotaBase + $gps);
-
-                    $start = null;
-                    try {
-                        if ($startRaw) $start = new \DateTimeImmutable($startRaw);
-                    } catch (\Throwable $e) {
-                        $start = null;
-                    }
-                    if (!$start) {
-                        $start = new \DateTimeImmutable('today');
-                    }
-
-                    $today = new \DateTimeImmutable('today');
-                    $data = [];
-                    for ($i = 1; $i <= max(0, $plazo); $i++) {
-                        $estado = 'Por abonar';
-                        if ($pagada > 0 && $i <= $pagada) $estado = 'Pagado';
-                        elseif ($i === ($pagada + 1)) $estado = 'Por saldar';
-
-                        // Regla negocio: la cuota #1 vence el mes siguiente a la fecha de inicio.
-                        $venc = $start->modify('+' . $i . ' month');
-                        $fecha = $venc->format('Y-m-d');
-
-                        // tolerancia: 3 días; mora desde el 4to día
-                        $toleranciaFin = $venc->modify('+3 day');
-                        $conMora = ($estado === 'Por saldar') && ($today > $toleranciaFin);
-                        if ($conMora) {
-                            $estado = 'Por saldar (MORA)';
-                        }
-
-                        $totalNormal = round($totalDefault, 2);
-                        $totalMora = round($totalNormal * (1 + ($moraPct / 100)), 2);
-                        $totalMostrar = $conMora ? $totalMora : $totalNormal;
-                        $data[] = [
-                            'numcuota' => $i,
-                            'fechapago' => $fecha,
-                            'valorcuota' => round($cuotaBase, 2),
-                            'gps' => round($gps, 2),
-                            'total_normal' => $totalNormal,
-                            'total_con_mora' => $totalMora,
-                            'total' => $totalMostrar,
-                            'estado' => $estado,
-                            'estado_raw' => null,
-                        ];
-                    }
-
-                    echo json_encode([
-                        'success' => true,
-                        'data' => $data,
-                        'gps' => $gps,
-                        'idcontrato' => null,
-                        'vehiculo' => trim((string) (($r['marca'] ?? '') . ' / ' . ($r['modelo'] ?? ''))),
-                        'contrato_estado' => null,
-                        'source' => 'registro_ventas_vehiculares',
-                        'message' => 'Cronograma estimado desde registro vehicular (Excel).',
-                    ], JSON_UNESCAPED_UNICODE);
-                    return;
-                }
+            if ($this->responderCronogramaDesdeDocumentoSiExiste($dni, $gps)) {
+                return;
             }
 
             echo json_encode([
@@ -924,6 +863,12 @@ class CajaController extends Controller
 
         $rows = [];
         $today = new \DateTimeImmutable('today');
+        $cuotasPagadas = 0;
+        $totalInteres = 0.0;
+        $totalCapital = 0.0;
+        $cuotaMensual = 0.0;
+        $montoFinanciar = 0.0;
+
         foreach ($cronograma as $c) {
             $num = (int) ($c['numcuota'] ?? 0);
             $estadoRaw = strtolower(trim((string) ($c['estado'] ?? '')));
@@ -931,12 +876,24 @@ class CajaController extends Controller
 
             if ($estadoRaw === 'pagado') {
                 $estadoLabel = 'Pagado';
+                $cuotasPagadas++;
             } elseif ($primeraPendienteNum !== null && $num === $primeraPendienteNum) {
                 $estadoLabel = 'Por saldar';
             }
 
             $valorCuota = (float) ($c['valorcuota'] ?? 0);
+            $interes = (float) ($c['interes'] ?? 0);
+            $abonoCapital = (float) ($c['abonocapital'] ?? 0);
+            $saldoCapital = (float) ($c['saldocapital'] ?? 0);
             $penalidad = (float) ($c['penalidad'] ?? 0);
+            $cuotaMensual = $valorCuota > 0 ? $valorCuota : $cuotaMensual;
+            $totalInteres += $interes;
+            $totalCapital += $abonoCapital;
+
+            if ($num === 1) {
+                $montoFinanciar = round($saldoCapital + $abonoCapital, 2);
+            }
+
             $totalNormal = round($valorCuota + $gps, 2);
             $totalMora = round($totalNormal + max(0, $penalidad), 2);
 
@@ -958,8 +915,14 @@ class CajaController extends Controller
             $rows[] = [
                 'numcuota' => $num,
                 'fechapago' => $c['fechapago'] ?? null,
+                'fecha_cronograma' => $c['fechapago'] ?? null,
+                'fecha_pago_cliente' => $c['fecha_pago_real'] ?? null,
+                'interes' => round($interes, 2),
+                'abonocapital' => round($abonoCapital, 2),
                 'valorcuota' => round($valorCuota, 2),
+                'saldocapital' => round($saldoCapital, 2),
                 'gps' => round($gps, 2),
+                'total_con_gps' => $totalNormal,
                 'total_normal' => $totalNormal,
                 'total_con_mora' => $totalMora,
                 'total' => $conMora ? $totalMora : $totalNormal,
@@ -968,15 +931,139 @@ class CajaController extends Controller
             ];
         }
 
-        echo json_encode([
-            'success' => true,
-            'data' => $rows,
+        $saldoActual = $montoFinanciar;
+        if ($cuotasPagadas > 0) {
+            foreach ($rows as $fila) {
+                if ((int) $fila['numcuota'] === $cuotasPagadas) {
+                    $saldoActual = (float) $fila['saldocapital'];
+                    break;
+                }
+            }
+        }
+
+        $fechaInicioCrono = !empty($rows) ? ($rows[0]['fecha_cronograma'] ?? $rows[0]['fechapago'] ?? null) : null;
+        $fechaFinCrono = !empty($rows) ? ($rows[count($rows) - 1]['fecha_cronograma'] ?? $rows[count($rows) - 1]['fechapago'] ?? null) : null;
+
+        $meta = [
+            'monto_financiar' => $montoFinanciar,
+            'lo_que_debe_pagar_cliente' => $montoFinanciar,
+            'cuota_por_mes' => round($cuotaMensual, 2),
+            'duracion_meses' => count($rows),
+            'cuotas_pagadas' => $cuotasPagadas,
+            'cuotas_pendientes' => max(0, count($rows) - $cuotasPagadas),
+            'saldo_capital_actual' => round($saldoActual, 2),
+            'tasa_mensual_pct' => null,
+            'tasa_anual_pct' => null,
+            'total_interes_proyectado' => round($totalInteres, 2),
+            'total_capital_proyectado' => round($totalCapital, 2),
+            'gps_mensual' => round($gps, 2),
+            'fecha_inicio_cronograma' => $fechaInicioCrono,
+            'fecha_fin_cronograma' => $fechaFinCrono,
+        ];
+
+        $this->responderCronogramaDetalladoJson($rows, $meta, [
             'gps' => $gps,
             'idcontrato' => $idContrato,
             'vehiculo' => $contratos[0]['vehiculo_resumen'] ?? null,
             'contrato_estado' => $contratos[0]['estado'] ?? null,
-            'source' => 'contrato'
+            'source' => 'contrato',
+        ]);
+    }
+
+    /**
+     * API JSON: cronograma detallado por DNI/RUC (Excel/import sin cliente en BD).
+     */
+    public function apiCronogramaPorDocumento(string $dni): void
+    {
+        $this->authRequired();
+        header('Content-Type: application/json; charset=utf-8');
+
+        $documento = preg_replace('/\D+/', '', $dni);
+        if (strlen($documento) !== 8 && strlen($documento) !== 11) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'Documento inválido.', 'data' => []], JSON_UNESCAPED_UNICODE);
+            return;
+        }
+
+        $gps = $this->cajaModel->getMontoConceptoPagoByNombre('GPS');
+        if ($this->responderCronogramaDesdeDocumentoSiExiste($documento, $gps)) {
+            return;
+        }
+
+        echo json_encode([
+            'success' => true,
+            'message' => 'Sin registro vehicular para este documento.',
+            'data' => [],
+            'resumen' => null,
+            'gps' => $gps,
+            'source' => 'none',
         ], JSON_UNESCAPED_UNICODE);
+    }
+
+    /**
+     * @return bool true si respondió JSON con cronograma
+     */
+    private function responderCronogramaDesdeDocumentoSiExiste(string $documento, float $gps): bool
+    {
+        if (strlen($documento) !== 8 && strlen($documento) !== 11) {
+            return false;
+        }
+
+        $rowsVeh = $this->cajaModel->getRegistroVentasVehicularesByDni($documento);
+        if (empty($rowsVeh)) {
+            return false;
+        }
+
+        $r = $rowsVeh[0];
+        $plazo = (int) ($r['plazo_meses'] ?? 0);
+        $pagada = (int) ($r['numero_cuota_pagada'] ?? 0);
+        $cuotaTotal = (float) ($r['cuota_total_mensual'] ?? 0);
+        $cuotaBase = (float) ($r['cuota_base'] ?? 0);
+        $montoFin = (float) ($r['monto_financiar'] ?? 0);
+        if ($montoFin <= 0) {
+            $montoFin = max(0, (float) ($r['precio_total'] ?? 0) - (float) ($r['pago_inicial'] ?? 0));
+        }
+        $cuotaMensual = $cuotaTotal > 0 ? $cuotaTotal : $cuotaBase;
+
+        $generado = CronogramaAmortizacionHelper::generar([
+            'monto_financiar' => $montoFin,
+            'cuota_mensual' => $cuotaMensual,
+            'plazo_meses' => $plazo,
+            'fecha_inicio' => (string) ($r['fecha_inicio_credito'] ?? ''),
+            'cuotas_pagadas' => $pagada,
+            'gps_monto' => $gps,
+            'fechas_pago' => CronogramaAmortizacionHelper::fechasPagoDesdeImport($r),
+        ]);
+
+        $this->responderCronogramaDetalladoJson(
+            $generado['filas'],
+            $generado['meta'],
+            [
+                'gps' => $gps,
+                'idcontrato' => null,
+                'vehiculo' => trim((string) (($r['marca'] ?? '') . ' / ' . ($r['modelo'] ?? ''))),
+                'contrato_estado' => null,
+                'cliente_nombre' => $r['nombre_cliente'] ?? null,
+                'source' => $r['fuente'] ?? 'registro_ventas_vehiculares',
+                'message' => 'Cronograma calculado desde datos del Excel/import.',
+            ]
+        );
+
+        return true;
+    }
+
+    /**
+     * @param list<array<string, mixed>> $filas
+     * @param array<string, mixed> $meta
+     * @param array<string, mixed> $extra
+     */
+    private function responderCronogramaDetalladoJson(array $filas, array $meta, array $extra): void
+    {
+        echo json_encode(array_merge([
+            'success' => true,
+            'data' => $filas,
+            'resumen' => $meta,
+        ], $extra), JSON_UNESCAPED_UNICODE);
     }
 
     /**

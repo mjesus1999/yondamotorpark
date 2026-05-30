@@ -64,27 +64,17 @@ class Permisos
         return $stmt->fetchAll(PDO::FETCH_COLUMN);
     }
 
-    /**
-     * Método comentado - Verificación de permiso específico
-     * 
-     * Este método alternativo verifica si un cargo tiene permiso para un módulo específico.
-     * Actualmente no está en uso pero se mantiene para referencia futura.
-     * 
-     * @param int $idCargo ID del cargo a verificar
-     * @param string $modulo Nombre del módulo a verificar
-     * @return bool True si tiene permiso, false en caso contrario
-     */
-    /* public function tienePermiso(int $idCargo, string $modulo): bool
+    public function tienePermiso(int $idCargo, string $modulo): bool
     {
         $stmt = $this->db->prepare("
-            SELECT COUNT(*) 
-            FROM permisos 
-            WHERE idcargo = :idCargo AND moduloapp = :modulo
+            SELECT COUNT(*)
+            FROM accesos
+            WHERE idcargo = :idCargo AND modulo = :modulo AND permisos = 1
         ");
         $stmt->execute([
             ':idCargo' => $idCargo,
-            ':modulo' => $modulo
+            ':modulo' => $modulo,
         ]);
-        return $stmt->fetchColumn() > 0;
-    } */
+        return (int) $stmt->fetchColumn() > 0;
+    }
 }

@@ -1,78 +1,160 @@
+-- BD seleccionada en phpMyAdmin.
+-- Requiere filas en `cargos` para cada nombre usado abajo. Si falla #1452, ejecutar antes:
+--   datos-inserts/cargos-areas_semilla_motorpark.sql
+--
+-- Los INSERT resuelven idcargo por nombre de cargo (no por número), para no depender del AUTO_INCREMENT.
 
-USE motorpark;
+-- Jefe de Caja
+INSERT INTO accesos (idcargo, modulo, permisos)
+SELECT c.idcargo, x.modulo, 1
+FROM cargos c
+JOIN (
+    SELECT 'Jefe de Caja' AS cargo, 'caja' AS modulo UNION ALL
+    SELECT 'Jefe de Caja', 'auth'
+) x ON c.cargo = x.cargo
+WHERE NOT EXISTS (
+    SELECT 1 FROM accesos a WHERE a.idcargo = c.idcargo AND a.modulo = x.modulo
+);
 
+-- Jefe de Logística
+INSERT INTO accesos (idcargo, modulo, permisos)
+SELECT c.idcargo, x.modulo, 1
+FROM cargos c
+JOIN (
+    SELECT 'Jefe de Logística' AS cargo, 'oc' AS modulo UNION ALL
+    SELECT 'Jefe de Logística', 'compras' UNION ALL
+    SELECT 'Jefe de Logística', 'vehiculos' UNION ALL
+    SELECT 'Jefe de Logística', 'recepcionVehiculos' UNION ALL
+    SELECT 'Jefe de Logística', 'marcas' UNION ALL
+    SELECT 'Jefe de Logística', 'concesionarios'
+) x ON c.cargo = x.cargo
+WHERE NOT EXISTS (
+    SELECT 1 FROM accesos a WHERE a.idcargo = c.idcargo AND a.modulo = x.modulo
+);
 
-SELECT * FROM colaboradores;
-SELECT * FROM contratoslaborales;
-UPDATE contratoslaborales SET idcargo = 1 WHERE idcontratolaboral = 3;
-SELECT * FROM cargos;
-SELECT * FROM areas;
+-- Asistente de Logística
+INSERT INTO accesos (idcargo, modulo, permisos)
+SELECT c.idcargo, x.modulo, 1
+FROM cargos c
+JOIN (
+    SELECT 'Asistente de Logística' AS cargo, 'oc' AS modulo UNION ALL
+    SELECT 'Asistente de Logística', 'compras' UNION ALL
+    SELECT 'Asistente de Logística', 'vehiculos' UNION ALL
+    SELECT 'Asistente de Logística', 'recepcionVehiculos' UNION ALL
+    SELECT 'Asistente de Logística', 'marcas'
+) x ON c.cargo = x.cargo
+WHERE NOT EXISTS (
+    SELECT 1 FROM accesos a WHERE a.idcargo = c.idcargo AND a.modulo = x.modulo
+);
 
--- Permisos para Jefe de Caja (idcargo = 17)
-INSERT INTO accesos (idcargo, modulo, permisos) VALUES
-(17, 'caja', 1),
-(17, 'auth', 1);
+-- Jefe de sistemas (nombre histórico en BD motorpark: minúscula en "sistemas")
+INSERT INTO accesos (idcargo, modulo, permisos)
+SELECT c.idcargo, x.modulo, 1
+FROM cargos c
+JOIN (
+    SELECT 'Jefe de sistemas' AS cargo, 'concesionarios' AS modulo UNION ALL
+    SELECT 'Jefe de sistemas', 'locales' UNION ALL
+    SELECT 'Jefe de sistemas', 'clientes' UNION ALL
+    SELECT 'Jefe de sistemas', 'marcas' UNION ALL
+    SELECT 'Jefe de sistemas', 'vehiculos' UNION ALL
+    SELECT 'Jefe de sistemas', 'recepcionVehiculos' UNION ALL
+    SELECT 'Jefe de sistemas', 'oc' UNION ALL
+    SELECT 'Jefe de sistemas', 'compras' UNION ALL
+    SELECT 'Jefe de sistemas', 'formatoCotizacion' UNION ALL
+    SELECT 'Jefe de sistemas', 'cotizacion' UNION ALL
+    SELECT 'Jefe de sistemas', 'contratos' UNION ALL
+    SELECT 'Jefe de sistemas', 'vehiculosAlContado' UNION ALL
+    SELECT 'Jefe de sistemas', 'usuarios' UNION ALL
+    SELECT 'Jefe de sistemas', 'caja' UNION ALL
+    SELECT 'Jefe de sistemas', 'creditos' UNION ALL
+    SELECT 'Jefe de sistemas', 'egreso' UNION ALL
+    SELECT 'Jefe de sistemas', 'arqueoCaja' UNION ALL
+    SELECT 'Jefe de sistemas', 'cobranza' UNION ALL
+    SELECT 'Jefe de sistemas', 'auth'
+) x ON c.cargo = x.cargo
+WHERE NOT EXISTS (
+    SELECT 1 FROM accesos a WHERE a.idcargo = c.idcargo AND a.modulo = x.modulo
+);
 
--- Jefe de Logística (idcargo = 8)
-INSERT INTO accesos (idcargo, modulo, permisos) VALUES
-(8, 'oc', 1),
-(8, 'compras', 1),
-(8, 'vehiculos', 1),
-(8, 'recepcionVehiculos', 1),
-(8, 'marcas', 1),
-(8, 'concesionarios', 1);
+-- Jefe de Recursos Humanos
+INSERT INTO accesos (idcargo, modulo, permisos)
+SELECT c.idcargo, x.modulo, 1
+FROM cargos c
+JOIN (
+    SELECT 'Jefe de Recursos Humanos' AS cargo, 'usuarios' AS modulo UNION ALL
+    SELECT 'Jefe de Recursos Humanos', 'auth'
+) x ON c.cargo = x.cargo
+WHERE NOT EXISTS (
+    SELECT 1 FROM accesos a WHERE a.idcargo = c.idcargo AND a.modulo = x.modulo
+);
 
--- Asistente de Logística (idcargo = 9)
-INSERT INTO accesos (idcargo, modulo, permisos) VALUES
-(9, 'oc', 1),
-(9, 'compras', 1),
-(9, 'vehiculos', 1),
-(9, 'recepcionVehiculos', 1),
-(9, 'marcas', 1);
+-- Jefe de Ventas
+INSERT INTO accesos (idcargo, modulo, permisos)
+SELECT c.idcargo, x.modulo, 1
+FROM cargos c
+JOIN (
+    SELECT 'Jefe de Ventas' AS cargo, 'clientes' AS modulo UNION ALL
+    SELECT 'Jefe de Ventas', 'vehiculos' UNION ALL
+    SELECT 'Jefe de Ventas', 'cotizacion' UNION ALL
+    SELECT 'Jefe de Ventas', 'contratos' UNION ALL
+    SELECT 'Jefe de Ventas', 'vehiculosAlContado'
+) x ON c.cargo = x.cargo
+WHERE NOT EXISTS (
+    SELECT 1 FROM accesos a WHERE a.idcargo = c.idcargo AND a.modulo = x.modulo
+);
 
+-- Asesor de Ventas
+INSERT INTO accesos (idcargo, modulo, permisos)
+SELECT c.idcargo, x.modulo, 1
+FROM cargos c
+JOIN (
+    SELECT 'Asesor de Ventas' AS cargo, 'clientes' AS modulo UNION ALL
+    SELECT 'Asesor de Ventas', 'cotizacion'
+) x ON c.cargo = x.cargo
+WHERE NOT EXISTS (
+    SELECT 1 FROM accesos a WHERE a.idcargo = c.idcargo AND a.modulo = x.modulo
+);
 
--- Jefe de Sistemas (idcargo = 1)
-INSERT INTO accesos (idcargo, modulo, permisos) VALUES
-(1, 'concesionarios', 1),
-(1, 'locales', 1),
-(1, 'clientes', 1),
-(1, 'marcas', 1),
-(1, 'vehiculos', 1),
-(1, 'recepcionVehiculos', 1),
-(1, 'oc', 1),
-(1, 'compras', 1),
-(1, 'formatoCotizacion', 1),
-(1, 'cotizacion', 1),
-(1, 'contratos', 1),
-(1, 'vehiculosAlContado', 1),
-(1, 'usuarios', 1),
-(1, 'caja', 1),
-(1, 'creditos', 1),
-(1, 'egreso', 1),
-(1, 'arqueoCaja', 1),
-(1, 'cobranza', 1),
-(1, 'auth', 1);
+-- Jefe de Cobranza
+INSERT INTO accesos (idcargo, modulo, permisos)
+SELECT c.idcargo, x.modulo, 1
+FROM cargos c
+JOIN (
+    SELECT 'Jefe de Cobranza' AS cargo, 'cobranza' AS modulo UNION ALL
+    SELECT 'Jefe de Cobranza', 'contratos' UNION ALL
+    SELECT 'Jefe de Cobranza', 'clientes'
+) x ON c.cargo = x.cargo
+WHERE NOT EXISTS (
+    SELECT 1 FROM accesos a WHERE a.idcargo = c.idcargo AND a.modulo = x.modulo
+);
 
--- Jefe de Recursos Humanos (idcargo = 10)
-INSERT INTO accesos (idcargo, modulo, permisos) VALUES
-(10, 'usuarios', 1),
-(10, 'auth', 1);
+-- Analista de Contabilidad (ver patch_accesos_contabilidad_logistica_legal_2026.sql)
+INSERT INTO accesos (idcargo, modulo, permisos)
+SELECT c.idcargo, x.modulo, 1
+FROM cargos c
+JOIN (
+    SELECT 'Analista de Contabilidad' AS cargo, 'clientes' AS modulo UNION ALL
+    SELECT 'Analista de Contabilidad', 'contratos' UNION ALL
+    SELECT 'Analista de Contabilidad', 'creditos' UNION ALL
+    SELECT 'Analista de Contabilidad', 'caja' UNION ALL
+    SELECT 'Analista de Contabilidad', 'arqueoCaja' UNION ALL
+    SELECT 'Analista de Contabilidad', 'egreso' UNION ALL
+    SELECT 'Analista de Contabilidad', 'cobranza'
+) x ON c.cargo = x.cargo
+WHERE NOT EXISTS (
+    SELECT 1 FROM accesos a WHERE a.idcargo = c.idcargo AND a.modulo = x.modulo
+);
 
--- Jefe de Ventas (idcargo = 16)
-INSERT INTO accesos (idcargo, modulo, permisos) VALUES
-(16, 'clientes', 1),
-(16, 'vehiculos', 1),
-(16, 'cotizacion', 1),
-(16, 'contratos', 1),
-(16, 'vehiculosAlContado', 1);
-
--- Asesor de Ventas (idcargo = 18)
-INSERT INTO accesos (idcargo, modulo, permisos) VALUES
-(18, 'clientes', 1),
-(18, 'cotizacion', 1);
-
--- Jefe de Cobranza (idcargo = 19)
-INSERT INTO accesos (idcargo, modulo, permisos) VALUES
-(19, 'cobranza', 1),
-(19, 'contratos', 1),
-(19, 'clientes', 1);
+-- Asesor Legal
+INSERT INTO accesos (idcargo, modulo, permisos)
+SELECT c.idcargo, x.modulo, 1
+FROM cargos c
+JOIN (
+    SELECT 'Asesor Legal' AS cargo, 'contratos' AS modulo UNION ALL
+    SELECT 'Asesor Legal', 'clientes' UNION ALL
+    SELECT 'Asesor Legal', 'cotizacion' UNION ALL
+    SELECT 'Asesor Legal', 'creditos'
+) x ON c.cargo = x.cargo
+WHERE NOT EXISTS (
+    SELECT 1 FROM accesos a WHERE a.idcargo = c.idcargo AND a.modulo = x.modulo
+);

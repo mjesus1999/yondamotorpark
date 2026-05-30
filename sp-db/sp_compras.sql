@@ -1,7 +1,7 @@
 
-USE motorpark;
+-- USE motorpark; -- hosting: seleccionar BD en phpMyAdmin
 
-DROP PROCEDURE  sp_compra_registrar;
+DROP PROCEDURE IF EXISTS sp_compra_registrar;
 DELIMITER //
 
 CREATE PROCEDURE sp_compra_registrar(
@@ -26,7 +26,7 @@ BEGIN
 
 END ;
  
- USE motorpark;
+ -- USE motorpark; -- hosting: seleccionar BD en phpMyAdmin
 DROP PROCEDURE IF EXISTS sp_detalle_oc_por_concesionario;
 
 DELIMITER //
@@ -68,6 +68,3 @@ BEGIN
     ORDER BY oc.emision DESC;
 END //
 DELIMITER ;
-
-
-CALL sp_detalle_oc_por_concesionario(1);

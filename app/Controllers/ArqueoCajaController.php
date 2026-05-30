@@ -60,6 +60,14 @@ class ArqueoCajaController extends Controller
      * @param string $entregado Filtro de estado de entrega: 'N' = pendientes (default), 'S' = entregados
      * @return void Renderiza la vista 'arqueo-caja.index' con los datos calculados
      */
+    /**
+     * Alias de la vista principal (el formulario de arqueo está en /arqueoCaja).
+     */
+    public function createForm(): void
+    {
+        $this->redirect('/arqueoCaja');
+    }
+
     public function index(string $entregado = 'N'): void
     {
         $this->authRequired();
@@ -75,20 +83,23 @@ class ArqueoCajaController extends Controller
         $ingresosEfectivoNuevos = $ingresosNuevos['ingresos_efectivo_nuevos'];
         $ingresosDigitalNuevos = $ingresosNuevos['ingresos_digital_nuevos'];
         $egresosDiaNuevos = $egresosNuevos;
-
+        $ingresosDesglose = ArqueoCaja::ingresosDesgloseParaVista($ingresosNuevos);
+        $totalIngresosPeriodo = $ingresosEfectivoNuevos + $ingresosDigitalNuevos;
 
         $montoTeorico = $saldoInicialParaArqueo + $ingresosEfectivoNuevos - $egresosDiaNuevos;
-
 
         $data = [
             'saldo_inicial' => number_format($saldoInicialParaArqueo, 2, '.', ''),
             'ingresos_efectivo' => number_format($ingresosEfectivoNuevos, 2, '.', ''),
             'ingresos_digital' => number_format($ingresosDigitalNuevos, 2, '.', ''),
+            'total_ingresos_periodo' => number_format($totalIngresosPeriodo, 2, '.', ''),
+            'ingresos_desglose' => $ingresosDesglose,
             'egresos_dia' => number_format($egresosDiaNuevos, 2, '.', ''),
             'monto_teorico' => number_format($montoTeorico, 2, '.', ''),
             'entregado' => $entregado,
             'es_primer_arqueo' => ($saldoInicialParaArqueo == 0.00),
             'hora_ultima_entrega' => $horaUltimaEntrega,
+            'corte_desde' => $fechaReferencia . ' ' . $horaReferencia,
         ];
 
 

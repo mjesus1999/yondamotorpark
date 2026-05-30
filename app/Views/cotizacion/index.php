@@ -1,9 +1,9 @@
 <?php include __DIR__ . '/../layout/header.php'; ?>
-<link href="https://unpkg.com/tabulator-tables@5.5.2/dist/css/tabulator_simple.min.css" rel="stylesheet">
+<link href="https://unpkg.com/tabulator-tables@6.3.1/dist/css/tabulator_simple.min.css" rel="stylesheet">
 <link rel="stylesheet" href="/assets/css/tabulator.css">
 <link rel="stylesheet" href="/assets/css/contrato-modal.css">
 
-<div class="container-fluid">
+<div class="container-fluid cotizacion-ui">
 
     <?php if (!empty($_SESSION['success_message'])): ?>
         <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
@@ -21,27 +21,22 @@
         <?php unset($_SESSION['error_message']); ?>
     <?php endif; ?>
 
-    <div class="alert alert-info mt-2" role="alert">
-        <div class="row">
-            <div class="col-md-6 d-flex align-items-center justify-content-start">
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb mb-0">
-                        <li class="breadcrumb-item"><a href="#">Cotizacion</a></li>
-                        <li class="breadcrumb-item active" aria-current="page">Cotizar</li>
-                    </ol>
-                </nav>
-            </div>
-            <div class="col-md-6 text-end">
-                <a href="/cotizacion/historial" class="btn btn-outline-secondary btn-sm me-2">
-                    <i class="bi bi-clock-history"></i> Historial
-                </a>
-                <a href="/cotizacion/create" class="btn btn-outline-primary btn-sm">
-                    Registrar
-                </a>
-            </div>
-
-        </div>
-    </div>
+    <?php
+    $pageHeaderBreadcrumbs = [
+        ['label' => 'Inicio', 'url' => '/'],
+        ['label' => 'Cotización', 'url' => '/cotizacion/P'],
+        ['label' => 'Listado', 'url' => null],
+    ];
+    $pageHeaderActionsHtml = '
+        <a href="/cotizacion/historial" class="btn btn-outline-light btn-sm">
+            <i class="bi bi-clock-history"></i> Historial
+        </a>
+        <a href="/cotizacion/create" class="btn btn-primary btn-sm">
+            <i class="bi bi-plus-lg"></i> Registrar
+        </a>';
+    $pageHeaderClass = 'cotizacion-ui';
+    include __DIR__ . '/../components/page-header.php';
+    ?>
 
     <div class="row">
         <div class="col-md-12">
@@ -53,7 +48,7 @@
                     // Asume que $cotizaciones y $puede_ver_todas ya están definidos
                     ?>
                     <div class="d-flex justify-content-between align-items-center flex-wrap">
-                        <div class="btn-group m-1 mb-2" id="botones-filtro">
+                        <div class="btn-group m-1 mb-2 cotizacion-filtros" id="botones-filtro">
                             <a href="/cotizacion/P"
                                 class="btn btn-sm <?= strtoupper($estadoActual) === 'P' ? 'btn-warning' : 'btn-outline-warning' ?>" title="Cotizaciones creadas que aún no cuentan con un pago de separación (Inicial)">
                                 <i class="bi bi-clock"></i> Pendientes
@@ -267,7 +262,7 @@
 </div>
 
 
-<script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.5.2/dist/js/tabulator.min.js"></script>
+<script type="text/javascript" src="https://unpkg.com/tabulator-tables@6.3.1/dist/js/tabulator.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
 <script src="/assets/js/logoBase64.js"></script>
@@ -306,9 +301,6 @@
 
     document.addEventListener('DOMContentLoaded', async () => {
 
-        const cotizacionAprobarIdInput = document.getElementById('cotizacion-aprobar-id');
-        const clienteAprobarNombreStrong = document.getElementById('cliente-aprobar-nombre');
-        const confirmarAprobarBtn = document.getElementById('confirmarAprobarBtn');
         const diaPago = document.getElementById('diapago');
         const fechaInicio = document.getElementById('fechainicio');
         const selectLocal = document.getElementById('idlocal');

@@ -62,7 +62,7 @@ class CompraController extends Controller
     {
         $compras = $this->compraModel->getAll();
         $this->authRequired();
-        $this->view('compras.index', ['compras' => $compras]);
+        $this->view('components.compras.index', ['compras' => $compras]);
     }
 
     /**
@@ -78,7 +78,7 @@ class CompraController extends Controller
     public function create(): void
     {
         $this->authRequired();
-        $this->view('compras.create');
+        $this->view('components.compras.create');
     }
 
     /**

@@ -2,7 +2,7 @@
 
 $router->add('GET', '/arqueoCaja', 'ArqueoCajaController', 'index');
 $router->add('GET', '/arqueoCaja/listar/{estado}', 'ArqueoCajaController', 'index'); // LISTAR POR ESTADO
-$router->add('GET', '/arqueoCaja/create', 'ArqueoCajaController', 'create');
+$router->add('GET', '/arqueoCaja/create', 'ArqueoCajaController', 'createForm');
 
 $router->add('GET', '/arqueo/entregados','EntregaDineroController', 'index');
 

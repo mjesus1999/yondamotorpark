@@ -1,95 +1,87 @@
-    [data-bs-theme="dark"] .tabulator .tabulator-header,
-    [data-bs-theme="dark"] .tabulator .tabulator-col {
-        /* Fondo del header y las columnas */
-        background-color: #343a40 !important;
-        color: #f8f9fa !important;
-        border-color: #495057 !important;
-    }
+.tabulator {
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 20px rgba(2, 6, 23, 0.22);
+}
 
-    /* El Contenido de la Columna (Título del Header) */
-    [data-bs-theme="dark"] .tabulator .tabulator-header .tabulator-col-content {
-        color: #f8f9fa !important;
-    }
+[data-bs-theme="dark"] .tabulator {
+    background: rgba(15, 23, 42, 0.75);
+}
 
-    /* Filas y Paginación */
+[data-bs-theme="dark"] .tabulator .tabulator-header,
+[data-bs-theme="dark"] .tabulator .tabulator-col {
+    background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%) !important;
+    color: #dbeafe !important;
+    border-color: rgba(148, 163, 184, 0.24) !important;
+}
 
-    [data-bs-theme="dark"] .tabulator-row {
-        background-color: #212529 !important;
-        border-color: #495057 !important;
-        color: #f8f9fa !important;
-    }
+[data-bs-theme="dark"] .tabulator .tabulator-header .tabulator-col-content {
+    color: #dbeafe !important;
+    font-weight: 600;
+}
 
-    [data-bs-theme="dark"] .tabulator-row:nth-child(even) {
-        background-color: #2a2f33 !important;
-        /* Fondo rayado alterno  */
-    }
+[data-bs-theme="dark"] .tabulator-row {
+    background-color: rgba(15, 23, 42, 0.92) !important;
+    border-color: rgba(148, 163, 184, 0.12) !important;
+    color: #e2e8f0 !important;
+}
 
-    [data-bs-theme="dark"] .tabulator-footer {
-        background-color: #343a40 !important;
-        color: #f8f9fa !important;
-    }
+[data-bs-theme="dark"] .tabulator-row:nth-child(even) {
+    background-color: rgba(30, 41, 59, 0.9) !important;
+}
 
+[data-bs-theme="dark"] .tabulator-row:hover {
+    background-color: rgba(37, 99, 235, 0.18) !important;
+}
 
-    .tabulator .tabulator-row.tabulator-group {
-        background: #f8f9fa;
-      
-        color: #495057;
-   
-        border-bottom: 1px solid #dee2e6;
-     
-        cursor: pointer;
-    }
+[data-bs-theme="dark"] .tabulator-footer {
+    background: rgba(15, 23, 42, 0.95) !important;
+    color: #cbd5e1 !important;
+    border-top: 1px solid rgba(148, 163, 184, 0.2);
+}
 
-    
-    .tabulator .tabulator-row.tabulator-group.tabulator-group-open {
-        background-color: #007bff !important;
-        /* Color azul fuerte cuando está expandido */
-        color: white !important;
- 
-        font-weight: bold;
-     
-    }
+.tabulator .tabulator-row.tabulator-group {
+    background: #e2e8f0;
+    color: #1e293b;
+    border-bottom: 1px solid #cbd5e1;
+    cursor: pointer;
+}
 
-    
-    .tabulator .tabulator-row.tabulator-group:hover {
-   
-        background-color: #d1ecf1;
-      
-        color: #0c5460;
-       
-    }
+.tabulator .tabulator-row.tabulator-group.tabulator-group-open {
+    background-color: #2563eb !important;
+    color: #fff !important;
+    font-weight: 700;
+}
 
+.tabulator .tabulator-row.tabulator-group:hover {
+    background-color: #cbd5e1;
+    color: #0f172a;
+}
 
-    .tabulator .tabulator-row.tabulator-group.tabulator-group-open:hover {
-        background-color: #0069d9;
-    
-    }
+.tabulator .tabulator-row.tabulator-group.tabulator-group-open:hover {
+    background-color: #1d4ed8;
+}
 
+.tabulator .tabulator-header .tabulator-col .tabulator-header-filter {
+    padding: 3px;
+}
 
+.tabulator .tabulator-header .tabulator-col .tabulator-header-filter input {
+    height: 28px;
+    padding: 4px 8px;
+    font-size: 0.82rem;
+    border-radius: 6px;
+    border: 1px solid rgba(148, 163, 184, 0.34);
+}
 
-
-    .tabulator .tabulator-header .tabulator-col .tabulator-header-filter {
-        padding: 2px;
-    }
-
-
-    .tabulator .tabulator-header .tabulator-col .tabulator-header-filter input {
-        height: 25px;
-        padding: 4px 6px;
-        font-size: 0.8rem;
-        border-radius: 4px;
-    }
-
-    .tabulator-tooltip {
-        background-color: #1e3a8a;
-
-        color: #fff;
-
-        font-size: 14px;
-        padding: 6px 10px;
-        border-radius: 6px;
-        border: 1px solid #0f172a;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
-        z-index: 9999;
-
-    }
+.tabulator-tooltip {
+    background-color: #0f172a;
+    color: #fff;
+    font-size: 13px;
+    padding: 7px 11px;
+    border-radius: 8px;
+    border: 1px solid #1e3a8a;
+    box-shadow: 0 8px 18px rgba(2, 6, 23, 0.4);
+    z-index: 9999;
+}

@@ -105,14 +105,18 @@ class Router
         $controllerName = 'App\\Controllers\\' . $route['controller'];
         $actionName = $route['action'];
 
-        if (class_exists($controllerName)) {
-          $controller = new $controllerName();
-          if (method_exists($controller, $actionName)) {
-            // Llama al método del controlador, pasando los parámetros capturados
-            call_user_func_array([$controller, $actionName], $matches);
-            return; // Ruta encontrada y procesada, salir
-          }
+        if (!class_exists($controllerName)) {
+          continue;
         }
+
+        $controller = new $controllerName();
+        if (!method_exists($controller, $actionName)) {
+          error_log("Router: método inexistente {$controllerName}::{$actionName} para {$method} {$uri}");
+          continue;
+        }
+
+        call_user_func_array([$controller, $actionName], $matches);
+        return;
       }
     }
 

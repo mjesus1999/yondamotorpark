@@ -17,17 +17,20 @@ class ProductController extends Controller
 
   public function index(): void
   {
+    $this->authRequired();
     $products = $this->productModel->getAll();
     $this->view('products.index', ['products' => $products]);
   }
 
   public function search(): void
   {
+    $this->authRequired();
     $this->view('products.search');
   }
 
   public function create(): void
   {
+    $this->authRequired();
     //$marcaModel = new Marca();
     //$marcas = $marcaModel->getAll();
 
@@ -36,6 +39,7 @@ class ProductController extends Controller
 
   public function store(): void
   {
+    $this->authRequired();
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $name = trim($_POST['name'] ?? '');
       $category = trim($_POST['category'] ?? '');
@@ -56,6 +60,7 @@ class ProductController extends Controller
 
   public function edit(int $id): void
   {
+    $this->authRequired();
     $product = $this->productModel->getById($id);
     if ($product) {
       $this->view('products.edit', ['product' => $product]);
@@ -67,6 +72,7 @@ class ProductController extends Controller
 
   public function update(int $id): void
   {
+    $this->authRequired();
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $name = trim($_POST['name'] ?? '');
       $category = trim($_POST['category'] ?? '');
@@ -88,6 +94,7 @@ class ProductController extends Controller
 
   public function delete(int $id): void
   {
+    $this->authRequired();
     if ($_SERVER['REQUEST_METHOD'] === 'POST') { // Usamos POST para la eliminación por seguridad
       if ($this->productModel->delete($id)) {
         $this->redirect('/products');
@@ -103,6 +110,7 @@ class ProductController extends Controller
   }
 
   public function searchById(int $id): void{
+    $this->authRequired();
     header('Content-Type: application/json');
     $product = $this->productModel->getById($id);
 

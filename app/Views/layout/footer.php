@@ -54,7 +54,15 @@
 
 <script>
   (() => {
-    const SERVER_TIMEOUT = parseInt("<?php echo (int) (getenv('SESSION_TIMEOUT') ?: 60); ?>", 10) || 60;
+    const SERVER_TIMEOUT = parseInt("<?php
+      $sessionTimeout = 600;
+      if (class_exists(\App\Config\Env::class)) {
+        $sessionTimeout = (int) \App\Config\Env::get('SESSION_TIMEOUT', '600');
+      } else {
+        $sessionTimeout = (int) (getenv('SESSION_TIMEOUT') ?: 600);
+      }
+      echo max(60, $sessionTimeout);
+    ?>", 10) || 600;
     const INTERVAL_MS = Math.max(5, Math.floor(SERVER_TIMEOUT / 2)) * 1000;
     const KEEPALIVE_URL = '/keepalive';
 

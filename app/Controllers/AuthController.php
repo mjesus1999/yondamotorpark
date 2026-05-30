@@ -62,10 +62,12 @@ class AuthController extends Controller
      */
     public function showLogin(): void
     {
-        if (!empty($_SESSION['user'])) {
+        $userId = (int) ($_SESSION['user']['id'] ?? $_SESSION['user']['idcolaborador'] ?? 0);
+        if ($userId > 0) {
             header('Location: /');
             exit;
         }
+        unset($_SESSION['user']);
         $error = $_SESSION['login_error'] ?? null;
         $message = $_SESSION['login_success'] ?? null;
         $old = $_SESSION['login_old'] ?? null;

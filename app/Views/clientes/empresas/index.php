@@ -1,5 +1,5 @@
 <?php include __DIR__ . '/../../layout/header.php'; ?>
-<link href="https://unpkg.com/tabulator-tables@5.5.2/dist/css/tabulator_simple.min.css" rel="stylesheet">
+<link href="https://unpkg.com/tabulator-tables@6.3.1/dist/css/tabulator_simple.min.css" rel="stylesheet">
 <link rel="stylesheet" href="/assets/css/tabulator.css">
 
 <?php if (isset($_SESSION['success'])): ?>

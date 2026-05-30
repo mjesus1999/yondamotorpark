@@ -7,7 +7,7 @@ $router->add('GET', '/egreso/reporteByFecha','EgresoController', 'indexReporteBy
 
 $router->add('POST', '/egreso/store', 'EgresoController', 'store');
 $router->add('POST', '/egreso/store/comprobante', 'EgresoController', 'storeComprobante');
-$router->add('POST', '/egreso/validarComprobante/{id}', 'EgresoController', 'ValidarComprobante');
+$router->add('POST', '/egreso/validarComprobante/{id}', 'EgresoController', 'validarComprobante');
 
 
 

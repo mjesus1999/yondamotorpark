@@ -1,5 +1,5 @@
 
-USE motorpark;
+-- USE motorpark; -- hosting: seleccionar BD en phpMyAdmin
 
 DELIMITER //
 CREATE FUNCTION fn_format_oc_display_id(
@@ -93,10 +93,7 @@ BEGIN
         oc.idordencompra = p_idordencompra; 
 END //
 
-
-
-CALL sp_detOC_By_IdOC(13);
-
+DELIMITER ;
 
 DROP PROCEDURE IF EXISTS sp_det_oc_escorrecto;
 DELIMITER //
@@ -128,12 +125,10 @@ WHERE oc.idordencompra = idOC
 ORDER BY detoc.iddetordencompra;
 
 END //
-USE motorpark;
-CALL sp_det_oc_escorrecto(54);
-   
 
+DELIMITER ;
 
--- SP QUE ACTUALIZA EL CAMPO ESCORRECTO DE LA TABLA OC Y LA FECHARECEPCION EN TABLA COMPRAS.DELIMITER ;
+-- SP que actualiza escorrecto y fecharecepción en compras
 DELIMITER $$
 
 CREATE PROCEDURE sp_check_recepcion_OC(
@@ -172,6 +167,3 @@ BEGIN
 END $$
 
 DELIMITER ;
-
-
-CALL sp_check_recepcion_OC('S',35);

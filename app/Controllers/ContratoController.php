@@ -164,7 +164,7 @@ class ContratoController extends Controller
      */
     public function apiGetContratos()
     {
-        // $this->authRequired();
+        $this->authRequired();
         header("Content-Type: application/json");
 
         $contratos = $this->contratoModel->getAll();
@@ -188,7 +188,8 @@ class ContratoController extends Controller
      */
     public function apiGetPDFContrato(int $idcontrato)
     {
-        // $this->authRequired();
+        $this->authRequired();
+        header('Content-Type: application/json');
         $data = $this->contratoModel->getDataPDFContrato($idcontrato);
 
         if ($data === false) {

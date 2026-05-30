@@ -1,6 +1,8 @@
 <?php
 //app/Helpers/ApiSms.php
 
+use App\Helpers\CurlHelper;
+
 class ApiSms
 {
     private $token;
@@ -37,7 +39,7 @@ class ApiSms
             $this->autorization
         ]);
         curl_setopt($ch, CURLOPT_URL, $this->url);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        CurlHelper::applySslOptions($ch);
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $fields_string);

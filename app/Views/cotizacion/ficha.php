@@ -1,8 +1,8 @@
 <?php include __DIR__ . '/../layout/header.php'; ?>
 <link rel="stylesheet" href="/assets/css/ficha-coti.css">
-<div class="container-fluid">
+<div class="container-fluid cotizacion-ui cotizacion-ficha-ui">
 
-    <div class="alert alert-info mt-2" role="alert">
+    <div class="alert alert-info mt-2 cotizacion-topbar" role="alert">
         <div class="row">
             <div class="col-md-6 d-flex align-items-center justify-content-start">
                 <nav aria-label="breadcrumb">
@@ -12,7 +12,7 @@
                     </ol>
                 </nav>
             </div>
-            <div class="col-md-6 text-end">
+            <div class="col-md-6 text-end cotizacion-actions">
 
                 <a href="/cotizacion/S" class="btn btn-outline-primary btn-sm">
                     <i class="bi bi-list-task me-1"></i> Listar

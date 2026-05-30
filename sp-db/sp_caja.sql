@@ -1,7 +1,5 @@
+-- USE motorpark; -- hosting: seleccionar BD en phpMyAdmin
 
-USE motorpark;
-    
-SELECT * FROM vehiculos;
 DROP PROCEDURE IF EXISTS sp_getAll_contratos_caja;
 DELIMITER $$
 CREATE PROCEDURE sp_getAll_contratos_caja()
@@ -53,8 +51,6 @@ BEGIN
                     
 END $$
 DELIMITER ;
-
-CALL sp_getAll_contratos_caja();
 
 DROP PROCEDURE IF EXISTS sp_get_cronogramas_by_idcontrato;
 
@@ -172,9 +168,6 @@ END$$
 
 DELIMITER;
 
-
-USE motorpark;
-
 DROP PROCEDURE IF EXISTS sp_get_pagos_by_contrato;
 DELIMITER $$
 
@@ -194,6 +187,9 @@ BEGIN
         p.numerotransaccion,
         p.comprobante,
         p.enlace_pdf_nubefact,
+        p.numero_boleta_sunat,
+        p.comprobante_serie,
+        p.comprobante_tipo_nubefact,
         p.tipo,
         p.observacion
     FROM pagos p
@@ -202,60 +198,9 @@ BEGIN
     ORDER BY c.numcuota, p.fechapago;
 END$$
 
-CALL sp_get_pagos_by_contrato (20);
+DELIMITER ;
 
-
-INSERT INTO
-    cuentaspago (
-        identidadpago,
-        moneda,
-        numcuenta
-    )
-VALUES (
-        1,
-        'Soles',
-        '4258958596585852'
-    );
-
-SELECT *
-FROM entidadespago;
-
-INSERT INTO
-    entidadespago (entidad, tipo)
-VALUES ('BCP', 'Banco');
-
-INSERT INTO
-    pagos (
-        idcronograma,
-        idcuentapago,
-        idcolcaja,
-        mediopago,
-        numerotransaccion,
-        fechapago,
-        amortizacion,
-        comprobante
-    )
-VALUES (
-        43,
-        3,
-        2,
-        'Yape',
-        '458585858558',
-        now(),
-        100,
-        'hghfd/ghfghdf'
-    );
-
-
-
-SHOW EVENTS;
-SHOW TRIGGERS;
-
-
-
-
-
-DROP PROCEDURE  IF EXISTS sp_getClienteBy_DNI;
+DROP PROCEDURE IF EXISTS sp_getClienteBy_DNI;
 
 
 DELIMITER //
@@ -298,9 +243,11 @@ DELIMITER ;
 
 
 
-DROP PROCEDURE sp_registrar_pago_compuesto;
+DROP PROCEDURE IF EXISTS sp_registrar_pago_compuesto;
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_registrar_pago_compuesto`(
+DELIMITER $$
+
+CREATE PROCEDURE sp_registrar_pago_compuesto(
 
     IN p_idcliente INT,
 
@@ -402,11 +349,9 @@ BEGIN
 
     SELECT v_idpago AS id_pago_generado;
 
+END$$
 
-END
-
-
-SHOW CREATE PROCEDURE sp_registrar_pago_compuesto;
+DELIMITER ;
 
 DROP PROCEDURE IF EXISTS sp_get_contratos_completados;
 
@@ -473,22 +418,3 @@ BEGIN
 END $$
 
 DELIMITER ;
-
-CALL sp_get_contratos_completados();
-
-
--- SELECT * FROM contratos
--- WHERE estado = 'FIN';
-
--- SELECT * FROM contratos;
-
-
-UPDATE contratos SET estado = 'FIN' WHERE idcontrato = 40;
-
-SELECT * FROM contratos;
-
-SELECT * FROM cronogramas;
-
-select * from pagos;
-
-SELECT * FROM cotizaciones WHERE idcotizacion = 113;

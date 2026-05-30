@@ -1,7 +1,7 @@
 <!-- app/Views/cobranza/indexVencidos.php -->
 
 <?php include __DIR__ . '/../layout/header.php'; ?>
-<link href="https://unpkg.com/tabulator-tables@5.5.2/dist/css/tabulator_simple.min.css" rel="stylesheet">
+<link href="https://unpkg.com/tabulator-tables@6.3.1/dist/css/tabulator_simple.min.css" rel="stylesheet">
 <link rel="stylesheet" href="/assets/css/tabulator.css">
 
 <!-- Includes del mapa viewer -->
@@ -30,9 +30,9 @@
     }
 </style>
 
-<div class="container-fluid">
+<div class="container-fluid cobranza-ui">
     <!-- CABECERA -->
-    <div class="alert alert-info mt-2" role="alert">
+    <div class="alert alert-info mt-2 cobranza-topbar" role="alert">
         <div class="row">
             <div class="col-md-6 d-flex align-items-center justify-content-start">
                 <nav aria-label="breadcrumb">
@@ -44,7 +44,7 @@
                     </ol>
                 </nav>
             </div>
-            <div class="col-md-6 text-end">
+            <div class="col-md-6 text-end cobranza-actions">
                 <button id="btn-exportar-excel" class="btn btn-sm btn-success">
                     <i class="bi bi-file-earmark-excel me-1"></i> Exportar Excel
                 </button>
@@ -115,7 +115,7 @@
 
 <?php include __DIR__ . '/../layout/footer.php'; ?>
 <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
-<script src="https://unpkg.com/tabulator-tables@5.5.2/dist/js/tabulator.min.js"></script>
+<script src="https://unpkg.com/tabulator-tables@6.3.1/dist/js/tabulator.min.js"></script>
 <script src="/assets/js/mapa-viewer.js"></script>
 
 <script>

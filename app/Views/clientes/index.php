@@ -3,7 +3,7 @@
 include __DIR__ . '/../layout/header.php';
 ?>
 
-<link href="https://unpkg.com/tabulator-tables@5.5.2/dist/css/tabulator_simple.min.css" rel="stylesheet">
+<link href="https://unpkg.com/tabulator-tables@6.3.1/dist/css/tabulator_simple.min.css" rel="stylesheet">
 <link rel="stylesheet" href="/assets/css/tabulator.css">
 
 <?php if (isset($_SESSION['success'])): ?>
@@ -183,9 +183,8 @@ include __DIR__ . '/../layout/header.php';
 
 <?php include __DIR__ . '/../layout/footer.php'; ?>
 
-<script src="https://unpkg.com/tabulator-tables@5.5.2/dist/js/tabulator.min.js"></script>
+<script src="https://unpkg.com/tabulator-tables@6.3.1/dist/js/tabulator.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<script type="text/javascript" src="https://unpkg.com/tabulator-tables@6.3.1/dist/js/tabulator.min.js"></script>
 
 <script>
     document.addEventListener("DOMContentLoaded", () => {

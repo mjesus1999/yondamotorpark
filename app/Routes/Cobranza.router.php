@@ -12,7 +12,6 @@ $router->add('GET', '/Cobranza/getVencidos', 'CobranzaController', 'getVencidos'
 $router->add('GET', '/Cobranza/getInfoCliente/{id}', 'CobranzaController', 'getInfoCliente');
 $router->add('GET', '/Cobranza/getDetalleContrato/{id}', 'CobranzaController', 'getDetalleContrato');
 $router->add('GET', '/Cobranza/getCronogramaPagos/{id}', 'CobranzaController', 'getCronogramaPagos');
-$router->add('GET', '/Cobranza/getResumenFinanciero/{id}', 'CobranzaController', 'getResumenFinanciero');
 $router->add('GET', '/Cobranza/getHistorialPagos/{id}/{limite}', 'CobranzaController', 'getHistorialPagos');
 
 // RUTA PARA ENVIAR SMS
@@ -27,11 +26,11 @@ $router->add('GET', '/Vencidos', 'CobranzaController', 'indexVencidos');
 
 
 //REPORTES PDF NOTIFICACION DE COBRANZA ATRASADO
-$router->add('GET', '/reportesAtrasado/(\d+)', 'CobranzaController', 'reporteCobranzaAtrasado');
+$router->add('GET', '/reportesAtrasado/{id}', 'CobranzaController', 'reporteCobranzaAtrasado');
 $router->add('GET', '/Cobranza/getDatosReporteNotificacion', 'CobranzaController', 'getDatosReporteNotificacion');
 
 //REPORTES PDF NOTIFICACION DE RECOJO VEHICULAR
-$router->add('GET', '/reportesRecojo/(\d+)', 'CobranzaController', 'reporteRecojoVehicular');
+$router->add('GET', '/reportesRecojo/{id}', 'CobranzaController', 'reporteRecojoVehicular');
 $router->add('GET', '/Cobranza/getDatosReporteRecojoVehicular', 'CobranzaController', 'getDatosReporteRecojoVehicular');
 
 $router->add('POST', '/Cobranza/actualizarVencidos', 'CobranzaController', 'actualizarVencidos');

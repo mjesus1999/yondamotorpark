@@ -2,9 +2,10 @@
 -- VISTAS DE USUARIO.PHP 
 */
 
-USE motorpark;
+-- USE motorpark; -- hosting: seleccionar BD en phpMyAdmin
 
 -- VISTA DE EJEMPLO PARA VISUALIZAR CARGOS CON USUARIOS
+DROP VIEW IF EXISTS vw_colaboradores_con_cargo;
 CREATE VIEW vw_colaboradores_con_cargo AS
 SELECT 
     col.idcolaborador,
@@ -198,6 +199,7 @@ JOIN cargos cg ON cg.idcargo = cl.idcargo;
 
 
 -- VISTA PRUEBA (VISTA DE MOSTRAR CONTRATOS / SI SE DESHABILITA UN USUARIO PASA A SER UN CONTRATO SIN CUENTA)
+DROP VIEW IF EXISTS vwContractsWithoutColaborador;
 CREATE VIEW vwContractsWithoutColaborador AS
 SELECT
   cl.idcontratolaboral,

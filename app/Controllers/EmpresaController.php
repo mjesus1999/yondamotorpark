@@ -61,7 +61,7 @@ class EmpresaController extends Controller
     {
         $empresas = $this->empresaModel->getAllEmpresasCliente();
         $this->authRequired();
-        $this->view('/clientes/empresas.index', ['empresasClientes' => $empresas]);
+        $this->view('clientes.empresas.index', ['empresasClientes' => $empresas]);
     }
 
     /**
@@ -74,7 +74,7 @@ class EmpresaController extends Controller
     public function createEmpresaClient(): void
     {
         $this->authRequired();
-        $this->view('/clientes/empresas.create');
+        $this->view('clientes.empresas.create');
     }
 
     /**
@@ -153,12 +153,12 @@ class EmpresaController extends Controller
         $errores = array_filter($errores);
 
         if (!empty($errores)) {
-            $this->view('/clientes/empresas.create', ['error' => implode("<br>", $errores), 'data' => $empresa]);
+            $this->view('clientes.empresas.create', ['error' => implode("<br>", $errores), 'data' => $empresa]);
             return -1;
         }
 
         if ($this->empresaModel->rucExiste($empresa['ruc'])) {
-            $this->view('/clientes/empresas.create', [
+            $this->view('clientes.empresas.create', [
                 'error' => 'El RUC ingresado ya se encuentra registrado',
                 'data' => $empresa
             ]);
@@ -184,10 +184,10 @@ class EmpresaController extends Controller
                 $this->redirect('/clientes/empresas');
                 return $idCliente; // Se pudo agregar
             } else {
-                $this->view('clientes/empresas.create', ['error' => 'Error al crear el cliente.']);
+                $this->view('clientes.empresas.create', ['error' => 'Error al crear el cliente.']);
             }
         } else {
-            $this->view('clientes/empresas.create', ['error' => 'Error al registrar la empresa.']);
+            $this->view('clientes.empresas.create', ['error' => 'Error al registrar la empresa.']);
         }
 
         return -1; // No se pudo agregar a la DB
@@ -207,7 +207,7 @@ class EmpresaController extends Controller
         $this->authRequired();
         $empresa = $this->empresaModel->getById($id);
         if ($empresa) {
-            $this->view('clientes/empresas.edit', ['empresaCliente' => $empresa]);
+            $this->view('clientes.empresas.edit', ['empresaCliente' => $empresa]);
         } else {
             http_response_code(404);
             $this->view('errors.404');
@@ -275,7 +275,7 @@ class EmpresaController extends Controller
 
         if (!empty($errores)) {
             $empresaCliente = $this->empresaModel->getById($id);
-            $this->view('clientes/empresas.edit', [
+            $this->view('clientes.empresas.edit', [
                 'empresaCliente' => $empresaCliente,
                 'error' => implode("<br>", $errores)
             ]);
@@ -290,12 +290,12 @@ class EmpresaController extends Controller
             $_SESSION['success'] = 'Cliente actualizado correctamente';
             $this->redirect('/clientes/empresas');
         } elseif ($resultado === 0) {
-            $this->view('clientes/empresas.edit', [
+            $this->view('clientes.empresas.edit', [
                 'empresaCliente' => $empresaCliente,
                 'error' => 'No se realizaron cambios.'
             ]);
         } else {
-            $this->view('clientes/empresas.edit', [
+            $this->view('clientes.empresas.edit', [
                 'empresaCliente' => $empresaCliente,
                 'error' => 'Error al actualizar el cliente.'
             ]);

@@ -15,9 +15,9 @@ $router->add('POST', '/recoverAccount', 'AuthController', 'handleRecover');
 //CREAR CUENTA
 
 $router->add('GET', '/createAccount', 'UsuarioController', 'showCreateFromContracts');
-$router->add('GET', '/createAccountAuth', 'UsuarioController', 'showCreateFromContractsAuth');
+$router->add('GET', '/createAccountAuth', 'UsuarioController', 'showCreateFromContracts');
 $router->add('POST', '/createFromContract', 'UsuarioController', 'createFromContract');
-$router->add('POST', '/createFromContractAuth', 'UsuarioController', 'createFromContractAuth');
+$router->add('POST', '/createFromContractAuth', 'UsuarioController', 'createFromContract');
 
 $router->add('GET', '/keepalive', 'AuthController', 'keepAlive');
 

@@ -1,6 +1,6 @@
 
-USE motorpark;
-DROP PROCEDURE sp_pagoInicial;DROP PROCEDURE IF EXISTS sp_pagoInicial;
+-- USE motorpark; -- hosting: seleccionar BD en phpMyAdmin
+DROP PROCEDURE IF EXISTS sp_pagoInicial;
 DELIMITER //
 
 CREATE PROCEDURE sp_pagoInicial(
@@ -98,7 +98,7 @@ DELIMITER ;
 
 
 
-DROP PROCEDURE sp_getActaSeparacionByIdCotizacion;
+DROP PROCEDURE IF EXISTS sp_getActaSeparacionByIdCotizacion;
 
 
 
@@ -198,8 +198,3 @@ BEGIN
 END //
 
 DELIMITER ;
-
-
-CALL sp_getActaSeparacionByIdCotizacion(92);
-
-select * from cotizaciones;

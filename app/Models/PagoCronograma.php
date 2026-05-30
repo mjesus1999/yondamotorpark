@@ -115,25 +115,51 @@ class PagoCronograma
 
 
 
-    public function actualizarEnlaceYDeclarado($idPago, $urlPdf, $urlXml, $urlCdr, $numeroBoleta)
-    {
-        // Usamos el campo declarado para marcar que la boleta fue enviada
+    public function actualizarEnlaceYDeclarado(
+        $idPago,
+        $urlPdf,
+        $urlXml,
+        $urlCdr,
+        $numeroBoleta,
+        ?string $serieComprobante = null,
+        ?int $tipoNubefact = null
+    ) {
         $sql = "UPDATE pagos SET 
                 enlace_pdf_nubefact = :pdf, 
                 enlace_xml_nubefact = :xmlUrl,
                 numero_boleta_sunat = :num, 
                 enlace_del_cdr = :cdr,
-                declarado = 'S' 
-            WHERE idpago = :id";
+                declarado = 'S'";
 
-        $stmt = $this->db->prepare($sql);
-        return $stmt->execute([
+        $params = [
             ':pdf' => $urlPdf,
             ':xmlUrl' => $urlXml,
             ':num' => $numeroBoleta,
             ':cdr' => $urlCdr,
-            ':id' => $idPago
-        ]);
+            ':id' => $idPago,
+        ];
+
+        if ($serieComprobante !== null && $serieComprobante !== '') {
+            $sql .= ", comprobante_serie = :serie";
+            $params[':serie'] = $serieComprobante;
+        }
+        if ($tipoNubefact !== null && ($tipoNubefact === 1 || $tipoNubefact === 2)) {
+            $sql .= ", comprobante_tipo_nubefact = :tipo_nubefact";
+            $params[':tipo_nubefact'] = $tipoNubefact;
+        }
+
+        $sql .= " WHERE idpago = :id";
+
+        try {
+            $stmt = $this->db->prepare($sql);
+            return $stmt->execute($params);
+        } catch (PDOException $e) {
+            if ($serieComprobante !== null || $tipoNubefact !== null) {
+                return $this->actualizarEnlaceYDeclarado($idPago, $urlPdf, $urlXml, $urlCdr, $numeroBoleta);
+            }
+            error_log('actualizarEnlaceYDeclarado: ' . $e->getMessage());
+            return false;
+        }
     }
 
 
@@ -294,25 +320,69 @@ class PagoCronograma
      *                    - nombrecuenta: Formato "Entidad - NumCuenta - Moneda"
      *                    o array vacío en caso de error
      */
-    public function getNumCuentasPagos(): ?array
+    public function getNumCuentasPagos(?string $tipoCuenta = null): ?array
     {
         $query = " SELECT 
                         cp.idcuentapago,
-                        CONCAT(ep.entidad, ' - ', cp.numcuenta, ' - ' , cp.moneda) AS nombrecuenta
+                        cp.tipo_cuenta,
+                        cp.numcuenta,
+                        cp.cuenta_corriente,
+                        ep.entidad,
+                        CONCAT(
+                            ep.entidad,
+                            IF(cp.tipo_cuenta = 'CCI', ' - CCI ', ' - '),
+                            cp.numcuenta,
+                            IF(cp.cuenta_corriente IS NOT NULL AND cp.cuenta_corriente != '',
+                               CONCAT(' (CTA ', cp.cuenta_corriente, ')'), ''),
+                            ' - ',
+                            cp.moneda
+                        ) AS nombrecuenta
                     FROM 
                         cuentaspago cp
                     JOIN 
-                        entidadespago ep ON cp.identidadpago = ep.identidadpago;
-                    ";
+                        entidadespago ep ON cp.identidadpago = ep.identidadpago
+                    WHERE 1=1";
+        if ($tipoCuenta === 'Cuenta' || $tipoCuenta === 'CCI') {
+            $query .= " AND cp.tipo_cuenta = :tipo_cuenta";
+        }
+        $query .= " ORDER BY ep.entidad ASC, cp.tipo_cuenta ASC";
         try {
             $stmt = $this->db->prepare($query);
+            if ($tipoCuenta === 'Cuenta' || $tipoCuenta === 'CCI') {
+                $stmt->bindValue(':tipo_cuenta', $tipoCuenta);
+            }
             $stmt->execute();
-            $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        } catch (PDOException $error) {
+            error_log('getNumCuentasPagos: ' . $error->getMessage());
+            if (stripos($error->getMessage(), 'tipo_cuenta') !== false) {
+                return [
+                    [
+                        '_migration_required' => true,
+                        'mensaje' => 'Falta ejecutar sp-db/ejecutar_interbancario_ahora.sql en la base de datos.',
+                    ],
+                ];
+            }
+            return [];
+        }
+    }
 
-            return $results;
+    public function cuentaValidaParaMedio(int $idCuentaPago, string $medioPago): bool
+    {
+        $tipoEsperado = \App\Config\MediosPago::tipoCuentaParaMedio($medioPago);
+        if ($tipoEsperado === null) {
+            return true;
+        }
+        $query = "SELECT tipo_cuenta FROM cuentaspago WHERE idcuentapago = :id LIMIT 1";
+        try {
+            $stmt = $this->db->prepare($query);
+            $stmt->bindValue(':id', $idCuentaPago, PDO::PARAM_INT);
+            $stmt->execute();
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $row && ($row['tipo_cuenta'] ?? '') === $tipoEsperado;
         } catch (PDOException $error) {
             error_log($error->getMessage());
-            return [];
+            return false;
         }
     }
 
@@ -323,12 +393,21 @@ class PagoCronograma
     {
         $query = " SELECT 
                         cp.idcuentapago,
-                        CONCAT(ep.entidad, ' - ', cp.numcuenta) AS nombrecuenta
+                        cp.tipo_cuenta,
+                        cp.numcuenta,
+                        cp.cuenta_corriente,
+                        ep.entidad,
+                        CONCAT(
+                            ep.entidad,
+                            IF(cp.tipo_cuenta = 'CCI', ' - CCI ', ' - '),
+                            cp.numcuenta,
+                            IF(cp.cuenta_corriente IS NOT NULL AND cp.cuenta_corriente != '',
+                               CONCAT(' (CTA ', cp.cuenta_corriente, ')'), '')
+                        ) AS nombrecuenta
                     FROM 
                         cuentaspago cp
                     JOIN 
                         entidadespago ep ON cp.identidadpago = ep.identidadpago
-
                         WHERE cp.idcuentapago = :id
                     ";
         try {

@@ -146,12 +146,30 @@ class Caja
             'tasa_interes' => round($pct, 2),
             'monto_interes' => $montoInteres,
             'cuota_total_mensual' => round($cuotaMens, 2),
+            'monto_financiar' => round(max(0, (float) ($r['monto_valor'] ?? 0) - (float) ($r['monto_inicial'] ?? 0)), 2),
+            'fechas_cuota_import' => self::fechasCuotaDesdeFilaImport($r),
             'mora_3_dias' => isset($r['mora_monto']) ? (float) $r['mora_monto'] : null,
             'total_con_mora' => isset($r['total_con_mora']) ? (float) $r['total_con_mora'] : null,
             'numero_cuota_pagada' => $numPagada,
             'id_contrato' => trim((string) ($r['id_contrato'] ?? '')) ?: null,
             'fuente' => 'import_excel',
         ];
+    }
+
+    /**
+     * @return array<int, string|null>
+     */
+    private static function fechasCuotaDesdeFilaImport(array $r): array
+    {
+        $out = [];
+        for ($n = 1; $n <= 5; $n++) {
+            $fp = trim((string) ($r['fecha_pago_' . $n] ?? ''));
+            if ($fp !== '' && $fp !== '0000-00-00') {
+                $out[$n] = $fp;
+            }
+        }
+
+        return $out;
     }
 
     /**
@@ -253,8 +271,7 @@ class Caja
                 ORDER BY fecha_venta DESC, id DESC";
 
         try {
-            $merged = [];
-            $seen = [];
+            $byKey = [];
 
             foreach ($variantes as $doc) {
                 $stmt = $this->db->prepare($sql);
@@ -265,12 +282,7 @@ class Caja
                 }
                 foreach ($rows as $row) {
                     $row['fuente'] = 'registro_ventas_vehiculares';
-                    $key = $this->registroVentasRowKey($row);
-                    if (isset($seen[$key])) {
-                        continue;
-                    }
-                    $seen[$key] = true;
-                    $merged[] = $row;
+                    $byKey[$this->registroVentasRowKey($row)] = $row;
                 }
             }
 
@@ -286,12 +298,7 @@ class Caja
                         }
                         foreach ($imp as $row) {
                             $mapped = $this->mapImportContratoEneroRowToRegistroVentas($row);
-                            $key = $this->registroVentasRowKey($mapped);
-                            if (isset($seen[$key])) {
-                                continue;
-                            }
-                            $seen[$key] = true;
-                            $merged[] = $mapped;
+                            $byKey[$this->registroVentasRowKey($mapped)] = $mapped;
                         }
                     }
                 } catch (PDOException $e) {
@@ -300,9 +307,11 @@ class Caja
                 }
             }
 
-            if ($merged === []) {
+            if ($byKey === []) {
                 return [];
             }
+
+            $merged = array_values($byKey);
             usort($merged, static function (array $a, array $b): int {
                 $fa = $a['fecha_venta'] ?? '';
                 $fb = $b['fecha_venta'] ?? '';
@@ -931,24 +940,52 @@ class Caja
 
 
     // 2. Actualizar datos de Nubefact tras éxito
-     public function actualizarDatosFacturacion(int $idPago, string $pdf, string $xml, ?string $cdr, int $numeroBoleta): bool
-     {
+     public function actualizarDatosFacturacion(
+         int $idPago,
+         string $pdf,
+         string $xml,
+         ?string $cdr,
+         int $numeroBoleta,
+         ?string $serieComprobante = null,
+         ?int $tipoNubefact = null
+     ): bool {
          $sql = "UPDATE pagos SET 
                      enlace_pdf_nubefact = :pdf,
                      enlace_xml_nubefact = :xml,
                      enlace_del_cdr = :cdr,
                      numero_boleta_sunat = :num,
-                     declarado = 'S'
-                 WHERE idpago = :idpago";
+                     declarado = 'S'";
 
-         $stmt = $this->db->prepare($sql);
-         return $stmt->execute([
+         $params = [
              ':pdf' => $pdf,
              ':xml' => $xml,
              ':cdr' => $cdr,
              ':num' => $numeroBoleta,
-             ':idpago' => $idPago
-         ]);
+             ':idpago' => $idPago,
+         ];
+
+         if ($serieComprobante !== null && $serieComprobante !== '') {
+             $sql .= ", comprobante_serie = :serie";
+             $params[':serie'] = $serieComprobante;
+         }
+         if ($tipoNubefact !== null && ($tipoNubefact === 1 || $tipoNubefact === 2)) {
+             $sql .= ", comprobante_tipo_nubefact = :tipo_nubefact";
+             $params[':tipo_nubefact'] = $tipoNubefact;
+         }
+
+         $sql .= " WHERE idpago = :idpago";
+
+         try {
+             $stmt = $this->db->prepare($sql);
+             return $stmt->execute($params);
+         } catch (PDOException $e) {
+             // Columnas nuevas aún no aplicadas en Hostinger: actualizar sin serie/tipo
+             if ($serieComprobante !== null || $tipoNubefact !== null) {
+                 return $this->actualizarDatosFacturacion($idPago, $pdf, $xml, $cdr, $numeroBoleta);
+             }
+             error_log('actualizarDatosFacturacion: ' . $e->getMessage());
+             return false;
+         }
      }
 
      public function actualizarCdrFacturacion(int $idPago, ?string $cdr): bool

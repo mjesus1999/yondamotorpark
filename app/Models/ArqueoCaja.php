@@ -152,14 +152,50 @@ class ArqueoCaja
             $stmt->execute();
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
             $stmt->closeCursor();
+
+            $efectivo = floatval($result['ingresos_efectivo_nuevos'] ?? 0);
+            $yape = floatval($result['ingresos_yape'] ?? 0);
+            $plin = floatval($result['ingresos_plin'] ?? 0);
+            $transferencia = floatval($result['ingresos_transferencia'] ?? 0);
+            $interbancario = floatval($result['ingresos_interbancario'] ?? 0);
+            $digital = floatval($result['ingresos_digital_nuevos'] ?? ($yape + $plin + $transferencia + $interbancario));
+
             return [
-                'ingresos_efectivo_nuevos' => floatval($result['ingresos_efectivo_nuevos'] ?? 0),
-                'ingresos_digital_nuevos' => floatval($result['ingresos_digital_nuevos'] ?? 0),
+                'ingresos_efectivo_nuevos' => $efectivo,
+                'ingresos_yape' => $yape,
+                'ingresos_plin' => $plin,
+                'ingresos_transferencia' => $transferencia,
+                'ingresos_interbancario' => $interbancario,
+                'ingresos_digital_nuevos' => $digital,
             ];
         } catch (PDOException $e) {
             error_log("Error al obtener ingresos desde hora: " . $e->getMessage());
-            return ['ingresos_efectivo_nuevos' => 0.00, 'ingresos_digital_nuevos' => 0.00];
+            return [
+                'ingresos_efectivo_nuevos' => 0.00,
+                'ingresos_yape' => 0.00,
+                'ingresos_plin' => 0.00,
+                'ingresos_transferencia' => 0.00,
+                'ingresos_interbancario' => 0.00,
+                'ingresos_digital_nuevos' => 0.00,
+            ];
         }
+    }
+
+    /**
+     * Etiquetas y montos de ingresos por medio de pago para la vista de arqueo.
+     *
+     * @param array $ingresos Resultado de obtenerIngresosDesde()
+     * @return array<int, array{medio: string, monto: float}>
+     */
+    public static function ingresosDesgloseParaVista(array $ingresos): array
+    {
+        return [
+            ['medio' => 'Efectivo', 'monto' => floatval($ingresos['ingresos_efectivo_nuevos'] ?? 0)],
+            ['medio' => 'Yape', 'monto' => floatval($ingresos['ingresos_yape'] ?? 0)],
+            ['medio' => 'Plin', 'monto' => floatval($ingresos['ingresos_plin'] ?? 0)],
+            ['medio' => 'Transferencia bancaria', 'monto' => floatval($ingresos['ingresos_transferencia'] ?? 0)],
+            ['medio' => 'Interbancario', 'monto' => floatval($ingresos['ingresos_interbancario'] ?? 0)],
+        ];
     }
 
     /**

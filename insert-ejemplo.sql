@@ -1,5 +1,5 @@
 
-USE motorpark;
+-- USE motorpark; -- hosting
 
 INSERT INTO formatocotizacion (tipocotizacion, fechainicio, fechafin)
 VALUES
@@ -151,7 +151,7 @@ INSERT INTO contratos (
 UPDATE contratos SET diapago = 13 WHERE idcontrato = 2;
 SELECT * FROM contratos;
 
-USE motorpark;
+-- USE motorpark; -- hosting
 DROP PROCEDURE generar_cronograma;
 
 update cronogramas SET fechapago = '2025-08-07', penalidad = 300.00 WHERE numcuota = 1;

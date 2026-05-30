@@ -1,5 +1,5 @@
 
-USE motorpark;
+-- USE motorpark; -- hosting: seleccionar BD en phpMyAdmin
 
 DELIMITER $$
 CREATE PROCEDURE spu_caja_reporte_completo_hoy()
@@ -26,8 +26,6 @@ BEGIN
         p.fechapago;
 END$$
 DELIMITER ;
-
-CALL spu_caja_reporte_completo_hoy();
 
 
 
@@ -91,6 +89,7 @@ SELECT
     COALESCE(SUM(CASE WHEN p.mediopago = 'Yape' THEN p.amortizacion ELSE 0 END), 0) AS total_yape,
     COALESCE(SUM(CASE WHEN p.mediopago = 'Plin' THEN p.amortizacion ELSE 0 END), 0) AS total_plin,
     COALESCE(SUM(CASE WHEN p.mediopago = 'Transferencia Bancaria' THEN p.amortizacion ELSE 0 END), 0) AS total_transferencia,
+    COALESCE(SUM(CASE WHEN p.mediopago = 'Interbancario' THEN p.amortizacion ELSE 0 END), 0) AS total_interbancario,
 
     COALESCE(SUM(p.amortizacion), 0) AS total_diario
 FROM
@@ -105,5 +104,3 @@ DROP TEMPORARY TABLE IF EXISTS fechaintervalo;
 
 END$$
 DELIMITER ;
-
-CALL ObtenerReportePagosPorFechas('2025-08-22', '2025-08-29');

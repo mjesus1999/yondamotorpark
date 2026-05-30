@@ -1,7 +1,6 @@
 
-USE motorpark;
+-- USE motorpark; -- hosting: seleccionar BD en phpMyAdmin
 
-select * from ordenescompra;
 DROP PROCEDURE IF EXISTS sp_oc_por_estado;
 DELIMITER $$
 CREATE PROCEDURE sp_oc_por_estado(IN p_estado VARCHAR(50))
@@ -70,11 +69,9 @@ DELIMITER ;
 -- INSERT INTO entidadespago(entidad)VALUES('Banco Azteca');
 
 
-CALL sp_oc_por_estado('proceso');
+DROP PROCEDURE IF EXISTS sp_oc_reporte_general;
 
-
-DROP PROCEDURE sp_oc_reporte_general;
-
+DELIMITER $$
 CREATE PROCEDURE sp_oc_reporte_general()
 BEGIN
   
@@ -127,12 +124,11 @@ BEGIN
     LEFT JOIN TotalPagado_CTE tp ON oc.idordencompra = tp.idordencompra
     
     ORDER BY oc.idordencompra DESC;
-END
+END$$
 
-CALL sp_oc_reporte_general();
+DELIMITER ;
 
-
-DROP PROCEDURE sp_getAll_OC_Compras;
+DROP PROCEDURE IF EXISTS sp_getAll_OC_Compras;
 
 DELIMITER //
 CREATE PROCEDURE sp_getAll_OC_Compras()
@@ -329,7 +325,7 @@ BEGIN
 
 END //
 
-DELIMITER CALL sp_get_OC_details_for_recepcion(13);
+DELIMITER ;
 
 
 
@@ -510,10 +506,9 @@ BEGIN
     ORDER BY
         oc.idordencompra DESC;
 
-END 
+END //
 
 DELIMITER ;
-CALL sp_reporte_general_oc_proceso();
 
 
 
@@ -663,10 +658,9 @@ BEGIN
 END //
 DELIMITER ;
 
+DROP PROCEDURE IF EXISTS sp_eliminar_OC;
 
-CALL sp_reporte_concesionario_detallado(1);
-
-
+DELIMITER //
 
 CREATE PROCEDURE sp_eliminar_OC(
 IN idordencompra_ INT
@@ -676,3 +670,5 @@ BEGIN
     DELETE FROM ordenescompra WHERE idordencompra = idordencompra_;
 
 END //
+
+DELIMITER ;

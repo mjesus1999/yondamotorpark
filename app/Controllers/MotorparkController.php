@@ -65,8 +65,8 @@ class MotorparkController extends Controller
    */
   public function getMotorPark(): void
   {
-    header('Content-Type: application/json');
     $this->authRequired();
+    header('Content-Type: application/json');
     $motorpark = $this->motorParkModel->getMotorPark();
 
     if ($motorpark) {

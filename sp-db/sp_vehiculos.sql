@@ -1,5 +1,5 @@
 
-USE motorpark;
+-- USE motorpark; -- hosting: seleccionar BD en phpMyAdmin
 
 
 DROP PROCEDURE IF EXISTS sp_vehiculo_update_recepcion_OC;
@@ -33,8 +33,6 @@ BEGIN
 END //
 
 DELIMITER ;
-
-SELECT * FROM vehiculos WHERE idvehiculo = 99;
 
 DELIMITER //
 
@@ -70,39 +68,7 @@ BEGIN
 
 END //
 
-CALL sp_vehiculo_OC_registrar(13,1,'FULL','Rojo','','','','');
-
-
-
-
-
-INSERT INTO combustibles(combustible)
-		VALUES ('Gasolina'),
-			   ('Diesel'),
-               ('GLP'),
-               ('GNV'),
-               ('Dual: Gasolina, GLP');
-               
-SELECT * FROM combustibles;
-
-
-
-CALL sp_vehiculo_OC_registrar(
-  13,             -- idmodelo_ 
-  1,             -- idcombustible_ 
-  2,             -- idlogistica_ 
-  NULL,          -- idlocal_ (es NULL)
-  'Full',        -- version_ 
-  'nuevo',       -- condicion_ 
-  NULL,          -- color_
-  NULL,          -- chasis_
-  NULL,          -- placa_
-  NULL,          -- placarotativa_
-  NULL,          -- seriemotor_
-  18000.00       -- precioventa_
-);
-	
-SELECT * FROM vehiculos;
+DELIMITER ;
 
 
 

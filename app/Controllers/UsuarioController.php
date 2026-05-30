@@ -75,6 +75,20 @@ class UsuarioController extends Controller
     $this->localModel = new Local();
   }
 
+  private function sessionUserId(): int
+  {
+    return (int) ($_SESSION['user']['id'] ?? $_SESSION['user']['idcolaborador'] ?? 0);
+  }
+
+  private function authAdminUsuariosOrSelf(int $targetId): void
+  {
+    if ($targetId > 0 && $targetId === $this->sessionUserId()) {
+      $this->authRequired(null);
+      return;
+    }
+    $this->authRequired('usuarios');
+  }
+
   /**
    * Muestra el listado de todos los usuarios
    * 
@@ -84,7 +98,7 @@ class UsuarioController extends Controller
    */
   public function index(): void
   {
-    $this->authRequired();
+    $this->authRequired('usuarios');
     $usuario = $this->usuarioModel->getAll();
     $this->view('usuarios.index', ['Usuarios' => $usuario]);
   }
@@ -98,6 +112,7 @@ class UsuarioController extends Controller
    */
   public function create(): void
   {
+    $this->authRequired('usuarios');
     $areas = $this->usuarioModel->getAllAreas();
     /* $locales = $this->usuarioModel->getAllLocales(); */
     $locales = $this->localModel->getAllLocales();
@@ -116,6 +131,7 @@ class UsuarioController extends Controller
    */
   public function getCargosByArea(): void
   {
+    $this->authRequired(null);
     $idArea = isset($_GET['idarea']) ? (int) $_GET['idarea'] : 0;
     $cargos = $this->usuarioModel->getCargosByArea($idArea);
 
@@ -136,6 +152,7 @@ class UsuarioController extends Controller
    */
   public function store(): void
   {
+    $this->authRequired('usuarios');
     //obtener datos del formulario
     $idPersona = (int) ($_POST['idpersona'] ?? 0);
     $idCargo = (int) ($_POST['idcargo'] ?? 0);
@@ -248,9 +265,10 @@ class UsuarioController extends Controller
    */
   public function changePassword(): void
   {
+    $idColab = (int) ($_POST['idcolaborador'] ?? 0);
+    $this->authAdminUsuariosOrSelf($idColab);
     header('Content-Type: application/json; charset=utf-8');
 
-    $idColab = (int) ($_POST['idcolaborador'] ?? 0);
     $p1 = $_POST['password1'] ?? '';
     $p2 = $_POST['password2'] ?? '';
 
@@ -293,6 +311,7 @@ class UsuarioController extends Controller
    */
   public function disabled(int $id): void
   {
+    $this->authRequired('usuarios');
     $disabled = $this->usuarioModel->disabled($id);
     if ($disabled) {
       $_SESSION['success_message'] = 'Usuario deshabilitado correctamente.';
@@ -312,7 +331,7 @@ class UsuarioController extends Controller
    */
   public function profile(): void
   {
-    $this->authRequired();
+    $this->authRequired(null);
     //ID por URL, recógelo: $id = (int) $params['id'];
     $idColab = $_SESSION['user']['id'];
 
@@ -330,7 +349,7 @@ class UsuarioController extends Controller
    */
   public function uploadAvatar(): void
   {
-    $this->authRequired();
+    $this->authRequired(null);
     header('Content-Type: application/json; charset=utf-8');
 
     $avatarErrors = $this->validator->validateAvatarUpload($_FILES['avatar'] ?? null);
@@ -395,6 +414,7 @@ class UsuarioController extends Controller
    */
   public function showCreateFromContracts(): void
   {
+    $this->authRequired('auth');
     $contracts = $this->usuarioModel->getContractsWithoutColaborador();
 
     // Obtener locales desde Local::getAllLocales()
@@ -422,8 +442,7 @@ class UsuarioController extends Controller
    */
   public function createFromContract(): void
   {
-    /* if (session_status() !== PHP_SESSION_ACTIVE)
-      session_start(); */
+    $this->authRequired('auth');
     $prevUser = $_SESSION['user'] ?? null;
 
     $idContrato = (int) ($_POST['idcontrato'] ?? 0);
@@ -500,7 +519,7 @@ class UsuarioController extends Controller
    */
   public function toggleRestriccion(): void
   {
-    $this->authRequired();
+    $this->authRequired('usuarios');
 
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
       $this->redirect('/usuarios');
@@ -551,9 +570,9 @@ class UsuarioController extends Controller
    */
   public function edit(int $id): void
   {
-    $this->authRequired();
-
     $idColab = (int) $id;
+    $this->authAdminUsuariosOrSelf($idColab);
+
     if ($idColab <= 0) {
       http_response_code(404);
       $this->view('errors.404');
@@ -590,14 +609,14 @@ class UsuarioController extends Controller
    */
   public function update(): void
   {
-    $this->authRequired();
-
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
       $this->redirect('/usuarios');
       return;
     }
 
     $idColab = (int) ($_POST['idcolaborador'] ?? 0);
+    $this->authAdminUsuariosOrSelf($idColab);
+
     $idLocal = !empty($_POST['idlocal']) ? (int) $_POST['idlocal'] : null;
     $nombres = trim($_POST['nombres'] ?? '');
     $apellidos = trim($_POST['apellidos'] ?? '');

@@ -2,6 +2,9 @@
 use App\Config\CajaRoutes;
 
 include __DIR__ . '/../layout/header.php';
+
+$notasPorPago = $notasPorPago ?? [];
+$idcontrato = (int) ($idcontrato ?? 0);
 ?>
 
 <style>
@@ -257,12 +260,13 @@ include __DIR__ . '/../layout/header.php';
                                 <th class="text-center">Observaciones</th>
                                 <th class="no-imprimir text-center" width="150">Voucher</th>
                                 <th>Boleta / Factura</th>
+                                <th class="no-imprimir text-center" width="140">Nota crédito</th>
                             </tr>
                         </thead>
                         <tbody id="tabla-body">
                             <?php if (empty($pagos)) : ?>
                                 <tr>
-                                    <td colspan="12" class="text-center py-5">
+                                    <td colspan="13" class="text-center py-5">
                                         <div class="empty-state">
                                             <i class="fas fa-info-circle fa-3x text-muted mb-3"></i>
                                             <p class="text-muted mb-0">No hay pagos registrados</p>
@@ -272,7 +276,11 @@ include __DIR__ . '/../layout/header.php';
                             <?php else: ?>
                                 <?php $numeroFila = 1; ?>
                                 <?php foreach ($pagos as $pago) : ?>
-                                    <tr class="align-middle">
+                                    <?php
+                                    $idPagoFila = (int) ($pago['idpago'] ?? 0);
+                                    $notaEmitida = $notasPorPago[$idPagoFila] ?? null;
+                                    ?>
+                                    <tr class="align-middle" data-idpago="<?= $idPagoFila ?>">
                                         <td class="text-center text-muted fw-semibold"><?= htmlspecialchars($numeroFila++) ?></td>
                                         <td class="fw-semibold"><?= htmlspecialchars($pago['numcuota']) ?></td>
                                         <td>
@@ -348,14 +356,31 @@ include __DIR__ . '/../layout/header.php';
                                                 </span>
                                             <?php endif; ?>
                                         </td>
-
-                                    <?php endforeach; ?>
+                                        <td class="no-imprimir text-center">
+                                            <?php if ($notaEmitida): ?>
+                                                <a href="<?= htmlspecialchars($notaEmitida['enlace_pdf_nubefact'] ?? '#') ?>"
+                                                    class="btn btn-sm btn-outline-warning rounded-pill"
+                                                    target="_blank"
+                                                    title="Ver nota de crédito">
+                                                    <i class="fas fa-file-invoice me-1"></i>NC
+                                                </a>
+                                            <?php elseif (!empty($pago['enlace_pdf_nubefact']) && !empty($pago['numero_boleta_sunat'])): ?>
+                                                <button type="button"
+                                                    class="btn btn-sm btn-outline-danger rounded-pill btn-emitir-nc"
+                                                    data-idpago="<?= $idPagoFila ?>"
+                                                    title="Emitir nota de crédito (anulación)">
+                                                    <i class="fas fa-undo me-1"></i>NC
+                                                </button>
+                                            <?php else: ?>
+                                                <span class="text-muted small">—</span>
+                                            <?php endif; ?>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
                                 <?php endif; ?>
                         </tbody>
                     </table>
                 </div>
-                </td>
-
 
             </div>
         </div>
@@ -475,6 +500,28 @@ include __DIR__ . '/../layout/header.php';
                                             <span class="badge bg-light text-muted">N/A</span>
                                         <?php endif; ?>
                                     </li>
+                                    <li class="list-group-item">
+                                        <strong>Boleta SUNAT:</strong>
+                                        <?php if (!empty($pago['enlace_pdf_nubefact'])): ?>
+                                            <a href="<?= htmlspecialchars($pago['enlace_pdf_nubefact']) ?>" target="_blank" class="btn btn-sm btn-primary mt-1">Ver</a>
+                                        <?php else: ?>
+                                            <span class="text-muted">Sin comprobante</span>
+                                        <?php endif; ?>
+                                    </li>
+                                    <li class="list-group-item">
+                                        <strong>Nota de crédito:</strong>
+                                        <?php
+                                        $idPagoMob = (int) ($pago['idpago'] ?? 0);
+                                        $notaMob = $notasPorPago[$idPagoMob] ?? null;
+                                        ?>
+                                        <?php if ($notaMob): ?>
+                                            <a href="<?= htmlspecialchars($notaMob['enlace_pdf_nubefact'] ?? '#') ?>" target="_blank" class="btn btn-sm btn-warning mt-1">Ver NC</a>
+                                        <?php elseif (!empty($pago['enlace_pdf_nubefact']) && !empty($pago['numero_boleta_sunat'])): ?>
+                                            <button type="button" class="btn btn-sm btn-outline-danger btn-emitir-nc mt-1" data-idpago="<?= $idPagoMob ?>">Emitir NC</button>
+                                        <?php else: ?>
+                                            <span class="text-muted">—</span>
+                                        <?php endif; ?>
+                                    </li>
 
                                 </ul>
                             </div>
@@ -512,6 +559,56 @@ include __DIR__ . '/../layout/header.php';
                 <a id="descargarComprobante" href="#" class="btn btn-primary" download>
                     <i class="fas fa-download me-1"></i> Descargar
                 </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal nota de crédito -->
+<div class="modal fade" id="modalNotaCredito" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title"><i class="fas fa-file-invoice me-2"></i>Nota de crédito</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="nc-idpago" value="">
+                <div id="nc-loading" class="text-center py-3 d-none">
+                    <div class="spinner-border text-primary" role="status"></div>
+                </div>
+                <div id="nc-form-wrap" class="d-none">
+                    <p class="small text-muted mb-2">Anula fiscalmente el comprobante SUNAT del pago. El registro del pago en caja no se elimina.</p>
+                    <dl class="row small mb-3">
+                        <dt class="col-5">Cliente</dt>
+                        <dd class="col-7" id="nc-cliente">—</dd>
+                        <dt class="col-5">Monto</dt>
+                        <dd class="col-7" id="nc-monto">—</dd>
+                        <dt class="col-5">Afecta a</dt>
+                        <dd class="col-7" id="nc-doc-afectado">—</dd>
+                        <dt class="col-5">Serie NC</dt>
+                        <dd class="col-7" id="nc-serie">—</dd>
+                    </dl>
+                    <div class="mb-3">
+                        <label class="form-label small" for="nc-tipo">Motivo SUNAT</label>
+                        <select class="form-select form-select-sm" id="nc-tipo">
+                            <option value="01">01 — Anulación de la operación</option>
+                            <option value="06">06 — Devolución total</option>
+                            <option value="07">07 — Devolución parcial</option>
+                        </select>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label small" for="nc-motivo">Observación (opcional)</label>
+                        <textarea class="form-control form-control-sm" id="nc-motivo" rows="2" maxlength="280" placeholder="Ej. Error al emitir boleta"></textarea>
+                    </div>
+                </div>
+                <div id="nc-error" class="alert alert-warning d-none mb-0"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger btn-sm d-none" id="nc-btn-confirmar">
+                    <i class="fas fa-paper-plane me-1"></i>Emitir y enviar a SUNAT
+                </button>
             </div>
         </div>
     </div>
@@ -831,6 +928,99 @@ include __DIR__ . '/../layout/header.php';
         localStorage.removeItem('page');
 
 
+
+        // Notas de crédito
+        const modalNcEl = document.getElementById('modalNotaCredito');
+        const modalNc = modalNcEl ? new bootstrap.Modal(modalNcEl) : null;
+
+        async function abrirModalNotaCredito(idpago) {
+            if (!modalNc) return;
+            document.getElementById('nc-idpago').value = idpago;
+            document.getElementById('nc-loading').classList.remove('d-none');
+            document.getElementById('nc-form-wrap').classList.add('d-none');
+            document.getElementById('nc-error').classList.add('d-none');
+            document.getElementById('nc-btn-confirmar').classList.add('d-none');
+            modalNc.show();
+
+            try {
+                const res = await fetch('/api/nota-credito/pago/' + idpago);
+                const json = await res.json();
+                document.getElementById('nc-loading').classList.add('d-none');
+
+                if (!json.success) {
+                    const err = document.getElementById('nc-error');
+                    err.textContent = json.message || 'No se puede emitir nota de crédito.';
+                    err.classList.remove('d-none');
+                    return;
+                }
+
+                const d = json.data;
+                document.getElementById('nc-cliente').textContent = d.cliente || '—';
+                document.getElementById('nc-monto').textContent = 'S/ ' + Number(d.amortizacion).toFixed(2);
+                const doc = d.documento_afectado || {};
+                document.getElementById('nc-doc-afectado').textContent =
+                    (doc.tipo_label || '') + ' ' + (doc.serie || '') + '-' + String(doc.numero || '').padStart(8, '0');
+                document.getElementById('nc-serie').textContent = d.serie_nc || '—';
+                document.getElementById('nc-form-wrap').classList.remove('d-none');
+                document.getElementById('nc-btn-confirmar').classList.remove('d-none');
+            } catch (e) {
+                document.getElementById('nc-loading').classList.add('d-none');
+                const err = document.getElementById('nc-error');
+                err.textContent = 'Error de conexión al cargar datos.';
+                err.classList.remove('d-none');
+            }
+        }
+
+        document.querySelectorAll('.btn-emitir-nc').forEach(btn => {
+            btn.addEventListener('click', () => abrirModalNotaCredito(btn.dataset.idpago));
+        });
+
+        const btnConfirmarNc = document.getElementById('nc-btn-confirmar');
+        if (btnConfirmarNc) {
+            btnConfirmarNc.addEventListener('click', async () => {
+                const idpago = document.getElementById('nc-idpago').value;
+                if (!idpago) return;
+
+                if (!confirm('¿Emitir nota de crédito y enviar a SUNAT? Esta acción no se puede deshacer.')) {
+                    return;
+                }
+
+                btnConfirmarNc.disabled = true;
+                const fd = new FormData();
+                fd.append('idpago', idpago);
+                fd.append('tipo_nota_credito', document.getElementById('nc-tipo').value);
+                fd.append('motivo', document.getElementById('nc-motivo').value);
+
+                try {
+                    const res = await fetch('/api/nota-credito/emitir', { method: 'POST', body: fd });
+                    const json = await res.json();
+                    if (json.success) {
+                        if (typeof Swal !== 'undefined') {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Nota de crédito emitida',
+                                text: json.message || 'OK',
+                                confirmButtonColor: '#f97316'
+                            }).then(() => window.location.reload());
+                        } else {
+                            alert(json.message || 'Nota de crédito emitida');
+                            window.location.reload();
+                        }
+                    } else {
+                        const msg = json.message || 'No se pudo emitir.';
+                        if (typeof Swal !== 'undefined') {
+                            Swal.fire({ icon: 'error', title: 'Error', text: msg });
+                        } else {
+                            alert(msg);
+                        }
+                    }
+                } catch (e) {
+                    alert('Error de conexión al emitir.');
+                } finally {
+                    btnConfirmarNc.disabled = false;
+                }
+            });
+        }
 
         // Manejar comprobantes
         document.querySelectorAll('.ver-comprobante-img').forEach(btn => {

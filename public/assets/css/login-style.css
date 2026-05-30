@@ -8341,3 +8341,35 @@ h1, h2, h3, h4, h5,
         border: 1px solid transparent;
         background: #e3b04b;
         color: #fff; }
+
+/* ===== Premium override (login legacy) ===== */
+body {
+  background: linear-gradient(140deg, #0b1220 0%, #111827 50%, #1e293b 100%);
+}
+
+.wrap {
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  box-shadow: 0 24px 60px rgba(2, 6, 23, 0.45);
+}
+
+.login-wrap {
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+}
+
+.form-control {
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  background: #f8fafc;
+}
+
+.form-control:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.btn.btn-primary {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+  border: 1px solid #1d4ed8 !important;
+}

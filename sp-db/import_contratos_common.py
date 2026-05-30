@@ -13,6 +13,22 @@ CUOTA_COLS = [
     (44, 45, 47, 46, None),
 ]
 MAS_DEUDAS_IDX = 48
+WIDE_CUOTA_START = 25
+WIDE_CUOTA_BLOCK = 9
+WIDE_NUM_CUOTAS = 4
+
+SIMPLIFIED_HEADER = (
+    "ID DEL CONTRATO\tFECHA DE LA FIRMA\tDNI\tNOMBRE\tDIRECCION\tCIUDAD\tCELULAR\t"
+    "CARACTERISTICAS\tCOLOR\tCHASIS\tMOTOR\tPLACA\tINICIAL\tVALOR\tTIPO DE CONTRATO\t"
+    "FECHA DE COMIENZO\tFECHA DE VENCIMIENTO\tVENDEDOR\tCONDICION\t"
+    "DURACIÓN DEL CONTRATO (MESES)\tCUOTA POR MES\t% DE MORA\t"
+    "MORA PASANDO LOS 3 DIAS SE APLICA\tTOTAL MONTO A PAGAR CON MORA\t"
+    "CUOTA 1\tFECHA EN LA QUE PAGO EL CLIENTE\tGPS\tMORA\tDEUDAS PENDIENTES\t"
+    "Cuota 2\tFECHA EN LA QUE PAGO EL CLIENTE\tMORA\tGPS\tDEUDAS PENDIENTES\t"
+    "Cuota 3\tFECHA EN LA QUE PAGO EL CLIENTE\tMORA\tGPS\tDEUDAS PENDIENTES\t"
+    "Cuota 4\tFECHA EN LA QUE PAGO EL CLIENTE\tMORA\tGPS\tDEUDAS PENDIENTES\t"
+    "Cuota 5\tFECHA EN LA QUE PAGO EL CLIENTE\tMORA\tGPS\tMAS DEDUDAS PENDIENTES"
+)
 
 MONTHS = {
     "enero": {
@@ -91,7 +107,95 @@ def normalize_id_contrato(s: str) -> str:
             seq = yr - 2118
             return f"May-{seq:03d}-2026"
     s = re.sub(r"(?i)^(Feb-\d+)-206[0-9]$", r"\1-2026", s)
+    m = re.match(r"(?i)^(Ene)-(\d+)-2024$", s)
+    if m:
+        return f"Ene-{m.group(2)}-2026"
     return s
+
+
+def is_wide_header(header: list) -> bool:
+    joined = " ".join((c or "") for c in header).upper()
+    return "MES EN EL QUE PAGO" in joined or "LO QUE DEBE PAGAR" in joined
+
+
+def _merge_cuota_extras(parts: list, off: int, deudas: str) -> str:
+    extras = []
+    mes = cell(parts, off + 2)
+    num = cell(parts, off + 3)
+    tiene = cell(parts, off + 6)
+    pago_mora = cell(parts, off + 7)
+    if mes:
+        extras.append("Mes:" + mes)
+    if num:
+        extras.append("Nº:" + num)
+    if tiene and tiene.upper() not in ("-", "NO", "NULL"):
+        extras.append("Tiene mora:" + tiene)
+    if pago_mora and pago_mora.upper() not in ("-", "NO", "NULL"):
+        extras.append("Pago mora:" + pago_mora)
+    if not extras:
+        return deudas
+    suffix = " | ".join(extras)
+    if not deudas or deudas.upper() == "NULL":
+        return suffix
+    return deudas + " | " + suffix
+
+
+def wide_row_to_simplified(parts: list) -> list:
+    """Excel ancho (4 cuotas × 9 cols) → TSV de 49 columnas para el generador SQL."""
+    out = [cell(parts, i) for i in range(14)]
+    out.append(cell(parts, 15))
+    for i in range(16, 25):
+        out.append(cell(parts, i))
+
+    for i in range(WIDE_NUM_CUOTAS):
+        off = WIDE_CUOTA_START + i * WIDE_CUOTA_BLOCK
+        cuota = cell(parts, off)
+        fecha = cell(parts, off + 1)
+        gps = cell(parts, off + 4)
+        mora = cell(parts, off + 5)
+        deudas = _merge_cuota_extras(parts, off, cell(parts, off + 8))
+        if i == 0:
+            out.extend([cuota, fecha, gps, mora, deudas])
+        else:
+            out.extend([cuota, fecha, mora, gps, deudas])
+
+    out.extend(["", "", "", ""])
+    deuda_fin = cell(parts, 14)
+    mas = ""
+    if deuda_fin:
+        mas = "Debe cliente: " + deuda_fin
+    out.append(mas)
+    return out
+
+
+def read_import_tsv(tsv_path: str):
+    with open(tsv_path, encoding="utf-8") as f:
+        reader = csv.reader(f, delimiter="\t")
+        header = next(reader)
+        rows = [p for p in reader if p and any((c or "").strip() for c in p)]
+    wide = is_wide_header(header)
+    if wide:
+        rows = [wide_row_to_simplified(p) for p in rows]
+        header = SIMPLIFIED_HEADER.split("\t")
+    return header, rows, wide
+
+
+def write_simplified_tsv(tsv_path: str, header: list, rows: list, *, from_wide: bool = False) -> None:
+    """Escribe TSV de 49 columnas. Solo convierte con wide_row_to_simplified si from_wide=True."""
+    ncol = len(SIMPLIFIED_HEADER.split("\t"))
+    out_header = header if header and len(header) >= ncol - 5 else SIMPLIFIED_HEADER.split("\t")
+    with open(tsv_path, "w", encoding="utf-8", newline="") as f:
+        w = csv.writer(f, delimiter="\t", lineterminator="\n")
+        w.writerow(out_header)
+        for parts in rows:
+            if from_wide:
+                row = wide_row_to_simplified(parts)
+            else:
+                row = list(parts)
+                if len(row) < ncol:
+                    row.extend([""] * (ncol - len(row)))
+                row = row[:ncol]
+            w.writerow(row)
 
 
 def parse_money(s: str):
@@ -102,7 +206,16 @@ def parse_money(s: str):
         return None
     s = re.sub(r"(?i)s/?\.?\s*", "", s)
     s = s.replace(" ", "")
-    if re.match(r"^\d{1,6},\d{1,2}$", s):
+    # Excel: 348.722 → 348.72 (antes del patrón de miles)
+    if re.match(r"^\d{1,4}\.\d{3}$", s):
+        a, b = s.split(".", 1)
+        s = f"{a}.{b[:2]}"
+    # Perú: 3.000,00 (miles con punto, decimales con coma) o 10,700.00 (estilo US)
+    elif re.match(r"^\d{1,3}(\.\d{3})+(,\d+)?$", s):
+        s = s.replace(".", "").replace(",", ".")
+    elif re.match(r"^\d{1,3}(,\d{3})+(\.\d+)?$", s):
+        s = s.replace(",", "")
+    elif re.match(r"^\d{1,6},\d{1,2}$", s):
         s = s.replace(",", ".")
     else:
         s = s.replace(",", "")
@@ -352,10 +465,7 @@ def generate(mes_key: str) -> int:
     anio = cfg["anio"]
     label = cfg["label"]
 
-    with open(tsv_path, encoding="utf-8") as f:
-        reader = csv.reader(f, delimiter="\t")
-        next(reader)
-        data_rows = [p for p in reader if p and any((c or "").strip() for c in p)]
+    _, data_rows, _ = read_import_tsv(tsv_path)
 
     vals = ["(" + ",".join(row_to_values(parts, anio)) + ")" for parts in data_rows]
 

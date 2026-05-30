@@ -1,5 +1,5 @@
 
-USE MOTORPARK;
+-- USE MOTORPARK; -- hosting: seleccionar BD en phpMyAdmin
 
 -- 1) ESTADÍSTICAS 
 
@@ -453,10 +453,6 @@ BEGIN
     ORDER BY dias_atraso DESC, deuda_vencida DESC;
 END$$
 DELIMITER ;
-USE motorpark;
-
-CALL sp_get_cuotas_vencidas();
-
 /*
 DROP PROCEDURE IF EXISTS sp_get_cuotas_vencidas;
 DELIMITER $$
@@ -812,9 +808,6 @@ BEGIN
 END$$
 DELIMITER ;
 
-
-CALL sp_get_cuotas_proximas_vencer();
-
 -- 9) ACTUALIZAR TELEFONO
 
 DELIMITER $$
@@ -1152,7 +1145,7 @@ DELIMITER ;
 /*
 -- ÍNDICES NECESARIOS (ejecutar primero)
 
-USE MOTORPARK;
+-- USE MOTORPARK; -- hosting: seleccionar BD en phpMyAdmin
 
 -- Índices básicos
 ALTER TABLE cronogramas ADD INDEX idx_estado_fecha (estado, fechapago);
@@ -1179,6 +1172,3 @@ SET profiling = 1;
 CALL sp_get_cuotas_vencidas();
 SHOW PROFILES;
 */
-
-
-SELECT * FROM personas WHERE apellidos = "GIL VALENTIN";

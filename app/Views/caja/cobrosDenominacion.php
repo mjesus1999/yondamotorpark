@@ -141,18 +141,33 @@ $mediosPago = $mediosPago ?? \App\Config\MediosPago::opciones();
         </div>
 
         <div class="card border-primary shadow-lg mt-4" id="card-cronograma" style="display: none;">
-            <div class="card-header bg-primary text-white d-flex align-items-center">
+            <div class="card-header bg-primary text-white d-flex align-items-center justify-content-between flex-wrap gap-2">
                 <h5 class="mb-0"><i class="bi bi-calendar-check me-2" style="font-size: 1.2rem;"></i> Cronograma de pagos</h5>
+                <span class="badge bg-light text-primary d-none" id="cronograma-cliente-badge"></span>
             </div>
             <div class="card-body p-0">
+                <div id="cronograma-resumen" class="p-3 border-bottom bg-body-tertiary d-none">
+                    <div class="row g-2 small">
+                        <div class="col-6 col-md-3"><span class="text-muted d-block">Lo que debe pagar</span><strong id="cr-monto-financiar">—</strong></div>
+                        <div class="col-6 col-md-2"><span class="text-muted d-block">Cuota por mes</span><strong id="cr-cuota-mes">—</strong></div>
+                        <div class="col-6 col-md-2"><span class="text-muted d-block">Duración</span><strong id="cr-plazo">—</strong></div>
+                        <div class="col-6 col-md-2"><span class="text-muted d-block">Cuotas pagadas</span><strong id="cr-pagadas">—</strong></div>
+                        <div class="col-6 col-md-3"><span class="text-muted d-block">Saldo capital actual</span><strong class="text-primary" id="cr-saldo">—</strong></div>
+                        <div class="col-12"><span class="text-muted d-block">Vigencia del cronograma</span><strong id="cr-vigencia">—</strong></div>
+                    </div>
+                </div>
                 <div class="table-responsive">
-                    <table class="table table-sm table-striped mb-0">
-                        <thead>
+                    <table class="table table-sm table-striped mb-0 align-middle">
+                        <thead class="table-light">
                             <tr>
-                                <th style="width: 12%;">Cuota</th>
-                                <th>Fecha</th>
-                                <th class="text-end">Monto (Cuota + GPS)</th>
-                                <th style="width: 28%;">Estado</th>
+                                <th>#</th>
+                                <th>Fecha cronograma</th>
+                                <th>Fecha en la que pagó el cliente</th>
+                                <th class="text-end">Interés</th>
+                                <th class="text-end">Abono a capital</th>
+                                <th class="text-end">Valor cuota</th>
+                                <th class="text-end">Saldo capital</th>
+                                <th>Estado</th>
                             </tr>
                         </thead>
                         <tbody id="tbody-cronograma"></tbody>
@@ -366,6 +381,7 @@ $idVariosCaja = isset($idConceptoVarios) ? (int) $idConceptoVarios : 0;
     const cronogramaCard = document.getElementById('card-cronograma');
     const cronogramaTbody = document.getElementById('tbody-cronograma');
     const cronogramaFootnote = document.getElementById('cronograma-footnote');
+    const cronogramaResumen = document.getElementById('cronograma-resumen');
 
     const selectMedioPago = document.getElementById('mediopago');
     const contenedorComprobante = document.getElementById('contenedor-comprobante');
@@ -684,22 +700,63 @@ $idVariosCaja = isset($idConceptoVarios) ? (int) $idConceptoVarios : 0;
         loadCronogramaCliente(idCliente);
     }
 
+    function fmtSoles(n) {
+        const v = Number(n);
+        if (!Number.isFinite(v)) return '—';
+        return 'S/ ' + v.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function renderCronogramaResumen(resumen, metaExtra = {}) {
+        if (!cronogramaResumen || !resumen) {
+            if (cronogramaResumen) cronogramaResumen.classList.add('d-none');
+            return;
+        }
+        cronogramaResumen.classList.remove('d-none');
+        const set = (id, val) => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = val;
+        };
+        set('cr-monto-financiar', fmtSoles(resumen.lo_que_debe_pagar_cliente ?? resumen.monto_financiar));
+        set('cr-cuota-mes', fmtSoles(resumen.cuota_por_mes));
+        set('cr-plazo', (resumen.duracion_meses ?? '—') + ' meses');
+        set('cr-pagadas', `${resumen.cuotas_pagadas ?? 0} / ${resumen.duracion_meses ?? 0} (pend. ${resumen.cuotas_pendientes ?? 0})`);
+        set('cr-saldo', fmtSoles(resumen.saldo_capital_actual));
+
+        const vigenciaEl = document.getElementById('cr-vigencia');
+        if (vigenciaEl) {
+            const ini = resumen.fecha_inicio_cronograma ? fmtDate(parseIsoDate(resumen.fecha_inicio_cronograma)) : null;
+            const fin = resumen.fecha_fin_cronograma ? fmtDate(parseIsoDate(resumen.fecha_fin_cronograma)) : null;
+            vigenciaEl.textContent = (ini && fin) ? `${ini} → ${fin}` : '—';
+        }
+
+        const badge = document.getElementById('cronograma-cliente-badge');
+        if (badge && metaExtra.cliente_nombre) {
+            badge.textContent = metaExtra.cliente_nombre;
+            badge.classList.remove('d-none');
+        } else if (badge) {
+            badge.classList.add('d-none');
+        }
+    }
+
     function renderCronograma(rows, meta = {}) {
         if (!cronogramaCard || !cronogramaTbody) return;
         cronogramaTbody.innerHTML = '';
 
         cronogramaCard.style.display = 'block';
+        renderCronogramaResumen(meta.resumen || null, meta);
+
         if (cronogramaFootnote) {
             const veh = meta?.vehiculo ? ` — ${meta.vehiculo}` : '';
-            const gps = (meta?.gps ?? null) !== null ? ` (GPS: S/ ${Number(meta.gps || 0).toFixed(2)})` : '';
+            const gps = (meta?.gps ?? null) !== null ? ` (GPS ref.: S/ ${Number(meta.gps || 0).toFixed(2)})` : '';
             const est = meta?.contrato_estado ? ` [Contrato: ${meta.contrato_estado}]` : '';
             const src = meta?.source ? ` [Fuente: ${meta.source}]` : '';
             const msg = meta?.message ? ` ${meta.message}` : '';
-            cronogramaFootnote.textContent = `Mostrando cronograma del contrato más reciente del cliente${veh}${gps}.${est}${src}${msg}`;
+            const tasa = meta?.resumen?.tasa_mensual_pct ? ` Tasa mensual ref.: ${meta.resumen.tasa_mensual_pct}%.` : '';
+            cronogramaFootnote.textContent = `Cronograma detallado (interés + abono a capital)${veh}${gps}.${est}${src}${tasa}${msg}`;
         }
 
         if (!rows || !rows.length) {
-            cronogramaTbody.innerHTML = `<tr><td colspan="4" class="small text-muted text-center p-3">Sin cronograma para mostrar.</td></tr>`;
+            cronogramaTbody.innerHTML = `<tr><td colspan="8" class="small text-muted text-center p-3">Sin cronograma para mostrar.</td></tr>`;
             return;
         }
 
@@ -710,15 +767,49 @@ $idVariosCaja = isset($idConceptoVarios) ? (int) $idConceptoVarios : 0;
                 estado === 'Pagado' ? 'bg-success' :
                     (estado === 'Por saldar' ? 'bg-warning text-dark' :
                         (estado.includes('MORA') ? 'bg-danger' : 'bg-secondary'));
-            const fecha = r.fechapago ? fmtDate(parseIsoDate(r.fechapago)) : '—';
+            const fechaCrono = r.fecha_cronograma || r.fechapago;
+            const fechaCronoTxt = fechaCrono ? fmtDate(parseIsoDate(fechaCrono)) : '—';
+            const fechaPagoTxt = r.fecha_pago_cliente ? fmtDate(parseIsoDate(r.fecha_pago_cliente)) : '—';
             tr.innerHTML = `
                 <td class="fw-bold">#${escapeHtml(r.numcuota)}</td>
-                <td class="small">${escapeHtml(fecha)}</td>
-                <td class="text-end fw-semibold">S/ ${escapeHtml(Number(r.total || 0).toFixed(2))}</td>
+                <td class="small fw-semibold">${escapeHtml(fechaCronoTxt)}</td>
+                <td class="small text-muted">${escapeHtml(fechaPagoTxt)}</td>
+                <td class="text-end small">${fmtSoles(r.interes)}</td>
+                <td class="text-end small">${fmtSoles(r.abonocapital)}</td>
+                <td class="text-end fw-semibold">${fmtSoles(r.valorcuota)}</td>
+                <td class="text-end fw-semibold text-primary">${fmtSoles(r.saldocapital)}</td>
                 <td><span class="badge ${badge}">${escapeHtml(estado)}</span></td>
             `;
             cronogramaTbody.appendChild(tr);
         });
+    }
+
+    async function loadCronogramaPorDocumento(documento) {
+        if (!documento) {
+            renderCronograma([]);
+            return;
+        }
+        try {
+            const req = await fetch(`/api/caja/cronograma-por-documento/${encodeURIComponent(String(documento))}`);
+            if (!req.ok) throw new Error('Fallo al cargar cronograma: ' + req.status);
+            const res = await req.json().catch(() => null);
+            if (res && res.success) {
+                renderCronograma(res.data || [], {
+                    vehiculo: res.vehiculo,
+                    gps: res.gps,
+                    contrato_estado: res.contrato_estado,
+                    source: res.source,
+                    message: res.message,
+                    resumen: res.resumen || null,
+                    cliente_nombre: res.cliente_nombre || null,
+                });
+            } else {
+                renderCronograma([]);
+            }
+        } catch (e) {
+            console.error(e);
+            renderCronograma([]);
+        }
     }
 
     async function loadCronogramaCliente(idcliente) {
@@ -732,7 +823,15 @@ $idVariosCaja = isset($idConceptoVarios) ? (int) $idConceptoVarios : 0;
             if (!req.ok) throw new Error('Fallo al cargar cronograma: ' + req.status);
             const res = await req.json().catch(() => null);
             if (res && res.success) {
-                renderCronograma(res.data || [], { vehiculo: res.vehiculo, gps: res.gps, contrato_estado: res.contrato_estado, source: res.source, message: res.message });
+                renderCronograma(res.data || [], {
+                    vehiculo: res.vehiculo,
+                    gps: res.gps,
+                    contrato_estado: res.contrato_estado,
+                    source: res.source,
+                    message: res.message,
+                    resumen: res.resumen || null,
+                    cliente_nombre: res.cliente_nombre || null,
+                });
             } else {
                 renderCronograma([]);
             }
@@ -938,8 +1037,11 @@ $idVariosCaja = isset($idConceptoVarios) ? (int) $idConceptoVarios : 0;
                 updateTotals();
 
                 await cargarRegistroVentasPorDocumento(documento);
+                await loadCronogramaPorDocumento(documento);
                 if (registroVentasCard && registroVentasCard.style.display !== 'none') {
                     showToast('Encontrado en registro vehicular (Excel). Para cobrar, primero registra al cliente.', 'INFO', 5500);
+                } else {
+                    showToast('No hay cliente ni registro Excel con ese documento.', 'WARNING', 4000);
                 }
                 return;
             }
@@ -1039,9 +1141,12 @@ $idVariosCaja = isset($idConceptoVarios) ? (int) $idConceptoVarios : 0;
             const chasis = row.getAttribute('data-chasis') || '';
 
 
-            const idConceptoFinal = idConcepto > 0 ? idConcepto : (ID_CONCEPTO_VARIOS > 0 ? ID_CONCEPTO_VARIOS : 1);
-            if (idConcepto <= 0 && ID_CONCEPTO_VARIOS <= 0) {
-                console.warn('Caja: configure el concepto "Varios caja (manual)" en MySQL (ver datos-inserts/caja_concepto_varios.sql).');
+            let idConceptoFinal = idConcepto;
+            if (idConceptoFinal <= 0) {
+                if (ID_CONCEPTO_VARIOS <= 0) {
+                    throw new Error('Falta configurar el concepto "Varios caja (manual)" (ejecutar datos-inserts/caja_concepto_varios.sql).');
+                }
+                idConceptoFinal = ID_CONCEPTO_VARIOS;
             }
 
             data.push({
@@ -1064,7 +1169,13 @@ $idVariosCaja = isset($idConceptoVarios) ? (int) $idConceptoVarios : 0;
             return;
         }
 
-        const conceptosData = collectConceptsData();
+        let conceptosData = [];
+        try {
+            conceptosData = collectConceptsData();
+        } catch (e) {
+            showToast(String(e?.message || e), 'ERROR', 5000);
+            return;
+        }
         const montoTotal = parseFloat(totalPagarSpan.textContent.replace('S/ ', '')) || 0;
         const medioPago = selectMedioPago.value;
         const idCuentaPago = (contenedorCuenta.style.display === 'block') ? selectCuenta.value : null;

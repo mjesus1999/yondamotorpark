@@ -1,4 +1,4 @@
-USE motorpark;
+-- USE motorpark; -- hosting: seleccionar BD en phpMyAdmin
 
 DROP PROCEDURE IF EXISTS sp_egresos_por_estado;
 DROP PROCEDURE IF EXISTS sp_egresos_add;

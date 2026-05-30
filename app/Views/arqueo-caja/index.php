@@ -198,18 +198,46 @@
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <div class=" p-3 rounded bg-success">
+                        <div class="p-3 rounded bg-success">
                             <h6 class="text-white fw-bold">Total Ingresos</h6>
-                            <h4 class="fw-bold text-white" id="modalTotalIngresos">+S/ <?= number_format($ingresos_efectivo + $ingresos_digital, 2); ?></h4>
+                            <h4 class="fw-bold text-white" id="modalTotalIngresos">+S/ <?= number_format((float) $ingresos_efectivo + (float) $ingresos_digital, 2); ?></h4>
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <div class=" p-3 rounded bg-danger">
+                        <div class="p-3 rounded bg-danger">
                             <h6 class="text-white fw-bold">Total Egresos</h6>
-                            <h4 class="fw-bold text-white" id="modalTotalEgresos">-S/ <?= number_format($egresos_dia, 2); ?></h4>
+                            <h4 class="fw-bold text-white" id="modalTotalEgresos">-S/ <?= number_format((float) $egresos_dia, 2); ?></h4>
                         </div>
                     </div>
                 </div>
+
+                <div class="card mb-3 border-success">
+                    <div class="card-header bg-success bg-opacity-25 py-2 d-flex justify-content-between align-items-center flex-wrap gap-1">
+                        <h6 class="mb-0 text-success fw-bold"><i class="fas fa-wallet me-1"></i> Ingresos del período por medio de pago</h6>
+                        <small class="text-muted">Desde <?= htmlspecialchars($corte_desde ?? '') ?></small>
+                    </div>
+                    <div class="card-body py-3">
+                        <div class="row g-2 text-center">
+                            <?php foreach (($ingresos_desglose ?? []) as $fila): ?>
+                                <?php
+                                $montoFila = (float) ($fila['monto'] ?? 0);
+                                $esEfectivo = ($fila['medio'] ?? '') === 'Efectivo';
+                                ?>
+                                <div class="col-6 col-md-4 col-lg">
+                                    <div class="border rounded p-2 h-100 <?= $esEfectivo ? 'border-primary bg-primary bg-opacity-10' : '' ?>">
+                                        <small class="text-muted d-block"><?= htmlspecialchars($fila['medio']) ?></small>
+                                        <span class="fw-bold fs-6">S/ <?= number_format($montoFila, 2) ?></span>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                        <p class="small text-muted mb-0 mt-3 text-center">
+                            El <strong>saldo teórico en caja</strong> usa solo <strong>efectivo</strong> + saldo inicial − egresos.
+                            Yape, Plin y transferencias se muestran para su informe, no se suman al conteo físico de billetes.
+                        </p>
+                    </div>
+                </div>
+
                 <hr>
                 <div class="mb-3 text-center">
                     <h4 class="text-info fw-bold">Saldo Teórico Esperado</h4>
@@ -406,7 +434,8 @@
                         const saldoInicial = parseFloat("<?= htmlspecialchars($saldo_inicial) ?>");
                         const ingresosEfectivo = parseFloat("<?= htmlspecialchars($ingresos_efectivo) ?>");
                         const egresosDia = parseFloat("<?= htmlspecialchars($egresos_dia) ?>");
-                        const ingresoDigital = parseFloat("<?= htmlspecialchars($ingresos_digital) ?>")
+                        const ingresoDigital = parseFloat("<?= htmlspecialchars($ingresos_digital) ?>");
+                        const totalIngresosPeriodo = parseFloat("<?= htmlspecialchars($total_ingresos_periodo ?? '0') ?>") || (ingresosEfectivo + ingresoDigital);
 
                         const btnEntregarSeleccionados = document.getElementById('btn-entregar-seleccionados');
                         const checkboxes = document.querySelectorAll('.arqueo-checkbox');
@@ -520,7 +549,7 @@
                         }
 
 
-                        if (ingresosEfectivo !== 0 || egresosDia !== 0 || ingresoDigital !== 0) {
+                        if (ingresosEfectivo !== 0 || egresosDia !== 0 || totalIngresosPeriodo !== 0) {
 
                             btnFinalizarArqueo.removeAttribute('disabled');
                             montoFisicoInput.removeAttribute('disabled');
@@ -595,8 +624,8 @@
                         form.addEventListener('submit', async (event) => {
                             event.preventDefault();
 
-                            if (ingresosEfectivo == 0 && egresosDia == 0 && ingresoDigital == 0) {
-                                showToast('No hay ingresos y egresos para registrar', 'bg-warning', 1350);
+                            if (totalIngresosPeriodo == 0 && egresosDia == 0) {
+                                showToast('No hay ingresos ni egresos en el período para registrar un arqueo.', 'bg-warning', 1350);
                                 return;
 
                             } else {

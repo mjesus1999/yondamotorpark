@@ -1,0 +1,31 @@
+REPORTE VALIDACIÓN CRONOGRAMAS — imports 2026
+Generado: 2026-05-30 04:42
+
+Total contratos: 133
+OK (sin alertas): 74
+Requieren revisión: 59
+
+Por mes (total / con alertas):
+  Enero: 37 contratos, 6 con alertas
+  Febrero: 38 contratos, 38 con alertas
+  Marzo: 33 contratos, 11 con alertas
+  Abril: 22 contratos, 4 con alertas
+  Mayo: 3 contratos, 0 con alertas
+
+Alertas más frecuentes:
+  SIN_PLAZO: 39
+  SIN_CUOTA_MENSUAL: 39
+  FECHA_PAGO_1_NO_PARSEA: 35
+  PAGO_C1_ANTES_INICIO: 16
+  HUECO_CUOTA_1: 8
+  PAGO_C2_ANTES_INICIO: 8
+  DUPLICADO_CHASIS_OTRO_MES: 4
+  PAGO_C3_ANTES_INICIO: 1
+  PAGO_C4_ANTES_INICIO: 1
+  SIN_FECHA_COMIENZO: 1
+  SIN_MONTO_FINANCIAR: 1
+  SIN_CHASIS: 1
+  FECHA_PAGO_2_NO_PARSEA: 1
+
+CSV detalle: c:\Users\YONDA\Downloads\yondamotorpark\yondamotorpark\sp-db\reporte_validacion_cronogramas_2026.csv
+Abrir en Excel (separador ;). Filtrar columna requiere_revision = SI

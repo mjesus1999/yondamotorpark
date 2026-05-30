@@ -463,4 +463,14 @@ class OrdenCompraController extends Controller
         }
         exit();
     }
+
+    /**
+     * Compatibilidad con enlace /oc/reporte/{id}: el PDF se genera en el listado OC (pdfMake).
+     */
+    public function html2pdfReport($idOC): void
+    {
+        $this->authRequired();
+        $_SESSION['info_message'] = 'Use el botón PDF en la lista de órdenes de compra para generar el documento.';
+        $this->redirect('/oc');
+    }
 }

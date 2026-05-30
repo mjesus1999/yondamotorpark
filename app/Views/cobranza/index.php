@@ -24,33 +24,32 @@
     }
 
     input[type="radio"]:checked+label {
-        background-color: #0d6efd !important;
+        background-color: #f97316 !important;
         color: white !important;
-        border-color: #0d6efd !important;
+        border-color: #ea580c !important;
     }
 
     input[type="radio"]:checked+label .badge {
         background-color: white !important;
-        color: #0d6efd !important;
+        color: #ea580c !important;
     }
 </style>
 
-<div class="container-fluid">
+<div class="container-fluid cobranza-ui">
 
     <!-- CABECERA -->
-    <div class="alert alert-info mt-2" role="alert">
-        <div class="row">
-            <nav class="col-md-6 d-flex align-items-center justify-content-start">
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb mb-0">
-                        <li class="breadcrumb-item"><a href="#" class="text-decoration-none">Área de cobranza</a></li>
-                        <li class="breadcrumb-item active" aria-current="page">Gestión de clientes con Deudas pendientes
-                        </li>
-                    </ol>
-                </nav>
-            </nav>
-        </div>
-    </div>
+    <?php
+    $pageHeaderBreadcrumbs = [
+        ['label' => 'Inicio', 'url' => '/'],
+        ['label' => 'Cobranza', 'url' => '/Cobranza'],
+        ['label' => 'Deudas pendientes', 'url' => null],
+    ];
+    $pageHeaderActionsHtml = '
+        <a href="/Vencidos" class="btn btn-outline-light btn-sm"><i class="bi bi-exclamation-triangle me-1"></i>Vencidos</a>
+        <a href="/Recordatorios" class="btn btn-primary btn-sm"><i class="bi bi-bell me-1"></i>Recordatorios</a>';
+    $pageHeaderClass = 'cobranza-ui';
+    include __DIR__ . '/../components/page-header.php';
+    ?>
 
     <!-- Estadísticas principales -->
     <div class="row mb-2" id="estadisticas">
@@ -115,7 +114,7 @@
             <div class="d-flex justify-content-between align-items-center">
                 <h6 class="mb-0"><i class="fas fa-filter me-2"></i> Opciones </h6>
 
-                <div class="btn-group" role="group">
+                <div class="btn-group cobranza-actions" role="group">
 
                     <!-- VER TODOS -->
                     <input type="radio" id="btnTodos" name="filtro" class="d-none" checked>

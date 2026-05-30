@@ -13,10 +13,12 @@
 
 namespace App\Controllers;
 
+use App\Config\MediosPago;
 use App\Core\Controller;
 use App\Helpers\Validador;
 use App\Models\PagoCronograma;
 use App\Models\Caja;
+use App\Models\NotaCredito;
 use App\Controllers\ComprobanteNubefactController;
 use DateTime;
 use Exception;
@@ -86,7 +88,21 @@ class PagoCronogramaController extends Controller
         // $tiempoInicio = microtime(true);
 
         // $datos = $this->pagoCronogramaModel->getHistorialPagosByContrato($id);
-        $this->view('caja.historial', ['pagos' => $datos]);
+        $notasPorPago = [];
+        try {
+            $notaModel = new NotaCredito();
+            if ($notaModel->tablaExiste()) {
+                $notasPorPago = $notaModel->getMapaPorContrato($id);
+            }
+        } catch (\Throwable $e) {
+            error_log('indexHistorialPagos notas_credito: ' . $e->getMessage());
+        }
+
+        $this->view('caja.historial', [
+            'pagos' => $datos,
+            'idcontrato' => $id,
+            'notasPorPago' => $notasPorPago,
+        ]);
 
         // $tiempoFin = microtime(true);
         // $tiempoEjecucion = $tiempoFin - $tiempoInicio;
@@ -230,7 +246,15 @@ class PagoCronogramaController extends Controller
                 if (empty($medioPago)) $errores[] = 'Medio de pago cuota obligatorio.';
                 if ($medioPago !== 'Efectivo') {
                     if (empty($numeroTransaccion)) $errores[] = 'N° transacción cuota obligatorio.';
-                    if ($medioPago === 'Transferencia Bancaria' && empty($idCuentaPago)) $errores[] = 'Cuenta bancaria cuota obligatoria.';
+                    if (MediosPago::requiereCuenta($medioPago)) {
+                        if (empty($idCuentaPago)) {
+                            $errores[] = $medioPago === MediosPago::INTERBANCARIO
+                                ? 'Cuenta destino (CCI) cuota obligatoria.'
+                                : 'Cuenta bancaria cuota obligatoria.';
+                        } elseif (!$this->pagoCronogramaModel->cuentaValidaParaMedio((int) $idCuentaPago, $medioPago)) {
+                            $errores[] = 'La cuenta de cuota no corresponde al medio de pago.';
+                        }
+                    }
                     if (is_null($rutaComprobanteCuota)) $errores[] = 'Comprobante cuota obligatorio.';
                 }
             }
@@ -239,7 +263,15 @@ class PagoCronogramaController extends Controller
                 if (empty($medioPagoPenalidad)) $errores[] = 'Medio de pago penalidad obligatorio.';
                 if ($medioPagoPenalidad !== 'Efectivo') {
                     if (empty($numeroTransaccionPenalidad)) $errores[] = 'N° transacción penalidad obligatorio.';
-                    if ($medioPagoPenalidad === 'Transferencia Bancaria' && empty($idCuentaPagoPenalidad)) $errores[] = 'Cuenta bancaria penalidad obligatoria.';
+                    if (MediosPago::requiereCuenta($medioPagoPenalidad)) {
+                        if (empty($idCuentaPagoPenalidad)) {
+                            $errores[] = $medioPagoPenalidad === MediosPago::INTERBANCARIO
+                                ? 'Cuenta destino (CCI) penalidad obligatoria.'
+                                : 'Cuenta bancaria penalidad obligatoria.';
+                        } elseif (!$this->pagoCronogramaModel->cuentaValidaParaMedio((int) $idCuentaPagoPenalidad, $medioPagoPenalidad)) {
+                            $errores[] = 'La cuenta de penalidad no corresponde al medio de pago.';
+                        }
+                    }
                     if (is_null($rutaComprobantePenalidad)) $errores[] = 'Comprobante penalidad obligatorio.';
                 }
             }
@@ -278,12 +310,12 @@ class PagoCronogramaController extends Controller
 
 
             $nombreCuentaCuota = $medioPago;
-            if ($amortizacionCuota > 0 && $medioPago === 'Transferencia Bancaria' && !empty($idCuentaPago)) {
+            if ($amortizacionCuota > 0 && MediosPago::requiereCuenta($medioPago) && !empty($idCuentaPago)) {
                 $cta = $this->pagoCronogramaModel->getNumCuentaPagoById((int)$idCuentaPago);
                 if ($cta) $nombreCuentaCuota = $cta['nombrecuenta'];
             }
             $nombreCuentaPenalidad = $medioPagoPenalidad;
-            if ($amortizacionPenalidad > 0 && $medioPagoPenalidad === 'Transferencia Bancaria' && !empty($idCuentaPagoPenalidad)) {
+            if ($amortizacionPenalidad > 0 && MediosPago::requiereCuenta($medioPagoPenalidad) && !empty($idCuentaPagoPenalidad)) {
                 $cta = $this->pagoCronogramaModel->getNumCuentaPagoById((int)$idCuentaPagoPenalidad);
                 if ($cta) $nombreCuentaPenalidad = $cta['nombrecuenta'];
             }
@@ -471,7 +503,15 @@ class PagoCronogramaController extends Controller
 
                             // Actualizar BD
                             foreach ($idPagos as $idpago) {
-                                $this->pagoCronogramaModel->actualizarEnlaceYDeclarado($idpago, $enlacePdf, $enlaceXml, $enlaceCdr, $nuevoNumero);
+                                $this->pagoCronogramaModel->actualizarEnlaceYDeclarado(
+                                    $idpago,
+                                    $enlacePdf,
+                                    $enlaceXml,
+                                    $enlaceCdr,
+                                    $nuevoNumero,
+                                    $serieComprobante,
+                                    $tipoComprobanteId
+                                );
                             }
                         } else {
                             $mensajeExtra = " (Pago OK, error al emitir comprobante: " . $respNube['message'] . ")";
@@ -523,19 +563,26 @@ class PagoCronogramaController extends Controller
     {
         $this->authRequired();
         header('Content-Type: application/json');
-        $numCuentas = $this->pagoCronogramaModel->getNumCuentasPagos();
-
-
-        if ($numCuentas) {
-            echo json_encode($numCuentas);
-        } else {
-            http_response_code(404);
-            echo json_encode([]);
+        $tipo = isset($_GET['tipo']) ? trim((string) $_GET['tipo']) : null;
+        if ($tipo !== 'Cuenta' && $tipo !== 'CCI') {
+            $tipo = null;
         }
+        $numCuentas = $this->pagoCronogramaModel->getNumCuentasPagos($tipo);
+        if (!empty($numCuentas[0]['_migration_required'])) {
+            http_response_code(503);
+            echo json_encode([
+                'error' => 'migration_required',
+                'message' => $numCuentas[0]['mensaje'] ?? 'Ejecute sp-db/ejecutar_interbancario_ahora.sql en MySQL.',
+            ]);
+            exit();
+        }
+
+        echo json_encode($numCuentas ?: []);
         exit();
     }
     public function getCuenta(int $id): void
     {
+        $this->authRequired();
         header('Content-Type: application/json');
         $numCuenta = $this->pagoCronogramaModel->getNumCuentaPagoById($id);
 

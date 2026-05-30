@@ -573,7 +573,7 @@ class VehiculoController extends Controller
       ]);
     } else {
       http_response_code(404);
-      $this->view('error.404');
+      $this->view('errors.404');
     }
   }
 

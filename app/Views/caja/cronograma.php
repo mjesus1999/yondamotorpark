@@ -31,7 +31,7 @@ include __DIR__ . '/../layout/header.php';
             <div class="col-md-6 d-flex align-items-center">
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb mb-0" style="background-color: transparent; padding: 0;">
-                        <li class="breadcrumb-item"><a href="#" class="text-primary"><i class="fas fa-home"></i></a>
+                        <li class="breadcrumb-item"><a href="/" class="text-primary"><i class="fas fa-home"></i></a>
                         </li>
                         <li class="breadcrumb-item"><a href="<?= CajaRoutes::LISTA_CONTRATOS ?>" class="text-primary">Caja</a></li>
                         <li class="breadcrumb-item active" aria-current="page">Cronograma de Pagos</li>

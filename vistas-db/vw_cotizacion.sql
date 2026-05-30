@@ -2,25 +2,20 @@
 -- VISTAS DE COTIZACION.PHP
 */
 
-USE motorpark;
--- SELECT * FROM personas;
+-- USE motorpark; -- hosting: seleccionar BD en phpMyAdmin
+-- IMPORTANTE (hosting / BD antigua):
+-- Si `pagos` NO tiene idcotizacion, idconcepto, idcliente, idvehiculo (tabla solo de cuotas),
+-- las dos primeras vistas usan definiciones compatibles (totales en 0 / contado vacío).
+-- Tras ejecutar sp-db/patch_pagos_unificado_si_falta.sql, importe también:
+--   vistas-db/vw_cotizacion_tras_patch_pagos.sql
+-- para recuperar habilitar_contrato y venta al contado por vehículo.
 
+-- Total inicial: sin columnas idcotizacion/idconcepto en pagos no hay enlace fiable → 0 hasta migrar.
 CREATE OR REPLACE VIEW vwPagosInicialCalculados AS
-SELECT 
+SELECT
     c.idcotizacion,
-    COALESCE(SUM(
-        CASE
-            WHEN c.moneda = 'PEN' THEN p.amortizacion
-            WHEN c.moneda = 'USD' THEN
-                IF(p.moneda = 'USD', p.montomonedaoriginal, (p.amortizacion / p.tipocambioaplicado))
-            ELSE 0
-        END
-    ), 0) AS totalpagado_calculado
-FROM cotizaciones c
-LEFT JOIN pagos p 
-    ON p.idcotizacion = c.idcotizacion
-    AND p.idconcepto = (SELECT idconcepto FROM conceptospago WHERE concepto = 'Inicial' LIMIT 1)
-GROUP BY c.idcotizacion, c.moneda;
+    CAST(0 AS DECIMAL(12, 2)) AS totalpagado_calculado
+FROM cotizaciones c;
 
 
 CREATE OR REPLACE VIEW vwReservaPorVehiculo AS
@@ -65,24 +60,12 @@ FROM (
 WHERE rn = 1;
 
 
+-- Contado por vehículo desde pagos requiere idvehiculo/idcliente/idconcepto; sin migración → vista vacía.
 CREATE OR REPLACE VIEW vwVentaContadoPorVehiculo AS
-SELECT idvehiculo, nombrecliente
-FROM (
-    SELECT
-        p_cont.idvehiculo,
-        COALESCE(
-            CASE WHEN cl_cont.tipocliente = 'P' 
-                 THEN CONCAT(per_cont.apellidos, ', ', per_cont.nombres) 
-                 ELSE e_cont.razonsocial END
-        ) AS nombrecliente,
-        ROW_NUMBER() OVER(PARTITION BY p_cont.idvehiculo ORDER BY p_cont.idpago DESC) AS rn
-    FROM pagos p_cont
-    JOIN clientes cl_cont ON p_cont.idcliente = cl_cont.idcliente
-    LEFT JOIN personas per_cont ON cl_cont.idpersona = per_cont.idpersona
-    LEFT JOIN empresas e_cont ON cl_cont.idempresa = e_cont.idempresa
-    WHERE p_cont.idconcepto = 1 
-) ranked
-WHERE rn = 1;
+SELECT
+    CAST(NULL AS UNSIGNED) AS idvehiculo,
+    CAST(NULL AS VARCHAR(512)) AS nombrecliente
+WHERE FALSE;
 
 
 CREATE OR REPLACE VIEW vwGetAllCotizacion AS
@@ -158,12 +141,6 @@ WHERE
     )
 ORDER BY c.creado DESC;
 
-
-
-SELECT * FROM  vwGetAllCotizacion WHERE estadocotizacion = 'A';
-
-SELECT * FROM cotizaciones;
-
 /*
 ORDER BY COALESCE (fechaRegistro, fechareactivacion) DESC
 ORDER BY COALESCE(c.fechareactivacion, c.creado) DESC, c.creado DESC
@@ -171,7 +148,7 @@ ORDER BY COALESCE(c.fechareactivacion, c.creado) DESC, c.creado DESC
 
 
 /*
-USE motorpark;
+-- USE motorpark; -- hosting: seleccionar BD en phpMyAdmin
 DROP VIEW vwGetAllCotizacion;
 SELECT * FROM cotizaciones;
 */

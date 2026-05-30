@@ -61,6 +61,7 @@ class UbigeoController extends Controller
      */
     public function departamentos(): void
     {
+        $this->authRequired(null);
         $departamentos = $this->ubigeoModel->getAllDepartamentos();
 
 
@@ -92,6 +93,7 @@ class UbigeoController extends Controller
      */
     public function provincias(int $iddepartamento): void
     {
+        $this->authRequired(null);
         // Validación básica del ID
         if ($iddepartamento <= 0) {
             header('Content-Type: application/json');
@@ -124,6 +126,7 @@ class UbigeoController extends Controller
      */
     public function distritos(int $idprovincia): void
     {
+        $this->authRequired(null);
         // Validación básica del ID
         if ($idprovincia <= 0) {
             header('Content-Type: application/json');
@@ -151,6 +154,7 @@ class UbigeoController extends Controller
      */
     public function getAllDistritosAll(): void
     {
+        $this->authRequired(null);
         header('Content-Type: application/json; charset=utf-8');
         echo json_encode($this->ubigeoModel->getAllDistritosAll());
     }

@@ -21,7 +21,7 @@ class ConceptosPago
        * 
        * @var int
        */
-      const int INICIAL_ID = 2;
+      const INICIAL_ID = 2;
 
       /**
        * ID del concepto "Pago de Contado"
@@ -33,5 +33,5 @@ class ConceptosPago
        * 
        * @var int
        */
-      const int CONTADO_ID = 1;
+      const CONTADO_ID = 1;
 }

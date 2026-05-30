@@ -1,26 +1,5 @@
 
-USE motorpark;
-
-SELECT * FROM fichasolicitud;
-SELECT * FROM personas;
-SELECT * FROM vehiculos;
-SELECT * FROM modelos;
-SELECT * FROM marcas;
-SELECT * FROM tipovehiculos;
-SELECT * FROM ordenescompra;
-
-SELECT * FROM contratos;
-
-select * FROM locales;
-SELECT * FROM cotizaciones;
-
-SELECT * FROM clientes;
-SELECT * FROM vehiculos;
-SELECT * FROM modelos;
-
-
-
-
+-- USE motorpark; -- hosting: seleccionar BD en phpMyAdmin
 
 CREATE VIEW v_ubigeo_completo AS
 SELECT 
@@ -36,7 +15,7 @@ JOIN departamentos dep ON p.iddepartamento = dep.iddepartamento;
 
 
 
-DROP PROCEDURE sp_contrato_pdf;
+DROP PROCEDURE IF EXISTS sp_contrato_pdf;
 
 
 DELIMITER //
@@ -192,7 +171,7 @@ DELIMITER ;
 
 
 
-CALL sp_contrato_pdf(37);
+-- CALL sp_contrato_pdf(37); -- prueba local
 
 
 
@@ -200,51 +179,36 @@ CALL sp_contrato_pdf(37);
 
 
 
--- CONTRATOS
-CREATE INDEX idx_contratos_idcotizacion ON contratos (idcotizacion);
-CREATE INDEX idx_contratos_idlocal ON contratos (idlocal);
-CREATE INDEX idx_contratos_estado ON contratos (estado);
+-- Índices opcionales (comentados si indices.sql ya los cubre)
+-- CREATE INDEX idx_contratos_idcotizacion ON contratos (idcotizacion);
+-- CREATE INDEX idx_contratos_idlocal ON contratos (idlocal);
+-- CREATE INDEX idx_contratos_estado ON contratos (estado);
 
 -- COTIZACIONES 
-CREATE INDEX idx_cotizaciones_idcliente ON cotizaciones (idcliente);
-CREATE INDEX idx_cotizaciones_idvehiculo ON cotizaciones (idvehiculo);
-CREATE INDEX idx_cotizaciones_estadocotizacion ON cotizaciones (estadocotizacion);
+-- CREATE INDEX idx_cotizaciones_idcliente ON cotizaciones (idcliente);
+-- CREATE INDEX idx_cotizaciones_idvehiculo ON cotizaciones (idvehiculo);
+-- CREATE INDEX idx_cotizaciones_estadocotizacion ON cotizaciones (estadocotizacion);
 
 -- LOCALES 
-CREATE INDEX idx_locales_iddistrito ON locales (iddistrito);
+-- CREATE INDEX idx_locales_iddistrito ON locales (iddistrito);
 
 
 -- FICHA SOLICITUD 
-CREATE INDEX idx_fichasolicitud_idcotizacion ON fichasolicitud (idcotizacion);
+-- CREATE INDEX idx_fichasolicitud_idcotizacion ON fichasolicitud (idcotizacion);
 
 -- MODELOS
-CREATE INDEX idx_modelos_idmarca ON modelos (idmarca);
+-- CREATE INDEX idx_modelos_idmarca ON modelos (idmarca);
 
 
 
 
 -- De esa forma, la búsqueda del contrato es directa sin recorrer filas innecesarias.
-CREATE UNIQUE INDEX idx_contratos_idcontrato_estado ON contratos (idcontrato, estado);
+-- CREATE UNIQUE INDEX idx_contratos_idcontrato_estado ON contratos (idcontrato, estado);
 
 
 
 
 
 
-SHOW COLUMNS FROM ordenescompra;
-SHOW COLUMNS FROM vehiculos;
-SHOW COLUMNS FROM cotizaciones;
-SHOW COLUMNS FROM contratos;
-
-
-CREATE INDEX idx_cotizacion_estado ON cotizaciones(estadocotizacion);
-CREATE INDEX idx_cotizacion_cliente ON cotizaciones(idcliente);
-CREATE INDEX idx_pagos_cotizacion ON pagos(idcotizacion);
-CREATE INDEX idx_pagos_concepto ON pagos(idconcepto);
-CREATE INDEX idx_contratos_cotizacion ON contratos(idcotizacion);
-CREATE INDEX idx_vehiculos_id ON vehiculos(idvehiculo);
-CREATE INDEX idx_clientes_tipo ON clientes(tipocliente);
-CREATE INDEX idx_modelos_marca ON modelos(idmarca);
-
-
-SELECT * FROM contratos;
+-- SHOW / CREATE INDEX / SELECT comentados para hosting seguro
+-- (descomenta solo si necesitas recrear índices manualmente)

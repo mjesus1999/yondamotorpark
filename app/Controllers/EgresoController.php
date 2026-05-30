@@ -102,7 +102,7 @@ class EgresoController extends Controller
     public function indexAjuntarComprobante(): void
     {
         $this->authRequired();
-        $this->view('egresos.adjuntarComprobante');
+        $this->redirect('/egreso/listar/N');
     }
 
     /**
@@ -275,6 +275,100 @@ class EgresoController extends Controller
             $this->egresoModel->deleteEgreso($newId);
             echo json_encode(['success' => false, 'message' => 'Error al guardar el comprobante. El egreso fue revertido.', 'id' => 0]);
         }
+    }
+
+    /**
+     * Registra comprobante para un egreso ya creado (sin comprobante inicial).
+     */
+    public function storeComprobante(): void
+    {
+        $this->authRequired();
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            echo json_encode(['success' => false, 'message' => 'Método no permitido.']);
+            exit;
+        }
+
+        header('Content-Type: application/json');
+        $data = array_map([Validador::class, 'limpiar'], $_POST);
+
+        $idegreso = (int) ($data['idegreso'] ?? 0);
+        if ($idegreso <= 0) {
+            echo json_encode(['success' => false, 'message' => 'ID de egreso inválido.', 'id' => 0]);
+            exit;
+        }
+
+        $registroComprobante = [
+            'idegreso' => $idegreso,
+            'idproovedor' => empty($data['idproovedor']) ? null : (int) $data['idproovedor'],
+            'tipodoc' => $data['tipodoc'] ?? null,
+            'serie' => $data['serie'] ?? null,
+            'numdocumento' => $data['numdocumento'] ?? null,
+            'monto' => empty($data['monto_comprobante']) ? null : (float) $data['monto_comprobante'],
+        ];
+
+        $erroresComprobante = [];
+        $erroresComprobante[] = Validador::campoObligatorio($registroComprobante['idproovedor'], 'Proveedor');
+        $erroresComprobante[] = Validador::campoObligatorio($registroComprobante['tipodoc'], 'Tipo de Documento');
+        $erroresComprobante[] = Validador::campoObligatorio($registroComprobante['serie'], 'Serie');
+        $erroresComprobante[] = Validador::campoObligatorio($registroComprobante['numdocumento'], 'Número de Documento');
+        $erroresComprobante[] = Validador::campoObligatorio($registroComprobante['monto'], 'Monto');
+
+        if (!empty(array_filter($erroresComprobante))) {
+            echo json_encode(['success' => false, 'message' => implode('<br>', array_filter($erroresComprobante)), 'id' => 0]);
+            exit;
+        }
+
+        if (!isset($_FILES['rutacomprobante']) || $_FILES['rutacomprobante']['error'] !== UPLOAD_ERR_OK) {
+            echo json_encode(['success' => false, 'message' => 'Error al subir el archivo de comprobante.', 'id' => 0]);
+            exit;
+        }
+
+        $archivoTemp = $_FILES['rutacomprobante']['tmp_name'];
+        $nombreOriginal = $_FILES['rutacomprobante']['name'];
+        $extension = strtolower(pathinfo($nombreOriginal, PATHINFO_EXTENSION));
+
+        if ($extension !== 'pdf') {
+            echo json_encode(['success' => false, 'message' => 'El archivo debe ser un PDF.', 'id' => 0]);
+            exit;
+        }
+
+        $subdirectorio = match ($registroComprobante['tipodoc']) {
+            'F' => 'facturas',
+            'B' => 'boletas',
+            default => null,
+        };
+
+        if ($subdirectorio === null) {
+            echo json_encode(['success' => false, 'message' => 'Tipo de documento no válido.', 'id' => 0]);
+            exit;
+        }
+
+        $nombreArchivo = uniqid($subdirectorio . '_') . '.' . $extension;
+        $directorioDestino = __DIR__ . '/../../storage/' . $subdirectorio . '/';
+        $rutaCompleta = $directorioDestino . $nombreArchivo;
+
+        if (!is_dir($directorioDestino) && !mkdir($directorioDestino, 0777, true)) {
+            echo json_encode(['success' => false, 'message' => 'Error al crear el directorio de destino.', 'id' => 0]);
+            exit;
+        }
+
+        if (!move_uploaded_file($archivoTemp, $rutaCompleta)) {
+            echo json_encode(['success' => false, 'message' => 'No se pudo guardar el archivo de comprobante.', 'id' => 0]);
+            exit;
+        }
+
+        $registroComprobante['rutacomprobante'] = $subdirectorio . '/' . $nombreArchivo;
+
+        if ($this->egresoModel->addComprobante($registroComprobante)) {
+            echo json_encode(['success' => true, 'message' => 'Comprobante registrado con éxito.', 'id' => $idegreso]);
+        } else {
+            if (file_exists($rutaCompleta)) {
+                unlink($rutaCompleta);
+            }
+            echo json_encode(['success' => false, 'message' => 'Error al guardar el comprobante en base de datos.', 'id' => 0]);
+        }
+        exit;
     }
 
     public function storeConceptoEgreso(): void

@@ -5,7 +5,7 @@
 <?php include __DIR__ . '/../components/mapa-viewer-includes.php'; ?>
 <?php include __DIR__ . '/../components/mapa-viewer-modal.php'; ?>
 
-<link href="https://unpkg.com/tabulator-tables@5.5.2/dist/css/tabulator_simple.min.css" rel="stylesheet">
+<link href="https://unpkg.com/tabulator-tables@6.3.1/dist/css/tabulator_simple.min.css" rel="stylesheet">
 <link rel="stylesheet" href="/assets/css/tabulator.css">|
 
 <div class="container-fluid">
@@ -97,7 +97,7 @@
 
 <?php include __DIR__ . '/../layout/footer.php'; ?>
 <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
-<script src="https://unpkg.com/tabulator-tables@5.5.2/dist/js/tabulator.min.js"></script>
+<script src="https://unpkg.com/tabulator-tables@6.3.1/dist/js/tabulator.min.js"></script>
 
 <script>
     let tablaGlobal = null;

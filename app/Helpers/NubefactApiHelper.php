@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Helpers;
+
 use Exception;
 class NubefactApiHelper {
 
@@ -35,7 +36,7 @@ class NubefactApiHelper {
         curl_setopt($ch, CURLOPT_POST, 1);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $data_json);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); 
+        CurlHelper::applySslOptions($ch);
 
         $respuesta = curl_exec($ch);
         $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);

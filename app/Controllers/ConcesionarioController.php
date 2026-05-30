@@ -15,6 +15,7 @@
 namespace App\Controllers;
 
 use App\Core\Controller;
+use App\Helpers\CurlHelper;
 use App\Helpers\Validador;
 use App\Models\Concesionario;
 
@@ -311,13 +312,13 @@ class ConcesionarioController extends Controller
         curl_setopt_array($curl, array(
             CURLOPT_URL => 'https://api.apis.net.pe/v2/sunat/ruc/full?numero=' . $ruc,
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_SSL_VERIFYPEER => false,
             CURLOPT_CUSTOMREQUEST => 'GET',
             CURLOPT_HTTPHEADER => array(
                 'Referer: http://apis.net.pe/api-ruc',
                 'Authorization: Bearer ' . $token
             ),
         ));
+        CurlHelper::applySslOptions($curl);
 
         $response = curl_exec($curl);
         curl_close($curl);

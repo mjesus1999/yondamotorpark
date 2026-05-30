@@ -226,7 +226,37 @@ class CotizacionController extends Controller
     public function indexReporteByCotizacion(): void
     {
         $this->authRequired();
-        $this->view('cotizacion.reporte-cotizacion');
+        $this->redirect('/cotizacion');
+    }
+
+    /**
+     * Aprueba una cotización (estado A).
+     */
+    public function aprobarCotizacion(int $id): void
+    {
+        $this->authRequired();
+        header('Content-Type: application/json');
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            echo json_encode(['success' => false, 'message' => 'Método no permitido']);
+            return;
+        }
+
+        if ($id <= 0) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'ID de cotización inválido']);
+            return;
+        }
+
+        $filas = $this->cotizacionModel->aprobarCotizacion($id);
+        if ($filas > 0) {
+            echo json_encode(['success' => true, 'message' => 'Cotización aprobada correctamente']);
+            return;
+        }
+
+        http_response_code(500);
+        echo json_encode(['success' => false, 'message' => 'No se pudo aprobar la cotización']);
     }
 
     /**

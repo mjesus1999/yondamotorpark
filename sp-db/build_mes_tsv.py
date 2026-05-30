@@ -20,7 +20,6 @@ REPLACEMENTS = (
     ("28-03-20226", "28-03-2026"),
 )
 
-
 def main():
     mes = (sys.argv[1] if len(sys.argv) > 1 else "marzo").lower()
     pfx = PREFIX.get(mes)
@@ -62,4 +61,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

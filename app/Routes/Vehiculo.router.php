@@ -12,7 +12,7 @@ $router->add('GET', '/vehiculosAlContado', 'VehiculoController', 'indexVehiculos
 $router->add('GET', '/vehiculos/create', 'VehiculoController', 'create');
 // $router->add('GET', '/vehiculos/edit/{id}','VehiculoController', 'edit');
 
-//Modelos de vehiculo
+//Modelos de vehiculo (query: ?idmarca=&idtipovehiculo=)
 $router->add('GET', '/modelos/lista', 'ModeloController', 'getByMarcaYTipo');
 $router->add('GET', '/vehiculos/edit/{id}', 'VehiculoController', 'edit');
 
@@ -30,9 +30,6 @@ $router->add('POST', '/vehiculos/delete', 'VehiculoController', 'delete');
 $router->add('POST', '/vehiculo/store/PagoAlContado', 'VehiculoController', 'storePagoALContado');
 
 $router->add('POST', '/vehiculos/update', 'VehiculoController', 'update');
-
-// listar tipos por marca (GET)
-$router->add('GET', '/api/getTipoVehiculoByMarca/{id}', 'TipovehiculoController', 'getByMarca');
 
 // agregar año (POST)
 $router->add('POST', '/vehiculos/agregarAnio', 'VehiculoController', 'agregarAnio');

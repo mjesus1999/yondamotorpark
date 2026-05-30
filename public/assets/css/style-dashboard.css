@@ -124,18 +124,28 @@ h4 {
     padding: 1.5rem 1.5rem .375rem;
 }
 
-a.sidebar-link {
+a.sidebar-link,
+button.sidebar-link.sidebar-collapse-toggle {
     padding: .625rem 1.625rem;
     color: #cbd5e1;
     border-left: 3px solid transparent;
     transition: all var(--ui-transition-fast);
     position: relative;
     display: block;
+    width: 100%;
     font-size: 0.875rem;
     border-radius: 0 var(--ui-radius-sm) var(--ui-radius-sm) 0;
 }
 
-a.sidebar-link:hover {
+button.sidebar-link.sidebar-collapse-toggle {
+    border: none;
+    background: transparent;
+    text-align: left;
+    cursor: pointer;
+}
+
+a.sidebar-link:hover,
+button.sidebar-link.sidebar-collapse-toggle:hover {
     background: rgba(249, 115, 22, 0.14);
     color: #ffffff;
     border-left-color: #f97316;

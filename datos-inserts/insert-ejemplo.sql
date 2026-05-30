@@ -1,4 +1,4 @@
-USE motorpark;
+-- USE motorpark; -- hosting
 
 -- CONTRASEÑA ACTUALIZADA PARA PODER ENTRAR EN EL LOGIN
 -- anonimo$$123%

@@ -59,6 +59,7 @@ class ModeloController extends Controller
      */
     public function getall(): void
     {
+        $this->authRequired();
         header('Content-Type: application/json');
         $idmarca = $_GET['idmarca'] ?? 0;
 
@@ -91,8 +92,25 @@ class ModeloController extends Controller
      * 
      * @example GET /api/getModeloByTipoMarca/2/3
      */
+    /**
+     * Lista modelos por marca y tipo (query string: idmarca, idtipovehiculo).
+     */
+    public function getByMarcaYTipo(): void
+    {
+        $this->authRequired();
+        $idmarca = (int) ($_GET['idmarca'] ?? $_GET['marca'] ?? 0);
+        $idtipovehiculo = (int) ($_GET['idtipovehiculo'] ?? $_GET['tipo'] ?? 0);
+        if ($idmarca <= 0 || $idtipovehiculo <= 0) {
+            header('Content-Type: application/json');
+            echo json_encode([]);
+            return;
+        }
+        $this->getModeloByTipoMarca($idmarca, $idtipovehiculo);
+    }
+
     public function getModeloByTipoMarca(int $idmarca, int $idtipovehiculo): void
     {
+        $this->authRequired();
         header('Content-Type: application/json');
         
         $modelos = $this->modeloModel->getByMarcaYTipo($idmarca, $idtipovehiculo);
@@ -113,6 +131,7 @@ class ModeloController extends Controller
      */
     public function show(): void
     {
+        $this->authRequired();
         header('Content-Type: application/json');
         $id = $_GET['id'] ?? 0;
 
@@ -145,6 +164,7 @@ class ModeloController extends Controller
      */
     public function store()
     {
+        $this->authRequired();
         header('Content-Type: application/json');
 
         $data = [
@@ -198,6 +218,7 @@ class ModeloController extends Controller
      */
     public function update()
     {
+        $this->authRequired();
         header('Content-Type: application/json');
 
         $data = [
@@ -256,6 +277,7 @@ class ModeloController extends Controller
      */
     public function destroy()
     {
+        $this->authRequired();
         header('Content-Type: application/json');
         $idmodelo = $_POST['idmodelo'] ?? 0;
         $idmarca = $_POST['idmarca'] ?? 0;

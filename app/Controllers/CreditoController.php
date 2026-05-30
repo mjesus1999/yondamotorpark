@@ -154,7 +154,8 @@ class CreditoController extends Controller
      */
     public function registrarSeguimiento(): void
     {
-        // Asegurar sesión
+        $this->authRequired();
+
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }

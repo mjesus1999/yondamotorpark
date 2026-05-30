@@ -1,5 +1,5 @@
 
-USE motorpark;
+-- USE motorpark; -- hosting: seleccionar BD en phpMyAdmin
 -- DELIMITER $$
 
 -- CREATE TRIGGER tr_calcular_saldorestante_before_insert
@@ -28,7 +28,9 @@ USE motorpark;
 
 -- DELIMITER ;
 
-DROP TRIGGER tr_calcular_saldorestante_before_insert;
+DROP TRIGGER IF EXISTS tr_calcular_saldorestante_before_insert;
+DROP TRIGGER IF EXISTS trg_verificar_fin_contrato;
+
 DELIMITER $$
 
 CREATE TRIGGER tr_calcular_saldorestante_before_insert
@@ -58,7 +60,6 @@ BEGIN
 END$$
 
 DELIMITER ;
-
 
 DELIMITER $$
 

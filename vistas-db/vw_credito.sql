@@ -1,4 +1,4 @@
-USE motorpark;
+-- USE motorpark; -- hosting: seleccionar BD en phpMyAdmin
 
 -- 1) PROCEDIMIENTO: Obtener estadísticas de morosos
 DROP PROCEDURE IF EXISTS sp_get_estadisticas_morosos;

@@ -1,5 +1,5 @@
-CREATE DATABASE motorpark;
-USE motorpark;
+-- Base de datos ya creada desde el panel de hosting (cPanel/phpMyAdmin)
+-- No usar CREATE DATABASE/USE aquí para evitar errores de permisos.
 
 -- Necesitaremos de una función que calcula la hora actual, esto será
 -- útil cuando la aplicación se aloje en un servidor remoto
@@ -457,7 +457,7 @@ CREATE TABLE conceptospago (
 
 SELECT * FROM conceptospago;
 
-USE motorpark;
+-- USE motorpark; -- deshabilitado para compatibilidad con BD prefijada del hosting
 
 INSERT INTO conceptospago(idcolregistra,concepto,montosugerido) 
     VALUES (3,'TRANSFERENCIA VEHÍCULAR',25),
@@ -554,7 +554,8 @@ CREATE TABLE pagos (
         'Yape',
         'Plin',
         'Transferencia Bancaria',
-        'Efectivo'
+        'Efectivo',
+        'Interbancario'
     ) NOT NULL,
     numerotransaccion VARCHAR(30) NULL,
     moneda ENUM('USD', 'PEN')  NULL,
@@ -646,7 +647,9 @@ CREATE TABLE cuentaspago (
     idcuentapago INT AUTO_INCREMENT PRIMARY KEY,
     identidadpago INT NOT NULL,
     moneda ENUM('Soles', 'Dólares') NOT NULL,
+    tipo_cuenta ENUM('Cuenta', 'CCI') NOT NULL DEFAULT 'Cuenta',
     numcuenta VARCHAR(35) NOT NULL,
+    cuenta_corriente VARCHAR(40) NULL,
     CONSTRAINT fk_identipago_cuentas FOREIGN KEY (identidadpago) REFERENCES entidadespago (identidadpago)
 ) ENGINE = InnoDb;
 

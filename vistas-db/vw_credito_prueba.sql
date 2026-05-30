@@ -4,7 +4,7 @@
 -- Solo JOINs directos con agregaciones
 -- =====================================================
 
-USE motorpark;
+-- USE motorpark; -- hosting
 
 -- =====================================================
 -- VISTA: Totales de pagos por cronograma

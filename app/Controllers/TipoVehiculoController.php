@@ -59,6 +59,7 @@ class TipoVehiculoController extends Controller
      */
     public function getall(): void
     {
+        $this->authRequired();
         header('Content-Type: application/json');
         $data = $this->tipoModel->getAll();
 
@@ -85,6 +86,7 @@ class TipoVehiculoController extends Controller
      */
     public function getTipoVehiculoByMarca(int $id): void
     {
+        $this->authRequired();
         header('Content-Type: application/json');
 
         $tipos = $this->tipoModel->getTipoVehiculoByMarca($id);

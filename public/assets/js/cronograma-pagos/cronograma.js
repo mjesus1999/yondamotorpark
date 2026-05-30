@@ -1003,7 +1003,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             const maxLength = Math.max(...lengths.filter(v => typeof v === 'number'));
             column.width = maxLength < 10 ? 10 : maxLength + 2;
         });
-        console.log(worksheet.colums.forEach(colum => console.log(colum)))
 
 
         const buffer = await workbook.xlsx.writeBuffer();

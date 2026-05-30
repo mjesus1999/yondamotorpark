@@ -6,8 +6,16 @@
 // Define el directorio raíz de la aplicación para mayor claridad
 define('APP_ROOT', dirname(__DIR__));
 
+$vendorAutoload = APP_ROOT . '/vendor/autoload.php';
+if (!is_readable($vendorAutoload)) {
+  http_response_code(500);
+  header('Content-Type: text/plain; charset=utf-8');
+  echo 'Falta vendor/autoload.php en el servidor. Suba la carpeta vendor o ejecute composer install.';
+  exit;
+}
+
 require APP_ROOT . '/app/Core/Autoloader.php';
-require APP_ROOT . '/vendor/autoload.php';
+require $vendorAutoload;
 
 // Registrar autoload propio (namespace App\*)
 Autoloader::register();
@@ -20,6 +28,25 @@ try {
   }
 } catch (Throwable $e) {
   error_log('Dotenv load: ' . $e->getMessage());
+}
+
+$appDebug = isset($_ENV['APP_DEBUG']) && strtolower((string) $_ENV['APP_DEBUG']) === 'true';
+if ($appDebug) {
+  ini_set('display_errors', '1');
+  error_reporting(E_ALL);
+  register_shutdown_function(static function (): void {
+    $err = error_get_last();
+    if (!$err || !in_array($err['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR], true)) {
+      return;
+    }
+    if (!headers_sent()) {
+      header('Content-Type: text/plain; charset=utf-8');
+      http_response_code(500);
+    }
+    echo "Error fatal PHP:\n";
+    echo $err['message'] . "\n";
+    echo $err['file'] . ':' . $err['line'] . "\n";
+  });
 }
 
 
@@ -55,16 +82,32 @@ foreach ($_ENV as $key => $value) {
  * Alinear para que no borre sesiones antes del timeout
  */
 
-$timeout = (int) (getenv('SESSION_TIMEOUT') ?: 60);
+$timeout = 600;
+if (class_exists(\App\Config\Env::class)) {
+  $timeout = (int) \App\Config\Env::get('SESSION_TIMEOUT', '600');
+} else {
+  $timeout = (int) (getenv('SESSION_TIMEOUT') ?: 600);
+}
+if ($timeout < 60) {
+  $timeout = 600;
+}
 ini_set('session.gc_maxlifetime', (string) max(1440, $timeout));
 
-//sesion y cookie params
+$sessionSecure = false;
+if (class_exists(\App\Config\Env::class) && method_exists(\App\Config\Env::class, 'sessionCookieSecure')) {
+  $sessionSecure = \App\Config\Env::sessionCookieSecure();
+} elseif (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
+  $sessionSecure = true;
+} elseif (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && strtolower((string) $_SERVER['HTTP_X_FORWARDED_PROTO']) === 'https') {
+  $sessionSecure = true;
+}
+
 session_name('YONDASESSID');
 session_set_cookie_params([
-  'lifetime' => 0,    // 0 = expira al cerrar navegador
+  'lifetime' => 0,
   'path' => '/',
   'domain' => '',
-  'secure' => false,  // poner true en producción con HTTPS
+  'secure' => $sessionSecure,
   'httponly' => true,
   'samesite' => 'Lax'
 ]);
@@ -118,9 +161,27 @@ require APP_ROOT . '/app/Routes/Cotizacion.router.php';
 require APP_ROOT .'/app/Routes/Credito.router.php';
 require APP_ROOT .'/app/Routes/Cobranza.router.php';
 require APP_ROOT . '/app/Routes/Nubefact.router.php';
+require APP_ROOT . '/app/Routes/NotaCredito.router.php';
 require APP_ROOT . '/app/Routes/Producto.router.php';
 
 
 
 
-$router->dispatch();
+try {
+  $router->dispatch();
+} catch (Throwable $e) {
+  error_log('Router dispatch: ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
+  http_response_code(500);
+  $debug = false;
+  if (class_exists(\App\Config\Env::class)) {
+    $debug = \App\Config\Env::get('APP_DEBUG', 'false') === 'true';
+  }
+  if ($debug) {
+    header('Content-Type: text/plain; charset=utf-8');
+    echo "Error: " . $e->getMessage() . "\n";
+    echo $e->getFile() . ':' . $e->getLine() . "\n\n";
+    echo $e->getTraceAsString();
+  } else {
+    require APP_ROOT . '/app/Views/errors/500.php';
+  }
+}
